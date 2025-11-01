@@ -91,6 +91,28 @@ public class TmxTileset
     /// Gets or sets the tileset image (if embedded tileset).
     /// </summary>
     public TmxImage? Image { get; set; }
+
+    /// <summary>
+    /// Gets or sets the animated tiles in this tileset.
+    /// Key: local tile ID, Value: animation data.
+    /// </summary>
+    public Dictionary<int, TmxTileAnimation> Animations { get; set; } = new();
+}
+
+/// <summary>
+/// Represents tile animation data.
+/// </summary>
+public class TmxTileAnimation
+{
+    /// <summary>
+    /// Gets or sets the array of tile IDs for each animation frame.
+    /// </summary>
+    public int[] FrameTileIds { get; set; } = Array.Empty<int>();
+
+    /// <summary>
+    /// Gets or sets the array of frame durations in seconds.
+    /// </summary>
+    public float[] FrameDurations { get; set; } = Array.Empty<float>();
 }
 
 /// <summary>

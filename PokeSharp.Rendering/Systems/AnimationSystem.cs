@@ -75,7 +75,7 @@ public class AnimationSystem : BaseSystem
         }
 
         // Safety check for empty animations
-        if (animDef.FrameCount == 0)
+        if (animDef!.FrameCount == 0)
         {
             _logger?.LogWarning("Animation '{AnimationName}' has no frames", animation.CurrentAnimation);
             return;

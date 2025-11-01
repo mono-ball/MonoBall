@@ -94,12 +94,18 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game
         // Register AnimationSystem (Priority: 800, after movement, before rendering)
         _systemManager.RegisterSystem(new AnimationSystem(_animationLibrary, logger: null));
 
+        // Register TileAnimationSystem (Priority: 850, animates water/grass tiles between Animation and MapRender)
+        _systemManager.RegisterSystem(new TileAnimationSystem());
+
         // Register MapRenderSystem before RenderSystem (MapRender priority: 900, Render priority: 1000)
         _systemManager.RegisterSystem(new MapRenderSystem(GraphicsDevice, _assetManager));
 
         // Render system needs graphics device and asset manager
         _renderSystem = new RenderSystem(GraphicsDevice, _assetManager);
         _systemManager.RegisterSystem(_renderSystem);
+
+        // Register OverheadRenderSystem AFTER RenderSystem (Overhead priority: 1050, after sprites)
+        _systemManager.RegisterSystem(new OverheadRenderSystem(GraphicsDevice, _assetManager));
 
         // Initialize all systems
         _systemManager.Initialize(_world);
@@ -157,12 +163,17 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game
             // Load test map from JSON
             var tileMap = _mapLoader.LoadMap("Assets/Maps/test-map.json");
             var tileCollider = _mapLoader.LoadCollision("Assets/Maps/test-map.json");
+            var animatedTiles = _mapLoader.LoadAnimatedTiles("Assets/Maps/test-map.json");
+
+            // Store animated tiles directly in TileMap component
+            tileMap.AnimatedTiles = animatedTiles;
 
             // Create map entity with TileMap and TileCollider components
             var mapEntity = _world.Create(tileMap, tileCollider);
 
             System.Console.WriteLine($"✅ Loaded test map: {tileMap.MapId} ({tileMap.Width}x{tileMap.Height} tiles)");
             System.Console.WriteLine($"   Map entity: {mapEntity}");
+            System.Console.WriteLine($"   Animated tiles: {animatedTiles.Length}");
         }
         catch (Exception ex)
         {

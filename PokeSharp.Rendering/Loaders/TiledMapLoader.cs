@@ -96,6 +96,12 @@ public static class TiledMapLoader
                 };
             }
 
+            // Parse tile animations
+            if (tiledTileset.Tiles != null)
+            {
+                ParseTileAnimations(tileset, tiledTileset.Tiles);
+            }
+
             result.Add(tileset);
         }
 
@@ -125,11 +131,44 @@ public static class TiledMapLoader
                         Height = tiledTileset.ImageHeight ?? 0
                     };
                 }
+
+                // Parse tile animations from external tileset
+                if (tiledTileset.Tiles != null)
+                {
+                    ParseTileAnimations(tileset, tiledTileset.Tiles);
+                }
             }
         }
         catch (Exception ex)
         {
             throw new InvalidOperationException($"Failed to load external tileset: {tilesetPath}", ex);
+        }
+    }
+
+    private static void ParseTileAnimations(TmxTileset tileset, List<TiledJsonTileDefinition> tiles)
+    {
+        foreach (var tile in tiles)
+        {
+            if (tile.Animation == null || tile.Animation.Count == 0)
+            {
+                continue;
+            }
+
+            var frameTileIds = new int[tile.Animation.Count];
+            var frameDurations = new float[tile.Animation.Count];
+
+            for (int i = 0; i < tile.Animation.Count; i++)
+            {
+                var frame = tile.Animation[i];
+                frameTileIds[i] = frame.TileId;
+                frameDurations[i] = frame.Duration / 1000f; // Convert milliseconds to seconds
+            }
+
+            tileset.Animations[tile.Id] = new TmxTileAnimation
+            {
+                FrameTileIds = frameTileIds,
+                FrameDurations = frameDurations
+            };
         }
     }
 

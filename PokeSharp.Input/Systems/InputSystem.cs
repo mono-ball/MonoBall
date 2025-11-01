@@ -122,10 +122,59 @@ public class InputSystem : BaseSystem
                 break;
         }
 
-        // Check collision before allowing movement
-        if (!CollisionSystem.IsPositionWalkable(world, targetX, targetY))
+        // Check if target tile is a Pokemon ledge
+        if (CollisionSystem.IsLedge(world, targetX, targetY))
         {
-            return; // Position is blocked, don't start movement
+            // Get the allowed jump direction for this ledge
+            Direction allowedJumpDir = CollisionSystem.GetLedgeJumpDirection(world, targetX, targetY);
+
+            // Only allow jumping in the specified direction
+            if (direction == allowedJumpDir)
+            {
+                // Calculate landing position (2 tiles in jump direction)
+                int jumpLandX = targetX;
+                int jumpLandY = targetY;
+
+                switch (allowedJumpDir)
+                {
+                    case Direction.Down:
+                        jumpLandY++;
+                        break;
+                    case Direction.Up:
+                        jumpLandY--;
+                        break;
+                    case Direction.Left:
+                        jumpLandX--;
+                        break;
+                    case Direction.Right:
+                        jumpLandX++;
+                        break;
+                }
+
+                // Check if landing position is valid
+                if (!CollisionSystem.IsPositionWalkable(world, jumpLandX, jumpLandY, Direction.None))
+                {
+                    return; // Can't jump if landing is blocked
+                }
+
+                // Perform the jump (2 tiles in jump direction)
+                var jumpStart = new Vector2(position.PixelX, position.PixelY);
+                var jumpEnd = new Vector2(jumpLandX * TileSize, jumpLandY * TileSize);
+                movement.StartMovement(jumpStart, jumpEnd);
+                return;
+            }
+            else
+            {
+                // Block all other directions
+                return;
+            }
+        }
+
+        // Check collision with directional blocking (for Pokemon ledges)
+        // Pass the movement direction to check if ledges block this move
+        if (!CollisionSystem.IsPositionWalkable(world, targetX, targetY, direction))
+        {
+            return; // Position is blocked from this direction, don't start movement
         }
 
         // Start the grid movement

@@ -45,6 +45,11 @@ public struct TileMap
     public int[,] OverheadLayer { get; set; }
 
     /// <summary>
+    /// Gets or sets the animated tiles for this map.
+    /// </summary>
+    public AnimatedTile[]? AnimatedTiles { get; set; }
+
+    /// <summary>
     /// Initializes a new instance of the TileMap struct.
     /// </summary>
     /// <param name="mapId">Map identifier.</param>
