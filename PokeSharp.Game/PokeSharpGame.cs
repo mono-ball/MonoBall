@@ -6,7 +6,10 @@ using PokeSharp.Core.Components;
 using PokeSharp.Core.Systems;
 using PokeSharp.Input.Components;
 using PokeSharp.Input.Systems;
+using PokeSharp.Rendering.Assets;
+using PokeSharp.Rendering.Loaders;
 using PokeSharp.Rendering.Systems;
+using PokeSharp.Game.Diagnostics;
 
 namespace PokeSharp.Game;
 
@@ -19,6 +22,8 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game
     private readonly GraphicsDeviceManager _graphics;
     private World _world = null!;
     private SystemManager _systemManager = null!;
+    private AssetManager _assetManager = null!;
+    private MapLoader _mapLoader = null!;
     private RenderSystem _renderSystem = null!;
 
     /// <summary>
@@ -51,16 +56,43 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game
         // Create system manager
         _systemManager = new SystemManager();
 
+        // Initialize AssetManager
+        _assetManager = new AssetManager(GraphicsDevice, "Assets");
+
+        // Load asset manifest
+        try
+        {
+            _assetManager.LoadManifest("Assets/manifest.json");
+            System.Console.WriteLine("✅ Asset manifest loaded successfully");
+
+            // Run diagnostics
+            AssetDiagnostics.PrintAssetManagerStatus(_assetManager);
+        }
+        catch (Exception ex)
+        {
+            System.Console.WriteLine($"⚠️ Failed to load manifest: {ex.Message}");
+            System.Console.WriteLine("Continuing with empty asset manager...");
+        }
+
+        // Create map loader
+        _mapLoader = new MapLoader(_assetManager);
+
         // Create and register systems in priority order
         _systemManager.RegisterSystem(new InputSystem());
         _systemManager.RegisterSystem(new MovementSystem());
 
-        // Render system needs graphics device
-        _renderSystem = new RenderSystem(GraphicsDevice);
+        // Register MapRenderSystem before RenderSystem (MapRender priority: 900, Render priority: 1000)
+        _systemManager.RegisterSystem(new MapRenderSystem(GraphicsDevice, _assetManager));
+
+        // Render system needs graphics device and asset manager
+        _renderSystem = new RenderSystem(GraphicsDevice, _assetManager);
         _systemManager.RegisterSystem(_renderSystem);
 
         // Initialize all systems
         _systemManager.Initialize(_world);
+
+        // Load test map and create map entity
+        LoadTestMap();
 
         // Create test player entity
         CreateTestPlayer();
@@ -82,7 +114,10 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game
     {
         float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-        // Update all systems
+        // Clear the screen BEFORE systems render
+        GraphicsDevice.Clear(Color.CornflowerBlue);
+
+        // Update all systems (including rendering systems)
         _systemManager.Update(_world, deltaTime);
 
         base.Update(gameTime);
@@ -95,8 +130,32 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game
     protected override void Draw(GameTime gameTime)
     {
         // Rendering is handled by RenderSystem during Update
-        // This is intentional to keep all system logic in the ECS Update loop
+        // Clear happens in Update() before systems render to ensure correct order
         base.Draw(gameTime);
+    }
+
+    /// <summary>
+    /// Loads the test map and creates a map entity.
+    /// </summary>
+    private void LoadTestMap()
+    {
+        try
+        {
+            // Load test map from JSON
+            var tileMap = _mapLoader.LoadMap("Assets/Maps/test-map.json");
+            var tileCollider = _mapLoader.LoadCollision("Assets/Maps/test-map.json");
+
+            // Create map entity with TileMap and TileCollider components
+            var mapEntity = _world.Create(tileMap, tileCollider);
+
+            System.Console.WriteLine($"✅ Loaded test map: {tileMap.MapId} ({tileMap.Width}x{tileMap.Height} tiles)");
+            System.Console.WriteLine($"   Map entity: {mapEntity}");
+        }
+        catch (Exception ex)
+        {
+            System.Console.WriteLine($"⚠️ Failed to load test map: {ex.Message}");
+            System.Console.WriteLine("Continuing without map...");
+        }
     }
 
     /// <summary>
@@ -108,17 +167,17 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game
         var playerEntity = _world.Create(
             new Player(),
             new Position(10, 8), // Start at grid position (10, 8)
-            new Sprite("pixel")
+            new Sprite("player")
             {
-                Tint = Color.LimeGreen,
-                Scale = 16f // Scale up the 1x1 pixel to 16x16
+                Tint = Color.White,
+                Scale = 1f
             },
             new GridMovement(4.0f), // 4 tiles per second movement speed
             new InputState()
         );
 
-        System.Console.WriteLine($"Created player entity: {playerEntity}");
-        System.Console.WriteLine("Use WASD or Arrow Keys to move the green square!");
+        System.Console.WriteLine($"✅ Created player entity: {playerEntity}");
+        System.Console.WriteLine("🎮 Use WASD or Arrow Keys to move!");
     }
 
     /// <summary>

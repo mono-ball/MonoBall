@@ -1,0 +1,22 @@
+{
+  "tilesets": [
+    {
+      "id": "test-tileset",
+      "path": "Tilesets/test-tileset.png",
+      "tileWidth": 16,
+      "tileHeight": 16
+    }
+  ],
+  "sprites": [
+    {
+      "id": "player",
+      "path": "Sprites/player.png"
+    }
+  ],
+  "maps": [
+    {
+      "id": "test-map",
+      "path": "Maps/test-map.json"
+    }
+  ]
+}

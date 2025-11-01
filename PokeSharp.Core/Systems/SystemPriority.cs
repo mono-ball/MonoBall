@@ -37,7 +37,12 @@ public static class SystemPriority
     public const int Animation = 800;
 
     /// <summary>
-    /// Rendering systems that draw to screen (Priority: 1000).
+    /// Map rendering systems (Priority: 900, before sprites).
+    /// </summary>
+    public const int MapRender = 900;
+
+    /// <summary>
+    /// Sprite rendering systems that draw to screen (Priority: 1000).
     /// </summary>
     public const int Render = 1000;
 

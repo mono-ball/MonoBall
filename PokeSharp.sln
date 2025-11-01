@@ -1,8 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# 
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokeSharp", "PokeSharp\PokeSharp.csproj", "{949810DA-024B-49BE-B7CD-71F69877092C}"
-EndProject
+#
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokeSharp.Core", "PokeSharp.Core\PokeSharp.Core.csproj", "{F4798FF4-20FD-4126-9E31-B695A70905C2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokeSharp.Data", "PokeSharp.Data\PokeSharp.Data.csproj", "{08E70932-5B37-464A-A004-D6B6511D9A45}"
