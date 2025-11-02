@@ -37,6 +37,11 @@ public static class SystemPriority
     public const int Animation = 800;
 
     /// <summary>
+    /// Camera systems (Priority: 825, after Animation but before TileAnimation).
+    /// </summary>
+    public const int Camera = 825;
+
+    /// <summary>
     /// Tile animation systems (Priority: 850, between Animation and MapRender).
     /// </summary>
     public const int TileAnimation = 850;

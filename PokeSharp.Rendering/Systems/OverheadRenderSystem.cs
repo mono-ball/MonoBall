@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework.Graphics;
 using PokeSharp.Core.Components;
 using PokeSharp.Core.Systems;
 using PokeSharp.Rendering.Assets;
+using PokeSharp.Rendering.Components;
 
 namespace PokeSharp.Rendering.Systems;
 
@@ -57,12 +58,20 @@ public class OverheadRenderSystem : BaseSystem
                 _frameCounter, Priority);
             _logger?.LogDebug("═══════════════════════════════════════════════════");
 
-            // Begin sprite batch for overhead layer rendering
+            // Get camera transform matrix (if camera exists)
+            Matrix cameraTransform = Matrix.Identity;
+            var cameraQuery = new QueryDescription().WithAll<Player, Camera>();
+            world.Query(in cameraQuery, (ref Camera camera) =>
+            {
+                cameraTransform = camera.GetTransformMatrix();
+            });
+
+            // Begin sprite batch for overhead layer rendering with camera transform
             _spriteBatch.Begin(
                 sortMode: SpriteSortMode.Deferred,
                 blendState: BlendState.AlphaBlend,
                 samplerState: SamplerState.PointClamp,
-                transformMatrix: null);
+                transformMatrix: cameraTransform);
 
             _logger?.LogDebug("SpriteBatch started (Deferred, AlphaBlend, PointClamp)");
 
