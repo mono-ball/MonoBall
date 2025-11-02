@@ -42,24 +42,15 @@ public static class SystemPriority
     public const int Camera = 825;
 
     /// <summary>
-    /// Tile animation systems (Priority: 850, between Animation and MapRender).
+    /// Tile animation systems (Priority: 850, between Animation and Render).
     /// </summary>
     public const int TileAnimation = 850;
 
     /// <summary>
-    /// Map rendering systems (Priority: 900, before sprites).
-    /// </summary>
-    public const int MapRender = 900;
-
-    /// <summary>
-    /// Sprite rendering systems that draw to screen (Priority: 1000).
+    /// Unified rendering system with Z-order sorting (Priority: 1000).
+    /// Renders tiles, sprites, and objects based on Y position for proper depth.
     /// </summary>
     public const int Render = 1000;
-
-    /// <summary>
-    /// Overhead layer rendering for trees, roofs, and bridges (Priority: 1050, after sprites).
-    /// </summary>
-    public const int Overhead = 1050;
 
     /// <summary>
     /// UI rendering systems (Priority: 1100).

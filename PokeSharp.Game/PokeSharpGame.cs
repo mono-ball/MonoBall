@@ -29,7 +29,7 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game
     private AssetManager _assetManager = null!;
     private MapLoader _mapLoader = null!;
     private AnimationLibrary _animationLibrary = null!;
-    private RenderSystem _renderSystem = null!;
+    private ZOrderRenderSystem _renderSystem = null!;
     private ViewportScaleManager _viewportScaleManager = null!;
 
     // Keyboard state for zoom controls
@@ -112,18 +112,13 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game
         // Register CameraFollowSystem (Priority: 825, after Animation, before TileAnimation)
         _systemManager.RegisterSystem(new CameraFollowSystem());
 
-        // Register TileAnimationSystem (Priority: 850, animates water/grass tiles between Animation and MapRender)
+        // Register TileAnimationSystem (Priority: 850, animates water/grass tiles between Animation and Render)
         _systemManager.RegisterSystem(new TileAnimationSystem());
 
-        // Register MapRenderSystem before RenderSystem (MapRender priority: 900, Render priority: 1000)
-        _systemManager.RegisterSystem(new MapRenderSystem(GraphicsDevice, _assetManager));
-
-        // Render system needs graphics device and asset manager
-        _renderSystem = new RenderSystem(GraphicsDevice, _assetManager);
+        // Register ZOrderRenderSystem (Priority: 1000) - unified rendering with Z-order sorting
+        // Renders everything (tiles, sprites, objects) based on Y position for authentic Pokemon-style depth
+        _renderSystem = new ZOrderRenderSystem(GraphicsDevice, _assetManager);
         _systemManager.RegisterSystem(_renderSystem);
-
-        // Register OverheadRenderSystem AFTER RenderSystem (Overhead priority: 1050, after sprites)
-        _systemManager.RegisterSystem(new OverheadRenderSystem(GraphicsDevice, _assetManager));
 
         // Initialize all systems
         _systemManager.Initialize(_world);
@@ -175,7 +170,7 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game
     /// <param name="gameTime">Provides timing information.</param>
     protected override void Draw(GameTime gameTime)
     {
-        // Rendering is handled by RenderSystem during Update
+        // Rendering is handled by ZOrderRenderSystem during Update
         // Clear happens in Update() before systems render to ensure correct order
         base.Draw(gameTime);
     }
