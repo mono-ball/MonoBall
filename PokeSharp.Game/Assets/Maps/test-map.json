@@ -2,37 +2,6 @@
   "compressionlevel": -1,
   "height": 15,
   "infinite": false,
-  "orientation": "orthogonal",
-  "renderorder": "right-down",
-  "tiledversion": "1.11.2",
-  "tileheight": 16,
-  "tilewidth": 16,
-  "type": "map",
-  "version": "1.11",
-  "width": 20,
-  "properties": [
-    {
-      "name": "display_name",
-      "type": "string",
-      "value": "Test Area"
-    },
-    {
-      "name": "music",
-      "type": "string",
-      "value": "music_test"
-    },
-    {
-      "name": "indoor",
-      "type": "bool",
-      "value": false
-    }
-  ],
-  "tilesets": [
-    {
-      "firstgid": 1,
-      "source": "../Tilesets/test-tileset.json"
-    }
-  ],
   "layers": [
     {
       "data": [
@@ -42,9 +11,9 @@
         1, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 2, 1,
         1, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 2, 1,
         1, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 2, 1,
-        1, 2, 3, 0, 0, 0, 0, 0, 7, 7, 7, 0, 0, 0, 0, 0, 0, 3, 2, 1,
+        1, 2, 3, 0, 0, 0, 0, 0, 8, 8, 8, 0, 0, 0, 0, 0, 0, 3, 2, 1,
         1, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 2, 1,
-        1, 2, 3, 0, 0, 7, 7, 7, 7, 0, 0, 7, 7, 7, 7, 0, 0, 3, 2, 1,
+        1, 2, 3, 0, 0, 8, 8, 8, 8, 0, 0, 8, 8, 8, 8, 0, 0, 3, 2, 1,
         1, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 2, 1,
         1, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 2, 1,
         1, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 2, 1,
@@ -120,5 +89,19 @@
     }
   ],
   "nextlayerid": 5,
-  "nextobjectid": 12
+  "nextobjectid": 12,
+  "orientation": "orthogonal",
+  "renderorder": "right-down",
+  "tiledversion": "1.11.2",
+  "tileheight": 16,
+  "tilesets": [
+    {
+      "firstgid": 1,
+      "source": "../Tilesets/test-tileset.json"
+    }
+  ],
+  "tilewidth": 16,
+  "type": "map",
+  "version": "1.11",
+  "width": 20
 }

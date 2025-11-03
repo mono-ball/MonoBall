@@ -1,13 +1,15 @@
 {
-  "type": "tileset",
-  "name": "test-tileset",
-  "tilewidth": 16,
-  "tileheight": 16,
-  "tilecount": 16,
   "columns": 4,
   "image": "test-tileset.png",
-  "imagewidth": 64,
   "imageheight": 64,
+  "imagewidth": 64,
+  "margin": 0,
+  "name": "test-tileset",
+  "spacing": 0,
+  "tilecount": 16,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset",
   "version": "1.11",
   "tiledversion": "1.11.2",
   "tiles": [
@@ -20,15 +22,13 @@
         {"tileid": 9, "duration": 300}
       ],
       "properties": [
-        {"name": "solid", "type": "bool", "value": true},
-        {"name": "name", "type": "string", "value": "border_wall"}
+        {"name": "solid", "type": "bool", "value": true}
       ]
     },
     {
       "id": 1,
       "properties": [
-        {"name": "solid", "type": "bool", "value": true},
-        {"name": "name", "type": "string", "value": "inner_wall"}
+        {"name": "solid", "type": "bool", "value": true}
       ]
     },
     {
@@ -40,62 +40,14 @@
         {"tileid": 11, "duration": 250}
       ],
       "properties": [
-        {"name": "solid", "type": "bool", "value": false},
-        {"name": "terrain", "type": "string", "value": "grass"},
-        {"name": "name", "type": "string", "value": "grass_animated"}
-      ]
-    },
-    {
-      "id": 3,
-      "properties": [
-        {"name": "solid", "type": "bool", "value": false},
-        {"name": "terrain", "type": "string", "value": "path"},
-        {"name": "name", "type": "string", "value": "walkable_area"}
-      ]
-    },
-    {
-      "id": 4,
-      "properties": [
-        {"name": "solid", "type": "bool", "value": true},
-        {"name": "name", "type": "string", "value": "rock"}
-      ]
-    },
-    {
-      "id": 5,
-      "properties": [
-        {"name": "solid", "type": "bool", "value": true},
-        {"name": "name", "type": "string", "value": "tree_trunk"}
-      ]
-    },
-    {
-      "id": 6,
-      "properties": [
-        {"name": "ledge", "type": "bool", "value": true},
-        {"name": "ledge_direction", "type": "string", "value": "down"},
-        {"name": "name", "type": "string", "value": "ledge_down"}
+        {"name": "solid", "type": "bool", "value": true}
       ]
     },
     {
       "id": 7,
       "properties": [
-        {"name": "solid", "type": "bool", "value": false},
-        {"name": "name", "type": "string", "value": "flower"}
-      ]
-    },
-    {
-      "id": 12,
-      "properties": [
-        {"name": "terrain", "type": "string", "value": "ice"},
-        {"name": "movement_speed", "type": "float", "value": 1.5},
-        {"name": "name", "type": "string", "value": "ice"}
-      ]
-    },
-    {
-      "id": 13,
-      "properties": [
-        {"name": "terrain", "type": "string", "value": "sand"},
-        {"name": "movement_speed", "type": "float", "value": 0.75},
-        {"name": "name", "type": "string", "value": "sand"}
+        {"name": "ledge", "type": "bool", "value": true},
+        {"name": "ledge_direction", "type": "string", "value": "down"}
       ]
     }
   ]
