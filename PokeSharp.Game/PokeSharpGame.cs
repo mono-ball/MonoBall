@@ -167,25 +167,15 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game
     {
         try
         {
-            // Load test map from JSON
-            var tileMap = _mapLoader.LoadMap("Assets/Maps/test-map.json");
-            var tileCollider = _mapLoader.LoadCollision("Assets/Maps/test-map.json");
-            var animatedTiles = _mapLoader.LoadAnimatedTiles("Assets/Maps/test-map.json");
-            var tileProperties = _mapLoader.LoadTileProperties("Assets/Maps/test-map.json");
+            // Load test map entity with all components (single file parse - 4x faster!)
+            var mapEntity = _mapLoader.LoadMapEntity(_world, "Assets/Maps/test-map.json");
 
-            // Store animated tiles directly in TileMap component
-            tileMap.AnimatedTiles = animatedTiles;
-
-            // Create map entity with TileMap, TileCollider, and TileProperties components
-            var mapEntity = _world.Create(tileMap, tileCollider, tileProperties);
-
-            System.Console.WriteLine($"✅ Loaded test map: {tileMap.MapId} ({tileMap.Width}x{tileMap.Height} tiles)");
-            System.Console.WriteLine($"   Map entity: {mapEntity}");
-            System.Console.WriteLine($"   Animated tiles: {animatedTiles.Length}");
-            System.Console.WriteLine($"   Tiles with properties: {tileProperties.TileCount}");
-
-            // Set camera bounds from map dimensions (will be applied to player camera after creation)
-            SetCameraMapBounds(tileMap.Width, tileMap.Height);
+            // Set camera bounds from map dimensions
+            var mapQuery = new QueryDescription().WithAll<TileMap>();
+            _world.Query(in mapQuery, (ref TileMap tileMap) =>
+            {
+                SetCameraMapBounds(tileMap.Width, tileMap.Height);
+            });
         }
         catch (Exception ex)
         {

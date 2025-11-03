@@ -1,3 +1,4 @@
+using Arch.Core;
 using PokeSharp.Core.Components;
 using PokeSharp.Rendering.Assets;
 
@@ -20,15 +21,54 @@ public class MapLoader
     }
 
     /// <summary>
+    /// Loads a complete map entity with all components from a Tiled map file.
+    /// Parses the file once and extracts all data (TileMap, TileCollider, TileProperties).
+    /// </summary>
+    /// <param name="world">The ECS world to create the entity in.</param>
+    /// <param name="mapPath">Path to the Tiled JSON map file.</param>
+    /// <returns>The created map entity with all components attached.</returns>
+    public Entity LoadMapEntity(World world, string mapPath)
+    {
+        // Parse Tiled map once
+        var tmxDoc = TiledMapLoader.Load(mapPath);
+        
+        // Extract all components
+        var tileMap = ExtractTileMap(tmxDoc, mapPath);
+        var tileCollider = ExtractTileCollider(tmxDoc);
+        var tileProperties = ExtractTileProperties(tmxDoc);
+        
+        // Add animated tiles to TileMap
+        tileMap.AnimatedTiles = ExtractAnimatedTiles(tmxDoc);
+        
+        // Create entity with all components
+        var mapEntity = world.Create(tileMap, tileCollider, tileProperties);
+        
+        Console.WriteLine($"✅ Loaded map entity: {tileMap.MapId} ({tileMap.Width}x{tileMap.Height} tiles)");
+        Console.WriteLine($"   Entity ID: {mapEntity}");
+        Console.WriteLine($"   Components: TileMap, TileCollider, TileProperties");
+        Console.WriteLine($"   Animated tiles: {tileMap.AnimatedTiles?.Length ?? 0}");
+        Console.WriteLine($"   Tiles with properties: {tileProperties.TileCount}");
+        
+        return mapEntity;
+    }
+
+    /// <summary>
     /// Loads a Tiled map from JSON file and converts to TileMap component.
     /// </summary>
     /// <param name="mapPath">Path to the .json map file.</param>
     /// <returns>TileMap component ready for ECS.</returns>
+    [Obsolete("Use LoadMapEntity() instead for better performance (avoids multiple file parses)")]
     public TileMap LoadMap(string mapPath)
     {
-        // Parse JSON map
         var tmxDoc = TiledMapLoader.Load(mapPath);
+        return ExtractTileMap(tmxDoc, mapPath);
+    }
 
+    /// <summary>
+    /// Extracts TileMap component from a parsed Tiled map document.
+    /// </summary>
+    private TileMap ExtractTileMap(TmxDocument tmxDoc, string mapPath)
+    {
         // Extract layers by name
         var groundLayer = tmxDoc.Layers.FirstOrDefault(l => l.Name.Equals("Ground", StringComparison.OrdinalIgnoreCase));
         var objectLayer = tmxDoc.Layers.FirstOrDefault(l => l.Name.Equals("Objects", StringComparison.OrdinalIgnoreCase));
@@ -65,9 +105,18 @@ public class MapLoader
     /// </summary>
     /// <param name="mapPath">Path to the .json map file.</param>
     /// <returns>TileCollider component with collision data.</returns>
+    [Obsolete("Use LoadMapEntity() instead for better performance (avoids multiple file parses)")]
     public TileCollider LoadCollision(string mapPath)
     {
         var tmxDoc = TiledMapLoader.Load(mapPath);
+        return ExtractTileCollider(tmxDoc);
+    }
+
+    /// <summary>
+    /// Extracts TileCollider component from a parsed Tiled map document.
+    /// </summary>
+    private TileCollider ExtractTileCollider(TmxDocument tmxDoc)
+    {
         var collider = new TileCollider(tmxDoc.Width, tmxDoc.Height);
 
         // Find collision object group
@@ -104,9 +153,18 @@ public class MapLoader
     /// </summary>
     /// <param name="mapPath">Path to the .json map file.</param>
     /// <returns>Array of AnimatedTile components for tiles with animations.</returns>
+    [Obsolete("Use LoadMapEntity() instead for better performance (avoids multiple file parses)")]
     public AnimatedTile[] LoadAnimatedTiles(string mapPath)
     {
         var tmxDoc = TiledMapLoader.Load(mapPath);
+        return ExtractAnimatedTiles(tmxDoc);
+    }
+
+    /// <summary>
+    /// Extracts AnimatedTile array from a parsed Tiled map document.
+    /// </summary>
+    private AnimatedTile[] ExtractAnimatedTiles(TmxDocument tmxDoc)
+    {
         var tileset = tmxDoc.Tilesets.FirstOrDefault();
 
         if (tileset == null || tileset.Animations.Count == 0)
@@ -144,9 +202,18 @@ public class MapLoader
     /// </summary>
     /// <param name="mapPath">Path to the .json map file.</param>
     /// <returns>TileProperties component with all tile properties from Tiled.</returns>
+    [Obsolete("Use LoadMapEntity() instead for better performance (avoids multiple file parses)")]
     public TileProperties LoadTileProperties(string mapPath)
     {
         var tmxDoc = TiledMapLoader.Load(mapPath);
+        return ExtractTileProperties(tmxDoc);
+    }
+
+    /// <summary>
+    /// Extracts TileProperties component from a parsed Tiled map document.
+    /// </summary>
+    private TileProperties ExtractTileProperties(TmxDocument tmxDoc)
+    {
         var tileProps = new TileProperties();
 
         // Process each tileset
