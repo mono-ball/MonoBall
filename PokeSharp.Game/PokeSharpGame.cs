@@ -84,15 +84,16 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game
             Console.WriteLine("Continuing with empty asset manager...");
         }
 
-        // Create map loader
-        _mapLoader = new MapLoader(_assetManager);
-
-        // Initialize entity factory with template system
+        // Initialize entity factory with template system (must be before MapLoader)
         var templateCache = new TemplateCache();
         var factoryLogger = ConsoleLoggerFactory.Create<EntityFactoryService>(LogLevel.Debug);
         TemplateRegistry.RegisterAllTemplates(templateCache);
         _entityFactory = new EntityFactoryService(templateCache, factoryLogger);
         Console.WriteLine("✅ Entity factory initialized with template system");
+
+        // Create map loader with entity factory for template-based tile creation
+        _mapLoader = new MapLoader(_assetManager, _entityFactory);
+        Console.WriteLine("✅ MapLoader initialized with template support");
 
         // Create animation library with default player animations
         _animationLibrary = new AnimationLibrary();
@@ -278,29 +279,82 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game
     }
 
     /// <summary>
-    ///     Creates test NPCs to demonstrate the entity factory system.
-    ///     Spawns NPCs at various positions using different templates.
+    ///     Creates test NPCs to demonstrate the entity factory system with template inheritance.
+    ///     Spawns NPCs at various positions using different templates that inherit from each other.
     /// </summary>
     private void CreateTestNpcs()
     {
-        Console.WriteLine("\n📦 Spawning test NPCs from templates...");
+        Console.WriteLine("\n📦 Spawning test NPCs from templates (with inheritance)...");
 
-        // Spawn a generic NPC at position (15, 8)
-        var npc1 = _entityFactory
+        // Spawn a generic NPC (inherits from npc/base)
+        var genericNpc = _entityFactory
             .SpawnFromTemplateAsync(
                 "npc/generic",
                 _world,
-                builder =>
-                {
-                    builder.OverrideComponent(new Position(15, 8));
-                }
+                builder => builder.OverrideComponent(new Position(15, 8))
             )
             .GetAwaiter()
             .GetResult();
+        Console.WriteLine($"✅ Generic NPC spawned at (15, 8) - inherits: npc/base");
 
-        Console.WriteLine($"✅ Spawned NPC: {npc1} from template 'npc/generic' at (15, 8)");
-        Console.WriteLine("   Total NPCs created: 1");
-        Console.WriteLine("   Template system working! 🎉\n");
+        // Spawn a stationary NPC (inherits from npc/base, no movement)
+        var stationaryNpc = _entityFactory
+            .SpawnFromTemplateAsync(
+                "npc/stationary",
+                _world,
+                builder => builder.OverrideComponent(new Position(18, 8))
+            )
+            .GetAwaiter()
+            .GetResult();
+        Console.WriteLine($"✅ Stationary NPC spawned at (18, 8) - inherits: npc/base (no GridMovement)");
+
+        // Spawn a trainer NPC (inherits from npc/generic)
+        var trainerNpc = _entityFactory
+            .SpawnFromTemplateAsync(
+                "npc/trainer",
+                _world,
+                builder => builder.OverrideComponent(new Position(12, 10))
+            )
+            .GetAwaiter()
+            .GetResult();
+        Console.WriteLine($"✅ Trainer NPC spawned at (12, 10) - inherits: npc/generic → npc/base");
+
+        // Spawn a gym leader NPC (inherits from npc/trainer → npc/generic → npc/base)
+        var gymLeaderNpc = _entityFactory
+            .SpawnFromTemplateAsync(
+                "npc/gym-leader",
+                _world,
+                builder => builder.OverrideComponent(new Position(10, 12))
+            )
+            .GetAwaiter()
+            .GetResult();
+        Console.WriteLine($"✅ Gym Leader spawned at (10, 12) - inherits: npc/trainer → npc/generic → npc/base");
+
+        // Spawn a shop keeper NPC (inherits from npc/stationary)
+        var shopKeeperNpc = _entityFactory
+            .SpawnFromTemplateAsync(
+                "npc/shop-keeper",
+                _world,
+                builder => builder.OverrideComponent(new Position(14, 12))
+            )
+            .GetAwaiter()
+            .GetResult();
+        Console.WriteLine($"✅ Shop Keeper spawned at (14, 12) - inherits: npc/stationary → npc/base");
+
+        // Spawn a fast NPC (inherits from npc/generic with overridden speed)
+        var fastNpc = _entityFactory
+            .SpawnFromTemplateAsync(
+                "npc/fast",
+                _world,
+                builder => builder.OverrideComponent(new Position(16, 12))
+            )
+            .GetAwaiter()
+            .GetResult();
+        Console.WriteLine($"✅ Fast NPC spawned at (16, 12) - inherits: npc/generic → npc/base (overrides speed)");
+
+        Console.WriteLine($"\n🎯 Total NPCs created: 6");
+        Console.WriteLine("   All NPCs created using template inheritance hierarchy!");
+        Console.WriteLine("   Template inheritance system working! 🎉\n");
     }
 
     /// <summary>

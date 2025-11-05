@@ -198,6 +198,12 @@ public class MovementSystem : BaseSystem
                 return; // Invalid direction
         }
 
+        // Check map boundaries
+        if (!IsWithinMapBounds(world, position.MapId, targetX, targetY))
+        {
+            return; // Outside map bounds - block movement
+        }
+
         // Check if target tile is a Pokemon ledge
         if (CollisionSystem.IsLedge(_spatialHashSystem, position.MapId, targetX, targetY))
         {
@@ -232,7 +238,11 @@ public class MovementSystem : BaseSystem
                         break;
                 }
 
-                // Check if landing position is valid
+                // Check if landing position is within bounds
+                if (!IsWithinMapBounds(world, position.MapId, jumpLandX, jumpLandY))
+                    return; // Can't jump outside map bounds
+
+                // Check if landing position is valid (not blocked)
                 if (
                     !CollisionSystem.IsPositionWalkable(
                         _spatialHashSystem,
@@ -277,5 +287,38 @@ public class MovementSystem : BaseSystem
 
         // Update facing direction
         movement.FacingDirection = direction;
+    }
+
+    /// <summary>
+    ///     Checks if the given tile coordinates are within the map boundaries.
+    ///     If no MapInfo is found for the given mapId, returns true (no boundaries enforced).
+    /// </summary>
+    /// <param name="world">The ECS world.</param>
+    /// <param name="mapId">The map identifier.</param>
+    /// <param name="tileX">The X coordinate in tile space.</param>
+    /// <param name="tileY">The Y coordinate in tile space.</param>
+    /// <returns>True if within bounds or no map bounds exist, false if outside.</returns>
+    private static bool IsWithinMapBounds(World world, int mapId, int tileX, int tileY)
+    {
+        // Query for MapInfo entity with matching mapId
+        var mapInfoQuery = new QueryDescription().WithAll<MapInfo>();
+        bool? withinBounds = null; // null = no MapInfo found
+
+        world.Query(
+            in mapInfoQuery,
+            (ref MapInfo mapInfo) =>
+            {
+                if (mapInfo.MapId == mapId)
+                {
+                    // Check if coordinates are within bounds [0, width) and [0, height)
+                    withinBounds =
+                        tileX >= 0 && tileX < mapInfo.Width && tileY >= 0 && tileY < mapInfo.Height;
+                }
+            }
+        );
+
+        // If no MapInfo found, allow movement (no boundaries enforced)
+        // This maintains backward compatibility with tests and situations without map metadata
+        return withinBounds ?? true;
     }
 }

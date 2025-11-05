@@ -42,8 +42,11 @@ public sealed class EntityFactoryService : IEntityFactoryService
             );
         }
 
-        // Validate template before spawning
-        var validationResult = ValidateTemplateInternal(template);
+        // Resolve template inheritance chain
+        var resolvedTemplate = ResolveTemplateInheritance(template);
+
+        // Validate resolved template before spawning
+        var validationResult = ValidateTemplateInternal(resolvedTemplate);
         if (!validationResult.IsValid)
         {
             _logger.LogError(
@@ -56,8 +59,8 @@ public sealed class EntityFactoryService : IEntityFactoryService
             );
         }
 
-        // Build component array from template
-        var components = BuildComponentArray(template, context);
+        // Build component array from resolved template
+        var components = BuildComponentArray(resolvedTemplate, context);
 
         // Create empty entity first
         var entity = world.Create();
@@ -192,7 +195,7 @@ public sealed class EntityFactoryService : IEntityFactoryService
 
         var template = _templateCache.Get(templateId);
         if (template == null)
-            return TemplateValidationResult.Failure($"Template '{templateId}' not found in cache");
+            return TemplateValidationResult.Failure(templateId, $"Template '{templateId}' not found in cache");
 
         return ValidateTemplateInternal(template);
     }
@@ -219,6 +222,106 @@ public sealed class EntityFactoryService : IEntityFactoryService
         return isValid
             ? TemplateValidationResult.Success(template.TemplateId)
             : TemplateValidationResult.Failure(template.TemplateId, errors.ToArray());
+    }
+
+    /// <summary>
+    ///     Resolves template inheritance by merging base template components with child template.
+    ///     Child components override base components of the same type.
+    /// </summary>
+    /// <param name="template">Template to resolve</param>
+    /// <returns>Resolved template with all inherited components</returns>
+    /// <exception cref="InvalidOperationException">Thrown on circular dependency</exception>
+    private EntityTemplate ResolveTemplateInheritance(EntityTemplate template)
+    {
+        // If no base template, return as-is
+        if (string.IsNullOrWhiteSpace(template.BaseTemplateId))
+            return template;
+
+        _logger.LogDebug(
+            "Resolving inheritance for template '{TemplateId}' (base: '{BaseTemplateId}')",
+            template.TemplateId,
+            template.BaseTemplateId
+        );
+
+        // Track visited templates to detect circular dependencies
+        var visited = new HashSet<string> { template.TemplateId };
+        var inheritanceChain = new List<EntityTemplate>();
+
+        // Walk up the inheritance chain
+        var currentTemplateId = template.BaseTemplateId;
+        while (!string.IsNullOrWhiteSpace(currentTemplateId))
+        {
+            // Check for circular dependency
+            if (visited.Contains(currentTemplateId))
+            {
+                throw new InvalidOperationException(
+                    $"Circular template inheritance detected: {string.Join(" → ", visited)} → {currentTemplateId}"
+                );
+            }
+
+            // Get base template
+            var baseTemplate = _templateCache.Get(currentTemplateId);
+            if (baseTemplate == null)
+            {
+                throw new InvalidOperationException(
+                    $"Base template '{currentTemplateId}' not found for template '{template.TemplateId}'"
+                );
+            }
+
+            visited.Add(currentTemplateId);
+            inheritanceChain.Add(baseTemplate);
+
+            // Continue up the chain
+            currentTemplateId = baseTemplate.BaseTemplateId;
+        }
+
+        // Reverse chain so we start from root and work down
+        inheritanceChain.Reverse();
+
+        _logger.LogDebug(
+            "Inheritance chain for '{TemplateId}': {Chain}",
+            template.TemplateId,
+            string.Join(" → ", inheritanceChain.Select(t => t.TemplateId).Append(template.TemplateId))
+        );
+
+        // Merge components from base to derived (derived overrides base)
+        var mergedComponents = new Dictionary<Type, ComponentTemplate>();
+
+        // Start with root base template
+        foreach (var baseTemplate in inheritanceChain)
+        {
+            foreach (var component in baseTemplate.Components)
+            {
+                // Base components are added or overridden
+                mergedComponents[component.ComponentType] = component;
+            }
+        }
+
+        // Apply child template components (final overrides)
+        foreach (var component in template.Components)
+        {
+            mergedComponents[component.ComponentType] = component;
+        }
+
+        // Create resolved template
+        var resolvedTemplate = new EntityTemplate
+        {
+            TemplateId = template.TemplateId,
+            Name = template.Name,
+            Tag = template.Tag,
+            Metadata = template.Metadata,
+            BaseTemplateId = null, // Clear to avoid re-resolution
+            CustomProperties = template.CustomProperties,
+            Components = mergedComponents.Values.ToList(),
+        };
+
+        _logger.LogDebug(
+            "Resolved template '{TemplateId}' with {Count} components",
+            resolvedTemplate.TemplateId,
+            resolvedTemplate.ComponentCount
+        );
+
+        return resolvedTemplate;
     }
 
     private static List<object> BuildComponentArray(

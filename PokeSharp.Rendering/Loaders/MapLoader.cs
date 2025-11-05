@@ -1,15 +1,18 @@
 using Arch.Core;
 using PokeSharp.Core.Components;
+using PokeSharp.Core.Factories;
 using PokeSharp.Rendering.Assets;
 
 namespace PokeSharp.Rendering.Loaders;
 
 /// <summary>
 ///     Loads Tiled maps and converts them to ECS components.
+///     Supports template-based tile creation when EntityFactoryService is provided.
 /// </summary>
 public class MapLoader
 {
     private readonly AssetManager _assetManager;
+    private readonly IEntityFactoryService? _entityFactory;
     private readonly Dictionary<string, int> _mapNameToId = new();
     private int _nextMapId = 0;
 
@@ -17,9 +20,11 @@ public class MapLoader
     ///     Initializes a new instance of the MapLoader class.
     /// </summary>
     /// <param name="assetManager">Asset manager for texture loading.</param>
-    public MapLoader(AssetManager assetManager)
+    /// <param name="entityFactory">Optional entity factory for template-based tile creation.</param>
+    public MapLoader(AssetManager assetManager, IEntityFactoryService? entityFactory = null)
     {
         _assetManager = assetManager ?? throw new ArgumentNullException(nameof(assetManager));
+        _entityFactory = entityFactory;
     }
 
     /// <summary>
@@ -218,6 +223,72 @@ public class MapLoader
         return layer?.Data;
     }
 
+    /// <summary>
+    ///     Determines which tile template to use based on tile properties.
+    ///     Returns null if no suitable template is found (falls back to manual creation).
+    /// </summary>
+    /// <param name="props">Tile properties from Tiled.</param>
+    /// <returns>Template ID or null</returns>
+    private static string? DetermineTileTemplate(Dictionary<string, object> props)
+    {
+        // Check for ledge - highest priority (specific behavior)
+        if (props.TryGetValue("ledge_direction", out var ledgeValue))
+        {
+            var ledgeDir = ledgeValue switch
+            {
+                string s => s,
+                _ => ledgeValue?.ToString()
+            };
+
+            if (!string.IsNullOrEmpty(ledgeDir))
+            {
+                return ledgeDir.ToLower() switch
+                {
+                    "down" => "tile/ledge/down",
+                    "up" => "tile/ledge/up",
+                    "left" => "tile/ledge/left",
+                    "right" => "tile/ledge/right",
+                    _ => null
+                };
+            }
+        }
+
+        // Check for solid wall (but not ledge)
+        if (props.TryGetValue("solid", out var solidValue))
+        {
+            bool isSolid = solidValue switch
+            {
+                bool b => b,
+                string s => bool.TryParse(s, out var result) && result,
+                _ => false
+            };
+
+            if (isSolid)
+            {
+                return "tile/wall";
+            }
+        }
+
+        // Check for encounter zone (grass)
+        if (props.TryGetValue("encounter_rate", out var encounterValue))
+        {
+            int encounterRate = encounterValue switch
+            {
+                int i => i,
+                string s => int.TryParse(s, out var result) ? result : 0,
+                _ => 0
+            };
+
+            if (encounterRate > 0)
+            {
+                return "tile/grass";
+            }
+        }
+
+        // Default ground tile
+        return "tile/ground";
+    }
+
     private void CreateTileEntity(
         World world,
         int x,
@@ -228,94 +299,137 @@ public class MapLoader
         TileLayer layer
     )
     {
-        // Always add position and sprite
-        var position = new TilePosition(x, y, mapId);
-        var sprite = new TileSprite(
-            tileset.Name ?? "default",
-            tileGid,
-            layer,
-            CalculateSourceRect(tileGid, tileset)
-        );
-
-        // Create entity with base components
-        var entity = world.Create(position, sprite);
-
         // Get tile properties from tileset (convert global ID to local ID)
         int localTileId = tileGid - tileset.FirstGid;
-        if (localTileId >= 0 && tileset.TileProperties.TryGetValue(localTileId, out var props))
+        Dictionary<string, object>? props = null;
+        if (localTileId >= 0)
         {
-            // Check if this is a ledge tile (needs special handling)
-            bool isLedge = props.ContainsKey("ledge_direction");
+            tileset.TileProperties.TryGetValue(localTileId, out props);
+        }
 
-            // Add Collision component if tile is solid OR is a ledge (ledges are always solid with directional exceptions)
-            if (props.TryGetValue("solid", out var solidValue) || isLedge)
+        // Determine which template to use (if entity factory is available)
+        string? templateId = null;
+        if (_entityFactory != null && props != null)
+        {
+            templateId = DetermineTileTemplate(props);
+        }
+
+        // Create the entity - use template if available, otherwise manual creation
+        Entity entity;
+        if (_entityFactory != null && templateId != null && _entityFactory.HasTemplate(templateId))
+        {
+            // Template-based creation
+            var position = new TilePosition(x, y, mapId);
+            var sprite = new TileSprite(
+                tileset.Name ?? "default",
+                tileGid,
+                layer,
+                CalculateSourceRect(tileGid, tileset)
+            );
+
+            entity = _entityFactory
+                .SpawnFromTemplateAsync(
+                    templateId,
+                    world,
+                    builder =>
+                    {
+                        builder.OverrideComponent(position);
+                        builder.OverrideComponent(sprite);
+                    }
+                )
+                .GetAwaiter()
+                .GetResult();
+        }
+        else
+        {
+            // Fallback: Manual creation (backward compatible)
+            var position = new TilePosition(x, y, mapId);
+            var sprite = new TileSprite(
+                tileset.Name ?? "default",
+                tileGid,
+                layer,
+                CalculateSourceRect(tileGid, tileset)
+            );
+
+            entity = world.Create(position, sprite);
+
+            // Add components based on properties (old behavior)
+            if (props != null)
             {
-                bool isSolid = false;
+                // Check if this is a ledge tile (needs special handling)
+                bool isLedge = props.ContainsKey("ledge_direction");
 
-                if (solidValue != null)
+                // Add Collision component if tile is solid OR is a ledge
+                if (props.TryGetValue("solid", out var solidValue) || isLedge)
                 {
-                    // Handle different value types from JSON
-                    isSolid = solidValue switch
+                    bool isSolid = false;
+
+                    if (solidValue != null)
                     {
-                        bool b => b,
-                        string s => bool.TryParse(s, out var result) && result,
-                        _ => false,
-                    };
-                }
-                else if (isLedge)
-                {
-                    // Ledges are always solid (just with directional exceptions)
-                    isSolid = true;
-                }
-
-                if (isSolid)
-                {
-                    world.Add(entity, new Collision(true));
-                }
-            }
-
-            // Add TileLedge component for ledges
-            if (props.TryGetValue("ledge_direction", out var ledgeValue))
-            {
-                // Handle different value types from JSON
-                string? ledgeDir = ledgeValue switch
-                {
-                    string s => s,
-                    _ => ledgeValue?.ToString(),
-                };
-
-                if (!string.IsNullOrEmpty(ledgeDir))
-                {
-                    var jumpDirection = ledgeDir.ToLower() switch
+                        isSolid = solidValue switch
+                        {
+                            bool b => b,
+                            string s => bool.TryParse(s, out var result) && result,
+                            _ => false,
+                        };
+                    }
+                    else if (isLedge)
                     {
-                        "down" => Direction.Down,
-                        "up" => Direction.Up,
-                        "left" => Direction.Left,
-                        "right" => Direction.Right,
-                        _ => Direction.None,
-                    };
+                        isSolid = true;
+                    }
 
-                    if (jumpDirection != Direction.None)
+                    if (isSolid)
                     {
-                        world.Add(entity, new TileLedge(jumpDirection));
+                        world.Add(entity, new Collision(true));
                     }
                 }
+
+                // Add TileLedge component for ledges
+                if (props.TryGetValue("ledge_direction", out var ledgeValue))
+                {
+                    string? ledgeDir = ledgeValue switch
+                    {
+                        string s => s,
+                        _ => ledgeValue?.ToString(),
+                    };
+
+                    if (!string.IsNullOrEmpty(ledgeDir))
+                    {
+                        var jumpDirection = ledgeDir.ToLower() switch
+                        {
+                            "down" => Direction.Down,
+                            "up" => Direction.Up,
+                            "left" => Direction.Left,
+                            "right" => Direction.Right,
+                            _ => Direction.None,
+                        };
+
+                        if (jumpDirection != Direction.None)
+                        {
+                            world.Add(entity, new TileLedge(jumpDirection));
+                        }
+                    }
+                }
+
+                // Add EncounterZone component if encounter rate exists
+                if (
+                    props.TryGetValue("encounter_rate", out var encounterRateValue)
+                    && encounterRateValue is int encounterRate
+                    && encounterRate > 0
+                )
+                {
+                    var encounterTableId = props.TryGetValue("encounter_table", out var tableValue)
+                        ? tableValue.ToString() ?? ""
+                        : "";
+
+                    world.Add(entity, new EncounterZone(encounterTableId, encounterRate));
+                }
             }
+        }
 
-            // Add EncounterZone component if encounter rate exists
-            if (
-                props.TryGetValue("encounter_rate", out var encounterRateValue)
-                && encounterRateValue is int encounterRate
-                && encounterRate > 0
-            )
-            {
-                var encounterTableId = props.TryGetValue("encounter_table", out var tableValue)
-                    ? tableValue.ToString() ?? ""
-                    : "";
-
-                world.Add(entity, new EncounterZone(encounterTableId, encounterRate));
-            }
-
+        // Add additional components that aren't in templates (both paths)
+        if (props != null)
+        {
             // Add TerrainType component if terrain type exists
             if (
                 props.TryGetValue("terrain_type", out var terrainValue)
