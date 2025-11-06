@@ -1,9 +1,7 @@
 using Arch.Core;
-using Arch.Core.Extensions;
 using Microsoft.Xna.Framework;
 using PokeSharp.Core.Components;
 using PokeSharp.Core.Systems;
-using Xunit;
 
 namespace PokeSharp.Core.Tests.Systems;
 
@@ -41,7 +39,10 @@ public class MovementSystemTests
         ref var movement = ref world.Get<GridMovement>(npc);
         Assert.True(movement.IsMoving, "NPC should have started moving");
         Assert.Equal(Direction.Down, movement.FacingDirection);
-        Assert.False(world.Has<MovementRequest>(npc), "MovementRequest should be removed after processing");
+        Assert.False(
+            world.Has<MovementRequest>(npc),
+            "MovementRequest should be removed after processing"
+        );
     }
 
     [Fact]
@@ -58,7 +59,7 @@ public class MovementSystemTests
 
         // Create wall at (5, 6)
         var wall = world.Create(
-            new TilePosition(5, 6, 0),
+            new TilePosition(5, 6),
             new TileSprite("tileset", 1, TileLayer.Ground, default),
             new Collision(true)
         );
@@ -79,7 +80,10 @@ public class MovementSystemTests
         // Assert
         ref var movement = ref world.Get<GridMovement>(npc);
         Assert.False(movement.IsMoving, "NPC should NOT have started moving (blocked by wall)");
-        Assert.False(world.Has<MovementRequest>(npc), "MovementRequest should be removed even if blocked");
+        Assert.False(
+            world.Has<MovementRequest>(npc),
+            "MovementRequest should be removed even if blocked"
+        );
     }
 
     [Fact]
@@ -96,7 +100,7 @@ public class MovementSystemTests
 
         // Create ledge at (5, 6) that allows jumping down
         var ledge = world.Create(
-            new TilePosition(5, 6, 0),
+            new TilePosition(5, 6),
             new TileSprite("tileset", 8, TileLayer.Object, default),
             new Collision(true),
             new TileLedge(Direction.Down)
@@ -140,7 +144,7 @@ public class MovementSystemTests
 
         // Create ledge at (5, 6) that only allows jumping down
         var ledge = world.Create(
-            new TilePosition(5, 6, 0),
+            new TilePosition(5, 6),
             new TileSprite("tileset", 8, TileLayer.Object, default),
             new Collision(true),
             new TileLedge(Direction.Down) // Can only jump down
@@ -205,5 +209,3 @@ public class MovementSystemTests
         Assert.Equal(Direction.Left, movement2.FacingDirection);
     }
 }
-
-

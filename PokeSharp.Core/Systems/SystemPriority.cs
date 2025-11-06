@@ -1,65 +1,31 @@
 namespace PokeSharp.Core.Systems;
 
 /// <summary>
-///     Defines standard priority values for system execution order.
-///     Systems execute in ascending priority order (lower values first).
+///     Defines system execution priorities.
+///     Lower numbers execute first.
 /// </summary>
 public static class SystemPriority
 {
-    /// <summary>
-    ///     Input systems that read player/AI input (Priority: 0).
-    /// </summary>
+    // Input and pre-processing
     public const int Input = 0;
 
-    /// <summary>
-    ///     Spatial hash indexing for O(1) entity lookups by position (Priority: 25).
-    ///     Runs early to build spatial index before AI and movement systems need it.
-    /// </summary>
+    // Spatial indexing (must run early)
     public const int SpatialHash = 25;
 
-    /// <summary>
-    ///     AI and decision-making systems (Priority: 50).
-    /// </summary>
+    // AI and behaviors
     public const int AI = 50;
+    public const int NpcBehavior = 75;
 
-    /// <summary>
-    ///     Movement and physics systems (Priority: 100).
-    /// </summary>
+    // Movement and physics
     public const int Movement = 100;
-
-    /// <summary>
-    ///     Collision detection systems (Priority: 200).
-    /// </summary>
     public const int Collision = 200;
 
-    /// <summary>
-    ///     Game logic systems (Priority: 300).
-    /// </summary>
-    public const int Logic = 300;
-
-    /// <summary>
-    ///     Animation systems (Priority: 800).
-    /// </summary>
+    // Animation
     public const int Animation = 800;
-
-    /// <summary>
-    ///     Camera systems (Priority: 825, after Animation but before TileAnimation).
-    /// </summary>
-    public const int Camera = 825;
-
-    /// <summary>
-    ///     Tile animation systems (Priority: 850, between Animation and Render).
-    /// </summary>
+    public const int CameraFollow = 825;
     public const int TileAnimation = 850;
 
-    /// <summary>
-    ///     Unified rendering system with Z-order sorting (Priority: 1000).
-    ///     Renders tiles, sprites, and objects based on Y position for proper depth.
-    /// </summary>
+    // Rendering
+    public const int MapRender = 900;
     public const int Render = 1000;
-
-    /// <summary>
-    ///     UI rendering systems (Priority: 1100).
-    /// </summary>
-    public const int UI = 1100;
 }

@@ -132,7 +132,7 @@ public class TileAnimationSystem : BaseSystem
                 sprite.SourceRect.Width,
                 sprite.SourceRect.Height
             );
-    }
+        }
 
         // Fallback for invalid SourceRect
         const int fallbackTileSize = 16;

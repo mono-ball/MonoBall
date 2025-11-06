@@ -33,7 +33,7 @@ public class ZOrderRenderSystem : BaseSystem
     private int _lastEntityCount;
     private int _lastTileCount;
     private int _lastSpriteCount;
-    
+
     // Cache query descriptions to avoid allocation every frame
     private readonly QueryDescription _cameraQuery;
     private readonly QueryDescription _groundTileQuery;
@@ -41,14 +41,20 @@ public class ZOrderRenderSystem : BaseSystem
     private readonly QueryDescription _overheadTileQuery;
     private readonly QueryDescription _movingSpriteQuery;
     private readonly QueryDescription _staticSpriteQuery;
-    
+
     // Cache camera transform to avoid recalculating
     private Matrix _cachedCameraTransform;
     private Rectangle? _cachedCameraBounds;
-    
+
     // Performance profiling
     private bool _enableDetailedProfiling = false;
-    private double _setupTime, _batchBeginTime, _groundTime, _objectTime, _spriteTime, _overheadTime, _batchEndTime;
+    private double _setupTime,
+        _batchBeginTime,
+        _groundTime,
+        _objectTime,
+        _spriteTime,
+        _overheadTime,
+        _batchEndTime;
 
     /// <summary>
     ///     Initializes a new instance of the ZOrderRenderSystem class.
@@ -66,18 +72,20 @@ public class ZOrderRenderSystem : BaseSystem
         _assetManager = assetManager ?? throw new ArgumentNullException(nameof(assetManager));
         _spriteBatch = new SpriteBatch(_graphicsDevice);
         _logger = logger;
-        
+
         // Pre-build query descriptions once
         _cameraQuery = new QueryDescription().WithAll<Player, Camera>();
-        
+
         // Separate queries for each tile layer - avoids filtering in callback
         _groundTileQuery = new QueryDescription().WithAll<TilePosition, TileSprite>();
         _objectTileQuery = new QueryDescription().WithAll<TilePosition, TileSprite>();
         _overheadTileQuery = new QueryDescription().WithAll<TilePosition, TileSprite>();
-        
+
         _movingSpriteQuery = new QueryDescription().WithAll<Position, Sprite, GridMovement>();
-        _staticSpriteQuery = new QueryDescription().WithAll<Position, Sprite>().WithNone<GridMovement>();
-        
+        _staticSpriteQuery = new QueryDescription()
+            .WithAll<Position, Sprite>()
+            .WithNone<GridMovement>();
+
         _cachedCameraTransform = Matrix.Identity;
     }
 
@@ -137,7 +145,12 @@ public class ZOrderRenderSystem : BaseSystem
             if (_frameCounter % 300 == 0)
             {
                 var totalEntities = totalTilesRendered + spriteCount;
-                _logger?.LogRenderStats(totalEntities, totalTilesRendered, spriteCount, _frameCounter);
+                _logger?.LogRenderStats(
+                    totalEntities,
+                    totalTilesRendered,
+                    spriteCount,
+                    _frameCounter
+                );
             }
 
             _lastEntityCount = totalTilesRendered + spriteCount;
@@ -148,11 +161,15 @@ public class ZOrderRenderSystem : BaseSystem
         }
         catch (Exception ex)
         {
-            _logger?.LogError(ex, "Error in ZOrderRenderSystem.Update (Frame {FrameCounter})", _frameCounter);
+            _logger?.LogError(
+                ex,
+                "Error in ZOrderRenderSystem.Update (Frame {FrameCounter})",
+                _frameCounter
+            );
             throw;
         }
     }
-    
+
     /// <summary>
     ///     Update with detailed profiling enabled (slower, for diagnostics only).
     /// </summary>
@@ -222,17 +239,24 @@ public class ZOrderRenderSystem : BaseSystem
         {
             var totalEntities = totalTilesRendered + spriteCount;
             _logger?.LogRenderStats(totalEntities, totalTilesRendered, spriteCount, _frameCounter);
-            
+
             _logger?.LogInformation(
                 "Render breakdown: Setup={0:F2}ms, Begin={1:F2}ms, Ground={2:F2}ms, Object={3:F2}ms, Sprites={4:F2}ms, Overhead={5:F2}ms, End={6:F2}ms",
-                _setupTime, _batchBeginTime, _groundTime, _objectTime, _spriteTime, _overheadTime, _batchEndTime);
+                _setupTime,
+                _batchBeginTime,
+                _groundTime,
+                _objectTime,
+                _spriteTime,
+                _overheadTime,
+                _batchEndTime
+            );
         }
 
         _lastEntityCount = totalTilesRendered + spriteCount;
         _lastTileCount = totalTilesRendered;
         _lastSpriteCount = spriteCount;
     }
-    
+
     /// <summary>
     ///     Enables or disables detailed per-frame profiling breakdown.
     /// </summary>
@@ -241,7 +265,7 @@ public class ZOrderRenderSystem : BaseSystem
         _enableDetailedProfiling = enabled;
         _logger?.LogInformation("Detailed profiling {State}", enabled ? "enabled" : "disabled");
     }
-    
+
     /// <summary>
     ///     Preloads all textures used by tiles in the world to avoid loading spikes during gameplay.
     ///     Call this after loading a new map.
@@ -250,7 +274,7 @@ public class ZOrderRenderSystem : BaseSystem
     {
         var sw = System.Diagnostics.Stopwatch.StartNew();
         var texturesNeeded = new HashSet<string>();
-        
+
         // Gather all tile textures
         world.Query(
             in _groundTileQuery,
@@ -259,7 +283,7 @@ public class ZOrderRenderSystem : BaseSystem
                 texturesNeeded.Add(sprite.TilesetId);
             }
         );
-        
+
         // Gather all sprite textures
         world.Query(
             in _movingSpriteQuery,
@@ -268,7 +292,7 @@ public class ZOrderRenderSystem : BaseSystem
                 texturesNeeded.Add(sprite.TextureId);
             }
         );
-        
+
         world.Query(
             in _staticSpriteQuery,
             (ref Sprite sprite) =>
@@ -276,7 +300,7 @@ public class ZOrderRenderSystem : BaseSystem
                 texturesNeeded.Add(sprite.TextureId);
             }
         );
-        
+
         // Preload all textures
         foreach (var textureId in texturesNeeded)
         {
@@ -286,14 +310,15 @@ public class ZOrderRenderSystem : BaseSystem
                 _assetManager.GetTexture(textureId); // Force load now
             }
         }
-        
+
         sw.Stop();
         _logger?.LogInformation(
-            "Preloaded {Count} textures in {TimeMs:F2}ms", 
-            texturesNeeded.Count, 
-            sw.Elapsed.TotalMilliseconds);
+            "Preloaded {Count} textures in {TimeMs:F2}ms",
+            texturesNeeded.Count,
+            sw.Elapsed.TotalMilliseconds
+        );
     }
-    
+
     /// <summary>
     ///     Updates the cached camera transform and bounds once per frame.
     /// </summary>
@@ -301,13 +326,13 @@ public class ZOrderRenderSystem : BaseSystem
     {
         _cachedCameraTransform = Matrix.Identity;
         _cachedCameraBounds = null;
-        
+
         world.Query(
             in _cameraQuery,
             (ref Camera camera) =>
             {
                 _cachedCameraTransform = camera.GetTransformMatrix();
-                
+
                 // Calculate camera bounds for culling
                 const int margin = 2;
                 int left =

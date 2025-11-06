@@ -10,6 +10,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\PokeSharp.Core\PokeSharp.Core.csproj" />
+    <ProjectReference Include="..\PokeSharp.Scripting\PokeSharp.Scripting.csproj" />
     <ProjectReference Include="..\PokeSharp.Rendering\PokeSharp.Rendering.csproj" />
     <ProjectReference Include="..\PokeSharp.Input\PokeSharp.Input.csproj" />
     <ProjectReference Include="..\PokeSharp.Data\PokeSharp.Data.csproj" />

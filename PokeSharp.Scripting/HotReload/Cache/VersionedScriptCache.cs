@@ -1,0 +1,306 @@
+using System.Collections.Concurrent;
+
+namespace PokeSharp.Scripting.HotReload.Cache;
+
+/// <summary>
+///     Thread-safe versioned cache for hot-reloadable scripts with rollback support.
+///     Maintains version history, lazy instantiation, and automatic rollback on compilation failure.
+///     Target: Enable instant rollback with no game disruption.
+/// </summary>
+public class VersionedScriptCache
+{
+    private readonly ConcurrentDictionary<string, ScriptCacheEntry> _cache = new();
+    private readonly object _versionLock = new();
+    private int _currentVersion;
+
+    /// <summary>
+    ///     Current global version number. Incremented on each successful compilation.
+    /// </summary>
+    public int CurrentVersion
+    {
+        get
+        {
+            lock (_versionLock)
+            {
+                return _currentVersion;
+            }
+        }
+    }
+
+    /// <summary>
+    ///     Total number of cached script types.
+    /// </summary>
+    public int CachedScriptCount => _cache.Count;
+
+    /// <summary>
+    ///     Update script type to new version. Instance lazily created on first GetOrCreateInstance().
+    ///     Maintains link to previous version for rollback support.
+    /// </summary>
+    /// <param name="typeId">Unique identifier for the script type (e.g., "Pikachu")</param>
+    /// <param name="newType">Compiled Type for the new version</param>
+    /// <returns>New version number</returns>
+    public int UpdateVersion(string typeId, Type newType)
+    {
+        if (string.IsNullOrEmpty(typeId))
+            throw new ArgumentNullException(nameof(typeId));
+        if (newType == null)
+            throw new ArgumentNullException(nameof(newType));
+
+        lock (_versionLock)
+        {
+            _currentVersion++;
+            var newVersion = _currentVersion;
+
+            _cache.AddOrUpdate(
+                typeId,
+                // Add new entry
+                _ => new ScriptCacheEntry(newVersion, newType),
+                // Update existing entry
+                (_, oldEntry) =>
+                {
+                    var newEntry = new ScriptCacheEntry(newVersion, newType)
+                    {
+                        PreviousVersion = oldEntry, // Link to previous for rollback
+                    };
+                    return newEntry;
+                }
+            );
+
+            return newVersion;
+        }
+    }
+
+    /// <summary>
+    ///     Update script type with explicit version number (for restoration from backup).
+    /// </summary>
+    /// <param name="typeId">Unique identifier for the script type</param>
+    /// <param name="type">Compiled Type</param>
+    /// <param name="version">Explicit version number to use</param>
+    public void UpdateVersion(string typeId, Type type, int version)
+    {
+        if (string.IsNullOrEmpty(typeId))
+            throw new ArgumentNullException(nameof(typeId));
+        if (type == null)
+            throw new ArgumentNullException(nameof(type));
+
+        _cache.AddOrUpdate(
+            typeId,
+            _ => new ScriptCacheEntry(version, type),
+            (_, oldEntry) =>
+                new ScriptCacheEntry(version, type)
+                {
+                    PreviousVersion = oldEntry.PreviousVersion, // Preserve rollback chain
+                }
+        );
+    }
+
+    /// <summary>
+    ///     Get current script instance, creating if needed (lazy instantiation).
+    ///     Thread-safe singleton pattern.
+    /// </summary>
+    /// <param name="typeId">Unique identifier for the script type</param>
+    /// <returns>Script instance</returns>
+    /// <exception cref="KeyNotFoundException">If typeId not found in cache</exception>
+    public object GetOrCreateInstance(string typeId)
+    {
+        if (string.IsNullOrEmpty(typeId))
+            throw new ArgumentNullException(nameof(typeId));
+
+        if (!_cache.TryGetValue(typeId, out var entry))
+            throw new KeyNotFoundException($"Script type '{typeId}' not found in cache");
+
+        return entry.GetOrCreateInstance();
+    }
+
+    /// <summary>
+    ///     Get current version and instance for a script type (without creating if not exists).
+    /// </summary>
+    /// <param name="typeId">Unique identifier for the script type</param>
+    /// <returns>Tuple of (version, instance) or (-1, null) if not found</returns>
+    public (int version, object? instance) GetInstance(string typeId)
+    {
+        if (string.IsNullOrEmpty(typeId))
+            throw new ArgumentNullException(nameof(typeId));
+
+        if (!_cache.TryGetValue(typeId, out var entry))
+            return (-1, null);
+
+        return (entry.Version, entry.Instance);
+    }
+
+    /// <summary>
+    ///     Get current version number for a specific script type.
+    /// </summary>
+    /// <param name="typeId">Unique identifier for the script type</param>
+    /// <returns>Version number or -1 if not found</returns>
+    public int GetVersion(string typeId)
+    {
+        if (string.IsNullOrEmpty(typeId))
+            throw new ArgumentNullException(nameof(typeId));
+
+        if (!_cache.TryGetValue(typeId, out var entry))
+            return -1;
+
+        return entry.Version;
+    }
+
+    /// <summary>
+    ///     Get current Type for a script.
+    /// </summary>
+    /// <param name="typeId">Unique identifier for the script type</param>
+    /// <returns>Current Type or null if not found</returns>
+    public Type? GetScriptType(string typeId)
+    {
+        if (string.IsNullOrEmpty(typeId))
+            throw new ArgumentNullException(nameof(typeId));
+
+        if (!_cache.TryGetValue(typeId, out var entry))
+            return null;
+
+        return entry.ScriptType;
+    }
+
+    /// <summary>
+    ///     Rollback to previous version (if available).
+    ///     Returns true if rollback was successful.
+    /// </summary>
+    /// <param name="typeId">Unique identifier for the script type</param>
+    /// <returns>True if rollback succeeded, false if no previous version available</returns>
+    public bool Rollback(string typeId)
+    {
+        if (string.IsNullOrEmpty(typeId))
+            throw new ArgumentNullException(nameof(typeId));
+
+        if (!_cache.TryGetValue(typeId, out var currentEntry))
+            return false;
+
+        if (currentEntry.PreviousVersion == null)
+            return false;
+
+        // Restore previous version
+        _cache.TryUpdate(typeId, currentEntry.PreviousVersion, currentEntry);
+
+        return true;
+    }
+
+    /// <summary>
+    ///     Check if a script type exists in the cache.
+    /// </summary>
+    /// <param name="typeId">Unique identifier for the script type</param>
+    /// <returns>True if exists, false otherwise</returns>
+    public bool Contains(string typeId)
+    {
+        if (string.IsNullOrEmpty(typeId))
+            return false;
+
+        return _cache.ContainsKey(typeId);
+    }
+
+    /// <summary>
+    ///     Clear instance for a script (force re-creation on next GetOrCreateInstance).
+    ///     Useful for testing or forced refresh.
+    /// </summary>
+    /// <param name="typeId">Unique identifier for the script type</param>
+    /// <returns>True if instance was cleared, false if not found</returns>
+    public bool ClearInstance(string typeId)
+    {
+        if (string.IsNullOrEmpty(typeId))
+            throw new ArgumentNullException(nameof(typeId));
+
+        if (!_cache.TryGetValue(typeId, out var entry))
+            return false;
+
+        entry.ClearInstance();
+        return true;
+    }
+
+    /// <summary>
+    ///     Remove a script type from the cache entirely.
+    /// </summary>
+    /// <param name="typeId">Unique identifier for the script type</param>
+    /// <returns>True if removed, false if not found</returns>
+    public bool Remove(string typeId)
+    {
+        if (string.IsNullOrEmpty(typeId))
+            throw new ArgumentNullException(nameof(typeId));
+
+        return _cache.TryRemove(typeId, out _);
+    }
+
+    /// <summary>
+    ///     Clear all cached scripts.
+    /// </summary>
+    public void Clear()
+    {
+        _cache.Clear();
+        lock (_versionLock)
+        {
+            _currentVersion = 0;
+        }
+    }
+
+    /// <summary>
+    ///     Get all cached script type IDs.
+    /// </summary>
+    public IEnumerable<string> GetAllTypeIds()
+    {
+        return _cache.Keys.ToList();
+    }
+
+    /// <summary>
+    ///     Get diagnostic information for all cached scripts.
+    /// </summary>
+    public IEnumerable<CacheEntryInfo> GetDiagnostics()
+    {
+        return _cache
+            .Select(kvp => new CacheEntryInfo
+            {
+                TypeId = kvp.Key,
+                Version = kvp.Value.Version,
+                TypeName = kvp.Value.ScriptType.Name,
+                IsInstantiated = kvp.Value.IsInstantiated,
+                LastUpdated = kvp.Value.LastUpdated,
+                HasPreviousVersion = kvp.Value.PreviousVersion != null,
+                PreviousVersionNumber = kvp.Value.PreviousVersion?.Version,
+            })
+            .ToList();
+    }
+
+    /// <summary>
+    ///     Get version history depth for a script type.
+    /// </summary>
+    /// <param name="typeId">Unique identifier for the script type</param>
+    /// <returns>Number of previous versions available for rollback</returns>
+    public int GetVersionHistoryDepth(string typeId)
+    {
+        if (string.IsNullOrEmpty(typeId))
+            throw new ArgumentNullException(nameof(typeId));
+
+        if (!_cache.TryGetValue(typeId, out var entry))
+            return 0;
+
+        var depth = 0;
+        var current = entry.PreviousVersion;
+        while (current != null)
+        {
+            depth++;
+            current = current.PreviousVersion;
+        }
+
+        return depth;
+    }
+}
+
+/// <summary>
+///     Diagnostic information for a cache entry.
+/// </summary>
+public class CacheEntryInfo
+{
+    public string TypeId { get; init; } = string.Empty;
+    public int Version { get; init; }
+    public string TypeName { get; init; } = string.Empty;
+    public bool IsInstantiated { get; init; }
+    public DateTime LastUpdated { get; init; }
+    public bool HasPreviousVersion { get; init; }
+    public int? PreviousVersionNumber { get; init; }
+}

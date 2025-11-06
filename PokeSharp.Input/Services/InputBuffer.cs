@@ -181,4 +181,3 @@ public readonly struct InputCommand
         return $"InputCommand({Direction} @ {Timestamp:F3}s)";
     }
 }
-

@@ -27,7 +27,7 @@ public class CameraFollowSystem : BaseSystem
     }
 
     /// <inheritdoc />
-    public override int Priority => SystemPriority.Camera;
+    public override int Priority => SystemPriority.CameraFollow;
 
     /// <inheritdoc />
     public override void Initialize(World world)

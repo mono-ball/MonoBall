@@ -88,10 +88,10 @@ public class SystemManager
 
             _systems.Add(system);
             _systems.Sort((a, b) => a.Priority.CompareTo(b.Priority));
-            
+
             // Initialize metrics for this system
             _metrics[system] = new SystemMetrics();
-            
+
             _logger?.LogSystemRegistered(system.GetType().Name, system.Priority);
         }
     }
@@ -134,7 +134,11 @@ public class SystemManager
                 }
                 catch (Exception ex)
                 {
-                    _logger?.LogExceptionWithContext(ex, "Failed to initialize system: {SystemName}", system.GetType().Name);
+                    _logger?.LogExceptionWithContext(
+                        ex,
+                        "Failed to initialize system: {SystemName}",
+                        system.GetType().Name
+                    );
                     throw;
                 }
             }
@@ -177,7 +181,11 @@ public class SystemManager
                 }
                 catch (Exception ex)
                 {
-                    _logger?.LogExceptionWithContext(ex, "Error updating system: {SystemName}", system.GetType().Name);
+                    _logger?.LogExceptionWithContext(
+                        ex,
+                        "Error updating system: {SystemName}",
+                        system.GetType().Name
+                    );
                     throw;
                 }
                 finally
@@ -203,7 +211,7 @@ public class SystemManager
         metrics.UpdateCount++;
         metrics.TotalTimeMs += elapsedMs;
         metrics.LastUpdateMs = elapsedMs;
-        
+
         if (elapsedMs > metrics.MaxUpdateMs)
             metrics.MaxUpdateMs = elapsedMs;
 
@@ -225,7 +233,8 @@ public class SystemManager
                     system.GetType().Name,
                     metrics.AverageUpdateMs,
                     metrics.MaxUpdateMs,
-                    metrics.UpdateCount);
+                    metrics.UpdateCount
+                );
             }
         }
     }

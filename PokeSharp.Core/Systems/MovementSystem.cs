@@ -17,7 +17,7 @@ public class MovementSystem : BaseSystem
     private const int TileSize = 16;
     private readonly ILogger<MovementSystem>? _logger;
     private SpatialHashSystem? _spatialHashSystem;
-    
+
     // Cache query descriptions to avoid allocation every frame
     private readonly QueryDescription _movementQuery;
     private readonly QueryDescription _movementQueryWithAnimation;
@@ -35,12 +35,18 @@ public class MovementSystem : BaseSystem
     {
         _logger = logger;
         _logger?.LogDebug("MovementSystem initialized");
-        
+
         // Pre-build query descriptions once
-        _movementQuery = new QueryDescription().WithAll<Position, GridMovement>().WithNone<Animation>();
-        _movementQueryWithAnimation = new QueryDescription().WithAll<Position, GridMovement, Animation>();
+        _movementQuery = new QueryDescription()
+            .WithAll<Position, GridMovement>()
+            .WithNone<Animation>();
+        _movementQueryWithAnimation = new QueryDescription().WithAll<
+            Position,
+            GridMovement,
+            Animation
+        >();
         _mapInfoQuery = new QueryDescription().WithAll<MapInfo>();
-        
+
         // Initialize request queries
         _requestQuery = new QueryDescription().WithAll<Position, GridMovement, MovementRequest>();
         _removeQuery = new QueryDescription().WithAll<MovementRequest>();
@@ -69,7 +75,12 @@ public class MovementSystem : BaseSystem
         // Process entities WITH animation (separate query to avoid Has<> checks)
         world.Query(
             in _movementQueryWithAnimation,
-            (Entity entity, ref Position position, ref GridMovement movement, ref Animation animation) =>
+            (
+                Entity entity,
+                ref Position position,
+                ref GridMovement movement,
+                ref Animation animation
+            ) =>
             {
                 ProcessMovementWithAnimation(ref position, ref movement, ref animation, deltaTime);
             }
@@ -84,11 +95,16 @@ public class MovementSystem : BaseSystem
             }
         );
     }
-    
+
     /// <summary>
     ///     Processes movement for entities with animation components.
     /// </summary>
-    private void ProcessMovementWithAnimation(ref Position position, ref GridMovement movement, ref Animation animation, float deltaTime)
+    private void ProcessMovementWithAnimation(
+        ref Position position,
+        ref GridMovement movement,
+        ref Animation animation,
+        float deltaTime
+    )
     {
         if (movement.IsMoving)
         {
@@ -143,11 +159,15 @@ public class MovementSystem : BaseSystem
                 animation.ChangeAnimation(expectedAnimation);
         }
     }
-    
+
     /// <summary>
     ///     Processes movement for entities without animation components.
     /// </summary>
-    private void ProcessMovementNoAnimation(ref Position position, ref GridMovement movement, float deltaTime)
+    private void ProcessMovementNoAnimation(
+        ref Position position,
+        ref GridMovement movement,
+        float deltaTime
+    )
     {
         if (movement.IsMoving)
         {
@@ -202,7 +222,12 @@ public class MovementSystem : BaseSystem
         // Use cached query descriptions (initialized in constructor)
         world.Query(
             in _requestQuery,
-            (Entity entity, ref Position position, ref GridMovement movement, ref MovementRequest request) =>
+            (
+                Entity entity,
+                ref Position position,
+                ref GridMovement movement,
+                ref MovementRequest request
+            ) =>
             {
                 // Skip if already processed or entity is currently moving
                 if (request.Processed || movement.IsMoving)

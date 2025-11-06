@@ -7,8 +7,10 @@ using PokeSharp.Core.Factories;
 using PokeSharp.Core.Logging;
 using PokeSharp.Core.Systems;
 using PokeSharp.Core.Templates;
+using PokeSharp.Core.Types;
 using PokeSharp.Core.Utilities;
 using PokeSharp.Game.Diagnostics;
+using PokeSharp.Game.Systems;
 using PokeSharp.Game.Templates;
 using PokeSharp.Input.Systems;
 using PokeSharp.Rendering.Animation;
@@ -16,6 +18,7 @@ using PokeSharp.Rendering.Assets;
 using PokeSharp.Rendering.Components;
 using PokeSharp.Rendering.Loaders;
 using PokeSharp.Rendering.Systems;
+using PokeSharp.Scripting;
 
 namespace PokeSharp.Game;
 
@@ -26,22 +29,32 @@ namespace PokeSharp.Game;
 public class PokeSharpGame : Microsoft.Xna.Framework.Game
 {
     private const float TargetFrameTime = 16.67f; // 60 FPS target
-    
+    private const double HighMemoryThresholdMb = 500.0; // Warn if memory exceeds 500MB
+    private readonly RollingAverage _frameTimeTracker;
+
     private readonly GraphicsDeviceManager _graphics;
     private readonly ILogger<PokeSharpGame> _logger;
-    private readonly RollingAverage _frameTimeTracker;
     private AnimationLibrary _animationLibrary = null!;
     private AssetManager _assetManager = null!;
+
+    // NPC and scripting systems
+    private TypeRegistry<BehaviorDefinition>? _behaviorRegistry;
+    private bool _detailedProfilingEnabled;
     private IEntityFactoryService _entityFactory = null!;
-    private MapLoader _mapLoader = null!;
     private ulong _frameCounter;
+    private int _lastGen0Count;
+    private int _lastGen1Count;
+    private int _lastGen2Count;
+    private MapLoader _mapLoader = null!;
 
     // Keyboard state for zoom controls
     private KeyboardState _previousKeyboardState;
     private ZOrderRenderSystem _renderSystem = null!;
+    private ScriptService? _scriptService;
+
+    private SpatialHashSystem? _spatialHashSystem;
     private SystemManager _systemManager = null!;
     private World _world = null!;
-    private bool _detailedProfilingEnabled;
 
     /// <summary>
     ///     Initializes a new instance of the PokeSharpGame class.
@@ -60,7 +73,7 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game
         Window.Title = "PokeSharp - Week 1 Demo";
 
         // Initialize logger and frame tracking
-        _logger = ConsoleLoggerFactory.Create<PokeSharpGame>(LogLevel.Information);
+        _logger = ConsoleLoggerFactory.Create<PokeSharpGame>();
         _frameTimeTracker = new RollingAverage(60); // Track last 60 frames (1 second)
     }
 
@@ -75,11 +88,11 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game
         _world = World.Create();
 
         // Create system manager with logger
-        var systemManagerLogger = ConsoleLoggerFactory.Create<SystemManager>(LogLevel.Information);
+        var systemManagerLogger = ConsoleLoggerFactory.Create<SystemManager>();
         _systemManager = new SystemManager(systemManagerLogger);
 
         // Initialize AssetManager with logger
-        var assetManagerLogger = ConsoleLoggerFactory.Create<AssetManager>(LogLevel.Information);
+        var assetManagerLogger = ConsoleLoggerFactory.Create<AssetManager>();
         _assetManager = new AssetManager(GraphicsDevice, "Assets", assetManagerLogger);
 
         // Load asset manifest
@@ -93,7 +106,10 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game
         }
         catch (Exception ex)
         {
-            _logger.LogOperationFailedWithRecovery("Load manifest", "Continuing with empty asset manager");
+            _logger.LogOperationFailedWithRecovery(
+                "Load manifest",
+                "Continuing with empty asset manager"
+            );
             _logger.LogDebug(ex, "Manifest load exception details");
         }
 
@@ -105,7 +121,7 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game
         _logger.LogSystemInitialized("EntityFactoryService", ("mode", "template-based"));
 
         // Create map loader with entity factory for template-based tile creation
-        var mapLoaderLogger = ConsoleLoggerFactory.Create<MapLoader>(LogLevel.Information);
+        var mapLoaderLogger = ConsoleLoggerFactory.Create<MapLoader>();
         _mapLoader = new MapLoader(_assetManager, _entityFactory, mapLoaderLogger);
         _logger.LogSystemInitialized("MapLoader", ("mode", "template-based"));
 
@@ -121,7 +137,7 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game
 
         // InputSystem with Pokemon-style input buffering (5 inputs, 200ms timeout)
         var inputLogger = ConsoleLoggerFactory.Create<InputSystem>(LogLevel.Debug);
-        var inputSystem = new InputSystem(maxBufferSize: 5, bufferTimeout: 0.2f, logger: inputLogger);
+        var inputSystem = new InputSystem(5, 0.2f, inputLogger);
         _systemManager.RegisterSystem(inputSystem);
 
         // Register MovementSystem (Priority: 100, handles movement and collision checking)
@@ -148,6 +164,9 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game
         var tileAnimLogger = ConsoleLoggerFactory.Create<TileAnimationSystem>(LogLevel.Debug);
         _systemManager.RegisterSystem(new TileAnimationSystem(tileAnimLogger));
 
+        // Initialize NPC Behavior System (Priority: 75, runs after spatial hash, before movement)
+        InitializeNpcBehaviorSystem();
+
         // Register ZOrderRenderSystem (Priority: 1000) - unified rendering with Z-order sorting
         // Renders everything (tiles, sprites, objects) based on Y position for authentic Pokemon-style depth
         var renderLogger = ConsoleLoggerFactory.Create<ZOrderRenderSystem>(LogLevel.Debug);
@@ -163,8 +182,7 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game
         // Create test player entity
         CreateTestPlayer();
 
-        // NPCs are now spawned from the map's object layers (see MapLoader.SpawnMapObjects)
-        // CreateTestNpcs(); // Disabled - NPCs come from map now
+        // NPCs are now spawned from the map data (see test-map.json object layer)
     }
 
     /// <summary>
@@ -183,15 +201,13 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game
     {
         var deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
         var frameTimeMs = (float)gameTime.ElapsedGameTime.TotalMilliseconds;
-        
+
         _frameCounter++;
         _frameTimeTracker.Add(frameTimeMs);
 
         // Warn about slow frames (>50% over budget)
         if (frameTimeMs > TargetFrameTime * 1.5f)
-        {
             _logger.LogSlowFrame(frameTimeMs, TargetFrameTime);
-        }
 
         // Log frame time statistics every 5 seconds (300 frames at 60fps)
         if (_frameCounter % 300 == 0)
@@ -199,14 +215,14 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game
             var avgMs = _frameTimeTracker.Average;
             var fps = 1000.0f / avgMs;
             _logger.LogFramePerformance(avgMs, fps, _frameTimeTracker.Min, _frameTimeTracker.Max);
-            
+
             // Log memory stats every 5 seconds
             LogMemoryStats();
         }
 
         // Handle zoom controls
         HandleZoomControls(deltaTime);
-        
+
         // Handle debug controls (profiling, etc.)
         HandleDebugControls();
 
@@ -230,50 +246,43 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game
         base.Draw(gameTime);
     }
 
-    private SpatialHashSystem? _spatialHashSystem;
-    private int _lastGen0Count;
-    private int _lastGen1Count;
-    private int _lastGen2Count;
-    private const double HighMemoryThresholdMb = 500.0; // Warn if memory exceeds 500MB
-
     /// <summary>
     ///     Logs current memory usage and GC statistics.
     /// </summary>
     private void LogMemoryStats()
     {
-        var totalMemoryBytes = GC.GetTotalMemory(forceFullCollection: false);
+        var totalMemoryBytes = GC.GetTotalMemory(false);
         var totalMemoryMb = totalMemoryBytes / 1024.0 / 1024.0;
-        
+
         var gen0 = GC.CollectionCount(0);
         var gen1 = GC.CollectionCount(1);
         var gen2 = GC.CollectionCount(2);
-        
+
         // Log memory stats using template
         _logger.LogMemoryStatistics(totalMemoryMb, gen0, gen1, gen2);
-        
+
         // Warn about high memory usage
         if (totalMemoryMb > HighMemoryThresholdMb)
-        {
             _logger.LogHighMemoryUsage(totalMemoryMb, HighMemoryThresholdMb);
-        }
-        
+
         // Warn about excessive GC activity (more than 10 collections per second)
         var gen0Delta = gen0 - _lastGen0Count;
         var gen1Delta = gen1 - _lastGen1Count;
         var gen2Delta = gen2 - _lastGen2Count;
-        
+
         if (gen0Delta > 50) // >50 Gen0 collections in 5 seconds = >10/sec
-        {
-            _logger.LogWarning("High Gen0 GC activity: {Count} collections in last 5 seconds ({PerSec:F1}/sec)",
-                gen0Delta, gen0Delta / 5.0);
-        }
-        
+            _logger.LogWarning(
+                "High Gen0 GC activity: {Count} collections in last 5 seconds ({PerSec:F1}/sec)",
+                gen0Delta,
+                gen0Delta / 5.0
+            );
+
         if (gen2Delta > 0) // Any Gen2 collection is notable
-        {
-            _logger.LogWarning("Gen2 GC occurred: {Count} collections (indicates memory pressure)",
-                gen2Delta);
-        }
-        
+            _logger.LogWarning(
+                "Gen2 GC occurred: {Count} collections (indicates memory pressure)",
+                gen2Delta
+            );
+
         // Update last counts
         _lastGen0Count = gen0;
         _lastGen1Count = gen1;
@@ -293,7 +302,7 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game
 
             // Invalidate spatial hash to reindex static tiles
             _spatialHashSystem?.InvalidateStaticTiles();
-            
+
             // Preload all textures used by the map to avoid loading spikes during gameplay
             _renderSystem.PreloadMapAssets(_world);
 
@@ -304,7 +313,11 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game
                 (ref MapInfo mapInfo) =>
                 {
                     SetCameraMapBounds(mapInfo.Width, mapInfo.Height);
-                    _logger.LogInformation("Camera bounds set to {Width}x{Height} pixels", mapInfo.PixelWidth, mapInfo.PixelHeight);
+                    _logger.LogInformation(
+                        "Camera bounds set to {Width}x{Height} pixels",
+                        mapInfo.PixelWidth,
+                        mapInfo.PixelHeight
+                    );
                 }
             );
         }
@@ -361,88 +374,18 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game
         // Add Camera component (not in template as it's created per-instance)
         _world.Add(playerEntity, camera);
 
-        _logger.LogEntityCreated("Player", playerEntity.Id, 
-            ("Position", "10,8"), ("Sprite", "player"), ("GridMovement", "enabled"), 
-            ("Direction", "down"), ("Animation", "idle"), ("Camera", "attached"));
+        _logger.LogEntityCreated(
+            "Player",
+            playerEntity.Id,
+            ("Position", "10,8"),
+            ("Sprite", "player"),
+            ("GridMovement", "enabled"),
+            ("Direction", "down"),
+            ("Animation", "idle"),
+            ("Camera", "attached")
+        );
         _logger.LogControlsHint("Use WASD or Arrow Keys to move!");
         _logger.LogControlsHint("Zoom: +/- to zoom in/out, 1=GBA, 2=NDS, 3=Default");
-    }
-
-    /// <summary>
-    ///     Creates test NPCs to demonstrate the entity factory system with template inheritance.
-    ///     Spawns NPCs at various positions using different templates that inherit from each other.
-    /// </summary>
-    private void CreateTestNpcs()
-    {
-        _logger.LogBatchStarted("NPC Spawning", 6);
-
-        // Spawn a generic NPC (inherits from npc/base)
-        var genericNpc = _entityFactory
-            .SpawnFromTemplateAsync(
-                "npc/generic",
-                _world,
-                builder => builder.OverrideComponent(new Position(15, 8))
-            )
-            .GetAwaiter()
-            .GetResult();
-        _logger.LogEntitySpawned("NPC", genericNpc.Id, "npc/generic", 15, 8);
-
-        // Spawn a stationary NPC (inherits from npc/base, no movement)
-        var stationaryNpc = _entityFactory
-            .SpawnFromTemplateAsync(
-                "npc/stationary",
-                _world,
-                builder => builder.OverrideComponent(new Position(18, 8))
-            )
-            .GetAwaiter()
-            .GetResult();
-        _logger.LogEntitySpawned("NPC", stationaryNpc.Id, "npc/stationary", 18, 8);
-
-        // Spawn a trainer NPC (inherits from npc/generic)
-        var trainerNpc = _entityFactory
-            .SpawnFromTemplateAsync(
-                "npc/trainer",
-                _world,
-                builder => builder.OverrideComponent(new Position(12, 10))
-            )
-            .GetAwaiter()
-            .GetResult();
-        _logger.LogEntitySpawned("Trainer", trainerNpc.Id, "npc/trainer", 12, 10);
-
-        // Spawn a gym leader NPC (inherits from npc/trainer → npc/generic → npc/base)
-        var gymLeaderNpc = _entityFactory
-            .SpawnFromTemplateAsync(
-                "npc/gym-leader",
-                _world,
-                builder => builder.OverrideComponent(new Position(10, 12))
-            )
-            .GetAwaiter()
-            .GetResult();
-        _logger.LogEntitySpawned("GymLeader", gymLeaderNpc.Id, "npc/gym-leader", 10, 12);
-
-        // Spawn a shop keeper NPC (inherits from npc/stationary)
-        var shopKeeperNpc = _entityFactory
-            .SpawnFromTemplateAsync(
-                "npc/shop-keeper",
-                _world,
-                builder => builder.OverrideComponent(new Position(14, 12))
-            )
-            .GetAwaiter()
-            .GetResult();
-        _logger.LogEntitySpawned("ShopKeeper", shopKeeperNpc.Id, "npc/shop-keeper", 14, 12);
-
-        // Spawn a fast NPC (inherits from npc/generic with overridden speed)
-        var fastNpc = _entityFactory
-            .SpawnFromTemplateAsync(
-                "npc/fast",
-                _world,
-                builder => builder.OverrideComponent(new Position(16, 12))
-            )
-            .GetAwaiter()
-            .GetResult();
-        _logger.LogEntitySpawned("FastNPC", fastNpc.Id, "npc/fast", 16, 12);
-
-        _logger.LogBatchCompleted("NPC Spawning", 6, 0, 0);
     }
 
     /// <summary>
@@ -504,7 +447,7 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game
 
         _previousKeyboardState = currentKeyboardState;
     }
-    
+
     /// <summary>
     ///     Handles debug controls for profiling and diagnostics.
     ///     P key: Toggle detailed rendering profiling
@@ -512,15 +455,18 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game
     private void HandleDebugControls()
     {
         var currentKeyboardState = Keyboard.GetState();
-        
+
         // Toggle detailed rendering profiling with P key
         if (IsKeyPressed(currentKeyboardState, Keys.P))
         {
             _detailedProfilingEnabled = !_detailedProfilingEnabled;
             _renderSystem.SetDetailedProfiling(_detailedProfilingEnabled);
-            _logger.LogInformation("Detailed profiling: {State}", _detailedProfilingEnabled ? "ON" : "OFF");
+            _logger.LogInformation(
+                "Detailed profiling: {State}",
+                _detailedProfilingEnabled ? "ON" : "OFF"
+            );
         }
-        
+
         _previousKeyboardState = currentKeyboardState;
     }
 
@@ -561,7 +507,94 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game
             }
         );
 
-        _logger.LogDebug("Camera bounds set: {Width}x{Height} pixels", mapBounds.Width, mapBounds.Height);
+        _logger.LogDebug(
+            "Camera bounds set: {Width}x{Height} pixels",
+            mapBounds.Width,
+            mapBounds.Height
+        );
+    }
+
+    /// <summary>
+    ///     Initializes the NPC behavior system with TypeRegistry and ScriptService.
+    /// </summary>
+    private void InitializeNpcBehaviorSystem()
+    {
+        try
+        {
+            // Initialize ScriptService for Roslyn compilation
+            var scriptLogger = ConsoleLoggerFactory.Create<ScriptService>();
+            _scriptService = new ScriptService("Assets/Scripts", scriptLogger);
+
+            // Initialize TypeRegistry for behavior definitions
+            var behaviorLogger = ConsoleLoggerFactory.Create<TypeRegistry<BehaviorDefinition>>();
+            _behaviorRegistry = new TypeRegistry<BehaviorDefinition>(
+                "Assets/Types/Behaviors",
+                behaviorLogger
+            );
+
+            // Load all behavior definitions from JSON
+            var loadedCount = _behaviorRegistry.LoadAllAsync().GetAwaiter().GetResult();
+            _logger.LogInformation("Loaded {Count} behavior definitions", loadedCount);
+
+            // Load and compile behavior scripts for each type
+            foreach (var typeId in _behaviorRegistry.GetAllTypeIds())
+            {
+                var definition = _behaviorRegistry.Get(typeId);
+                if (
+                    definition is IScriptedType scripted
+                    && !string.IsNullOrEmpty(scripted.BehaviorScript)
+                )
+                {
+                    _logger.LogInformation(
+                        "Loading behavior script for {TypeId}: {Script}",
+                        typeId,
+                        scripted.BehaviorScript
+                    );
+
+                    var scriptInstance = _scriptService
+                        .LoadScriptAsync(scripted.BehaviorScript)
+                        .GetAwaiter()
+                        .GetResult();
+                    if (scriptInstance != null)
+                    {
+                        // Initialize script with world
+                        _scriptService.InitializeScript(scriptInstance, _world);
+
+                        // Register script instance in the registry
+                        _behaviorRegistry.RegisterScript(typeId, scriptInstance);
+
+                        _logger.LogInformation(
+                            "✓ Loaded and initialized behavior: {TypeId}",
+                            typeId
+                        );
+                    }
+                    else
+                    {
+                        _logger.LogError(
+                            "✗ Failed to compile script for {TypeId}: {Script}",
+                            typeId,
+                            scripted.BehaviorScript
+                        );
+                    }
+                }
+            }
+
+            // Register NpcBehaviorSystem
+            var npcBehaviorLogger = ConsoleLoggerFactory.Create<NpcBehaviorSystem>();
+            var npcBehaviorLoggerFactory = ConsoleLoggerFactory.Create();
+            var npcBehaviorSystem = new NpcBehaviorSystem(
+                npcBehaviorLogger,
+                npcBehaviorLoggerFactory
+            );
+            npcBehaviorSystem.SetBehaviorRegistry(_behaviorRegistry);
+            _systemManager.RegisterSystem(npcBehaviorSystem);
+
+            _logger.LogSystemInitialized("NpcBehaviorSystem", ("behaviors", loadedCount));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to initialize NPC behavior system");
+        }
     }
 
     /// <summary>

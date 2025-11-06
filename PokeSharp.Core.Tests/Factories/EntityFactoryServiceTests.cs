@@ -480,7 +480,10 @@ public class EntityFactoryServiceTests : IDisposable
         var entity = await _factoryService.SpawnFromTemplateAsync(
             "npc/custom",
             world,
-            builder => { builder.OverrideComponent(new Position(20, 20)); }
+            builder =>
+            {
+                builder.OverrideComponent(new Position(20, 20));
+            }
         );
 
         // Assert

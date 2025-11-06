@@ -30,5 +30,3 @@ public struct MovementRequest
         Processed = false;
     }
 }
-
-

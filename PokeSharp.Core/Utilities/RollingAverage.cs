@@ -8,7 +8,6 @@ public class RollingAverage
 {
     private readonly float[] _samples;
     private int _currentIndex;
-    private int _sampleCount;
     private float _sum;
 
     /// <summary>
@@ -22,14 +21,14 @@ public class RollingAverage
 
         _samples = new float[windowSize];
         _currentIndex = 0;
-        _sampleCount = 0;
+        Count = 0;
         _sum = 0;
     }
 
     /// <summary>
     ///     Gets the current average of all samples in the window.
     /// </summary>
-    public float Average => _sampleCount > 0 ? _sum / _sampleCount : 0;
+    public float Average => Count > 0 ? _sum / Count : 0;
 
     /// <summary>
     ///     Gets the minimum value in the current window.
@@ -38,15 +37,13 @@ public class RollingAverage
     {
         get
         {
-            if (_sampleCount == 0)
+            if (Count == 0)
                 return 0;
 
             var min = _samples[0];
-            for (int i = 1; i < _sampleCount; i++)
-            {
+            for (var i = 1; i < Count; i++)
                 if (_samples[i] < min)
                     min = _samples[i];
-            }
             return min;
         }
     }
@@ -58,15 +55,13 @@ public class RollingAverage
     {
         get
         {
-            if (_sampleCount == 0)
+            if (Count == 0)
                 return 0;
 
             var max = _samples[0];
-            for (int i = 1; i < _sampleCount; i++)
-            {
+            for (var i = 1; i < Count; i++)
                 if (_samples[i] > max)
                     max = _samples[i];
-            }
             return max;
         }
     }
@@ -74,7 +69,7 @@ public class RollingAverage
     /// <summary>
     ///     Gets the number of samples currently in the window.
     /// </summary>
-    public int Count => _sampleCount;
+    public int Count { get; private set; }
 
     /// <summary>
     ///     Adds a new sample to the rolling average.
@@ -83,14 +78,10 @@ public class RollingAverage
     public void Add(float value)
     {
         // If buffer is full, subtract the oldest value from sum
-        if (_sampleCount == _samples.Length)
-        {
+        if (Count == _samples.Length)
             _sum -= _samples[_currentIndex];
-        }
         else
-        {
-            _sampleCount++;
-        }
+            Count++;
 
         // Add new value
         _samples[_currentIndex] = value;
@@ -106,10 +97,8 @@ public class RollingAverage
     public void Reset()
     {
         _currentIndex = 0;
-        _sampleCount = 0;
+        Count = 0;
         _sum = 0;
         Array.Clear(_samples, 0, _samples.Length);
     }
 }
-
-

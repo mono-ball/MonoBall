@@ -1,0 +1,10 @@
+{
+  "typeId": "stationary",
+  "displayName": "Stationary Behavior",
+  "description": "NPC stays in one place, does not move",
+  "behaviorScript": null,
+  "defaultSpeed": 0.0,
+  "pauseAtWaypoint": 0.0,
+  "allowInteractionWhileMoving": false
+}
+

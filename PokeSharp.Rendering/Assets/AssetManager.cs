@@ -24,7 +24,11 @@ public class AssetManager : IDisposable
     /// <param name="graphicsDevice">The graphics device for creating textures.</param>
     /// <param name="assetRoot">Root directory for assets (default: "Assets").</param>
     /// <param name="logger">Optional logger for diagnostic output.</param>
-    public AssetManager(GraphicsDevice graphicsDevice, string assetRoot = "Assets", ILogger<AssetManager>? logger = null)
+    public AssetManager(
+        GraphicsDevice graphicsDevice,
+        string assetRoot = "Assets",
+        ILogger<AssetManager>? logger = null
+    )
     {
         _graphicsDevice = graphicsDevice ?? throw new ArgumentNullException(nameof(graphicsDevice));
         _assetRoot = assetRoot;
@@ -92,7 +96,7 @@ public class AssetManager : IDisposable
             _logger?.LogAssetLoadingStarted("tileset(s)", _manifest.Tilesets.Count);
             var successful = 0;
             var failed = 0;
-            
+
             foreach (var tileset in _manifest.Tilesets)
                 try
                 {
@@ -102,12 +106,21 @@ public class AssetManager : IDisposable
                 catch (Exception ex)
                 {
                     failed++;
-                    _logger?.LogExceptionWithContext(ex, "Failed to load tileset '{TilesetId}'", tileset.Id);
+                    _logger?.LogExceptionWithContext(
+                        ex,
+                        "Failed to load tileset '{TilesetId}'",
+                        tileset.Id
+                    );
                 }
-                
+
             if (successful > 0)
-                _logger?.LogInformation("[green]Loaded [cyan]{Count}[/] tilesets" + (failed > 0 ? " [dim]({Failed} failed)[/]" : "") + "[/]", 
-                    successful, failed);
+                _logger?.LogInformation(
+                    "[green]Loaded [cyan]{Count}[/] tilesets"
+                        + (failed > 0 ? " [dim]({Failed} failed)[/]" : "")
+                        + "[/]",
+                    successful,
+                    failed
+                );
         }
 
         // Load all sprites
@@ -116,7 +129,7 @@ public class AssetManager : IDisposable
             _logger?.LogAssetLoadingStarted("sprite(s)", _manifest.Sprites.Count);
             var successful = 0;
             var failed = 0;
-            
+
             foreach (var sprite in _manifest.Sprites)
                 try
                 {
@@ -126,12 +139,21 @@ public class AssetManager : IDisposable
                 catch (Exception ex)
                 {
                     failed++;
-                    _logger?.LogExceptionWithContext(ex, "Failed to load sprite '{SpriteId}'", sprite.Id);
+                    _logger?.LogExceptionWithContext(
+                        ex,
+                        "Failed to load sprite '{SpriteId}'",
+                        sprite.Id
+                    );
                 }
-                
+
             if (successful > 0)
-                _logger?.LogInformation("[green]Loaded [cyan]{Count}[/] sprites" + (failed > 0 ? " [dim]({Failed} failed)[/]" : "") + "[/]", 
-                    successful, failed);
+                _logger?.LogInformation(
+                    "[green]Loaded [cyan]{Count}[/] sprites"
+                        + (failed > 0 ? " [dim]({Failed} failed)[/]" : "")
+                        + "[/]",
+                    successful,
+                    failed
+                );
         }
     }
 
@@ -151,7 +173,7 @@ public class AssetManager : IDisposable
             throw new FileNotFoundException($"Texture file not found: {fullPath}");
 
         var sw = System.Diagnostics.Stopwatch.StartNew();
-        
+
         using var fileStream = File.OpenRead(fullPath);
         var texture = Texture2D.FromStream(_graphicsDevice, fileStream);
 
@@ -162,7 +184,7 @@ public class AssetManager : IDisposable
 
         // Log texture loading with timing
         _logger?.LogTextureLoaded(id, elapsedMs, texture.Width, texture.Height);
-        
+
         // Warn about slow texture loads (>100ms)
         if (elapsedMs > 100.0)
         {

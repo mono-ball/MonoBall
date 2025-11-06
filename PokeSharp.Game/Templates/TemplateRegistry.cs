@@ -64,7 +64,7 @@ public static class TemplateRegistry
                 SourcePath = "TemplateRegistry.RegisterTileTemplates",
             },
         };
-        baseTile.WithComponent(new TilePosition(0, 0, 0)); // Will be overridden
+        baseTile.WithComponent(new TilePosition(0, 0)); // Will be overridden
         baseTile.WithComponent(new TileSprite("default", 0, TileLayer.Ground, Rectangle.Empty)); // Will be overridden
         cache.Register(baseTile);
         logger?.LogDebug("Registered base tile template: {TemplateId}", baseTile.TemplateId);
@@ -87,8 +87,11 @@ public static class TemplateRegistry
         // We need at least one component for validation, so override sprite layer
         groundTile.WithComponent(new TileSprite("default", 0, TileLayer.Ground, Rectangle.Empty));
         cache.Register(groundTile);
-        logger?.LogDebug("Registered template: {TemplateId} (inherits from {BaseId})", 
-            groundTile.TemplateId, groundTile.BaseTemplateId);
+        logger?.LogDebug(
+            "Registered template: {TemplateId} (inherits from {BaseId})",
+            groundTile.TemplateId,
+            groundTile.BaseTemplateId
+        );
 
         // Wall tile - solid collision
         var wallTile = new EntityTemplate
@@ -107,8 +110,11 @@ public static class TemplateRegistry
         wallTile.WithComponent(new Collision(true)); // Solid
         wallTile.WithComponent(new TileSprite("default", 0, TileLayer.Object, Rectangle.Empty)); // Object layer
         cache.Register(wallTile);
-        logger?.LogDebug("Registered template: {TemplateId} (inherits from {BaseId})", 
-            wallTile.TemplateId, wallTile.BaseTemplateId);
+        logger?.LogDebug(
+            "Registered template: {TemplateId} (inherits from {BaseId})",
+            wallTile.TemplateId,
+            wallTile.BaseTemplateId
+        );
 
         // Grass tile - encounter zone
         var grassTile = new EntityTemplate
@@ -126,8 +132,11 @@ public static class TemplateRegistry
         };
         grassTile.WithComponent(new EncounterZone("default", 10)); // Default encounter rate
         cache.Register(grassTile);
-        logger?.LogDebug("Registered template: {TemplateId} (inherits from {BaseId})", 
-            grassTile.TemplateId, grassTile.BaseTemplateId);
+        logger?.LogDebug(
+            "Registered template: {TemplateId} (inherits from {BaseId})",
+            grassTile.TemplateId,
+            grassTile.BaseTemplateId
+        );
 
         // Ledge tiles - directional (inherit wall's collision, add ledge component)
         var ledgeDirections = new[]
@@ -135,7 +144,7 @@ public static class TemplateRegistry
             ("down", Direction.Down),
             ("up", Direction.Up),
             ("left", Direction.Left),
-            ("right", Direction.Right)
+            ("right", Direction.Right),
         };
 
         foreach (var (dirName, direction) in ledgeDirections)
@@ -155,8 +164,11 @@ public static class TemplateRegistry
             };
             ledgeTile.WithComponent(new TileLedge(direction)); // Add ledge behavior
             cache.Register(ledgeTile);
-            logger?.LogDebug("Registered template: {TemplateId} (inherits from {BaseId})", 
-                ledgeTile.TemplateId, ledgeTile.BaseTemplateId);
+            logger?.LogDebug(
+                "Registered template: {TemplateId} (inherits from {BaseId})",
+                ledgeTile.TemplateId,
+                ledgeTile.BaseTemplateId
+            );
         }
 
         logger?.LogInformation("Registered tile template hierarchy with {Count} templates", 8);
@@ -243,8 +255,11 @@ public static class TemplateRegistry
         };
         genericNpc.WithComponent(new GridMovement(2.0f)); // NPCs move slower than player
         cache.Register(genericNpc);
-        logger?.LogDebug("Registered template: {TemplateId} (inherits from {BaseId})", 
-            genericNpc.TemplateId, genericNpc.BaseTemplateId);
+        logger?.LogDebug(
+            "Registered template: {TemplateId} (inherits from {BaseId})",
+            genericNpc.TemplateId,
+            genericNpc.BaseTemplateId
+        );
 
         // Stationary NPC - inherits from base, no movement
         var stationaryNpc = new EntityTemplate
@@ -262,10 +277,15 @@ public static class TemplateRegistry
         };
         // No GridMovement component - can't move
         // Override sprite to use different texture
-        stationaryNpc.WithComponent(new Sprite("npc-spritesheet") { Tint = Color.White, Scale = 1f });
+        stationaryNpc.WithComponent(
+            new Sprite("npc-spritesheet") { Tint = Color.White, Scale = 1f }
+        );
         cache.Register(stationaryNpc);
-        logger?.LogDebug("Registered template: {TemplateId} (inherits from {BaseId})", 
-            stationaryNpc.TemplateId, stationaryNpc.BaseTemplateId);
+        logger?.LogDebug(
+            "Registered template: {TemplateId} (inherits from {BaseId})",
+            stationaryNpc.TemplateId,
+            stationaryNpc.BaseTemplateId
+        );
 
         // Trainer NPC - inherits from generic, for battles
         var trainerNpc = new EntityTemplate
@@ -286,8 +306,11 @@ public static class TemplateRegistry
         // TODO: Add Trainer component when implemented
         // trainerNpc.WithComponent(new Trainer(...));
         cache.Register(trainerNpc);
-        logger?.LogDebug("Registered template: {TemplateId} (inherits from {BaseId})", 
-            trainerNpc.TemplateId, trainerNpc.BaseTemplateId);
+        logger?.LogDebug(
+            "Registered template: {TemplateId} (inherits from {BaseId})",
+            trainerNpc.TemplateId,
+            trainerNpc.BaseTemplateId
+        );
 
         // Gym Leader - inherits from trainer, special NPCs
         var gymLeaderNpc = new EntityTemplate
@@ -304,12 +327,17 @@ public static class TemplateRegistry
             },
         };
         // Override sprite for gym leaders
-        gymLeaderNpc.WithComponent(new Sprite("npc-spritesheet") { Tint = Color.White, Scale = 1f });
+        gymLeaderNpc.WithComponent(
+            new Sprite("npc-spritesheet") { Tint = Color.White, Scale = 1f }
+        );
         // TODO: Add Badge component when implemented
         // gymLeaderNpc.WithComponent(new Badge(...));
         cache.Register(gymLeaderNpc);
-        logger?.LogDebug("Registered template: {TemplateId} (inherits from {BaseId})", 
-            gymLeaderNpc.TemplateId, gymLeaderNpc.BaseTemplateId);
+        logger?.LogDebug(
+            "Registered template: {TemplateId} (inherits from {BaseId})",
+            gymLeaderNpc.TemplateId,
+            gymLeaderNpc.BaseTemplateId
+        );
 
         // Shop Keeper - inherits from stationary, for shops
         var shopKeeperNpc = new EntityTemplate
@@ -326,12 +354,17 @@ public static class TemplateRegistry
             },
         };
         // Override sprite for shop keepers
-        shopKeeperNpc.WithComponent(new Sprite("npc-spritesheet") { Tint = Color.White, Scale = 1f });
+        shopKeeperNpc.WithComponent(
+            new Sprite("npc-spritesheet") { Tint = Color.White, Scale = 1f }
+        );
         // TODO: Add Shop component when implemented
         // shopKeeperNpc.WithComponent(new Shop(...));
         cache.Register(shopKeeperNpc);
-        logger?.LogDebug("Registered template: {TemplateId} (inherits from {BaseId})", 
-            shopKeeperNpc.TemplateId, shopKeeperNpc.BaseTemplateId);
+        logger?.LogDebug(
+            "Registered template: {TemplateId} (inherits from {BaseId})",
+            shopKeeperNpc.TemplateId,
+            shopKeeperNpc.BaseTemplateId
+        );
 
         // Fast NPC - inherits from generic, faster movement
         var fastNpc = new EntityTemplate
@@ -350,10 +383,44 @@ public static class TemplateRegistry
         // Override movement speed - same as player
         fastNpc.WithComponent(new GridMovement(4.0f));
         cache.Register(fastNpc);
-        logger?.LogDebug("Registered template: {TemplateId} (inherits from {BaseId})", 
-            fastNpc.TemplateId, fastNpc.BaseTemplateId);
+        logger?.LogDebug(
+            "Registered template: {TemplateId} (inherits from {BaseId})",
+            fastNpc.TemplateId,
+            fastNpc.BaseTemplateId
+        );
 
-        logger?.LogInformation("Registered NPC template hierarchy with {Count} templates", 7);
+        // Patrol NPC - inherits from generic, adds patrol behavior
+        var patrolNpc = new EntityTemplate
+        {
+            TemplateId = "npc/patrol",
+            Name = "Patrol NPC",
+            Tag = "npc",
+            BaseTemplateId = "npc/generic",
+            Metadata = new EntityTemplateMetadata
+            {
+                Version = "1.0.0",
+                CompiledAt = DateTime.UtcNow,
+                SourcePath = "TemplateRegistry.RegisterNpcTemplates",
+            },
+        };
+        // Add NpcComponent (will be overridden at spawn with specific NPC data)
+        patrolNpc.WithComponent(new NpcComponent("patrol_npc", "GUARD"));
+        // Add PathComponent (will be overridden at spawn with actual waypoints)
+        patrolNpc.WithComponent(
+            new PathComponent(
+                new[] { new Point(10, 10), new Point(15, 10), new Point(15, 15), new Point(10, 15) }
+            )
+        );
+        // Add BehaviorComponent with patrol behavior
+        patrolNpc.WithComponent(new BehaviorComponent("patrol"));
+        cache.Register(patrolNpc);
+        logger?.LogDebug(
+            "Registered template: {TemplateId} (inherits from {BaseId})",
+            patrolNpc.TemplateId,
+            patrolNpc.BaseTemplateId
+        );
+
+        logger?.LogInformation("Registered NPC template hierarchy with {Count} templates", 8);
     }
 
     /// <summary>
@@ -382,7 +449,8 @@ public static class TemplateRegistry
             "npc/trainer",
             "npc/gym-leader",
             "npc/shop-keeper",
-            "npc/fast"
+            "npc/fast",
+            "npc/patrol",
         };
     }
 }

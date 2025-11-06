@@ -18,5 +18,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\PokeSharp.Core\PokeSharp.Core.csproj" />
+    <ProjectReference Include="..\PokeSharp.Scripting\PokeSharp.Scripting.csproj" />
   </ItemGroup>
 </Project>

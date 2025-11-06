@@ -24,9 +24,12 @@ public static class AssetDiagnostics
             try
             {
                 var playerTexture = assetManager.GetTexture("player");
-                logger.LogResourceLoaded("Texture", "player", 
+                logger.LogResourceLoaded(
+                    "Texture",
+                    "player",
                     ("dimensions", $"{playerTexture.Width}x{playerTexture.Height}px"),
-                    ("format", playerTexture.Format.ToString()));
+                    ("format", playerTexture.Format.ToString())
+                );
             }
             catch (Exception ex)
             {

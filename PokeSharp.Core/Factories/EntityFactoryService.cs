@@ -195,7 +195,10 @@ public sealed class EntityFactoryService : IEntityFactoryService
 
         var template = _templateCache.Get(templateId);
         if (template == null)
-            return TemplateValidationResult.Failure(templateId, $"Template '{templateId}' not found in cache");
+            return TemplateValidationResult.Failure(
+                templateId,
+                $"Template '{templateId}' not found in cache"
+            );
 
         return ValidateTemplateInternal(template);
     }
@@ -281,7 +284,10 @@ public sealed class EntityFactoryService : IEntityFactoryService
         _logger.LogDebug(
             "Inheritance chain for '{TemplateId}': {Chain}",
             template.TemplateId,
-            string.Join(" → ", inheritanceChain.Select(t => t.TemplateId).Append(template.TemplateId))
+            string.Join(
+                " → ",
+                inheritanceChain.Select(t => t.TemplateId).Append(template.TemplateId)
+            )
         );
 
         // Merge components from base to derived (derived overrides base)

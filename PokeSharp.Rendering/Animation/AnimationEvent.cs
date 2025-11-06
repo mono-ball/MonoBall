@@ -112,4 +112,3 @@ public static class AnimationEventTypes
     /// </summary>
     public const string Custom = "custom";
 }
-

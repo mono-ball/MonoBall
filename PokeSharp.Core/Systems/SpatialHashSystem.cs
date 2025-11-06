@@ -15,8 +15,8 @@ namespace PokeSharp.Core.Systems;
 public class SpatialHashSystem : BaseSystem
 {
     private readonly ILogger<SpatialHashSystem>? _logger;
-    private readonly SpatialHash _staticHash;   // For tiles (indexed once)
-    private readonly SpatialHash _dynamicHash;  // For entities with Position (cleared each frame)
+    private readonly SpatialHash _staticHash; // For tiles (indexed once)
+    private readonly SpatialHash _dynamicHash; // For entities with Position (cleared each frame)
     private bool _staticTilesIndexed = false;
 
     /// <summary>
@@ -107,7 +107,9 @@ public class SpatialHashSystem : BaseSystem
     )
     {
         // Return entities from both static and dynamic hashes
-        return _staticHash.GetInBounds(mapId, bounds).Concat(_dynamicHash.GetInBounds(mapId, bounds));
+        return _staticHash
+            .GetInBounds(mapId, bounds)
+            .Concat(_dynamicHash.GetInBounds(mapId, bounds));
     }
 
     /// <summary>

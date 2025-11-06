@@ -1,5 +1,6 @@
 using Arch.Core;
 using Microsoft.Extensions.Logging;
+using Microsoft.Xna.Framework;
 using PokeSharp.Core.Components;
 using PokeSharp.Core.Factories;
 using PokeSharp.Core.Logging;
@@ -17,7 +18,7 @@ public class MapLoader
     private readonly IEntityFactoryService? _entityFactory;
     private readonly ILogger<MapLoader>? _logger;
     private readonly Dictionary<string, int> _mapNameToId = new();
-    private int _nextMapId = 0;
+    private int _nextMapId;
 
     /// <summary>
     ///     Initializes a new instance of the MapLoader class.
@@ -25,7 +26,11 @@ public class MapLoader
     /// <param name="assetManager">Asset manager for texture loading.</param>
     /// <param name="entityFactory">Optional entity factory for template-based tile creation.</param>
     /// <param name="logger">Optional logger for diagnostic output.</param>
-    public MapLoader(AssetManager assetManager, IEntityFactoryService? entityFactory = null, ILogger<MapLoader>? logger = null)
+    public MapLoader(
+        AssetManager assetManager,
+        IEntityFactoryService? entityFactory = null,
+        ILogger<MapLoader>? logger = null
+    )
     {
         _assetManager = assetManager ?? throw new ArgumentNullException(nameof(assetManager));
         _entityFactory = entityFactory;
@@ -63,10 +68,10 @@ public class MapLoader
         if (!_assetManager.HasTexture(tilesetId))
             LoadTilesetTexture(tileset, mapPath, tilesetId);
 
-        int tilesCreated = 0;
+        var tilesCreated = 0;
 
         // Create entity for each non-empty tile across all layers
-        for (int layerIndex = 0; layerIndex < 3; layerIndex++)
+        for (var layerIndex = 0; layerIndex < 3; layerIndex++)
         {
             var layerData = GetLayerData(tmxDoc, layerIndex);
             if (layerData == null)
@@ -74,17 +79,15 @@ public class MapLoader
 
             var tileLayer = (TileLayer)layerIndex;
 
-            for (int y = 0; y < tmxDoc.Height; y++)
+            for (var y = 0; y < tmxDoc.Height; y++)
+            for (var x = 0; x < tmxDoc.Width; x++)
             {
-                for (int x = 0; x < tmxDoc.Width; x++)
-                {
-                    int tileGid = layerData[y, x];
-                    if (tileGid == 0)
-                        continue; // Skip empty tiles
+                var tileGid = layerData[y, x];
+                if (tileGid == 0)
+                    continue; // Skip empty tiles
 
-                    CreateTileEntity(world, x, y, mapId, tileGid, tileset, tileLayer);
-                    tilesCreated++;
-                }
+                CreateTileEntity(world, x, y, mapId, tileGid, tileset, tileLayer);
+                tilesCreated++;
             }
         }
 
@@ -111,8 +114,12 @@ public class MapLoader
         var objectsCreated = SpawnMapObjects(world, tmxDoc, mapId, tmxDoc.TileHeight);
 
         _logger?.LogMapLoaded(mapName, tmxDoc.Width, tmxDoc.Height, tilesCreated, objectsCreated);
-        _logger?.LogDebug("[dim]MapId:[/] [grey]{MapId}[/] [dim]|[/] [dim]Animated:[/] [yellow]{AnimatedCount}[/] [dim]|[/] [dim]Tileset:[/] [cyan]{TilesetId}[/]",
-            mapId, animatedTilesCreated, tilesetId);
+        _logger?.LogDebug(
+            "[dim]MapId:[/] [grey]{MapId}[/] [dim]|[/] [dim]Animated:[/] [yellow]{AnimatedCount}[/] [dim]|[/] [dim]Tileset:[/] [cyan]{TilesetId}[/]",
+            mapId,
+            animatedTilesCreated,
+            tilesetId
+        );
 
         return mapInfoEntity;
     }
@@ -122,7 +129,7 @@ public class MapLoader
         if (tileset.Animations.Count == 0)
             return 0;
 
-        int created = 0;
+        var created = 0;
 
         foreach (var kvp in tileset.Animations)
         {
@@ -248,52 +255,46 @@ public class MapLoader
             var ledgeDir = ledgeValue switch
             {
                 string s => s,
-                _ => ledgeValue?.ToString()
+                _ => ledgeValue?.ToString(),
             };
 
             if (!string.IsNullOrEmpty(ledgeDir))
-            {
                 return ledgeDir.ToLower() switch
                 {
                     "down" => "tile/ledge/down",
                     "up" => "tile/ledge/up",
                     "left" => "tile/ledge/left",
                     "right" => "tile/ledge/right",
-                    _ => null
+                    _ => null,
                 };
-            }
         }
 
         // Check for solid wall (but not ledge)
         if (props.TryGetValue("solid", out var solidValue))
         {
-            bool isSolid = solidValue switch
+            var isSolid = solidValue switch
             {
                 bool b => b,
                 string s => bool.TryParse(s, out var result) && result,
-                _ => false
+                _ => false,
             };
 
             if (isSolid)
-            {
                 return "tile/wall";
-            }
         }
 
         // Check for encounter zone (grass)
         if (props.TryGetValue("encounter_rate", out var encounterValue))
         {
-            int encounterRate = encounterValue switch
+            var encounterRate = encounterValue switch
             {
                 int i => i,
                 string s => int.TryParse(s, out var result) ? result : 0,
-                _ => 0
+                _ => 0,
             };
 
             if (encounterRate > 0)
-            {
                 return "tile/grass";
-            }
         }
 
         // Default ground tile
@@ -311,19 +312,15 @@ public class MapLoader
     )
     {
         // Get tile properties from tileset (convert global ID to local ID)
-        int localTileId = tileGid - tileset.FirstGid;
+        var localTileId = tileGid - tileset.FirstGid;
         Dictionary<string, object>? props = null;
         if (localTileId >= 0)
-        {
             tileset.TileProperties.TryGetValue(localTileId, out props);
-        }
 
         // Determine which template to use (if entity factory is available)
         string? templateId = null;
         if (_entityFactory != null && props != null)
-        {
             templateId = DetermineTileTemplate(props);
-        }
 
         // Create the entity - use template if available, otherwise manual creation
         Entity entity;
@@ -368,37 +365,31 @@ public class MapLoader
             if (props != null)
             {
                 // Check if this is a ledge tile (needs special handling)
-                bool isLedge = props.ContainsKey("ledge_direction");
+                var isLedge = props.ContainsKey("ledge_direction");
 
                 // Add Collision component if tile is solid OR is a ledge
                 if (props.TryGetValue("solid", out var solidValue) || isLedge)
                 {
-                    bool isSolid = false;
+                    var isSolid = false;
 
                     if (solidValue != null)
-                    {
                         isSolid = solidValue switch
                         {
                             bool b => b,
                             string s => bool.TryParse(s, out var result) && result,
                             _ => false,
                         };
-                    }
                     else if (isLedge)
-                    {
                         isSolid = true;
-                    }
 
                     if (isSolid)
-                    {
                         world.Add(entity, new Collision(true));
-                    }
                 }
 
                 // Add TileLedge component for ledges
                 if (props.TryGetValue("ledge_direction", out var ledgeValue))
                 {
-                    string? ledgeDir = ledgeValue switch
+                    var ledgeDir = ledgeValue switch
                     {
                         string s => s,
                         _ => ledgeValue?.ToString(),
@@ -416,9 +407,7 @@ public class MapLoader
                         };
 
                         if (jumpDirection != Direction.None)
-                        {
                             world.Add(entity, new TileLedge(jumpDirection));
-                        }
                     }
                 }
 
@@ -458,9 +447,7 @@ public class MapLoader
             if (
                 props.TryGetValue("script", out var scriptValue) && scriptValue is string scriptPath
             )
-            {
                 world.Add(entity, new TileScript(scriptPath));
-            }
         }
     }
 
@@ -476,105 +463,175 @@ public class MapLoader
     private int SpawnMapObjects(World world, TmxDocument tmxDoc, int mapId, int tileHeight)
     {
         if (_entityFactory == null)
-        {
             // No entity factory - can't spawn from templates
             return 0;
-        }
 
-        int created = 0;
+        var created = 0;
 
         foreach (var objectGroup in tmxDoc.ObjectGroups)
+        foreach (var obj in objectGroup.Objects)
         {
-            foreach (var obj in objectGroup.Objects)
+            // Get template ID from object type or properties
+            var templateId = obj.Type;
+            if (
+                string.IsNullOrEmpty(templateId)
+                && obj.Properties.TryGetValue("template", out var templateProp)
+            )
+                templateId = templateProp.ToString();
+
+            if (string.IsNullOrEmpty(templateId))
             {
-                // Get template ID from object type or properties
-                var templateId = obj.Type;
-                if (string.IsNullOrEmpty(templateId) && obj.Properties.TryGetValue("template", out var templateProp))
-                {
-                    templateId = templateProp.ToString();
-                }
+                _logger?.LogOperationSkipped($"Object '{obj.Name}'", "no type/template");
+                continue;
+            }
 
-                if (string.IsNullOrEmpty(templateId))
-                {
-                    _logger?.LogOperationSkipped($"Object '{obj.Name}'", "no type/template");
-                    continue;
-                }
+            // Check if template exists
+            if (!_entityFactory.HasTemplate(templateId))
+            {
+                _logger?.LogResourceNotFound("Template", $"{templateId} for '{obj.Name}'");
+                continue;
+            }
 
-                // Check if template exists
-                if (!_entityFactory.HasTemplate(templateId))
-                {
-                    _logger?.LogResourceNotFound("Template", $"{templateId} for '{obj.Name}'");
-                    continue;
-                }
+            // Convert pixel coordinates to tile coordinates
+            // Tiled Y coordinate is from top of object, we want bottom-center for entities
+            var tileX = (int)Math.Floor(obj.X / tileHeight);
+            var tileY = (int)Math.Floor((obj.Y + obj.Height) / tileHeight) - 1; // -1 to account for entity being 1 tile tall
 
-                // Convert pixel coordinates to tile coordinates
-                // Tiled Y coordinate is from top of object, we want bottom-center for entities
-                var tileX = (int)Math.Floor(obj.X / tileHeight);
-                var tileY = (int)Math.Floor((obj.Y + obj.Height) / tileHeight) - 1; // -1 to account for entity being 1 tile tall
+            try
+            {
+                // Spawn entity from template
+                var entity = _entityFactory
+                    .SpawnFromTemplateAsync(
+                        templateId,
+                        world,
+                        builder =>
+                        {
+                            // Override position with map coordinates
+                            builder.OverrideComponent(new Position(tileX, tileY, mapId));
 
-                try
-                {
-                    // Spawn entity from template
-                    var entity = _entityFactory
-                        .SpawnFromTemplateAsync(
-                            templateId,
-                            world,
-                            builder =>
+                            // Apply any custom properties from the object
+                            if (obj.Properties.TryGetValue("direction", out var dirProp))
                             {
-                                // Override position with map coordinates
-                                builder.OverrideComponent(new Position(tileX, tileY, mapId));
-
-                                // Apply any custom properties from the object
-                                if (obj.Properties.TryGetValue("direction", out var dirProp))
+                                var dirStr = dirProp.ToString()?.ToLower();
+                                var direction = dirStr switch
                                 {
-                                    var dirStr = dirProp.ToString()?.ToLower();
-                                    var direction = dirStr switch
+                                    "up" => Direction.Up,
+                                    "down" => Direction.Down,
+                                    "left" => Direction.Left,
+                                    "right" => Direction.Right,
+                                    _ => Direction.Down,
+                                };
+                                builder.OverrideComponent(direction);
+                            }
+
+                            // Handle NPC-specific properties
+                            if (templateId.StartsWith("npc/"))
+                            {
+                                // NpcComponent properties
+                                var hasNpcId = obj.Properties.TryGetValue(
+                                    "npcId",
+                                    out var npcIdProp
+                                );
+                                var hasDisplayName = obj.Properties.TryGetValue(
+                                    "displayName",
+                                    out var displayNameProp
+                                );
+
+                                if (hasNpcId || hasDisplayName)
+                                {
+                                    var npcId = npcIdProp?.ToString() ?? obj.Name;
+                                    var displayName = displayNameProp?.ToString() ?? obj.Name;
+                                    builder.OverrideComponent(new NpcComponent(npcId, displayName));
+                                }
+
+                                // PathComponent properties (waypoints for patrol NPCs)
+                                if (obj.Properties.TryGetValue("waypoints", out var waypointsProp))
+                                {
+                                    var waypointsStr = waypointsProp.ToString();
+                                    if (!string.IsNullOrEmpty(waypointsStr))
                                     {
-                                        "up" => Direction.Up,
-                                        "down" => Direction.Down,
-                                        "left" => Direction.Left,
-                                        "right" => Direction.Right,
-                                        _ => Direction.Down
-                                    };
-                                    builder.OverrideComponent(direction);
+                                        // Parse waypoints: "x1,y1;x2,y2;x3,y3"
+                                        var points = new List<Point>();
+                                        var pairs = waypointsStr.Split(';');
+                                        foreach (var pair in pairs)
+                                        {
+                                            var coords = pair.Split(',');
+                                            if (
+                                                coords.Length == 2
+                                                && int.TryParse(coords[0].Trim(), out var x)
+                                                && int.TryParse(coords[1].Trim(), out var y)
+                                            )
+                                                points.Add(new Point(x, y));
+                                        }
+
+                                        if (points.Count > 0)
+                                        {
+                                            var waypointWaitTime = 1.0f;
+                                            if (
+                                                obj.Properties.TryGetValue(
+                                                    "waypointWaitTime",
+                                                    out var waitProp
+                                                )
+                                                && float.TryParse(
+                                                    waitProp.ToString(),
+                                                    out var waitTime
+                                                )
+                                            )
+                                                waypointWaitTime = waitTime;
+
+                                            builder.OverrideComponent(
+                                                new PathComponent(
+                                                    points.ToArray(),
+                                                    true,
+                                                    waypointWaitTime
+                                                )
+                                            );
+                                        }
+                                    }
                                 }
                             }
-                        )
-                        .GetAwaiter()
-                        .GetResult();
+                        }
+                    )
+                    .GetAwaiter()
+                    .GetResult();
 
-                    _logger?.LogDebug("Spawned '{ObjectName}' ({TemplateId}) at ({X}, {Y})", obj.Name, templateId, tileX, tileY);
-                    created++;
-                }
-                catch (Exception ex)
-                {
-                    _logger?.LogExceptionWithContext(ex, "Failed to spawn '{ObjectName}' from template '{TemplateId}'", obj.Name, templateId);
-                }
+                _logger?.LogDebug(
+                    "Spawned '{ObjectName}' ({TemplateId}) at ({X}, {Y})",
+                    obj.Name,
+                    templateId,
+                    tileX,
+                    tileY
+                );
+                created++;
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogExceptionWithContext(
+                    ex,
+                    "Failed to spawn '{ObjectName}' from template '{TemplateId}'",
+                    obj.Name,
+                    templateId
+                );
             }
         }
 
         return created;
     }
 
-    private Microsoft.Xna.Framework.Rectangle CalculateSourceRect(int tileGid, TmxTileset tileset)
+    private Rectangle CalculateSourceRect(int tileGid, TmxTileset tileset)
     {
         // Convert global ID to local ID
-        int localTileId = tileGid - tileset.FirstGid;
+        var localTileId = tileGid - tileset.FirstGid;
 
         // Get tileset dimensions
-        int tileWidth = tileset.TileWidth;
-        int tileHeight = tileset.TileHeight;
-        int tilesPerRow = tileset.Image?.Width / tileWidth ?? 1;
+        var tileWidth = tileset.TileWidth;
+        var tileHeight = tileset.TileHeight;
+        var tilesPerRow = tileset.Image?.Width / tileWidth ?? 1;
 
         // Calculate source rectangle
-        int tileX = localTileId % tilesPerRow;
-        int tileY = localTileId / tilesPerRow;
+        var tileX = localTileId % tilesPerRow;
+        var tileY = localTileId / tilesPerRow;
 
-        return new Microsoft.Xna.Framework.Rectangle(
-            tileX * tileWidth,
-            tileY * tileHeight,
-            tileWidth,
-            tileHeight
-        );
+        return new Rectangle(tileX * tileWidth, tileY * tileHeight, tileWidth, tileHeight);
     }
 }
