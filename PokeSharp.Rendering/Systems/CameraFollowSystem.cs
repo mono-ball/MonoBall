@@ -16,20 +16,10 @@ namespace PokeSharp.Rendering.Systems;
 ///     System for camera following with smooth transitions and map bounds clamping.
 ///     Sets the camera's follow target and calls camera.Update() to handle all logic.
 /// </summary>
-public class CameraFollowSystem : BaseSystem
+public class CameraFollowSystem(ILogger<CameraFollowSystem>? logger = null) : BaseSystem
 {
-    private readonly ILogger<CameraFollowSystem>? _logger;
+    private readonly ILogger<CameraFollowSystem>? _logger = logger;
     private QueryDescription _playerQuery;
-
-    /// <summary>
-    ///     Initializes a new instance of the CameraFollowSystem class.
-    /// </summary>
-    /// <param name="logger">Optional logger for diagnostic output.</param>
-    public CameraFollowSystem(ILogger<CameraFollowSystem>? logger = null)
-    {
-        _logger = logger;
-        _logger?.LogDebug("CameraFollowSystem initialized");
-    }
 
     /// <inheritdoc />
     public override int Priority => SystemPriority.CameraFollow;

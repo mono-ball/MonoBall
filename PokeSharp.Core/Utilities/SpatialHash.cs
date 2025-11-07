@@ -97,11 +97,11 @@ public class SpatialHash
     public IEnumerable<Entity> GetAt(int mapId, int x, int y)
     {
         if (!_grid.TryGetValue(mapId, out var mapGrid))
-            return Enumerable.Empty<Entity>();
+            return [];
 
         var key = (x, y);
         if (!mapGrid.TryGetValue(key, out var entities))
-            return Enumerable.Empty<Entity>();
+            return [];
 
         return entities;
     }

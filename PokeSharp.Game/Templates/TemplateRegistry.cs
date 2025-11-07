@@ -309,7 +309,7 @@ public static class TemplateRegistry
         };
         // Override sprite for trainers
         trainerNpc.WithComponent(new Sprite("npc-spritesheet") { Tint = Color.White, Scale = 1f });
-        // TODO: Add Trainer component when implemented
+        #warning TODO: Add Trainer component when implemented
         // trainerNpc.WithComponent(new Trainer(...));
         cache.Register(trainerNpc);
         logger?.LogDebug(
@@ -336,7 +336,7 @@ public static class TemplateRegistry
         gymLeaderNpc.WithComponent(
             new Sprite("npc-spritesheet") { Tint = Color.White, Scale = 1f }
         );
-        // TODO: Add Badge component when implemented
+        #warning TODO: Add Badge component when implemented
         // gymLeaderNpc.WithComponent(new Badge(...));
         cache.Register(gymLeaderNpc);
         logger?.LogDebug(
@@ -363,7 +363,7 @@ public static class TemplateRegistry
         shopKeeperNpc.WithComponent(
             new Sprite("npc-spritesheet") { Tint = Color.White, Scale = 1f }
         );
-        // TODO: Add Shop component when implemented
+        #warning TODO: Add Shop component when implemented
         // shopKeeperNpc.WithComponent(new Shop(...));
         cache.Register(shopKeeperNpc);
         logger?.LogDebug(

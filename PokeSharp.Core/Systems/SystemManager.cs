@@ -10,36 +10,18 @@ namespace PokeSharp.Core.Systems;
 ///     Systems are executed in priority order each frame.
 ///     Tracks performance metrics for each system.
 /// </summary>
-public class SystemManager
+public class SystemManager(ILogger<SystemManager>? logger = null)
 {
+    private const float TargetFrameTime = 16.67f; // 60 FPS target
+    private const double SlowSystemThresholdPercent = 0.1; // Warn if system takes >10% of frame budget
+    
     private readonly object _lock = new();
-    private readonly ILogger<SystemManager>? _logger;
+    private readonly ILogger<SystemManager>? _logger = logger;
     private readonly Dictionary<ISystem, SystemMetrics> _metrics = new();
     private readonly List<ISystem> _systems = new();
     private bool _initialized;
     private ulong _frameCounter;
-    private const float TargetFrameTime = 16.67f; // 60 FPS target
 
-    /// <summary>
-    ///     Initializes a new instance of the SystemManager class.
-    /// </summary>
-    /// <param name="logger">Optional logger for diagnostic output.</param>
-    public SystemManager(ILogger<SystemManager>? logger = null)
-    {
-        _logger = logger;
-    }
-
-    /// <summary>
-    ///     Performance metrics for a system.
-    /// </summary>
-    public class SystemMetrics
-    {
-        public long UpdateCount;
-        public double TotalTimeMs;
-        public double LastUpdateMs;
-        public double MaxUpdateMs;
-        public double AverageUpdateMs => UpdateCount > 0 ? TotalTimeMs / UpdateCount : 0;
-    }
 
     /// <summary>
     ///     Gets all registered systems.
@@ -216,7 +198,7 @@ public class SystemManager
             metrics.MaxUpdateMs = elapsedMs;
 
         // Warn about slow systems (taking >10% of frame budget)
-        if (elapsedMs > TargetFrameTime * 0.1)
+        if (elapsedMs > TargetFrameTime * SlowSystemThresholdPercent)
         {
             var percent = (elapsedMs / TargetFrameTime) * 100;
             _logger?.LogSlowSystem(system.GetType().Name, elapsedMs, percent);
@@ -266,4 +248,16 @@ public class SystemManager
             }
         }
     }
+}
+
+/// <summary>
+///     Performance metrics for a system.
+/// </summary>
+public class SystemMetrics
+{
+    public long UpdateCount;
+    public double TotalTimeMs;
+    public double LastUpdateMs;
+    public double MaxUpdateMs;
+    public double AverageUpdateMs => UpdateCount > 0 ? TotalTimeMs / UpdateCount : 0;
 }

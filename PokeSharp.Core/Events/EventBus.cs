@@ -41,19 +41,10 @@ namespace PokeSharp.Core.Events;
 /// });
 /// </code>
 /// </example>
-public class EventBus : IEventBus
+public class EventBus(ILogger<EventBus>? logger = null) : IEventBus
 {
     private readonly ConcurrentDictionary<Type, ConcurrentBag<Delegate>> _handlers = new();
-    private readonly ILogger<EventBus> _logger;
-
-    /// <summary>
-    ///     Initializes a new EventBus with optional logger.
-    /// </summary>
-    /// <param name="logger">Optional logger for error reporting.</param>
-    public EventBus(ILogger<EventBus>? logger = null)
-    {
-        _logger = logger ?? NullLogger<EventBus>.Instance;
-    }
+    private readonly ILogger<EventBus> _logger = logger ?? NullLogger<EventBus>.Instance;
 
     /// <inheritdoc />
     public void Publish<TEvent>(TEvent eventData)
@@ -146,29 +137,24 @@ public class EventBus : IEventBus
         }
     }
 
-    /// <summary>
-    ///     Disposable subscription handle for unsubscribing.
-    /// </summary>
-    private class Subscription<TEvent> : IDisposable
-        where TEvent : TypeEventBase
+}
+
+/// <summary>
+///     Disposable subscription handle for unsubscribing.
+/// </summary>
+file sealed class Subscription<TEvent>(EventBus eventBus, Action<TEvent> handler) : IDisposable
+    where TEvent : TypeEventBase
+{
+    private readonly EventBus _eventBus = eventBus;
+    private readonly Action<TEvent> _handler = handler;
+    private bool _disposed;
+
+    public void Dispose()
     {
-        private readonly EventBus _eventBus;
-        private readonly Action<TEvent> _handler;
-        private bool _disposed;
-
-        public Subscription(EventBus eventBus, Action<TEvent> handler)
+        if (!_disposed)
         {
-            _eventBus = eventBus;
-            _handler = handler;
-        }
-
-        public void Dispose()
-        {
-            if (!_disposed)
-            {
-                _eventBus.Unsubscribe(_handler);
-                _disposed = true;
-            }
+            _eventBus.Unsubscribe(_handler);
+            _disposed = true;
         }
     }
 }

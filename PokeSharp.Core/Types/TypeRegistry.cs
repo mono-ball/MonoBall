@@ -17,24 +17,13 @@ namespace PokeSharp.Core.Types;
 ///     Scripts are stored as object instances (TypeScriptBase) and cached as singletons.
 ///     Cast to TypeScriptBase in the consuming system (e.g., NpcBehaviorSystem).
 /// </remarks>
-public class TypeRegistry<T>
+public class TypeRegistry<T>(string dataPath, ILogger logger) : IAsyncDisposable
     where T : ITypeDefinition
 {
-    private readonly string _dataPath;
+    private readonly string _dataPath = dataPath ?? throw new ArgumentNullException(nameof(dataPath));
+    private readonly ILogger _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     private readonly ConcurrentDictionary<string, T> _definitions = new();
-    private readonly ILogger _logger;
     private readonly ConcurrentDictionary<string, object> _scripts = new();
-
-    /// <summary>
-    ///     Initializes a new TypeRegistry with the specified data path.
-    /// </summary>
-    /// <param name="dataPath">Base directory for JSON type definition files.</param>
-    /// <param name="logger">Logger for diagnostic messages.</param>
-    public TypeRegistry(string dataPath, ILogger logger)
-    {
-        _dataPath = dataPath ?? throw new ArgumentNullException(nameof(dataPath));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-    }
 
     /// <summary>
     ///     Get count of registered types.
@@ -264,5 +253,27 @@ public class TypeRegistry<T>
             return false;
 
         return _scripts.ContainsKey(typeId);
+    }
+
+    /// <summary>
+    ///     Asynchronously disposes resources and clears script instances.
+    /// </summary>
+    public async ValueTask DisposeAsync()
+    {
+        // Dispose any script instances that implement IAsyncDisposable
+        foreach (var script in _scripts.Values)
+        {
+            if (script is IAsyncDisposable asyncDisposable)
+            {
+                await asyncDisposable.DisposeAsync();
+            }
+            else if (script is IDisposable disposable)
+            {
+                disposable.Dispose();
+            }
+        }
+
+        Clear();
+        GC.SuppressFinalize(this);
     }
 }

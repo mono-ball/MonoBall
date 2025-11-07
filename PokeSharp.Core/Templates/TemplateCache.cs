@@ -129,7 +129,7 @@ public sealed class TemplateCache
     /// <returns>Enumerable of template IDs</returns>
     public IEnumerable<string> GetAllTemplateIds()
     {
-        return _templates.Keys.ToList(); // Snapshot to avoid enumeration issues
+        return [.. _templates.Keys]; // Snapshot to avoid enumeration issues
     }
 
     /// <summary>
@@ -139,7 +139,7 @@ public sealed class TemplateCache
     /// <returns>Enumerable of templates</returns>
     public IEnumerable<EntityTemplate> GetAllTemplates()
     {
-        return _templates.Values.ToList(); // Snapshot
+        return [.. _templates.Values]; // Snapshot
     }
 
     /// <summary>
@@ -151,11 +151,9 @@ public sealed class TemplateCache
     public IEnumerable<EntityTemplate> GetByTag(string tag)
     {
         if (string.IsNullOrWhiteSpace(tag))
-            return Enumerable.Empty<EntityTemplate>();
+            return [];
 
-        return _templates
-            .Values.Where(t => t.Tag.Equals(tag, StringComparison.OrdinalIgnoreCase))
-            .ToList(); // Snapshot
+        return [.. _templates.Values.Where(t => t.Tag.Equals(tag, StringComparison.OrdinalIgnoreCase))]; // Snapshot
     }
 
     /// <summary>
@@ -219,10 +217,10 @@ public sealed class TemplateCache
 /// </summary>
 public sealed class CacheStatistics
 {
-    public int TotalTemplates { get; init; }
-    public Dictionary<string, int> TemplatesByTag { get; init; } = new();
-    public DateTime? OldestTemplate { get; init; }
-    public DateTime? NewestTemplate { get; init; }
+    public required int TotalTemplates { get; init; }
+    public required Dictionary<string, int> TemplatesByTag { get; init; }
+    public required DateTime? OldestTemplate { get; init; }
+    public required DateTime? NewestTemplate { get; init; }
 
     public override string ToString()
     {

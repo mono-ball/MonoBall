@@ -14,14 +14,12 @@ public interface IEntityFactoryService
     /// <param name="templateId">Template identifier</param>
     /// <param name="world">Arch world to spawn entity in</param>
     /// <param name="context">Spawn context (position, overrides)</param>
-    /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Spawned entity</returns>
     /// <exception cref="ArgumentException">Template not found or invalid</exception>
-    Task<Entity> SpawnFromTemplateAsync(
+    Entity SpawnFromTemplate(
         string templateId,
         World world,
-        EntitySpawnContext? context = null,
-        CancellationToken cancellationToken = default
+        EntitySpawnContext? context = null
     );
 
     /// <summary>
@@ -31,13 +29,11 @@ public interface IEntityFactoryService
     /// <param name="templateId">Template identifier</param>
     /// <param name="world">Arch world</param>
     /// <param name="configure">Builder configuration action</param>
-    /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Spawned entity</returns>
-    Task<Entity> SpawnFromTemplateAsync(
+    Entity SpawnFromTemplate(
         string templateId,
         World world,
-        Action<EntityBuilder> configure,
-        CancellationToken cancellationToken = default
+        Action<EntityBuilder> configure
     );
 
     /// <summary>
@@ -46,12 +42,10 @@ public interface IEntityFactoryService
     /// </summary>
     /// <param name="templateIds">Template identifiers</param>
     /// <param name="world">Arch world</param>
-    /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Spawned entities</returns>
-    Task<IEnumerable<Entity>> SpawnBatchAsync(
+    IEnumerable<Entity> SpawnBatch(
         IEnumerable<string> templateIds,
-        World world,
-        CancellationToken cancellationToken = default
+        World world
     );
 
     /// <summary>

@@ -17,26 +17,13 @@ namespace PokeSharp.Rendering.Systems;
 ///     animation definitions and frame timing.
 ///     Executes at priority 800 (after movement, before rendering).
 /// </summary>
-public class AnimationSystem : BaseSystem
+public class AnimationSystem(
+    AnimationLibrary animationLibrary,
+    ILogger<AnimationSystem>? logger = null) : BaseSystem
 {
-    private readonly AnimationLibrary _animationLibrary;
-    private readonly ILogger<AnimationSystem>? _logger;
+    private readonly AnimationLibrary _animationLibrary = animationLibrary ?? throw new ArgumentNullException(nameof(animationLibrary));
+    private readonly ILogger<AnimationSystem>? _logger = logger;
     private ulong _frameCounter;
-
-    /// <summary>
-    ///     Initializes a new instance of the AnimationSystem class.
-    /// </summary>
-    /// <param name="animationLibrary">The animation library containing all animation definitions.</param>
-    /// <param name="logger">Optional logger for diagnostics.</param>
-    public AnimationSystem(
-        AnimationLibrary animationLibrary,
-        ILogger<AnimationSystem>? logger = null
-    )
-    {
-        _animationLibrary =
-            animationLibrary ?? throw new ArgumentNullException(nameof(animationLibrary));
-        _logger = logger;
-    }
 
     /// <inheritdoc />
     public override int Priority => SystemPriority.Animation;

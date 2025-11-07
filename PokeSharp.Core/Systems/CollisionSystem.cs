@@ -10,20 +10,10 @@ namespace PokeSharp.Core.Systems;
 ///     System that provides tile-based collision detection for grid movement.
 ///     Uses spatial hash to query entities with Collision components.
 /// </summary>
-public class CollisionSystem : BaseSystem
+public class CollisionSystem(ILogger<CollisionSystem>? logger = null) : BaseSystem
 {
-    private readonly ILogger<CollisionSystem>? _logger;
+    private readonly ILogger<CollisionSystem>? _logger = logger;
     private SpatialHashSystem? _spatialHashSystem;
-
-    /// <summary>
-    ///     Initializes a new instance of the CollisionSystem class.
-    /// </summary>
-    /// <param name="logger">Optional logger for diagnostic output.</param>
-    public CollisionSystem(ILogger<CollisionSystem>? logger = null)
-    {
-        _logger = logger;
-        _logger?.LogDebug("CollisionSystem initialized");
-    }
 
     /// <inheritdoc />
     public override int Priority => SystemPriority.Collision;

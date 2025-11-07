@@ -9,32 +9,17 @@ namespace PokeSharp.Rendering.Assets;
 ///     Manages runtime asset loading for textures and resources.
 ///     Provides PNG loading without MonoGame Content Pipeline.
 /// </summary>
-public class AssetManager : IDisposable
+public class AssetManager(
+    GraphicsDevice graphicsDevice,
+    string assetRoot = "Assets",
+    ILogger<AssetManager>? logger = null) : IDisposable
 {
-    private readonly string _assetRoot;
-    private readonly GraphicsDevice _graphicsDevice;
-    private readonly ILogger<AssetManager>? _logger;
-    private readonly Dictionary<string, Texture2D> _textures;
+    private readonly GraphicsDevice _graphicsDevice = graphicsDevice ?? throw new ArgumentNullException(nameof(graphicsDevice));
+    private readonly string _assetRoot = assetRoot;
+    private readonly ILogger<AssetManager>? _logger = logger;
+    private readonly Dictionary<string, Texture2D> _textures = new();
     private bool _disposed;
     private AssetManifest? _manifest;
-
-    /// <summary>
-    ///     Initializes a new instance of the AssetManager class.
-    /// </summary>
-    /// <param name="graphicsDevice">The graphics device for creating textures.</param>
-    /// <param name="assetRoot">Root directory for assets (default: "Assets").</param>
-    /// <param name="logger">Optional logger for diagnostic output.</param>
-    public AssetManager(
-        GraphicsDevice graphicsDevice,
-        string assetRoot = "Assets",
-        ILogger<AssetManager>? logger = null
-    )
-    {
-        _graphicsDevice = graphicsDevice ?? throw new ArgumentNullException(nameof(graphicsDevice));
-        _assetRoot = assetRoot;
-        _logger = logger;
-        _textures = new Dictionary<string, Texture2D>();
-    }
 
     /// <summary>
     ///     Gets the number of loaded textures.

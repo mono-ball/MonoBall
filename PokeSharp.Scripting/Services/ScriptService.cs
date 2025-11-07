@@ -14,29 +14,13 @@ namespace PokeSharp.Scripting.Services;
 ///     Service for compiling and executing Roslyn C# scripts (.csx files).
 ///     Provides hot-reload support and script caching.
 /// </summary>
-public class ScriptService
+public class ScriptService(string scriptsBasePath, ILogger<ScriptService> logger) : IAsyncDisposable
 {
-    private readonly ScriptOptions _defaultOptions;
-    private readonly ILogger<ScriptService> _logger;
-    private readonly ConcurrentDictionary<
-        string,
-        (Script<object> compiled, Type? scriptType)
-    > _scriptCache = new();
+    private readonly string _scriptsBasePath = scriptsBasePath ?? throw new ArgumentNullException(nameof(scriptsBasePath));
+    private readonly ILogger<ScriptService> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    private readonly ScriptOptions _defaultOptions = ScriptCompilationOptions.GetDefaultOptions();
+    private readonly ConcurrentDictionary<string, (Script<object> compiled, Type? scriptType)> _scriptCache = new();
     private readonly ConcurrentDictionary<string, object> _scriptInstances = new();
-    private readonly string _scriptsBasePath;
-
-    /// <summary>
-    ///     Initializes a new ScriptService.
-    /// </summary>
-    /// <param name="scriptsBasePath">Base path for script files.</param>
-    /// <param name="logger">Logger for diagnostic messages.</param>
-    public ScriptService(string scriptsBasePath, ILogger<ScriptService> logger)
-    {
-        _scriptsBasePath =
-            scriptsBasePath ?? throw new ArgumentNullException(nameof(scriptsBasePath));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _defaultOptions = ScriptCompilationOptions.GetDefaultOptions();
-    }
 
     /// <summary>
     ///     Load and compile a script from a .csx file.
@@ -252,5 +236,27 @@ public class ScriptService
         _scriptCache.Clear();
         _scriptInstances.Clear();
         _logger.LogInformation("Cleared script cache");
+    }
+
+    /// <summary>
+    ///     Asynchronously disposes resources and clears script cache.
+    /// </summary>
+    public async ValueTask DisposeAsync()
+    {
+        // Dispose any scripts that implement IAsyncDisposable
+        foreach (var instance in _scriptInstances.Values)
+        {
+            if (instance is IAsyncDisposable asyncDisposable)
+            {
+                await asyncDisposable.DisposeAsync();
+            }
+            else if (instance is IDisposable disposable)
+            {
+                disposable.Dispose();
+            }
+        }
+
+        ClearCache();
+        GC.SuppressFinalize(this);
     }
 }

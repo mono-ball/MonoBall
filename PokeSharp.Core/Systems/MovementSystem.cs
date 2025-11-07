@@ -15,45 +15,26 @@ namespace PokeSharp.Core.Systems;
 ///     Implements Pokemon-style tile-by-tile movement and updates animations based on movement state.
 ///     Also handles collision checking and movement validation.
 /// </summary>
-public class MovementSystem : BaseSystem
+public class MovementSystem(ILogger<MovementSystem>? logger = null) : BaseSystem
 {
     private const int TileSize = 16;
-    private readonly ILogger<MovementSystem>? _logger;
+    private readonly ILogger<MovementSystem>? _logger = logger;
     private SpatialHashSystem? _spatialHashSystem;
 
     // Cache query descriptions to avoid allocation every frame
-    private readonly QueryDescription _movementQuery;
-    private readonly QueryDescription _movementQueryWithAnimation;
-    private readonly QueryDescription _mapInfoQuery;
+    private readonly QueryDescription _movementQuery = new QueryDescription()
+        .WithAll<Position, GridMovement>()
+        .WithNone<Animation>();
+    private readonly QueryDescription _movementQueryWithAnimation = new QueryDescription().WithAll<
+        Position,
+        GridMovement,
+        Animation
+    >();
+    private readonly QueryDescription _mapInfoQuery = new QueryDescription().WithAll<MapInfo>();
 
     // Cache query descriptions for movement requests
-    private readonly QueryDescription _requestQuery;
-    private readonly QueryDescription _removeQuery;
-
-    /// <summary>
-    ///     Initializes a new instance of the MovementSystem class.
-    /// </summary>
-    /// <param name="logger">Optional logger for diagnostic output.</param>
-    public MovementSystem(ILogger<MovementSystem>? logger = null)
-    {
-        _logger = logger;
-        _logger?.LogDebug("MovementSystem initialized");
-
-        // Pre-build query descriptions once
-        _movementQuery = new QueryDescription()
-            .WithAll<Position, GridMovement>()
-            .WithNone<Animation>();
-        _movementQueryWithAnimation = new QueryDescription().WithAll<
-            Position,
-            GridMovement,
-            Animation
-        >();
-        _mapInfoQuery = new QueryDescription().WithAll<MapInfo>();
-
-        // Initialize request queries
-        _requestQuery = new QueryDescription().WithAll<Position, GridMovement, MovementRequest>();
-        _removeQuery = new QueryDescription().WithAll<MovementRequest>();
-    }
+    private readonly QueryDescription _requestQuery = new QueryDescription().WithAll<Position, GridMovement, MovementRequest>();
+    private readonly QueryDescription _removeQuery = new QueryDescription().WithAll<MovementRequest>();
 
     /// <summary>
     ///     Sets the spatial hash system for collision detection.

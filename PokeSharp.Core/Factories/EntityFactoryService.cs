@@ -1,3 +1,5 @@
+using System.Collections.Concurrent;
+using System.Reflection;
 using Arch.Core;
 using Microsoft.Extensions.Logging;
 using PokeSharp.Core.Templates;
@@ -9,24 +11,19 @@ namespace PokeSharp.Core.Factories;
 ///     Resolves templates from <see cref="TemplateCache" /> and instantiates entities with components.
 ///     Thread-safe and supports hot-reload via template cache invalidation.
 /// </summary>
-public sealed class EntityFactoryService : IEntityFactoryService
+public sealed class EntityFactoryService(TemplateCache templateCache, ILogger<EntityFactoryService> logger) : IEntityFactoryService
 {
-    private readonly ILogger<EntityFactoryService> _logger;
-    private readonly TemplateCache _templateCache;
+    // Static cache for reflection MethodInfo to avoid expensive lookups
+    private static readonly ConcurrentDictionary<Type, MethodInfo> _addMethodCache = new();
 
-    public EntityFactoryService(TemplateCache templateCache, ILogger<EntityFactoryService> logger)
-    {
-        _templateCache = templateCache ?? throw new ArgumentNullException(nameof(templateCache));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-    }
+    private readonly TemplateCache _templateCache = templateCache ?? throw new ArgumentNullException(nameof(templateCache));
+    private readonly ILogger<EntityFactoryService> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
     /// <inheritdoc />
-    public async Task<Entity> SpawnFromTemplateAsync(
+    public Entity SpawnFromTemplate(
         string templateId,
         World world,
-        EntitySpawnContext? context = null,
-        CancellationToken cancellationToken = default
-    )
+        EntitySpawnContext? context = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(templateId, nameof(templateId));
         ArgumentNullException.ThrowIfNull(world, nameof(world));
@@ -70,32 +67,12 @@ public sealed class EntityFactoryService : IEntityFactoryService
         {
             var componentType = component.GetType();
 
-            // Get the generic Add<T> method and make it concrete for this component type
-            var addMethod = typeof(World)
-                .GetMethods()
-                .Where(m => m.Name == nameof(World.Add) && m.IsGenericMethod)
-                .FirstOrDefault(m =>
-                {
-                    var parameters = m.GetParameters();
-                    return parameters.Length == 2 && parameters[0].ParameterType == typeof(Entity);
-                });
+            // Get cached Add<T> method for this component type
+            var addMethod = GetCachedAddMethod(componentType);
 
-            if (addMethod != null)
-            {
-                // Make the generic method concrete for this component type
-                var genericMethod = addMethod.MakeGenericMethod(componentType);
-
-                // Invoke Add<T>(entity, component)
-                genericMethod.Invoke(world, new[] { entity, component });
-                _logger.LogDebug("  Added {Type} to entity", componentType.Name);
-            }
-            else
-            {
-                _logger.LogWarning(
-                    "Could not find Add<T> method for component type {Type}",
-                    componentType.Name
-                );
-            }
+            // Invoke Add<T>(entity, component)
+            addMethod.Invoke(world, [entity, component]);
+            _logger.LogDebug("  Added {Type} to entity", componentType.Name);
         }
 
         _logger.LogDebug(
@@ -105,16 +82,14 @@ public sealed class EntityFactoryService : IEntityFactoryService
             components.Count
         );
 
-        return await Task.FromResult(entity);
+        return entity;
     }
 
     /// <inheritdoc />
-    public async Task<Entity> SpawnFromTemplateAsync(
+    public Entity SpawnFromTemplate(
         string templateId,
         World world,
-        Action<EntityBuilder> configure,
-        CancellationToken cancellationToken = default
-    )
+        Action<EntityBuilder> configure)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(templateId, nameof(templateId));
         ArgumentNullException.ThrowIfNull(world, nameof(world));
@@ -136,41 +111,34 @@ public sealed class EntityFactoryService : IEntityFactoryService
 
         // Add custom properties if any
         if (builder.CustomProperties.Any())
+        {
             context.Metadata = builder.CustomProperties.ToDictionary(
                 kvp => kvp.Key,
                 kvp => kvp.Value
             );
+        }
 
-        return await SpawnFromTemplateAsync(templateId, world, context, cancellationToken);
+        return SpawnFromTemplate(templateId, world, context);
     }
 
     /// <inheritdoc />
-    public async Task<IEnumerable<Entity>> SpawnBatchAsync(
+    public IEnumerable<Entity> SpawnBatch(
         IEnumerable<string> templateIds,
-        World world,
-        CancellationToken cancellationToken = default
-    )
+        World world)
     {
         ArgumentNullException.ThrowIfNull(templateIds, nameof(templateIds));
         ArgumentNullException.ThrowIfNull(world, nameof(world));
 
         var entities = new List<Entity>();
-        var templateIdList = templateIds.ToList();
+        List<string> templateIdList = [.. templateIds];
 
         _logger.LogDebug("Batch spawning {Count} entities", templateIdList.Count);
 
         foreach (var templateId in templateIdList)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
             try
             {
-                var entity = await SpawnFromTemplateAsync(
-                    templateId,
-                    world,
-                    (EntitySpawnContext?)null,
-                    cancellationToken
-                );
+                var entity = SpawnFromTemplate(templateId, world, (EntitySpawnContext?)null);
                 entities.Add(entity);
             }
             catch (Exception ex)
@@ -218,6 +186,34 @@ public sealed class EntityFactoryService : IEntityFactoryService
     }
 
     // Private helper methods
+
+    /// <summary>
+    ///     Gets or creates cached MethodInfo for World.Add{T} to avoid expensive reflection every spawn.
+    /// </summary>
+    private static MethodInfo GetCachedAddMethod(Type componentType)
+    {
+        return _addMethodCache.GetOrAdd(componentType, type =>
+        {
+            var method = typeof(World)
+                .GetMethods()
+                .Where(m => m.Name == nameof(World.Add) && m.IsGenericMethod)
+                .FirstOrDefault(m =>
+                {
+                    var parameters = m.GetParameters();
+                    return parameters.Length == 2 && parameters[0].ParameterType == typeof(Entity);
+                });
+
+            if (method == null)
+            {
+                throw new InvalidOperationException(
+                    $"Could not find World.Add<T> method for component type {type.Name}"
+                );
+            }
+
+            // Make the generic method concrete for this component type
+            return method.MakeGenericMethod(type);
+        });
+    }
 
     private static TemplateValidationResult ValidateTemplateInternal(EntityTemplate template)
     {
@@ -318,7 +314,7 @@ public sealed class EntityFactoryService : IEntityFactoryService
             Metadata = template.Metadata,
             BaseTemplateId = null, // Clear to avoid re-resolution
             CustomProperties = template.CustomProperties,
-            Components = mergedComponents.Values.ToList(),
+            Components = [.. mergedComponents.Values],
         };
 
         _logger.LogDebug(
@@ -339,17 +335,11 @@ public sealed class EntityFactoryService : IEntityFactoryService
 
         foreach (var componentTemplate in template.Components)
         {
-            // Check if context has override for this component
+            // Use override if available, otherwise use template's initial data
             var componentTypeName = componentTemplate.ComponentType.Name;
-            if (
-                context?.Overrides != null
-                && context.Overrides.TryGetValue(componentTypeName, out var overrideData)
-            )
-                // Use override data
-                components.Add(overrideData);
-            else
-                // Use template's initial data
-                components.Add(componentTemplate.InitialData);
+            var componentData = context?.Overrides?.GetValueOrDefault(componentTypeName)
+                ?? componentTemplate.InitialData;
+            components.Add(componentData);
         }
 
         return components;

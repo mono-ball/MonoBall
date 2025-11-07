@@ -12,20 +12,10 @@ namespace PokeSharp.Core.Systems;
 ///     Handles Pokemon-style tile animations (water ripples, grass swaying, flowers).
 ///     Priority: 850 (after Animation:800, before Render:1000).
 /// </summary>
-public class TileAnimationSystem : BaseSystem
+public class TileAnimationSystem(ILogger<TileAnimationSystem>? logger = null) : BaseSystem
 {
-    private readonly ILogger<TileAnimationSystem>? _logger;
+    private readonly ILogger<TileAnimationSystem>? _logger = logger;
     private int _animatedTileCount = -1; // Track for logging on first update
-
-    /// <summary>
-    ///     Initializes a new instance of the TileAnimationSystem class.
-    /// </summary>
-    /// <param name="logger">Optional logger for diagnostic output.</param>
-    public TileAnimationSystem(ILogger<TileAnimationSystem>? logger = null)
-    {
-        _logger = logger;
-        _logger?.LogDebug("TileAnimationSystem initialized");
-    }
 
     /// <inheritdoc />
     public override int Priority => SystemPriority.TileAnimation;

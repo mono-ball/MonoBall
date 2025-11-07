@@ -18,30 +18,16 @@ namespace PokeSharp.Rendering.Loaders;
 ///     Loads Tiled maps and converts them to ECS components.
 ///     Supports template-based tile creation when EntityFactoryService is provided.
 /// </summary>
-public class MapLoader
+public class MapLoader(
+    AssetManager assetManager,
+    IEntityFactoryService? entityFactory = null,
+    ILogger<MapLoader>? logger = null)
 {
-    private readonly AssetManager _assetManager;
-    private readonly IEntityFactoryService? _entityFactory;
-    private readonly ILogger<MapLoader>? _logger;
+    private readonly AssetManager _assetManager = assetManager ?? throw new ArgumentNullException(nameof(assetManager));
+    private readonly IEntityFactoryService? _entityFactory = entityFactory;
+    private readonly ILogger<MapLoader>? _logger = logger;
     private readonly Dictionary<string, int> _mapNameToId = new();
     private int _nextMapId;
-
-    /// <summary>
-    ///     Initializes a new instance of the MapLoader class.
-    /// </summary>
-    /// <param name="assetManager">Asset manager for texture loading.</param>
-    /// <param name="entityFactory">Optional entity factory for template-based tile creation.</param>
-    /// <param name="logger">Optional logger for diagnostic output.</param>
-    public MapLoader(
-        AssetManager assetManager,
-        IEntityFactoryService? entityFactory = null,
-        ILogger<MapLoader>? logger = null
-    )
-    {
-        _assetManager = assetManager ?? throw new ArgumentNullException(nameof(assetManager));
-        _entityFactory = entityFactory;
-        _logger = logger;
-    }
 
     /// <summary>
     ///     Loads a complete map by creating tile entities for each non-empty tile.
@@ -258,21 +244,26 @@ public class MapLoader
         // Check for ledge - highest priority (specific behavior)
         if (props.TryGetValue("ledge_direction", out var ledgeValue))
         {
-            var ledgeDir = ledgeValue switch
+            return ledgeValue switch
             {
-                string s => s,
-                _ => ledgeValue?.ToString(),
-            };
-
-            if (!string.IsNullOrEmpty(ledgeDir))
-                return ledgeDir.ToLower() switch
+                string s when !string.IsNullOrEmpty(s) => s.ToLower() switch
                 {
                     "down" => "tile/ledge/down",
                     "up" => "tile/ledge/up",
                     "left" => "tile/ledge/left",
                     "right" => "tile/ledge/right",
-                    _ => null,
-                };
+                    _ => null
+                },
+                not null when !string.IsNullOrEmpty(ledgeValue.ToString()) => ledgeValue.ToString()!.ToLower() switch
+                {
+                    "down" => "tile/ledge/down",
+                    "up" => "tile/ledge/up",
+                    "left" => "tile/ledge/left",
+                    "right" => "tile/ledge/right",
+                    _ => null
+                },
+                _ => null
+            };
         }
 
         // Check for solid wall (but not ledge)
@@ -282,11 +273,13 @@ public class MapLoader
             {
                 bool b => b,
                 string s => bool.TryParse(s, out var result) && result,
-                _ => false,
+                _ => false
             };
 
             if (isSolid)
+            {
                 return "tile/wall";
+            }
         }
 
         // Check for encounter zone (grass)
@@ -295,12 +288,14 @@ public class MapLoader
             var encounterRate = encounterValue switch
             {
                 int i => i,
-                string s => int.TryParse(s, out var result) ? result : 0,
-                _ => 0,
+                string s when int.TryParse(s, out var result) => result,
+                _ => 0
             };
 
             if (encounterRate > 0)
+            {
                 return "tile/grass";
+            }
         }
 
         // Default ground tile
@@ -341,18 +336,15 @@ public class MapLoader
                 CalculateSourceRect(tileGid, tileset)
             );
 
-            entity = _entityFactory
-                .SpawnFromTemplateAsync(
-                    templateId,
-                    world,
-                    builder =>
-                    {
-                        builder.OverrideComponent(position);
-                        builder.OverrideComponent(sprite);
-                    }
-                )
-                .GetAwaiter()
-                .GetResult();
+            entity = _entityFactory.SpawnFromTemplate(
+                templateId,
+                world,
+                builder =>
+                {
+                    builder.OverrideComponent(position);
+                    builder.OverrideComponent(sprite);
+                }
+            );
         }
         else
         {
@@ -506,100 +498,101 @@ public class MapLoader
             try
             {
                 // Spawn entity from template
-                var entity = _entityFactory
-                    .SpawnFromTemplateAsync(
-                        templateId,
-                        world,
-                        builder =>
-                        {
-                            // Override position with map coordinates
-                            builder.OverrideComponent(new Position(tileX, tileY, mapId));
+                var entity = _entityFactory.SpawnFromTemplate(
+                    templateId,
+                    world,
+                    builder =>
+                    {
+                        // Override position with map coordinates
+                        builder.OverrideComponent(new Position(tileX, tileY, mapId));
 
-                            // Apply any custom properties from the object
-                            if (obj.Properties.TryGetValue("direction", out var dirProp))
+                        // Apply any custom properties from the object
+                        if (obj.Properties.TryGetValue("direction", out var dirProp))
+                        {
+                            var dirStr = dirProp.ToString()?.ToLower();
+                            var direction = dirStr switch
                             {
-                                var dirStr = dirProp.ToString()?.ToLower();
-                                var direction = dirStr switch
-                                {
-                                    "up" => Direction.Up,
-                                    "down" => Direction.Down,
-                                    "left" => Direction.Left,
-                                    "right" => Direction.Right,
-                                    _ => Direction.Down,
-                                };
-                                builder.OverrideComponent(direction);
+                                "up" => Direction.Up,
+                                "down" => Direction.Down,
+                                "left" => Direction.Left,
+                                "right" => Direction.Right,
+                                _ => Direction.Down,
+                            };
+                            builder.OverrideComponent(direction);
+                        }
+
+                        // Handle NPC-specific properties
+                        if (templateId.StartsWith("npc/"))
+                        {
+                            // NPCComponent properties
+                            var hasNpcId = obj.Properties.TryGetValue(
+                                "npcId",
+                                out var npcIdProp
+                            );
+                            var hasDisplayName = obj.Properties.TryGetValue(
+                                "displayName",
+                                out var displayNameProp
+                            );
+
+                            if (hasNpcId || hasDisplayName)
+                            {
+                                var npcId = npcIdProp?.ToString() ?? obj.Name;
+                                var displayName = displayNameProp?.ToString() ?? obj.Name;
+                                builder.OverrideComponent(new NPCComponent(npcId, displayName));
                             }
 
-                            // Handle NPC-specific properties
-                            if (templateId.StartsWith("npc/"))
+                            // PathComponent properties (waypoints for patrol NPCs)
+                            if (obj.Properties.TryGetValue("waypoints", out var waypointsProp))
                             {
-                                // NPCComponent properties
-                                var hasNpcId = obj.Properties.TryGetValue(
-                                    "npcId",
-                                    out var npcIdProp
-                                );
-                                var hasDisplayName = obj.Properties.TryGetValue(
-                                    "displayName",
-                                    out var displayNameProp
-                                );
-
-                                if (hasNpcId || hasDisplayName)
+                                var waypointsStr = waypointsProp.ToString();
+                                if (!string.IsNullOrEmpty(waypointsStr))
                                 {
-                                    var npcId = npcIdProp?.ToString() ?? obj.Name;
-                                    var displayName = displayNameProp?.ToString() ?? obj.Name;
-                                    builder.OverrideComponent(new NPCComponent(npcId, displayName));
-                                }
-
-                                // PathComponent properties (waypoints for patrol NPCs)
-                                if (obj.Properties.TryGetValue("waypoints", out var waypointsProp))
-                                {
-                                    var waypointsStr = waypointsProp.ToString();
-                                    if (!string.IsNullOrEmpty(waypointsStr))
+                                    // Parse waypoints: "x1,y1;x2,y2;x3,y3"
+                                    var points = new List<Point>();
+                                    var pairs = waypointsStr.Split(';');
+                                    foreach (var pair in pairs)
                                     {
-                                        // Parse waypoints: "x1,y1;x2,y2;x3,y3"
-                                        var points = new List<Point>();
-                                        var pairs = waypointsStr.Split(';');
-                                        foreach (var pair in pairs)
+                                        var coords = pair.Split(',');
+                                        if (
+                                            coords.Length == 2
+                                            && int.TryParse(coords[0].Trim(), out var x)
+                                            && int.TryParse(coords[1].Trim(), out var y)
+                                        )
                                         {
-                                            var coords = pair.Split(',');
-                                            if (
-                                                coords.Length == 2
-                                                && int.TryParse(coords[0].Trim(), out var x)
-                                                && int.TryParse(coords[1].Trim(), out var y)
+                                            points.Add(new Point(x, y));
+                                        }
+                                    }
+
+                                    if (points.Count > 0)
+                                    {
+                                        var waypointWaitTime = 1.0f;
+                                        if (
+                                            obj.Properties.TryGetValue(
+                                                "waypointWaitTime",
+                                                out var waitProp
                                             )
-                                                points.Add(new Point(x, y));
+                                            && float.TryParse(
+                                                waitProp.ToString(),
+                                                out var waitTime
+                                            )
+                                        )
+                                        {
+                                            waypointWaitTime = waitTime;
                                         }
 
-                                        if (points.Count > 0)
-                                        {
-                                            var waypointWaitTime = 1.0f;
-                                            if (
-                                                obj.Properties.TryGetValue(
-                                                    "waypointWaitTime",
-                                                    out var waitProp
-                                                )
-                                                && float.TryParse(
-                                                    waitProp.ToString(),
-                                                    out var waitTime
-                                                )
+                                        builder.OverrideComponent(
+                                            new PathComponent(
+                                                points.ToArray(),
+                                                true,
+                                                waypointWaitTime
                                             )
-                                                waypointWaitTime = waitTime;
-
-                                            builder.OverrideComponent(
-                                                new PathComponent(
-                                                    points.ToArray(),
-                                                    true,
-                                                    waypointWaitTime
-                                                )
-                                            );
-                                        }
+                                        );
                                     }
                                 }
                             }
                         }
-                    )
-                    .GetAwaiter()
-                    .GetResult();
+                    }
+                );
 
                 _logger?.LogDebug(
                     "Spawned '{ObjectName}' ({TemplateId}) at ({X}, {Y})",

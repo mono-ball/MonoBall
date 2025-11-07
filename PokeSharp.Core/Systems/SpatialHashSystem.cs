@@ -13,24 +13,12 @@ namespace PokeSharp.Core.Systems;
 ///     Runs very early (Priority: 25) to ensure spatial data is available for other systems.
 ///     Uses dirty tracking to avoid rebuilding index for static tiles every frame.
 /// </summary>
-public class SpatialHashSystem : BaseSystem
+public class SpatialHashSystem(ILogger<SpatialHashSystem>? logger = null) : BaseSystem
 {
-    private readonly ILogger<SpatialHashSystem>? _logger;
-    private readonly SpatialHash _staticHash; // For tiles (indexed once)
-    private readonly SpatialHash _dynamicHash; // For entities with Position (cleared each frame)
+    private readonly ILogger<SpatialHashSystem>? _logger = logger;
+    private readonly SpatialHash _staticHash = new(); // For tiles (indexed once)
+    private readonly SpatialHash _dynamicHash = new(); // For entities with Position (cleared each frame)
     private bool _staticTilesIndexed = false;
-
-    /// <summary>
-    ///     Initializes a new instance of the SpatialHashSystem class.
-    /// </summary>
-    /// <param name="logger">Optional logger for diagnostic output.</param>
-    public SpatialHashSystem(ILogger<SpatialHashSystem>? logger = null)
-    {
-        _logger = logger;
-        _staticHash = new SpatialHash();
-        _dynamicHash = new SpatialHash();
-        _logger?.LogDebug("SpatialHashSystem initialized");
-    }
 
     /// <inheritdoc />
     public override int Priority => SystemPriority.SpatialHash;

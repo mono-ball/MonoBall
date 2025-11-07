@@ -22,33 +22,39 @@ namespace PokeSharp.Rendering.Systems;
 ///     2. Y-sort and render object layer tiles + all sprites together
 ///     3. Render overhead layer (naturally appears on top due to layer order)
 /// </summary>
-public class ZOrderRenderSystem : BaseSystem
+public class ZOrderRenderSystem(
+    GraphicsDevice graphicsDevice,
+    AssetManager assetManager,
+    ILogger<ZOrderRenderSystem>? logger = null) : BaseSystem
 {
     private const int TileSize = 16;
     private const float MaxRenderDistance = 10000f; // Maximum Y coordinate for normalization
 
     // Layer indices where sprites should be rendered (between object and overhead layers)
     private const int SpriteRenderAfterLayer = 1; // Render sprites after layer index 1 (Objects)
-    private readonly AssetManager _assetManager;
-
-    private readonly GraphicsDevice _graphicsDevice;
-    private readonly ILogger<ZOrderRenderSystem>? _logger;
-    private readonly SpriteBatch _spriteBatch;
+    
+    private readonly GraphicsDevice _graphicsDevice = graphicsDevice ?? throw new ArgumentNullException(nameof(graphicsDevice));
+    private readonly AssetManager _assetManager = assetManager ?? throw new ArgumentNullException(nameof(assetManager));
+    private readonly SpriteBatch _spriteBatch = new(graphicsDevice);
+    private readonly ILogger<ZOrderRenderSystem>? _logger = logger;
+    
     private ulong _frameCounter;
     private int _lastEntityCount;
     private int _lastTileCount;
     private int _lastSpriteCount;
 
     // Cache query descriptions to avoid allocation every frame
-    private readonly QueryDescription _cameraQuery;
-    private readonly QueryDescription _groundTileQuery;
-    private readonly QueryDescription _objectTileQuery;
-    private readonly QueryDescription _overheadTileQuery;
-    private readonly QueryDescription _movingSpriteQuery;
-    private readonly QueryDescription _staticSpriteQuery;
+    private readonly QueryDescription _cameraQuery = new QueryDescription().WithAll<Player, Camera>();
+    private readonly QueryDescription _groundTileQuery = new QueryDescription().WithAll<TilePosition, TileSprite>();
+    private readonly QueryDescription _objectTileQuery = new QueryDescription().WithAll<TilePosition, TileSprite>();
+    private readonly QueryDescription _overheadTileQuery = new QueryDescription().WithAll<TilePosition, TileSprite>();
+    private readonly QueryDescription _movingSpriteQuery = new QueryDescription().WithAll<Position, Sprite, GridMovement>();
+    private readonly QueryDescription _staticSpriteQuery = new QueryDescription()
+        .WithAll<Position, Sprite>()
+        .WithNone<GridMovement>();
 
     // Cache camera transform to avoid recalculating
-    private Matrix _cachedCameraTransform;
+    private Matrix _cachedCameraTransform = Matrix.Identity;
     private Rectangle? _cachedCameraBounds;
 
     // Performance profiling
@@ -61,38 +67,6 @@ public class ZOrderRenderSystem : BaseSystem
         _overheadTime,
         _batchEndTime;
 
-    /// <summary>
-    ///     Initializes a new instance of the ZOrderRenderSystem class.
-    /// </summary>
-    /// <param name="graphicsDevice">The graphics device for rendering.</param>
-    /// <param name="assetManager">Asset manager for texture loading.</param>
-    /// <param name="logger">Optional logger for debug output.</param>
-    public ZOrderRenderSystem(
-        GraphicsDevice graphicsDevice,
-        AssetManager assetManager,
-        ILogger<ZOrderRenderSystem>? logger = null
-    )
-    {
-        _graphicsDevice = graphicsDevice ?? throw new ArgumentNullException(nameof(graphicsDevice));
-        _assetManager = assetManager ?? throw new ArgumentNullException(nameof(assetManager));
-        _spriteBatch = new SpriteBatch(_graphicsDevice);
-        _logger = logger;
-
-        // Pre-build query descriptions once
-        _cameraQuery = new QueryDescription().WithAll<Player, Camera>();
-
-        // Separate queries for each tile layer - avoids filtering in callback
-        _groundTileQuery = new QueryDescription().WithAll<TilePosition, TileSprite>();
-        _objectTileQuery = new QueryDescription().WithAll<TilePosition, TileSprite>();
-        _overheadTileQuery = new QueryDescription().WithAll<TilePosition, TileSprite>();
-
-        _movingSpriteQuery = new QueryDescription().WithAll<Position, Sprite, GridMovement>();
-        _staticSpriteQuery = new QueryDescription()
-            .WithAll<Position, Sprite>()
-            .WithNone<GridMovement>();
-
-        _cachedCameraTransform = Matrix.Identity;
-    }
 
     /// <inheritdoc />
     public override int Priority => SystemPriority.Render;

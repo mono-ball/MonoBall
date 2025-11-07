@@ -42,7 +42,7 @@ public class AnimationDefinition
     ///     Gets or sets the array of source rectangles for each frame.
     ///     Each rectangle defines the sprite sheet region for that frame.
     /// </summary>
-    public Rectangle[] Frames { get; set; } = Array.Empty<Rectangle>();
+    public Rectangle[] Frames { get; set; } = [];
 
     /// <summary>
     ///     Gets or sets the duration of each frame in seconds.

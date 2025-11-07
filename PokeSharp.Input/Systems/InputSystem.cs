@@ -20,52 +20,31 @@ namespace PokeSharp.Input.Systems;
 ///     Implements Pokemon-style grid-locked input with queue-based buffering for responsive controls.
 ///     Movement validation and collision checking happens in MovementSystem.
 /// </summary>
-public class InputSystem : BaseSystem
+public class InputSystem(
+    int maxBufferSize = 5,
+    float bufferTimeout = 0.2f,
+    ILogger<InputSystem>? logger = null) : BaseSystem
 {
-    private readonly InputBuffer _inputBuffer;
-    private readonly ILogger<InputSystem>? _logger;
+    private readonly InputBuffer _inputBuffer = new(maxBufferSize, bufferTimeout);
+    private readonly ILogger<InputSystem>? _logger = logger;
     private Direction _lastBufferedDirection = Direction.None;
     private float _lastBufferTime = -1f;
     private float _totalTime;
     private int _inputEventsProcessed;
 
     // Cache query description to avoid allocation every frame
-    private readonly QueryDescription _playerQuery;
+    private readonly QueryDescription _playerQuery = new QueryDescription().WithAll<
+        Player,
+        Position,
+        GridMovement,
+        InputState,
+        Direction
+    >();
 
     // Cache input states to avoid redundant polling
     private KeyboardState _keyboardState;
     private GamePadState _gamepadState;
     private KeyboardState _prevKeyboardState;
-
-    /// <summary>
-    ///     Initializes a new instance of the InputSystem class.
-    /// </summary>
-    /// <param name="maxBufferSize">Maximum number of inputs to buffer (default: 5).</param>
-    /// <param name="bufferTimeout">How long inputs remain valid in seconds (default: 0.2s).</param>
-    /// <param name="logger">Optional logger for diagnostic output.</param>
-    public InputSystem(
-        int maxBufferSize = 5,
-        float bufferTimeout = 0.2f,
-        ILogger<InputSystem>? logger = null
-    )
-    {
-        _inputBuffer = new InputBuffer(maxBufferSize, bufferTimeout);
-        _logger = logger;
-        _logger?.LogDebug(
-            "InputSystem initialized with buffer size {BufferSize} and timeout {Timeout}s",
-            maxBufferSize,
-            bufferTimeout
-        );
-
-        // Pre-build query description once
-        _playerQuery = new QueryDescription().WithAll<
-            Player,
-            Position,
-            GridMovement,
-            InputState,
-            Direction
-        >();
-    }
 
     /// <inheritdoc />
     public override int Priority => SystemPriority.Input;

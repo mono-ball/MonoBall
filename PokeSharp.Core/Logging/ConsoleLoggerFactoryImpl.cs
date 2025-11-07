@@ -7,14 +7,9 @@ namespace PokeSharp.Core.Logging;
 /// <summary>
 ///     Simple ILoggerFactory implementation for console logging.
 /// </summary>
-internal sealed class ConsoleLoggerFactoryImpl : ILoggerFactory
+internal sealed class ConsoleLoggerFactoryImpl(LogLevel minLevel = LogLevel.Information) : ILoggerFactory
 {
-    private readonly LogLevel _minLevel;
-
-    public ConsoleLoggerFactoryImpl(LogLevel minLevel = LogLevel.Information)
-    {
-        _minLevel = minLevel;
-    }
+    private readonly LogLevel _minLevel = minLevel;
 
     public void AddProvider(ILoggerProvider provider)
     {
