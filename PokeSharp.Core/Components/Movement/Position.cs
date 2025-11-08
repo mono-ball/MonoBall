@@ -38,21 +38,23 @@ public struct Position
     /// <param name="x">Grid X coordinate.</param>
     /// <param name="y">Grid Y coordinate.</param>
     /// <param name="mapId">Map identifier (default: 0).</param>
-    public Position(int x, int y, int mapId = 0)
+    /// <param name="tileSize">Tile size in pixels (default: 16 for backward compatibility).</param>
+    public Position(int x, int y, int mapId = 0, int tileSize = 16)
     {
         X = x;
         Y = y;
-        PixelX = x * 16f;
-        PixelY = y * 16f;
+        PixelX = x * tileSize;
+        PixelY = y * tileSize;
         MapId = mapId;
     }
 
     /// <summary>
     ///     Updates pixel coordinates based on grid coordinates.
     /// </summary>
-    public void SyncPixelsToGrid()
+    /// <param name="tileSize">Tile size in pixels (default: 16 for backward compatibility).</param>
+    public void SyncPixelsToGrid(int tileSize = 16)
     {
-        PixelX = X * 16f;
-        PixelY = Y * 16f;
+        PixelX = X * tileSize;
+        PixelY = Y * tileSize;
     }
 }

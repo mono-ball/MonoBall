@@ -2,6 +2,7 @@ using System.IO.Compression;
 using System.Text.Json;
 using PokeSharp.Rendering.Loaders.TiledJson;
 using PokeSharp.Rendering.Loaders.Tmx;
+using ZstdSharp;
 
 namespace PokeSharp.Rendering.Loaders;
 
@@ -210,6 +211,8 @@ public static class TiledMapLoader
                 Height = tiledLayer.Height > 0 ? tiledLayer.Height : mapHeight,
                 Visible = tiledLayer.Visible,
                 Opacity = tiledLayer.Opacity,
+                OffsetX = tiledLayer.OffsetX,
+                OffsetY = tiledLayer.OffsetY,
             };
 
             // Decode layer data (handles plain arrays, base64, and compression)
@@ -258,10 +261,8 @@ public static class TiledMapLoader
             return ConvertBytesToInts(bytes);
         }
 
-        // Unknown data type - log warning if possible
-        Console.WriteLine(
-            $"Warning: Unexpected data type in layer '{layer.Name}': {dataElement.ValueKind}"
-        );
+        // Unknown data type - return empty array (production code should not use Console.WriteLine)
+        // TODO: Add proper logging via ILogger when available
         return Array.Empty<int>();
     }
 
@@ -270,22 +271,39 @@ public static class TiledMapLoader
     /// </summary>
     private static byte[] DecompressBytes(byte[] compressed, string compression)
     {
-        using var compressedStream = new MemoryStream(compressed);
-        Stream decompressor = compression.ToLower() switch
+        return compression.ToLower() switch
         {
-            "gzip" => new GZipStream(compressedStream, CompressionMode.Decompress),
-            "zlib" => new ZLibStream(compressedStream, CompressionMode.Decompress),
+            "gzip" => DecompressGzip(compressed),
+            "zlib" => DecompressZlib(compressed),
+            "zstd" => DecompressZstd(compressed),
             _ => throw new NotSupportedException(
-                $"Compression '{compression}' not supported. Supported formats: gzip, zlib"
+                $"Compression '{compression}' not supported. Supported formats: gzip, zlib, zstd"
             ),
         };
+    }
 
-        using (decompressor)
-        {
-            using var decompressed = new MemoryStream();
-            decompressor.CopyTo(decompressed);
-            return decompressed.ToArray();
-        }
+    private static byte[] DecompressGzip(byte[] compressed)
+    {
+        using var compressedStream = new MemoryStream(compressed);
+        using var decompressor = new GZipStream(compressedStream, CompressionMode.Decompress);
+        using var decompressed = new MemoryStream();
+        decompressor.CopyTo(decompressed);
+        return decompressed.ToArray();
+    }
+
+    private static byte[] DecompressZlib(byte[] compressed)
+    {
+        using var compressedStream = new MemoryStream(compressed);
+        using var decompressor = new ZLibStream(compressedStream, CompressionMode.Decompress);
+        using var decompressed = new MemoryStream();
+        decompressor.CopyTo(decompressed);
+        return decompressed.ToArray();
+    }
+
+    private static byte[] DecompressZstd(byte[] compressed)
+    {
+        using var decompressor = new Decompressor();
+        return decompressor.Unwrap(compressed).ToArray();
     }
 
     /// <summary>

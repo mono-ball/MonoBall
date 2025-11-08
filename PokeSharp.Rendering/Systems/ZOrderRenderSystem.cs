@@ -50,6 +50,12 @@ public class ZOrderRenderSystem(
         TileSprite
     >();
 
+    private readonly QueryDescription _groundTileWithOffsetQuery = new QueryDescription().WithAll<
+        TilePosition,
+        TileSprite,
+        LayerOffset
+    >();
+
     private readonly ILogger<ZOrderRenderSystem>? _logger = logger;
 
     private readonly QueryDescription _movingSpriteQuery = new QueryDescription().WithAll<
@@ -67,6 +73,8 @@ public class ZOrderRenderSystem(
         TilePosition,
         TileSprite
     >();
+
+    private readonly QueryDescription _imageLayerQuery = new QueryDescription().WithAll<ImageLayer>();
 
     private readonly SpriteBatch _spriteBatch = new(graphicsDevice);
 
@@ -127,6 +135,9 @@ public class ZOrderRenderSystem(
             totalTilesRendered += RenderTileLayer(world, TileLayer.Ground);
             totalTilesRendered += RenderTileLayer(world, TileLayer.Object);
 
+            // Render image layers (they sort with everything via layerDepth)
+            var imageLayerCount = RenderImageLayers(world);
+
             var spriteCount = 0;
             world.Query(
                 in _movingSpriteQuery,
@@ -150,16 +161,23 @@ public class ZOrderRenderSystem(
 
             if (_frameCounter % 300 == 0)
             {
-                var totalEntities = totalTilesRendered + spriteCount;
+                var totalEntities = totalTilesRendered + spriteCount + imageLayerCount;
                 _logger?.LogRenderStats(
                     totalEntities,
                     totalTilesRendered,
                     spriteCount,
                     _frameCounter
                 );
+                if (imageLayerCount > 0)
+                {
+                    _logger?.LogDebug(
+                        "[dim]Image Layers Rendered:[/] [magenta]{ImageLayerCount}[/]",
+                        imageLayerCount
+                    );
+                }
             }
 
-            _lastEntityCount = totalTilesRendered + spriteCount;
+            _lastEntityCount = totalTilesRendered + spriteCount + imageLayerCount;
             _lastTileCount = totalTilesRendered;
             _lastSpriteCount = spriteCount;
 
@@ -208,6 +226,9 @@ public class ZOrderRenderSystem(
         swObject.Stop();
         _objectTime = swObject.Elapsed.TotalMilliseconds;
 
+        // Render image layers
+        var imageLayerCount = RenderImageLayers(world);
+
         var swSprites = Stopwatch.StartNew();
         var spriteCount = 0;
 
@@ -243,7 +264,7 @@ public class ZOrderRenderSystem(
 
         if (_frameCounter % 300 == 0)
         {
-            var totalEntities = totalTilesRendered + spriteCount;
+            var totalEntities = totalTilesRendered + spriteCount + imageLayerCount;
             _logger?.LogRenderStats(totalEntities, totalTilesRendered, spriteCount, _frameCounter);
 
             _logger?.LogInformation(
@@ -256,9 +277,16 @@ public class ZOrderRenderSystem(
                 _overheadTime,
                 _batchEndTime
             );
+            if (imageLayerCount > 0)
+            {
+                _logger?.LogDebug(
+                    "[dim]Image Layers Rendered:[/] [magenta]{ImageLayerCount}[/]",
+                    imageLayerCount
+                );
+            }
         }
 
-        _lastEntityCount = totalTilesRendered + spriteCount;
+        _lastEntityCount = totalTilesRendered + spriteCount + imageLayerCount;
         _lastTileCount = totalTilesRendered;
         _lastSpriteCount = spriteCount;
     }
@@ -365,12 +393,93 @@ public class ZOrderRenderSystem(
             // Use cached camera bounds instead of querying every time
             var cameraBounds = _cachedCameraBounds;
 
-            // Use the general tile query (we still need to filter by layer since
-            // Arch doesn't support querying by component field values)
+            // Render tiles with layer offsets (parallax scrolling)
+            world.Query(
+                in _groundTileWithOffsetQuery,
+                (ref TilePosition pos, ref TileSprite sprite, ref LayerOffset offset) =>
+                {
+                    // Filter by layer (unavoidable - can't query by component field)
+                    if (sprite.Layer != layer)
+                        return;
+
+                    // Viewport culling: skip tiles outside camera bounds
+                    if (cameraBounds.HasValue)
+                        if (
+                            pos.X < cameraBounds.Value.Left
+                            || pos.X >= cameraBounds.Value.Right
+                            || pos.Y < cameraBounds.Value.Top
+                            || pos.Y >= cameraBounds.Value.Bottom
+                        )
+                        {
+                            tilesCulled++;
+                            return;
+                        }
+
+                    // Get tileset texture
+                    if (!_assetManager.HasTexture(sprite.TilesetId))
+                    {
+                        if (tilesRendered == 0) // Only warn once per layer
+                            _logger?.LogWarning(
+                                "  WARNING: Tileset '{TilesetId}' NOT FOUND - skipping tiles",
+                                sprite.TilesetId
+                            );
+                        return;
+                    }
+
+                    var texture = _assetManager.GetTexture(sprite.TilesetId);
+
+                    // Apply layer offset to position for parallax effect
+                    var position = new Vector2(
+                        pos.X * TileSize + offset.X,
+                        pos.Y * TileSize + offset.Y
+                    );
+
+                    // Calculate layer depth based on layer type
+                    var layerDepth = layer switch
+                    {
+                        TileLayer.Ground => 0.95f, // Back
+                        TileLayer.Object => CalculateYSortDepth(position.Y + TileSize), // Y-sorted
+                        TileLayer.Overhead => 0.05f, // Front
+                        _ => 0.5f,
+                    };
+
+                    // Apply flip flags from Tiled
+                    var effects = SpriteEffects.None;
+                    if (sprite.FlipHorizontally)
+                        effects |= SpriteEffects.FlipHorizontally;
+                    if (sprite.FlipVertically)
+                        effects |= SpriteEffects.FlipVertically;
+
+                    // Note: Diagonal flip (rotate 90° then flip) is not directly supported by MonoGame's SpriteEffects.
+                    // For full diagonal flip support, we would need to use rotation parameter.
+                    // This is rarely used in practice, so we skip it for now.
+
+                    // Render tile
+                    _spriteBatch.Draw(
+                        texture,
+                        position,
+                        sprite.SourceRect,
+                        Color.White,
+                        0f,
+                        Vector2.Zero,
+                        1f,
+                        effects,
+                        layerDepth
+                    );
+
+                    tilesRendered++;
+                }
+            );
+
+            // Render tiles without layer offsets (standard positioning)
             world.Query(
                 in _groundTileQuery, // All queries are the same, just reusing
-                (ref TilePosition pos, ref TileSprite sprite) =>
+                (Entity entity, ref TilePosition pos, ref TileSprite sprite) =>
                 {
+                    // Skip if this tile has a LayerOffset component (already rendered above)
+                    if (world.Has<LayerOffset>(entity))
+                        return;
+
                     // Filter by layer (unavoidable - can't query by component field)
                     if (sprite.Layer != layer)
                         return;
@@ -607,5 +716,58 @@ public class ZOrderRenderSystem(
 
         // Clamp to Y-sort range
         return MathHelper.Clamp(layerDepth, 0.4f, 0.6f);
+    }
+
+    /// <summary>
+    ///     Renders all image layers with proper Z-ordering and transparency.
+    /// </summary>
+    /// <param name="world">The ECS world.</param>
+    /// <returns>Number of image layers rendered.</returns>
+    private int RenderImageLayers(World world)
+    {
+        var rendered = 0;
+
+        try
+        {
+            world.Query(
+                in _imageLayerQuery,
+                (ref ImageLayer imageLayer) =>
+                {
+                    // Get texture from AssetManager
+                    if (!_assetManager.HasTexture(imageLayer.TextureId))
+                    {
+                        if (rendered == 0) // Only warn once
+                            _logger?.LogWarning(
+                                "  WARNING: Image layer texture '{TextureId}' NOT FOUND - skipping",
+                                imageLayer.TextureId
+                            );
+                        return;
+                    }
+
+                    var texture = _assetManager.GetTexture(imageLayer.TextureId);
+
+                    // Render the full image at the specified position
+                    _spriteBatch.Draw(
+                        texture,
+                        imageLayer.Position,
+                        null, // No source rect - use full texture
+                        imageLayer.TintColor, // Apply opacity via tint
+                        0f,
+                        Vector2.Zero,
+                        1f,
+                        SpriteEffects.None,
+                        imageLayer.LayerDepth
+                    );
+
+                    rendered++;
+                }
+            );
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError(ex, "  ERROR rendering image layers");
+        }
+
+        return rendered;
     }
 }

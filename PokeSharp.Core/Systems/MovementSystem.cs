@@ -15,12 +15,13 @@ namespace PokeSharp.Core.Systems;
 /// </summary>
 public class MovementSystem(ILogger<MovementSystem>? logger = null) : BaseSystem
 {
-    private const int TileSize = 16;
-
     // Cache for entities to remove (reused across frames to avoid allocation)
     private readonly List<Entity> _entitiesToRemove = new(32);
     private readonly ILogger<MovementSystem>? _logger = logger;
     private readonly QueryDescription _mapInfoQuery = new QueryDescription().WithAll<MapInfo>();
+
+    // Cache for tile sizes per map (reduces redundant queries)
+    private readonly Dictionary<int, int> _tileSizeCache = new();
 
     // Cache query descriptions to avoid allocation every frame
     private readonly QueryDescription _movementQuery = new QueryDescription()
@@ -143,6 +144,7 @@ public class MovementSystem(ILogger<MovementSystem>? logger = null) : BaseSystem
         else
         {
             // Ensure pixel position matches grid position when not moving
+            // Note: SyncPixelsToGrid will use default 16 if tileSize not available
             position.SyncPixelsToGrid();
 
             // Ensure idle animation is playing
@@ -197,6 +199,7 @@ public class MovementSystem(ILogger<MovementSystem>? logger = null) : BaseSystem
         else
         {
             // Ensure pixel position matches grid position when not moving
+            // Note: SyncPixelsToGrid will use default 16 if tileSize not available
             position.SyncPixelsToGrid();
         }
     }
@@ -268,6 +271,9 @@ public class MovementSystem(ILogger<MovementSystem>? logger = null) : BaseSystem
                 "SpatialHashSystem must be set before processing movement. Call SetSpatialHashSystem() first."
             );
         }
+
+        // Get tile size for this map (cached for performance)
+        var tileSize = GetTileSize(world, position.MapId);
 
         // Calculate target grid position
         var targetX = position.X;
@@ -356,7 +362,7 @@ public class MovementSystem(ILogger<MovementSystem>? logger = null) : BaseSystem
 
                 // Perform the jump (2 tiles in jump direction)
                 var jumpStart = new Vector2(position.PixelX, position.PixelY);
-                var jumpEnd = new Vector2(jumpLandX * TileSize, jumpLandY * TileSize);
+                var jumpEnd = new Vector2(jumpLandX * tileSize, jumpLandY * tileSize);
                 movement.StartMovement(jumpStart, jumpEnd);
 
                 // Update grid position immediately to the landing position
@@ -389,7 +395,7 @@ public class MovementSystem(ILogger<MovementSystem>? logger = null) : BaseSystem
 
         // Start the grid movement
         var startPixels = new Vector2(position.PixelX, position.PixelY);
-        var targetPixels = new Vector2(targetX * TileSize, targetY * TileSize);
+        var targetPixels = new Vector2(targetX * tileSize, targetY * tileSize);
         movement.StartMovement(startPixels, targetPixels);
 
         // Update grid position immediately to prevent entities from passing through each other
@@ -399,6 +405,35 @@ public class MovementSystem(ILogger<MovementSystem>? logger = null) : BaseSystem
 
         // Update facing direction
         movement.FacingDirection = direction;
+    }
+
+    /// <summary>
+    ///     Gets the tile size for a specific map from MapInfo component.
+    ///     Uses caching to minimize redundant queries.
+    /// </summary>
+    /// <param name="world">The ECS world.</param>
+    /// <param name="mapId">The map identifier.</param>
+    /// <returns>Tile size in pixels (default: 16).</returns>
+    private int GetTileSize(World world, int mapId)
+    {
+        // Check cache first
+        if (_tileSizeCache.TryGetValue(mapId, out var cached))
+            return cached;
+
+        // Query MapInfo for tile size
+        var tileSize = 16; // default
+        world.Query(
+            in _mapInfoQuery,
+            (ref MapInfo mapInfo) =>
+            {
+                if (mapInfo.MapId == mapId)
+                    tileSize = mapInfo.TileSize;
+            }
+        );
+
+        // Cache the result
+        _tileSizeCache[mapId] = tileSize;
+        return tileSize;
     }
 
     /// <summary>

@@ -1,9 +1,10 @@
 namespace PokeSharp.Rendering.Loaders.Tmx;
 
 /// <summary>
-///     Represents a tile layer in a Tiled map.
+///     Represents an image layer in a Tiled map.
+///     Image layers display a single image at a specific position with optional transparency.
 /// </summary>
-public class TmxLayer
+public class TmxImageLayer
 {
     /// <summary>
     ///     Gets or sets the layer ID.
@@ -16,14 +17,14 @@ public class TmxLayer
     public string Name { get; set; } = string.Empty;
 
     /// <summary>
-    ///     Gets or sets the layer width in tiles.
+    ///     Gets or sets the X offset in pixels.
     /// </summary>
-    public int Width { get; set; }
+    public float X { get; set; }
 
     /// <summary>
-    ///     Gets or sets the layer height in tiles.
+    ///     Gets or sets the Y offset in pixels.
     /// </summary>
-    public int Height { get; set; }
+    public float Y { get; set; }
 
     /// <summary>
     ///     Gets or sets whether the layer is visible.
@@ -36,17 +37,7 @@ public class TmxLayer
     public float Opacity { get; set; } = 1.0f;
 
     /// <summary>
-    ///     Gets or sets the horizontal offset in pixels for parallax scrolling.
+    ///     Gets or sets the image information for this layer.
     /// </summary>
-    public int OffsetX { get; set; }
-
-    /// <summary>
-    ///     Gets or sets the vertical offset in pixels for parallax scrolling.
-    /// </summary>
-    public int OffsetY { get; set; }
-
-    /// <summary>
-    ///     Gets or sets the tile data as a 2D array [y, x].
-    /// </summary>
-    public int[,] Data { get; set; } = new int[0, 0];
+    public TmxImage? Image { get; set; }
 }

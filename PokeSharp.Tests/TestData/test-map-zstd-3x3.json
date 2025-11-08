@@ -1,0 +1,35 @@
+{
+  "width": 3,
+  "height": 3,
+  "tilewidth": 16,
+  "tileheight": 16,
+  "orientation": "orthogonal",
+  "renderorder": "right-down",
+  "version": "1.10",
+  "tiledversion": "1.10.0",
+  "nextlayerid": 2,
+  "nextobjectid": 1,
+  "infinite": false,
+  "layers": [
+    {
+      "id": 1,
+      "name": "Ground",
+      "type": "tilelayer",
+      "visible": true,
+      "opacity": 1,
+      "x": 0,
+      "y": 0,
+      "width": 3,
+      "height": 3,
+      "data": "KLUv/SAkIQEAAQAAAAIAAAADAAAABAAAAAUAAAAGAAAABwAAAAgAAAAJAAAA",
+      "encoding": "base64",
+      "compression": "zstd"
+    }
+  ],
+  "tilesets": [
+    {
+      "firstgid": 1,
+      "source": "test-tileset.tsx"
+    }
+  ]
+}

@@ -36,6 +36,18 @@ public class TiledJsonLayer
     public int Y { get; set; }
 
     /// <summary>
+    ///     Horizontal offset in pixels for parallax scrolling.
+    /// </summary>
+    [JsonPropertyName("offsetx")]
+    public int OffsetX { get; set; }
+
+    /// <summary>
+    ///     Vertical offset in pixels for parallax scrolling.
+    /// </summary>
+    [JsonPropertyName("offsety")]
+    public int OffsetY { get; set; }
+
+    /// <summary>
     ///     Tile data - can be either an array of ints (uncompressed) or a base64 string (compressed).
     ///     Use JsonElement to handle the polymorphic "data" property.
     /// </summary>

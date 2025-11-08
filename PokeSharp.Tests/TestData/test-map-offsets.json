@@ -1,0 +1,70 @@
+{
+  "width": 4,
+  "height": 4,
+  "tilewidth": 16,
+  "tileheight": 16,
+  "orientation": "orthogonal",
+  "renderorder": "right-down",
+  "version": "1.10",
+  "tiledversion": "1.10.0",
+  "nextlayerid": 4,
+  "nextobjectid": 1,
+  "infinite": false,
+  "layers": [
+    {
+      "id": 1,
+      "name": "Background",
+      "type": "tilelayer",
+      "visible": true,
+      "opacity": 0.7,
+      "x": 0,
+      "y": 0,
+      "offsetx": 10,
+      "offsety": 5,
+      "width": 4,
+      "height": 4,
+      "data": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+    },
+    {
+      "id": 2,
+      "name": "Ground",
+      "type": "tilelayer",
+      "visible": true,
+      "opacity": 1,
+      "x": 0,
+      "y": 0,
+      "offsetx": 0,
+      "offsety": 0,
+      "width": 4,
+      "height": 4,
+      "data": [17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32]
+    },
+    {
+      "id": 3,
+      "name": "Foreground",
+      "type": "tilelayer",
+      "visible": true,
+      "opacity": 1,
+      "x": 0,
+      "y": 0,
+      "offsetx": -8,
+      "offsety": -4,
+      "width": 4,
+      "height": 4,
+      "data": [33, 0, 35, 0, 0, 38, 0, 40, 41, 0, 43, 0, 0, 46, 0, 48]
+    }
+  ],
+  "tilesets": [
+    {
+      "firstgid": 1,
+      "source": "test-tileset.tsx"
+    }
+  ],
+  "properties": [
+    {
+      "name": "test_parallax",
+      "type": "bool",
+      "value": true
+    }
+  ]
+}

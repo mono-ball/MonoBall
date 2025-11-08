@@ -5,6 +5,7 @@ using PokeSharp.Core.Components.Common;
 using PokeSharp.Core.Components.Maps;
 using PokeSharp.Core.Components.Movement;
 using PokeSharp.Core.Components.NPCs;
+using PokeSharp.Core.Components.Rendering;
 using PokeSharp.Core.Components.Tiles;
 using PokeSharp.Core.Factories;
 using PokeSharp.Core.Logging;
@@ -18,7 +19,7 @@ namespace PokeSharp.Rendering.Loaders;
 ///     Supports template-based tile creation when EntityFactoryService is provided.
 /// </summary>
 public class MapLoader(
-    AssetManager assetManager,
+    IAssetProvider assetManager,
     IEntityFactoryService? entityFactory = null,
     ILogger<MapLoader>? logger = null
 )
@@ -29,7 +30,7 @@ public class MapLoader(
     private const uint FLIPPED_DIAGONALLY_FLAG = 0x20000000;
     private const uint TILE_ID_MASK = 0x1FFFFFFF;
 
-    private readonly AssetManager _assetManager =
+    private readonly IAssetProvider _assetManager =
         assetManager ?? throw new ArgumentNullException(nameof(assetManager));
 
     private readonly IEntityFactoryService? _entityFactory = entityFactory;
@@ -69,21 +70,28 @@ public class MapLoader(
             LoadTilesetTexture(tileset, mapPath, tilesetId);
 
         var tilesCreated = 0;
+        var totalLayerCount = tmxDoc.Layers.Count + tmxDoc.ImageLayers.Count;
 
         // Create entity for each non-empty tile across all layers
-        for (var layerIndex = 0; layerIndex < 3; layerIndex++)
+        for (var layerIndex = 0; layerIndex < tmxDoc.Layers.Count; layerIndex++)
         {
-            var layerData = GetLayerData(tmxDoc, layerIndex);
-            if (layerData == null)
+            var layer = tmxDoc.Layers[layerIndex];
+            if (layer?.Data == null)
                 continue;
 
-            var tileLayer = (TileLayer)layerIndex;
+            // Determine TileLayer from layer name or index
+            var tileLayer = DetermineTileLayer(layer.Name, layerIndex);
+
+            // Get layer offset for parallax scrolling (default to 0,0 if not set)
+            var layerOffset = (layer.OffsetX != 0 || layer.OffsetY != 0)
+                ? new LayerOffset(layer.OffsetX, layer.OffsetY)
+                : (LayerOffset?)null;
 
             for (var y = 0; y < tmxDoc.Height; y++)
             for (var x = 0; x < tmxDoc.Width; x++)
             {
                 // Extract flip flags from GID
-                var rawGid = (uint)layerData[y, x];
+                var rawGid = (uint)layer.Data[y, x];
                 var tileGid = (int)(rawGid & TILE_ID_MASK);
                 var flipH = (rawGid & FLIPPED_HORIZONTALLY_FLAG) != 0;
                 var flipV = (rawGid & FLIPPED_VERTICALLY_FLAG) != 0;
@@ -100,6 +108,7 @@ public class MapLoader(
                     tileGid,
                     tileset,
                     tileLayer,
+                    layerOffset,
                     flipH,
                     flipV,
                     flipD
@@ -127,10 +136,20 @@ public class MapLoader(
         // Create animated tile entities
         var animatedTilesCreated = CreateAnimatedTileEntities(world, tmxDoc, tileset);
 
+        // Create image layer entities
+        var imageLayersCreated = CreateImageLayerEntities(world, tmxDoc, mapPath, totalLayerCount);
+
         // Spawn entities from map objects (NPCs, items, etc.)
         var objectsCreated = SpawnMapObjects(world, tmxDoc, mapId, tmxDoc.TileHeight);
 
         _logger?.LogMapLoaded(mapName, tmxDoc.Width, tmxDoc.Height, tilesCreated, objectsCreated);
+        if (imageLayersCreated > 0)
+        {
+            _logger?.LogDebug(
+                "[dim]Image Layers:[/] [magenta]{ImageLayerCount}[/]",
+                imageLayersCreated
+            );
+        }
         _logger?.LogDebug(
             "[dim]MapId:[/] [grey]{MapId}[/] [dim]|[/] [dim]Animated:[/] [yellow]{AnimatedCount}[/] [dim]|[/] [dim]Tileset:[/] [cyan]{TilesetId}[/]",
             mapId,
@@ -238,24 +257,45 @@ public class MapLoader(
         return _mapNameToId.TryGetValue(mapName, out var id) ? id : -1;
     }
 
-    private int[,]? GetLayerData(TmxDocument tmxDoc, int layerIndex)
+    /// <summary>
+    ///     Determines the TileLayer enum value from a layer name.
+    ///     Supports backward compatibility with standard "Ground", "Objects", "Overhead" names,
+    ///     while also working with any layer names by falling back to layer index.
+    /// </summary>
+    /// <param name="layerName">The name of the layer from Tiled.</param>
+    /// <param name="layerIndex">The index of the layer (0-based).</param>
+    /// <returns>The appropriate TileLayer enum value.</returns>
+    private TileLayer DetermineTileLayer(string layerName, int layerIndex)
     {
-        var layerName = layerIndex switch
+        // Try to determine from layer name (case-insensitive)
+        if (!string.IsNullOrEmpty(layerName))
         {
-            0 => "Ground",
-            1 => "Objects",
-            2 => "Overhead",
-            _ => null,
+            return layerName.ToLowerInvariant() switch
+            {
+                "ground" => TileLayer.Ground,
+                "objects" => TileLayer.Object,
+                "overhead" => TileLayer.Overhead,
+                // For any other names, use index-based fallback
+                _ => DetermineFromIndex(layerIndex)
+            };
+        }
+
+        // Fallback to index
+        return DetermineFromIndex(layerIndex);
+    }
+
+    /// <summary>
+    ///     Determines TileLayer from index with wraparound for 4+ layers.
+    ///     Treats index 0 as Ground, 1 as Objects, 2+ as Overhead.
+    /// </summary>
+    private static TileLayer DetermineFromIndex(int layerIndex)
+    {
+        return layerIndex switch
+        {
+            0 => TileLayer.Ground,
+            1 => TileLayer.Object,
+            _ => TileLayer.Overhead // 2+ all map to Overhead
         };
-
-        if (layerName == null)
-            return null;
-
-        var layer = tmxDoc.Layers.FirstOrDefault(l =>
-            l.Name.Equals(layerName, StringComparison.OrdinalIgnoreCase)
-        );
-
-        return layer?.Data;
     }
 
     /// <summary>
@@ -331,6 +371,7 @@ public class MapLoader(
         int tileGid,
         TmxTileset tileset,
         TileLayer layer,
+        LayerOffset? layerOffset,
         bool flipH = false,
         bool flipV = false,
         bool flipD = false
@@ -477,6 +518,10 @@ public class MapLoader(
             )
                 world.Add(entity, new TileScript(scriptPath));
         }
+
+        // Add LayerOffset component if layer has offset (for parallax scrolling)
+        if (layerOffset.HasValue)
+            world.Add(entity, layerOffset.Value);
     }
 
     /// <summary>
@@ -534,7 +579,7 @@ public class MapLoader(
                     builder =>
                     {
                         // Override position with map coordinates
-                        builder.OverrideComponent(new Position(tileX, tileY, mapId));
+                        builder.OverrideComponent(new Position(tileX, tileY, mapId, tileHeight));
 
                         // Apply any custom properties from the object
                         if (obj.Properties.TryGetValue("direction", out var dirProp))
@@ -679,5 +724,128 @@ public class MapLoader(
         var sourceY = margin + tileY * (tileHeight + spacing);
 
         return new Rectangle(sourceX, sourceY, tileWidth, tileHeight);
+    }
+
+    /// <summary>
+    ///     Creates entities for image layers in the map.
+    ///     Image layers are rendered as full images at specific positions in the layer order.
+    /// </summary>
+    /// <param name="world">The ECS world.</param>
+    /// <param name="tmxDoc">The Tiled map document.</param>
+    /// <param name="mapPath">Path to the map file (for relative image path resolution).</param>
+    /// <param name="totalLayerCount">Total number of layers (for Z-order calculation).</param>
+    /// <returns>Number of image layer entities created.</returns>
+    private int CreateImageLayerEntities(
+        World world,
+        TmxDocument tmxDoc,
+        string mapPath,
+        int totalLayerCount
+    )
+    {
+        if (tmxDoc.ImageLayers.Count == 0)
+            return 0;
+
+        var created = 0;
+        var mapDirectory = Path.GetDirectoryName(mapPath) ?? string.Empty;
+
+        // Process image layers in order
+        for (var i = 0; i < tmxDoc.ImageLayers.Count; i++)
+        {
+            var imageLayer = tmxDoc.ImageLayers[i];
+
+            // Skip invisible layers
+            if (!imageLayer.Visible || imageLayer.Image == null)
+                continue;
+
+            // Get image path
+            var imagePath = imageLayer.Image.Source;
+            if (string.IsNullOrEmpty(imagePath))
+            {
+                _logger?.LogWarning(
+                    "Image layer '{LayerName}' has no image source - skipping",
+                    imageLayer.Name
+                );
+                continue;
+            }
+
+            // Create texture ID from image filename
+            var textureId = Path.GetFileNameWithoutExtension(imagePath);
+
+            // Load texture if not already loaded
+            if (!_assetManager.HasTexture(textureId))
+            {
+                try
+                {
+                    // Resolve relative path from map directory
+                    var fullImagePath = Path.Combine(mapDirectory, imagePath);
+
+                    // Make path relative to Assets root for AssetManager
+                    var assetsRoot = "Assets";
+                    var relativePath = Path.GetRelativePath(assetsRoot, fullImagePath);
+
+                    _assetManager.LoadTexture(textureId, relativePath);
+                }
+                catch (Exception ex)
+                {
+                    _logger?.LogExceptionWithContext(
+                        ex,
+                        "Failed to load image layer texture '{TextureId}' from '{ImagePath}'",
+                        textureId,
+                        imagePath
+                    );
+                    continue;
+                }
+            }
+
+            // Calculate layer depth based on position in layer stack
+            // Image layers should interleave with tile layers
+            // We need to determine where this image layer falls in the overall layer order
+            var layerDepth = CalculateImageLayerDepth(imageLayer.Id, totalLayerCount);
+
+            // Create ImageLayer component
+            var imageLayerComponent = new ImageLayer(
+                textureId,
+                imageLayer.X,
+                imageLayer.Y,
+                imageLayer.Opacity,
+                layerDepth,
+                imageLayer.Id
+            );
+
+            // Create entity with ImageLayer component
+            var entity = world.Create(imageLayerComponent);
+
+            _logger?.LogDebug(
+                "Created image layer '{LayerName}' with texture '{TextureId}' at ({X}, {Y}) depth {Depth:F2}",
+                imageLayer.Name,
+                textureId,
+                imageLayer.X,
+                imageLayer.Y,
+                layerDepth
+            );
+
+            created++;
+        }
+
+        return created;
+    }
+
+    /// <summary>
+    ///     Calculates the layer depth for an image layer based on its ID.
+    ///     Lower IDs render behind, higher IDs render in front.
+    /// </summary>
+    /// <param name="layerId">The layer ID from Tiled.</param>
+    /// <param name="totalLayerCount">Total number of layers in the map.</param>
+    /// <returns>Layer depth value (0.0 to 1.0, where lower is in front).</returns>
+    private static float CalculateImageLayerDepth(int layerId, int totalLayerCount)
+    {
+        // Map layer IDs to depth range 0.0 (front) to 1.0 (back)
+        // Lower layer IDs (created first in Tiled) should render behind (higher depth)
+        // Higher layer IDs (created later in Tiled) should render in front (lower depth)
+        if (totalLayerCount <= 1)
+            return 0.5f;
+
+        var normalized = (float)layerId / totalLayerCount;
+        return 1.0f - normalized; // Invert so lower IDs = higher depth (back)
     }
 }

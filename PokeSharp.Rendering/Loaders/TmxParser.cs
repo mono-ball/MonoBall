@@ -38,6 +38,7 @@ public static class TmxParser
             Tilesets = ParseTilesets(mapElement, tmxPath),
             Layers = ParseLayers(mapElement),
             ObjectGroups = ParseObjectGroups(mapElement),
+            ImageLayers = ParseImageLayers(mapElement),
         };
 
         return tmxDoc;
@@ -264,5 +265,39 @@ public static class TmxParser
             attr != null && float.TryParse(attr.Value, CultureInfo.InvariantCulture, out var result)
             ? result
             : defaultValue;
+    }
+
+    private static List<TmxImageLayer> ParseImageLayers(XElement mapElement)
+    {
+        var imageLayers = new List<TmxImageLayer>();
+
+        foreach (var layerElement in mapElement.Elements("imagelayer"))
+        {
+            var imageLayer = new TmxImageLayer
+            {
+                Id = ParseInt(layerElement, "id"),
+                Name = layerElement.Attribute("name")?.Value ?? string.Empty,
+                X = ParseFloat(layerElement, "offsetx", 0f),
+                Y = ParseFloat(layerElement, "offsety", 0f),
+                Visible = ParseInt(layerElement, "visible", 1) == 1,
+                Opacity = ParseFloat(layerElement, "opacity", 1.0f),
+            };
+
+            // Parse image element
+            var imageElement = layerElement.Element("image");
+            if (imageElement != null)
+            {
+                imageLayer.Image = new TmxImage
+                {
+                    Source = imageElement.Attribute("source")?.Value ?? string.Empty,
+                    Width = ParseInt(imageElement, "width"),
+                    Height = ParseInt(imageElement, "height"),
+                };
+            }
+
+            imageLayers.Add(imageLayer);
+        }
+
+        return imageLayers;
     }
 }

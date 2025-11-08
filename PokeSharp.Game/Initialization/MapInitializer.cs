@@ -66,14 +66,4 @@ public class MapInitializer(
         }
     }
 
-    /// <summary>
-    ///     Sets the camera map bounds based on tilemap dimensions.
-    /// </summary>
-    /// <param name="mapWidthInTiles">Map width in tiles.</param>
-    /// <param name="mapHeightInTiles">Map height in tiles.</param>
-    public Rectangle GetMapBounds(int mapWidthInTiles, int mapHeightInTiles)
-    {
-        const int tileSize = 16;
-        return new Rectangle(0, 0, mapWidthInTiles * tileSize, mapHeightInTiles * tileSize);
-    }
 }

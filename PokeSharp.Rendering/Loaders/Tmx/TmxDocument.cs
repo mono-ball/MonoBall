@@ -50,4 +50,9 @@ public class TmxDocument
     ///     Gets or sets the object groups (collision, triggers, etc.).
     /// </summary>
     public List<TmxObjectGroup> ObjectGroups { get; set; } = new();
+
+    /// <summary>
+    ///     Gets or sets the image layers in this map.
+    /// </summary>
+    public List<TmxImageLayer> ImageLayers { get; set; } = new();
 }

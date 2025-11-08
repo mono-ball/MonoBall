@@ -14,7 +14,7 @@ public class AssetManager(
     GraphicsDevice graphicsDevice,
     string assetRoot = "Assets",
     ILogger<AssetManager>? logger = null
-) : IDisposable
+) : IAssetProvider, IDisposable
 {
     private readonly string _assetRoot = assetRoot;
 

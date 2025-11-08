@@ -32,6 +32,17 @@ public class PlayerFactory(
     /// <returns>The created player entity.</returns>
     public Entity CreatePlayer(int x, int y, int viewportWidth, int viewportHeight)
     {
+        // Capture tile size from MapInfo (default to 16 if not found)
+        var tileSize = 16;
+        var mapInfoQuery = new QueryDescription().WithAll<MapInfo>();
+        _world.Query(
+            in mapInfoQuery,
+            (ref MapInfo mapInfo) =>
+            {
+                tileSize = mapInfo.TileSize;
+            }
+        );
+
         // Create camera component with viewport and initial settings
         var viewport = new Rectangle(0, 0, viewportWidth, viewportHeight);
         var camera = new Camera(viewport)
@@ -39,11 +50,10 @@ public class PlayerFactory(
             Zoom = 3.0f,
             TargetZoom = 3.0f,
             ZoomTransitionSpeed = 0.1f,
-            Position = new Vector2(x * 16, y * 16), // Start at player's position (grid to pixels)
+            Position = new Vector2(x * tileSize, y * tileSize), // Start at player's position (grid to pixels)
         };
 
         // Set map bounds on camera from MapInfo
-        var mapInfoQuery = new QueryDescription().WithAll<MapInfo>();
         _world.Query(
             in mapInfoQuery,
             (ref MapInfo mapInfo) =>
@@ -58,7 +68,7 @@ public class PlayerFactory(
             _world,
             builder =>
             {
-                builder.OverrideComponent(new Position(x, y));
+                builder.OverrideComponent(new Position(x, y, mapId: 0, tileSize));
             }
         );
 
