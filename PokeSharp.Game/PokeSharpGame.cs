@@ -23,19 +23,14 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game, IAsyncDisposable
 {
     private readonly TypeRegistry<BehaviorDefinition> _behaviorRegistry;
     private readonly IEntityFactoryService _entityFactory;
-    private readonly GameStateApiService _gameStateApi;
-    private readonly DialogueApiService _dialogueApi;
-    private readonly EffectApiService _effectApi;
+    private readonly IScriptingApiProvider _apiProvider;
     private readonly GraphicsDeviceManager _graphics;
     private readonly InputManager _inputManager;
     private readonly ILogger<PokeSharpGame> _logger;
     private readonly ILoggerFactory _loggerFactory;
-    private readonly MapApiService _mapApiService = null!;
-    private readonly NpcApiService _npcApi;
 
     // Services that depend on GraphicsDevice (created in Initialize)
     private readonly PerformanceMonitor _performanceMonitor;
-    private readonly PlayerApiService _playerApi;
     private readonly PlayerFactory _playerFactory;
     private readonly ScriptService _scriptService;
     private readonly SystemManager _systemManager;
@@ -61,12 +56,7 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game, IAsyncDisposable
         PerformanceMonitor performanceMonitor,
         InputManager inputManager,
         PlayerFactory playerFactory,
-        PlayerApiService playerApi,
-        NpcApiService npcApi,
-        MapApiService mapApiService,
-        GameStateApiService gameStateApi,
-        DialogueApiService dialogueApi,
-        EffectApiService effectApi,
+        IScriptingApiProvider apiProvider,
         ApiTestInitializer apiTestInitializer,
         ApiTestEventSubscriber apiTestSubscriber
     )
@@ -81,12 +71,7 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game, IAsyncDisposable
         _performanceMonitor = performanceMonitor;
         _inputManager = inputManager;
         _playerFactory = playerFactory;
-        _playerApi = playerApi;
-        _npcApi = npcApi;
-        _mapApiService = mapApiService;
-        _gameStateApi = gameStateApi;
-        _dialogueApi = dialogueApi;
-        _effectApi = effectApi;
+        _apiProvider = apiProvider ?? throw new ArgumentNullException(nameof(apiProvider));
         _apiTestInitializer = apiTestInitializer ?? throw new ArgumentNullException(nameof(apiTestInitializer));
         _apiTestSubscriber = apiTestSubscriber ?? throw new ArgumentNullException(nameof(apiTestSubscriber));
 
@@ -151,7 +136,7 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game, IAsyncDisposable
         _gameInitializer.Initialize(GraphicsDevice);
 
         // Set SpatialHashSystem on the MapApiService that was created by DI (used by ScriptService)
-        _mapApiService.SetSpatialHashSystem(_gameInitializer.SpatialHashSystem);
+        _apiProvider.Map.SetSpatialHashSystem(_gameInitializer.SpatialHashSystem);
 
         var mapInitializerLogger = _loggerFactory.CreateLogger<MapInitializer>();
         _mapInitializer = new MapInitializer(
@@ -170,12 +155,7 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game, IAsyncDisposable
             _systemManager,
             _scriptService,
             _behaviorRegistry,
-            _playerApi,
-            _npcApi,
-            _mapApiService,
-            _gameStateApi,
-            _dialogueApi,
-            _effectApi
+            _apiProvider
         );
 
         // Initialize NPC behavior system

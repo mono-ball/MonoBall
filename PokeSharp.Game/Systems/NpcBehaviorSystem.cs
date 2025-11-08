@@ -23,36 +23,21 @@ namespace PokeSharp.Game.Systems;
 /// </remarks>
 public class NPCBehaviorSystem : BaseSystem
 {
-    private readonly GameStateApiService _gameStateApi;
-    private readonly DialogueApiService _dialogueApi;
-    private readonly EffectApiService _effectApi;
     private readonly ILogger<NPCBehaviorSystem> _logger;
     private readonly ILoggerFactory _loggerFactory;
-    private readonly MapApiService _mapApi;
-    private readonly NpcApiService _npcApi;
-    private readonly PlayerApiService _playerApi;
+    private readonly IScriptingApiProvider _apis;
     private readonly ConcurrentDictionary<string, ILogger> _scriptLoggerCache = new();
     private TypeRegistry<BehaviorDefinition>? _behaviorRegistry;
 
     public NPCBehaviorSystem(
         ILogger<NPCBehaviorSystem> logger,
         ILoggerFactory loggerFactory,
-        PlayerApiService playerApi,
-        NpcApiService npcApi,
-        MapApiService mapApi,
-        GameStateApiService gameStateApi,
-        DialogueApiService dialogueApi,
-        EffectApiService effectApi
+        IScriptingApiProvider apis
     )
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _loggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
-        _playerApi = playerApi ?? throw new ArgumentNullException(nameof(playerApi));
-        _npcApi = npcApi ?? throw new ArgumentNullException(nameof(npcApi));
-        _mapApi = mapApi ?? throw new ArgumentNullException(nameof(mapApi));
-        _gameStateApi = gameStateApi ?? throw new ArgumentNullException(nameof(gameStateApi));
-        _dialogueApi = dialogueApi ?? throw new ArgumentNullException(nameof(dialogueApi));
-        _effectApi = effectApi ?? throw new ArgumentNullException(nameof(effectApi));
+        _apis = apis ?? throw new ArgumentNullException(nameof(apis));
     }
 
     /// <summary>
@@ -133,12 +118,7 @@ public class NPCBehaviorSystem : BaseSystem
                         world,
                         entity,
                         scriptLogger,
-                        _playerApi,
-                        _npcApi,
-                        _mapApi,
-                        _gameStateApi,
-                        _dialogueApi,
-                        _effectApi
+                        _apis
                     );
 
                     // Initialize on first tick

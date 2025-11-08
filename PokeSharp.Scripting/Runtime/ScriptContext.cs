@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using PokeSharp.Core.Components.Movement;
 using PokeSharp.Core.Scripting.Services;
 using PokeSharp.Core.ScriptingApi;
+using PokeSharp.Scripting.Services;
 
 namespace PokeSharp.Scripting.Runtime;
 
@@ -18,6 +19,10 @@ namespace PokeSharp.Scripting.Runtime;
 ///     <example>
 ///         Entity script example:
 ///         <code>
+/// // Create context (typically handled by ScriptService)
+/// var apis = serviceProvider.GetRequiredService&lt;IScriptingApiProvider&gt;();
+/// var ctx = new ScriptContext(world, entity, logger, apis);
+///
 /// public void Execute(ScriptContext ctx)
 /// {
 ///     if (ctx.TryGetState&lt;Health&gt;(out var health))
@@ -25,7 +30,7 @@ namespace PokeSharp.Scripting.Runtime;
 ///         ctx.Logger.LogInformation("Entity has {HP} HP", health.Current);
 ///     }
 ///
-///     // Use API services
+///     // Use API services (accessed via facade)
 ///     var playerMoney = ctx.Player.GetMoney();
 ///     ctx.Logger.LogInformation("Player has {Money} money", playerMoney);
 /// }
@@ -51,6 +56,7 @@ namespace PokeSharp.Scripting.Runtime;
 public sealed class ScriptContext
 {
     private readonly Entity? _entity;
+    private readonly IScriptingApiProvider _apis;
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="ScriptContext" /> class.
@@ -58,35 +64,27 @@ public sealed class ScriptContext
     /// <param name="world">The ECS world instance.</param>
     /// <param name="entity">The target entity for entity-level scripts, or null for global scripts.</param>
     /// <param name="logger">Logger instance for this script's execution.</param>
-    /// <param name="playerApi">Player API service for player-related operations.</param>
-    /// <param name="npcApi">NPC API service for NPC-related operations.</param>
-    /// <param name="mapApi">Map API service for map queries and transitions.</param>
-    /// <param name="gameStateApi">Game state API service for flags and variables.</param>
-    /// <param name="dialogueApi">Dialogue API service for displaying messages.</param>
-    /// <param name="effectApi">Effect API service for spawning visual effects.</param>
+    /// <param name="apis">The scripting API provider facade (provides access to all domain-specific APIs).</param>
+    /// <remarks>
+    ///     <para>
+    ///         This constructor uses the facade pattern to reduce parameter count from 9 to 4.
+    ///         The <paramref name="apis"/> provider supplies all domain-specific API services.
+    ///     </para>
+    ///     <para>
+    ///         Typically, you won't construct this directly - ScriptService handles instantiation.
+    ///     </para>
+    /// </remarks>
     public ScriptContext(
         World world,
         Entity? entity,
         ILogger logger,
-        PlayerApiService playerApi,
-        NpcApiService npcApi,
-        MapApiService mapApi,
-        GameStateApiService gameStateApi,
-        DialogueApiService dialogueApi,
-        EffectApiService effectApi
+        IScriptingApiProvider apis
     )
     {
         World = world ?? throw new ArgumentNullException(nameof(world));
         Logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _entity = entity;
-
-        // Inject API services
-        Player = playerApi ?? throw new ArgumentNullException(nameof(playerApi));
-        Npc = npcApi ?? throw new ArgumentNullException(nameof(npcApi));
-        Map = mapApi ?? throw new ArgumentNullException(nameof(mapApi));
-        GameState = gameStateApi ?? throw new ArgumentNullException(nameof(gameStateApi));
-        Dialogue = dialogueApi ?? throw new ArgumentNullException(nameof(dialogueApi));
-        Effects = effectApi ?? throw new ArgumentNullException(nameof(effectApi));
+        _apis = apis ?? throw new ArgumentNullException(nameof(apis));
     }
 
     #region Core Properties
@@ -127,6 +125,7 @@ public sealed class ScriptContext
     /// </summary>
     /// <remarks>
     ///     Use this to interact with the player entity, manage money, position, and movement.
+    ///     Accessed via the API provider facade.
     /// </remarks>
     /// <example>
     ///     <code>
@@ -135,13 +134,14 @@ public sealed class ScriptContext
     /// var facing = ctx.Player.GetPlayerFacing();
     /// </code>
     /// </example>
-    public PlayerApiService Player { get; }
+    public PlayerApiService Player => _apis.Player;
 
     /// <summary>
     ///     Gets the NPC API service for NPC-related operations.
     /// </summary>
     /// <remarks>
     ///     Use this to control NPCs, move them, face directions, and manage paths.
+    ///     Accessed via the API provider facade.
     /// </remarks>
     /// <example>
     ///     <code>
@@ -149,13 +149,14 @@ public sealed class ScriptContext
     /// ctx.Npc.MoveNPC(npcEntity, Direction.Up);
     /// </code>
     /// </example>
-    public NpcApiService Npc { get; }
+    public NpcApiService Npc => _apis.Npc;
 
     /// <summary>
     ///     Gets the Map API service for map queries and transitions.
     /// </summary>
     /// <remarks>
     ///     Use this to check walkability, query entities at positions, and transition between maps.
+    ///     Accessed via the API provider facade.
     /// </remarks>
     /// <example>
     ///     <code>
@@ -164,13 +165,14 @@ public sealed class ScriptContext
     /// ctx.Map.TransitionToMap(2, 10, 10);
     /// </code>
     /// </example>
-    public MapApiService Map { get; }
+    public MapApiService Map => _apis.Map;
 
     /// <summary>
     ///     Gets the Game State API service for managing flags and variables.
     /// </summary>
     /// <remarks>
     ///     Use this to manage game state through flags (booleans) and variables (strings).
+    ///     Accessed via the API provider facade.
     /// </remarks>
     /// <example>
     ///     <code>
@@ -181,13 +183,14 @@ public sealed class ScriptContext
     /// }
     /// </code>
     /// </example>
-    public GameStateApiService GameState { get; }
+    public GameStateApiService GameState => _apis.GameState;
 
     /// <summary>
     ///     Gets the Dialogue API service for displaying messages and text.
     /// </summary>
     /// <remarks>
     ///     Use this to show dialogue boxes, messages, and text to the player.
+    ///     Accessed via the API provider facade.
     /// </remarks>
     /// <example>
     ///     <code>
@@ -195,13 +198,14 @@ public sealed class ScriptContext
     /// ctx.Dialogue.ShowDialogue(npcEntity, "Welcome to my shop.");
     /// </code>
     /// </example>
-    public DialogueApiService Dialogue { get; }
+    public DialogueApiService Dialogue => _apis.Dialogue;
 
     /// <summary>
     ///     Gets the Effects API service for spawning visual effects.
     /// </summary>
     /// <remarks>
     ///     Use this to create visual effects, animations, and particles in the game world.
+    ///     Accessed via the API provider facade.
     /// </remarks>
     /// <example>
     ///     <code>
@@ -209,7 +213,7 @@ public sealed class ScriptContext
     /// ctx.Effects.PlayAnimation(entity, "hit");
     /// </code>
     /// </example>
-    public EffectApiService Effects { get; }
+    public EffectApiService Effects => _apis.Effects;
 
     #endregion
 

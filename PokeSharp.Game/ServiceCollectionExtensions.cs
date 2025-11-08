@@ -85,27 +85,15 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<EffectApiService>();
         // WorldApi removed - scripts now use domain APIs directly via ScriptContext
 
+        // Scripting API Provider
+        services.AddSingleton<IScriptingApiProvider, ScriptingApiProvider>();
+
         // Scripting Service
         services.AddSingleton(sp =>
         {
             var logger = sp.GetRequiredService<ILogger<ScriptService>>();
-            var playerApi = sp.GetRequiredService<PlayerApiService>();
-            var npcApi = sp.GetRequiredService<NpcApiService>();
-            var mapApi = sp.GetRequiredService<MapApiService>();
-            var gameStateApi = sp.GetRequiredService<GameStateApiService>();
-            var dialogueApi = sp.GetRequiredService<DialogueApiService>();
-            var effectApi = sp.GetRequiredService<EffectApiService>();
-            // worldApi parameter removed - no longer needed
-            return new ScriptService(
-                "Assets/Scripts",
-                logger,
-                playerApi,
-                npcApi,
-                mapApi,
-                gameStateApi,
-                dialogueApi,
-                effectApi
-            );
+            var apis = sp.GetRequiredService<IScriptingApiProvider>();
+            return new ScriptService("Assets/Scripts", logger, apis);
         });
 
         // Game Initializers and Helpers

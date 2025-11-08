@@ -19,13 +19,8 @@ namespace PokeSharp.Scripting.Services;
 public class ScriptService : IAsyncDisposable
 {
     private readonly ScriptOptions _defaultOptions = ScriptCompilationOptions.GetDefaultOptions();
-    private readonly GameStateApiService _gameStateApi;
-    private readonly DialogueApiService _dialogueApi;
-    private readonly EffectApiService _effectApi;
+    private readonly IScriptingApiProvider _apis;
     private readonly ILogger<ScriptService> _logger;
-    private readonly MapApiService _mapApi;
-    private readonly NpcApiService _npcApi;
-    private readonly PlayerApiService _playerApi;
 
     private readonly ConcurrentDictionary<
         string,
@@ -40,32 +35,17 @@ public class ScriptService : IAsyncDisposable
     /// </summary>
     /// <param name="scriptsBasePath">Base path for script files.</param>
     /// <param name="logger">Logger instance.</param>
-    /// <param name="playerApi">Player API service.</param>
-    /// <param name="npcApi">NPC API service.</param>
-    /// <param name="mapApi">Map API service.</param>
-    /// <param name="gameStateApi">Game state API service.</param>
-    /// <param name="dialogueApi">Dialogue API service.</param>
-    /// <param name="effectApi">Effect API service.</param>
+    /// <param name="apis">Scripting API provider.</param>
     public ScriptService(
         string scriptsBasePath,
         ILogger<ScriptService> logger,
-        PlayerApiService playerApi,
-        NpcApiService npcApi,
-        MapApiService mapApi,
-        GameStateApiService gameStateApi,
-        DialogueApiService dialogueApi,
-        EffectApiService effectApi
+        IScriptingApiProvider apis
     )
     {
         _scriptsBasePath =
             scriptsBasePath ?? throw new ArgumentNullException(nameof(scriptsBasePath));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _playerApi = playerApi ?? throw new ArgumentNullException(nameof(playerApi));
-        _npcApi = npcApi ?? throw new ArgumentNullException(nameof(npcApi));
-        _mapApi = mapApi ?? throw new ArgumentNullException(nameof(mapApi));
-        _gameStateApi = gameStateApi ?? throw new ArgumentNullException(nameof(gameStateApi));
-        _dialogueApi = dialogueApi ?? throw new ArgumentNullException(nameof(dialogueApi));
-        _effectApi = effectApi ?? throw new ArgumentNullException(nameof(effectApi));
+        _apis = apis ?? throw new ArgumentNullException(nameof(apis));
     }
 
     /// <summary>
@@ -291,12 +271,7 @@ public class ScriptService : IAsyncDisposable
                 world,
                 entity,
                 effectiveLogger,
-                _playerApi,
-                _npcApi,
-                _mapApi,
-                _gameStateApi,
-                _dialogueApi,
-                _effectApi
+                _apis
             );
             initMethod.Invoke(scriptBase, new object[] { context });
 

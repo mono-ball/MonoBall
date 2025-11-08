@@ -20,12 +20,7 @@ public class NPCBehaviorInitializer(
     SystemManager systemManager,
     ScriptService scriptService,
     TypeRegistry<BehaviorDefinition> behaviorRegistry,
-    PlayerApiService playerApi,
-    NpcApiService npcApi,
-    MapApiService mapApi,
-    GameStateApiService gameStateApi,
-    DialogueApiService dialogueApi,
-    EffectApiService effectApi
+    IScriptingApiProvider apiProvider
 )
 {
     /// <summary>
@@ -87,12 +82,7 @@ public class NPCBehaviorInitializer(
             var npcBehaviorSystem = new NPCBehaviorSystem(
                 npcBehaviorLogger,
                 loggerFactory,
-                playerApi,
-                npcApi,
-                mapApi,
-                gameStateApi,
-                dialogueApi,
-                effectApi
+                apiProvider
             );
             npcBehaviorSystem.SetBehaviorRegistry(behaviorRegistry);
             systemManager.RegisterSystem(npcBehaviorSystem);
