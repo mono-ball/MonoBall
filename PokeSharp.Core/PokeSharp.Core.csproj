@@ -1,19 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <TargetFramework>net9.0</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
-    </PropertyGroup>
-    <ItemGroup>
-        <PackageReference Include="Arch" Version="2.1.0"/>
-        <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.4.1"/>
-        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.10"/>
-        <PackageReference Include="Spectre.Console" Version="0.53.0"/>
-        <PackageReference Include="xunit.extensibility.core" Version="2.9.3"/>
-    </ItemGroup>
-    <ItemGroup>
-        <Reference Include="PokeNET.Core">
-            <HintPath>..\..\PokeNET\PokeNET\PokeNET.Core\bin\Debug\net9.0\PokeNET.Core.dll</HintPath>
-        </Reference>
-    </ItemGroup>
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Arch" Version="2.1.0" />
+    <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.4.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.10" />
+    <PackageReference Include="Spectre.Console" Version="0.53.0" />
+    <PackageReference Include="xunit.extensibility.core" Version="2.9.3" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="PokeNET.Core">
+      <HintPath>..\..\PokeNET\PokeNET\PokeNET.Core\bin\Debug\net9.0\PokeNET.Core.dll</HintPath>
+    </Reference>
+  </ItemGroup>
 </Project>

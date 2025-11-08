@@ -7,21 +7,30 @@ namespace PokeSharp.Rendering.Loaders.TiledJson;
 /// </summary>
 public class TiledJsonObject
 {
-    [JsonPropertyName("id")] public int Id { get; set; }
+    [JsonPropertyName("id")]
+    public int Id { get; set; }
 
-    [JsonPropertyName("name")] public string? Name { get; set; }
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
 
-    [JsonPropertyName("type")] public string? Type { get; set; }
+    [JsonPropertyName("type")]
+    public string? Type { get; set; }
 
-    [JsonPropertyName("x")] public float X { get; set; }
+    [JsonPropertyName("x")]
+    public float X { get; set; }
 
-    [JsonPropertyName("y")] public float Y { get; set; }
+    [JsonPropertyName("y")]
+    public float Y { get; set; }
 
-    [JsonPropertyName("width")] public float Width { get; set; }
+    [JsonPropertyName("width")]
+    public float Width { get; set; }
 
-    [JsonPropertyName("height")] public float Height { get; set; }
+    [JsonPropertyName("height")]
+    public float Height { get; set; }
 
-    [JsonPropertyName("visible")] public bool Visible { get; set; } = true;
+    [JsonPropertyName("visible")]
+    public bool Visible { get; set; } = true;
 
-    [JsonPropertyName("properties")] public List<TiledJsonProperty>? Properties { get; set; }
+    [JsonPropertyName("properties")]
+    public List<TiledJsonProperty>? Properties { get; set; }
 }

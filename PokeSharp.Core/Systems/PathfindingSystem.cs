@@ -196,13 +196,7 @@ public class PathfindingSystem : BaseSystem
             return;
 
         // Use A* to find path
-        var path = _pathfindingService.FindPath(
-            current,
-            target,
-            mapId,
-            _spatialHashSystem,
-            500
-        );
+        var path = _pathfindingService.FindPath(current, target, mapId, _spatialHashSystem, 500);
 
         if (path == null || path.Count == 0)
         {

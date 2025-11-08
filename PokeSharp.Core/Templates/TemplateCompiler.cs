@@ -35,7 +35,7 @@ public class TemplateCompiler<TEntity> : ITemplateCompiler<TEntity>
             _logger.LogError("No compiler registered for type {EntityType}", entityType.Name);
             throw new InvalidOperationException(
                 $"No compiler registered for entity type '{entityType.Name}'. "
-                + $"Use RegisterCompiler<{entityType.Name}>() to register a compilation function."
+                    + $"Use RegisterCompiler<{entityType.Name}>() to register a compilation function."
             );
         }
 

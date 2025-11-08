@@ -148,7 +148,7 @@ public class PollingWatcher : IScriptWatcher
                     {
                         Exception = ex,
                         Message = "Error during polling",
-                        IsCritical = false
+                        IsCritical = false,
                     }
                 );
             }
@@ -221,7 +221,7 @@ public class PollingWatcher : IScriptWatcher
                 FilePath = filePath,
                 ChangeTime = DateTime.UtcNow,
                 FileSize = fileSize,
-                ChangeType = changeType
+                ChangeType = changeType,
             }
         );
 

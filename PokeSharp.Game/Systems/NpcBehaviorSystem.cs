@@ -24,13 +24,14 @@ namespace PokeSharp.Game.Systems;
 public class NPCBehaviorSystem : BaseSystem
 {
     private readonly GameStateApiService _gameStateApi;
+    private readonly DialogueApiService _dialogueApi;
+    private readonly EffectApiService _effectApi;
     private readonly ILogger<NPCBehaviorSystem> _logger;
     private readonly ILoggerFactory _loggerFactory;
     private readonly MapApiService _mapApi;
     private readonly NpcApiService _npcApi;
     private readonly PlayerApiService _playerApi;
     private readonly ConcurrentDictionary<string, ILogger> _scriptLoggerCache = new();
-    private readonly IWorldApi _worldApi;
     private TypeRegistry<BehaviorDefinition>? _behaviorRegistry;
 
     public NPCBehaviorSystem(
@@ -40,7 +41,8 @@ public class NPCBehaviorSystem : BaseSystem
         NpcApiService npcApi,
         MapApiService mapApi,
         GameStateApiService gameStateApi,
-        IWorldApi worldApi
+        DialogueApiService dialogueApi,
+        EffectApiService effectApi
     )
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -49,7 +51,8 @@ public class NPCBehaviorSystem : BaseSystem
         _npcApi = npcApi ?? throw new ArgumentNullException(nameof(npcApi));
         _mapApi = mapApi ?? throw new ArgumentNullException(nameof(mapApi));
         _gameStateApi = gameStateApi ?? throw new ArgumentNullException(nameof(gameStateApi));
-        _worldApi = worldApi ?? throw new ArgumentNullException(nameof(worldApi));
+        _dialogueApi = dialogueApi ?? throw new ArgumentNullException(nameof(dialogueApi));
+        _effectApi = effectApi ?? throw new ArgumentNullException(nameof(effectApi));
     }
 
     /// <summary>
@@ -134,7 +137,8 @@ public class NPCBehaviorSystem : BaseSystem
                         _npcApi,
                         _mapApi,
                         _gameStateApi,
-                        _worldApi
+                        _dialogueApi,
+                        _effectApi
                     );
 
                     // Initialize on first tick

@@ -11,9 +11,7 @@ public class AnimationDefinition
     /// <summary>
     ///     Initializes a new instance of the AnimationDefinition class.
     /// </summary>
-    public AnimationDefinition()
-    {
-    }
+    public AnimationDefinition() { }
 
     /// <summary>
     ///     Initializes a new instance of the AnimationDefinition class with specified parameters.

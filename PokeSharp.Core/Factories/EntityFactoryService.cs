@@ -110,7 +110,7 @@ public sealed class EntityFactoryService(
             Overrides = builder.ComponentOverrides.ToDictionary(
                 kvp => kvp.Key.Name,
                 kvp => kvp.Value
-            )
+            ),
         };
 
         // Add custom properties if any
@@ -201,7 +201,7 @@ public sealed class EntityFactoryService(
                     {
                         var parameters = m.GetParameters();
                         return parameters.Length == 2
-                               && parameters[0].ParameterType == typeof(Entity);
+                            && parameters[0].ParameterType == typeof(Entity);
                     });
 
                 if (method == null)
@@ -292,7 +292,8 @@ public sealed class EntityFactoryService(
             mergedComponents[component.ComponentType] = component;
 
         // Apply child template components (final overrides)
-        foreach (var component in template.Components) mergedComponents[component.ComponentType] = component;
+        foreach (var component in template.Components)
+            mergedComponents[component.ComponentType] = component;
 
         // Create resolved template
         var resolvedTemplate = new EntityTemplate
@@ -303,7 +304,7 @@ public sealed class EntityFactoryService(
             Metadata = template.Metadata,
             BaseTemplateId = null, // Clear to avoid re-resolution
             CustomProperties = template.CustomProperties,
-            Components = [.. mergedComponents.Values]
+            Components = [.. mergedComponents.Values],
         };
 
         _logger.LogDebug(

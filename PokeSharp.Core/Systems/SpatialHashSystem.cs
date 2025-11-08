@@ -54,7 +54,10 @@ public class SpatialHashSystem(ILogger<SpatialHashSystem>? logger = null) : Base
         var dynamicQuery = new QueryDescription().WithAll<Position>();
         world.Query(
             in dynamicQuery,
-            (Entity entity, ref Position pos) => { _dynamicHash.Add(entity, pos.MapId, pos.X, pos.Y); }
+            (Entity entity, ref Position pos) =>
+            {
+                _dynamicHash.Add(entity, pos.MapId, pos.X, pos.Y);
+            }
         );
     }
 
@@ -87,10 +90,7 @@ public class SpatialHashSystem(ILogger<SpatialHashSystem>? logger = null) : Base
     /// <param name="mapId">The map identifier.</param>
     /// <param name="bounds">The bounding rectangle in tile coordinates.</param>
     /// <returns>Collection of entities within the bounds.</returns>
-    public IEnumerable<Entity> GetEntitiesInBounds(
-        int mapId,
-        Rectangle bounds
-    )
+    public IEnumerable<Entity> GetEntitiesInBounds(int mapId, Rectangle bounds)
     {
         // Return entities from both static and dynamic hashes
         return _staticHash

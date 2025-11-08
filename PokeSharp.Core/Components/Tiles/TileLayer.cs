@@ -21,5 +21,5 @@ public enum TileLayer
     ///     Overhead layer - rendered on top (layerDepth 0.05).
     ///     Used for roofs, overhangs, bridge tops.
     /// </summary>
-    Overhead = 2
+    Overhead = 2,
 }

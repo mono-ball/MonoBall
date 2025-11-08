@@ -41,7 +41,8 @@ public class TypeRegistry<T>(string dataPath, ILogger logger) : IAsyncDisposable
         foreach (var script in _scripts.Values)
             if (script is IAsyncDisposable asyncDisposable)
                 await asyncDisposable.DisposeAsync();
-            else if (script is IDisposable disposable) disposable.Dispose();
+            else if (script is IDisposable disposable)
+                disposable.Dispose();
 
         Clear();
         GC.SuppressFinalize(this);
@@ -113,7 +114,7 @@ public class TypeRegistry<T>(string dataPath, ILogger logger) : IAsyncDisposable
         {
             PropertyNameCaseInsensitive = true,
             ReadCommentHandling = JsonCommentHandling.Skip,
-            AllowTrailingCommas = true
+            AllowTrailingCommas = true,
         };
 
         var definition = JsonSerializer.Deserialize<T>(json, options);

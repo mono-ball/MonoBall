@@ -39,7 +39,7 @@ public class PlayerFactory(
             Zoom = 3.0f,
             TargetZoom = 3.0f,
             ZoomTransitionSpeed = 0.1f,
-            Position = new Vector2(x * 16, y * 16) // Start at player's position (grid to pixels)
+            Position = new Vector2(x * 16, y * 16), // Start at player's position (grid to pixels)
         };
 
         // Set map bounds on camera from MapInfo
@@ -56,7 +56,10 @@ public class PlayerFactory(
         var playerEntity = _entityFactory.SpawnFromTemplate(
             "player",
             _world,
-            builder => { builder.OverrideComponent(new Position(x, y)); }
+            builder =>
+            {
+                builder.OverrideComponent(new Position(x, y));
+            }
         );
 
         // Add Camera component (not in template as it's created per-instance)

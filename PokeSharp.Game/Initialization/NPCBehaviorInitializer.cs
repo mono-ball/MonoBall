@@ -24,7 +24,8 @@ public class NPCBehaviorInitializer(
     NpcApiService npcApi,
     MapApiService mapApi,
     GameStateApiService gameStateApi,
-    IWorldApi worldApi
+    DialogueApiService dialogueApi,
+    EffectApiService effectApi
 )
 {
     /// <summary>
@@ -90,7 +91,8 @@ public class NPCBehaviorInitializer(
                 npcApi,
                 mapApi,
                 gameStateApi,
-                worldApi
+                dialogueApi,
+                effectApi
             );
             npcBehaviorSystem.SetBehaviorRegistry(behaviorRegistry);
             systemManager.RegisterSystem(npcBehaviorSystem);

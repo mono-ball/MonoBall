@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 using PokeSharp.Core.Events;
-using PokeSharp.Scripting.Events;
+using PokeSharp.Core.Types.Events;
 
 namespace PokeSharp.Scripting.Services;
 
@@ -37,13 +37,13 @@ public sealed class EventBasedDialogueSystem : IDialogueSystem
             return;
         }
 
-        var dialogueEvent = new DialogueRequestEvent
+        var dialogueEvent = new DialogueRequestedEvent
         {
             TypeId = "dialogue-system",
             Timestamp = _gameTime,
             Message = message,
             SpeakerName = speakerName,
-            Priority = priority
+            Priority = priority,
         };
 
         _eventBus.Publish(dialogueEvent);

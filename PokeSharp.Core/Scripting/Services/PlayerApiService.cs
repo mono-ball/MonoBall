@@ -53,7 +53,8 @@ public class PlayerApiService(World world, ILogger<PlayerApiService> logger) : I
 
     public void GiveMoney(int amount)
     {
-        if (amount < 0) throw new ArgumentException("Amount must be positive", nameof(amount));
+        if (amount < 0)
+            throw new ArgumentException("Amount must be positive", nameof(amount));
 
         var playerEntity = GetPlayerEntity();
         if (playerEntity.HasValue && _world.Has<Player>(playerEntity.Value))
@@ -70,7 +71,8 @@ public class PlayerApiService(World world, ILogger<PlayerApiService> logger) : I
 
     public bool TakeMoney(int amount)
     {
-        if (amount < 0) throw new ArgumentException("Amount must be positive", nameof(amount));
+        if (amount < 0)
+            throw new ArgumentException("Amount must be positive", nameof(amount));
 
         var playerEntity = GetPlayerEntity();
         if (playerEntity.HasValue && _world.Has<Player>(playerEntity.Value))
@@ -174,7 +176,10 @@ public class PlayerApiService(World world, ILogger<PlayerApiService> logger) : I
 
         _world.Query(
             in query,
-            entity => { playerEntity = entity; }
+            entity =>
+            {
+                playerEntity = entity;
+            }
         );
 
         return playerEntity;

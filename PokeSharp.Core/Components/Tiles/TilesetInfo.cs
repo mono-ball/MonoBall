@@ -85,11 +85,6 @@ public struct TilesetInfo
         var tileX = localId % TilesPerRow;
         var tileY = localId / TilesPerRow;
 
-        return new Rectangle(
-            tileX * TileWidth,
-            tileY * TileHeight,
-            TileWidth,
-            TileHeight
-        );
+        return new Rectangle(tileX * TileWidth, tileY * TileHeight, TileWidth, TileHeight);
     }
 }

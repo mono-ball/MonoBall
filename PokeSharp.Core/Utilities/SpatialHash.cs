@@ -145,7 +145,8 @@ public class SpatialHash
     public int GetOccupiedPositionCount()
     {
         var count = 0;
-        foreach (var mapGrid in _grid.Values) count += mapGrid.Count;
+        foreach (var mapGrid in _grid.Values)
+            count += mapGrid.Count;
         return count;
     }
 }

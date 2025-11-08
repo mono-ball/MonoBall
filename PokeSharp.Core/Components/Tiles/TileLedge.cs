@@ -46,7 +46,7 @@ public struct TileLedge
             Direction.Down => JumpDirection == Direction.Up,
             Direction.Left => JumpDirection == Direction.Right,
             Direction.Right => JumpDirection == Direction.Left,
-            _ => false
+            _ => false,
         };
     }
 }

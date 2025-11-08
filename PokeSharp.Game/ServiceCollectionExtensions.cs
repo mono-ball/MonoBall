@@ -60,6 +60,10 @@ public static class ServiceCollectionExtensions
             return new EventBus(logger);
         });
 
+        // API Test Event Subscriber (for Phase 1 validation)
+        services.AddSingleton<ApiTestEventSubscriber>();
+        services.AddSingleton<ApiTestInitializer>();
+
         // Abstract Factory Pattern: Graphics services that depend on GraphicsDevice
         // The factory allows deferred creation of AssetManager and MapLoader until
         // GraphicsDevice is available at runtime (in PokeSharpGame.Initialize)
@@ -77,7 +81,9 @@ public static class ServiceCollectionExtensions
             return new MapApiService(world, logger);
         });
         services.AddSingleton<GameStateApiService>();
-        services.AddSingleton<IWorldApi, WorldApi>();
+        services.AddSingleton<DialogueApiService>();
+        services.AddSingleton<EffectApiService>();
+        // WorldApi removed - scripts now use domain APIs directly via ScriptContext
 
         // Scripting Service
         services.AddSingleton(sp =>
@@ -87,7 +93,9 @@ public static class ServiceCollectionExtensions
             var npcApi = sp.GetRequiredService<NpcApiService>();
             var mapApi = sp.GetRequiredService<MapApiService>();
             var gameStateApi = sp.GetRequiredService<GameStateApiService>();
-            var worldApi = sp.GetRequiredService<IWorldApi>();
+            var dialogueApi = sp.GetRequiredService<DialogueApiService>();
+            var effectApi = sp.GetRequiredService<EffectApiService>();
+            // worldApi parameter removed - no longer needed
             return new ScriptService(
                 "Assets/Scripts",
                 logger,
@@ -95,7 +103,8 @@ public static class ServiceCollectionExtensions
                 npcApi,
                 mapApi,
                 gameStateApi,
-                worldApi
+                dialogueApi,
+                effectApi
             );
         });
 

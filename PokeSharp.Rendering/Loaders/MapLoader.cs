@@ -244,7 +244,7 @@ public class MapLoader(
             0 => "Ground",
             1 => "Objects",
             2 => "Overhead",
-            _ => null
+            _ => null,
         };
 
         if (layerName == null)
@@ -275,19 +275,19 @@ public class MapLoader(
                     "up" => "tile/ledge/up",
                     "left" => "tile/ledge/left",
                     "right" => "tile/ledge/right",
-                    _ => null
+                    _ => null,
                 },
                 not null when !string.IsNullOrEmpty(ledgeValue.ToString()) => ledgeValue
-                        .ToString()!
-                        .ToLower() switch
-                    {
-                        "down" => "tile/ledge/down",
-                        "up" => "tile/ledge/up",
-                        "left" => "tile/ledge/left",
-                        "right" => "tile/ledge/right",
-                        _ => null
-                    },
-                _ => null
+                    .ToString()!
+                    .ToLower() switch
+                {
+                    "down" => "tile/ledge/down",
+                    "up" => "tile/ledge/up",
+                    "left" => "tile/ledge/left",
+                    "right" => "tile/ledge/right",
+                    _ => null,
+                },
+                _ => null,
             };
 
         // Check for solid wall (but not ledge)
@@ -297,10 +297,11 @@ public class MapLoader(
             {
                 bool b => b,
                 string s => bool.TryParse(s, out var result) && result,
-                _ => false
+                _ => false,
             };
 
-            if (isSolid) return "tile/wall";
+            if (isSolid)
+                return "tile/wall";
         }
 
         // Check for encounter zone (grass)
@@ -310,10 +311,11 @@ public class MapLoader(
             {
                 int i => i,
                 string s when int.TryParse(s, out var result) => result,
-                _ => 0
+                _ => 0,
             };
 
-            if (encounterRate > 0) return "tile/grass";
+            if (encounterRate > 0)
+                return "tile/grass";
         }
 
         // Default ground tile
@@ -402,7 +404,7 @@ public class MapLoader(
                         {
                             bool b => b,
                             string s => bool.TryParse(s, out var result) && result,
-                            _ => false
+                            _ => false,
                         };
                     else if (isLedge)
                         isSolid = true;
@@ -417,7 +419,7 @@ public class MapLoader(
                     var ledgeDir = ledgeValue switch
                     {
                         string s => s,
-                        _ => ledgeValue?.ToString()
+                        _ => ledgeValue?.ToString(),
                     };
 
                     if (!string.IsNullOrEmpty(ledgeDir))
@@ -428,7 +430,7 @@ public class MapLoader(
                             "up" => Direction.Up,
                             "left" => Direction.Left,
                             "right" => Direction.Right,
-                            _ => Direction.None
+                            _ => Direction.None,
                         };
 
                         if (jumpDirection != Direction.None)
@@ -543,7 +545,7 @@ public class MapLoader(
                                 "down" => Direction.Down,
                                 "left" => Direction.Left,
                                 "right" => Direction.Right,
-                                _ => Direction.Down
+                                _ => Direction.Down,
                             };
                             builder.OverrideComponent(direction);
                         }

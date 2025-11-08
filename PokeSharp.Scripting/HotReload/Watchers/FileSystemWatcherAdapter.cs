@@ -44,7 +44,7 @@ public class FileSystemWatcherAdapter : IScriptWatcher
                 NotifyFilter =
                     NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.Size,
                 EnableRaisingEvents = false,
-                IncludeSubdirectories = true
+                IncludeSubdirectories = true,
             };
 
             _watcher.Changed += OnFileChanged;
@@ -72,7 +72,7 @@ public class FileSystemWatcherAdapter : IScriptWatcher
                 {
                     Exception = ex,
                     Message = "Failed to start FileSystemWatcher",
-                    IsCritical = true
+                    IsCritical = true,
                 }
             );
             throw;
@@ -155,7 +155,8 @@ public class FileSystemWatcherAdapter : IScriptWatcher
                             await CheckStabilityAndNotify(e.FullPath, e.ChangeType.ToString());
 
                             // Remove and dispose the CancellationTokenSource
-                            if (_debounceTimers.TryRemove(e.FullPath, out var removedCts)) removedCts.Dispose();
+                            if (_debounceTimers.TryRemove(e.FullPath, out var removedCts))
+                                removedCts.Dispose();
                         }
                     }
                     catch (Exception ex)
@@ -185,7 +186,7 @@ public class FileSystemWatcherAdapter : IScriptWatcher
             {
                 Exception = e.GetException(),
                 Message = "FileSystemWatcher encountered an error",
-                IsCritical = false
+                IsCritical = false,
             }
         );
     }
@@ -237,7 +238,7 @@ public class FileSystemWatcherAdapter : IScriptWatcher
                         FilePath = filePath,
                         ChangeTime = DateTime.UtcNow,
                         FileSize = fileInfo.Length,
-                        ChangeType = changeType
+                        ChangeType = changeType,
                     }
                 );
 

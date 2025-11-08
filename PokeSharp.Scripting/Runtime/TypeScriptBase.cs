@@ -23,14 +23,14 @@ namespace PokeSharp.Scripting.Runtime;
 /// {
 ///     // ❌ WRONG - instance state will break with multiple entities
 ///     private int counter;
-/// 
+///
 ///     // ✅ CORRECT - use ScriptContext for state
 ///     protected override void OnTick(ScriptContext ctx, float deltaTime)
 ///     {
 ///         var counter = ctx.GetState&lt;int&gt;("counter");
 ///         counter++;
 ///         ctx.SetState("counter", counter);
-/// 
+///
 ///         // Access ECS world, entity, logger via context
 ///         var position = ctx.World.Get&lt;Position&gt;(ctx.Entity);
 ///         ctx.Logger?.LogInformation("Position: {Pos}", position);
@@ -56,18 +56,14 @@ public abstract class TypeScriptBase
     /// <remarks>
     ///     Use <c>ctx.SetState&lt;T&gt;(key, value)</c> to initialize persistent data.
     /// </remarks>
-    public virtual void OnInitialize(ScriptContext ctx)
-    {
-    }
+    public virtual void OnInitialize(ScriptContext ctx) { }
 
     /// <summary>
     ///     Called when the type is activated on an entity or globally.
     ///     Override to handle activation logic.
     /// </summary>
     /// <param name="ctx">Script execution context providing access to World, Entity, Logger, and state.</param>
-    public virtual void OnActivated(ScriptContext ctx)
-    {
-    }
+    public virtual void OnActivated(ScriptContext ctx) { }
 
     /// <summary>
     ///     Called every frame while the type is active.
@@ -75,18 +71,14 @@ public abstract class TypeScriptBase
     /// </summary>
     /// <param name="ctx">Script execution context providing access to World, Entity, Logger, and state.</param>
     /// <param name="deltaTime">Time elapsed since last frame (in seconds).</param>
-    public virtual void OnTick(ScriptContext ctx, float deltaTime)
-    {
-    }
+    public virtual void OnTick(ScriptContext ctx, float deltaTime) { }
 
     /// <summary>
     ///     Called when the type is deactivated from an entity or globally.
     ///     Override to handle cleanup logic.
     /// </summary>
     /// <param name="ctx">Script execution context providing access to World, Entity, Logger, and state.</param>
-    public virtual void OnDeactivated(ScriptContext ctx)
-    {
-    }
+    public virtual void OnDeactivated(ScriptContext ctx) { }
 
     // ============================================================================
     // Helper Methods (Static - No Instance State)
@@ -123,12 +115,12 @@ public abstract class TypeScriptBase
     /// <summary>
     ///     Show a message to the player via the dialogue system.
     /// </summary>
-    /// <param name="ctx">Script execution context providing access to services.</param>
+    /// <param name="ctx">Script execution context providing access to domain services.</param>
     /// <param name="message">The message text to display.</param>
     /// <param name="speakerName">Optional speaker name for dialogue attribution.</param>
     /// <param name="priority">Display priority (higher values show first). Default is 0.</param>
     /// <remarks>
-    ///     This method publishes a DialogueRequestEvent to the event bus, allowing UI systems
+    ///     This method uses the Dialogue API directly to show messages, allowing UI systems
     ///     to subscribe and display messages in their preferred style (dialogue box, notification, etc.).
     ///     If no dialogue system is registered, the message is logged as a fallback.
     /// </remarks>
@@ -146,7 +138,8 @@ public abstract class TypeScriptBase
         int priority = 0
     )
     {
-        if (ctx == null) throw new ArgumentNullException(nameof(ctx));
+        if (ctx == null)
+            throw new ArgumentNullException(nameof(ctx));
 
         if (string.IsNullOrWhiteSpace(message))
         {
@@ -156,21 +149,7 @@ public abstract class TypeScriptBase
 
         try
         {
-            // Get the dialogue system from ScriptContext services
-            // This uses dependency injection - the system is provided by the game host
-            var dialogueSystem = ctx.WorldApi as IDialogueSystem;
-
-            if (dialogueSystem != null)
-                dialogueSystem.ShowMessage(message, speakerName, priority);
-            else
-                // Fallback: Log the message if no dialogue system is registered
-                // This ensures scripts don't break even if the system isn't set up yet
-                ctx.Logger?.LogInformation(
-                    "[Script Message] {Message} (Speaker: {Speaker}, Priority: {Priority})",
-                    message,
-                    speakerName ?? "None",
-                    priority
-                );
+            ctx.Dialogue.ShowMessage(message, speakerName, priority);
         }
         catch (Exception ex)
         {
@@ -186,14 +165,14 @@ public abstract class TypeScriptBase
     /// <summary>
     ///     Spawn a visual effect at a position via the effect system.
     /// </summary>
-    /// <param name="ctx">Script execution context providing access to services.</param>
+    /// <param name="ctx">Script execution context providing access to domain services.</param>
     /// <param name="effectId">The effect identifier (effect name or type).</param>
     /// <param name="position">The world position to spawn at (in grid coordinates).</param>
     /// <param name="duration">Duration in seconds (0 for one-shot effects). Default is 0.</param>
     /// <param name="scale">Scale multiplier for the effect. Default is 1.0.</param>
     /// <param name="tint">Optional color tint for the effect. Default is null (no tint).</param>
     /// <remarks>
-    ///     This method publishes an EffectRequestEvent to the event bus, allowing particle systems,
+    ///     This method uses the Effects API directly to spawn effects, allowing particle systems,
     ///     sprite animators, or shader effects to subscribe and render the effect.
     ///     If no effect system is registered, the request is logged as a fallback.
     /// </remarks>
@@ -213,7 +192,8 @@ public abstract class TypeScriptBase
         Color? tint = null
     )
     {
-        if (ctx == null) throw new ArgumentNullException(nameof(ctx));
+        if (ctx == null)
+            throw new ArgumentNullException(nameof(ctx));
 
         if (string.IsNullOrWhiteSpace(effectId))
         {
@@ -229,24 +209,7 @@ public abstract class TypeScriptBase
 
         try
         {
-            // Get the effect system from ScriptContext services
-            // This uses dependency injection - the system is provided by the game host
-            var effectSystem = ctx.WorldApi as IEffectSystem;
-
-            if (effectSystem != null)
-                effectSystem.SpawnEffect(effectId, position, duration, scale, tint);
-            else
-                // Fallback: Log the effect request if no effect system is registered
-                // This ensures scripts don't break even if the system isn't set up yet
-                ctx.Logger?.LogDebug(
-                    "[Script Effect] {EffectId} at ({X}, {Y}) (Duration: {Duration:F2}s, Scale: {Scale:F2}, Tint: {Tint})",
-                    effectId,
-                    position.X,
-                    position.Y,
-                    duration,
-                    scale,
-                    tint?.ToString() ?? "None"
-                );
+            ctx.Effects.SpawnEffect(effectId, position, duration, scale, tint);
         }
         catch (Exception ex)
         {

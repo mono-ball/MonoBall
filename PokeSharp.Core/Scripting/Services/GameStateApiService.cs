@@ -17,7 +17,8 @@ public class GameStateApiService(ILogger<GameStateApiService> logger) : IGameSta
 
     public bool GetFlag(string flagId)
     {
-        if (string.IsNullOrWhiteSpace(flagId)) return false;
+        if (string.IsNullOrWhiteSpace(flagId))
+            return false;
 
         return _flags.TryGetValue(flagId, out var value) && value;
     }
@@ -33,14 +34,16 @@ public class GameStateApiService(ILogger<GameStateApiService> logger) : IGameSta
 
     public bool FlagExists(string flagId)
     {
-        if (string.IsNullOrWhiteSpace(flagId)) return false;
+        if (string.IsNullOrWhiteSpace(flagId))
+            return false;
 
         return _flags.ContainsKey(flagId);
     }
 
     public string? GetVariable(string key)
     {
-        if (string.IsNullOrWhiteSpace(key)) return null;
+        if (string.IsNullOrWhiteSpace(key))
+            return null;
 
         return _variables.TryGetValue(key, out var value) ? value : null;
     }
@@ -56,14 +59,16 @@ public class GameStateApiService(ILogger<GameStateApiService> logger) : IGameSta
 
     public bool VariableExists(string key)
     {
-        if (string.IsNullOrWhiteSpace(key)) return false;
+        if (string.IsNullOrWhiteSpace(key))
+            return false;
 
         return _variables.ContainsKey(key);
     }
 
     public void DeleteVariable(string key)
     {
-        if (string.IsNullOrWhiteSpace(key)) return;
+        if (string.IsNullOrWhiteSpace(key))
+            return;
 
         _variables.Remove(key);
         _logger.LogDebug("Variable {Key} deleted", key);

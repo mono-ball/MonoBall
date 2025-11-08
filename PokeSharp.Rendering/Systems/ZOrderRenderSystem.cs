@@ -284,18 +284,27 @@ public class ZOrderRenderSystem(
         // Gather all tile textures
         world.Query(
             in _groundTileQuery,
-            (ref TileSprite sprite) => { texturesNeeded.Add(sprite.TilesetId); }
+            (ref TileSprite sprite) =>
+            {
+                texturesNeeded.Add(sprite.TilesetId);
+            }
         );
 
         // Gather all sprite textures
         world.Query(
             in _movingSpriteQuery,
-            (ref Sprite sprite) => { texturesNeeded.Add(sprite.TextureId); }
+            (ref Sprite sprite) =>
+            {
+                texturesNeeded.Add(sprite.TextureId);
+            }
         );
 
         world.Query(
             in _staticSpriteQuery,
-            (ref Sprite sprite) => { texturesNeeded.Add(sprite.TextureId); }
+            (ref Sprite sprite) =>
+            {
+                texturesNeeded.Add(sprite.TextureId);
+            }
         );
 
         // Preload all textures
@@ -399,7 +408,7 @@ public class ZOrderRenderSystem(
                         TileLayer.Ground => 0.95f, // Back
                         TileLayer.Object => CalculateYSortDepth(position.Y + TileSize), // Y-sorted
                         TileLayer.Overhead => 0.05f, // Front
-                        _ => 0.5f
+                        _ => 0.5f,
                     };
 
                     // Apply flip flags from Tiled

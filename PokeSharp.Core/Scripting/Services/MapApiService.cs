@@ -36,7 +36,8 @@ public class MapApiService(
             if (_world.Has<Collision>(entity))
             {
                 ref var collision = ref _world.Get<Collision>(entity);
-                if (collision.IsSolid) return false;
+                if (collision.IsSolid)
+                    return false;
             }
 
         return true;
@@ -89,7 +90,8 @@ public class MapApiService(
             in query,
             (ref MapInfo mapInfo) =>
             {
-                if (mapInfo.MapId == mapId) result = (mapInfo.Width, mapInfo.Height);
+                if (mapInfo.MapId == mapId)
+                    result = (mapInfo.Width, mapInfo.Height);
             }
         );
 
@@ -112,7 +114,10 @@ public class MapApiService(
 
         _world.Query(
             in query,
-            entity => { playerEntity = entity; }
+            entity =>
+            {
+                playerEntity = entity;
+            }
         );
 
         return playerEntity;

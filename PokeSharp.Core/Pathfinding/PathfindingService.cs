@@ -58,7 +58,8 @@ public class PathfindingService
             var current = _openSet.Dequeue();
 
             // Goal reached
-            if (current.Position == goal) return ReconstructPath(current);
+            if (current.Position == goal)
+                return ReconstructPath(current);
 
             _closedSet.Add(current.Position);
 

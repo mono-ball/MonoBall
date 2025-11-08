@@ -245,7 +245,8 @@ public class MovementSystem(ILogger<MovementSystem>? logger = null) : BaseSystem
         );
 
         // Remove in separate loop to avoid modifying collection during iteration
-        foreach (var entity in _entitiesToRemove) world.Remove<MovementRequest>(entity);
+        foreach (var entity in _entitiesToRemove)
+            world.Remove<MovementRequest>(entity);
     }
 
     /// <summary>

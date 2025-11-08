@@ -68,7 +68,7 @@ public class VersionedScriptCache
                 {
                     var newEntry = new ScriptCacheEntry(newVersion, newType)
                     {
-                        PreviousVersion = oldEntry // Link to previous for rollback
+                        PreviousVersion = oldEntry, // Link to previous for rollback
                     };
 
                     // OPTIMIZATION: Prune version history to MaxHistoryDepth using LRU strategy
@@ -101,7 +101,7 @@ public class VersionedScriptCache
             (_, oldEntry) =>
                 new ScriptCacheEntry(version, type)
                 {
-                    PreviousVersion = oldEntry.PreviousVersion // Preserve rollback chain
+                    PreviousVersion = oldEntry.PreviousVersion, // Preserve rollback chain
                 }
         );
     }
@@ -273,7 +273,7 @@ public class VersionedScriptCache
                 IsInstantiated = kvp.Value.IsInstantiated,
                 LastUpdated = kvp.Value.LastUpdated,
                 HasPreviousVersion = kvp.Value.PreviousVersion != null,
-                PreviousVersionNumber = kvp.Value.PreviousVersion?.Version
+                PreviousVersionNumber = kvp.Value.PreviousVersion?.Version,
             })
             .ToList();
     }
@@ -325,7 +325,8 @@ public class VersionedScriptCache
         }
 
         // Sever the chain at max depth to allow GC of older versions
-        if (current.PreviousVersion != null) current.PreviousVersion = null;
+        if (current.PreviousVersion != null)
+            current.PreviousVersion = null;
     }
 
     /// <summary>

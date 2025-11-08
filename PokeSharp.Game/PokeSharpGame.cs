@@ -24,6 +24,8 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game, IAsyncDisposable
     private readonly TypeRegistry<BehaviorDefinition> _behaviorRegistry;
     private readonly IEntityFactoryService _entityFactory;
     private readonly GameStateApiService _gameStateApi;
+    private readonly DialogueApiService _dialogueApi;
+    private readonly EffectApiService _effectApi;
     private readonly GraphicsDeviceManager _graphics;
     private readonly InputManager _inputManager;
     private readonly ILogger<PokeSharpGame> _logger;
@@ -38,7 +40,8 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game, IAsyncDisposable
     private readonly ScriptService _scriptService;
     private readonly SystemManager _systemManager;
     private readonly World _world;
-    private readonly IWorldApi _worldApi;
+    private readonly ApiTestInitializer _apiTestInitializer;
+    private readonly ApiTestEventSubscriber _apiTestSubscriber;
 
     private GameInitializer _gameInitializer = null!;
     private MapInitializer _mapInitializer = null!;
@@ -62,7 +65,10 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game, IAsyncDisposable
         NpcApiService npcApi,
         MapApiService mapApiService,
         GameStateApiService gameStateApi,
-        IWorldApi worldApi
+        DialogueApiService dialogueApi,
+        EffectApiService effectApi,
+        ApiTestInitializer apiTestInitializer,
+        ApiTestEventSubscriber apiTestSubscriber
     )
     {
         _logger = logger;
@@ -79,7 +85,12 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game, IAsyncDisposable
         _npcApi = npcApi;
         _mapApiService = mapApiService;
         _gameStateApi = gameStateApi;
-        _worldApi = worldApi;
+        _dialogueApi = dialogueApi;
+        _effectApi = effectApi;
+        _apiTestInitializer = apiTestInitializer ?? throw new ArgumentNullException(nameof(apiTestInitializer));
+        _apiTestSubscriber = apiTestSubscriber ?? throw new ArgumentNullException(nameof(apiTestSubscriber));
+
+        _logger.LogInformation("API test event subscriber initialized");
 
         _graphics = new GraphicsDeviceManager(this);
         Content.RootDirectory = "Content";
@@ -98,10 +109,13 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game, IAsyncDisposable
     /// </summary>
     public async ValueTask DisposeAsync()
     {
-        if (_scriptService is IAsyncDisposable scriptServiceDisposable) await scriptServiceDisposable.DisposeAsync();
+        if (_scriptService is IAsyncDisposable scriptServiceDisposable)
+            await scriptServiceDisposable.DisposeAsync();
 
-        if (_behaviorRegistry is IAsyncDisposable registryDisposable) await registryDisposable.DisposeAsync();
+        if (_behaviorRegistry is IAsyncDisposable registryDisposable)
+            await registryDisposable.DisposeAsync();
 
+        _apiTestSubscriber?.Dispose();
         _world?.Dispose();
 
         GC.SuppressFinalize(this);
@@ -160,7 +174,8 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game, IAsyncDisposable
             _npcApi,
             _mapApiService,
             _gameStateApi,
-            _worldApi
+            _dialogueApi,
+            _effectApi
         );
 
         // Initialize NPC behavior system
@@ -176,6 +191,10 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game, IAsyncDisposable
             _graphics.PreferredBackBufferWidth,
             _graphics.PreferredBackBufferHeight
         );
+
+        // Run Phase 1 API validation tests
+        _logger.LogInformation("Running Phase 1 API validation tests...");
+        _ = _apiTestInitializer.RunApiTestAsync(); // Fire and forget
     }
 
     /// <summary>
@@ -227,7 +246,11 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game, IAsyncDisposable
     /// </summary>
     protected override void Dispose(bool disposing)
     {
-        if (disposing) _world?.Dispose();
+        if (disposing)
+        {
+            _apiTestSubscriber?.Dispose();
+            _world?.Dispose();
+        }
 
         base.Dispose(disposing);
     }

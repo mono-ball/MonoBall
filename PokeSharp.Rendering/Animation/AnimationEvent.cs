@@ -11,9 +11,7 @@ public class AnimationEvent
     /// <summary>
     ///     Initializes a new instance of the AnimationEvent class.
     /// </summary>
-    public AnimationEvent()
-    {
-    }
+    public AnimationEvent() { }
 
     /// <summary>
     ///     Initializes a new instance of the AnimationEvent class with a name and callback.

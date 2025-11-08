@@ -106,8 +106,8 @@ public class AssetManager(
             if (successful > 0)
                 _logger?.LogInformation(
                     "[green]Loaded [cyan]{Count}[/] tilesets"
-                    + (failed > 0 ? " [dim]({Failed} failed)[/]" : "")
-                    + "[/]",
+                        + (failed > 0 ? " [dim]({Failed} failed)[/]" : "")
+                        + "[/]",
                     successful,
                     failed
                 );
@@ -139,8 +139,8 @@ public class AssetManager(
             if (successful > 0)
                 _logger?.LogInformation(
                     "[green]Loaded [cyan]{Count}[/] sprites"
-                    + (failed > 0 ? " [dim]({Failed} failed)[/]" : "")
-                    + "[/]",
+                        + (failed > 0 ? " [dim]({Failed} failed)[/]" : "")
+                        + "[/]",
                     successful,
                     failed
                 );
@@ -176,7 +176,8 @@ public class AssetManager(
         _logger?.LogTextureLoaded(id, elapsedMs, texture.Width, texture.Height);
 
         // Warn about slow texture loads (>100ms)
-        if (elapsedMs > 100.0) _logger?.LogSlowTextureLoad(id, elapsedMs);
+        if (elapsedMs > 100.0)
+            _logger?.LogSlowTextureLoad(id, elapsedMs);
     }
 
     /// <summary>

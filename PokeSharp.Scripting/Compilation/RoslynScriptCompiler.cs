@@ -79,7 +79,7 @@ public class RoslynScriptCompiler : IScriptCompiler
             return new CompilationResult
             {
                 Success = false,
-                Errors = new List<string> { "File path cannot be null or empty" }
+                Errors = new List<string> { "File path cannot be null or empty" },
             };
 
         if (!File.Exists(filePath))
@@ -88,7 +88,7 @@ public class RoslynScriptCompiler : IScriptCompiler
             return new CompilationResult
             {
                 Success = false,
-                Errors = new List<string> { $"File not found: {filePath}" }
+                Errors = new List<string> { $"File not found: {filePath}" },
             };
         }
 
@@ -113,7 +113,7 @@ public class RoslynScriptCompiler : IScriptCompiler
                     Success = true,
                     CompiledType = cached.CompiledType,
                     Errors = new List<string>(),
-                    Diagnostics = new List<CompilationDiagnostic>()
+                    Diagnostics = new List<CompilationDiagnostic>(),
                 };
             }
 
@@ -155,10 +155,7 @@ public class RoslynScriptCompiler : IScriptCompiler
                 _logger.LogError(
                     "Compilation failed for {FileName} with {ErrorCount} errors",
                     Path.GetFileName(filePath),
-                    diagnostics.Count(d =>
-                        d.Severity
-                        == DiagnosticSeverity.Error
-                    )
+                    diagnostics.Count(d => d.Severity == DiagnosticSeverity.Error)
                 );
 
                 return new CompilationResult
@@ -166,13 +163,10 @@ public class RoslynScriptCompiler : IScriptCompiler
                     Success = false,
                     CompiledType = null,
                     Errors = diagnostics
-                        .Where(d =>
-                            d.Severity
-                            == DiagnosticSeverity.Error
-                        )
+                        .Where(d => d.Severity == DiagnosticSeverity.Error)
                         .Select(d => d.Message)
                         .ToList(),
-                    Diagnostics = diagnostics
+                    Diagnostics = diagnostics,
                 };
             }
 
@@ -195,9 +189,9 @@ public class RoslynScriptCompiler : IScriptCompiler
                     CompiledType = null,
                     Errors = new List<string>
                     {
-                        "No public class inheriting from TypeScriptBase found in script"
+                        "No public class inheriting from TypeScriptBase found in script",
                     },
-                    Diagnostics = diagnostics
+                    Diagnostics = diagnostics,
                 };
             }
 
@@ -206,7 +200,7 @@ public class RoslynScriptCompiler : IScriptCompiler
             {
                 CompiledType = compiledType,
                 ContentHash = contentHash,
-                CompiledAt = DateTime.UtcNow
+                CompiledAt = DateTime.UtcNow,
             };
             _compilationCache[contentHash] = cachedCompilation;
 
@@ -222,7 +216,7 @@ public class RoslynScriptCompiler : IScriptCompiler
                 Success = true,
                 CompiledType = compiledType,
                 Errors = new List<string>(),
-                Diagnostics = diagnostics
+                Diagnostics = diagnostics,
             };
         }
         catch (Exception ex)
@@ -233,7 +227,7 @@ public class RoslynScriptCompiler : IScriptCompiler
                 Success = false,
                 CompiledType = null,
                 Errors = new List<string> { $"Compilation exception: {ex.Message}" },
-                Diagnostics = new List<CompilationDiagnostic>()
+                Diagnostics = new List<CompilationDiagnostic>(),
             };
         }
     }
@@ -256,7 +250,8 @@ public class RoslynScriptCompiler : IScriptCompiler
         var sb = new StringBuilder();
 
         // Add global usings
-        foreach (var globalUsing in _globalUsings) sb.AppendLine($"using {globalUsing};");
+        foreach (var globalUsing in _globalUsings)
+            sb.AppendLine($"using {globalUsing};");
 
         sb.AppendLine(); // Blank line for readability
         sb.Append(scriptContent);
@@ -284,7 +279,7 @@ public class RoslynScriptCompiler : IScriptCompiler
                     Line = lineSpan.StartLinePosition.Line + 1, // 1-based line numbers
                     Column = lineSpan.StartLinePosition.Character + 1, // 1-based columns
                     Code = diagnostic.Id,
-                    FilePath = lineSpan.Path
+                    FilePath = lineSpan.Path,
                 }
             );
         }
@@ -301,15 +296,11 @@ public class RoslynScriptCompiler : IScriptCompiler
     {
         return roslynSeverity switch
         {
-            Microsoft.CodeAnalysis.DiagnosticSeverity.Hidden => DiagnosticSeverity
-                .Hidden,
-            Microsoft.CodeAnalysis.DiagnosticSeverity.Info => DiagnosticSeverity
-                .Info,
-            Microsoft.CodeAnalysis.DiagnosticSeverity.Warning => DiagnosticSeverity
-                .Warning,
-            Microsoft.CodeAnalysis.DiagnosticSeverity.Error => DiagnosticSeverity
-                .Error,
-            _ => DiagnosticSeverity.Hidden
+            Microsoft.CodeAnalysis.DiagnosticSeverity.Hidden => DiagnosticSeverity.Hidden,
+            Microsoft.CodeAnalysis.DiagnosticSeverity.Info => DiagnosticSeverity.Info,
+            Microsoft.CodeAnalysis.DiagnosticSeverity.Warning => DiagnosticSeverity.Warning,
+            Microsoft.CodeAnalysis.DiagnosticSeverity.Error => DiagnosticSeverity.Error,
+            _ => DiagnosticSeverity.Hidden,
         };
     }
 
@@ -352,16 +343,10 @@ public class RoslynScriptCompiler : IScriptCompiler
             MetadataReference.CreateFromFile(typeof(Enumerable).Assembly.Location), // System.Linq
             MetadataReference.CreateFromFile(typeof(List<>).Assembly.Location), // System.Collections
             MetadataReference.CreateFromFile(typeof(World).Assembly.Location), // Arch.Core
-            MetadataReference.CreateFromFile(
-                typeof(Point).Assembly.Location
-            ), // MonoGame.Framework
+            MetadataReference.CreateFromFile(typeof(Point).Assembly.Location), // MonoGame.Framework
             MetadataReference.CreateFromFile(typeof(TypeScriptBase).Assembly.Location), // PokeSharp.Scripting
-            MetadataReference.CreateFromFile(
-                typeof(Direction).Assembly.Location
-            ), // PokeSharp.Core
-            MetadataReference.CreateFromFile(
-                typeof(ILogger).Assembly.Location
-            ) // Microsoft.Extensions.Logging.Abstractions
+            MetadataReference.CreateFromFile(typeof(Direction).Assembly.Location), // PokeSharp.Core
+            MetadataReference.CreateFromFile(typeof(ILogger).Assembly.Location), // Microsoft.Extensions.Logging.Abstractions
         };
 
         // Add runtime references for .NET 9
@@ -373,13 +358,14 @@ public class RoslynScriptCompiler : IScriptCompiler
                 "System.Runtime.dll",
                 "System.Collections.dll",
                 "System.Linq.dll",
-                "netstandard.dll"
+                "netstandard.dll",
             };
 
             foreach (var runtimeRef in runtimeRefs)
             {
                 var refPath = Path.Combine(runtimePath, runtimeRef);
-                if (File.Exists(refPath)) references.Add(MetadataReference.CreateFromFile(refPath));
+                if (File.Exists(refPath))
+                    references.Add(MetadataReference.CreateFromFile(refPath));
             }
         }
 
@@ -408,7 +394,7 @@ public class RoslynScriptCompiler : IScriptCompiler
             "PokeSharp.Core.Components.Player",
             "PokeSharp.Core.Components.Rendering",
             "PokeSharp.Core.Components.Tiles",
-            "PokeSharp.Core.Types"
+            "PokeSharp.Core.Types",
         };
     }
 
@@ -431,7 +417,7 @@ public class RoslynScriptCompiler : IScriptCompiler
             CachedEntries = _compilationCache.Count,
             TotalSize = _compilationCache.Sum(kvp =>
                 kvp.Value.CompiledType?.Assembly.GetName().Name?.Length ?? 0
-            )
+            ),
         };
     }
 }

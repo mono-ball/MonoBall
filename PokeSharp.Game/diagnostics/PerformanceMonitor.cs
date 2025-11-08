@@ -32,7 +32,8 @@ public class PerformanceMonitor(ILogger<PerformanceMonitor> logger)
         _frameTimeTracker.Add(frameTimeMs);
 
         // Warn about slow frames (>50% over budget)
-        if (frameTimeMs > TargetFrameTime * 1.5f) _logger.LogSlowFrame(frameTimeMs, TargetFrameTime);
+        if (frameTimeMs > TargetFrameTime * 1.5f)
+            _logger.LogSlowFrame(frameTimeMs, TargetFrameTime);
 
         // Log frame time statistics every 5 seconds (300 frames at 60fps)
         if (_frameCounter % PerformanceLogIntervalFrames == 0)
@@ -62,7 +63,8 @@ public class PerformanceMonitor(ILogger<PerformanceMonitor> logger)
         _logger.LogMemoryStatistics(totalMemoryMb, gen0, gen1, gen2);
 
         // Warn about high memory usage
-        if (totalMemoryMb > HighMemoryThresholdMb) _logger.LogHighMemoryUsage(totalMemoryMb, HighMemoryThresholdMb);
+        if (totalMemoryMb > HighMemoryThresholdMb)
+            _logger.LogHighMemoryUsage(totalMemoryMb, HighMemoryThresholdMb);
 
         // Warn about excessive GC activity (more than 10 collections per second)
         var gen0Delta = gen0 - _lastGen0Count;

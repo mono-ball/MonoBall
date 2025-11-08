@@ -24,7 +24,7 @@ namespace PokeSharp.Scripting.Runtime;
 ///     {
 ///         ctx.Logger.LogInformation("Entity has {HP} HP", health.Current);
 ///     }
-/// 
+///
 ///     // Use API services
 ///     var playerMoney = ctx.Player.GetMoney();
 ///     ctx.Logger.LogInformation("Player has {Money} money", playerMoney);
@@ -41,9 +41,9 @@ namespace PokeSharp.Scripting.Runtime;
 ///     {
 ///         // Process all players
 ///     }
-/// 
-///     // Use World API
-///     ctx.World.GiveMoney(100);
+///
+///     // Use domain APIs
+///     ctx.Player.GiveMoney(100);
 /// }
 /// </code>
 ///     </example>
@@ -62,7 +62,8 @@ public sealed class ScriptContext
     /// <param name="npcApi">NPC API service for NPC-related operations.</param>
     /// <param name="mapApi">Map API service for map queries and transitions.</param>
     /// <param name="gameStateApi">Game state API service for flags and variables.</param>
-    /// <param name="worldApi">World API service that composes all API services.</param>
+    /// <param name="dialogueApi">Dialogue API service for displaying messages.</param>
+    /// <param name="effectApi">Effect API service for spawning visual effects.</param>
     public ScriptContext(
         World world,
         Entity? entity,
@@ -71,7 +72,8 @@ public sealed class ScriptContext
         NpcApiService npcApi,
         MapApiService mapApi,
         GameStateApiService gameStateApi,
-        IWorldApi worldApi
+        DialogueApiService dialogueApi,
+        EffectApiService effectApi
     )
     {
         World = world ?? throw new ArgumentNullException(nameof(world));
@@ -83,7 +85,8 @@ public sealed class ScriptContext
         Npc = npcApi ?? throw new ArgumentNullException(nameof(npcApi));
         Map = mapApi ?? throw new ArgumentNullException(nameof(mapApi));
         GameState = gameStateApi ?? throw new ArgumentNullException(nameof(gameStateApi));
-        WorldApi = worldApi ?? throw new ArgumentNullException(nameof(worldApi));
+        Dialogue = dialogueApi ?? throw new ArgumentNullException(nameof(dialogueApi));
+        Effects = effectApi ?? throw new ArgumentNullException(nameof(effectApi));
     }
 
     #region Core Properties
@@ -181,20 +184,32 @@ public sealed class ScriptContext
     public GameStateApiService GameState { get; }
 
     /// <summary>
-    ///     Gets the World API service that provides a unified interface to all APIs.
+    ///     Gets the Dialogue API service for displaying messages and text.
     /// </summary>
     /// <remarks>
-    ///     This is a composed API that delegates to all domain-specific services.
-    ///     Use this when you want a single interface for all world operations.
+    ///     Use this to show dialogue boxes, messages, and text to the player.
     /// </remarks>
     /// <example>
     ///     <code>
-    /// ctx.WorldApi.GiveMoney(100);
-    /// ctx.WorldApi.SetFlag("event_triggered", true);
-    /// ctx.WorldApi.TransitionToMap(2, 5, 5);
+    /// ctx.Dialogue.ShowMessage("Hello, traveler!");
+    /// ctx.Dialogue.ShowDialogue(npcEntity, "Welcome to my shop.");
     /// </code>
     /// </example>
-    public IWorldApi WorldApi { get; }
+    public DialogueApiService Dialogue { get; }
+
+    /// <summary>
+    ///     Gets the Effects API service for spawning visual effects.
+    /// </summary>
+    /// <remarks>
+    ///     Use this to create visual effects, animations, and particles in the game world.
+    /// </remarks>
+    /// <example>
+    ///     <code>
+    /// ctx.Effects.SpawnEffect("explosion", x, y);
+    /// ctx.Effects.PlayAnimation(entity, "hit");
+    /// </code>
+    /// </example>
+    public EffectApiService Effects { get; }
 
     #endregion
 
@@ -250,13 +265,13 @@ public sealed class ScriptContext
         if (!_entity.HasValue)
             throw new InvalidOperationException(
                 $"Cannot get state of type '{typeof(T).Name}' for global script. "
-                + "Use TryGetState instead, or check IsEntityScript before calling."
+                    + "Use TryGetState instead, or check IsEntityScript before calling."
             );
 
         if (!World.Has<T>(_entity.Value))
             throw new InvalidOperationException(
                 $"Entity {_entity.Value.Id} does not have component '{typeof(T).Name}'. "
-                + "Use HasState or TryGetState to check existence first."
+                    + "Use HasState or TryGetState to check existence first."
             );
 
         return ref World.Get<T>(_entity.Value);
@@ -321,7 +336,7 @@ public sealed class ScriptContext
         if (!_entity.HasValue)
             throw new InvalidOperationException(
                 $"Cannot get or add state of type '{typeof(T).Name}' for global script. "
-                + "Use TryGetState or check IsEntityScript before calling."
+                    + "Use TryGetState or check IsEntityScript before calling."
             );
 
         var entity = _entity.Value;

@@ -138,7 +138,7 @@ public sealed class ConsoleLogger<T> : ILogger<T>
             LogLevel.Warning => "WARN ",
             LogLevel.Error => "ERROR",
             LogLevel.Critical => "CRIT ",
-            _ => "NONE "
+            _ => "NONE ",
         };
     }
 
@@ -152,7 +152,7 @@ public sealed class ConsoleLogger<T> : ILogger<T>
             LogLevel.Warning => "[yellow][[WARN ]][/]",
             LogLevel.Error => "[red bold][[ERROR]][/]",
             LogLevel.Critical => "[magenta bold][[CRIT ]][/]",
-            _ => "[white][[NONE ]][/]"
+            _ => "[white][[NONE ]][/]",
         };
     }
 
@@ -166,7 +166,7 @@ public sealed class ConsoleLogger<T> : ILogger<T>
             LogLevel.Warning => "yellow",
             LogLevel.Error => "red bold",
             LogLevel.Critical => "magenta bold",
-            _ => "white"
+            _ => "white",
         };
     }
 
@@ -194,7 +194,7 @@ public sealed class ConsoleLogger<T> : ILogger<T>
             "mediumorchid",
             "springgreen1",
             "gold1",
-            "hotpink"
+            "hotpink",
         };
 
         // Generate a consistent hash from the category name

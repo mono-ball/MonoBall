@@ -20,6 +20,8 @@ public class ScriptService : IAsyncDisposable
 {
     private readonly ScriptOptions _defaultOptions = ScriptCompilationOptions.GetDefaultOptions();
     private readonly GameStateApiService _gameStateApi;
+    private readonly DialogueApiService _dialogueApi;
+    private readonly EffectApiService _effectApi;
     private readonly ILogger<ScriptService> _logger;
     private readonly MapApiService _mapApi;
     private readonly NpcApiService _npcApi;
@@ -32,7 +34,6 @@ public class ScriptService : IAsyncDisposable
 
     private readonly ConcurrentDictionary<string, object> _scriptInstances = new();
     private readonly string _scriptsBasePath;
-    private readonly IWorldApi _worldApi;
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="ScriptService" /> class.
@@ -43,7 +44,8 @@ public class ScriptService : IAsyncDisposable
     /// <param name="npcApi">NPC API service.</param>
     /// <param name="mapApi">Map API service.</param>
     /// <param name="gameStateApi">Game state API service.</param>
-    /// <param name="worldApi">World API service.</param>
+    /// <param name="dialogueApi">Dialogue API service.</param>
+    /// <param name="effectApi">Effect API service.</param>
     public ScriptService(
         string scriptsBasePath,
         ILogger<ScriptService> logger,
@@ -51,7 +53,8 @@ public class ScriptService : IAsyncDisposable
         NpcApiService npcApi,
         MapApiService mapApi,
         GameStateApiService gameStateApi,
-        IWorldApi worldApi
+        DialogueApiService dialogueApi,
+        EffectApiService effectApi
     )
     {
         _scriptsBasePath =
@@ -61,7 +64,8 @@ public class ScriptService : IAsyncDisposable
         _npcApi = npcApi ?? throw new ArgumentNullException(nameof(npcApi));
         _mapApi = mapApi ?? throw new ArgumentNullException(nameof(mapApi));
         _gameStateApi = gameStateApi ?? throw new ArgumentNullException(nameof(gameStateApi));
-        _worldApi = worldApi ?? throw new ArgumentNullException(nameof(worldApi));
+        _dialogueApi = dialogueApi ?? throw new ArgumentNullException(nameof(dialogueApi));
+        _effectApi = effectApi ?? throw new ArgumentNullException(nameof(effectApi));
     }
 
     /// <summary>
@@ -77,7 +81,8 @@ public class ScriptService : IAsyncDisposable
             {
                 if (instance is IAsyncDisposable asyncDisposable)
                     await asyncDisposable.DisposeAsync();
-                else if (instance is IDisposable disposable) disposable.Dispose();
+                else if (instance is IDisposable disposable)
+                    disposable.Dispose();
             }
             catch (Exception ex)
             {
@@ -252,7 +257,8 @@ public class ScriptService : IAsyncDisposable
                 "Script instance cannot be null"
             );
 
-        if (world == null) throw new ArgumentNullException(nameof(world), "World cannot be null");
+        if (world == null)
+            throw new ArgumentNullException(nameof(world), "World cannot be null");
 
         // Validate script instance type
         if (scriptInstance is not TypeScriptBase scriptBase)
@@ -269,9 +275,9 @@ public class ScriptService : IAsyncDisposable
                 .GetMethod(
                     "OnInitialize",
                     BindingFlags.NonPublic
-                    | BindingFlags.Public
-                    | BindingFlags.Instance
-                    | BindingFlags.FlattenHierarchy
+                        | BindingFlags.Public
+                        | BindingFlags.Instance
+                        | BindingFlags.FlattenHierarchy
                 );
 
             if (initMethod == null)
@@ -280,8 +286,7 @@ public class ScriptService : IAsyncDisposable
                 );
 
             // Create ScriptContext for initialization (use NullLogger if no logger provided)
-            var effectiveLogger =
-                logger ?? NullLogger.Instance;
+            var effectiveLogger = logger ?? NullLogger.Instance;
             var context = new ScriptContext(
                 world,
                 entity,
@@ -290,7 +295,8 @@ public class ScriptService : IAsyncDisposable
                 _npcApi,
                 _mapApi,
                 _gameStateApi,
-                _worldApi
+                _dialogueApi,
+                _effectApi
             );
             initMethod.Invoke(scriptBase, new object[] { context });
 

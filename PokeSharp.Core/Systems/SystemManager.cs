@@ -184,7 +184,8 @@ public class SystemManager(ILogger<SystemManager>? logger = null)
             // Update metrics under lock
             lock (_lock)
             {
-                if (!_metrics.ContainsKey(system)) _metrics[system] = new SystemMetrics();
+                if (!_metrics.ContainsKey(system))
+                    _metrics[system] = new SystemMetrics();
 
                 var metrics = _metrics[system];
                 metrics.UpdateCount++;
@@ -219,7 +220,8 @@ public class SystemManager(ILogger<SystemManager>? logger = null)
         }
 
         // Log performance stats periodically (every 5 seconds at 60fps)
-        if (_frameCounter % 300 == 0) LogPerformanceStats();
+        if (_frameCounter % 300 == 0)
+            LogPerformanceStats();
     }
 
     private void LogPerformanceStats()

@@ -218,7 +218,7 @@ public class ScriptCacheEntry
             {
                 Instance = _instance, // Share same instance reference
                 LastUpdated = LastUpdated,
-                PreviousVersion = PreviousVersion
+                PreviousVersion = PreviousVersion,
             };
         }
     }

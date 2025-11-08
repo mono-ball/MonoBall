@@ -105,7 +105,7 @@ internal sealed class ConsoleLoggerFactoryImpl(LogLevel minLevel = LogLevel.Info
                 LogLevel.Warning => "[yellow]WARN [/]",
                 LogLevel.Error => "[red]ERROR[/]",
                 LogLevel.Critical => "[bold red]CRIT [/]",
-                _ => "[grey]NONE [/]"
+                _ => "[grey]NONE [/]",
             };
         }
 
