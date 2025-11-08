@@ -99,7 +99,6 @@ public class AnimationLibrary
     {
         const int frameWidth = 16;
         const int frameHeight = 16;
-        const float walkFrameDuration = 0.15f; // 6.67 FPS for walk cycle
 
         _logger?.LogInformation("Initializing default player animations...");
 

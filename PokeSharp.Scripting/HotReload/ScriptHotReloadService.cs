@@ -13,7 +13,6 @@ namespace PokeSharp.Scripting.HotReload;
 /// <summary>
 ///     Hot-reload service with automatic rollback on compilation failure.
 ///     Target: 100% uptime during script edits (zero NPC crashes from bad syntax).
-///
 ///     Features:
 ///     - Detailed compilation diagnostics with line numbers and error codes
 ///     - Automatic rollback to last known-good version on failure
@@ -22,7 +21,6 @@ namespace PokeSharp.Scripting.HotReload;
 ///     - Debouncing to prevent excessive recompilation
 ///     - Versioned cache with instant rollback capability
 ///     - Three-tier recovery: versioned cache → backup manager → emergency rollback
-///
 ///     Performance:
 ///     - Debouncing reduces file events by 70-90% in typical scenarios
 ///     - Average reload time: 100-500ms (target met)
@@ -47,7 +45,7 @@ public class ScriptHotReloadService : IDisposable
     private IScriptWatcher? _watcher;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ScriptHotReloadService"/> class.
+    ///     Initializes a new instance of the <see cref="ScriptHotReloadService" /> class.
     /// </summary>
     /// <param name="logger">Logger for hot-reload operations and diagnostics.</param>
     /// <param name="watcherFactory">Factory for creating file system watchers (optimized per platform).</param>
@@ -55,7 +53,10 @@ public class ScriptHotReloadService : IDisposable
     /// <param name="backupManager">Backup manager for persistent rollback across sessions.</param>
     /// <param name="notificationService">Service for displaying notifications to the user.</param>
     /// <param name="compiler">Compiler for recompiling changed scripts.</param>
-    /// <param name="debounceDelayMs">Debounce delay in milliseconds (default: 300ms). Prevents excessive recompilation during rapid edits.</param>
+    /// <param name="debounceDelayMs">
+    ///     Debounce delay in milliseconds (default: 300ms). Prevents excessive recompilation during
+    ///     rapid edits.
+    /// </param>
     public ScriptHotReloadService(
         ILogger<ScriptHotReloadService> logger,
         WatcherFactory watcherFactory,
@@ -149,7 +150,7 @@ public class ScriptHotReloadService : IDisposable
                 {
                     Type = NotificationType.Info,
                     Message = "Hot-reload enabled with auto-rollback",
-                    Details = $"Watching {scriptDirectory} for changes",
+                    Details = $"Watching {scriptDirectory} for changes"
                 }
             );
         }
@@ -184,7 +185,7 @@ public class ScriptHotReloadService : IDisposable
     }
 
     /// <summary>
-    /// Gets performance and reliability statistics for the hot-reload service.
+    ///     Gets performance and reliability statistics for the hot-reload service.
     /// </summary>
     /// <returns>Statistics including success rate, rollback rate, and performance metrics.</returns>
     public HotReloadStatistics GetStatistics()
@@ -195,18 +196,17 @@ public class ScriptHotReloadService : IDisposable
     }
 
     /// <summary>
-    /// Handles script file change events from the file system watcher.
-    /// Implements debouncing to prevent excessive recompilation during rapid edits.
+    ///     Handles script file change events from the file system watcher.
+    ///     Implements debouncing to prevent excessive recompilation during rapid edits.
     /// </summary>
     /// <remarks>
-    /// Debouncing strategy:
-    /// - Each file has its own debounce timer (per-file debouncing)
-    /// - When a change is detected, any existing timer for that file is cancelled
-    /// - A new timer starts for the configured delay (default 300ms)
-    /// - If another change occurs before the timer expires, the process repeats
-    /// - Only when the timer expires without interruption does compilation begin
-    ///
-    /// This approach reduces compilation events by 70-90% during typical editing sessions.
+    ///     Debouncing strategy:
+    ///     - Each file has its own debounce timer (per-file debouncing)
+    ///     - When a change is detected, any existing timer for that file is cancelled
+    ///     - A new timer starts for the configured delay (default 300ms)
+    ///     - If another change occurs before the timer expires, the process repeats
+    ///     - Only when the timer expires without interruption does compilation begin
+    ///     This approach reduces compilation events by 70-90% during typical editing sessions.
     /// </remarks>
     private async void OnScriptChanged(object? sender, ScriptChangedEventArgs e)
     {
@@ -251,21 +251,20 @@ public class ScriptHotReloadService : IDisposable
     }
 
     /// <summary>
-    /// Processes a script change after debouncing, with automatic rollback on compilation failure.
+    ///     Processes a script change after debouncing, with automatic rollback on compilation failure.
     /// </summary>
     /// <remarks>
-    /// Processing flow:
-    /// 1. Acquire lock to prevent concurrent reloads
-    /// 2. Create backup of current version before compilation
-    /// 3. Compile new version
-    /// 4. On success: Update cache, clear backup, notify success
-    /// 5. On failure: Rollback to previous version (3-tier strategy):
-    ///    - Tier 1: Versioned cache rollback (instant, no recompilation)
-    ///    - Tier 2: Backup manager restore (persistent across sessions)
-    ///    - Tier 3: Emergency rollback on unexpected errors
-    ///
-    /// The lock is acquired only at the start (not held across await) to prevent
-    /// concurrent modifications to the script cache while maintaining async safety.
+    ///     Processing flow:
+    ///     1. Acquire lock to prevent concurrent reloads
+    ///     2. Create backup of current version before compilation
+    ///     3. Compile new version
+    ///     4. On success: Update cache, clear backup, notify success
+    ///     5. On failure: Rollback to previous version (3-tier strategy):
+    ///     - Tier 1: Versioned cache rollback (instant, no recompilation)
+    ///     - Tier 2: Backup manager restore (persistent across sessions)
+    ///     - Tier 3: Emergency rollback on unexpected errors
+    ///     The lock is acquired only at the start (not held across await) to prevent
+    ///     concurrent modifications to the script cache while maintaining async safety.
     /// </remarks>
     private async Task ProcessScriptChangeAsync(ScriptChangedEventArgs e)
     {
@@ -299,7 +298,12 @@ public class ScriptHotReloadService : IDisposable
                 var currentType = ScriptCache.GetScriptType(typeId);
                 if (currentType != null)
                 {
-                    await _backupManager.CreateBackupAsync(typeId, currentType, instance, currentVersion);
+                    await _backupManager.CreateBackupAsync(
+                        typeId,
+                        currentType,
+                        instance,
+                        currentVersion
+                    );
                     _logger.LogDebug(
                         "Created backup for {TypeId} (version {Version}) before compilation",
                         typeId,
@@ -352,7 +356,7 @@ public class ScriptHotReloadService : IDisposable
                         TypeId = typeId,
                         Success = true,
                         Result = compileResult,
-                        CompiledType = compileResult.CompiledType,
+                        CompiledType = compileResult.CompiledType
                     }
                 );
 
@@ -362,7 +366,7 @@ public class ScriptHotReloadService : IDisposable
                         Type = NotificationType.Success,
                         Message = $"✓ Reloaded {typeId}",
                         Duration = sw.Elapsed,
-                        AffectedScripts = 1,
+                        AffectedScripts = 1
                     }
                 );
             }
@@ -389,7 +393,7 @@ public class ScriptHotReloadService : IDisposable
                     Type = NotificationType.Error,
                     Message = "Hot-reload error - emergency rollback attempted",
                     Details = ex.Message,
-                    IsAutoDismiss = false,
+                    IsAutoDismiss = false
                 }
             );
         }
@@ -442,7 +446,7 @@ public class ScriptHotReloadService : IDisposable
             {
                 TypeId = typeId,
                 Success = false,
-                Result = compileResult,
+                Result = compileResult
             }
         );
 
@@ -459,7 +463,7 @@ public class ScriptHotReloadService : IDisposable
                     Message = $"⚠ Compilation failed - rolled back {typeId}",
                     Details =
                         $"Previous version restored. Fix errors and save again.\n\n{errorSummary}",
-                    IsAutoDismiss = false,
+                    IsAutoDismiss = false
                 }
             );
         }
@@ -472,7 +476,7 @@ public class ScriptHotReloadService : IDisposable
                     Type = NotificationType.Error,
                     Message = $"✗ Compilation failed - NO BACKUP for {typeId}",
                     Details = $"This is the first version. Manual fix required.\n\n{errorSummary}",
-                    IsAutoDismiss = false,
+                    IsAutoDismiss = false
                 }
             );
         }
@@ -503,7 +507,7 @@ public class ScriptHotReloadService : IDisposable
                 {
                     TypeId = typeId,
                     Success = true,
-                    CompiledType = rolledBackType,
+                    CompiledType = rolledBackType
                 }
             );
 
@@ -529,7 +533,7 @@ public class ScriptHotReloadService : IDisposable
                 {
                     TypeId = typeId,
                     Success = true,
-                    CompiledType = restored.Value.type,
+                    CompiledType = restored.Value.type
                 }
             );
 
@@ -572,7 +576,7 @@ public class ScriptHotReloadService : IDisposable
                     Type = NotificationType.Error,
                     Message = "Hot-reload watcher failed",
                     Details = e.Message,
-                    IsAutoDismiss = false,
+                    IsAutoDismiss = false
                 }
             );
     }
@@ -591,8 +595,8 @@ public class ScriptHotReloadService : IDisposable
 }
 
 /// <summary>
-/// Statistics for hot-reload operations with rollback tracking.
-/// Provides metrics for monitoring reliability and performance.
+///     Statistics for hot-reload operations with rollback tracking.
+///     Provides metrics for monitoring reliability and performance.
 /// </summary>
 public class HotReloadStatistics
 {
@@ -609,12 +613,15 @@ public class HotReloadStatistics
 
     public double SuccessRate =>
         TotalReloads > 0 ? (double)SuccessfulReloads / TotalReloads * 100 : 0;
+
     public double RollbackRate =>
         FailedReloads > 0 ? (double)RollbacksPerformed / FailedReloads * 100 : 0;
 
-    public double UptimeRate => RollbacksPerformed == FailedReloads ? 100.0 : 0.0; // 100% if all failures were rolled back
+    public double UptimeRate =>
+        RollbacksPerformed == FailedReloads ? 100.0 : 0.0; // 100% if all failures were rolled back
 
     public int TotalFileEvents => TotalReloads + DebouncedEvents;
+
     public double DebounceEfficiency =>
         TotalFileEvents > 0 ? (double)DebouncedEvents / TotalFileEvents * 100 : 0;
 }

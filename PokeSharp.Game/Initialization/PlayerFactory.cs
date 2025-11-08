@@ -1,7 +1,6 @@
 using Arch.Core;
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using PokeSharp.Core.Components.Maps;
 using PokeSharp.Core.Components.Movement;
 using PokeSharp.Core.Factories;
@@ -16,11 +15,12 @@ namespace PokeSharp.Game.Initialization;
 public class PlayerFactory(
     ILogger<PlayerFactory> logger,
     World world,
-    IEntityFactoryService entityFactory)
+    IEntityFactoryService entityFactory
+)
 {
+    private readonly IEntityFactoryService _entityFactory = entityFactory;
     private readonly ILogger<PlayerFactory> _logger = logger;
     private readonly World _world = world;
-    private readonly IEntityFactoryService _entityFactory = entityFactory;
 
     /// <summary>
     ///     Creates a player entity at the specified position with a camera.
@@ -39,7 +39,7 @@ public class PlayerFactory(
             Zoom = 3.0f,
             TargetZoom = 3.0f,
             ZoomTransitionSpeed = 0.1f,
-            Position = new Vector2(x * 16, y * 16), // Start at player's position (grid to pixels)
+            Position = new Vector2(x * 16, y * 16) // Start at player's position (grid to pixels)
         };
 
         // Set map bounds on camera from MapInfo
@@ -56,10 +56,7 @@ public class PlayerFactory(
         var playerEntity = _entityFactory.SpawnFromTemplate(
             "player",
             _world,
-            builder =>
-            {
-                builder.OverrideComponent(new Position(x, y));
-            }
+            builder => { builder.OverrideComponent(new Position(x, y)); }
         );
 
         // Add Camera component (not in template as it's created per-instance)
@@ -81,4 +78,3 @@ public class PlayerFactory(
         return playerEntity;
     }
 }
-

@@ -48,7 +48,7 @@ public sealed class TemplateValidationResult
         {
             TemplateId = templateId,
             IsValid = false,
-            Errors = errors.ToList(),
+            Errors = errors.ToList()
         };
     }
 
@@ -61,7 +61,7 @@ public sealed class TemplateValidationResult
         {
             TemplateId = templateId,
             IsValid = true,
-            Warnings = warnings.ToList(),
+            Warnings = warnings.ToList()
         };
     }
 

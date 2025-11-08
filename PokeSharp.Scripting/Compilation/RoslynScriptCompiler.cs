@@ -2,13 +2,15 @@ using System.Collections.Concurrent;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
+using Arch.Core;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.Emit;
 using Microsoft.Extensions.Logging;
-using PokeSharp.Scripting.HotReload;
+using Microsoft.Xna.Framework;
+using PokeSharp.Core.Components.Movement;
 using PokeSharp.Scripting.HotReload.Compilation;
 using PokeSharp.Scripting.Runtime;
+using DiagnosticSeverity = PokeSharp.Scripting.HotReload.Compilation.DiagnosticSeverity;
 
 namespace PokeSharp.Scripting.Compilation;
 
@@ -18,8 +20,6 @@ namespace PokeSharp.Scripting.Compilation;
 /// </summary>
 public class RoslynScriptCompiler : IScriptCompiler
 {
-    private readonly ILogger<RoslynScriptCompiler> _logger;
-
     /// <summary>
     ///     Cache of compiled assemblies keyed by content hash (SHA256).
     ///     This ensures scripts with identical content reuse the same compiled assembly.
@@ -27,19 +27,21 @@ public class RoslynScriptCompiler : IScriptCompiler
     private readonly ConcurrentDictionary<string, CachedCompilation> _compilationCache = new();
 
     /// <summary>
-    ///     Metadata references for compilation (assemblies).
+    ///     Compilation options for Roslyn.
     /// </summary>
-    private readonly List<MetadataReference> _metadataReferences;
+    private readonly CSharpCompilationOptions _compilationOptions;
 
     /// <summary>
     ///     Global using directives to include in all scripts.
     /// </summary>
     private readonly List<string> _globalUsings;
 
+    private readonly ILogger<RoslynScriptCompiler> _logger;
+
     /// <summary>
-    ///     Compilation options for Roslyn.
+    ///     Metadata references for compilation (assemblies).
     /// </summary>
-    private readonly CSharpCompilationOptions _compilationOptions;
+    private readonly List<MetadataReference> _metadataReferences;
 
     public RoslynScriptCompiler(ILogger<RoslynScriptCompiler> logger)
     {
@@ -74,13 +76,11 @@ public class RoslynScriptCompiler : IScriptCompiler
     public async Task<CompilationResult> CompileScriptAsync(string filePath)
     {
         if (string.IsNullOrWhiteSpace(filePath))
-        {
             return new CompilationResult
             {
                 Success = false,
-                Errors = new List<string> { "File path cannot be null or empty" },
+                Errors = new List<string> { "File path cannot be null or empty" }
             };
-        }
 
         if (!File.Exists(filePath))
         {
@@ -88,7 +88,7 @@ public class RoslynScriptCompiler : IScriptCompiler
             return new CompilationResult
             {
                 Success = false,
-                Errors = new List<string> { $"File not found: {filePath}" },
+                Errors = new List<string> { $"File not found: {filePath}" }
             };
         }
 
@@ -113,7 +113,7 @@ public class RoslynScriptCompiler : IScriptCompiler
                     Success = true,
                     CompiledType = cached.CompiledType,
                     Errors = new List<string>(),
-                    Diagnostics = new List<CompilationDiagnostic>(),
+                    Diagnostics = new List<CompilationDiagnostic>()
                 };
             }
 
@@ -130,11 +130,12 @@ public class RoslynScriptCompiler : IScriptCompiler
             var syntaxTree = CSharpSyntaxTree.ParseText(
                 fullScript,
                 CSharpParseOptions.Default.WithLanguageVersion(LanguageVersion.Latest),
-                path: filePath
+                filePath
             );
 
             // Create compilation
-            var assemblyName = $"Script_{Path.GetFileNameWithoutExtension(filePath)}_{Guid.NewGuid():N}";
+            var assemblyName =
+                $"Script_{Path.GetFileNameWithoutExtension(filePath)}_{Guid.NewGuid():N}";
             var compilation = CSharpCompilation.Create(
                 assemblyName,
                 new[] { syntaxTree },
@@ -155,7 +156,8 @@ public class RoslynScriptCompiler : IScriptCompiler
                     "Compilation failed for {FileName} with {ErrorCount} errors",
                     Path.GetFileName(filePath),
                     diagnostics.Count(d =>
-                        d.Severity == PokeSharp.Scripting.HotReload.Compilation.DiagnosticSeverity.Error
+                        d.Severity
+                        == DiagnosticSeverity.Error
                     )
                 );
 
@@ -165,11 +167,12 @@ public class RoslynScriptCompiler : IScriptCompiler
                     CompiledType = null,
                     Errors = diagnostics
                         .Where(d =>
-                            d.Severity == PokeSharp.Scripting.HotReload.Compilation.DiagnosticSeverity.Error
+                            d.Severity
+                            == DiagnosticSeverity.Error
                         )
                         .Select(d => d.Message)
                         .ToList(),
-                    Diagnostics = diagnostics,
+                    Diagnostics = diagnostics
                 };
             }
 
@@ -192,9 +195,9 @@ public class RoslynScriptCompiler : IScriptCompiler
                     CompiledType = null,
                     Errors = new List<string>
                     {
-                        "No public class inheriting from TypeScriptBase found in script",
+                        "No public class inheriting from TypeScriptBase found in script"
                     },
-                    Diagnostics = diagnostics,
+                    Diagnostics = diagnostics
                 };
             }
 
@@ -203,7 +206,7 @@ public class RoslynScriptCompiler : IScriptCompiler
             {
                 CompiledType = compiledType,
                 ContentHash = contentHash,
-                CompiledAt = DateTime.UtcNow,
+                CompiledAt = DateTime.UtcNow
             };
             _compilationCache[contentHash] = cachedCompilation;
 
@@ -219,7 +222,7 @@ public class RoslynScriptCompiler : IScriptCompiler
                 Success = true,
                 CompiledType = compiledType,
                 Errors = new List<string>(),
-                Diagnostics = diagnostics,
+                Diagnostics = diagnostics
             };
         }
         catch (Exception ex)
@@ -230,7 +233,7 @@ public class RoslynScriptCompiler : IScriptCompiler
                 Success = false,
                 CompiledType = null,
                 Errors = new List<string> { $"Compilation exception: {ex.Message}" },
-                Diagnostics = new List<CompilationDiagnostic>(),
+                Diagnostics = new List<CompilationDiagnostic>()
             };
         }
     }
@@ -253,10 +256,7 @@ public class RoslynScriptCompiler : IScriptCompiler
         var sb = new StringBuilder();
 
         // Add global usings
-        foreach (var globalUsing in _globalUsings)
-        {
-            sb.AppendLine($"using {globalUsing};");
-        }
+        foreach (var globalUsing in _globalUsings) sb.AppendLine($"using {globalUsing};");
 
         sb.AppendLine(); // Blank line for readability
         sb.Append(scriptContent);
@@ -284,7 +284,7 @@ public class RoslynScriptCompiler : IScriptCompiler
                     Line = lineSpan.StartLinePosition.Line + 1, // 1-based line numbers
                     Column = lineSpan.StartLinePosition.Character + 1, // 1-based columns
                     Code = diagnostic.Id,
-                    FilePath = lineSpan.Path,
+                    FilePath = lineSpan.Path
                 }
             );
         }
@@ -295,21 +295,21 @@ public class RoslynScriptCompiler : IScriptCompiler
     /// <summary>
     ///     Map Roslyn DiagnosticSeverity to our DiagnosticSeverity enum.
     /// </summary>
-    private static PokeSharp.Scripting.HotReload.Compilation.DiagnosticSeverity MapSeverity(
+    private static DiagnosticSeverity MapSeverity(
         Microsoft.CodeAnalysis.DiagnosticSeverity roslynSeverity
     )
     {
         return roslynSeverity switch
         {
-            Microsoft.CodeAnalysis.DiagnosticSeverity.Hidden
-                => PokeSharp.Scripting.HotReload.Compilation.DiagnosticSeverity.Hidden,
-            Microsoft.CodeAnalysis.DiagnosticSeverity.Info
-                => PokeSharp.Scripting.HotReload.Compilation.DiagnosticSeverity.Info,
-            Microsoft.CodeAnalysis.DiagnosticSeverity.Warning
-                => PokeSharp.Scripting.HotReload.Compilation.DiagnosticSeverity.Warning,
-            Microsoft.CodeAnalysis.DiagnosticSeverity.Error
-                => PokeSharp.Scripting.HotReload.Compilation.DiagnosticSeverity.Error,
-            _ => PokeSharp.Scripting.HotReload.Compilation.DiagnosticSeverity.Hidden,
+            Microsoft.CodeAnalysis.DiagnosticSeverity.Hidden => DiagnosticSeverity
+                .Hidden,
+            Microsoft.CodeAnalysis.DiagnosticSeverity.Info => DiagnosticSeverity
+                .Info,
+            Microsoft.CodeAnalysis.DiagnosticSeverity.Warning => DiagnosticSeverity
+                .Warning,
+            Microsoft.CodeAnalysis.DiagnosticSeverity.Error => DiagnosticSeverity
+                .Error,
+            _ => DiagnosticSeverity.Hidden
         };
     }
 
@@ -324,10 +324,7 @@ public class RoslynScriptCompiler : IScriptCompiler
             return assembly
                 .GetTypes()
                 .FirstOrDefault(t =>
-                    t.IsClass
-                    && !t.IsAbstract
-                    && t.IsPublic
-                    && baseType.IsAssignableFrom(t)
+                    t.IsClass && !t.IsAbstract && t.IsPublic && baseType.IsAssignableFrom(t)
                 );
         }
         catch (ReflectionTypeLoadException ex)
@@ -337,10 +334,8 @@ public class RoslynScriptCompiler : IScriptCompiler
                 "ReflectionTypeLoadException while searching for script type in assembly"
             );
             foreach (var loaderException in ex.LoaderExceptions)
-            {
                 if (loaderException != null)
                     _logger.LogError("Loader exception: {Message}", loaderException.Message);
-            }
             return null;
         }
     }
@@ -356,17 +351,17 @@ public class RoslynScriptCompiler : IScriptCompiler
             MetadataReference.CreateFromFile(typeof(Console).Assembly.Location), // System.Console
             MetadataReference.CreateFromFile(typeof(Enumerable).Assembly.Location), // System.Linq
             MetadataReference.CreateFromFile(typeof(List<>).Assembly.Location), // System.Collections
-            MetadataReference.CreateFromFile(typeof(Arch.Core.World).Assembly.Location), // Arch.Core
+            MetadataReference.CreateFromFile(typeof(World).Assembly.Location), // Arch.Core
             MetadataReference.CreateFromFile(
-                typeof(Microsoft.Xna.Framework.Point).Assembly.Location
+                typeof(Point).Assembly.Location
             ), // MonoGame.Framework
             MetadataReference.CreateFromFile(typeof(TypeScriptBase).Assembly.Location), // PokeSharp.Scripting
             MetadataReference.CreateFromFile(
-                typeof(Core.Components.Movement.Direction).Assembly.Location
+                typeof(Direction).Assembly.Location
             ), // PokeSharp.Core
             MetadataReference.CreateFromFile(
-                typeof(Microsoft.Extensions.Logging.ILogger).Assembly.Location
-            ), // Microsoft.Extensions.Logging.Abstractions
+                typeof(ILogger).Assembly.Location
+            ) // Microsoft.Extensions.Logging.Abstractions
         };
 
         // Add runtime references for .NET 9
@@ -378,16 +373,13 @@ public class RoslynScriptCompiler : IScriptCompiler
                 "System.Runtime.dll",
                 "System.Collections.dll",
                 "System.Linq.dll",
-                "netstandard.dll",
+                "netstandard.dll"
             };
 
             foreach (var runtimeRef in runtimeRefs)
             {
                 var refPath = Path.Combine(runtimePath, runtimeRef);
-                if (File.Exists(refPath))
-                {
-                    references.Add(MetadataReference.CreateFromFile(refPath));
-                }
+                if (File.Exists(refPath)) references.Add(MetadataReference.CreateFromFile(refPath));
             }
         }
 
@@ -416,7 +408,7 @@ public class RoslynScriptCompiler : IScriptCompiler
             "PokeSharp.Core.Components.Player",
             "PokeSharp.Core.Components.Rendering",
             "PokeSharp.Core.Components.Tiles",
-            "PokeSharp.Core.Types",
+            "PokeSharp.Core.Types"
         };
     }
 
@@ -439,8 +431,7 @@ public class RoslynScriptCompiler : IScriptCompiler
             CachedEntries = _compilationCache.Count,
             TotalSize = _compilationCache.Sum(kvp =>
                 kvp.Value.CompiledType?.Assembly.GetName().Name?.Length ?? 0
-            ),
+            )
         };
     }
 }
-

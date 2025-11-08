@@ -3,7 +3,6 @@ using Microsoft.Xna.Framework;
 using PokeSharp.Core.Components.Maps;
 using PokeSharp.Core.Components.Movement;
 using PokeSharp.Core.Components.NPCs;
-using PokeSharp.Core.Components.NPCs.States;
 using PokeSharp.Core.Components.Player;
 using PokeSharp.Core.Components.Rendering;
 using PokeSharp.Core.Components.Tiles;
@@ -67,8 +66,8 @@ public static class TemplateRegistry
             {
                 Version = "1.0.0",
                 CompiledAt = DateTime.UtcNow,
-                SourcePath = "TemplateRegistry.RegisterTileTemplates",
-            },
+                SourcePath = "TemplateRegistry.RegisterTileTemplates"
+            }
         };
         baseTile.WithComponent(new TilePosition(0, 0)); // Will be overridden
         baseTile.WithComponent(new TileSprite("default", 0, TileLayer.Ground, Rectangle.Empty)); // Will be overridden
@@ -86,8 +85,8 @@ public static class TemplateRegistry
             {
                 Version = "1.0.0",
                 CompiledAt = DateTime.UtcNow,
-                SourcePath = "TemplateRegistry.RegisterTileTemplates",
-            },
+                SourcePath = "TemplateRegistry.RegisterTileTemplates"
+            }
         };
         // No additional components - just a walkable tile
         // We need at least one component for validation, so override sprite layer
@@ -110,8 +109,8 @@ public static class TemplateRegistry
             {
                 Version = "1.0.0",
                 CompiledAt = DateTime.UtcNow,
-                SourcePath = "TemplateRegistry.RegisterTileTemplates",
-            },
+                SourcePath = "TemplateRegistry.RegisterTileTemplates"
+            }
         };
         wallTile.WithComponent(new Collision(true)); // Solid
         wallTile.WithComponent(new TileSprite("default", 0, TileLayer.Object, Rectangle.Empty)); // Object layer
@@ -133,8 +132,8 @@ public static class TemplateRegistry
             {
                 Version = "1.0.0",
                 CompiledAt = DateTime.UtcNow,
-                SourcePath = "TemplateRegistry.RegisterTileTemplates",
-            },
+                SourcePath = "TemplateRegistry.RegisterTileTemplates"
+            }
         };
         grassTile.WithComponent(new EncounterZone("default", 10)); // Default encounter rate
         cache.Register(grassTile);
@@ -150,7 +149,7 @@ public static class TemplateRegistry
             ("down", Direction.Down),
             ("up", Direction.Up),
             ("left", Direction.Left),
-            ("right", Direction.Right),
+            ("right", Direction.Right)
         };
 
         foreach (var (dirName, direction) in ledgeDirections)
@@ -165,8 +164,8 @@ public static class TemplateRegistry
                 {
                     Version = "1.0.0",
                     CompiledAt = DateTime.UtcNow,
-                    SourcePath = "TemplateRegistry.RegisterTileTemplates",
-                },
+                    SourcePath = "TemplateRegistry.RegisterTileTemplates"
+                }
             };
             ledgeTile.WithComponent(new TileLedge(direction)); // Add ledge behavior
             cache.Register(ledgeTile);
@@ -194,12 +193,12 @@ public static class TemplateRegistry
             {
                 Version = "1.0.0",
                 CompiledAt = DateTime.UtcNow,
-                SourcePath = "TemplateRegistry.RegisterPlayerTemplate",
-            },
+                SourcePath = "TemplateRegistry.RegisterPlayerTemplate"
+            }
         };
 
         // Add components in the order they should be created
-        template.WithComponent(new Player());
+        template.WithComponent(new Player("PLAYER", 3000)); // Default name and starting money
         template.WithComponent(new Position(0, 0)); // Default position, overridden at spawn
         template.WithComponent(new Sprite("player-spritesheet") { Tint = Color.White, Scale = 1f });
         template.WithComponent(new GridMovement(4.0f)); // 4 tiles per second
@@ -234,8 +233,8 @@ public static class TemplateRegistry
             {
                 Version = "1.0.0",
                 CompiledAt = DateTime.UtcNow,
-                SourcePath = "TemplateRegistry.RegisterNpcTemplates",
-            },
+                SourcePath = "TemplateRegistry.RegisterNpcTemplates"
+            }
         };
         baseNpc.WithComponent(new Position(0, 0)); // Default position
         baseNpc.WithComponent(new Sprite("npc-spritesheet") { Tint = Color.White, Scale = 1f });
@@ -256,8 +255,8 @@ public static class TemplateRegistry
             {
                 Version = "1.0.0",
                 CompiledAt = DateTime.UtcNow,
-                SourcePath = "TemplateRegistry.RegisterNpcTemplates",
-            },
+                SourcePath = "TemplateRegistry.RegisterNpcTemplates"
+            }
         };
         genericNpc.WithComponent(new GridMovement(2.0f)); // NPCs move slower than player
         cache.Register(genericNpc);
@@ -278,8 +277,8 @@ public static class TemplateRegistry
             {
                 Version = "1.0.0",
                 CompiledAt = DateTime.UtcNow,
-                SourcePath = "TemplateRegistry.RegisterNpcTemplates",
-            },
+                SourcePath = "TemplateRegistry.RegisterNpcTemplates"
+            }
         };
         // No GridMovement component - can't move
         // Override sprite to use different texture
@@ -304,12 +303,12 @@ public static class TemplateRegistry
             {
                 Version = "1.0.0",
                 CompiledAt = DateTime.UtcNow,
-                SourcePath = "TemplateRegistry.RegisterNpcTemplates",
-            },
+                SourcePath = "TemplateRegistry.RegisterNpcTemplates"
+            }
         };
         // Override sprite for trainers
         trainerNpc.WithComponent(new Sprite("npc-spritesheet") { Tint = Color.White, Scale = 1f });
-        #warning TODO: Add Trainer component when implemented
+#warning TODO: Add Trainer component when implemented
         // trainerNpc.WithComponent(new Trainer(...));
         cache.Register(trainerNpc);
         logger?.LogDebug(
@@ -329,14 +328,14 @@ public static class TemplateRegistry
             {
                 Version = "1.0.0",
                 CompiledAt = DateTime.UtcNow,
-                SourcePath = "TemplateRegistry.RegisterNpcTemplates",
-            },
+                SourcePath = "TemplateRegistry.RegisterNpcTemplates"
+            }
         };
         // Override sprite for gym leaders
         gymLeaderNpc.WithComponent(
             new Sprite("npc-spritesheet") { Tint = Color.White, Scale = 1f }
         );
-        #warning TODO: Add Badge component when implemented
+#warning TODO: Add Badge component when implemented
         // gymLeaderNpc.WithComponent(new Badge(...));
         cache.Register(gymLeaderNpc);
         logger?.LogDebug(
@@ -356,14 +355,14 @@ public static class TemplateRegistry
             {
                 Version = "1.0.0",
                 CompiledAt = DateTime.UtcNow,
-                SourcePath = "TemplateRegistry.RegisterNpcTemplates",
-            },
+                SourcePath = "TemplateRegistry.RegisterNpcTemplates"
+            }
         };
         // Override sprite for shop keepers
         shopKeeperNpc.WithComponent(
             new Sprite("npc-spritesheet") { Tint = Color.White, Scale = 1f }
         );
-        #warning TODO: Add Shop component when implemented
+#warning TODO: Add Shop component when implemented
         // shopKeeperNpc.WithComponent(new Shop(...));
         cache.Register(shopKeeperNpc);
         logger?.LogDebug(
@@ -383,8 +382,8 @@ public static class TemplateRegistry
             {
                 Version = "1.0.0",
                 CompiledAt = DateTime.UtcNow,
-                SourcePath = "TemplateRegistry.RegisterNpcTemplates",
-            },
+                SourcePath = "TemplateRegistry.RegisterNpcTemplates"
+            }
         };
         // Override movement speed - same as player
         fastNpc.WithComponent(new GridMovement(4.0f));
@@ -406,8 +405,8 @@ public static class TemplateRegistry
             {
                 Version = "1.0.0",
                 CompiledAt = DateTime.UtcNow,
-                SourcePath = "TemplateRegistry.RegisterNpcTemplates",
-            },
+                SourcePath = "TemplateRegistry.RegisterNpcTemplates"
+            }
         };
         // Add NPCComponent (will be overridden at spawn with specific NPC data)
         patrolNpc.WithComponent(new NPCComponent("patrol_npc", "GUARD"));
@@ -456,7 +455,7 @@ public static class TemplateRegistry
             "npc/gym-leader",
             "npc/shop-keeper",
             "npc/fast",
-            "npc/patrol",
+            "npc/patrol"
         };
     }
 }

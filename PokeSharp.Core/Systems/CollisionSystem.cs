@@ -81,7 +81,6 @@ public class CollisionSystem(ILogger<CollisionSystem>? logger = null) : BaseSyst
         var entities = spatialHash.GetEntitiesAt(mapId, tileX, tileY);
 
         foreach (var entity in entities)
-        {
             // Check if entity has Collision component
             if (entity.Has<Collision>())
             {
@@ -96,9 +95,7 @@ public class CollisionSystem(ILogger<CollisionSystem>? logger = null) : BaseSyst
 
                         // Check if ledge blocks this specific direction
                         if (ledge.IsBlockedFrom(fromDirection))
-                        {
                             return false; // Ledge blocks this direction (can't climb up)
-                        }
                         // Ledge allows this direction (can jump down) - continue checking other entities
                         // Don't return true yet, there might be other blocking entities
                     }
@@ -109,7 +106,6 @@ public class CollisionSystem(ILogger<CollisionSystem>? logger = null) : BaseSyst
                     }
                 }
             }
-        }
 
         // No blocking collisions found
         return true;
@@ -150,10 +146,8 @@ public class CollisionSystem(ILogger<CollisionSystem>? logger = null) : BaseSyst
         var entities = spatialHash.GetEntitiesAt(mapId, tileX, tileY);
 
         foreach (var entity in entities)
-        {
             if (entity.Has<TileLedge>())
                 return true;
-        }
 
         return false;
     }
@@ -179,13 +173,11 @@ public class CollisionSystem(ILogger<CollisionSystem>? logger = null) : BaseSyst
         var entities = spatialHash.GetEntitiesAt(mapId, tileX, tileY);
 
         foreach (var entity in entities)
-        {
             if (entity.Has<TileLedge>())
             {
                 ref var ledge = ref entity.Get<TileLedge>();
                 return ledge.JumpDirection;
             }
-        }
 
         return Direction.None;
     }

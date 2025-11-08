@@ -7,7 +7,7 @@ using PokeSharp.Game;
 var services = new ServiceCollection();
 
 // Add fancy Spectre.Console logging instead of standard console logging
-var loggerFactory = ConsoleLoggerFactory.Create(LogLevel.Information);
+var loggerFactory = ConsoleLoggerFactory.Create();
 services.AddSingleton<ILoggerFactory>(loggerFactory);
 services.AddSingleton(typeof(ILogger<>), typeof(Logger<>));
 

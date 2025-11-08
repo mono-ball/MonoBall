@@ -44,7 +44,7 @@ public sealed class ComponentTemplate
         {
             ComponentType = typeof(T),
             InitialData = initialData,
-            ScriptId = scriptId,
+            ScriptId = scriptId
         };
     }
 

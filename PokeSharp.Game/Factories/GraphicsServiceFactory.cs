@@ -12,14 +12,13 @@ namespace PokeSharp.Game.Factories;
 /// <summary>
 ///     Concrete implementation of IGraphicsServiceFactory that creates services
 ///     with proper dependency injection and logging support.
-///
 ///     This factory resolves the DI architecture split by providing a centralized
 ///     place to create GraphicsDevice-dependent services after the device is available.
 /// </summary>
 public class GraphicsServiceFactory : IGraphicsServiceFactory
 {
-    private readonly IServiceProvider _serviceProvider;
     private readonly ILoggerFactory _loggerFactory;
+    private readonly IServiceProvider _serviceProvider;
 
     /// <summary>
     ///     Initializes a new instance of the GraphicsServiceFactory.
@@ -31,7 +30,8 @@ public class GraphicsServiceFactory : IGraphicsServiceFactory
     /// </exception>
     public GraphicsServiceFactory(IServiceProvider serviceProvider, ILoggerFactory loggerFactory)
     {
-        _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+        _serviceProvider =
+            serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         _loggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
     }
 

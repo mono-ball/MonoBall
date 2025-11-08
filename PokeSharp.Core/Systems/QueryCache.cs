@@ -16,6 +16,11 @@ public static class QueryCache
     private static readonly ConcurrentDictionary<string, QueryDescription> _cache = new();
 
     /// <summary>
+    ///     Gets the count of cached queries.
+    /// </summary>
+    public static int Count => _cache.Count;
+
+    /// <summary>
     ///     Gets or creates a query description with one component type.
     /// </summary>
     public static QueryDescription Get<T1>()
@@ -68,7 +73,10 @@ public static class QueryCache
         where TNone : struct
     {
         var key = $"{typeof(T1).FullName},{typeof(T2).FullName}!{typeof(TNone).FullName}";
-        return _cache.GetOrAdd(key, _ => new QueryDescription().WithAll<T1, T2>().WithNone<TNone>());
+        return _cache.GetOrAdd(
+            key,
+            _ => new QueryDescription().WithAll<T1, T2>().WithNone<TNone>()
+        );
     }
 
     /// <summary>
@@ -78,10 +86,4 @@ public static class QueryCache
     {
         _cache.Clear();
     }
-
-    /// <summary>
-    ///     Gets the count of cached queries.
-    /// </summary>
-    public static int Count => _cache.Count;
 }
-

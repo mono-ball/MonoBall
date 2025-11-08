@@ -5,10 +5,10 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.Extensions.Logging;
-using PokeSharp.Scripting.Compilation;
-using PokeSharp.Scripting.Runtime;
+using Microsoft.Extensions.Logging.Abstractions;
 using PokeSharp.Core.Scripting.Services;
 using PokeSharp.Core.ScriptingApi;
+using PokeSharp.Scripting.Runtime;
 
 namespace PokeSharp.Scripting.Services;
 
@@ -18,19 +18,24 @@ namespace PokeSharp.Scripting.Services;
 /// </summary>
 public class ScriptService : IAsyncDisposable
 {
-    private readonly string _scriptsBasePath;
-    private readonly ILogger<ScriptService> _logger;
     private readonly ScriptOptions _defaultOptions = ScriptCompilationOptions.GetDefaultOptions();
-    private readonly ConcurrentDictionary<string, (Script<object> compiled, Type? scriptType)> _scriptCache = new();
-    private readonly ConcurrentDictionary<string, object> _scriptInstances = new();
-    private readonly PlayerApiService _playerApi;
-    private readonly NpcApiService _npcApi;
-    private readonly MapApiService _mapApi;
     private readonly GameStateApiService _gameStateApi;
+    private readonly ILogger<ScriptService> _logger;
+    private readonly MapApiService _mapApi;
+    private readonly NpcApiService _npcApi;
+    private readonly PlayerApiService _playerApi;
+
+    private readonly ConcurrentDictionary<
+        string,
+        (Script<object> compiled, Type? scriptType)
+    > _scriptCache = new();
+
+    private readonly ConcurrentDictionary<string, object> _scriptInstances = new();
+    private readonly string _scriptsBasePath;
     private readonly IWorldApi _worldApi;
 
     /// <summary>
-    ///     Initializes a new instance of the <see cref="ScriptService"/> class.
+    ///     Initializes a new instance of the <see cref="ScriptService" /> class.
     /// </summary>
     /// <param name="scriptsBasePath">Base path for script files.</param>
     /// <param name="logger">Logger instance.</param>
@@ -46,15 +51,45 @@ public class ScriptService : IAsyncDisposable
         NpcApiService npcApi,
         MapApiService mapApi,
         GameStateApiService gameStateApi,
-        IWorldApi worldApi)
+        IWorldApi worldApi
+    )
     {
-        _scriptsBasePath = scriptsBasePath ?? throw new ArgumentNullException(nameof(scriptsBasePath));
+        _scriptsBasePath =
+            scriptsBasePath ?? throw new ArgumentNullException(nameof(scriptsBasePath));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _playerApi = playerApi ?? throw new ArgumentNullException(nameof(playerApi));
         _npcApi = npcApi ?? throw new ArgumentNullException(nameof(npcApi));
         _mapApi = mapApi ?? throw new ArgumentNullException(nameof(mapApi));
         _gameStateApi = gameStateApi ?? throw new ArgumentNullException(nameof(gameStateApi));
         _worldApi = worldApi ?? throw new ArgumentNullException(nameof(worldApi));
+    }
+
+    /// <summary>
+    ///     Asynchronously disposes resources and clears script cache.
+    /// </summary>
+    public async ValueTask DisposeAsync()
+    {
+        var exceptions = new List<Exception>();
+
+        // Dispose any scripts that implement IAsyncDisposable
+        foreach (var instance in _scriptInstances.Values)
+            try
+            {
+                if (instance is IAsyncDisposable asyncDisposable)
+                    await asyncDisposable.DisposeAsync();
+                else if (instance is IDisposable disposable) disposable.Dispose();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error disposing script instance");
+                exceptions.Add(ex);
+            }
+
+        ClearCache();
+        GC.SuppressFinalize(this);
+
+        if (exceptions.Count > 0)
+            throw new AggregateException("Errors during script disposal", exceptions);
     }
 
     /// <summary>
@@ -212,41 +247,41 @@ public class ScriptService : IAsyncDisposable
     {
         // Validate required parameters
         if (scriptInstance == null)
-        {
-            throw new ArgumentNullException(nameof(scriptInstance), "Script instance cannot be null");
-        }
+            throw new ArgumentNullException(
+                nameof(scriptInstance),
+                "Script instance cannot be null"
+            );
 
-        if (world == null)
-        {
-            throw new ArgumentNullException(nameof(world), "World cannot be null");
-        }
+        if (world == null) throw new ArgumentNullException(nameof(world), "World cannot be null");
 
         // Validate script instance type
         if (scriptInstance is not TypeScriptBase scriptBase)
-        {
             throw new ArgumentException(
                 $"Script instance must be of type TypeScriptBase, but was {scriptInstance.GetType().FullName}",
                 nameof(scriptInstance)
             );
-        }
 
         try
         {
             // Call the protected OnInitialize method using reflection
-            var initMethod = scriptBase.GetType().GetMethod(
-                "OnInitialize",
-                BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy
-            );
+            var initMethod = scriptBase
+                .GetType()
+                .GetMethod(
+                    "OnInitialize",
+                    BindingFlags.NonPublic
+                    | BindingFlags.Public
+                    | BindingFlags.Instance
+                    | BindingFlags.FlattenHierarchy
+                );
 
             if (initMethod == null)
-            {
                 throw new InvalidOperationException(
                     $"OnInitialize method not found on {scriptBase.GetType().FullName}"
                 );
-            }
 
             // Create ScriptContext for initialization (use NullLogger if no logger provided)
-            var effectiveLogger = logger ?? Microsoft.Extensions.Logging.Abstractions.NullLogger.Instance;
+            var effectiveLogger =
+                logger ?? NullLogger.Instance;
             var context = new ScriptContext(
                 world,
                 entity,
@@ -255,7 +290,8 @@ public class ScriptService : IAsyncDisposable
                 _npcApi,
                 _mapApi,
                 _gameStateApi,
-                _worldApi);
+                _worldApi
+            );
             initMethod.Invoke(scriptBase, new object[] { context });
 
             _logger.LogDebug(
@@ -294,40 +330,5 @@ public class ScriptService : IAsyncDisposable
         _scriptCache.Clear();
         _scriptInstances.Clear();
         _logger.LogInformation("Cleared script cache");
-    }
-
-    /// <summary>
-    ///     Asynchronously disposes resources and clears script cache.
-    /// </summary>
-    public async ValueTask DisposeAsync()
-    {
-        var exceptions = new List<Exception>();
-
-        // Dispose any scripts that implement IAsyncDisposable
-        foreach (var instance in _scriptInstances.Values)
-        {
-            try
-            {
-                if (instance is IAsyncDisposable asyncDisposable)
-                {
-                    await asyncDisposable.DisposeAsync();
-                }
-                else if (instance is IDisposable disposable)
-                {
-                    disposable.Dispose();
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error disposing script instance");
-                exceptions.Add(ex);
-            }
-        }
-
-        ClearCache();
-        GC.SuppressFinalize(this);
-
-        if (exceptions.Count > 0)
-            throw new AggregateException("Errors during script disposal", exceptions);
     }
 }

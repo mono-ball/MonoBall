@@ -20,4 +20,3 @@ public class TmxObjectGroup
     /// </summary>
     public List<TmxObject> Objects { get; set; } = new();
 }
-

@@ -15,7 +15,7 @@ public static class TiledMapLoader
     {
         PropertyNameCaseInsensitive = true,
         ReadCommentHandling = JsonCommentHandling.Skip,
-        AllowTrailingCommas = true,
+        AllowTrailingCommas = true
     };
 
     /// <summary>
@@ -50,7 +50,7 @@ public static class TiledMapLoader
             TileHeight = tiledMap.TileHeight,
             Tilesets = ConvertTilesets(tiledMap.Tilesets, mapPath),
             Layers = ConvertLayers(tiledMap.Layers, tiledMap.Width, tiledMap.Height),
-            ObjectGroups = ConvertObjectGroups(tiledMap.Layers),
+            ObjectGroups = ConvertObjectGroups(tiledMap.Layers)
         };
 
         return doc;
@@ -77,7 +77,7 @@ public static class TiledMapLoader
                 TileHeight = tiledTileset.TileHeight ?? 16,
                 TileCount = tiledTileset.TileCount ?? 0,
                 Spacing = tiledTileset.Spacing ?? 0,
-                Margin = tiledTileset.Margin ?? 0,
+                Margin = tiledTileset.Margin ?? 0
             };
 
             // Handle external tileset
@@ -95,7 +95,7 @@ public static class TiledMapLoader
                 {
                     Source = tiledTileset.Image,
                     Width = tiledTileset.ImageWidth ?? 0,
-                    Height = tiledTileset.ImageHeight ?? 0,
+                    Height = tiledTileset.ImageHeight ?? 0
                 };
             }
 
@@ -130,7 +130,7 @@ public static class TiledMapLoader
                     {
                         Source = tiledTileset.Image,
                         Width = tiledTileset.ImageWidth ?? 0,
-                        Height = tiledTileset.ImageHeight ?? 0,
+                        Height = tiledTileset.ImageHeight ?? 0
                     };
 
                 // Parse tile animations and properties from external tileset
@@ -167,7 +167,7 @@ public static class TiledMapLoader
                 tileset.Animations[tile.Id] = new TmxTileAnimation
                 {
                     FrameTileIds = frameTileIds,
-                    FrameDurations = frameDurations,
+                    FrameDurations = frameDurations
                 };
             }
 
@@ -209,7 +209,7 @@ public static class TiledMapLoader
                 Width = tiledLayer.Width > 0 ? tiledLayer.Width : mapWidth,
                 Height = tiledLayer.Height > 0 ? tiledLayer.Height : mapHeight,
                 Visible = tiledLayer.Visible,
-                Opacity = tiledLayer.Opacity,
+                Opacity = tiledLayer.Opacity
             };
 
             // Decode layer data (handles plain arrays, base64, and compression)
@@ -237,10 +237,7 @@ public static class TiledMapLoader
         if (dataElement.ValueKind == JsonValueKind.Array)
         {
             var dataList = new List<int>();
-            foreach (var element in dataElement.EnumerateArray())
-            {
-                dataList.Add(element.GetInt32());
-            }
+            foreach (var element in dataElement.EnumerateArray()) dataList.Add(element.GetInt32());
             return dataList.ToArray();
         }
 
@@ -254,16 +251,15 @@ public static class TiledMapLoader
             var bytes = Convert.FromBase64String(base64Data);
 
             // Handle compression
-            if (!string.IsNullOrEmpty(layer.Compression))
-            {
-                bytes = DecompressBytes(bytes, layer.Compression);
-            }
+            if (!string.IsNullOrEmpty(layer.Compression)) bytes = DecompressBytes(bytes, layer.Compression);
 
             return ConvertBytesToInts(bytes);
         }
 
         // Unknown data type - log warning if possible
-        Console.WriteLine($"Warning: Unexpected data type in layer '{layer.Name}': {dataElement.ValueKind}");
+        Console.WriteLine(
+            $"Warning: Unexpected data type in layer '{layer.Name}': {dataElement.ValueKind}"
+        );
         return Array.Empty<int>();
     }
 
@@ -279,7 +275,7 @@ public static class TiledMapLoader
             "zlib" => new ZLibStream(compressedStream, CompressionMode.Decompress),
             _ => throw new NotSupportedException(
                 $"Compression '{compression}' not supported. Supported formats: gzip, zlib"
-            ),
+            )
         };
 
         using (decompressor)
@@ -301,10 +297,7 @@ public static class TiledMapLoader
             );
 
         var ints = new int[bytes.Length / 4];
-        for (var i = 0; i < ints.Length; i++)
-        {
-            ints[i] = BitConverter.ToInt32(bytes, i * 4);
-        }
+        for (var i = 0; i < ints.Length; i++) ints[i] = BitConverter.ToInt32(bytes, i * 4);
 
         return ints;
     }
@@ -340,7 +333,7 @@ public static class TiledMapLoader
             {
                 Id = tiledLayer.Id,
                 Name = tiledLayer.Name,
-                Objects = ConvertObjects(tiledLayer.Objects),
+                Objects = ConvertObjects(tiledLayer.Objects)
             };
 
             result.Add(group);
@@ -364,7 +357,7 @@ public static class TiledMapLoader
                 Y = tiledObj.Y,
                 Width = tiledObj.Width,
                 Height = tiledObj.Height,
-                Properties = ConvertProperties(tiledObj.Properties),
+                Properties = ConvertProperties(tiledObj.Properties)
             };
 
             result.Add(obj);

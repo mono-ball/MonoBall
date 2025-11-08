@@ -15,4 +15,3 @@ public interface IHotReloadNotificationService
     /// </summary>
     void ClearNotifications();
 }
-

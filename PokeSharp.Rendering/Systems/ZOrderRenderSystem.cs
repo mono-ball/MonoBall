@@ -1,10 +1,9 @@
+using System.Diagnostics;
 using Arch.Core;
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using PokeSharp.Core.Components.Maps;
 using PokeSharp.Core.Components.Movement;
-using PokeSharp.Core.Components.NPCs;
 using PokeSharp.Core.Components.Player;
 using PokeSharp.Core.Components.Rendering;
 using PokeSharp.Core.Components.Tiles;
@@ -25,40 +24,69 @@ namespace PokeSharp.Rendering.Systems;
 public class ZOrderRenderSystem(
     GraphicsDevice graphicsDevice,
     AssetManager assetManager,
-    ILogger<ZOrderRenderSystem>? logger = null) : BaseSystem
+    ILogger<ZOrderRenderSystem>? logger = null
+) : BaseSystem
 {
     private const int TileSize = 16;
     private const float MaxRenderDistance = 10000f; // Maximum Y coordinate for normalization
 
     // Layer indices where sprites should be rendered (between object and overhead layers)
     private const int SpriteRenderAfterLayer = 1; // Render sprites after layer index 1 (Objects)
-    
-    private readonly GraphicsDevice _graphicsDevice = graphicsDevice ?? throw new ArgumentNullException(nameof(graphicsDevice));
-    private readonly AssetManager _assetManager = assetManager ?? throw new ArgumentNullException(nameof(assetManager));
-    private readonly SpriteBatch _spriteBatch = new(graphicsDevice);
-    private readonly ILogger<ZOrderRenderSystem>? _logger = logger;
-    
-    private ulong _frameCounter;
-    private int _lastEntityCount;
-    private int _lastTileCount;
-    private int _lastSpriteCount;
+
+    private readonly AssetManager _assetManager =
+        assetManager ?? throw new ArgumentNullException(nameof(assetManager));
 
     // Cache query descriptions to avoid allocation every frame
-    private readonly QueryDescription _cameraQuery = new QueryDescription().WithAll<Player, Camera>();
-    private readonly QueryDescription _groundTileQuery = new QueryDescription().WithAll<TilePosition, TileSprite>();
-    private readonly QueryDescription _objectTileQuery = new QueryDescription().WithAll<TilePosition, TileSprite>();
-    private readonly QueryDescription _overheadTileQuery = new QueryDescription().WithAll<TilePosition, TileSprite>();
-    private readonly QueryDescription _movingSpriteQuery = new QueryDescription().WithAll<Position, Sprite, GridMovement>();
+    private readonly QueryDescription _cameraQuery = new QueryDescription().WithAll<
+        Player,
+        Camera
+    >();
+
+    private readonly GraphicsDevice _graphicsDevice =
+        graphicsDevice ?? throw new ArgumentNullException(nameof(graphicsDevice));
+
+    private readonly QueryDescription _groundTileQuery = new QueryDescription().WithAll<
+        TilePosition,
+        TileSprite
+    >();
+
+    private readonly ILogger<ZOrderRenderSystem>? _logger = logger;
+
+    private readonly QueryDescription _movingSpriteQuery = new QueryDescription().WithAll<
+        Position,
+        Sprite,
+        GridMovement
+    >();
+
+    private readonly QueryDescription _objectTileQuery = new QueryDescription().WithAll<
+        TilePosition,
+        TileSprite
+    >();
+
+    private readonly QueryDescription _overheadTileQuery = new QueryDescription().WithAll<
+        TilePosition,
+        TileSprite
+    >();
+
+    private readonly SpriteBatch _spriteBatch = new(graphicsDevice);
+
     private readonly QueryDescription _staticSpriteQuery = new QueryDescription()
         .WithAll<Position, Sprite>()
         .WithNone<GridMovement>();
 
-    // Cache camera transform to avoid recalculating
-    private Matrix _cachedCameraTransform = Matrix.Identity;
     private Rectangle? _cachedCameraBounds;
 
+    // Cache camera transform to avoid recalculating
+    private Matrix _cachedCameraTransform = Matrix.Identity;
+
     // Performance profiling
-    private bool _enableDetailedProfiling = false;
+    private bool _enableDetailedProfiling;
+
+    private ulong _frameCounter;
+    private int _lastEntityCount;
+    private int _lastSpriteCount;
+    private int _lastTileCount;
+
     private double _setupTime,
         _batchBeginTime,
         _groundTime,
@@ -66,7 +94,6 @@ public class ZOrderRenderSystem(
         _spriteTime,
         _overheadTime,
         _batchEndTime;
-
 
     /// <inheritdoc />
     public override int Priority => SystemPriority.Render;
@@ -154,12 +181,12 @@ public class ZOrderRenderSystem(
     /// </summary>
     private void UpdateWithProfiling(World world)
     {
-        var swSetup = System.Diagnostics.Stopwatch.StartNew();
+        var swSetup = Stopwatch.StartNew();
         UpdateCameraCache(world);
         swSetup.Stop();
         _setupTime = swSetup.Elapsed.TotalMilliseconds;
 
-        var swBatchBegin = System.Diagnostics.Stopwatch.StartNew();
+        var swBatchBegin = Stopwatch.StartNew();
         _spriteBatch.Begin(
             SpriteSortMode.BackToFront,
             BlendState.AlphaBlend,
@@ -171,17 +198,17 @@ public class ZOrderRenderSystem(
 
         var totalTilesRendered = 0;
 
-        var swGround = System.Diagnostics.Stopwatch.StartNew();
+        var swGround = Stopwatch.StartNew();
         totalTilesRendered += RenderTileLayer(world, TileLayer.Ground);
         swGround.Stop();
         _groundTime = swGround.Elapsed.TotalMilliseconds;
 
-        var swObject = System.Diagnostics.Stopwatch.StartNew();
+        var swObject = Stopwatch.StartNew();
         totalTilesRendered += RenderTileLayer(world, TileLayer.Object);
         swObject.Stop();
         _objectTime = swObject.Elapsed.TotalMilliseconds;
 
-        var swSprites = System.Diagnostics.Stopwatch.StartNew();
+        var swSprites = Stopwatch.StartNew();
         var spriteCount = 0;
 
         world.Query(
@@ -204,12 +231,12 @@ public class ZOrderRenderSystem(
         swSprites.Stop();
         _spriteTime = swSprites.Elapsed.TotalMilliseconds;
 
-        var swOverhead = System.Diagnostics.Stopwatch.StartNew();
+        var swOverhead = Stopwatch.StartNew();
         totalTilesRendered += RenderTileLayer(world, TileLayer.Overhead);
         swOverhead.Stop();
         _overheadTime = swOverhead.Elapsed.TotalMilliseconds;
 
-        var swBatchEnd = System.Diagnostics.Stopwatch.StartNew();
+        var swBatchEnd = Stopwatch.StartNew();
         _spriteBatch.End();
         swBatchEnd.Stop();
         _batchEndTime = swBatchEnd.Elapsed.TotalMilliseconds;
@@ -251,44 +278,33 @@ public class ZOrderRenderSystem(
     /// </summary>
     public void PreloadMapAssets(World world)
     {
-        var sw = System.Diagnostics.Stopwatch.StartNew();
+        var sw = Stopwatch.StartNew();
         var texturesNeeded = new HashSet<string>();
 
         // Gather all tile textures
         world.Query(
             in _groundTileQuery,
-            (ref TileSprite sprite) =>
-            {
-                texturesNeeded.Add(sprite.TilesetId);
-            }
+            (ref TileSprite sprite) => { texturesNeeded.Add(sprite.TilesetId); }
         );
 
         // Gather all sprite textures
         world.Query(
             in _movingSpriteQuery,
-            (ref Sprite sprite) =>
-            {
-                texturesNeeded.Add(sprite.TextureId);
-            }
+            (ref Sprite sprite) => { texturesNeeded.Add(sprite.TextureId); }
         );
 
         world.Query(
             in _staticSpriteQuery,
-            (ref Sprite sprite) =>
-            {
-                texturesNeeded.Add(sprite.TextureId);
-            }
+            (ref Sprite sprite) => { texturesNeeded.Add(sprite.TextureId); }
         );
 
         // Preload all textures
         foreach (var textureId in texturesNeeded)
-        {
             if (!_assetManager.HasTexture(textureId))
             {
                 _logger?.LogDebug("Preloading texture: {TextureId}", textureId);
                 _assetManager.GetTexture(textureId); // Force load now
             }
-        }
 
         sw.Stop();
         _logger?.LogInformation(
@@ -314,16 +330,16 @@ public class ZOrderRenderSystem(
 
                 // Calculate camera bounds for culling
                 const int margin = 2;
-                int left =
+                var left =
                     (int)(camera.Position.X / TileSize)
-                    - (camera.Viewport.Width / 2 / TileSize) / (int)camera.Zoom
+                    - camera.Viewport.Width / 2 / TileSize / (int)camera.Zoom
                     - margin;
-                int top =
+                var top =
                     (int)(camera.Position.Y / TileSize)
-                    - (camera.Viewport.Height / 2 / TileSize) / (int)camera.Zoom
+                    - camera.Viewport.Height / 2 / TileSize / (int)camera.Zoom
                     - margin;
-                int width = (camera.Viewport.Width / TileSize) / (int)camera.Zoom + margin * 2;
-                int height = (camera.Viewport.Height / TileSize) / (int)camera.Zoom + margin * 2;
+                var width = camera.Viewport.Width / TileSize / (int)camera.Zoom + margin * 2;
+                var height = camera.Viewport.Height / TileSize / (int)camera.Zoom + margin * 2;
 
                 _cachedCameraBounds = new Rectangle(left, top, width, height);
             }
@@ -352,7 +368,6 @@ public class ZOrderRenderSystem(
 
                     // Viewport culling: skip tiles outside camera bounds
                     if (cameraBounds.HasValue)
-                    {
                         if (
                             pos.X < cameraBounds.Value.Left
                             || pos.X >= cameraBounds.Value.Right
@@ -363,18 +378,15 @@ public class ZOrderRenderSystem(
                             tilesCulled++;
                             return;
                         }
-                    }
 
                     // Get tileset texture
                     if (!_assetManager.HasTexture(sprite.TilesetId))
                     {
                         if (tilesRendered == 0) // Only warn once per layer
-                        {
                             _logger?.LogWarning(
                                 "  WARNING: Tileset '{TilesetId}' NOT FOUND - skipping tiles",
                                 sprite.TilesetId
                             );
-                        }
                         return;
                     }
 
@@ -382,12 +394,12 @@ public class ZOrderRenderSystem(
                     var position = new Vector2(pos.X * TileSize, pos.Y * TileSize);
 
                     // Calculate layer depth based on layer type
-                    float layerDepth = layer switch
+                    var layerDepth = layer switch
                     {
                         TileLayer.Ground => 0.95f, // Back
                         TileLayer.Object => CalculateYSortDepth(position.Y + TileSize), // Y-sorted
                         TileLayer.Overhead => 0.05f, // Front
-                        _ => 0.5f,
+                        _ => 0.5f
                     };
 
                     // Apply flip flags from Tiled

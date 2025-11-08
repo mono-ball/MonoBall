@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Logging;
-using PokeSharp.Scripting.HotReload;
 
 namespace PokeSharp.Scripting.Compilation;
 

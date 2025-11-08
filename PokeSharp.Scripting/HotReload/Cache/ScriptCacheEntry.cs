@@ -1,5 +1,5 @@
-using System.Linq.Expressions;
 using System.Collections.Concurrent;
+using System.Linq.Expressions;
 
 namespace PokeSharp.Scripting.HotReload.Cache;
 
@@ -96,8 +96,13 @@ public class ScriptCacheEntry
                 try
                 {
                     // OPTIMIZATION: Use compiled constructor factory instead of reflection
-                    var factory = CompiledConstructors.GetOrAdd(ScriptType, CreateCompiledConstructor);
-                    _instance = factory() ?? throw new InvalidOperationException(
+                    var factory = CompiledConstructors.GetOrAdd(
+                        ScriptType,
+                        CreateCompiledConstructor
+                    );
+                    _instance =
+                        factory()
+                        ?? throw new InvalidOperationException(
                             $"Failed to create instance of {ScriptType.Name}"
                         );
                 }
@@ -130,11 +135,9 @@ public class ScriptCacheEntry
             // Fallback: Try to find any public constructor with parameters
             var constructors = type.GetConstructors();
             if (constructors.Length == 0)
-            {
                 throw new InvalidOperationException(
                     $"Type {type.Name} has no public constructors available for compiled instantiation"
                 );
-            }
 
             // Use first available constructor (may require parameters)
             constructor = constructors[0];
@@ -143,12 +146,14 @@ public class ScriptCacheEntry
             if (parameters.Length > 0)
             {
                 // Create constructor call with default parameter values
-                var paramExpressions = parameters.Select(p =>
-                    Expression.Constant(
-                        p.HasDefaultValue ? p.DefaultValue : GetDefaultValue(p.ParameterType),
-                        p.ParameterType
+                var paramExpressions = parameters
+                    .Select(p =>
+                        Expression.Constant(
+                            p.HasDefaultValue ? p.DefaultValue : GetDefaultValue(p.ParameterType),
+                            p.ParameterType
+                        )
                     )
-                ).ToArray();
+                    .ToArray();
 
                 var newExpression = Expression.New(constructor, paramExpressions);
                 var lambda = Expression.Lambda<Func<object>>(
@@ -213,7 +218,7 @@ public class ScriptCacheEntry
             {
                 Instance = _instance, // Share same instance reference
                 LastUpdated = LastUpdated,
-                PreviousVersion = PreviousVersion,
+                PreviousVersion = PreviousVersion
             };
         }
     }

@@ -44,7 +44,7 @@ public class FileSystemWatcherAdapter : IScriptWatcher
                 NotifyFilter =
                     NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.Size,
                 EnableRaisingEvents = false,
-                IncludeSubdirectories = true,
+                IncludeSubdirectories = true
             };
 
             _watcher.Changed += OnFileChanged;
@@ -72,7 +72,7 @@ public class FileSystemWatcherAdapter : IScriptWatcher
                 {
                     Exception = ex,
                     Message = "Failed to start FileSystemWatcher",
-                    IsCritical = true,
+                    IsCritical = true
                 }
             );
             throw;
@@ -80,7 +80,7 @@ public class FileSystemWatcherAdapter : IScriptWatcher
     }
 
     /// <summary>
-    /// Stops the file watcher and disposes all CancellationTokenSource instances.
+    ///     Stops the file watcher and disposes all CancellationTokenSource instances.
     /// </summary>
     public Task StopAsync()
     {
@@ -99,7 +99,6 @@ public class FileSystemWatcherAdapter : IScriptWatcher
 
         // Cancel and dispose all pending debounce timers to prevent resource leaks
         foreach (var cts in _debounceTimers.Values)
-        {
             try
             {
                 cts.Cancel();
@@ -109,7 +108,7 @@ public class FileSystemWatcherAdapter : IScriptWatcher
             {
                 // Already disposed, ignore
             }
-        }
+
         _debounceTimers.Clear();
 
         Status = WatcherStatus.Stopped;
@@ -118,7 +117,7 @@ public class FileSystemWatcherAdapter : IScriptWatcher
     }
 
     /// <summary>
-    /// Disposes the watcher and ensures all resources are cleaned up.
+    ///     Disposes the watcher and ensures all resources are cleaned up.
     /// </summary>
     public void Dispose()
     {
@@ -126,13 +125,12 @@ public class FileSystemWatcherAdapter : IScriptWatcher
     }
 
     /// <summary>
-    /// Handles file change events with debouncing and proper CancellationTokenSource disposal.
+    ///     Handles file change events with debouncing and proper CancellationTokenSource disposal.
     /// </summary>
     private void OnFileChanged(object sender, FileSystemEventArgs e)
     {
         // Debounce: if file is saved multiple times rapidly, only process once
         if (_debounceTimers.TryGetValue(e.FullPath, out var existingCts))
-        {
             try
             {
                 existingCts.Cancel();
@@ -142,7 +140,6 @@ public class FileSystemWatcherAdapter : IScriptWatcher
             {
                 // Already disposed, ignore
             }
-        }
 
         var cts = new CancellationTokenSource();
         _debounceTimers[e.FullPath] = cts;
@@ -158,15 +155,16 @@ public class FileSystemWatcherAdapter : IScriptWatcher
                             await CheckStabilityAndNotify(e.FullPath, e.ChangeType.ToString());
 
                             // Remove and dispose the CancellationTokenSource
-                            if (_debounceTimers.TryRemove(e.FullPath, out var removedCts))
-                            {
-                                removedCts.Dispose();
-                            }
+                            if (_debounceTimers.TryRemove(e.FullPath, out var removedCts)) removedCts.Dispose();
                         }
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, "Error in debounce continuation for {FilePath}", e.FullPath);
+                        _logger.LogError(
+                            ex,
+                            "Error in debounce continuation for {FilePath}",
+                            e.FullPath
+                        );
                     }
                 },
                 TaskScheduler.Default
@@ -187,7 +185,7 @@ public class FileSystemWatcherAdapter : IScriptWatcher
             {
                 Exception = e.GetException(),
                 Message = "FileSystemWatcher encountered an error",
-                IsCritical = false,
+                IsCritical = false
             }
         );
     }
@@ -239,7 +237,7 @@ public class FileSystemWatcherAdapter : IScriptWatcher
                         FilePath = filePath,
                         ChangeTime = DateTime.UtcNow,
                         FileSize = fileInfo.Length,
-                        ChangeType = changeType,
+                        ChangeType = changeType
                     }
                 );
 

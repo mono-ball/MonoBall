@@ -63,4 +63,3 @@ public class TmxTileset
     /// </summary>
     public Dictionary<int, Dictionary<string, object>> TileProperties { get; set; } = new();
 }
-

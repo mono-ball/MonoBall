@@ -40,4 +40,3 @@ public class TmxLayer
     /// </summary>
     public int[,] Data { get; set; } = new int[0, 0];
 }
-

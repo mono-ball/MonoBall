@@ -51,4 +51,3 @@ public class TmxDocument
     /// </summary>
     public List<TmxObjectGroup> ObjectGroups { get; set; } = new();
 }
-

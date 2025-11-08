@@ -15,4 +15,3 @@ public class TmxTileAnimation
     /// </summary>
     public float[] FrameDurations { get; set; } = [];
 }
-

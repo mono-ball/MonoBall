@@ -1,3 +1,5 @@
+using Microsoft.Xna.Framework;
+
 namespace PokeSharp.Core.Components.Tiles;
 
 /// <summary>
@@ -71,19 +73,19 @@ public struct TilesetInfo
     /// </summary>
     /// <param name="tileGid">The global tile ID.</param>
     /// <returns>Source rectangle in the tileset texture.</returns>
-    public readonly Microsoft.Xna.Framework.Rectangle CalculateSourceRect(int tileGid)
+    public readonly Rectangle CalculateSourceRect(int tileGid)
     {
         // Convert global ID to local ID
         var localId = tileGid - FirstGid;
 
         if (localId < 0)
-            return Microsoft.Xna.Framework.Rectangle.Empty;
+            return Rectangle.Empty;
 
         // Calculate position in tileset
         var tileX = localId % TilesPerRow;
         var tileY = localId / TilesPerRow;
 
-        return new Microsoft.Xna.Framework.Rectangle(
+        return new Rectangle(
             tileX * TileWidth,
             tileY * TileHeight,
             TileWidth,

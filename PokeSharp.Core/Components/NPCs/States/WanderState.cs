@@ -38,4 +38,3 @@ public struct WanderState
     /// </summary>
     public float Speed;
 }
-

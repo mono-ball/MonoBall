@@ -6,6 +6,5 @@ public enum WatcherStatus
     Starting,
     Running,
     Error,
-    Stopping,
+    Stopping
 }
-

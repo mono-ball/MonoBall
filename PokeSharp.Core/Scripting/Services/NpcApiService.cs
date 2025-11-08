@@ -1,7 +1,6 @@
 using Arch.Core;
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
-using PokeSharp.Core.Components;
 using PokeSharp.Core.Components.Movement;
 using PokeSharp.Core.Components.NPCs;
 using PokeSharp.Core.ScriptingApi;
@@ -13,8 +12,10 @@ namespace PokeSharp.Core.Scripting.Services;
 /// </summary>
 public class NpcApiService(World world, ILogger<NpcApiService> logger) : INPCApi
 {
+    private readonly ILogger<NpcApiService> _logger =
+        logger ?? throw new ArgumentNullException(nameof(logger));
+
     private readonly World _world = world ?? throw new ArgumentNullException(nameof(world));
-    private readonly ILogger<NpcApiService> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
     public void MoveNPC(Entity npc, Direction direction)
     {
@@ -74,27 +75,18 @@ public class NpcApiService(World world, ILogger<NpcApiService> logger) : INPCApi
 
         Direction direction;
         if (Math.Abs(dx) > Math.Abs(dy))
-        {
             direction = dx > 0 ? Direction.Right : Direction.Left;
-        }
         else if (Math.Abs(dy) > 0)
-        {
             direction = dy > 0 ? Direction.Down : Direction.Up;
-        }
         else
-        {
             direction = Direction.Down; // Default if at same position
-        }
 
         FaceDirection(npc, direction);
     }
 
     public Point GetNPCPosition(Entity npc)
     {
-        if (!_world.IsAlive(npc))
-        {
-            return Point.Zero;
-        }
+        if (!_world.IsAlive(npc)) return Point.Zero;
 
         if (_world.Has<Position>(npc))
         {
@@ -124,17 +116,14 @@ public class NpcApiService(World world, ILogger<NpcApiService> logger) : INPCApi
             Waypoints = waypoints,
             CurrentWaypointIndex = 0,
             Loop = loop,
-            WaypointWaitTime = 0f
+            WaypointWaitTime = 0f,
+            CurrentWaitTime = 0f
         };
 
         if (_world.Has<PathComponent>(npc))
-        {
             _world.Set(npc, pathComponent);
-        }
         else
-        {
             _world.Add(npc, pathComponent);
-        }
 
         _logger.LogInformation(
             "Path set for entity {Entity} with {Count} waypoints (loop: {Loop})",
@@ -144,12 +133,58 @@ public class NpcApiService(World world, ILogger<NpcApiService> logger) : INPCApi
         );
     }
 
+    public Point[]? GetNPCPath(Entity npc)
+    {
+        if (!_world.IsAlive(npc)) return null;
+
+        if (_world.Has<PathComponent>(npc))
+        {
+            ref var path = ref _world.Get<PathComponent>(npc);
+            return path.Waypoints;
+        }
+
+        return null;
+    }
+
+    public void ClearNPCPath(Entity npc)
+    {
+        if (!_world.IsAlive(npc)) return;
+
+        if (_world.Has<PathComponent>(npc))
+        {
+            _world.Remove<PathComponent>(npc);
+            _logger.LogInformation("Path cleared for entity {Entity}", npc.Id);
+        }
+    }
+
+    public void PauseNPCPath(Entity npc)
+    {
+        if (!_world.IsAlive(npc) || !_world.Has<PathComponent>(npc)) return;
+
+        ref var path = ref _world.Get<PathComponent>(npc);
+
+        // Set wait time to a very high value to effectively pause
+        path.WaypointWaitTime = float.MaxValue;
+
+        _logger.LogInformation("Path paused for entity {Entity}", npc.Id);
+    }
+
+    public void ResumeNPCPath(Entity npc, float waitTime = 0f)
+    {
+        if (!_world.IsAlive(npc) || !_world.Has<PathComponent>(npc)) return;
+
+        ref var path = ref _world.Get<PathComponent>(npc);
+
+        // Reset wait time to resume movement
+        path.WaypointWaitTime = waitTime;
+        path.CurrentWaitTime = 0f;
+
+        _logger.LogInformation("Path resumed for entity {Entity}", npc.Id);
+    }
+
     public bool IsNPCMoving(Entity npc)
     {
-        if (!_world.IsAlive(npc))
-        {
-            return false;
-        }
+        if (!_world.IsAlive(npc)) return false;
 
         if (_world.Has<GridMovement>(npc))
         {
@@ -162,10 +197,7 @@ public class NpcApiService(World world, ILogger<NpcApiService> logger) : INPCApi
 
     public void StopNPC(Entity npc)
     {
-        if (!_world.IsAlive(npc))
-        {
-            return;
-        }
+        if (!_world.IsAlive(npc)) return;
 
         if (_world.Has<GridMovement>(npc))
         {
@@ -174,10 +206,6 @@ public class NpcApiService(World world, ILogger<NpcApiService> logger) : INPCApi
         }
 
         // Clear any pending movement requests
-        if (_world.Has<MovementRequest>(npc))
-        {
-            _world.Remove<MovementRequest>(npc);
-        }
+        if (_world.Has<MovementRequest>(npc)) _world.Remove<MovementRequest>(npc);
     }
 }
-

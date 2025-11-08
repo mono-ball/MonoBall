@@ -1,12 +1,6 @@
 using Arch.Core;
 using Microsoft.Extensions.Logging;
-using PokeSharp.Core.Components.Maps;
 using PokeSharp.Core.Components.Movement;
-using PokeSharp.Core.Components.NPCs;
-using PokeSharp.Core.Components.Player;
-using PokeSharp.Core.Components.Rendering;
-using PokeSharp.Core.Components.Tiles;
-using PokeSharp.Core.Types;
 using PokeSharp.Core.Scripting.Services;
 using PokeSharp.Core.ScriptingApi;
 
@@ -30,7 +24,7 @@ namespace PokeSharp.Scripting.Runtime;
 ///     {
 ///         ctx.Logger.LogInformation("Entity has {HP} HP", health.Current);
 ///     }
-///
+/// 
 ///     // Use API services
 ///     var playerMoney = ctx.Player.GetMoney();
 ///     ctx.Logger.LogInformation("Player has {Money} money", playerMoney);
@@ -47,7 +41,7 @@ namespace PokeSharp.Scripting.Runtime;
 ///     {
 ///         // Process all players
 ///     }
-///
+/// 
 ///     // Use World API
 ///     ctx.World.GiveMoney(100);
 /// }
@@ -77,7 +71,8 @@ public sealed class ScriptContext
         NpcApiService npcApi,
         MapApiService mapApi,
         GameStateApiService gameStateApi,
-        IWorldApi worldApi)
+        IWorldApi worldApi
+    )
     {
         World = world ?? throw new ArgumentNullException(nameof(world));
         Logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -255,13 +250,13 @@ public sealed class ScriptContext
         if (!_entity.HasValue)
             throw new InvalidOperationException(
                 $"Cannot get state of type '{typeof(T).Name}' for global script. "
-                    + "Use TryGetState instead, or check IsEntityScript before calling."
+                + "Use TryGetState instead, or check IsEntityScript before calling."
             );
 
         if (!World.Has<T>(_entity.Value))
             throw new InvalidOperationException(
                 $"Entity {_entity.Value.Id} does not have component '{typeof(T).Name}'. "
-                    + "Use HasState or TryGetState to check existence first."
+                + "Use HasState or TryGetState to check existence first."
             );
 
         return ref World.Get<T>(_entity.Value);
@@ -326,7 +321,7 @@ public sealed class ScriptContext
         if (!_entity.HasValue)
             throw new InvalidOperationException(
                 $"Cannot get or add state of type '{typeof(T).Name}' for global script. "
-                    + "Use TryGetState or check IsEntityScript before calling."
+                + "Use TryGetState or check IsEntityScript before calling."
             );
 
         var entity = _entity.Value;

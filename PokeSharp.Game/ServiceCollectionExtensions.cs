@@ -3,6 +3,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using PokeSharp.Core.Events;
 using PokeSharp.Core.Factories;
+using PokeSharp.Core.Scripting.Services;
+using PokeSharp.Core.ScriptingApi;
 using PokeSharp.Core.Systems;
 using PokeSharp.Core.Templates;
 using PokeSharp.Core.Types;
@@ -12,8 +14,6 @@ using PokeSharp.Game.Input;
 using PokeSharp.Game.Templates;
 using PokeSharp.Rendering.Factories;
 using PokeSharp.Scripting.Services;
-using PokeSharp.Core.Scripting.Services;
-using PokeSharp.Core.ScriptingApi;
 
 namespace PokeSharp.Game;
 
@@ -46,7 +46,6 @@ public static class ServiceCollectionExtensions
         });
         services.AddSingleton<IEntityFactoryService, EntityFactoryService>();
 
-
         // Type Registry for Behaviors
         services.AddSingleton(sp =>
         {
@@ -75,7 +74,7 @@ public static class ServiceCollectionExtensions
             var logger = sp.GetRequiredService<ILogger<MapApiService>>();
             // SpatialHashSystem is initialized later in GameInitializer
             // It will be set via SetSpatialHashSystem method after initialization
-            return new MapApiService(world, logger, null!);
+            return new MapApiService(world, logger);
         });
         services.AddSingleton<GameStateApiService>();
         services.AddSingleton<IWorldApi, WorldApi>();
@@ -89,7 +88,15 @@ public static class ServiceCollectionExtensions
             var mapApi = sp.GetRequiredService<MapApiService>();
             var gameStateApi = sp.GetRequiredService<GameStateApiService>();
             var worldApi = sp.GetRequiredService<IWorldApi>();
-            return new ScriptService("Assets/Scripts", logger, playerApi, npcApi, mapApi, gameStateApi, worldApi);
+            return new ScriptService(
+                "Assets/Scripts",
+                logger,
+                playerApi,
+                npcApi,
+                mapApi,
+                gameStateApi,
+                worldApi
+            );
         });
 
         // Game Initializers and Helpers
@@ -104,4 +111,3 @@ public static class ServiceCollectionExtensions
         return services;
     }
 }
-

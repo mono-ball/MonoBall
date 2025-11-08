@@ -19,4 +19,3 @@ public class TiledJsonAnimationFrame
     [JsonPropertyName("duration")]
     public int Duration { get; set; }
 }
-

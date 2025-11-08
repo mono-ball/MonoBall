@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework.Graphics;
 using PokeSharp.Core.Factories;
 using PokeSharp.Rendering.Assets;
@@ -27,5 +26,8 @@ public interface IGraphicsServiceFactory
     /// <param name="assetManager">The AssetManager for loading textures.</param>
     /// <param name="entityFactory">Optional EntityFactory for template-based entity creation.</param>
     /// <returns>A configured MapLoader instance.</returns>
-    MapLoader CreateMapLoader(AssetManager assetManager, IEntityFactoryService? entityFactory = null);
+    MapLoader CreateMapLoader(
+        AssetManager assetManager,
+        IEntityFactoryService? entityFactory = null
+    );
 }

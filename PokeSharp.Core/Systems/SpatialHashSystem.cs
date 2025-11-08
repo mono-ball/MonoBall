@@ -1,6 +1,6 @@
 using Arch.Core;
-using Arch.Core.Extensions;
 using Microsoft.Extensions.Logging;
+using Microsoft.Xna.Framework;
 using PokeSharp.Core.Components.Movement;
 using PokeSharp.Core.Components.Tiles;
 using PokeSharp.Core.Logging;
@@ -15,10 +15,10 @@ namespace PokeSharp.Core.Systems;
 /// </summary>
 public class SpatialHashSystem(ILogger<SpatialHashSystem>? logger = null) : BaseSystem
 {
+    private readonly SpatialHash _dynamicHash = new(); // For entities with Position (cleared each frame)
     private readonly ILogger<SpatialHashSystem>? _logger = logger;
     private readonly SpatialHash _staticHash = new(); // For tiles (indexed once)
-    private readonly SpatialHash _dynamicHash = new(); // For entities with Position (cleared each frame)
-    private bool _staticTilesIndexed = false;
+    private bool _staticTilesIndexed;
 
     /// <inheritdoc />
     public override int Priority => SystemPriority.SpatialHash;
@@ -32,7 +32,7 @@ public class SpatialHashSystem(ILogger<SpatialHashSystem>? logger = null) : Base
         if (!_staticTilesIndexed)
         {
             _staticHash.Clear();
-            int staticTileCount = 0;
+            var staticTileCount = 0;
 
             var tileQuery = new QueryDescription().WithAll<TilePosition>();
             world.Query(
@@ -54,10 +54,7 @@ public class SpatialHashSystem(ILogger<SpatialHashSystem>? logger = null) : Base
         var dynamicQuery = new QueryDescription().WithAll<Position>();
         world.Query(
             in dynamicQuery,
-            (Entity entity, ref Position pos) =>
-            {
-                _dynamicHash.Add(entity, pos.MapId, pos.X, pos.Y);
-            }
+            (Entity entity, ref Position pos) => { _dynamicHash.Add(entity, pos.MapId, pos.X, pos.Y); }
         );
     }
 
@@ -92,7 +89,7 @@ public class SpatialHashSystem(ILogger<SpatialHashSystem>? logger = null) : Base
     /// <returns>Collection of entities within the bounds.</returns>
     public IEnumerable<Entity> GetEntitiesInBounds(
         int mapId,
-        Microsoft.Xna.Framework.Rectangle bounds
+        Rectangle bounds
     )
     {
         // Return entities from both static and dynamic hashes

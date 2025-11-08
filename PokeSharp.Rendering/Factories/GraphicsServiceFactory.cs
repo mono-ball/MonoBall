@@ -24,7 +24,10 @@ public class GraphicsServiceFactory : IGraphicsServiceFactory
     }
 
     /// <inheritdoc />
-    public AssetManager CreateAssetManager(GraphicsDevice graphicsDevice, string assetRoot = "Assets")
+    public AssetManager CreateAssetManager(
+        GraphicsDevice graphicsDevice,
+        string assetRoot = "Assets"
+    )
     {
         if (graphicsDevice == null)
             throw new ArgumentNullException(nameof(graphicsDevice));
@@ -34,7 +37,10 @@ public class GraphicsServiceFactory : IGraphicsServiceFactory
     }
 
     /// <inheritdoc />
-    public MapLoader CreateMapLoader(AssetManager assetManager, IEntityFactoryService? entityFactory = null)
+    public MapLoader CreateMapLoader(
+        AssetManager assetManager,
+        IEntityFactoryService? entityFactory = null
+    )
     {
         if (assetManager == null)
             throw new ArgumentNullException(nameof(assetManager));

@@ -41,4 +41,3 @@ public interface IScriptWatcher : IDisposable
     /// </summary>
     Task StopAsync();
 }
-

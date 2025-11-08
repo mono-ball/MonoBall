@@ -164,7 +164,7 @@ public sealed class FileLogger<T> : ILogger<T>, IDisposable
         _currentLogFile = Path.Combine(_logDirectory, $"pokesharp_{timestamp}.log");
         _currentWriter = new StreamWriter(_currentLogFile, true, Encoding.UTF8)
         {
-            AutoFlush = true,
+            AutoFlush = true
         };
         _currentFileSize = 0;
 
@@ -208,7 +208,7 @@ public sealed class FileLogger<T> : ILogger<T>, IDisposable
             LogLevel.Warning => "WARN ",
             LogLevel.Error => "ERROR",
             LogLevel.Critical => "CRIT ",
-            _ => "NONE ",
+            _ => "NONE "
         };
     }
 }

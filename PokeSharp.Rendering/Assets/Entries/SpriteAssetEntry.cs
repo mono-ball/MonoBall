@@ -15,4 +15,3 @@ public class SpriteAssetEntry
     /// </summary>
     public required string Path { get; set; }
 }
-

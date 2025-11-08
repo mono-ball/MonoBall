@@ -39,4 +39,3 @@ public struct ChaseState
     /// </summary>
     public float ChaseSpeed;
 }
-

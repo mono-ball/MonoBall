@@ -31,12 +31,8 @@ public class SpatialHash
     public void Clear()
     {
         foreach (var mapGrid in _grid.Values)
-        {
-            foreach (var entityList in mapGrid.Values)
-            {
-                entityList.Clear();
-            }
-        }
+        foreach (var entityList in mapGrid.Values)
+            entityList.Clear();
     }
 
     /// <summary>
@@ -118,19 +114,13 @@ public class SpatialHash
             yield break;
 
         // Iterate over all positions within bounds
-        for (int y = bounds.Top; y < bounds.Bottom; y++)
+        for (var y = bounds.Top; y < bounds.Bottom; y++)
+        for (var x = bounds.Left; x < bounds.Right; x++)
         {
-            for (int x = bounds.Left; x < bounds.Right; x++)
-            {
-                var key = (x, y);
-                if (mapGrid.TryGetValue(key, out var entities))
-                {
-                    foreach (var entity in entities)
-                    {
-                        yield return entity;
-                    }
-                }
-            }
+            var key = (x, y);
+            if (mapGrid.TryGetValue(key, out var entities))
+                foreach (var entity in entities)
+                    yield return entity;
         }
     }
 
@@ -140,14 +130,11 @@ public class SpatialHash
     /// <returns>Total entity count across all maps and positions.</returns>
     public int GetEntityCount()
     {
-        int count = 0;
+        var count = 0;
         foreach (var mapGrid in _grid.Values)
-        {
-            foreach (var entities in mapGrid.Values)
-            {
-                count += entities.Count;
-            }
-        }
+        foreach (var entities in mapGrid.Values)
+            count += entities.Count;
+
         return count;
     }
 
@@ -157,11 +144,8 @@ public class SpatialHash
     /// <returns>Number of (map, x, y) positions with at least one entity.</returns>
     public int GetOccupiedPositionCount()
     {
-        int count = 0;
-        foreach (var mapGrid in _grid.Values)
-        {
-            count += mapGrid.Count;
-        }
+        var count = 0;
+        foreach (var mapGrid in _grid.Values) count += mapGrid.Count;
         return count;
     }
 }

@@ -11,6 +11,7 @@ public class PollingWatcher : IScriptWatcher
 {
     private readonly ConcurrentDictionary<string, (DateTime lastWrite, long size)> _fileStates =
         new();
+
     private readonly ILogger<PollingWatcher> _logger;
     private readonly TimeSpan _pollingInterval = TimeSpan.FromMilliseconds(500);
     private CancellationTokenSource? _cancellationTokenSource;
@@ -147,7 +148,7 @@ public class PollingWatcher : IScriptWatcher
                     {
                         Exception = ex,
                         Message = "Error during polling",
-                        IsCritical = false,
+                        IsCritical = false
                     }
                 );
             }
@@ -220,7 +221,7 @@ public class PollingWatcher : IScriptWatcher
                 FilePath = filePath,
                 ChangeTime = DateTime.UtcNow,
                 FileSize = fileSize,
-                ChangeType = changeType,
+                ChangeType = changeType
             }
         );
 

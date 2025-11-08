@@ -15,15 +15,14 @@ public class SystemManager(ILogger<SystemManager>? logger = null)
     private const float TargetFrameTime = 16.67f; // 60 FPS target
     private const double SlowSystemThresholdPercent = 0.1; // Warn if system takes >10% of frame budget
     private const ulong SlowSystemWarningCooldownFrames = 300; // Only warn once per 5 seconds (at 60fps)
+    private readonly Dictionary<ISystem, ulong> _lastSlowWarningFrame = new();
 
     private readonly object _lock = new();
     private readonly ILogger<SystemManager>? _logger = logger;
     private readonly Dictionary<ISystem, SystemMetrics> _metrics = new();
-    private readonly Dictionary<ISystem, ulong> _lastSlowWarningFrame = new();
     private readonly List<ISystem> _systems = new();
-    private bool _initialized;
     private ulong _frameCounter;
-
+    private bool _initialized;
 
     /// <summary>
     ///     Gets all registered systems.
@@ -112,7 +111,6 @@ public class SystemManager(ILogger<SystemManager>? logger = null)
         lock (_lock)
         {
             foreach (var system in _systems)
-            {
                 try
                 {
                     _logger?.LogSystemInitializing(system.GetType().Name);
@@ -127,7 +125,6 @@ public class SystemManager(ILogger<SystemManager>? logger = null)
                     );
                     throw;
                 }
-            }
         }
 
         _initialized = true;
@@ -187,10 +184,7 @@ public class SystemManager(ILogger<SystemManager>? logger = null)
             // Update metrics under lock
             lock (_lock)
             {
-                if (!_metrics.ContainsKey(system))
-                {
-                    _metrics[system] = new SystemMetrics();
-                }
+                if (!_metrics.ContainsKey(system)) _metrics[system] = new SystemMetrics();
 
                 var metrics = _metrics[system];
                 metrics.UpdateCount++;
@@ -204,43 +198,40 @@ public class SystemManager(ILogger<SystemManager>? logger = null)
             // Log slow systems (throttled to avoid spam)
             var elapsed = stopwatch.Elapsed.TotalMilliseconds;
             if (elapsed > TargetFrameTime * SlowSystemThresholdPercent)
-            {
                 lock (_lock)
                 {
                     // Only warn if cooldown period has passed since last warning for this system
-                    if (!_lastSlowWarningFrame.TryGetValue(system, out var lastWarning) ||
-                        (_frameCounter - lastWarning) >= SlowSystemWarningCooldownFrames)
+                    if (
+                        !_lastSlowWarningFrame.TryGetValue(system, out var lastWarning)
+                        || _frameCounter - lastWarning >= SlowSystemWarningCooldownFrames
+                    )
                     {
                         _lastSlowWarningFrame[system] = _frameCounter;
-                        var percentOfFrame = (elapsed / TargetFrameTime) * 100;
-                        _logger?.LogWarning("Slow system: {System} took {Time:F2}ms ({Percent:F1}% of frame)",
-                            system.GetType().Name, elapsed, percentOfFrame);
+                        var percentOfFrame = elapsed / TargetFrameTime * 100;
+                        _logger?.LogWarning(
+                            "Slow system: {System} took {Time:F2}ms ({Percent:F1}% of frame)",
+                            system.GetType().Name,
+                            elapsed,
+                            percentOfFrame
+                        );
                     }
                 }
-            }
         }
 
         // Log performance stats periodically (every 5 seconds at 60fps)
-        if (_frameCounter % 300 == 0)
-        {
-            LogPerformanceStats();
-        }
+        if (_frameCounter % 300 == 0) LogPerformanceStats();
     }
 
     private void LogPerformanceStats()
     {
         foreach (var (system, metrics) in _metrics)
-        {
             if (metrics.UpdateCount > 0)
-            {
                 _logger?.LogSystemPerformance(
                     system.GetType().Name,
                     metrics.AverageUpdateMs,
                     metrics.MaxUpdateMs,
                     metrics.UpdateCount
                 );
-            }
-        }
     }
 
     /// <summary>
@@ -277,9 +268,9 @@ public class SystemManager(ILogger<SystemManager>? logger = null)
 /// </summary>
 public class SystemMetrics
 {
-    public long UpdateCount;
-    public double TotalTimeMs;
     public double LastUpdateMs;
     public double MaxUpdateMs;
+    public double TotalTimeMs;
+    public long UpdateCount;
     public double AverageUpdateMs => UpdateCount > 0 ? TotalTimeMs / UpdateCount : 0;
 }

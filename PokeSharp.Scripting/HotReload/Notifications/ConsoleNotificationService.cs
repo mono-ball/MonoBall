@@ -13,7 +13,7 @@ public class ConsoleNotificationService : IHotReloadNotificationService
             NotificationType.Warning => "⚠",
             NotificationType.Error => "✗",
             NotificationType.Info => "ℹ",
-            _ => "•",
+            _ => "•"
         };
 
         var color = notification.Type switch
@@ -22,7 +22,7 @@ public class ConsoleNotificationService : IHotReloadNotificationService
             NotificationType.Warning => ConsoleColor.Yellow,
             NotificationType.Error => ConsoleColor.Red,
             NotificationType.Info => ConsoleColor.Cyan,
-            _ => ConsoleColor.White,
+            _ => ConsoleColor.White
         };
 
         var originalColor = Console.ForegroundColor;
@@ -48,4 +48,3 @@ public class ConsoleNotificationService : IHotReloadNotificationService
         // Console doesn't need clearing
     }
 }
-

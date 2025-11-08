@@ -18,7 +18,6 @@ public struct TileLedge
     /// <remarks>
     ///     Movement in this direction is allowed (jumping down).
     ///     Movement in the opposite direction is blocked (can't climb up).
-    ///
     ///     Example: JumpDirection = Down means you can jump south but can't go north.
     /// </remarks>
     public Direction JumpDirection { get; set; }
@@ -47,7 +46,7 @@ public struct TileLedge
             Direction.Down => JumpDirection == Direction.Up,
             Direction.Left => JumpDirection == Direction.Right,
             Direction.Right => JumpDirection == Direction.Left,
-            _ => false,
+            _ => false
         };
     }
 }

@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework.Graphics;
@@ -12,10 +13,14 @@ namespace PokeSharp.Rendering.Assets;
 public class AssetManager(
     GraphicsDevice graphicsDevice,
     string assetRoot = "Assets",
-    ILogger<AssetManager>? logger = null) : IDisposable
+    ILogger<AssetManager>? logger = null
+) : IDisposable
 {
-    private readonly GraphicsDevice _graphicsDevice = graphicsDevice ?? throw new ArgumentNullException(nameof(graphicsDevice));
     private readonly string _assetRoot = assetRoot;
+
+    private readonly GraphicsDevice _graphicsDevice =
+        graphicsDevice ?? throw new ArgumentNullException(nameof(graphicsDevice));
+
     private readonly ILogger<AssetManager>? _logger = logger;
     private readonly Dictionary<string, Texture2D> _textures = new();
     private bool _disposed;
@@ -101,8 +106,8 @@ public class AssetManager(
             if (successful > 0)
                 _logger?.LogInformation(
                     "[green]Loaded [cyan]{Count}[/] tilesets"
-                        + (failed > 0 ? " [dim]({Failed} failed)[/]" : "")
-                        + "[/]",
+                    + (failed > 0 ? " [dim]({Failed} failed)[/]" : "")
+                    + "[/]",
                     successful,
                     failed
                 );
@@ -134,8 +139,8 @@ public class AssetManager(
             if (successful > 0)
                 _logger?.LogInformation(
                     "[green]Loaded [cyan]{Count}[/] sprites"
-                        + (failed > 0 ? " [dim]({Failed} failed)[/]" : "")
-                        + "[/]",
+                    + (failed > 0 ? " [dim]({Failed} failed)[/]" : "")
+                    + "[/]",
                     successful,
                     failed
                 );
@@ -157,7 +162,7 @@ public class AssetManager(
         if (!File.Exists(fullPath))
             throw new FileNotFoundException($"Texture file not found: {fullPath}");
 
-        var sw = System.Diagnostics.Stopwatch.StartNew();
+        var sw = Stopwatch.StartNew();
 
         using var fileStream = File.OpenRead(fullPath);
         var texture = Texture2D.FromStream(_graphicsDevice, fileStream);
@@ -171,10 +176,7 @@ public class AssetManager(
         _logger?.LogTextureLoaded(id, elapsedMs, texture.Width, texture.Height);
 
         // Warn about slow texture loads (>100ms)
-        if (elapsedMs > 100.0)
-        {
-            _logger?.LogSlowTextureLoad(id, elapsedMs);
-        }
+        if (elapsedMs > 100.0) _logger?.LogSlowTextureLoad(id, elapsedMs);
     }
 
     /// <summary>

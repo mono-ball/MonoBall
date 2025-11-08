@@ -20,15 +20,32 @@ namespace PokeSharp.Core.Types;
 public class TypeRegistry<T>(string dataPath, ILogger logger) : IAsyncDisposable
     where T : ITypeDefinition
 {
-    private readonly string _dataPath = dataPath ?? throw new ArgumentNullException(nameof(dataPath));
-    private readonly ILogger _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    private readonly string _dataPath =
+        dataPath ?? throw new ArgumentNullException(nameof(dataPath));
+
     private readonly ConcurrentDictionary<string, T> _definitions = new();
+    private readonly ILogger _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     private readonly ConcurrentDictionary<string, object> _scripts = new();
 
     /// <summary>
     ///     Get count of registered types.
     /// </summary>
     public int Count => _definitions.Count;
+
+    /// <summary>
+    ///     Asynchronously disposes resources and clears script instances.
+    /// </summary>
+    public async ValueTask DisposeAsync()
+    {
+        // Dispose any script instances that implement IAsyncDisposable
+        foreach (var script in _scripts.Values)
+            if (script is IAsyncDisposable asyncDisposable)
+                await asyncDisposable.DisposeAsync();
+            else if (script is IDisposable disposable) disposable.Dispose();
+
+        Clear();
+        GC.SuppressFinalize(this);
+    }
 
     /// <summary>
     ///     Register a compiled script instance for a type.
@@ -96,7 +113,7 @@ public class TypeRegistry<T>(string dataPath, ILogger logger) : IAsyncDisposable
         {
             PropertyNameCaseInsensitive = true,
             ReadCommentHandling = JsonCommentHandling.Skip,
-            AllowTrailingCommas = true,
+            AllowTrailingCommas = true
         };
 
         var definition = JsonSerializer.Deserialize<T>(json, options);
@@ -253,27 +270,5 @@ public class TypeRegistry<T>(string dataPath, ILogger logger) : IAsyncDisposable
             return false;
 
         return _scripts.ContainsKey(typeId);
-    }
-
-    /// <summary>
-    ///     Asynchronously disposes resources and clears script instances.
-    /// </summary>
-    public async ValueTask DisposeAsync()
-    {
-        // Dispose any script instances that implement IAsyncDisposable
-        foreach (var script in _scripts.Values)
-        {
-            if (script is IAsyncDisposable asyncDisposable)
-            {
-                await asyncDisposable.DisposeAsync();
-            }
-            else if (script is IDisposable disposable)
-            {
-                disposable.Dispose();
-            }
-        }
-
-        Clear();
-        GC.SuppressFinalize(this);
     }
 }

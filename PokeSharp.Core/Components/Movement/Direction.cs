@@ -28,7 +28,7 @@ public enum Direction
     /// <summary>
     ///     Facing up (north).
     /// </summary>
-    Up = 3,
+    Up = 3
 }
 
 /// <summary>
@@ -49,7 +49,7 @@ public static class DirectionExtensions
             Direction.Left => (-1, 0),
             Direction.Right => (1, 0),
             Direction.Up => (0, -1),
-            _ => (0, 0),
+            _ => (0, 0)
         };
     }
 
@@ -66,7 +66,7 @@ public static class DirectionExtensions
             Direction.Left => "walk_left",
             Direction.Right => "walk_right",
             Direction.Up => "walk_up",
-            _ => "walk_down",
+            _ => "walk_down"
         };
     }
 
@@ -83,7 +83,7 @@ public static class DirectionExtensions
             Direction.Left => "idle_left",
             Direction.Right => "idle_right",
             Direction.Up => "idle_up",
-            _ => "idle_down",
+            _ => "idle_down"
         };
     }
 
@@ -100,7 +100,7 @@ public static class DirectionExtensions
             Direction.Left => Direction.Right,
             Direction.Right => Direction.Left,
             Direction.Up => Direction.Down,
-            _ => direction,
+            _ => direction
         };
     }
 }

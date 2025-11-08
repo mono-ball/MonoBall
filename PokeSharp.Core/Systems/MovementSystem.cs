@@ -1,11 +1,9 @@
 using Arch.Core;
-using Arch.Core.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
 using PokeSharp.Core.Components.Maps;
 using PokeSharp.Core.Components.Movement;
 using PokeSharp.Core.Components.Rendering;
-using PokeSharp.Core.Components.Tiles;
 using PokeSharp.Core.Logging;
 
 namespace PokeSharp.Core.Systems;
@@ -18,23 +16,37 @@ namespace PokeSharp.Core.Systems;
 public class MovementSystem(ILogger<MovementSystem>? logger = null) : BaseSystem
 {
     private const int TileSize = 16;
+
+    // Cache for entities to remove (reused across frames to avoid allocation)
+    private readonly List<Entity> _entitiesToRemove = new(32);
     private readonly ILogger<MovementSystem>? _logger = logger;
-    private SpatialHashSystem? _spatialHashSystem;
+    private readonly QueryDescription _mapInfoQuery = new QueryDescription().WithAll<MapInfo>();
 
     // Cache query descriptions to avoid allocation every frame
     private readonly QueryDescription _movementQuery = new QueryDescription()
         .WithAll<Position, GridMovement>()
         .WithNone<Animation>();
+
     private readonly QueryDescription _movementQueryWithAnimation = new QueryDescription().WithAll<
         Position,
         GridMovement,
         Animation
     >();
-    private readonly QueryDescription _mapInfoQuery = new QueryDescription().WithAll<MapInfo>();
+
+    private readonly QueryDescription _removeQuery =
+        new QueryDescription().WithAll<MovementRequest>();
 
     // Cache query descriptions for movement requests
-    private readonly QueryDescription _requestQuery = new QueryDescription().WithAll<Position, GridMovement, MovementRequest>();
-    private readonly QueryDescription _removeQuery = new QueryDescription().WithAll<MovementRequest>();
+    private readonly QueryDescription _requestQuery = new QueryDescription().WithAll<
+        Position,
+        GridMovement,
+        MovementRequest
+    >();
+
+    private SpatialHashSystem? _spatialHashSystem;
+
+    /// <inheritdoc />
+    public override int Priority => SystemPriority.Movement;
 
     /// <summary>
     ///     Sets the spatial hash system for collision detection.
@@ -44,9 +56,6 @@ public class MovementSystem(ILogger<MovementSystem>? logger = null) : BaseSystem
         _spatialHashSystem = spatialHashSystem;
         _logger?.LogDebug("SpatialHashSystem connected to MovementSystem");
     }
-
-    /// <inheritdoc />
-    public override int Priority => SystemPriority.Movement;
 
     /// <inheritdoc />
     public override void Update(World world, float deltaTime)
@@ -192,9 +201,6 @@ public class MovementSystem(ILogger<MovementSystem>? logger = null) : BaseSystem
         }
     }
 
-    // Cache for entities to remove (reused across frames to avoid allocation)
-    private readonly List<Entity> _entitiesToRemove = new(32);
-
     /// <summary>
     ///     Processes pending movement requests and validates them with collision checking.
     ///     This allows any entity (player, NPC, AI) to request movement.
@@ -239,10 +245,7 @@ public class MovementSystem(ILogger<MovementSystem>? logger = null) : BaseSystem
         );
 
         // Remove in separate loop to avoid modifying collection during iteration
-        foreach (var entity in _entitiesToRemove)
-        {
-            world.Remove<MovementRequest>(entity);
-        }
+        foreach (var entity in _entitiesToRemove) world.Remove<MovementRequest>(entity);
     }
 
     /// <summary>
@@ -260,7 +263,9 @@ public class MovementSystem(ILogger<MovementSystem>? logger = null) : BaseSystem
         if (_spatialHashSystem == null)
         {
             _logger?.LogError("SpatialHashSystem not set - movement blocked for entity");
-            throw new InvalidOperationException("SpatialHashSystem must be set before processing movement. Call SetSpatialHashSystem() first.");
+            throw new InvalidOperationException(
+                "SpatialHashSystem must be set before processing movement. Call SetSpatialHashSystem() first."
+            );
         }
 
         // Calculate target grid position
@@ -360,7 +365,6 @@ public class MovementSystem(ILogger<MovementSystem>? logger = null) : BaseSystem
                 // Update facing direction
                 movement.FacingDirection = direction;
                 _logger?.LogLedgeJump(targetX, targetY, jumpLandX, jumpLandY, direction.ToString());
-                return;
             }
 
             // Block all other directions
@@ -415,11 +419,9 @@ public class MovementSystem(ILogger<MovementSystem>? logger = null) : BaseSystem
             (ref MapInfo mapInfo) =>
             {
                 if (mapInfo.MapId == mapId)
-                {
                     // Check if coordinates are within bounds [0, width) and [0, height)
                     withinBounds =
                         tileX >= 0 && tileX < mapInfo.Width && tileY >= 0 && tileY < mapInfo.Height;
-                }
             }
         );
 

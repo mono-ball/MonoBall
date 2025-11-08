@@ -1,6 +1,5 @@
 using Arch.Core;
 using Microsoft.Extensions.Logging;
-using PokeSharp.Core.Components;
 using PokeSharp.Core.Components.Maps;
 using PokeSharp.Core.Components.Movement;
 using PokeSharp.Core.Components.Player;
@@ -15,19 +14,14 @@ namespace PokeSharp.Core.Scripting.Services;
 public class MapApiService(
     World world,
     ILogger<MapApiService> logger,
-    SpatialHashSystem? spatialHashSystem = null) : IMapApi
+    SpatialHashSystem? spatialHashSystem = null
+) : IMapApi
 {
-    private readonly World _world = world ?? throw new ArgumentNullException(nameof(world));
-    private readonly ILogger<MapApiService> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-    private SpatialHashSystem? _spatialHashSystem = spatialHashSystem;
+    private readonly ILogger<MapApiService> _logger =
+        logger ?? throw new ArgumentNullException(nameof(logger));
 
-    /// <summary>
-    ///     Sets the spatial hash system. This is called after initialization when GraphicsDevice is available.
-    /// </summary>
-    public void SetSpatialHashSystem(SpatialHashSystem spatialHashSystem)
-    {
-        _spatialHashSystem = spatialHashSystem ?? throw new ArgumentNullException(nameof(spatialHashSystem));
-    }
+    private readonly World _world = world ?? throw new ArgumentNullException(nameof(world));
+    private SpatialHashSystem? _spatialHashSystem = spatialHashSystem;
 
     public bool IsPositionWalkable(int mapId, int x, int y)
     {
@@ -39,16 +33,11 @@ public class MapApiService(
 
         var entities = _spatialHashSystem.GetEntitiesAt(mapId, x, y);
         foreach (var entity in entities)
-        {
             if (_world.Has<Collision>(entity))
             {
                 ref var collision = ref _world.Get<Collision>(entity);
-                if (collision.IsSolid)
-                {
-                    return false;
-                }
+                if (collision.IsSolid) return false;
             }
-        }
 
         return true;
     }
@@ -100,14 +89,20 @@ public class MapApiService(
             in query,
             (ref MapInfo mapInfo) =>
             {
-                if (mapInfo.MapId == mapId)
-                {
-                    result = (mapInfo.Width, mapInfo.Height);
-                }
+                if (mapInfo.MapId == mapId) result = (mapInfo.Width, mapInfo.Height);
             }
         );
 
         return result;
+    }
+
+    /// <summary>
+    ///     Sets the spatial hash system. This is called after initialization when GraphicsDevice is available.
+    /// </summary>
+    public void SetSpatialHashSystem(SpatialHashSystem spatialHashSystem)
+    {
+        _spatialHashSystem =
+            spatialHashSystem ?? throw new ArgumentNullException(nameof(spatialHashSystem));
     }
 
     private Entity? GetPlayerEntity()
@@ -117,13 +112,9 @@ public class MapApiService(
 
         _world.Query(
             in query,
-            entity =>
-            {
-                playerEntity = entity;
-            }
+            entity => { playerEntity = entity; }
         );
 
         return playerEntity;
     }
 }
-

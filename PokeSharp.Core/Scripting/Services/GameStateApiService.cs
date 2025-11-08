@@ -8,16 +8,16 @@ namespace PokeSharp.Core.Scripting.Services;
 /// </summary>
 public class GameStateApiService(ILogger<GameStateApiService> logger) : IGameStateApi
 {
-    private readonly ILogger<GameStateApiService> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     private readonly Dictionary<string, bool> _flags = new();
+
+    private readonly ILogger<GameStateApiService> _logger =
+        logger ?? throw new ArgumentNullException(nameof(logger));
+
     private readonly Dictionary<string, string> _variables = new();
 
     public bool GetFlag(string flagId)
     {
-        if (string.IsNullOrWhiteSpace(flagId))
-        {
-            return false;
-        }
+        if (string.IsNullOrWhiteSpace(flagId)) return false;
 
         return _flags.TryGetValue(flagId, out var value) && value;
     }
@@ -25,9 +25,7 @@ public class GameStateApiService(ILogger<GameStateApiService> logger) : IGameSta
     public void SetFlag(string flagId, bool value)
     {
         if (string.IsNullOrWhiteSpace(flagId))
-        {
             throw new ArgumentException("Flag ID cannot be null or empty", nameof(flagId));
-        }
 
         _flags[flagId] = value;
         _logger.LogDebug("Flag {FlagId} set to {Value}", flagId, value);
@@ -35,20 +33,14 @@ public class GameStateApiService(ILogger<GameStateApiService> logger) : IGameSta
 
     public bool FlagExists(string flagId)
     {
-        if (string.IsNullOrWhiteSpace(flagId))
-        {
-            return false;
-        }
+        if (string.IsNullOrWhiteSpace(flagId)) return false;
 
         return _flags.ContainsKey(flagId);
     }
 
     public string? GetVariable(string key)
     {
-        if (string.IsNullOrWhiteSpace(key))
-        {
-            return null;
-        }
+        if (string.IsNullOrWhiteSpace(key)) return null;
 
         return _variables.TryGetValue(key, out var value) ? value : null;
     }
@@ -56,9 +48,7 @@ public class GameStateApiService(ILogger<GameStateApiService> logger) : IGameSta
     public void SetVariable(string key, string value)
     {
         if (string.IsNullOrWhiteSpace(key))
-        {
             throw new ArgumentException("Variable key cannot be null or empty", nameof(key));
-        }
 
         _variables[key] = value;
         _logger.LogDebug("Variable {Key} set to {Value}", key, value);
@@ -66,20 +56,14 @@ public class GameStateApiService(ILogger<GameStateApiService> logger) : IGameSta
 
     public bool VariableExists(string key)
     {
-        if (string.IsNullOrWhiteSpace(key))
-        {
-            return false;
-        }
+        if (string.IsNullOrWhiteSpace(key)) return false;
 
         return _variables.ContainsKey(key);
     }
 
     public void DeleteVariable(string key)
     {
-        if (string.IsNullOrWhiteSpace(key))
-        {
-            return;
-        }
+        if (string.IsNullOrWhiteSpace(key)) return;
 
         _variables.Remove(key);
         _logger.LogDebug("Variable {Key} deleted", key);
@@ -95,4 +79,3 @@ public class GameStateApiService(ILogger<GameStateApiService> logger) : IGameSta
         return _variables.Keys;
     }
 }
-

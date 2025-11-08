@@ -1,9 +1,9 @@
 using Arch.Core;
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using PokeSharp.Core.Factories;
 using PokeSharp.Core.Scripting.Services;
+using PokeSharp.Core.ScriptingApi;
 using PokeSharp.Core.Systems;
 using PokeSharp.Core.Types;
 using PokeSharp.Game.Diagnostics;
@@ -12,7 +12,6 @@ using PokeSharp.Game.Input;
 using PokeSharp.Rendering.Assets;
 using PokeSharp.Rendering.Loaders;
 using PokeSharp.Scripting.Services;
-using PokeSharp.Core.ScriptingApi;
 
 namespace PokeSharp.Game;
 
@@ -22,28 +21,28 @@ namespace PokeSharp.Game;
 /// </summary>
 public class PokeSharpGame : Microsoft.Xna.Framework.Game, IAsyncDisposable
 {
+    private readonly TypeRegistry<BehaviorDefinition> _behaviorRegistry;
+    private readonly IEntityFactoryService _entityFactory;
+    private readonly GameStateApiService _gameStateApi;
     private readonly GraphicsDeviceManager _graphics;
+    private readonly InputManager _inputManager;
     private readonly ILogger<PokeSharpGame> _logger;
     private readonly ILoggerFactory _loggerFactory;
-    private readonly World _world;
-    private readonly SystemManager _systemManager;
-    private readonly IEntityFactoryService _entityFactory;
-    private readonly ScriptService _scriptService;
-    private readonly TypeRegistry<BehaviorDefinition> _behaviorRegistry;
-    private readonly PlayerApiService _playerApi;
+    private readonly MapApiService _mapApiService = null!;
     private readonly NpcApiService _npcApi;
-    private readonly GameStateApiService _gameStateApi;
-    private readonly IWorldApi _worldApi;
 
     // Services that depend on GraphicsDevice (created in Initialize)
     private readonly PerformanceMonitor _performanceMonitor;
-    private readonly InputManager _inputManager;
+    private readonly PlayerApiService _playerApi;
     private readonly PlayerFactory _playerFactory;
+    private readonly ScriptService _scriptService;
+    private readonly SystemManager _systemManager;
+    private readonly World _world;
+    private readonly IWorldApi _worldApi;
 
     private GameInitializer _gameInitializer = null!;
     private MapInitializer _mapInitializer = null!;
     private NPCBehaviorInitializer _npcBehaviorInitializer = null!;
-    private MapApiService _mapApiService = null!;
 
     /// <summary>
     ///     Initializes a new instance of the PokeSharpGame class.
@@ -63,7 +62,8 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game, IAsyncDisposable
         NpcApiService npcApi,
         MapApiService mapApiService,
         GameStateApiService gameStateApi,
-        IWorldApi worldApi)
+        IWorldApi worldApi
+    )
     {
         _logger = logger;
         _loggerFactory = loggerFactory;
@@ -91,6 +91,20 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game, IAsyncDisposable
         _graphics.ApplyChanges();
 
         Window.Title = "PokeSharp - Week 1 Demo";
+    }
+
+    /// <summary>
+    ///     Asynchronously disposes resources.
+    /// </summary>
+    public async ValueTask DisposeAsync()
+    {
+        if (_scriptService is IAsyncDisposable scriptServiceDisposable) await scriptServiceDisposable.DisposeAsync();
+
+        if (_behaviorRegistry is IAsyncDisposable registryDisposable) await registryDisposable.DisposeAsync();
+
+        _world?.Dispose();
+
+        GC.SuppressFinalize(this);
     }
 
     /// <summary>
@@ -156,7 +170,12 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game, IAsyncDisposable
         _mapInitializer.LoadMap("Assets/Maps/test-map.json");
 
         // Create test player entity
-        _playerFactory.CreatePlayer(10, 8, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
+        _playerFactory.CreatePlayer(
+            10,
+            8,
+            _graphics.PreferredBackBufferWidth,
+            _graphics.PreferredBackBufferHeight
+        );
     }
 
     /// <summary>
@@ -164,7 +183,7 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game, IAsyncDisposable
     /// </summary>
     protected override void LoadContent()
     {
-        #warning TODO: Load textures and assets here when content pipeline is set up
+#warning TODO: Load textures and assets here when content pipeline is set up
     }
 
     /// <summary>
@@ -208,31 +227,8 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game, IAsyncDisposable
     /// </summary>
     protected override void Dispose(bool disposing)
     {
-        if (disposing)
-        {
-            _world?.Dispose();
-        }
+        if (disposing) _world?.Dispose();
 
         base.Dispose(disposing);
-    }
-
-    /// <summary>
-    ///     Asynchronously disposes resources.
-    /// </summary>
-    public async ValueTask DisposeAsync()
-    {
-        if (_scriptService is IAsyncDisposable scriptServiceDisposable)
-        {
-            await scriptServiceDisposable.DisposeAsync();
-        }
-
-        if (_behaviorRegistry is IAsyncDisposable registryDisposable)
-        {
-            await registryDisposable.DisposeAsync();
-        }
-
-        _world?.Dispose();
-
-        GC.SuppressFinalize(this);
     }
 }

@@ -40,4 +40,3 @@ public struct GuardState
     /// </summary>
     public int ViewRange;
 }
-

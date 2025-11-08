@@ -31,4 +31,3 @@ public class TiledJsonTileDefinition
     [JsonPropertyName("type")]
     public string? Type { get; set; }
 }
-

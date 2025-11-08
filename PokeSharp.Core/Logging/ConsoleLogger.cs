@@ -15,7 +15,10 @@ public sealed class ConsoleLogger<T> : ILogger<T>
     private readonly string _categoryName;
     private readonly LogLevel _minLevel;
 
-    public ConsoleLogger(LogLevel minLevel = LogLevel.Information, string? categoryNameOverride = null)
+    public ConsoleLogger(
+        LogLevel minLevel = LogLevel.Information,
+        string? categoryNameOverride = null
+    )
     {
         var fullName = categoryNameOverride ?? typeof(T).Name;
         // Extract just the class name without namespace (e.g., "SystemManager" from "PokeSharp.Core.Systems.SystemManager")
@@ -135,7 +138,7 @@ public sealed class ConsoleLogger<T> : ILogger<T>
             LogLevel.Warning => "WARN ",
             LogLevel.Error => "ERROR",
             LogLevel.Critical => "CRIT ",
-            _ => "NONE ",
+            _ => "NONE "
         };
     }
 
@@ -149,7 +152,7 @@ public sealed class ConsoleLogger<T> : ILogger<T>
             LogLevel.Warning => "[yellow][[WARN ]][/]",
             LogLevel.Error => "[red bold][[ERROR]][/]",
             LogLevel.Critical => "[magenta bold][[CRIT ]][/]",
-            _ => "[white][[NONE ]][/]",
+            _ => "[white][[NONE ]][/]"
         };
     }
 
@@ -163,7 +166,7 @@ public sealed class ConsoleLogger<T> : ILogger<T>
             LogLevel.Warning => "yellow",
             LogLevel.Error => "red bold",
             LogLevel.Critical => "magenta bold",
-            _ => "white",
+            _ => "white"
         };
     }
 
@@ -191,7 +194,7 @@ public sealed class ConsoleLogger<T> : ILogger<T>
             "mediumorchid",
             "springgreen1",
             "gold1",
-            "hotpink",
+            "hotpink"
         };
 
         // Generate a consistent hash from the category name

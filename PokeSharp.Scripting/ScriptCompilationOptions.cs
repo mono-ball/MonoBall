@@ -3,13 +3,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
-using PokeSharp.Core.Components.Maps;
 using PokeSharp.Core.Components.Movement;
-using PokeSharp.Core.Components.NPCs;
-using PokeSharp.Core.Components.NPCs.States;
-using PokeSharp.Core.Components.Player;
-using PokeSharp.Core.Components.Rendering;
-using PokeSharp.Core.Components.Tiles;
 using PokeSharp.Scripting.Runtime;
 
 namespace PokeSharp.Scripting;
@@ -37,7 +31,7 @@ public static class ScriptCompilationOptions
                 typeof(World).Assembly, // Arch.Core
                 typeof(Point).Assembly, // MonoGame.Framework
                 typeof(TypeScriptBase).Assembly, // PokeSharp.Scripting
-                typeof(PokeSharp.Core.Components.Movement.Direction).Assembly, // PokeSharp.Core
+                typeof(Direction).Assembly, // PokeSharp.Core
                 typeof(ILogger).Assembly // Microsoft.Extensions.Logging.Abstractions
             )
             // Add namespace imports

@@ -25,4 +25,3 @@ public class TilesetAssetEntry
     /// </summary>
     public int TileHeight { get; set; } = 16;
 }
-

@@ -153,7 +153,10 @@ public sealed class TemplateCache
         if (string.IsNullOrWhiteSpace(tag))
             return [];
 
-        return [.. _templates.Values.Where(t => t.Tag.Equals(tag, StringComparison.OrdinalIgnoreCase))]; // Snapshot
+        return
+        [
+            .. _templates.Values.Where(t => t.Tag.Equals(tag, StringComparison.OrdinalIgnoreCase))
+        ]; // Snapshot
     }
 
     /// <summary>
@@ -182,7 +185,7 @@ public sealed class TemplateCache
                 .Values.GroupBy(t => t.Tag)
                 .ToDictionary(g => g.Key, g => g.Count()),
             OldestTemplate = _lastModified.Values.Any() ? _lastModified.Values.Min() : null,
-            NewestTemplate = _lastModified.Values.Any() ? _lastModified.Values.Max() : null,
+            NewestTemplate = _lastModified.Values.Any() ? _lastModified.Values.Max() : null
         };
     }
 
@@ -225,7 +228,7 @@ public sealed class CacheStatistics
     public override string ToString()
     {
         return $"Templates: {TotalTemplates}, Tags: {TemplatesByTag.Count}, "
-            + $"Oldest: {OldestTemplate?.ToString() ?? "N/A"}, "
-            + $"Newest: {NewestTemplate?.ToString() ?? "N/A"}";
+               + $"Oldest: {OldestTemplate?.ToString() ?? "N/A"}, "
+               + $"Newest: {NewestTemplate?.ToString() ?? "N/A"}";
     }
 }

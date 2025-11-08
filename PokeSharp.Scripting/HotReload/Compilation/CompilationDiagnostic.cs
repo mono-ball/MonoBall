@@ -17,4 +17,3 @@ public class CompilationDiagnostic
         return $"[{Severity}] Line {Line}, Col {Column}: {Message} ({Code})";
     }
 }
-

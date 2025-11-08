@@ -26,7 +26,7 @@ public class WatcherFactory
 
         _logger.LogInformation(
             "Path analysis for {Directory}: Platform={Platform}, IsNetworkPath={IsNetwork}, "
-                + "IsDockerVolume={IsDocker}, IsWSL2={IsWSL2}, RecommendPolling={RecommendPolling}",
+            + "IsDockerVolume={IsDocker}, IsWSL2={IsWSL2}, RecommendPolling={RecommendPolling}",
             directory,
             analysis.Platform,
             analysis.IsNetworkPath,
@@ -88,13 +88,13 @@ public class WatcherFactory
 
         // Linux/macOS: check for NFS, SMB, CIFS mounts
         return (
-                path.StartsWith("/mnt/")
-                && !path.StartsWith("/mnt/c/")
-                && !path.StartsWith("/mnt/wsl")
-            )
-            || path.StartsWith("/net/")
-            || path.Contains("/nfs/")
-            || path.Contains("/smb/");
+                   path.StartsWith("/mnt/")
+                   && !path.StartsWith("/mnt/c/")
+                   && !path.StartsWith("/mnt/wsl")
+               )
+               || path.StartsWith("/net/")
+               || path.Contains("/nfs/")
+               || path.Contains("/smb/");
     }
 
     private static bool IsNetworkDriveWindows(string path)
@@ -117,9 +117,9 @@ public class WatcherFactory
     {
         // Check for Docker-specific paths
         return path.Contains("/var/lib/docker/")
-            || path.Contains("/docker/")
-            || File.Exists("/.dockerenv")
-            || File.Exists("/run/.containerenv"); // Podman
+               || path.Contains("/docker/")
+               || File.Exists("/.dockerenv")
+               || File.Exists("/run/.containerenv"); // Podman
     }
 
     private static bool IsWSL2Path(string path)
@@ -139,7 +139,7 @@ public class WatcherFactory
         {
             var version = File.ReadAllText("/proc/version");
             return version.Contains("microsoft", StringComparison.OrdinalIgnoreCase)
-                || version.Contains("WSL", StringComparison.OrdinalIgnoreCase);
+                   || version.Contains("WSL", StringComparison.OrdinalIgnoreCase);
         }
         catch
         {

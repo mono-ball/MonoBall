@@ -1,11 +1,6 @@
 using Arch.Core;
 using Microsoft.Extensions.Logging;
-using PokeSharp.Core.Components.Maps;
-using PokeSharp.Core.Components.Movement;
-using PokeSharp.Core.Components.NPCs;
-using PokeSharp.Core.Components.Player;
 using PokeSharp.Core.Components.Rendering;
-using PokeSharp.Core.Components.Tiles;
 using PokeSharp.Core.Systems;
 using PokeSharp.Rendering.Animation;
 using AnimationComponent = PokeSharp.Core.Components.Rendering.Animation;
@@ -19,9 +14,12 @@ namespace PokeSharp.Rendering.Systems;
 /// </summary>
 public class AnimationSystem(
     AnimationLibrary animationLibrary,
-    ILogger<AnimationSystem>? logger = null) : BaseSystem
+    ILogger<AnimationSystem>? logger = null
+) : BaseSystem
 {
-    private readonly AnimationLibrary _animationLibrary = animationLibrary ?? throw new ArgumentNullException(nameof(animationLibrary));
+    private readonly AnimationLibrary _animationLibrary =
+        animationLibrary ?? throw new ArgumentNullException(nameof(animationLibrary));
+
     private readonly ILogger<AnimationSystem>? _logger = logger;
     private ulong _frameCounter;
 

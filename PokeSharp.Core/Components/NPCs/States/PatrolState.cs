@@ -35,4 +35,3 @@ public struct PatrolState
     /// </summary>
     public bool IsWaiting;
 }
-

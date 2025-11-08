@@ -149,9 +149,9 @@ public struct Camera
         var roundedY = MathF.Round(Position.Y * Zoom) / Zoom;
 
         return Matrix.CreateTranslation(-roundedX, -roundedY, 0)
-            * Matrix.CreateRotationZ(Rotation)
-            * Matrix.CreateScale(Zoom, Zoom, 1)
-            * Matrix.CreateTranslation(Viewport.Width / 2f, Viewport.Height / 2f, 0);
+               * Matrix.CreateRotationZ(Rotation)
+               * Matrix.CreateScale(Zoom, Zoom, 1)
+               * Matrix.CreateTranslation(Viewport.Width / 2f, Viewport.Height / 2f, 0);
     }
 
     /// <summary>

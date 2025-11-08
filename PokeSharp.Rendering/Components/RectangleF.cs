@@ -112,9 +112,9 @@ public struct RectangleF
     public bool Contains(RectangleF other)
     {
         return other.Left >= Left
-            && other.Right <= Right
-            && other.Top >= Top
-            && other.Bottom <= Bottom;
+               && other.Right <= Right
+               && other.Top >= Top
+               && other.Bottom <= Bottom;
     }
 
     /// <summary>
@@ -154,10 +154,10 @@ public struct RectangleF
     public override bool Equals(object? obj)
     {
         return obj is RectangleF other
-            && X == other.X
-            && Y == other.Y
-            && Width == other.Width
-            && Height == other.Height;
+               && X == other.X
+               && Y == other.Y
+               && Width == other.Width
+               && Height == other.Height;
     }
 
     /// <summary>

@@ -11,7 +11,9 @@ public class AnimationDefinition
     /// <summary>
     ///     Initializes a new instance of the AnimationDefinition class.
     /// </summary>
-    public AnimationDefinition() { }
+    public AnimationDefinition()
+    {
+    }
 
     /// <summary>
     ///     Initializes a new instance of the AnimationDefinition class with specified parameters.
@@ -94,7 +96,7 @@ public class AnimationDefinition
     /// <returns>A new AnimationDefinition with one frame.</returns>
     public static AnimationDefinition CreateSingleFrame(string name, Rectangle frame)
     {
-        return new AnimationDefinition(name, new[] { frame }, 1.0f, true);
+        return new AnimationDefinition(name, new[] { frame }, 1.0f);
     }
 
     /// <summary>

@@ -13,4 +13,3 @@ public class HotReloadNotification
     public int AffectedScripts { get; init; }
     public bool IsAutoDismiss { get; init; } = true;
 }
-

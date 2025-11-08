@@ -16,11 +16,7 @@ public interface IEntityFactoryService
     /// <param name="context">Spawn context (position, overrides)</param>
     /// <returns>Spawned entity</returns>
     /// <exception cref="ArgumentException">Template not found or invalid</exception>
-    Entity SpawnFromTemplate(
-        string templateId,
-        World world,
-        EntitySpawnContext? context = null
-    );
+    Entity SpawnFromTemplate(string templateId, World world, EntitySpawnContext? context = null);
 
     /// <summary>
     ///     Spawn an entity with fluent configuration.
@@ -30,11 +26,7 @@ public interface IEntityFactoryService
     /// <param name="world">Arch world</param>
     /// <param name="configure">Builder configuration action</param>
     /// <returns>Spawned entity</returns>
-    Entity SpawnFromTemplate(
-        string templateId,
-        World world,
-        Action<EntityBuilder> configure
-    );
+    Entity SpawnFromTemplate(string templateId, World world, Action<EntityBuilder> configure);
 
     /// <summary>
     ///     Spawn multiple entities from templates in batch (optimized).
@@ -43,10 +35,7 @@ public interface IEntityFactoryService
     /// <param name="templateIds">Template identifiers</param>
     /// <param name="world">Arch world</param>
     /// <returns>Spawned entities</returns>
-    IEnumerable<Entity> SpawnBatch(
-        IEnumerable<string> templateIds,
-        World world
-    );
+    IEnumerable<Entity> SpawnBatch(IEnumerable<string> templateIds, World world);
 
     /// <summary>
     ///     Validate a template before spawning.

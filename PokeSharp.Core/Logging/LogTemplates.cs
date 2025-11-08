@@ -174,7 +174,7 @@ public static class LogTemplates
             : avgMs > 0.84 ? "yellow"
             : "green";
         var message =
-            $"[blue]│[/] [cyan]{systemName, -25}[/] [{avgColor}]{avgMs, 6:F2}ms[/] [dim]avg[/] [yellow]{maxMs, 6:F2}ms[/] [dim]max[/] [grey]│[/] [dim]{calls} calls[/]";
+            $"[blue]│[/] [cyan]{systemName,-25}[/] [{avgColor}]{avgMs,6:F2}ms[/] [dim]avg[/] [yellow]{maxMs,6:F2}ms[/] [dim]max[/] [grey]│[/] [dim]{calls} calls[/]";
         logger.LogInformation(message);
     }
 
@@ -395,7 +395,7 @@ public static class LogTemplates
     public static void LogDiagnosticHeader(this ILogger logger, string title)
     {
         logger.LogInformation("[blue bold]╔══════════════════════════════════════════╗[/]");
-        var headerLine = $"[blue bold]║[/]  [cyan bold]{title, -38}[/]  [blue bold]║[/]";
+        var headerLine = $"[blue bold]║[/]  [cyan bold]{title,-38}[/]  [blue bold]║[/]";
         logger.LogInformation(headerLine);
         logger.LogInformation("[blue bold]╚══════════════════════════════════════════╝[/]");
     }

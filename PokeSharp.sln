@@ -11,12 +11,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokeSharp.Scripting", "Poke
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokeSharp.Game", "PokeSharp.Game\PokeSharp.Game.csproj", "{6C026CBA-1899-4421-8C51-BC3854A0D102}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokeSharp.Game.Tests", "PokeSharp.Game.Tests\PokeSharp.Game.Tests.csproj", "{A1B2C3D4-5E6F-7890-AB12-CD34EF567890}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokeSharp.Rendering.Tests", "PokeSharp.Rendering.Tests\PokeSharp.Rendering.Tests.csproj", "{B2C3D4E5-6F78-9012-BC23-DE45FG678901}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokeSharp.Scripting.Tests", "PokeSharp.Scripting.Tests\PokeSharp.Scripting.Tests.csproj", "{C3D4E5F6-7890-1234-CD34-EF56GH789012}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,10 +41,6 @@ Global
 		{6C026CBA-1899-4421-8C51-BC3854A0D102}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6C026CBA-1899-4421-8C51-BC3854A0D102}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6C026CBA-1899-4421-8C51-BC3854A0D102}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A1B2C3D4-5E6F-7890-AB12-CD34EF567890}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A1B2C3D4-5E6F-7890-AB12-CD34EF567890}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A1B2C3D4-5E6F-7890-AB12-CD34EF567890}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A1B2C3D4-5E6F-7890-AB12-CD34EF567890}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B2C3D4E5-6F78-9012-BC23-DE45FG678901}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B2C3D4E5-6F78-9012-BC23-DE45FG678901}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B2C3D4E5-6F78-9012-BC23-DE45FG678901}.Release|Any CPU.ActiveCfg = Release|Any CPU

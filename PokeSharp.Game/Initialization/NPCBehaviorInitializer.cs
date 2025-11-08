@@ -1,12 +1,12 @@
 using Arch.Core;
 using Microsoft.Extensions.Logging;
 using PokeSharp.Core.Logging;
+using PokeSharp.Core.Scripting.Services;
+using PokeSharp.Core.ScriptingApi;
 using PokeSharp.Core.Systems;
 using PokeSharp.Core.Types;
 using PokeSharp.Game.Systems;
 using PokeSharp.Scripting.Services;
-using PokeSharp.Core.Scripting.Services;
-using PokeSharp.Core.ScriptingApi;
 
 namespace PokeSharp.Game.Initialization;
 
@@ -24,20 +24,9 @@ public class NPCBehaviorInitializer(
     NpcApiService npcApi,
     MapApiService mapApi,
     GameStateApiService gameStateApi,
-    IWorldApi worldApi)
+    IWorldApi worldApi
+)
 {
-    private readonly ILogger<NPCBehaviorInitializer> _logger = logger;
-    private readonly ILoggerFactory _loggerFactory = loggerFactory;
-    private readonly World _world = world;
-    private readonly SystemManager _systemManager = systemManager;
-    private readonly ScriptService _scriptService = scriptService;
-    private readonly TypeRegistry<BehaviorDefinition> _behaviorRegistry = behaviorRegistry;
-    private readonly PlayerApiService _playerApi = playerApi;
-    private readonly NpcApiService _npcApi = npcApi;
-    private readonly MapApiService _mapApi = mapApi;
-    private readonly GameStateApiService _gameStateApi = gameStateApi;
-    private readonly IWorldApi _worldApi = worldApi;
-
     /// <summary>
     ///     Initializes the NPC behavior system with TypeRegistry and ScriptService.
     /// </summary>
@@ -46,42 +35,44 @@ public class NPCBehaviorInitializer(
         try
         {
             // Load all behavior definitions from JSON
-            var loadedCount = _behaviorRegistry.LoadAllAsync().Result;
-            _logger.LogInformation("Loaded {Count} behavior definitions", loadedCount);
+            var loadedCount = behaviorRegistry.LoadAllAsync().Result;
+            logger.LogInformation("Loaded {Count} behavior definitions", loadedCount);
 
             // Load and compile behavior scripts for each type
-            foreach (var typeId in _behaviorRegistry.GetAllTypeIds())
+            foreach (var typeId in behaviorRegistry.GetAllTypeIds())
             {
-                var definition = _behaviorRegistry.Get(typeId);
+                var definition = behaviorRegistry.Get(typeId);
                 if (
                     definition is IScriptedType scripted
                     && !string.IsNullOrEmpty(scripted.BehaviorScript)
                 )
                 {
-                    _logger.LogInformation(
+                    logger.LogInformation(
                         "Loading behavior script for {TypeId}: {Script}",
                         typeId,
                         scripted.BehaviorScript
                     );
 
-                    var scriptInstance = _scriptService.LoadScriptAsync(scripted.BehaviorScript).Result;
+                    var scriptInstance = scriptService
+                        .LoadScriptAsync(scripted.BehaviorScript)
+                        .Result;
 
                     if (scriptInstance != null)
                     {
                         // Initialize script with world
-                        _scriptService.InitializeScript(scriptInstance, _world);
+                        scriptService.InitializeScript(scriptInstance, world);
 
                         // Register script instance in the registry
-                        _behaviorRegistry.RegisterScript(typeId, scriptInstance);
+                        behaviorRegistry.RegisterScript(typeId, scriptInstance);
 
-                        _logger.LogInformation(
+                        logger.LogInformation(
                             "✓ Loaded and initialized behavior: {TypeId}",
                             typeId
                         );
                     }
                     else
                     {
-                        _logger.LogError(
+                        logger.LogError(
                             "✗ Failed to compile script for {TypeId}: {Script}",
                             typeId,
                             scripted.BehaviorScript
@@ -91,24 +82,24 @@ public class NPCBehaviorInitializer(
             }
 
             // Register NPCBehaviorSystem with API services
-            var npcBehaviorLogger = _loggerFactory.CreateLogger<NPCBehaviorSystem>();
+            var npcBehaviorLogger = loggerFactory.CreateLogger<NPCBehaviorSystem>();
             var npcBehaviorSystem = new NPCBehaviorSystem(
                 npcBehaviorLogger,
-                _loggerFactory,
-                _playerApi,
-                _npcApi,
-                _mapApi,
-                _gameStateApi,
-                _worldApi);
-            npcBehaviorSystem.SetBehaviorRegistry(_behaviorRegistry);
-            _systemManager.RegisterSystem(npcBehaviorSystem);
+                loggerFactory,
+                playerApi,
+                npcApi,
+                mapApi,
+                gameStateApi,
+                worldApi
+            );
+            npcBehaviorSystem.SetBehaviorRegistry(behaviorRegistry);
+            systemManager.RegisterSystem(npcBehaviorSystem);
 
-            _logger.LogSystemInitialized("NPCBehaviorSystem", ("behaviors", loadedCount));
+            logger.LogSystemInitialized("NPCBehaviorSystem", ("behaviors", loadedCount));
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to initialize NPC behavior system");
+            logger.LogError(ex, "Failed to initialize NPC behavior system");
         }
     }
 }
-

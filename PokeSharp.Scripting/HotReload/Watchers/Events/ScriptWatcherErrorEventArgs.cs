@@ -6,4 +6,3 @@ public class ScriptWatcherErrorEventArgs : EventArgs
     public string Message { get; init; } = string.Empty;
     public bool IsCritical { get; init; }
 }
-

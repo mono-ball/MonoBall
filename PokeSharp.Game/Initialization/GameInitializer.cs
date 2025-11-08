@@ -3,11 +3,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework.Graphics;
 using PokeSharp.Core.Factories;
 using PokeSharp.Core.Logging;
-using PokeSharp.Core.Scripting.Services;
 using PokeSharp.Core.Systems;
-using PokeSharp.Core.Templates;
 using PokeSharp.Game.Diagnostics;
-using PokeSharp.Game.Systems;
 using PokeSharp.Input.Systems;
 using PokeSharp.Rendering.Animation;
 using PokeSharp.Rendering.Assets;
@@ -26,34 +23,31 @@ public class GameInitializer(
     SystemManager systemManager,
     AssetManager assetManager,
     IEntityFactoryService entityFactory,
-    MapLoader mapLoader)
+    MapLoader mapLoader
+)
 {
-    private readonly ILogger<GameInitializer> _logger = logger;
-    private readonly ILoggerFactory _loggerFactory = loggerFactory;
-    private readonly World _world = world;
-    private readonly SystemManager _systemManager = systemManager;
     private readonly AssetManager _assetManager = assetManager;
     private readonly IEntityFactoryService _entityFactory = entityFactory;
+    private readonly ILogger<GameInitializer> _logger = logger;
+    private readonly ILoggerFactory _loggerFactory = loggerFactory;
     private readonly MapLoader _mapLoader = mapLoader;
-
-    private AnimationLibrary _animationLibrary = null!;
-    private SpatialHashSystem _spatialHashSystem = null!;
-    private ZOrderRenderSystem _renderSystem = null!;
+    private readonly SystemManager _systemManager = systemManager;
+    private readonly World _world = world;
 
     /// <summary>
     ///     Gets the animation library.
     /// </summary>
-    public AnimationLibrary AnimationLibrary => _animationLibrary;
+    public AnimationLibrary AnimationLibrary { get; private set; } = null!;
 
     /// <summary>
     ///     Gets the spatial hash system.
     /// </summary>
-    public SpatialHashSystem SpatialHashSystem => _spatialHashSystem;
+    public SpatialHashSystem SpatialHashSystem { get; private set; } = null!;
 
     /// <summary>
     ///     Gets the render system.
     /// </summary>
-    public ZOrderRenderSystem RenderSystem => _renderSystem;
+    public ZOrderRenderSystem RenderSystem { get; private set; } = null!;
 
     /// <summary>
     ///     Initializes all game systems and infrastructure.
@@ -80,14 +74,14 @@ public class GameInitializer(
         }
 
         // Create animation library with default player animations
-        _animationLibrary = new AnimationLibrary();
-        _logger.LogComponentInitialized("AnimationLibrary", _animationLibrary.Count);
+        AnimationLibrary = new AnimationLibrary();
+        _logger.LogComponentInitialized("AnimationLibrary", AnimationLibrary.Count);
 
         // Create and register systems in priority order
         // SpatialHashSystem (Priority: 25) - must run early to build spatial index
         var spatialHashLogger = _loggerFactory.CreateLogger<SpatialHashSystem>();
-        _spatialHashSystem = new SpatialHashSystem(spatialHashLogger);
-        _systemManager.RegisterSystem(_spatialHashSystem);
+        SpatialHashSystem = new SpatialHashSystem(spatialHashLogger);
+        _systemManager.RegisterSystem(SpatialHashSystem);
 
         // InputSystem with Pokemon-style input buffering (5 inputs, 200ms timeout)
         var inputLogger = _loggerFactory.CreateLogger<InputSystem>();
@@ -97,18 +91,18 @@ public class GameInitializer(
         // Register MovementSystem (Priority: 100, handles movement and collision checking)
         var movementLogger = _loggerFactory.CreateLogger<MovementSystem>();
         var movementSystem = new MovementSystem(movementLogger);
-        movementSystem.SetSpatialHashSystem(_spatialHashSystem);
+        movementSystem.SetSpatialHashSystem(SpatialHashSystem);
         _systemManager.RegisterSystem(movementSystem);
 
         // Register CollisionSystem (Priority: 200, provides tile collision checking)
         var collisionLogger = _loggerFactory.CreateLogger<CollisionSystem>();
         var collisionSystem = new CollisionSystem(collisionLogger);
-        collisionSystem.SetSpatialHashSystem(_spatialHashSystem);
+        collisionSystem.SetSpatialHashSystem(SpatialHashSystem);
         _systemManager.RegisterSystem(collisionSystem);
 
         // Register AnimationSystem (Priority: 800, after movement, before rendering)
         var animationLogger = _loggerFactory.CreateLogger<AnimationSystem>();
-        _systemManager.RegisterSystem(new AnimationSystem(_animationLibrary, animationLogger));
+        _systemManager.RegisterSystem(new AnimationSystem(AnimationLibrary, animationLogger));
 
         // Register CameraFollowSystem (Priority: 825, after Animation, before TileAnimation)
         var cameraFollowLogger = _loggerFactory.CreateLogger<CameraFollowSystem>();
@@ -120,8 +114,8 @@ public class GameInitializer(
 
         // Register ZOrderRenderSystem (Priority: 1000) - unified rendering with Z-order sorting
         var renderLogger = _loggerFactory.CreateLogger<ZOrderRenderSystem>();
-        _renderSystem = new ZOrderRenderSystem(graphicsDevice, _assetManager, renderLogger);
-        _systemManager.RegisterSystem(_renderSystem);
+        RenderSystem = new ZOrderRenderSystem(graphicsDevice, _assetManager, renderLogger);
+        _systemManager.RegisterSystem(RenderSystem);
 
         // Initialize all systems
         _systemManager.Initialize(_world);
@@ -129,4 +123,3 @@ public class GameInitializer(
         _logger.LogInformation("Game initialization complete");
     }
 }
-

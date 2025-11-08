@@ -15,12 +15,11 @@ public class InputManager(ILogger<InputManager> logger)
 {
     private readonly ILogger<InputManager> _logger = logger;
     private KeyboardState _previousKeyboardState;
-    private bool _detailedProfilingEnabled;
 
     /// <summary>
     ///     Gets whether detailed profiling is enabled.
     /// </summary>
-    public bool IsDetailedProfilingEnabled => _detailedProfilingEnabled;
+    public bool IsDetailedProfilingEnabled { get; private set; }
 
     /// <summary>
     ///     Handles zoom controls and debug inputs.
@@ -104,11 +103,11 @@ public class InputManager(ILogger<InputManager> logger)
         // Toggle detailed rendering profiling with P key
         if (IsKeyPressed(currentKeyboardState, Keys.P))
         {
-            _detailedProfilingEnabled = !_detailedProfilingEnabled;
-            renderSystem?.SetDetailedProfiling(_detailedProfilingEnabled);
+            IsDetailedProfilingEnabled = !IsDetailedProfilingEnabled;
+            renderSystem?.SetDetailedProfiling(IsDetailedProfilingEnabled);
             _logger.LogInformation(
                 "Detailed profiling: {State}",
-                _detailedProfilingEnabled ? "ON" : "OFF"
+                IsDetailedProfilingEnabled ? "ON" : "OFF"
             );
         }
 
@@ -123,4 +122,3 @@ public class InputManager(ILogger<InputManager> logger)
         return currentState.IsKeyDown(key) && _previousKeyboardState.IsKeyUp(key);
     }
 }
-

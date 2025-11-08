@@ -54,4 +54,3 @@ public class CompilationResult
         return "No errors";
     }
 }
-

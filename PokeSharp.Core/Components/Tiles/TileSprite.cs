@@ -53,7 +53,8 @@ public struct TileSprite
         Rectangle sourceRect,
         bool flipHorizontally = false,
         bool flipVertically = false,
-        bool flipDiagonally = false)
+        bool flipDiagonally = false
+    )
     {
         TilesetId = tilesetId;
         TileGid = tileGid;
@@ -64,4 +65,3 @@ public struct TileSprite
         FlipDiagonally = flipDiagonally;
     }
 }
-

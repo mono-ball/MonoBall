@@ -6,10 +6,10 @@ namespace PokeSharp.Core.Services;
 /// </summary>
 public class MapRegistry
 {
-    private readonly Dictionary<string, int> _mapNameToId = new();
-    private readonly Dictionary<int, string> _mapIdToName = new();
     private readonly HashSet<int> _loadedMaps = new();
-    private int _nextMapId = 0;
+    private readonly Dictionary<int, string> _mapIdToName = new();
+    private readonly Dictionary<string, int> _mapNameToId = new();
+    private int _nextMapId;
 
     /// <summary>
     ///     Gets or creates a unique ID for a map name.

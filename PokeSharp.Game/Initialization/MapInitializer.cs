@@ -17,14 +17,9 @@ public class MapInitializer(
     World world,
     MapLoader mapLoader,
     SpatialHashSystem spatialHashSystem,
-    ZOrderRenderSystem renderSystem)
+    ZOrderRenderSystem renderSystem
+)
 {
-    private readonly ILogger<MapInitializer> _logger = logger;
-    private readonly World _world = world;
-    private readonly MapLoader _mapLoader = mapLoader;
-    private readonly SpatialHashSystem _spatialHashSystem = spatialHashSystem;
-    private readonly ZOrderRenderSystem _renderSystem = renderSystem;
-
     /// <summary>
     ///     Loads the test map using the entity-based tile system.
     ///     Creates individual entities for each tile with appropriate components.
@@ -36,21 +31,21 @@ public class MapInitializer(
         try
         {
             // Load map as tile entities (ECS-based approach)
-            var mapInfoEntity = _mapLoader.LoadMapEntities(_world, mapPath);
+            var mapInfoEntity = mapLoader.LoadMapEntities(world, mapPath);
 
             // Invalidate spatial hash to reindex static tiles
-            _spatialHashSystem.InvalidateStaticTiles();
+            spatialHashSystem.InvalidateStaticTiles();
 
             // Preload all textures used by the map to avoid loading spikes during gameplay
-            _renderSystem.PreloadMapAssets(_world);
+            renderSystem.PreloadMapAssets(world);
 
             // Set camera bounds from MapInfo
             var mapInfoQuery = new QueryDescription().WithAll<MapInfo>();
-            _world.Query(
+            world.Query(
                 in mapInfoQuery,
                 (ref MapInfo mapInfo) =>
                 {
-                    _logger.LogInformation(
+                    logger.LogInformation(
                         "Camera bounds set to {Width}x{Height} pixels",
                         mapInfo.PixelWidth,
                         mapInfo.PixelHeight
@@ -62,7 +57,11 @@ public class MapInitializer(
         }
         catch (Exception ex)
         {
-            _logger.LogExceptionWithContext(ex, "Failed to load map: {MapPath}. Game will continue without map", mapPath);
+            logger.LogExceptionWithContext(
+                ex,
+                "Failed to load map: {MapPath}. Game will continue without map",
+                mapPath
+            );
             return null;
         }
     }
@@ -75,12 +74,6 @@ public class MapInitializer(
     public Rectangle GetMapBounds(int mapWidthInTiles, int mapHeightInTiles)
     {
         const int tileSize = 16;
-        return new Rectangle(
-            0,
-            0,
-            mapWidthInTiles * tileSize,
-            mapHeightInTiles * tileSize
-        );
+        return new Rectangle(0, 0, mapWidthInTiles * tileSize, mapHeightInTiles * tileSize);
     }
 }
-

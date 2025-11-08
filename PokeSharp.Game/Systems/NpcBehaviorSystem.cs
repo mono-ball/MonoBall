@@ -3,12 +3,11 @@ using Arch.Core;
 using Microsoft.Extensions.Logging;
 using PokeSharp.Core.Components.Movement;
 using PokeSharp.Core.Components.NPCs;
-using PokeSharp.Core.Components.Player;
+using PokeSharp.Core.Scripting.Services;
+using PokeSharp.Core.ScriptingApi;
 using PokeSharp.Core.Systems;
 using PokeSharp.Core.Types;
 using PokeSharp.Scripting.Runtime;
-using PokeSharp.Core.Scripting.Services;
-using PokeSharp.Core.ScriptingApi;
 
 namespace PokeSharp.Game.Systems;
 
@@ -24,13 +23,13 @@ namespace PokeSharp.Game.Systems;
 /// </remarks>
 public class NPCBehaviorSystem : BaseSystem
 {
+    private readonly GameStateApiService _gameStateApi;
     private readonly ILogger<NPCBehaviorSystem> _logger;
     private readonly ILoggerFactory _loggerFactory;
-    private readonly ConcurrentDictionary<string, ILogger> _scriptLoggerCache = new();
-    private readonly PlayerApiService _playerApi;
-    private readonly NpcApiService _npcApi;
     private readonly MapApiService _mapApi;
-    private readonly GameStateApiService _gameStateApi;
+    private readonly NpcApiService _npcApi;
+    private readonly PlayerApiService _playerApi;
+    private readonly ConcurrentDictionary<string, ILogger> _scriptLoggerCache = new();
     private readonly IWorldApi _worldApi;
     private TypeRegistry<BehaviorDefinition>? _behaviorRegistry;
 
@@ -41,7 +40,8 @@ public class NPCBehaviorSystem : BaseSystem
         NpcApiService npcApi,
         MapApiService mapApi,
         GameStateApiService gameStateApi,
-        IWorldApi worldApi)
+        IWorldApi worldApi
+    )
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _loggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
@@ -134,7 +134,8 @@ public class NPCBehaviorSystem : BaseSystem
                         _npcApi,
                         _mapApi,
                         _gameStateApi,
-                        _worldApi);
+                        _worldApi
+                    );
 
                     // Initialize on first tick
                     if (!behavior.IsInitialized)

@@ -7,4 +7,3 @@ public class ScriptChangedEventArgs : EventArgs
     public long FileSize { get; init; }
     public string ChangeType { get; init; } = "Modified";
 }
-

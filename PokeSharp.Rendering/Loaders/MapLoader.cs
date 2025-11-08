@@ -4,8 +4,6 @@ using Microsoft.Xna.Framework;
 using PokeSharp.Core.Components.Maps;
 using PokeSharp.Core.Components.Movement;
 using PokeSharp.Core.Components.NPCs;
-using PokeSharp.Core.Components.Player;
-using PokeSharp.Core.Components.Rendering;
 using PokeSharp.Core.Components.Tiles;
 using PokeSharp.Core.Factories;
 using PokeSharp.Core.Logging;
@@ -21,7 +19,8 @@ namespace PokeSharp.Rendering.Loaders;
 public class MapLoader(
     AssetManager assetManager,
     IEntityFactoryService? entityFactory = null,
-    ILogger<MapLoader>? logger = null)
+    ILogger<MapLoader>? logger = null
+)
 {
     // Tiled flip flags (stored in upper 3 bits of GID)
     private const uint FLIPPED_HORIZONTALLY_FLAG = 0x80000000;
@@ -29,7 +28,9 @@ public class MapLoader(
     private const uint FLIPPED_DIAGONALLY_FLAG = 0x20000000;
     private const uint TILE_ID_MASK = 0x1FFFFFFF;
 
-    private readonly AssetManager _assetManager = assetManager ?? throw new ArgumentNullException(nameof(assetManager));
+    private readonly AssetManager _assetManager =
+        assetManager ?? throw new ArgumentNullException(nameof(assetManager));
+
     private readonly IEntityFactoryService? _entityFactory = entityFactory;
     private readonly ILogger<MapLoader>? _logger = logger;
     private readonly Dictionary<string, int> _mapNameToId = new();
@@ -90,7 +91,18 @@ public class MapLoader(
                 if (tileGid == 0)
                     continue; // Skip empty tiles
 
-                CreateTileEntity(world, x, y, mapId, tileGid, tileset, tileLayer, flipH, flipV, flipD);
+                CreateTileEntity(
+                    world,
+                    x,
+                    y,
+                    mapId,
+                    tileGid,
+                    tileset,
+                    tileLayer,
+                    flipH,
+                    flipV,
+                    flipD
+                );
                 tilesCreated++;
             }
         }
@@ -232,7 +244,7 @@ public class MapLoader(
             0 => "Ground",
             1 => "Objects",
             2 => "Overhead",
-            _ => null,
+            _ => null
         };
 
         if (layerName == null)
@@ -255,7 +267,6 @@ public class MapLoader(
     {
         // Check for ledge - highest priority (specific behavior)
         if (props.TryGetValue("ledge_direction", out var ledgeValue))
-        {
             return ledgeValue switch
             {
                 string s when !string.IsNullOrEmpty(s) => s.ToLower() switch
@@ -266,17 +277,18 @@ public class MapLoader(
                     "right" => "tile/ledge/right",
                     _ => null
                 },
-                not null when !string.IsNullOrEmpty(ledgeValue.ToString()) => ledgeValue.ToString()!.ToLower() switch
-                {
-                    "down" => "tile/ledge/down",
-                    "up" => "tile/ledge/up",
-                    "left" => "tile/ledge/left",
-                    "right" => "tile/ledge/right",
-                    _ => null
-                },
+                not null when !string.IsNullOrEmpty(ledgeValue.ToString()) => ledgeValue
+                        .ToString()!
+                        .ToLower() switch
+                    {
+                        "down" => "tile/ledge/down",
+                        "up" => "tile/ledge/up",
+                        "left" => "tile/ledge/left",
+                        "right" => "tile/ledge/right",
+                        _ => null
+                    },
                 _ => null
             };
-        }
 
         // Check for solid wall (but not ledge)
         if (props.TryGetValue("solid", out var solidValue))
@@ -288,10 +300,7 @@ public class MapLoader(
                 _ => false
             };
 
-            if (isSolid)
-            {
-                return "tile/wall";
-            }
+            if (isSolid) return "tile/wall";
         }
 
         // Check for encounter zone (grass)
@@ -304,10 +313,7 @@ public class MapLoader(
                 _ => 0
             };
 
-            if (encounterRate > 0)
-            {
-                return "tile/grass";
-            }
+            if (encounterRate > 0) return "tile/grass";
         }
 
         // Default ground tile
@@ -396,7 +402,7 @@ public class MapLoader(
                         {
                             bool b => b,
                             string s => bool.TryParse(s, out var result) && result,
-                            _ => false,
+                            _ => false
                         };
                     else if (isLedge)
                         isSolid = true;
@@ -411,7 +417,7 @@ public class MapLoader(
                     var ledgeDir = ledgeValue switch
                     {
                         string s => s,
-                        _ => ledgeValue?.ToString(),
+                        _ => ledgeValue?.ToString()
                     };
 
                     if (!string.IsNullOrEmpty(ledgeDir))
@@ -422,7 +428,7 @@ public class MapLoader(
                             "up" => Direction.Up,
                             "left" => Direction.Left,
                             "right" => Direction.Right,
-                            _ => Direction.None,
+                            _ => Direction.None
                         };
 
                         if (jumpDirection != Direction.None)
@@ -537,7 +543,7 @@ public class MapLoader(
                                 "down" => Direction.Down,
                                 "left" => Direction.Left,
                                 "right" => Direction.Right,
-                                _ => Direction.Down,
+                                _ => Direction.Down
                             };
                             builder.OverrideComponent(direction);
                         }
@@ -546,10 +552,7 @@ public class MapLoader(
                         if (templateId.StartsWith("npc/"))
                         {
                             // NPCComponent properties
-                            var hasNpcId = obj.Properties.TryGetValue(
-                                "npcId",
-                                out var npcIdProp
-                            );
+                            var hasNpcId = obj.Properties.TryGetValue("npcId", out var npcIdProp);
                             var hasDisplayName = obj.Properties.TryGetValue(
                                 "displayName",
                                 out var displayNameProp
@@ -579,9 +582,7 @@ public class MapLoader(
                                             && int.TryParse(coords[0].Trim(), out var x)
                                             && int.TryParse(coords[1].Trim(), out var y)
                                         )
-                                        {
                                             points.Add(new Point(x, y));
-                                        }
                                     }
 
                                     if (points.Count > 0)
@@ -592,14 +593,9 @@ public class MapLoader(
                                                 "waypointWaitTime",
                                                 out var waitProp
                                             )
-                                            && float.TryParse(
-                                                waitProp.ToString(),
-                                                out var waitTime
-                                            )
+                                            && float.TryParse(waitProp.ToString(), out var waitTime)
                                         )
-                                        {
                                             waypointWaitTime = waitTime;
-                                        }
 
                                         builder.OverrideComponent(
                                             new PathComponent(
@@ -651,11 +647,13 @@ public class MapLoader(
         if (tileWidth <= 0 || tileHeight <= 0)
         {
             _logger?.LogError("Invalid tile dimensions: {Width}x{Height}", tileWidth, tileHeight);
-            throw new InvalidOperationException($"Invalid tile dimensions: {tileWidth}x{tileHeight}");
+            throw new InvalidOperationException(
+                $"Invalid tile dimensions: {tileWidth}x{tileHeight}"
+            );
         }
 
         var spacing = tileset.Spacing; // Space between tiles
-        var margin = tileset.Margin;   // Border around tileset
+        var margin = tileset.Margin; // Border around tileset
 
         var imageWidth = tileset.Image?.Width ?? 256;
         var tilesPerRow = (imageWidth - margin) / (tileWidth + spacing);

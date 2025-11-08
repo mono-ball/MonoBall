@@ -1,0 +1,3917 @@
+{
+  "columns": 16,
+  "image": "Petalburg_tiles.png",
+  "imageheight": 104,
+  "imagewidth": 128,
+  "margin": 0,
+  "name": "Petalburg",
+  "spacing": 0,
+  "tilecount": 195,
+  "tileheight": 8,
+  "tilewidth": 8,
+  "type": "tileset",
+  "version": "1.10",
+  "tiledversion": "1.10.2",
+  "tiles": [
+    {
+      "id": 0,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "0,1,13,15,17,21,22,23,31,38,39,41,43,45,47,49,51,53,54,55,57,59,61,63,65,67,69,71,73,75,77,79,81,83,85,87,89,91,93,94,95,97,99,101,103,105,107,109,110,111,113,115,117,119,121,123,125,129,131,142,143,145,147,155,157,158,159,161,163,165,167,171,173,174,175,177,179,180,181,183,185,187,189,190,191,197,199,209,211,213,215,222,223,225,227,229,230,231,238,239,241,243,245,247,254,255,257,259,263,267,271,273,275,281,283,285,287"
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "2,4,6,8,10,16,18,20,24,26,28,32,34,36,56,60,64,68,72,76,80,84,120,122,124,126,132,134,136,138,140,152,160,162,168,192,194,200,202,204,206,208,210,216,218,220,232,234,236,246,248,250,252,264,268,272,274,280,284"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "2,4,6,8,10,16,18,20,24,26,28,32,34,36,56,60,64,68,72,76,80,84,120,122,124,126,132,134,136,138,140,152,160,162,168,192,194,200,202,204,206,208,210,216,218,220,232,234,236,246,248,250,252,264,268,272,274,280,284"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 592
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 5
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "3"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 593
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 5
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "3"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 608
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 5
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "3"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 609
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 5
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "3"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 5
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "5"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 21
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "5"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 299
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "6,280"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 6
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "7,9,11,277,279"
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 7
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "7,9,11,277,279"
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 22
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "7,9,11,277,279"
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 300
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "8,282"
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 252
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "8,282"
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 251
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "10,284"
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 249
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "12,14"
+        }
+      ]
+    },
+    {
+      "id": 17,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 297
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "12,14,224,228,240,244"
+        }
+      ]
+    },
+    {
+      "id": 18,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 265
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "12,14,228,244"
+        }
+      ]
+    },
+    {
+      "id": 19,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 281
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "12,14,224,240"
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 204
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "15,165,225,227,229,257,273"
+        }
+      ]
+    },
+    {
+      "id": 21,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 514
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "17,33,193"
+        }
+      ]
+    },
+    {
+      "id": 22,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 530
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "17,33,193"
+        }
+      ]
+    },
+    {
+      "id": 23,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 515
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "19,193,195"
+        }
+      ]
+    },
+    {
+      "id": 24,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 531
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "19,193,195"
+        }
+      ]
+    },
+    {
+      "id": 25,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 516
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "21,37,195"
+        }
+      ]
+    },
+    {
+      "id": 26,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 532
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "21,37,195"
+        }
+      ]
+    },
+    {
+      "id": 27,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 517
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 8
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "25"
+        }
+      ]
+    },
+    {
+      "id": 28,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 518
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 8
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "25,27,29"
+        }
+      ]
+    },
+    {
+      "id": 29,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 533
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 8
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "25"
+        }
+      ]
+    },
+    {
+      "id": 30,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 534
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 8
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "25,27,29"
+        }
+      ]
+    },
+    {
+      "id": 31,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 519
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 8
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "29"
+        }
+      ]
+    },
+    {
+      "id": 32,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 535
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 8
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "29"
+        }
+      ]
+    },
+    {
+      "id": 33,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 566
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 8
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "30,56,58,60,62,88,90,92,130"
+        }
+      ]
+    },
+    {
+      "id": 34,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 661
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 8
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "30"
+        }
+      ]
+    },
+    {
+      "id": 35,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 546
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "33,48,49,208"
+        }
+      ]
+    },
+    {
+      "id": 36,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 547
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "35,209,211"
+        }
+      ]
+    },
+    {
+      "id": 37,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 548
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "37,52,53,210"
+        }
+      ]
+    },
+    {
+      "id": 38,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 549
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 8
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "40,41"
+        }
+      ]
+    },
+    {
+      "id": 39,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 550
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 8
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "40,42,44"
+        }
+      ]
+    },
+    {
+      "id": 40,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 551
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 8
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "44,45"
+        }
+      ]
+    },
+    {
+      "id": 41,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 662
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 8
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "46"
+        }
+      ]
+    },
+    {
+      "id": 42,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 663
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 8
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "46,76,78,104,106,108"
+        }
+      ]
+    },
+    {
+      "id": 43,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 610
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "48"
+        }
+      ]
+    },
+    {
+      "id": 44,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 626
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "48"
+        }
+      ]
+    },
+    {
+      "id": 45,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 563
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "50,64,66,68,70,96,98,100,102,128,196,198"
+        }
+      ]
+    },
+    {
+      "id": 46,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 627
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "50"
+        }
+      ]
+    },
+    {
+      "id": 47,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 612
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "52"
+        }
+      ]
+    },
+    {
+      "id": 48,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 628
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "52"
+        }
+      ]
+    },
+    {
+      "id": 49,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 582
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 8
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "56,58,72,74,88,90,104,106"
+        }
+      ]
+    },
+    {
+      "id": 50,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 565
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 8
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "57,61"
+        }
+      ]
+    },
+    {
+      "id": 51,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 581
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 8
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "57,61,73,77"
+        }
+      ]
+    },
+    {
+      "id": 52,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 618
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 9
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "58,62,66,70,74,78,82,86,198,214,252,268"
+        }
+      ]
+    },
+    {
+      "id": 53,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 567
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 8
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "59,63"
+        }
+      ]
+    },
+    {
+      "id": 54,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 583
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 8
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "59,63,75,79"
+        }
+      ]
+    },
+    {
+      "id": 55,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 614
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 8
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "60,62,76,78,88,90,92,104,106,108"
+        }
+      ]
+    },
+    {
+      "id": 56,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 579
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 6
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "64,66,80,82,96,98,112,114,196,212"
+        }
+      ]
+    },
+    {
+      "id": 57,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 562
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "65,69"
+        }
+      ]
+    },
+    {
+      "id": 58,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 578
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 6
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "65,81,85"
+        }
+      ]
+    },
+    {
+      "id": 59,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 564
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "67,71,199"
+        }
+      ]
+    },
+    {
+      "id": 60,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 580
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 6
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "67,83,87,215"
+        }
+      ]
+    },
+    {
+      "id": 61,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 644
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 6
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "68,70,96,98,102"
+        }
+      ]
+    },
+    {
+      "id": 62,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 642
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 6
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "69"
+        }
+      ]
+    },
+    {
+      "id": 63,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 643
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 6
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "71,199"
+        }
+      ]
+    },
+    {
+      "id": 64,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 598
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 8
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "72,74,104,106"
+        }
+      ]
+    },
+    {
+      "id": 65,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 597
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 8
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "73,77"
+        }
+      ]
+    },
+    {
+      "id": 66,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 599
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 8
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "75,79"
+        }
+      ]
+    },
+    {
+      "id": 67,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 595
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 6
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "80,82,112,114,212"
+        }
+      ]
+    },
+    {
+      "id": 68,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 594
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 6
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "81,85"
+        }
+      ]
+    },
+    {
+      "id": 69,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 596
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 6
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "83,87,215"
+        }
+      ]
+    },
+    {
+      "id": 70,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 611
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 6
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "84,86,112,114,118"
+        }
+      ]
+    },
+    {
+      "id": 71,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 660
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 6
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "84,86,112,114,116,118,212,214"
+        }
+      ]
+    },
+    {
+      "id": 72,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 658
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 6
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "100,196,197,198,199"
+        }
+      ]
+    },
+    {
+      "id": 73,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 659
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 6
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "116,212,213,214,215"
+        }
+      ]
+    },
+    {
+      "id": 74,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 589
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "121,125,127,171,173,183,185,189"
+        }
+      ]
+    },
+    {
+      "id": 75,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 587
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "121,123,125,155,157,171,173,183,185,187,189"
+        }
+      ]
+    },
+    {
+      "id": 76,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 189
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "126,140,152,168,202,204,206"
+        }
+      ]
+    },
+    {
+      "id": 77,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 588
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "127,137,141,153,205,207"
+        }
+      ]
+    },
+    {
+      "id": 78,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 635
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 6
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "128"
+        }
+      ]
+    },
+    {
+      "id": 79,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 636
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 6
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "128"
+        }
+      ]
+    },
+    {
+      "id": 80,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 637
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 8
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "130"
+        }
+      ]
+    },
+    {
+      "id": 81,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 638
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 8
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "130"
+        }
+      ]
+    },
+    {
+      "id": 82,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 523
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 8
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "133"
+        }
+      ]
+    },
+    {
+      "id": 83,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 524
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 8
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "133"
+        }
+      ]
+    },
+    {
+      "id": 84,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 539
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 8
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "133"
+        }
+      ]
+    },
+    {
+      "id": 85,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 540
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 8
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "133"
+        }
+      ]
+    },
+    {
+      "id": 86,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 525
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 8
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "135"
+        }
+      ]
+    },
+    {
+      "id": 87,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 526
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 8
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "135"
+        }
+      ]
+    },
+    {
+      "id": 88,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 541
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 8
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "135"
+        }
+      ]
+    },
+    {
+      "id": 89,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 542
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 8
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "135"
+        }
+      ]
+    },
+    {
+      "id": 90,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 605
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "137,141,205,207"
+        }
+      ]
+    },
+    {
+      "id": 91,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 621
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "137,141"
+        }
+      ]
+    },
+    {
+      "id": 92,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 603
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "139,201,203"
+        }
+      ]
+    },
+    {
+      "id": 93,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 619
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "139,201,203"
+        }
+      ]
+    },
+    {
+      "id": 94,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 651
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 6
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "144"
+        }
+      ]
+    },
+    {
+      "id": 95,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 652
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 6
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "144"
+        }
+      ]
+    },
+    {
+      "id": 96,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 667
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 6
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "144"
+        }
+      ]
+    },
+    {
+      "id": 97,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 668
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 6
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "144"
+        }
+      ]
+    },
+    {
+      "id": 98,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 653
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 8
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "146"
+        }
+      ]
+    },
+    {
+      "id": 99,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 654
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 8
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "146"
+        }
+      ]
+    },
+    {
+      "id": 100,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 669
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 8
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "146"
+        }
+      ]
+    },
+    {
+      "id": 101,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 670
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 8
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "146"
+        }
+      ]
+    },
+    {
+      "id": 102,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 800
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 14
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "148"
+        }
+      ]
+    },
+    {
+      "id": 103,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 801
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 14
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "148"
+        }
+      ]
+    },
+    {
+      "id": 104,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 816
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 14
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "148"
+        }
+      ]
+    },
+    {
+      "id": 105,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 817
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 14
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "148"
+        }
+      ]
+    },
+    {
+      "id": 106,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 555
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 8
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "149"
+        }
+      ]
+    },
+    {
+      "id": 107,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 556
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 8
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "149"
+        }
+      ]
+    },
+    {
+      "id": 108,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 571
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 8
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "149"
+        }
+      ]
+    },
+    {
+      "id": 109,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 572
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 8
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "149,151"
+        }
+      ]
+    },
+    {
+      "id": 110,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 802
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 14
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "150"
+        }
+      ]
+    },
+    {
+      "id": 111,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 803
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 14
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "150"
+        }
+      ]
+    },
+    {
+      "id": 112,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 818
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 14
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "150"
+        }
+      ]
+    },
+    {
+      "id": 113,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 819
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 14
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "150"
+        }
+      ]
+    },
+    {
+      "id": 114,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 557
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 8
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "151"
+        }
+      ]
+    },
+    {
+      "id": 115,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 558
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 8
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "151"
+        }
+      ]
+    },
+    {
+      "id": 116,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 574
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 8
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "151"
+        }
+      ]
+    },
+    {
+      "id": 117,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 416
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "154,170,172,176"
+        }
+      ]
+    },
+    {
+      "id": 118,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 41
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "154,156,170,172,176,178,266"
+        }
+      ]
+    },
+    {
+      "id": 119,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 418
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "154,170,172,176"
+        }
+      ]
+    },
+    {
+      "id": 120,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 419
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "154,170,172,176"
+        }
+      ]
+    },
+    {
+      "id": 121,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 417
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "156,178"
+        }
+      ]
+    },
+    {
+      "id": 122,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 420
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "156,178"
+        }
+      ]
+    },
+    {
+      "id": 123,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 421
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "156,178"
+        }
+      ]
+    },
+    {
+      "id": 124,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 174
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "160,162,272,274"
+        }
+      ]
+    },
+    {
+      "id": 125,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 175
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "160,162,272,274"
+        }
+      ]
+    },
+    {
+      "id": 126,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 272
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "161"
+        }
+      ]
+    },
+    {
+      "id": 127,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 273
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "161,163,177,179,267"
+        }
+      ]
+    },
+    {
+      "id": 128,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 264
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 5
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "164,166,184,186,188"
+        }
+      ]
+    },
+    {
+      "id": 129,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 280
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 5
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "164,166,182,184,186,188"
+        }
+      ]
+    },
+    {
+      "id": 130,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 296
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 5
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "164,166,182"
+        }
+      ]
+    },
+    {
+      "id": 131,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 205
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "167,241,243,245,259,275"
+        }
+      ]
+    },
+    {
+      "id": 132,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 386
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "168,202"
+        }
+      ]
+    },
+    {
+      "id": 133,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 604
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "169,201,203"
+        }
+      ]
+    },
+    {
+      "id": 134,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 573
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "169,201,203"
+        }
+      ]
+    },
+    {
+      "id": 135,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 274
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "179,267"
+        }
+      ]
+    },
+    {
+      "id": 136,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 279
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 5
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "182"
+        }
+      ]
+    },
+    {
+      "id": 137,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 295
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 5
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "182"
+        }
+      ]
+    },
+    {
+      "id": 138,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 520
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "217"
+        }
+      ]
+    },
+    {
+      "id": 139,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 521
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "217,219,221"
+        }
+      ]
+    },
+    {
+      "id": 140,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 536
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "217"
+        }
+      ]
+    },
+    {
+      "id": 141,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 537
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "217,219,221"
+        }
+      ]
+    },
+    {
+      "id": 142,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 522
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "221"
+        }
+      ]
+    },
+    {
+      "id": 143,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 538
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "221"
+        }
+      ]
+    },
+    {
+      "id": 144,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 282
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "224,226,240,242,260,262"
+        }
+      ]
+    },
+    {
+      "id": 145,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 298
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "224,226,240,242"
+        }
+      ]
+    },
+    {
+      "id": 146,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 266
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "226,228,242,244,260,262"
+        }
+      ]
+    },
+    {
+      "id": 147,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 250
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "226,228,242,244"
+        }
+      ]
+    },
+    {
+      "id": 148,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 552
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "233"
+        }
+      ]
+    },
+    {
+      "id": 149,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 553
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "233,235,237"
+        }
+      ]
+    },
+    {
+      "id": 150,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 554
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "237"
+        }
+      ]
+    },
+    {
+      "id": 151,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 122
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "247"
+        }
+      ]
+    },
+    {
+      "id": 152,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 120
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "247"
+        }
+      ]
+    },
+    {
+      "id": 153,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 138
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "247"
+        }
+      ]
+    },
+    {
+      "id": 154,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 568
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "249"
+        }
+      ]
+    },
+    {
+      "id": 155,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 569
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "249,251,253,255"
+        }
+      ]
+    },
+    {
+      "id": 156,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 584
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 9
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "249,265"
+        }
+      ]
+    },
+    {
+      "id": 157,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 585
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 9
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "249,253,265,269"
+        }
+      ]
+    },
+    {
+      "id": 158,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 648
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 9
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "251"
+        }
+      ]
+    },
+    {
+      "id": 159,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 649
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 9
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "251"
+        }
+      ]
+    },
+    {
+      "id": 160,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 570
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 10
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "253"
+        }
+      ]
+    },
+    {
+      "id": 161,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 586
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 9
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "253,269"
+        }
+      ]
+    },
+    {
+      "id": 162,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 624
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 9
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "254"
+        }
+      ]
+    },
+    {
+      "id": 163,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 625
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 9
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "254"
+        }
+      ]
+    },
+    {
+      "id": 164,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 130
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "256,258,276"
+        }
+      ]
+    },
+    {
+      "id": 165,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 131
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "256,258,276"
+        }
+      ]
+    },
+    {
+      "id": 166,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 146
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "256,258,276"
+        }
+      ]
+    },
+    {
+      "id": 167,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 147
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "256,258,276"
+        }
+      ]
+    },
+    {
+      "id": 168,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 260
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "261"
+        }
+      ]
+    },
+    {
+      "id": 169,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 259
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "261"
+        }
+      ]
+    },
+    {
+      "id": 170,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 276
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "261"
+        }
+      ]
+    },
+    {
+      "id": 171,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 275
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "261"
+        }
+      ]
+    },
+    {
+      "id": 172,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 273
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "263"
+        }
+      ]
+    },
+    {
+      "id": 173,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 274
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 1
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "263"
+        }
+      ]
+    },
+    {
+      "id": 174,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 600
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 9
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "265"
+        }
+      ]
+    },
+    {
+      "id": 175,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 601
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 9
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "265,269"
+        }
+      ]
+    },
+    {
+      "id": 176,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 40
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "266"
+        }
+      ]
+    },
+    {
+      "id": 177,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 56
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "266"
+        }
+      ]
+    },
+    {
+      "id": 178,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 57
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 2
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "266"
+        }
+      ]
+    },
+    {
+      "id": 179,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 602
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 9
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "269"
+        }
+      ]
+    },
+    {
+      "id": 180,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 640
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 9
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "270"
+        }
+      ]
+    },
+    {
+      "id": 181,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 641
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 9
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "270"
+        }
+      ]
+    },
+    {
+      "id": 182,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 656
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 9
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "270"
+        }
+      ]
+    },
+    {
+      "id": 183,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 657
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 9
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "270"
+        }
+      ]
+    },
+    {
+      "id": 184,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 132
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "278"
+        }
+      ]
+    },
+    {
+      "id": 185,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 139
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "278"
+        }
+      ]
+    },
+    {
+      "id": 186,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 154
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "278"
+        }
+      ]
+    },
+    {
+      "id": 187,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 155
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "278"
+        }
+      ]
+    },
+    {
+      "id": 188,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 283
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "280"
+        }
+      ]
+    },
+    {
+      "id": 189,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 284
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "282"
+        }
+      ]
+    },
+    {
+      "id": 190,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 268
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "282"
+        }
+      ]
+    },
+    {
+      "id": 191,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 267
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 3
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "284"
+        }
+      ]
+    },
+    {
+      "id": 192,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 664
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 9
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "286"
+        }
+      ]
+    },
+    {
+      "id": 193,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 665
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 9
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "286"
+        }
+      ]
+    },
+    {
+      "id": 194,
+      "properties": [
+        {
+          "name": "source_tile_index",
+          "type": "int",
+          "value": 666
+        },
+        {
+          "name": "palette",
+          "type": "int",
+          "value": 9
+        },
+        {
+          "name": "metatile_ids",
+          "type": "string",
+          "value": "286"
+        }
+      ]
+    }
+  ]
+}

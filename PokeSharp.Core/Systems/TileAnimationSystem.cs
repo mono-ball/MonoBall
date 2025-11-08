@@ -1,5 +1,4 @@
 using Arch.Core;
-using Arch.Core.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
 using PokeSharp.Core.Components.Tiles;
@@ -30,7 +29,7 @@ public class TileAnimationSystem(ILogger<TileAnimationSystem>? logger = null) : 
 
         // Query all entities with AnimatedTile and TileSprite components
         var query = new QueryDescription().WithAll<AnimatedTile, TileSprite>();
-        int tileCount = 0;
+        var tileCount = 0;
 
         world.Query(
             in query,

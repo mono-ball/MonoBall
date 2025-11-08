@@ -28,4 +28,3 @@ public struct IdleState
     /// </summary>
     public bool CanRotate;
 }
-

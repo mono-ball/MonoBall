@@ -48,6 +48,32 @@ public interface INPCApi
     void SetNPCPath(Entity npc, Point[] waypoints, bool loop);
 
     /// <summary>
+    ///     Get an NPC's current patrol path.
+    /// </summary>
+    /// <param name="npc">The NPC entity.</param>
+    /// <returns>Array of waypoint positions, or null if no path set.</returns>
+    Point[]? GetNPCPath(Entity npc);
+
+    /// <summary>
+    ///     Clear an NPC's patrol path.
+    /// </summary>
+    /// <param name="npc">The NPC entity.</param>
+    void ClearNPCPath(Entity npc);
+
+    /// <summary>
+    ///     Pause an NPC's patrol path (stops movement but keeps path).
+    /// </summary>
+    /// <param name="npc">The NPC entity.</param>
+    void PauseNPCPath(Entity npc);
+
+    /// <summary>
+    ///     Resume an NPC's patrol path after pausing.
+    /// </summary>
+    /// <param name="npc">The NPC entity.</param>
+    /// <param name="waitTime">Wait time at waypoints in seconds (default 0).</param>
+    void ResumeNPCPath(Entity npc, float waitTime = 0f);
+
+    /// <summary>
     ///     Check if an NPC is currently moving.
     /// </summary>
     /// <param name="npc">The NPC entity.</param>

@@ -15,4 +15,3 @@ public class MapAssetEntry
     /// </summary>
     public required string Path { get; set; }
 }
-

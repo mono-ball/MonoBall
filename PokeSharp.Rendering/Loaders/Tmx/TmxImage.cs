@@ -20,4 +20,3 @@ public class TmxImage
     /// </summary>
     public int Height { get; set; }
 }
-

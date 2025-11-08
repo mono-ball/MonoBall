@@ -3,12 +3,8 @@ using Arch.Core.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
-using PokeSharp.Core.Components.Maps;
 using PokeSharp.Core.Components.Movement;
-using PokeSharp.Core.Components.NPCs;
 using PokeSharp.Core.Components.Player;
-using PokeSharp.Core.Components.Rendering;
-using PokeSharp.Core.Components.Tiles;
 using PokeSharp.Core.Systems;
 using PokeSharp.Input.Components;
 using PokeSharp.Input.Services;
@@ -23,14 +19,11 @@ namespace PokeSharp.Input.Systems;
 public class InputSystem(
     int maxBufferSize = 5,
     float bufferTimeout = 0.2f,
-    ILogger<InputSystem>? logger = null) : BaseSystem
+    ILogger<InputSystem>? logger = null
+) : BaseSystem
 {
     private readonly InputBuffer _inputBuffer = new(maxBufferSize, bufferTimeout);
     private readonly ILogger<InputSystem>? _logger = logger;
-    private Direction _lastBufferedDirection = Direction.None;
-    private float _lastBufferTime = -1f;
-    private float _totalTime;
-    private int _inputEventsProcessed;
 
     // Cache query description to avoid allocation every frame
     private readonly QueryDescription _playerQuery = new QueryDescription().WithAll<
@@ -41,10 +34,15 @@ public class InputSystem(
         Direction
     >();
 
+    private GamePadState _gamepadState;
+    private int _inputEventsProcessed;
+
     // Cache input states to avoid redundant polling
     private KeyboardState _keyboardState;
-    private GamePadState _gamepadState;
+    private Direction _lastBufferedDirection = Direction.None;
+    private float _lastBufferTime = -1f;
     private KeyboardState _prevKeyboardState;
+    private float _totalTime;
 
     /// <inheritdoc />
     public override int Priority => SystemPriority.Input;

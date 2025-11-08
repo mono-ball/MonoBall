@@ -45,4 +45,3 @@ public class TmxObject
     /// </summary>
     public Dictionary<string, object> Properties { get; set; } = new();
 }
-

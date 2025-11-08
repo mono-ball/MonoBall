@@ -45,4 +45,3 @@ public static class ConsoleLoggerFactory
         return new CompositeLogger<T>(consoleLevel, fileLevel, logDirectory);
     }
 }
-

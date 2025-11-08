@@ -66,4 +66,3 @@ public sealed class TemplateCompilerRegistry
         return _compilers.Keys;
     }
 }
-

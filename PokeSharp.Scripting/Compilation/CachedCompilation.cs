@@ -9,4 +9,3 @@ internal class CachedCompilation
     public required string ContentHash { get; init; }
     public DateTime CompiledAt { get; init; }
 }
-

@@ -11,19 +11,26 @@ namespace PokeSharp.Core.Factories;
 ///     Resolves templates from <see cref="TemplateCache" /> and instantiates entities with components.
 ///     Thread-safe and supports hot-reload via template cache invalidation.
 /// </summary>
-public sealed class EntityFactoryService(TemplateCache templateCache, ILogger<EntityFactoryService> logger) : IEntityFactoryService
+public sealed class EntityFactoryService(
+    TemplateCache templateCache,
+    ILogger<EntityFactoryService> logger
+) : IEntityFactoryService
 {
     // Static cache for reflection MethodInfo to avoid expensive lookups
     private static readonly ConcurrentDictionary<Type, MethodInfo> _addMethodCache = new();
 
-    private readonly TemplateCache _templateCache = templateCache ?? throw new ArgumentNullException(nameof(templateCache));
-    private readonly ILogger<EntityFactoryService> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    private readonly ILogger<EntityFactoryService> _logger =
+        logger ?? throw new ArgumentNullException(nameof(logger));
+
+    private readonly TemplateCache _templateCache =
+        templateCache ?? throw new ArgumentNullException(nameof(templateCache));
 
     /// <inheritdoc />
     public Entity SpawnFromTemplate(
         string templateId,
         World world,
-        EntitySpawnContext? context = null)
+        EntitySpawnContext? context = null
+    )
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(templateId, nameof(templateId));
         ArgumentNullException.ThrowIfNull(world, nameof(world));
@@ -86,10 +93,7 @@ public sealed class EntityFactoryService(TemplateCache templateCache, ILogger<En
     }
 
     /// <inheritdoc />
-    public Entity SpawnFromTemplate(
-        string templateId,
-        World world,
-        Action<EntityBuilder> configure)
+    public Entity SpawnFromTemplate(string templateId, World world, Action<EntityBuilder> configure)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(templateId, nameof(templateId));
         ArgumentNullException.ThrowIfNull(world, nameof(world));
@@ -106,25 +110,21 @@ public sealed class EntityFactoryService(TemplateCache templateCache, ILogger<En
             Overrides = builder.ComponentOverrides.ToDictionary(
                 kvp => kvp.Key.Name,
                 kvp => kvp.Value
-            ),
+            )
         };
 
         // Add custom properties if any
         if (builder.CustomProperties.Any())
-        {
             context.Metadata = builder.CustomProperties.ToDictionary(
                 kvp => kvp.Key,
                 kvp => kvp.Value
             );
-        }
 
         return SpawnFromTemplate(templateId, world, context);
     }
 
     /// <inheritdoc />
-    public IEnumerable<Entity> SpawnBatch(
-        IEnumerable<string> templateIds,
-        World world)
+    public IEnumerable<Entity> SpawnBatch(IEnumerable<string> templateIds, World world)
     {
         ArgumentNullException.ThrowIfNull(templateIds, nameof(templateIds));
         ArgumentNullException.ThrowIfNull(world, nameof(world));
@@ -135,10 +135,9 @@ public sealed class EntityFactoryService(TemplateCache templateCache, ILogger<En
         _logger.LogDebug("Batch spawning {Count} entities", templateIdList.Count);
 
         foreach (var templateId in templateIdList)
-        {
             try
             {
-                var entity = SpawnFromTemplate(templateId, world, (EntitySpawnContext?)null);
+                var entity = SpawnFromTemplate(templateId, world);
                 entities.Add(entity);
             }
             catch (Exception ex)
@@ -150,7 +149,6 @@ public sealed class EntityFactoryService(TemplateCache templateCache, ILogger<En
                 );
                 throw;
             }
-        }
 
         _logger.LogInformation("Successfully spawned {Count} entities in batch", entities.Count);
         return entities;
@@ -192,27 +190,29 @@ public sealed class EntityFactoryService(TemplateCache templateCache, ILogger<En
     /// </summary>
     private static MethodInfo GetCachedAddMethod(Type componentType)
     {
-        return _addMethodCache.GetOrAdd(componentType, type =>
-        {
-            var method = typeof(World)
-                .GetMethods()
-                .Where(m => m.Name == nameof(World.Add) && m.IsGenericMethod)
-                .FirstOrDefault(m =>
-                {
-                    var parameters = m.GetParameters();
-                    return parameters.Length == 2 && parameters[0].ParameterType == typeof(Entity);
-                });
-
-            if (method == null)
+        return _addMethodCache.GetOrAdd(
+            componentType,
+            type =>
             {
-                throw new InvalidOperationException(
-                    $"Could not find World.Add<T> method for component type {type.Name}"
-                );
-            }
+                var method = typeof(World)
+                    .GetMethods()
+                    .Where(m => m.Name == nameof(World.Add) && m.IsGenericMethod)
+                    .FirstOrDefault(m =>
+                    {
+                        var parameters = m.GetParameters();
+                        return parameters.Length == 2
+                               && parameters[0].ParameterType == typeof(Entity);
+                    });
 
-            // Make the generic method concrete for this component type
-            return method.MakeGenericMethod(type);
-        });
+                if (method == null)
+                    throw new InvalidOperationException(
+                        $"Could not find World.Add<T> method for component type {type.Name}"
+                    );
+
+                // Make the generic method concrete for this component type
+                return method.MakeGenericMethod(type);
+            }
+        );
     }
 
     private static TemplateValidationResult ValidateTemplateInternal(EntityTemplate template)
@@ -252,20 +252,16 @@ public sealed class EntityFactoryService(TemplateCache templateCache, ILogger<En
         {
             // Check for circular dependency
             if (visited.Contains(currentTemplateId))
-            {
                 throw new InvalidOperationException(
                     $"Circular template inheritance detected: {string.Join(" → ", visited)} → {currentTemplateId}"
                 );
-            }
 
             // Get base template
             var baseTemplate = _templateCache.Get(currentTemplateId);
             if (baseTemplate == null)
-            {
                 throw new InvalidOperationException(
                     $"Base template '{currentTemplateId}' not found for template '{template.TemplateId}'"
                 );
-            }
 
             visited.Add(currentTemplateId);
             inheritanceChain.Add(baseTemplate);
@@ -291,19 +287,12 @@ public sealed class EntityFactoryService(TemplateCache templateCache, ILogger<En
 
         // Start with root base template
         foreach (var baseTemplate in inheritanceChain)
-        {
-            foreach (var component in baseTemplate.Components)
-            {
-                // Base components are added or overridden
-                mergedComponents[component.ComponentType] = component;
-            }
-        }
+        foreach (var component in baseTemplate.Components)
+            // Base components are added or overridden
+            mergedComponents[component.ComponentType] = component;
 
         // Apply child template components (final overrides)
-        foreach (var component in template.Components)
-        {
-            mergedComponents[component.ComponentType] = component;
-        }
+        foreach (var component in template.Components) mergedComponents[component.ComponentType] = component;
 
         // Create resolved template
         var resolvedTemplate = new EntityTemplate
@@ -314,7 +303,7 @@ public sealed class EntityFactoryService(TemplateCache templateCache, ILogger<En
             Metadata = template.Metadata,
             BaseTemplateId = null, // Clear to avoid re-resolution
             CustomProperties = template.CustomProperties,
-            Components = [.. mergedComponents.Values],
+            Components = [.. mergedComponents.Values]
         };
 
         _logger.LogDebug(
@@ -337,7 +326,8 @@ public sealed class EntityFactoryService(TemplateCache templateCache, ILogger<En
         {
             // Use override if available, otherwise use template's initial data
             var componentTypeName = componentTemplate.ComponentType.Name;
-            var componentData = context?.Overrides?.GetValueOrDefault(componentTypeName)
+            var componentData =
+                context?.Overrides?.GetValueOrDefault(componentTypeName)
                 ?? componentTemplate.InitialData;
             components.Add(componentData);
         }

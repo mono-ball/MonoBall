@@ -39,6 +39,12 @@ public struct GridMovement
     public Direction FacingDirection { get; set; }
 
     /// <summary>
+    ///     Gets or sets whether movement is locked (e.g., during cutscenes, dialogue, or battles).
+    ///     When true, the entity cannot initiate new movement.
+    /// </summary>
+    public bool MovementLocked { get; set; }
+
+    /// <summary>
     ///     Initializes a new instance of the GridMovement struct.
     /// </summary>
     /// <param name="speed">Movement speed in tiles per second (default 4.0).</param>
@@ -50,6 +56,7 @@ public struct GridMovement
         MovementProgress = 0f;
         MovementSpeed = speed;
         FacingDirection = Direction.Down;
+        MovementLocked = false;
     }
 
     /// <summary>

@@ -35,10 +35,8 @@ public class EventBus(ILogger<EventBus>? logger = null) : IEventBus
         var eventType = typeof(TEvent);
 
         if (_handlers.TryGetValue(eventType, out var handlers) && !handlers.IsEmpty)
-        {
             // Execute all handlers with error isolation
             foreach (var handler in handlers.ToArray())
-            {
                 try
                 {
                     ((Action<TEvent>)handler)(eventData);
@@ -53,8 +51,6 @@ public class EventBus(ILogger<EventBus>? logger = null) : IEventBus
                         ex.Message
                     );
                 }
-            }
-        }
     }
 
     /// <inheritdoc />
@@ -115,7 +111,6 @@ public class EventBus(ILogger<EventBus>? logger = null) : IEventBus
             _handlers.TryUpdate(eventType, newBag, handlers);
         }
     }
-
 }
 
 /// <summary>
