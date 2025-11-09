@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
 using PokeSharp.Core.Components.Tiles;
 using PokeSharp.Core.Logging;
+using PokeSharp.Core.Queries;
 
 namespace PokeSharp.Core.Systems;
 
@@ -28,12 +29,11 @@ public class TileAnimationSystem(ILogger<TileAnimationSystem>? logger = null) : 
         if (!Enabled)
             return;
 
-        // Query all entities with AnimatedTile and TileSprite components
-        var query = new QueryDescription().WithAll<AnimatedTile, TileSprite>();
+        // Use centralized query for animated tiles
         var tileCount = 0;
 
         world.Query(
-            in query,
+            in Queries.Queries.AnimatedTiles,
             (Entity entity, ref AnimatedTile animTile, ref TileSprite sprite) =>
             {
                 UpdateTileAnimation(ref animTile, ref sprite, deltaTime);

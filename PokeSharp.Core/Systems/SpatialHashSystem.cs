@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework;
 using PokeSharp.Core.Components.Movement;
 using PokeSharp.Core.Components.Tiles;
 using PokeSharp.Core.Logging;
+using PokeSharp.Core.Queries;
 using PokeSharp.Core.Utilities;
 
 namespace PokeSharp.Core.Systems;
@@ -34,9 +35,9 @@ public class SpatialHashSystem(ILogger<SpatialHashSystem>? logger = null) : Base
             _staticHash.Clear();
             var staticTileCount = 0;
 
-            var tileQuery = new QueryDescription().WithAll<TilePosition>();
+            // Use centralized query for all tile-positioned entities
             world.Query(
-                in tileQuery,
+                in Queries.Queries.AllTilePositioned,
                 (Entity entity, ref TilePosition pos) =>
                 {
                     _staticHash.Add(entity, pos.MapId, pos.X, pos.Y);
@@ -51,9 +52,9 @@ public class SpatialHashSystem(ILogger<SpatialHashSystem>? logger = null) : Base
         // Clear and re-index all dynamic entities each frame
         _dynamicHash.Clear();
 
-        var dynamicQuery = new QueryDescription().WithAll<Position>();
+        // Use centralized query for all positioned entities
         world.Query(
-            in dynamicQuery,
+            in Queries.Queries.AllPositioned,
             (Entity entity, ref Position pos) =>
             {
                 _dynamicHash.Add(entity, pos.MapId, pos.X, pos.Y);

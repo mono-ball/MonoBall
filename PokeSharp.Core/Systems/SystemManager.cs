@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using Arch.Core;
 using Microsoft.Extensions.Logging;
+using PokeSharp.Core.DependencyInjection;
 using PokeSharp.Core.Logging;
 
 namespace PokeSharp.Core.Systems;
@@ -9,6 +10,7 @@ namespace PokeSharp.Core.Systems;
 ///     Manages registration and execution of all game systems.
 ///     Systems are executed in priority order each frame.
 ///     Tracks performance metrics for each system.
+///     Supports dependency injection for automatic system creation and service resolution.
 /// </summary>
 public class SystemManager(ILogger<SystemManager>? logger = null)
 {
@@ -20,9 +22,11 @@ public class SystemManager(ILogger<SystemManager>? logger = null)
     private readonly object _lock = new();
     private readonly ILogger<SystemManager>? _logger = logger;
     private readonly Dictionary<ISystem, SystemMetrics> _metrics = new();
+    private readonly ServiceContainer _serviceContainer = new();
     private readonly List<ISystem> _systems = new();
     private ulong _frameCounter;
     private bool _initialized;
+    private SystemFactory? _systemFactory;
 
     /// <summary>
     ///     Gets all registered systems.
@@ -53,8 +57,9 @@ public class SystemManager(ILogger<SystemManager>? logger = null)
     }
 
     /// <summary>
-    ///     Registers a system with the manager.
+    ///     Registers a system instance with the manager.
     ///     Systems are automatically sorted by priority.
+    ///     Use this method for manual system instantiation (backward compatible).
     /// </summary>
     /// <param name="system">The system to register.</param>
     /// <exception cref="ArgumentNullException">Thrown if system is null.</exception>
@@ -77,6 +82,50 @@ public class SystemManager(ILogger<SystemManager>? logger = null)
 
             _logger?.LogSystemRegistered(system.GetType().Name, system.Priority);
         }
+    }
+
+    /// <summary>
+    ///     Registers a system type with automatic dependency injection.
+    ///     The system will be created using the SystemFactory with all dependencies resolved.
+    /// </summary>
+    /// <typeparam name="TSystem">The system type to register.</typeparam>
+    /// <exception cref="InvalidOperationException">
+    ///     Thrown if the system cannot be created or dependencies cannot be resolved.
+    /// </exception>
+    public void RegisterSystem<TSystem>()
+        where TSystem : ISystem
+    {
+        lock (_lock)
+        {
+            // Initialize factory on first use
+            if (_systemFactory == null)
+                _systemFactory = new SystemFactory(_serviceContainer);
+
+            // Create system with dependency injection
+            var system = _systemFactory.CreateSystem<TSystem>();
+
+            // Register the created instance
+            RegisterSystem(system);
+
+            _logger?.LogDebug(
+                "System {SystemName} registered with dependency injection",
+                typeof(TSystem).Name
+            );
+        }
+    }
+
+    /// <summary>
+    ///     Registers a system type with automatic dependency injection and a specific priority override.
+    ///     Note: The priority property of the system type itself will be used; this is for future extensibility.
+    /// </summary>
+    /// <typeparam name="TSystem">The system type to register.</typeparam>
+    /// <param name="priority">Priority hint (currently not used, for future extensibility).</param>
+    public void RegisterSystem<TSystem>(int priority)
+        where TSystem : ISystem
+    {
+        // For now, just delegate to the parameterless version
+        // In the future, this could support priority overrides
+        RegisterSystem<TSystem>();
     }
 
     /// <summary>
@@ -256,6 +305,102 @@ public class SystemManager(ILogger<SystemManager>? logger = null)
                 metrics.LastUpdateMs = 0;
                 metrics.MaxUpdateMs = 0;
             }
+        }
+    }
+
+    /// <summary>
+    ///     Registers a singleton service in the dependency injection container.
+    ///     The same instance will be injected into all systems that depend on this service.
+    /// </summary>
+    /// <typeparam name="TService">The service type.</typeparam>
+    /// <param name="instance">The service instance.</param>
+    /// <returns>This SystemManager for method chaining.</returns>
+    public SystemManager RegisterService<TService>(TService instance)
+        where TService : class
+    {
+        ArgumentNullException.ThrowIfNull(instance);
+
+        lock (_lock)
+        {
+            _serviceContainer.RegisterSingleton(instance);
+            _logger?.LogDebug("Service {ServiceName} registered as singleton", typeof(TService).Name);
+        }
+
+        return this;
+    }
+
+    /// <summary>
+    ///     Registers a singleton service using a factory function.
+    ///     The factory is called once when first needed, then the instance is cached.
+    /// </summary>
+    /// <typeparam name="TService">The service type.</typeparam>
+    /// <param name="factory">Factory function that creates the service.</param>
+    /// <returns>This SystemManager for method chaining.</returns>
+    public SystemManager RegisterService<TService>(Func<ServiceContainer, TService> factory)
+        where TService : class
+    {
+        ArgumentNullException.ThrowIfNull(factory);
+
+        lock (_lock)
+        {
+            _serviceContainer.RegisterSingleton(factory);
+            _logger?.LogDebug(
+                "Service {ServiceName} registered as singleton with factory",
+                typeof(TService).Name
+            );
+        }
+
+        return this;
+    }
+
+    /// <summary>
+    ///     Registers a transient service using a factory function.
+    ///     A new instance is created each time the service is requested.
+    /// </summary>
+    /// <typeparam name="TService">The service type.</typeparam>
+    /// <param name="factory">Factory function that creates the service.</param>
+    /// <returns>This SystemManager for method chaining.</returns>
+    public SystemManager RegisterTransientService<TService>(Func<ServiceContainer, TService> factory)
+        where TService : class
+    {
+        ArgumentNullException.ThrowIfNull(factory);
+
+        lock (_lock)
+        {
+            _serviceContainer.RegisterTransient(factory);
+            _logger?.LogDebug(
+                "Service {ServiceName} registered as transient with factory",
+                typeof(TService).Name
+            );
+        }
+
+        return this;
+    }
+
+    /// <summary>
+    ///     Gets the service container for advanced dependency injection scenarios.
+    /// </summary>
+    public ServiceContainer ServiceContainer => _serviceContainer;
+
+    /// <summary>
+    ///     Validates that all dependencies for a system type can be resolved.
+    ///     Useful for debugging dependency issues before attempting to register a system.
+    /// </summary>
+    /// <typeparam name="TSystem">The system type to validate.</typeparam>
+    /// <returns>
+    ///     A tuple containing: (canResolve, missingDependencies).
+    ///     canResolve is true if all dependencies can be resolved.
+    ///     missingDependencies contains the names of any missing dependencies.
+    /// </returns>
+    public (bool canResolve, List<string> missingDependencies) ValidateSystemDependencies<TSystem>()
+        where TSystem : ISystem
+    {
+        lock (_lock)
+        {
+            if (_systemFactory == null)
+                _systemFactory = new SystemFactory(_serviceContainer);
+
+            return _systemFactory.ValidateDependencies<TSystem>();
         }
     }
 }

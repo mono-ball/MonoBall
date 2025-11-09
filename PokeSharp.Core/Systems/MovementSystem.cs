@@ -5,6 +5,7 @@ using PokeSharp.Core.Components.Maps;
 using PokeSharp.Core.Components.Movement;
 using PokeSharp.Core.Components.Rendering;
 using PokeSharp.Core.Logging;
+using PokeSharp.Core.Queries;
 
 namespace PokeSharp.Core.Systems;
 
@@ -18,31 +19,9 @@ public class MovementSystem(ILogger<MovementSystem>? logger = null) : BaseSystem
     // Cache for entities to remove (reused across frames to avoid allocation)
     private readonly List<Entity> _entitiesToRemove = new(32);
     private readonly ILogger<MovementSystem>? _logger = logger;
-    private readonly QueryDescription _mapInfoQuery = new QueryDescription().WithAll<MapInfo>();
 
     // Cache for tile sizes per map (reduces redundant queries)
     private readonly Dictionary<int, int> _tileSizeCache = new();
-
-    // Cache query descriptions to avoid allocation every frame
-    private readonly QueryDescription _movementQuery = new QueryDescription()
-        .WithAll<Position, GridMovement>()
-        .WithNone<Animation>();
-
-    private readonly QueryDescription _movementQueryWithAnimation = new QueryDescription().WithAll<
-        Position,
-        GridMovement,
-        Animation
-    >();
-
-    private readonly QueryDescription _removeQuery =
-        new QueryDescription().WithAll<MovementRequest>();
-
-    // Cache query descriptions for movement requests
-    private readonly QueryDescription _requestQuery = new QueryDescription().WithAll<
-        Position,
-        GridMovement,
-        MovementRequest
-    >();
 
     private SpatialHashSystem? _spatialHashSystem;
 
@@ -68,7 +47,7 @@ public class MovementSystem(ILogger<MovementSystem>? logger = null) : BaseSystem
 
         // Process entities WITH animation (separate query to avoid Has<> checks)
         world.Query(
-            in _movementQueryWithAnimation,
+            in Queries.Queries.MovementWithAnimation,
             (
                 Entity entity,
                 ref Position position,
@@ -82,7 +61,7 @@ public class MovementSystem(ILogger<MovementSystem>? logger = null) : BaseSystem
 
         // Process entities WITHOUT animation (separate query for performance)
         world.Query(
-            in _movementQuery,
+            in Queries.Queries.MovementWithoutAnimation,
             (Entity entity, ref Position position, ref GridMovement movement) =>
             {
                 ProcessMovementNoAnimation(ref position, ref movement, deltaTime);
@@ -210,9 +189,9 @@ public class MovementSystem(ILogger<MovementSystem>? logger = null) : BaseSystem
     /// </summary>
     private void ProcessMovementRequests(World world)
     {
-        // Use cached query descriptions (initialized in constructor)
+        // Use centralized query cache (zero allocation per frame)
         world.Query(
-            in _requestQuery,
+            in Queries.Queries.MovementRequests,
             (
                 Entity entity,
                 ref Position position,
@@ -239,7 +218,7 @@ public class MovementSystem(ILogger<MovementSystem>? logger = null) : BaseSystem
         _entitiesToRemove.Clear();
 
         world.Query(
-            in _removeQuery,
+            in Queries.Queries.MovementRequestsOnly,
             (Entity entity, ref MovementRequest request) =>
             {
                 if (request.Processed)
@@ -420,10 +399,10 @@ public class MovementSystem(ILogger<MovementSystem>? logger = null) : BaseSystem
         if (_tileSizeCache.TryGetValue(mapId, out var cached))
             return cached;
 
-        // Query MapInfo for tile size
+        // Query MapInfo for tile size using centralized query
         var tileSize = 16; // default
         world.Query(
-            in _mapInfoQuery,
+            in Queries.Queries.MapInfo,
             (ref MapInfo mapInfo) =>
             {
                 if (mapInfo.MapId == mapId)
@@ -447,11 +426,11 @@ public class MovementSystem(ILogger<MovementSystem>? logger = null) : BaseSystem
     /// <returns>True if within bounds or no map bounds exist, false if outside.</returns>
     private bool IsWithinMapBounds(World world, int mapId, int tileX, int tileY)
     {
-        // Use cached query description to avoid allocation
+        // Use centralized query cache to avoid allocation
         bool? withinBounds = null; // null = no MapInfo found
 
         world.Query(
-            in _mapInfoQuery,
+            in Queries.Queries.MapInfo,
             (ref MapInfo mapInfo) =>
             {
                 if (mapInfo.MapId == mapId)

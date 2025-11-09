@@ -5,6 +5,7 @@ using PokeSharp.Core.Components.Movement;
 using PokeSharp.Core.Components.NPCs;
 using PokeSharp.Core.Logging;
 using PokeSharp.Core.Pathfinding;
+using PokeSharp.Core.Queries;
 
 namespace PokeSharp.Core.Systems;
 
@@ -20,14 +21,6 @@ public class PathfindingSystem : BaseSystem
 {
     private readonly ILogger<PathfindingSystem>? _logger;
     private readonly PathfindingService _pathfindingService;
-
-    // Cache query descriptions
-    private readonly QueryDescription _pathQuery = new QueryDescription().WithAll<
-        Position,
-        GridMovement,
-        MovementRoute
-    >();
-
     private SpatialHashSystem? _spatialHashSystem;
 
     public PathfindingSystem(ILogger<PathfindingSystem>? logger = null)
@@ -60,8 +53,9 @@ public class PathfindingSystem : BaseSystem
             return;
         }
 
+        // Use centralized query for path followers
         world.Query(
-            in _pathQuery,
+            in Queries.Queries.PathFollowers,
             (
                 Entity entity,
                 ref Position position,
