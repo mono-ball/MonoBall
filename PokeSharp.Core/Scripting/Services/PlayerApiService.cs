@@ -215,11 +215,11 @@ public class PlayerApiService(World world, ILogger<PlayerApiService> logger) : I
 
     private Entity? GetPlayerEntity()
     {
-        var query = QueryCache.Get<Player>();
         Entity? playerEntity = null;
 
+        // Use centralized query for Player
         _world.Query(
-            in query,
+            in Queries.Queries.Player,
             entity =>
             {
                 playerEntity = entity;

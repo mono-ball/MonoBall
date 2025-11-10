@@ -83,12 +83,11 @@ public class MapApiService(
 
     public (int width, int height)? GetMapDimensions(int mapId)
     {
-        // Query for MapInfo component
-        var query = QueryCache.Get<MapInfo>();
         (int width, int height)? result = null;
 
+        // Use centralized query for MapInfo
         _world.Query(
-            in query,
+            in Queries.Queries.MapInfo,
             (ref MapInfo mapInfo) =>
             {
                 if (mapInfo.MapId == mapId)
@@ -122,11 +121,11 @@ public class MapApiService(
 
     private Entity? GetPlayerEntity()
     {
-        var query = QueryCache.Get<Player>();
         Entity? playerEntity = null;
 
+        // Use centralized query for Player
         _world.Query(
-            in query,
+            in Queries.Queries.Player,
             entity =>
             {
                 playerEntity = entity;

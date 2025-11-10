@@ -133,14 +133,12 @@ public class NPCBehaviorSystem : ParallelSystemBase, IUpdateSystem
             return;
         }
 
-        // Query all NPCs with behavior data
-        var query = QueryCache.Get<Npc, Behavior, Position>();
-
         var behaviorCount = 0;
         var errorCount = 0;
 
+        // Use centralized query for NPCs with behavior
         world.Query(
-            in query,
+            in Queries.Queries.NpcsWithBehavior,
             (Entity entity, ref Npc npc, ref Behavior behavior) =>
             {
                 try

@@ -1,6 +1,7 @@
 using Arch.Core;
 using Arch.Core.Extensions;
 using PokeSharp.Core.Components.Relationships;
+using PokeSharp.Core.Queries;
 using PokeSharp.Core.Systems;
 using System;
 using System.Collections.Generic;
@@ -309,7 +310,8 @@ public static class RelationshipExtensions
             return Enumerable.Empty<Entity>();
 
         var ownedEntities = new List<Entity>();
-        var query = QueryCache.Get<Owned>();
+        // Use centralized relationship query
+        var query = RelationshipQueries.AllOwned;
 
         world.Query(in query, (Entity entity, ref Owned owned) =>
         {

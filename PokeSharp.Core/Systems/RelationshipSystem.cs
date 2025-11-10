@@ -2,6 +2,7 @@ using Arch.Core;
 using Arch.Core.Extensions;
 using Microsoft.Extensions.Logging;
 using PokeSharp.Core.Components.Relationships;
+using PokeSharp.Core.Queries;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -61,11 +62,11 @@ public class RelationshipSystem : SystemBase
     {
         base.Initialize(world);
 
-        // Use cached queries for relationship components
-        _parentQuery = QueryCache.Get<Parent>();
-        _childrenQuery = QueryCache.Get<Children>();
-        _ownerQuery = QueryCache.Get<Owner>();
-        _ownedQuery = QueryCache.Get<Owned>();
+        // Use centralized relationship queries for better semantics
+        _parentQuery = RelationshipQueries.AllChildren;    // Entities with Parent component
+        _childrenQuery = RelationshipQueries.AllParents;   // Entities with Children component
+        _ownerQuery = RelationshipQueries.AllOwners;       // Entities with Owner component
+        _ownedQuery = RelationshipQueries.AllOwned;        // Entities with Owned component
 
         _logger.LogInformation("RelationshipSystem initialized (Priority: {Priority})", Priority);
     }
