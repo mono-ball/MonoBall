@@ -10,6 +10,7 @@ using PokeSharp.Core.Logging;
 using PokeSharp.Core.Scripting.Services;
 using PokeSharp.Core.ScriptingApi;
 using PokeSharp.Core.Scripting.Runtime;
+using PokeSharp.Scripting.Compilation;
 
 namespace PokeSharp.Scripting.Services;
 
