@@ -1,0 +1,118 @@
+{
+  "Name": "watering",
+  "Category": "may",
+  "OriginalPath": "may/watering.png",
+  "OutputDirectory": "Players/may/watering",
+  "SpriteSheet": "spritesheet.png",
+  "FrameWidth": 16,
+  "FrameHeight": 32,
+  "FrameCount": 12,
+  "Frames": [
+    {
+      "Index": 0,
+      "X": 0,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 1,
+      "X": 16,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 2,
+      "X": 32,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 3,
+      "X": 48,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 4,
+      "X": 64,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 5,
+      "X": 80,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 6,
+      "X": 96,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 7,
+      "X": 112,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 8,
+      "X": 128,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 9,
+      "X": 144,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 10,
+      "X": 160,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 11,
+      "X": 176,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    }
+  ],
+  "Animations": [
+    {
+      "Name": "default",
+      "Loop": true,
+      "FrameIndices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "FrameDuration": 0.15,
+      "FlipHorizontal": false
+    }
+  ]
+}

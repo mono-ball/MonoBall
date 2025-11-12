@@ -1545,7 +1545,9 @@ public class MapLoader(
 
                     if (!string.IsNullOrEmpty(npcDef.SpriteId))
                     {
-                        builder.OverrideComponent(new Sprite(npcDef.SpriteId));
+                        // Parse sprite ID format: "category/spriteName" or fallback to "generic/spriteName"
+                        var (category, spriteName) = ParseSpriteId(npcDef.SpriteId);
+                        builder.OverrideComponent(new Sprite(spriteName, category));
                     }
 
                     builder.OverrideComponent(new GridMovement(npcDef.MovementSpeed));
@@ -1592,7 +1594,9 @@ public class MapLoader(
 
                     if (!string.IsNullOrEmpty(trainerDef.SpriteId))
                     {
-                        builder.OverrideComponent(new Sprite(trainerDef.SpriteId));
+                        // Parse sprite ID format: "category/spriteName" or fallback to "generic/spriteName"
+                        var (category, spriteName) = ParseSpriteId(trainerDef.SpriteId);
+                        builder.OverrideComponent(new Sprite(spriteName, category));
                     }
 
                     // Add trainer-specific component (when Trainer component exists)
@@ -1947,5 +1951,23 @@ public class MapLoader(
 
         var normalized = (float)layerId / totalLayerCount;
         return 1.0f - normalized; // Invert so lower IDs = higher depth (back)
+    }
+
+    /// <summary>
+    ///     Parses a sprite ID in "category/spriteName" format.
+    ///     Falls back to "generic" category if no slash is present.
+    /// </summary>
+    /// <param name="spriteId">The sprite ID (e.g., "may/walking", "boy_1").</param>
+    /// <returns>Tuple of (category, spriteName).</returns>
+    private static (string category, string spriteName) ParseSpriteId(string spriteId)
+    {
+        var parts = spriteId.Split('/', 2);
+        if (parts.Length == 2)
+        {
+            return (parts[0], parts[1]);
+        }
+
+        // No slash - assume generic category
+        return ("generic", spriteId);
     }
 }

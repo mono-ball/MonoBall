@@ -154,20 +154,24 @@ public static class ComponentDeserializerSetup
 
     private static void RegisterRenderingComponents(ComponentDeserializerRegistry registry)
     {
-        // Sprite
+        // Sprite - Uses Pokemon Emerald extracted sprites
         registry.Register<Sprite>(json =>
         {
-            var textureId = json.GetProperty("textureId").GetString() ?? "default";
-            var sprite = new Sprite(textureId);
+            var spriteName = json.GetProperty("spriteId").GetString() ?? "boy_1";
+            var category = json.GetProperty("category").GetString() ?? "generic";
 
-            // SourceRect is optional - can be set after construction
-            if (json.TryGetProperty("sourceRect", out var rectElement))
+            var sprite = new Sprite(spriteName, category);
+
+            // Optional: FlipHorizontal for facing left
+            if (json.TryGetProperty("flipHorizontal", out var flipElement))
             {
-                var x = rectElement.GetProperty("x").GetInt32();
-                var y = rectElement.GetProperty("y").GetInt32();
-                var width = rectElement.GetProperty("width").GetInt32();
-                var height = rectElement.GetProperty("height").GetInt32();
-                sprite.SourceRect = new Rectangle(x, y, width, height);
+                sprite.FlipHorizontal = flipElement.GetBoolean();
+            }
+
+            // Optional: CurrentFrame (defaults to 0)
+            if (json.TryGetProperty("currentFrame", out var frameElement))
+            {
+                sprite.CurrentFrame = frameElement.GetInt32();
             }
 
             return sprite;

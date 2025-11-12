@@ -2,7 +2,7 @@
   "npcId": "guard_001",
   "displayName": "GUARD",
   "npcType": "guard",
-  "spriteId": "npc-spritesheet",
+  "spriteId": "generic/youngster",
   "behaviorScript": "patrol",
   "dialogueScript": "Dialogue/guard_greeting.csx",
   "movementSpeed": 2.0,

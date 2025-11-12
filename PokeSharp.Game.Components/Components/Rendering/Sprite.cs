@@ -3,17 +3,33 @@ using Microsoft.Xna.Framework;
 namespace PokeSharp.Game.Components.Rendering;
 
 /// <summary>
-///     Component for rendering sprites with texture information and visual properties.
+///     Component for rendering NPC/Player sprites from the Pokemon Emerald sprite extraction.
+///     Uses sprite sheet + source rectangles for efficient rendering.
 /// </summary>
 public struct Sprite
 {
     /// <summary>
-    ///     Gets or sets the texture identifier for asset loading.
+    ///     Gets or sets the sprite name (e.g., "walking", "nurse", "boy_1").
     /// </summary>
-    public string TextureId { get; set; }
+    public string SpriteName { get; set; }
 
     /// <summary>
-    ///     Gets or sets the source rectangle on the sprite sheet.
+    ///     Gets or sets the sprite category (e.g., "may", "brendan", "generic", "gym_leaders").
+    /// </summary>
+    public string Category { get; set; }
+
+    /// <summary>
+    ///     Gets or sets the current frame index in the sprite sheet.
+    /// </summary>
+    public int CurrentFrame { get; set; }
+
+    /// <summary>
+    ///     Gets or sets whether to flip the sprite horizontally (for left/right directions).
+    /// </summary>
+    public bool FlipHorizontal { get; set; }
+
+    /// <summary>
+    ///     Gets or sets the source rectangle on the sprite sheet (calculated from frame data).
     /// </summary>
     public Rectangle SourceRect { get; set; }
 
@@ -40,10 +56,14 @@ public struct Sprite
     /// <summary>
     ///     Initializes a new instance of the Sprite struct with default values.
     /// </summary>
-    /// <param name="textureId">The texture identifier.</param>
-    public Sprite(string textureId)
+    /// <param name="spriteName">The sprite name (e.g., "walking", "nurse").</param>
+    /// <param name="category">The sprite category (e.g., "may", "generic").</param>
+    public Sprite(string spriteName, string category)
     {
-        TextureId = textureId;
+        SpriteName = spriteName;
+        Category = category;
+        CurrentFrame = 0;
+        FlipHorizontal = false;
         SourceRect = Rectangle.Empty;
         Origin = Vector2.Zero;
         Rotation = 0f;

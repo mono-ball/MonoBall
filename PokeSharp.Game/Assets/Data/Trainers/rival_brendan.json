@@ -2,7 +2,7 @@
   "trainerId": "rival_brendan",
   "displayName": "BRENDAN",
   "trainerClass": "rival",
-  "spriteId": "trainer-rival-sprite",
+  "spriteId": "brendan/walking",
   "prizeMoney": 500,
   "introDialogue": "So you're the new kid? Let's see what you've got!",
   "defeatDialogue": "Not bad! You're pretty good!",

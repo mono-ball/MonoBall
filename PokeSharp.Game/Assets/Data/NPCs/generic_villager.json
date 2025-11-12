@@ -2,7 +2,7 @@
   "npcId": "generic_villager",
   "displayName": "VILLAGER",
   "npcType": "generic",
-  "spriteId": "npc-spritesheet",
+  "spriteId": "generic/girl_1",
   "behaviorScript": "stationary",
   "dialogueScript": "Dialogue/generic_greeting.csx",
   "movementSpeed": 1.5,

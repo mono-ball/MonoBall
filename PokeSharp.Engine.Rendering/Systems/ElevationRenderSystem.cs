@@ -48,6 +48,20 @@ public class ElevationRenderSystem(
     private readonly AssetManager _assetManager =
         assetManager ?? throw new ArgumentNullException(nameof(assetManager));
 
+    /// <summary>
+    /// Gets the AssetManager used by this render system.
+    /// </summary>
+    public AssetManager AssetManager => _assetManager;
+
+    /// <summary>
+    /// Sets the sprite texture loader for lazy loading.
+    /// </summary>
+    public void SetSpriteTextureLoader(object loader)
+    {
+        _spriteTextureLoader = loader;
+        _logger?.LogInformation("Sprite texture loader registered for lazy loading");
+    }
+
     // Cache query descriptions to avoid allocation every frame
     private readonly QueryDescription _cameraQuery = QueryCache.Get<Player, Camera>();
 
@@ -69,6 +83,9 @@ public class ElevationRenderSystem(
     >();
 
     private readonly ILogger<ElevationRenderSystem>? _logger = logger;
+
+    // Lazy sprite texture loader (set after initialization)
+    private object? _spriteTextureLoader;
 
     // Sprite queries (moving and static)
     private readonly QueryDescription _movingSpriteQuery = QueryCache.Get<
@@ -142,10 +159,10 @@ public class ElevationRenderSystem(
             UpdateCameraCache(world);
 
             _spriteBatch.Begin(
-                SpriteSortMode.Deferred,
-                BlendState.AlphaBlend,
+                SpriteSortMode.BackToFront,  // Sort sprites by layerDepth for proper overlap
+                BlendState.NonPremultiplied,  // Use NonPremultiplied for PNG transparency
                 SamplerState.PointClamp,
-                DepthStencilState.Default,
+                DepthStencilState.None,  // Disable depth buffer for 2D sprite transparency
                 RasterizerState.CullNone,
                 null,
                 transformMatrix: _cachedCameraTransform
@@ -207,10 +224,10 @@ public class ElevationRenderSystem(
 
         var swBatchBegin = Stopwatch.StartNew();
         _spriteBatch.Begin(
-            SpriteSortMode.Deferred,
-            BlendState.AlphaBlend,
+            SpriteSortMode.BackToFront,  // Sort sprites by layerDepth for proper overlap
+            BlendState.NonPremultiplied,  // Use NonPremultiplied for PNG transparency
             SamplerState.PointClamp,
-            DepthStencilState.Default,
+            DepthStencilState.None,  // Disable depth buffer for 2D sprite transparency
             RasterizerState.CullNone,
             null,
             transformMatrix: _cachedCameraTransform
@@ -300,7 +317,8 @@ public class ElevationRenderSystem(
             in _movingSpriteQuery,
             (ref Sprite sprite) =>
             {
-                texturesNeeded.Add(sprite.TextureId);
+                var textureKey = GetSpriteTextureKey(sprite);
+                texturesNeeded.Add(textureKey);
             }
         );
 
@@ -308,17 +326,33 @@ public class ElevationRenderSystem(
             in _staticSpriteQuery,
             (ref Sprite sprite) =>
             {
-                texturesNeeded.Add(sprite.TextureId);
+                var textureKey = GetSpriteTextureKey(sprite);
+                texturesNeeded.Add(textureKey);
             }
         );
 
-        // Preload all textures
-        foreach (var textureId in texturesNeeded)
-            if (!_assetManager.HasTexture(textureId))
+        // With lazy loading, sprites will load on-demand during rendering
+        // Just log what textures are expected
+        _logger?.LogDebug("Map requires {Count} textures (will load on-demand)", texturesNeeded.Count);
+
+        // Optionally preload sprite textures if lazy loader is available
+        if (_spriteTextureLoader != null)
+        {
+            foreach (var textureId in texturesNeeded)
             {
-                _logger?.LogWorkflowStatus("Preloading texture", ("texture", textureId));
-                _assetManager.GetTexture(textureId); // Force load now
+                if (!_assetManager.HasTexture(textureId) && textureId.StartsWith("sprites/"))
+                {
+                    // Parse sprite category/name from texture key
+                    var parts = textureId.Split('/');
+                    if (parts.Length >= 3)
+                    {
+                        var category = parts[1];
+                        var spriteName = parts[2];
+                        TryLazyLoadSprite(category, spriteName, textureId);
+                    }
+                }
             }
+        }
 
         sw.Stop();
         _logger?.LogWorkflowStatus(
@@ -421,15 +455,16 @@ public class ElevationRenderSystem(
                     if (world.TryGet(entity, out LayerOffset offset))
                     {
                         // Apply layer offset for parallax effect
+                        // +1 to Y for bottom-left origin alignment
                         position = new Vector2(
                             pos.X * TileSize + offset.X,
-                            pos.Y * TileSize + offset.Y
+                            (pos.Y + 1) * TileSize + offset.Y
                         );
                     }
                     else
                     {
-                        // Standard positioning
-                        position = new Vector2(pos.X * TileSize, pos.Y * TileSize);
+                        // Standard positioning (+1 to Y for bottom-left origin alignment)
+                        position = new Vector2(pos.X * TileSize, (pos.Y + 1) * TileSize);
                     }
 
                     // Calculate elevation-based layer depth
@@ -443,13 +478,16 @@ public class ElevationRenderSystem(
                         effects |= SpriteEffects.FlipVertically;
 
                     // Render tile
+                    // Calculate tile origin (bottom-left for grid alignment)
+                    var tileOrigin = new Vector2(0, sprite.SourceRect.Height);
+
                     _spriteBatch.Draw(
                         texture,
                         position,
                         sprite.SourceRect,
                         Color.White,
                         0f,
-                        Vector2.Zero,
+                        tileOrigin,
                         1f,
                         effects,
                         layerDepth
@@ -513,17 +551,28 @@ public class ElevationRenderSystem(
     {
         try
         {
-            // Get texture from AssetManager
-            if (!_assetManager.HasTexture(sprite.TextureId))
+            // Get texture key from sprite (category/spriteName)
+            var textureKey = GetSpriteTextureKey(sprite);
+
+            // Lazy load texture if not already loaded
+            if (!_assetManager.HasTexture(textureKey))
             {
-                _logger?.LogWarning(
-                    "    WARNING: Texture '{TextureId}' NOT FOUND in AssetManager - skipping sprite",
-                    sprite.TextureId
-                );
-                return;
+                TryLazyLoadSprite(sprite.Category, sprite.SpriteName, textureKey);
+
+                // If still not found after lazy load attempt, skip rendering
+                if (!_assetManager.HasTexture(textureKey))
+                {
+                    _logger?.LogWarning(
+                        "    WARNING: Texture '{TextureKey}' NOT FOUND - skipping sprite ({Category}/{SpriteName})",
+                        textureKey,
+                        sprite.Category,
+                        sprite.SpriteName
+                    );
+                    return;
+                }
             }
 
-            var texture = _assetManager.GetTexture(sprite.TextureId);
+            var texture = _assetManager.GetTexture(textureKey);
 
             // Determine source rectangle
             var sourceRect = sprite.SourceRect;
@@ -531,7 +580,8 @@ public class ElevationRenderSystem(
                 sourceRect = new Rectangle(0, 0, texture.Width, texture.Height);
 
             // Calculate render position (visual interpolated position)
-            var renderPosition = new Vector2(position.PixelX, position.PixelY);
+            // Add TileSize to Y to align sprite feet with tile bottom
+            var renderPosition = new Vector2(position.PixelX, position.PixelY + TileSize);
 
             // BEST PRACTICE FOR MOVING ENTITIES: Use TARGET position for depth sorting
             // When moving/jumping, sort based on where the entity is going, not where they started.
@@ -553,6 +603,9 @@ public class ElevationRenderSystem(
 
             var layerDepth = CalculateElevationDepth(elevation.Value, groundY);
 
+            // Determine sprite effects (flip horizontal for left-facing)
+            var effects = sprite.FlipHorizontal ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
+
             // Draw sprite
             _spriteBatch.Draw(
                 texture,
@@ -562,7 +615,7 @@ public class ElevationRenderSystem(
                 sprite.Rotation,
                 sprite.Origin,
                 sprite.Scale,
-                SpriteEffects.None,
+                effects,
                 layerDepth
             );
         }
@@ -570,8 +623,9 @@ public class ElevationRenderSystem(
         {
             _logger?.LogError(
                 ex,
-                "    ERROR rendering moving sprite with TextureId '{TextureId}' at position ({X}, {Y})",
-                sprite.TextureId,
+                "    ERROR rendering moving sprite '{Category}/{SpriteName}' at position ({X}, {Y})",
+                sprite.Category,
+                sprite.SpriteName,
                 position.PixelX,
                 position.PixelY
             );
@@ -582,17 +636,28 @@ public class ElevationRenderSystem(
     {
         try
         {
-            // Get texture from AssetManager
-            if (!_assetManager.HasTexture(sprite.TextureId))
+            // Get texture key from sprite (category/spriteName)
+            var textureKey = GetSpriteTextureKey(sprite);
+
+            // Lazy load texture if not already loaded
+            if (!_assetManager.HasTexture(textureKey))
             {
-                _logger?.LogWarning(
-                    "    WARNING: Texture '{TextureId}' NOT FOUND in AssetManager - skipping sprite",
-                    sprite.TextureId
-                );
-                return;
+                TryLazyLoadSprite(sprite.Category, sprite.SpriteName, textureKey);
+
+                // If still not found after lazy load attempt, skip rendering
+                if (!_assetManager.HasTexture(textureKey))
+                {
+                    _logger?.LogWarning(
+                        "    WARNING: Texture '{TextureKey}' NOT FOUND - skipping sprite ({Category}/{SpriteName})",
+                        textureKey,
+                        sprite.Category,
+                        sprite.SpriteName
+                    );
+                    return;
+                }
             }
 
-            var texture = _assetManager.GetTexture(sprite.TextureId);
+            var texture = _assetManager.GetTexture(textureKey);
 
             // Determine source rectangle
             var sourceRect = sprite.SourceRect;
@@ -600,7 +665,8 @@ public class ElevationRenderSystem(
                 sourceRect = new Rectangle(0, 0, texture.Width, texture.Height);
 
             // Calculate render position
-            var renderPosition = new Vector2(position.PixelX, position.PixelY);
+            // Add TileSize to Y to align sprite feet with tile bottom
+            var renderPosition = new Vector2(position.PixelX, position.PixelY + TileSize);
 
             // BEST PRACTICE: Calculate layer depth based on entity's GRID position, not visual pixel position.
             // This ensures:
@@ -614,6 +680,9 @@ public class ElevationRenderSystem(
             float groundY = (position.Y + 1) * TileSize; // +1 because we want bottom of tile
             var layerDepth = CalculateElevationDepth(elevation.Value, groundY);
 
+            // Determine sprite effects (flip horizontal for left-facing)
+            var effects = sprite.FlipHorizontal ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
+
             // Draw sprite
             _spriteBatch.Draw(
                 texture,
@@ -623,7 +692,7 @@ public class ElevationRenderSystem(
                 sprite.Rotation,
                 sprite.Origin,
                 sprite.Scale,
-                SpriteEffects.None,
+                effects,
                 layerDepth
             );
         }
@@ -631,11 +700,47 @@ public class ElevationRenderSystem(
         {
             _logger?.LogError(
                 ex,
-                "    ERROR rendering sprite with TextureId '{TextureId}' at position ({X}, {Y})",
-                sprite.TextureId,
+                "    ERROR rendering sprite '{Category}/{SpriteName}' at position ({X}, {Y})",
+                sprite.Category,
+                sprite.SpriteName,
                 position.PixelX,
                 position.PixelY
             );
+        }
+    }
+
+    /// <summary>
+    /// Gets the texture key for loading sprite sheets from the AssetManager.
+    /// </summary>
+    /// <param name="sprite">The sprite component.</param>
+    /// <returns>Texture key in format "sprites/{category}/{spriteName}".</returns>
+    private static string GetSpriteTextureKey(Sprite sprite)
+    {
+        return $"sprites/{sprite.Category}/{sprite.SpriteName}";
+    }
+
+    /// <summary>
+    /// Attempts to lazy-load a sprite texture if a loader is registered.
+    /// </summary>
+    private void TryLazyLoadSprite(string category, string spriteName, string textureKey)
+    {
+        if (_spriteTextureLoader == null)
+            return;
+
+        try
+        {
+            // Use reflection to call LoadSpriteTexture on the loader
+            var loaderType = _spriteTextureLoader.GetType();
+            var method = loaderType.GetMethod("LoadSpriteTexture");
+            if (method != null)
+            {
+                method.Invoke(_spriteTextureLoader, new object[] { category, spriteName });
+                _logger?.LogDebug("Lazy-loaded sprite: {TextureKey}", textureKey);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogWarning(ex, "Failed to lazy-load sprite: {TextureKey}", textureKey);
         }
     }
 

@@ -1,0 +1,46 @@
+{
+  "Name": "drake",
+  "Category": "elite_four",
+  "OriginalPath": "elite_four/drake.png",
+  "OutputDirectory": "NPCs/elite_four/drake",
+  "SpriteSheet": "spritesheet.png",
+  "FrameWidth": 16,
+  "FrameHeight": 32,
+  "FrameCount": 3,
+  "Frames": [
+    {
+      "Index": 0,
+      "X": 0,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 1,
+      "X": 16,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 2,
+      "X": 32,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    }
+  ],
+  "Animations": [
+    {
+      "Name": "default",
+      "Loop": true,
+      "FrameIndices": [
+        0,
+        1,
+        2
+      ],
+      "FrameDuration": 0.15,
+      "FlipHorizontal": false
+    }
+  ]
+}

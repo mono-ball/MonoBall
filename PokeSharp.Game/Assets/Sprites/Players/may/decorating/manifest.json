@@ -1,0 +1,30 @@
+{
+  "Name": "decorating",
+  "Category": "may",
+  "OriginalPath": "may/decorating.png",
+  "OutputDirectory": "Players/may/decorating",
+  "SpriteSheet": "spritesheet.png",
+  "FrameWidth": 16,
+  "FrameHeight": 32,
+  "FrameCount": 1,
+  "Frames": [
+    {
+      "Index": 0,
+      "X": 0,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    }
+  ],
+  "Animations": [
+    {
+      "Name": "default",
+      "Loop": true,
+      "FrameIndices": [
+        0
+      ],
+      "FrameDuration": 0.15,
+      "FlipHorizontal": false
+    }
+  ]
+}

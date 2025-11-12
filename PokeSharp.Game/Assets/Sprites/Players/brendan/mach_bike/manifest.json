@@ -1,0 +1,272 @@
+{
+  "Name": "mach_bike",
+  "Category": "brendan",
+  "OriginalPath": "brendan/mach_bike.png",
+  "OutputDirectory": "Players/brendan/mach_bike",
+  "SpriteSheet": "spritesheet.png",
+  "FrameWidth": 16,
+  "FrameHeight": 32,
+  "FrameCount": 18,
+  "Frames": [
+    {
+      "Index": 0,
+      "X": 0,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 1,
+      "X": 16,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 2,
+      "X": 32,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 3,
+      "X": 48,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 4,
+      "X": 64,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 5,
+      "X": 80,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 6,
+      "X": 96,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 7,
+      "X": 112,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 8,
+      "X": 128,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 9,
+      "X": 144,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 10,
+      "X": 160,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 11,
+      "X": 176,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 12,
+      "X": 192,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 13,
+      "X": 208,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 14,
+      "X": 224,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 15,
+      "X": 240,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 16,
+      "X": 256,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 17,
+      "X": 272,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    }
+  ],
+  "Animations": [
+    {
+      "Name": "idle_down",
+      "Loop": true,
+      "FrameIndices": [
+        0
+      ],
+      "FrameDuration": 0.5,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "walk_down",
+      "Loop": true,
+      "FrameIndices": [
+        3,
+        0,
+        4,
+        0
+      ],
+      "FrameDuration": 0.15,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "idle_up",
+      "Loop": true,
+      "FrameIndices": [
+        1
+      ],
+      "FrameDuration": 0.5,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "walk_up",
+      "Loop": true,
+      "FrameIndices": [
+        5,
+        1,
+        6,
+        1
+      ],
+      "FrameDuration": 0.15,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "idle_left",
+      "Loop": true,
+      "FrameIndices": [
+        2
+      ],
+      "FrameDuration": 0.5,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "walk_left",
+      "Loop": true,
+      "FrameIndices": [
+        7,
+        2,
+        8,
+        2
+      ],
+      "FrameDuration": 0.15,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "idle_right",
+      "Loop": true,
+      "FrameIndices": [
+        2
+      ],
+      "FrameDuration": 0.5,
+      "FlipHorizontal": true
+    },
+    {
+      "Name": "walk_right",
+      "Loop": true,
+      "FrameIndices": [
+        7,
+        2,
+        8,
+        2
+      ],
+      "FrameDuration": 0.15,
+      "FlipHorizontal": true
+    },
+    {
+      "Name": "run_down",
+      "Loop": true,
+      "FrameIndices": [
+        12,
+        9,
+        13,
+        9
+      ],
+      "FrameDuration": 0.1,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "run_up",
+      "Loop": true,
+      "FrameIndices": [
+        14,
+        10,
+        15,
+        10
+      ],
+      "FrameDuration": 0.1,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "run_left",
+      "Loop": true,
+      "FrameIndices": [
+        16,
+        11,
+        17,
+        11
+      ],
+      "FrameDuration": 0.1,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "run_right",
+      "Loop": true,
+      "FrameIndices": [
+        16,
+        11,
+        17,
+        11
+      ],
+      "FrameDuration": 0.1,
+      "FlipHorizontal": true
+    }
+  ]
+}

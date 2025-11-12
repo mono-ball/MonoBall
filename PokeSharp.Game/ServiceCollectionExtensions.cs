@@ -53,6 +53,9 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<PokeSharp.Game.Data.Services.NpcDefinitionService>();
         services.AddSingleton<PokeSharp.Game.Data.Services.MapDefinitionService>();
 
+        // NPC Sprite Loader - for loading sprites extracted from Pokemon Emerald
+        services.AddSingleton<SpriteLoader>();
+
         // Core ECS
         services.AddSingleton(sp =>
         {

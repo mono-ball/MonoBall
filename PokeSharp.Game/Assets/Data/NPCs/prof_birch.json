@@ -2,7 +2,7 @@
   "npcId": "prof_birch",
   "displayName": "PROF. BIRCH",
   "npcType": "professor",
-  "spriteId": "npc-spritesheet",
+  "spriteId": "generic/prof_birch",
   "behaviorScript": "stationary",
   "dialogueScript": "Dialogue/prof_birch_intro.csx",
   "movementSpeed": 2.0,

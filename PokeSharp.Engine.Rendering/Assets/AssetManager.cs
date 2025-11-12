@@ -243,4 +243,48 @@ public class AssetManager(
         // Reload
         LoadTexture(id, path);
     }
+
+    /// <summary>
+    ///     Registers a pre-loaded texture with the asset manager.
+    ///     Useful for runtime-loaded textures (e.g., sprite sheets).
+    /// </summary>
+    /// <param name="id">Unique identifier for the texture.</param>
+    /// <param name="texture">The pre-loaded texture to register.</param>
+    public void RegisterTexture(string id, Texture2D texture)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(id);
+        ArgumentNullException.ThrowIfNull(texture);
+
+        // If texture already exists, dispose the old one
+        if (_textures.TryGetValue(id, out var oldTexture))
+        {
+            _logger?.LogDebug("Replacing existing texture: {TextureId}", id);
+            oldTexture.Dispose();
+        }
+
+        _textures[id] = texture;
+        _logger?.LogDebug(
+            "Registered texture: {TextureId} ({Width}x{Height})",
+            id,
+            texture.Width,
+            texture.Height);
+    }
+
+    /// <summary>
+    ///     Unregisters and disposes a texture.
+    /// </summary>
+    /// <param name="id">The texture identifier to remove.</param>
+    /// <returns>True if texture was found and removed.</returns>
+    public bool UnregisterTexture(string id)
+    {
+        if (_textures.TryGetValue(id, out var texture))
+        {
+            texture.Dispose();
+            _textures.Remove(id);
+            _logger?.LogDebug("Unregistered texture: {TextureId}", id);
+            return true;
+        }
+
+        return false;
+    }
 }

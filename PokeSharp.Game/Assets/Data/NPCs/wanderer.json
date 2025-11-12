@@ -2,7 +2,7 @@
   "npcId": "wanderer",
   "displayName": "WANDERER",
   "npcType": "wanderer",
-  "spriteId": "npc-spritesheet",
+  "spriteId": "generic/boy_1",
   "behaviorScript": "wander",
   "dialogueScript": "Dialogue/generic_greeting.csx",
   "movementSpeed": 1.5,

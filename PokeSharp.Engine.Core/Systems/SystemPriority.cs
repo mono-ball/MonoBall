@@ -28,6 +28,7 @@ public static class SystemPriority
     public const int Animation = 800;
     public const int CameraFollow = 825;
     public const int TileAnimation = 850;
+    public const int SpriteAnimation = 875;
 
     // Rendering
     public const int MapRender = 900;

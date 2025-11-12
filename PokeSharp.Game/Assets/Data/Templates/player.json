@@ -30,7 +30,8 @@
     {
       "type": "Sprite",
       "data": {
-        "textureId": "player-spritesheet"
+        "spriteId": "walking",
+        "category": "may"
       }
     },
     {
@@ -72,4 +73,3 @@
     }
   ]
 }
-

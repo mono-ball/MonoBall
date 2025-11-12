@@ -14,7 +14,8 @@
     {
       "type": "Sprite",
       "data": {
-        "textureId": "npc-spritesheet"
+        "spriteId": "boy_1",
+        "category": "generic"
       }
     },
     {

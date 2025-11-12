@@ -2,7 +2,7 @@
   "trainerId": "youngster_joey",
   "displayName": "YOUNGSTER JOEY",
   "trainerClass": "youngster",
-  "spriteId": "trainer-youngster-sprite",
+  "spriteId": "generic/youngster",
   "prizeMoney": 100,
   "introDialogue": "Hi! I like shorts! They're comfy and easy to wear!",
   "defeatDialogue": "Aww! My Rattata!",

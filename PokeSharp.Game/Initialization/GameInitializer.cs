@@ -14,6 +14,7 @@ using PokeSharp.Game.Data.MapLoading.Tiled;
 using PokeSharp.Engine.Rendering.Systems;
 using PokeSharp.Game.Systems;
 using PokeSharp.Game.Systems.Services;
+using PokeSharp.Game.Services;
 
 namespace PokeSharp.Game.Initialization;
 
@@ -28,7 +29,8 @@ public class GameInitializer(
     AssetManager assetManager,
     IEntityFactoryService entityFactory,
     MapLoader mapLoader,
-    EntityPoolManager poolManager
+    EntityPoolManager poolManager,
+            SpriteLoader spriteLoader
 )
 {
     private readonly AssetManager _assetManager = assetManager;
@@ -39,6 +41,7 @@ public class GameInitializer(
     private readonly SystemManager _systemManager = systemManager;
     private readonly World _world = world;
     private readonly EntityPoolManager _poolManager = poolManager;
+    private readonly SpriteLoader _spriteLoader = spriteLoader;
 
     /// <summary>
     ///     Gets the animation library.
@@ -157,6 +160,10 @@ public class GameInitializer(
         // Register TileAnimationSystem (Priority: 850, animates water/grass tiles between Animation and Render)
         var tileAnimLogger = _loggerFactory.CreateLogger<TileAnimationSystem>();
         _systemManager.RegisterUpdateSystem(new TileAnimationSystem(tileAnimLogger));
+
+        // Register SpriteAnimationSystem (Priority: 875, updates NPC/player sprite frames from manifests)
+        var spriteAnimLogger = _loggerFactory.CreateLogger<SpriteAnimationSystem>();
+            _systemManager.RegisterUpdateSystem(new SpriteAnimationSystem(_spriteLoader, spriteAnimLogger));
 
         // NOTE: NPCBehaviorSystem is registered separately in NPCBehaviorInitializer
         // It requires ScriptService and behavior registry to be set up first

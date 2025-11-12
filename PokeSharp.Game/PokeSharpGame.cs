@@ -15,6 +15,7 @@ using PokeSharp.Engine.Rendering.Assets;
 using PokeSharp.Game.Data.MapLoading.Tiled;
 using PokeSharp.Game.Data.Loading;
 using PokeSharp.Game.Data.Services;
+using PokeSharp.Game.Systems;
 
 namespace PokeSharp.Game;
 
@@ -33,6 +34,7 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game, IAsyncDisposable
     private readonly GameDataLoader _dataLoader;
     private readonly NpcDefinitionService _npcDefinitionService;
     private readonly MapDefinitionService _mapDefinitionService;
+        private readonly SpriteLoader _spriteLoader;
     private readonly GraphicsDeviceManager _graphics;
 
     // Services that depend on GraphicsDevice (created in Initialize)
@@ -57,7 +59,8 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game, IAsyncDisposable
         EntityPoolManager poolManager,
         GameDataLoader dataLoader,
         NpcDefinitionService npcDefinitionService,
-        MapDefinitionService mapDefinitionService
+        MapDefinitionService mapDefinitionService,
+            SpriteLoader spriteLoader
     )
     {
         _logging = logging ?? throw new ArgumentNullException(nameof(logging));
@@ -71,6 +74,7 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game, IAsyncDisposable
         _dataLoader = dataLoader ?? throw new ArgumentNullException(nameof(dataLoader));
         _npcDefinitionService = npcDefinitionService ?? throw new ArgumentNullException(nameof(npcDefinitionService));
         _mapDefinitionService = mapDefinitionService ?? throw new ArgumentNullException(nameof(mapDefinitionService));
+        _spriteLoader = spriteLoader ?? throw new ArgumentNullException(nameof(spriteLoader));
 
         _graphics = new GraphicsDeviceManager(this);
         Content.RootDirectory = "Content";
@@ -155,7 +159,8 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game, IAsyncDisposable
             assetManager,
             _gameServices.EntityFactory,
             mapLoader,
-            _poolManager
+            _poolManager,
+            _spriteLoader
         );
 
         // Initialize core game systems
@@ -186,6 +191,9 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game, IAsyncDisposable
         // Initialize NPC behavior system
         _npcBehaviorInitializer.Initialize();
 
+        // Load sprite textures BEFORE loading the map (so PreloadMapAssets can find them)
+        LoadSpriteTextures();
+
         // Load test map and create map entity (NEW: Definition-based loading)
         _mapInitializer.LoadMap("test-map");
 
@@ -199,11 +207,35 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game, IAsyncDisposable
     }
 
     /// <summary>
-    ///     Loads game content.
+    ///     Loads game content. Called by MonoGame during initialization.
     /// </summary>
     protected override void LoadContent()
     {
-#warning TODO: Load textures and assets here when content pipeline is set up
+        // Content loading is handled in LoadSpriteTextures() after initialization
+        // This is called too early (before _gameInitializer is created)
+    }
+
+    /// <summary>
+    ///     Initializes lazy sprite loading system.
+    /// </summary>
+    private void LoadSpriteTextures()
+    {
+        // Create sprite texture loader for lazy loading
+        // Sprites will be loaded on-demand when first rendered
+        var spriteTextureLogger = _logging.CreateLogger<SpriteTextureLoader>();
+            var spriteTextureLoader = new SpriteTextureLoader(
+            _spriteLoader,
+            _gameInitializer.RenderSystem.AssetManager,
+            GraphicsDevice,
+            logger: spriteTextureLogger
+        );
+
+        // Register the loader with the render system for lazy loading
+        _gameInitializer.RenderSystem.SetSpriteTextureLoader(spriteTextureLoader);
+
+        _logging.CreateLogger<PokeSharpGame>().LogInformation(
+            "Sprite lazy loading initialized - sprites will load on-demand"
+        );
     }
 
     /// <summary>

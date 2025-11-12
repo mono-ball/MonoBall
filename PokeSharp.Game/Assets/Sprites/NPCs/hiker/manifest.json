@@ -1,0 +1,161 @@
+{
+  "Name": "hiker",
+  "Category": "generic",
+  "OriginalPath": "hiker.png",
+  "OutputDirectory": "NPCs/hiker",
+  "SpriteSheet": "spritesheet.png",
+  "FrameWidth": 16,
+  "FrameHeight": 32,
+  "FrameCount": 9,
+  "Frames": [
+    {
+      "Index": 0,
+      "X": 0,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 1,
+      "X": 16,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 2,
+      "X": 32,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 3,
+      "X": 48,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 4,
+      "X": 64,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 5,
+      "X": 80,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 6,
+      "X": 96,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 7,
+      "X": 112,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 8,
+      "X": 128,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    }
+  ],
+  "Animations": [
+    {
+      "Name": "idle_down",
+      "Loop": true,
+      "FrameIndices": [
+        0
+      ],
+      "FrameDuration": 0.5,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "walk_down",
+      "Loop": true,
+      "FrameIndices": [
+        3,
+        0,
+        4,
+        0
+      ],
+      "FrameDuration": 0.15,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "idle_up",
+      "Loop": true,
+      "FrameIndices": [
+        1
+      ],
+      "FrameDuration": 0.5,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "walk_up",
+      "Loop": true,
+      "FrameIndices": [
+        5,
+        1,
+        6,
+        1
+      ],
+      "FrameDuration": 0.15,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "idle_left",
+      "Loop": true,
+      "FrameIndices": [
+        2
+      ],
+      "FrameDuration": 0.5,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "walk_left",
+      "Loop": true,
+      "FrameIndices": [
+        7,
+        2,
+        8,
+        2
+      ],
+      "FrameDuration": 0.15,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "idle_right",
+      "Loop": true,
+      "FrameIndices": [
+        2
+      ],
+      "FrameDuration": 0.5,
+      "FlipHorizontal": true
+    },
+    {
+      "Name": "walk_right",
+      "Loop": true,
+      "FrameIndices": [
+        7,
+        2,
+        8,
+        2
+      ],
+      "FrameDuration": 0.15,
+      "FlipHorizontal": true
+    }
+  ]
+}

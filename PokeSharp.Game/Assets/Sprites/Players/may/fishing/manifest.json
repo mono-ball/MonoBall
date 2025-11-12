@@ -1,0 +1,214 @@
+{
+  "Name": "fishing",
+  "Category": "may",
+  "OriginalPath": "may/fishing.png",
+  "OutputDirectory": "Players/may/fishing",
+  "SpriteSheet": "spritesheet.png",
+  "FrameWidth": 16,
+  "FrameHeight": 32,
+  "FrameCount": 24,
+  "Frames": [
+    {
+      "Index": 0,
+      "X": 0,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 1,
+      "X": 16,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 2,
+      "X": 32,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 3,
+      "X": 48,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 4,
+      "X": 64,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 5,
+      "X": 80,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 6,
+      "X": 96,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 7,
+      "X": 112,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 8,
+      "X": 128,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 9,
+      "X": 144,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 10,
+      "X": 160,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 11,
+      "X": 176,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 12,
+      "X": 192,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 13,
+      "X": 208,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 14,
+      "X": 224,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 15,
+      "X": 240,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 16,
+      "X": 256,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 17,
+      "X": 272,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 18,
+      "X": 288,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 19,
+      "X": 304,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 20,
+      "X": 320,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 21,
+      "X": 336,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 22,
+      "X": 352,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 23,
+      "X": 368,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    }
+  ],
+  "Animations": [
+    {
+      "Name": "default",
+      "Loop": true,
+      "FrameIndices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "FrameDuration": 0.15,
+      "FlipHorizontal": false
+    }
+  ]
+}
