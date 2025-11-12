@@ -1,12 +1,12 @@
 {
   "Name": "fishing",
   "Category": "may",
-  "OriginalPath": "may/fishing.png",
+  "OriginalPath": "may/fishing",
   "OutputDirectory": "Players/may/fishing",
   "SpriteSheet": "spritesheet.png",
   "FrameWidth": 16,
   "FrameHeight": 32,
-  "FrameCount": 24,
+  "FrameCount": 12,
   "Frames": [
     {
       "Index": 0,
@@ -91,124 +91,148 @@
       "Y": 0,
       "Width": 16,
       "Height": 32
-    },
-    {
-      "Index": 12,
-      "X": 192,
-      "Y": 0,
-      "Width": 16,
-      "Height": 32
-    },
-    {
-      "Index": 13,
-      "X": 208,
-      "Y": 0,
-      "Width": 16,
-      "Height": 32
-    },
-    {
-      "Index": 14,
-      "X": 224,
-      "Y": 0,
-      "Width": 16,
-      "Height": 32
-    },
-    {
-      "Index": 15,
-      "X": 240,
-      "Y": 0,
-      "Width": 16,
-      "Height": 32
-    },
-    {
-      "Index": 16,
-      "X": 256,
-      "Y": 0,
-      "Width": 16,
-      "Height": 32
-    },
-    {
-      "Index": 17,
-      "X": 272,
-      "Y": 0,
-      "Width": 16,
-      "Height": 32
-    },
-    {
-      "Index": 18,
-      "X": 288,
-      "Y": 0,
-      "Width": 16,
-      "Height": 32
-    },
-    {
-      "Index": 19,
-      "X": 304,
-      "Y": 0,
-      "Width": 16,
-      "Height": 32
-    },
-    {
-      "Index": 20,
-      "X": 320,
-      "Y": 0,
-      "Width": 16,
-      "Height": 32
-    },
-    {
-      "Index": 21,
-      "X": 336,
-      "Y": 0,
-      "Width": 16,
-      "Height": 32
-    },
-    {
-      "Index": 22,
-      "X": 352,
-      "Y": 0,
-      "Width": 16,
-      "Height": 32
-    },
-    {
-      "Index": 23,
-      "X": 368,
-      "Y": 0,
-      "Width": 16,
-      "Height": 32
     }
   ],
   "Animations": [
     {
-      "Name": "default",
+      "Name": "take_out_rod_south",
+      "Loop": true,
+      "FrameIndices": [
+        8,
+        9,
+        10,
+        11
+      ],
+      "FrameDuration": 0.06666667,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "take_out_rod_north",
+      "Loop": true,
+      "FrameIndices": [
+        4,
+        5,
+        6,
+        7
+      ],
+      "FrameDuration": 0.06666667,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "take_out_rod_west",
       "Loop": true,
       "FrameIndices": [
         0,
         1,
         2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
+        3
+      ],
+      "FrameDuration": 0.06666667,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "take_out_rod_east",
+      "Loop": true,
+      "FrameIndices": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "FrameDuration": 0.06666667,
+      "FlipHorizontal": true
+    },
+    {
+      "Name": "put_away_rod_south",
+      "Loop": true,
+      "FrameIndices": [
+        11,
+        10,
         9,
+        8
+      ],
+      "FrameDuration": 0.09166667,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "put_away_rod_north",
+      "Loop": true,
+      "FrameIndices": [
+        7,
+        6,
+        5,
+        4
+      ],
+      "FrameDuration": 0.09166667,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "put_away_rod_west",
+      "Loop": true,
+      "FrameIndices": [
+        3,
+        2,
+        1,
+        0
+      ],
+      "FrameDuration": 0.06666667,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "put_away_rod_east",
+      "Loop": true,
+      "FrameIndices": [
+        3,
+        2,
+        1,
+        0
+      ],
+      "FrameDuration": 0.06666667,
+      "FlipHorizontal": true
+    },
+    {
+      "Name": "hooked_pokemon_south",
+      "Loop": true,
+      "FrameIndices": [
         10,
         11,
-        12,
-        13,
-        14,
-        15,
-        16,
-        17,
-        18,
-        19,
-        20,
-        21,
-        22,
-        23
+        11
       ],
-      "FrameDuration": 0.15,
+      "FrameDuration": 0.23333333,
       "FlipHorizontal": false
+    },
+    {
+      "Name": "hooked_pokemon_north",
+      "Loop": true,
+      "FrameIndices": [
+        6,
+        7,
+        7
+      ],
+      "FrameDuration": 0.23333333,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "hooked_pokemon_west",
+      "Loop": true,
+      "FrameIndices": [
+        2,
+        3,
+        3
+      ],
+      "FrameDuration": 0.23333333,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "hooked_pokemon_east",
+      "Loop": true,
+      "FrameIndices": [
+        2,
+        3,
+        3
+      ],
+      "FrameDuration": 0.23333333,
+      "FlipHorizontal": true
     }
   ]
 }

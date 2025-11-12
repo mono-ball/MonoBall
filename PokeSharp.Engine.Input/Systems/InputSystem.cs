@@ -157,24 +157,24 @@ public class InputSystem(
     {
         // Keyboard input (priority: most recently pressed)
         if (keyboard.IsKeyDown(Keys.Up) || keyboard.IsKeyDown(Keys.W))
-            return Direction.Up;
+            return Direction.North;
         if (keyboard.IsKeyDown(Keys.Down) || keyboard.IsKeyDown(Keys.S))
-            return Direction.Down;
+            return Direction.South;
         if (keyboard.IsKeyDown(Keys.Left) || keyboard.IsKeyDown(Keys.A))
-            return Direction.Left;
+            return Direction.West;
         if (keyboard.IsKeyDown(Keys.Right) || keyboard.IsKeyDown(Keys.D))
-            return Direction.Right;
+            return Direction.East;
 
         // Gamepad input
         var thumbstick = gamepad.ThumbSticks.Left;
         if (thumbstick.Y > 0.5f || gamepad.DPad.Up == ButtonState.Pressed)
-            return Direction.Up;
+            return Direction.North;
         if (thumbstick.Y < -0.5f || gamepad.DPad.Down == ButtonState.Pressed)
-            return Direction.Down;
+            return Direction.South;
         if (thumbstick.X < -0.5f || gamepad.DPad.Left == ButtonState.Pressed)
-            return Direction.Left;
+            return Direction.West;
         if (thumbstick.X > 0.5f || gamepad.DPad.Right == ButtonState.Pressed)
-            return Direction.Right;
+            return Direction.East;
 
         return Direction.None;
     }

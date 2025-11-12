@@ -78,11 +78,11 @@ public class NpcApiService(World world, ILogger<NpcApiService> logger) : INPCApi
 
         Direction direction;
         if (Math.Abs(dx) > Math.Abs(dy))
-            direction = dx > 0 ? Direction.Right : Direction.Left;
+            direction = dx > 0 ? Direction.East : Direction.West;
         else if (Math.Abs(dy) > 0)
-            direction = dy > 0 ? Direction.Down : Direction.Up;
+            direction = dy > 0 ? Direction.South : Direction.North;
         else
-            direction = Direction.Down; // Default if at same position
+            direction = Direction.South; // Default if at same position
 
         FaceDirection(npc, direction);
     }

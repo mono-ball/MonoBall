@@ -1118,20 +1118,20 @@ public class MapLoader(
             {
                 string s when !string.IsNullOrEmpty(s) => s.ToLower() switch
                 {
-                    "down" => "tile/ledge/down",
-                    "up" => "tile/ledge/up",
-                    "left" => "tile/ledge/left",
-                    "right" => "tile/ledge/right",
+                    "south" or "down" => "tile/ledge/down",
+                    "north" or "up" => "tile/ledge/up",
+                    "west" or "left" => "tile/ledge/left",
+                    "east" or "right" => "tile/ledge/right",
                     _ => null,
                 },
                 not null when !string.IsNullOrEmpty(ledgeValue.ToString()) => ledgeValue
                     .ToString()!
                     .ToLower() switch
                 {
-                    "down" => "tile/ledge/down",
-                    "up" => "tile/ledge/up",
-                    "left" => "tile/ledge/left",
-                    "right" => "tile/ledge/right",
+                    "south" or "down" => "tile/ledge/down",
+                    "north" or "up" => "tile/ledge/up",
+                    "west" or "left" => "tile/ledge/left",
+                    "east" or "right" => "tile/ledge/right",
                     _ => null,
                 },
                 _ => null,
@@ -1319,10 +1319,10 @@ public class MapLoader(
             {
                 var jumpDirection = ledgeDir.ToLower() switch
                 {
-                    "down" => Direction.Down,
-                    "up" => Direction.Up,
-                    "left" => Direction.Left,
-                    "right" => Direction.Right,
+                    "south" or "down" => Direction.South,
+                    "north" or "up" => Direction.North,
+                    "west" or "left" => Direction.West,
+                    "east" or "right" => Direction.East,
                     _ => Direction.None,
                 };
 
@@ -1481,11 +1481,11 @@ public class MapLoader(
                             var dirStr = dirProp.ToString()?.ToLower();
                             var direction = dirStr switch
                             {
-                                "up" => Direction.Up,
-                                "down" => Direction.Down,
-                                "left" => Direction.Left,
-                                "right" => Direction.Right,
-                                _ => Direction.Down,
+                                "north" or "up" => Direction.North,
+                                "south" or "down" => Direction.South,
+                                "west" or "left" => Direction.West,
+                                "east" or "right" => Direction.East,
+                                _ => Direction.South,
                             };
                             builder.OverrideComponent(direction);
                         }

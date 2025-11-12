@@ -1,0 +1,639 @@
+{
+  "Name": "acrobike",
+  "Category": "may",
+  "OriginalPath": "may/acro_bike",
+  "OutputDirectory": "Players/may/acrobike",
+  "SpriteSheet": "spritesheet.png",
+  "FrameWidth": 16,
+  "FrameHeight": 32,
+  "FrameCount": 27,
+  "Frames": [
+    {
+      "Index": 0,
+      "X": 0,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 1,
+      "X": 16,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 2,
+      "X": 32,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 3,
+      "X": 48,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 4,
+      "X": 64,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 5,
+      "X": 80,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 6,
+      "X": 96,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 7,
+      "X": 112,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 8,
+      "X": 128,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 9,
+      "X": 144,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 10,
+      "X": 160,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 11,
+      "X": 176,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 12,
+      "X": 192,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 13,
+      "X": 208,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 14,
+      "X": 224,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 15,
+      "X": 240,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 16,
+      "X": 256,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 17,
+      "X": 272,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 18,
+      "X": 288,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 19,
+      "X": 304,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 20,
+      "X": 320,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 21,
+      "X": 336,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 22,
+      "X": 352,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 23,
+      "X": 368,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 24,
+      "X": 384,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 25,
+      "X": 400,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 26,
+      "X": 416,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    }
+  ],
+  "Animations": [
+    {
+      "Name": "face_south",
+      "Loop": true,
+      "FrameIndices": [
+        0
+      ],
+      "FrameDuration": 0.26666668,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "face_north",
+      "Loop": true,
+      "FrameIndices": [
+        1
+      ],
+      "FrameDuration": 0.26666668,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "face_west",
+      "Loop": true,
+      "FrameIndices": [
+        2
+      ],
+      "FrameDuration": 0.26666668,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "face_east",
+      "Loop": true,
+      "FrameIndices": [
+        2
+      ],
+      "FrameDuration": 0.26666668,
+      "FlipHorizontal": true
+    },
+    {
+      "Name": "go_south",
+      "Loop": true,
+      "FrameIndices": [
+        3,
+        0,
+        4,
+        0
+      ],
+      "FrameDuration": 0.13333334,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "go_north",
+      "Loop": true,
+      "FrameIndices": [
+        5,
+        1,
+        6,
+        1
+      ],
+      "FrameDuration": 0.13333334,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "go_west",
+      "Loop": true,
+      "FrameIndices": [
+        7,
+        2,
+        8,
+        2
+      ],
+      "FrameDuration": 0.13333334,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "go_east",
+      "Loop": true,
+      "FrameIndices": [
+        7,
+        2,
+        8,
+        2
+      ],
+      "FrameDuration": 0.13333334,
+      "FlipHorizontal": true
+    },
+    {
+      "Name": "go_fast_south",
+      "Loop": true,
+      "FrameIndices": [
+        3,
+        0,
+        4,
+        0
+      ],
+      "FrameDuration": 0.06666667,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "go_fast_north",
+      "Loop": true,
+      "FrameIndices": [
+        5,
+        1,
+        6,
+        1
+      ],
+      "FrameDuration": 0.06666667,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "go_fast_west",
+      "Loop": true,
+      "FrameIndices": [
+        7,
+        2,
+        8,
+        2
+      ],
+      "FrameDuration": 0.06666667,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "go_fast_east",
+      "Loop": true,
+      "FrameIndices": [
+        7,
+        2,
+        8,
+        2
+      ],
+      "FrameDuration": 0.06666667,
+      "FlipHorizontal": true
+    },
+    {
+      "Name": "go_faster_south",
+      "Loop": true,
+      "FrameIndices": [
+        3,
+        0,
+        4,
+        0
+      ],
+      "FrameDuration": 0.033333335,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "go_faster_north",
+      "Loop": true,
+      "FrameIndices": [
+        5,
+        1,
+        6,
+        1
+      ],
+      "FrameDuration": 0.033333335,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "go_faster_west",
+      "Loop": true,
+      "FrameIndices": [
+        7,
+        2,
+        8,
+        2
+      ],
+      "FrameDuration": 0.033333335,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "go_faster_east",
+      "Loop": true,
+      "FrameIndices": [
+        7,
+        2,
+        8,
+        2
+      ],
+      "FrameDuration": 0.033333335,
+      "FlipHorizontal": true
+    },
+    {
+      "Name": "go_fastest_south",
+      "Loop": true,
+      "FrameIndices": [
+        3,
+        0,
+        4,
+        0
+      ],
+      "FrameDuration": 0.016666668,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "go_fastest_north",
+      "Loop": true,
+      "FrameIndices": [
+        5,
+        1,
+        6,
+        1
+      ],
+      "FrameDuration": 0.016666668,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "go_fastest_west",
+      "Loop": true,
+      "FrameIndices": [
+        7,
+        2,
+        8,
+        2
+      ],
+      "FrameDuration": 0.016666668,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "go_fastest_east",
+      "Loop": true,
+      "FrameIndices": [
+        7,
+        2,
+        8,
+        2
+      ],
+      "FrameDuration": 0.016666668,
+      "FlipHorizontal": true
+    },
+    {
+      "Name": "bunny_hop_back_wheel_south",
+      "Loop": true,
+      "FrameIndices": [
+        9,
+        10
+      ],
+      "FrameDuration": 0.06666667,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "bunny_hop_back_wheel_north",
+      "Loop": true,
+      "FrameIndices": [
+        13,
+        14
+      ],
+      "FrameDuration": 0.06666667,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "bunny_hop_back_wheel_west",
+      "Loop": true,
+      "FrameIndices": [
+        17,
+        18
+      ],
+      "FrameDuration": 0.06666667,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "bunny_hop_back_wheel_east",
+      "Loop": true,
+      "FrameIndices": [
+        17,
+        18
+      ],
+      "FrameDuration": 0.06666667,
+      "FlipHorizontal": true
+    },
+    {
+      "Name": "bunny_hop_front_wheel_south",
+      "Loop": true,
+      "FrameIndices": [
+        11,
+        12
+      ],
+      "FrameDuration": 0.06666667,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "bunny_hop_front_wheel_north",
+      "Loop": true,
+      "FrameIndices": [
+        15,
+        16
+      ],
+      "FrameDuration": 0.06666667,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "bunny_hop_front_wheel_west",
+      "Loop": true,
+      "FrameIndices": [
+        19,
+        20
+      ],
+      "FrameDuration": 0.06666667,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "bunny_hop_front_wheel_east",
+      "Loop": true,
+      "FrameIndices": [
+        19,
+        20
+      ],
+      "FrameDuration": 0.06666667,
+      "FlipHorizontal": true
+    },
+    {
+      "Name": "standing_wheelie_back_wheel_south",
+      "Loop": true,
+      "FrameIndices": [
+        9,
+        0
+      ],
+      "FrameDuration": 0.06666667,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "standing_wheelie_back_wheel_north",
+      "Loop": true,
+      "FrameIndices": [
+        13,
+        1
+      ],
+      "FrameDuration": 0.06666667,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "standing_wheelie_back_wheel_west",
+      "Loop": true,
+      "FrameIndices": [
+        17,
+        2
+      ],
+      "FrameDuration": 0.06666667,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "standing_wheelie_back_wheel_east",
+      "Loop": true,
+      "FrameIndices": [
+        17,
+        2
+      ],
+      "FrameDuration": 0.06666667,
+      "FlipHorizontal": true
+    },
+    {
+      "Name": "standing_wheelie_front_wheel_south",
+      "Loop": true,
+      "FrameIndices": [
+        11,
+        0
+      ],
+      "FrameDuration": 0.06666667,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "standing_wheelie_front_wheel_north",
+      "Loop": true,
+      "FrameIndices": [
+        15,
+        1
+      ],
+      "FrameDuration": 0.06666667,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "standing_wheelie_front_wheel_west",
+      "Loop": true,
+      "FrameIndices": [
+        19,
+        2
+      ],
+      "FrameDuration": 0.06666667,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "standing_wheelie_front_wheel_east",
+      "Loop": true,
+      "FrameIndices": [
+        19,
+        2
+      ],
+      "FrameDuration": 0.06666667,
+      "FlipHorizontal": true
+    },
+    {
+      "Name": "moving_wheelie_south",
+      "Loop": true,
+      "FrameIndices": [
+        21,
+        10,
+        22,
+        10
+      ],
+      "FrameDuration": 0.06666667,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "moving_wheelie_north",
+      "Loop": true,
+      "FrameIndices": [
+        23,
+        14,
+        24,
+        14
+      ],
+      "FrameDuration": 0.06666667,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "moving_wheelie_west",
+      "Loop": true,
+      "FrameIndices": [
+        25,
+        18,
+        26,
+        18
+      ],
+      "FrameDuration": 0.06666667,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "moving_wheelie_east",
+      "Loop": true,
+      "FrameIndices": [
+        25,
+        18,
+        26,
+        18
+      ],
+      "FrameDuration": 0.06666667,
+      "FlipHorizontal": true
+    }
+  ]
+}

@@ -387,7 +387,7 @@ public class ComponentPoolIntegrationTests
         var movement = manager.RentGridMovement();
         movement.IsMoving = true;
         movement.MovementSpeed = 4.5f;
-        movement.FacingDirection = Direction.Right;
+        movement.FacingDirection = Direction.East;
         movement.MovementProgress = 0.75f;
 
         var movementSpeed = movement.MovementSpeed;

@@ -42,10 +42,10 @@ public struct TileLedge
         // Example: If jump direction is Down, block Up movement
         return fromDirection switch
         {
-            Direction.Up => JumpDirection == Direction.Down,
-            Direction.Down => JumpDirection == Direction.Up,
-            Direction.Left => JumpDirection == Direction.Right,
-            Direction.Right => JumpDirection == Direction.Left,
+            Direction.North => JumpDirection == Direction.South,
+            Direction.South => JumpDirection == Direction.North,
+            Direction.West => JumpDirection == Direction.East,
+            Direction.East => JumpDirection == Direction.West,
             _ => false,
         };
     }

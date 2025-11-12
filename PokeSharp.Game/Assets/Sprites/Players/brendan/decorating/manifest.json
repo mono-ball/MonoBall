@@ -1,7 +1,7 @@
 {
   "Name": "decorating",
   "Category": "brendan",
-  "OriginalPath": "brendan/decorating.png",
+  "OriginalPath": "brendan/decorating",
   "OutputDirectory": "Players/brendan/decorating",
   "SpriteSheet": "spritesheet.png",
   "FrameWidth": 16,
@@ -18,12 +18,15 @@
   ],
   "Animations": [
     {
-      "Name": "default",
+      "Name": "stay_still",
       "Loop": true,
       "FrameIndices": [
+        0,
+        0,
+        0,
         0
       ],
-      "FrameDuration": 0.15,
+      "FrameDuration": 0.13333334,
       "FlipHorizontal": false
     }
   ]

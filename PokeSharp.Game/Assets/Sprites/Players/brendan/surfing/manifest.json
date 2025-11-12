@@ -1,7 +1,7 @@
 {
   "Name": "surfing",
   "Category": "brendan",
-  "OriginalPath": "brendan/surfing.png",
+  "OriginalPath": "brendan/surfing",
   "OutputDirectory": "Players/brendan/surfing",
   "SpriteSheet": "spritesheet.png",
   "FrameWidth": 16,
@@ -17,77 +17,77 @@
     },
     {
       "Index": 1,
-      "X": 16,
-      "Y": 0,
-      "Width": 16,
-      "Height": 32
-    },
-    {
-      "Index": 2,
       "X": 32,
       "Y": 0,
       "Width": 16,
       "Height": 32
     },
     {
-      "Index": 3,
-      "X": 48,
-      "Y": 0,
-      "Width": 16,
-      "Height": 32
-    },
-    {
-      "Index": 4,
+      "Index": 2,
       "X": 64,
       "Y": 0,
       "Width": 16,
       "Height": 32
     },
     {
+      "Index": 3,
+      "X": 0,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
+      "Index": 4,
+      "X": 0,
+      "Y": 0,
+      "Width": 16,
+      "Height": 32
+    },
+    {
       "Index": 5,
-      "X": 80,
+      "X": 32,
       "Y": 0,
       "Width": 16,
       "Height": 32
     },
     {
       "Index": 6,
-      "X": 96,
+      "X": 32,
       "Y": 0,
       "Width": 16,
       "Height": 32
     },
     {
       "Index": 7,
-      "X": 112,
+      "X": 64,
       "Y": 0,
       "Width": 16,
       "Height": 32
     },
     {
       "Index": 8,
-      "X": 128,
+      "X": 64,
       "Y": 0,
       "Width": 16,
       "Height": 32
     },
     {
       "Index": 9,
-      "X": 144,
+      "X": 16,
       "Y": 0,
       "Width": 16,
       "Height": 32
     },
     {
       "Index": 10,
-      "X": 160,
+      "X": 48,
       "Y": 0,
       "Width": 16,
       "Height": 32
     },
     {
       "Index": 11,
-      "X": 176,
+      "X": 80,
       "Y": 0,
       "Width": 16,
       "Height": 32
@@ -95,24 +95,268 @@
   ],
   "Animations": [
     {
-      "Name": "default",
+      "Name": "face_south",
       "Loop": true,
       "FrameIndices": [
-        0,
-        1,
-        2,
+        0
+      ],
+      "FrameDuration": 0.26666668,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "face_north",
+      "Loop": true,
+      "FrameIndices": [
+        1
+      ],
+      "FrameDuration": 0.26666668,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "face_west",
+      "Loop": true,
+      "FrameIndices": [
+        2
+      ],
+      "FrameDuration": 0.26666668,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "face_east",
+      "Loop": true,
+      "FrameIndices": [
+        2
+      ],
+      "FrameDuration": 0.26666668,
+      "FlipHorizontal": true
+    },
+    {
+      "Name": "go_south",
+      "Loop": true,
+      "FrameIndices": [
         3,
+        0,
         4,
+        0
+      ],
+      "FrameDuration": 0.13333334,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "go_north",
+      "Loop": true,
+      "FrameIndices": [
         5,
+        1,
         6,
+        1
+      ],
+      "FrameDuration": 0.13333334,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "go_west",
+      "Loop": true,
+      "FrameIndices": [
         7,
+        2,
         8,
-        9,
-        10,
+        2
+      ],
+      "FrameDuration": 0.13333334,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "go_east",
+      "Loop": true,
+      "FrameIndices": [
+        7,
+        2,
+        8,
+        2
+      ],
+      "FrameDuration": 0.13333334,
+      "FlipHorizontal": true
+    },
+    {
+      "Name": "go_fast_south",
+      "Loop": true,
+      "FrameIndices": [
+        3,
+        0,
+        4,
+        0
+      ],
+      "FrameDuration": 0.06666667,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "go_fast_north",
+      "Loop": true,
+      "FrameIndices": [
+        5,
+        1,
+        6,
+        1
+      ],
+      "FrameDuration": 0.06666667,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "go_fast_west",
+      "Loop": true,
+      "FrameIndices": [
+        7,
+        2,
+        8,
+        2
+      ],
+      "FrameDuration": 0.06666667,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "go_fast_east",
+      "Loop": true,
+      "FrameIndices": [
+        7,
+        2,
+        8,
+        2
+      ],
+      "FrameDuration": 0.06666667,
+      "FlipHorizontal": true
+    },
+    {
+      "Name": "go_faster_south",
+      "Loop": true,
+      "FrameIndices": [
+        3,
+        0,
+        4,
+        0
+      ],
+      "FrameDuration": 0.033333335,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "go_faster_north",
+      "Loop": true,
+      "FrameIndices": [
+        5,
+        1,
+        6,
+        1
+      ],
+      "FrameDuration": 0.033333335,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "go_faster_west",
+      "Loop": true,
+      "FrameIndices": [
+        7,
+        2,
+        8,
+        2
+      ],
+      "FrameDuration": 0.033333335,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "go_faster_east",
+      "Loop": true,
+      "FrameIndices": [
+        7,
+        2,
+        8,
+        2
+      ],
+      "FrameDuration": 0.033333335,
+      "FlipHorizontal": true
+    },
+    {
+      "Name": "go_fastest_south",
+      "Loop": true,
+      "FrameIndices": [
+        3,
+        0,
+        4,
+        0
+      ],
+      "FrameDuration": 0.016666668,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "go_fastest_north",
+      "Loop": true,
+      "FrameIndices": [
+        5,
+        1,
+        6,
+        1
+      ],
+      "FrameDuration": 0.016666668,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "go_fastest_west",
+      "Loop": true,
+      "FrameIndices": [
+        7,
+        2,
+        8,
+        2
+      ],
+      "FrameDuration": 0.016666668,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "go_fastest_east",
+      "Loop": true,
+      "FrameIndices": [
+        7,
+        2,
+        8,
+        2
+      ],
+      "FrameDuration": 0.016666668,
+      "FlipHorizontal": true
+    },
+    {
+      "Name": "get_on_off_pokemon_south",
+      "Loop": true,
+      "FrameIndices": [
+        9
+      ],
+      "FrameDuration": 0.53333336,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "get_on_off_pokemon_north",
+      "Loop": true,
+      "FrameIndices": [
+        10
+      ],
+      "FrameDuration": 0.53333336,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "get_on_off_pokemon_west",
+      "Loop": true,
+      "FrameIndices": [
         11
       ],
-      "FrameDuration": 0.15,
+      "FrameDuration": 0.53333336,
       "FlipHorizontal": false
+    },
+    {
+      "Name": "get_on_off_pokemon_east",
+      "Loop": true,
+      "FrameIndices": [
+        11
+      ],
+      "FrameDuration": 0.53333336,
+      "FlipHorizontal": true
     }
   ]
 }

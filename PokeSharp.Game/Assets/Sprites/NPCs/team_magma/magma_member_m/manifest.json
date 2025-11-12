@@ -1,7 +1,7 @@
 {
   "Name": "magma_member_m",
   "Category": "team_magma",
-  "OriginalPath": "team_magma/magma_member_m.png",
+  "OriginalPath": "team_magma/magma_member_m",
   "OutputDirectory": "NPCs/team_magma/magma_member_m",
   "SpriteSheet": "spritesheet.png",
   "FrameWidth": 16,
@@ -74,16 +74,43 @@
   ],
   "Animations": [
     {
-      "Name": "idle_down",
+      "Name": "face_south",
       "Loop": true,
       "FrameIndices": [
         0
       ],
-      "FrameDuration": 0.5,
+      "FrameDuration": 0.26666668,
       "FlipHorizontal": false
     },
     {
-      "Name": "walk_down",
+      "Name": "face_north",
+      "Loop": true,
+      "FrameIndices": [
+        1
+      ],
+      "FrameDuration": 0.26666668,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "face_west",
+      "Loop": true,
+      "FrameIndices": [
+        2
+      ],
+      "FrameDuration": 0.26666668,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "face_east",
+      "Loop": true,
+      "FrameIndices": [
+        2
+      ],
+      "FrameDuration": 0.26666668,
+      "FlipHorizontal": true
+    },
+    {
+      "Name": "go_south",
       "Loop": true,
       "FrameIndices": [
         3,
@@ -91,20 +118,11 @@
         4,
         0
       ],
-      "FrameDuration": 0.15,
+      "FrameDuration": 0.13333334,
       "FlipHorizontal": false
     },
     {
-      "Name": "idle_up",
-      "Loop": true,
-      "FrameIndices": [
-        1
-      ],
-      "FrameDuration": 0.5,
-      "FlipHorizontal": false
-    },
-    {
-      "Name": "walk_up",
+      "Name": "go_north",
       "Loop": true,
       "FrameIndices": [
         5,
@@ -112,20 +130,11 @@
         6,
         1
       ],
-      "FrameDuration": 0.15,
+      "FrameDuration": 0.13333334,
       "FlipHorizontal": false
     },
     {
-      "Name": "idle_left",
-      "Loop": true,
-      "FrameIndices": [
-        2
-      ],
-      "FrameDuration": 0.5,
-      "FlipHorizontal": false
-    },
-    {
-      "Name": "walk_left",
+      "Name": "go_west",
       "Loop": true,
       "FrameIndices": [
         7,
@@ -133,20 +142,47 @@
         8,
         2
       ],
-      "FrameDuration": 0.15,
+      "FrameDuration": 0.13333334,
       "FlipHorizontal": false
     },
     {
-      "Name": "idle_right",
+      "Name": "go_east",
       "Loop": true,
       "FrameIndices": [
+        7,
+        2,
+        8,
         2
       ],
-      "FrameDuration": 0.5,
+      "FrameDuration": 0.13333334,
       "FlipHorizontal": true
     },
     {
-      "Name": "walk_right",
+      "Name": "go_fast_south",
+      "Loop": true,
+      "FrameIndices": [
+        3,
+        0,
+        4,
+        0
+      ],
+      "FrameDuration": 0.06666667,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "go_fast_north",
+      "Loop": true,
+      "FrameIndices": [
+        5,
+        1,
+        6,
+        1
+      ],
+      "FrameDuration": 0.06666667,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "go_fast_west",
       "Loop": true,
       "FrameIndices": [
         7,
@@ -154,7 +190,115 @@
         8,
         2
       ],
-      "FrameDuration": 0.15,
+      "FrameDuration": 0.06666667,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "go_fast_east",
+      "Loop": true,
+      "FrameIndices": [
+        7,
+        2,
+        8,
+        2
+      ],
+      "FrameDuration": 0.06666667,
+      "FlipHorizontal": true
+    },
+    {
+      "Name": "go_faster_south",
+      "Loop": true,
+      "FrameIndices": [
+        3,
+        0,
+        4,
+        0
+      ],
+      "FrameDuration": 0.033333335,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "go_faster_north",
+      "Loop": true,
+      "FrameIndices": [
+        5,
+        1,
+        6,
+        1
+      ],
+      "FrameDuration": 0.033333335,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "go_faster_west",
+      "Loop": true,
+      "FrameIndices": [
+        7,
+        2,
+        8,
+        2
+      ],
+      "FrameDuration": 0.033333335,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "go_faster_east",
+      "Loop": true,
+      "FrameIndices": [
+        7,
+        2,
+        8,
+        2
+      ],
+      "FrameDuration": 0.033333335,
+      "FlipHorizontal": true
+    },
+    {
+      "Name": "go_fastest_south",
+      "Loop": true,
+      "FrameIndices": [
+        3,
+        0,
+        4,
+        0
+      ],
+      "FrameDuration": 0.016666668,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "go_fastest_north",
+      "Loop": true,
+      "FrameIndices": [
+        5,
+        1,
+        6,
+        1
+      ],
+      "FrameDuration": 0.016666668,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "go_fastest_west",
+      "Loop": true,
+      "FrameIndices": [
+        7,
+        2,
+        8,
+        2
+      ],
+      "FrameDuration": 0.016666668,
+      "FlipHorizontal": false
+    },
+    {
+      "Name": "go_fastest_east",
+      "Loop": true,
+      "FrameIndices": [
+        7,
+        2,
+        8,
+        2
+      ],
+      "FrameDuration": 0.016666668,
       "FlipHorizontal": true
     }
   ]

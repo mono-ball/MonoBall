@@ -34,12 +34,12 @@ public class LedgeMapper : IEntityPropertyMapper<TileLedge>
 
         var jumpDirection = ledgeDir.ToLower() switch
         {
-            "down" => Direction.Down,
-            "up" => Direction.Up,
-            "left" => Direction.Left,
-            "right" => Direction.Right,
+            "south" or "down" => Direction.South,
+            "north" or "up" => Direction.North,
+            "west" or "left" => Direction.West,
+            "east" or "right" => Direction.East,
             _ => throw new InvalidOperationException(
-                $"Invalid ledge_direction value: '{ledgeDir}'. Valid values: down, up, left, right")
+                $"Invalid ledge_direction value: '{ledgeDir}'. Valid values: south/down, north/up, west/left, east/right")
         };
 
         return new TileLedge(jumpDirection);

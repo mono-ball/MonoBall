@@ -55,7 +55,7 @@ public struct GridMovement
         TargetPosition = Vector2.Zero;
         MovementProgress = 0f;
         MovementSpeed = speed;
-        FacingDirection = Direction.Down;
+        FacingDirection = Direction.South;
         MovementLocked = false;
     }
 
@@ -104,8 +104,8 @@ public struct GridMovement
 
         // Determine primary axis (larger delta)
         if (Math.Abs(delta.X) > Math.Abs(delta.Y))
-            return delta.X > 0 ? Direction.Right : Direction.Left;
+            return delta.X > 0 ? Direction.East : Direction.West;
 
-        return delta.Y > 0 ? Direction.Down : Direction.Up;
+        return delta.Y > 0 ? Direction.South : Direction.North;
     }
 }

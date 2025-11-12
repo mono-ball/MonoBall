@@ -9,7 +9,7 @@ set -e
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 POKEEMERALD_PATH="$PROJECT_ROOT/pokeemerald"
-OUTPUT_PATH="$PROJECT_ROOT/PokeSharp.Game/Assets/Sprites/NPCs"
+OUTPUT_PATH="$PROJECT_ROOT/PokeSharp.Game/Assets/Sprites"
 EXTRACTOR_PATH="$SCRIPT_DIR/SpriteExtractor"
 
 # Colors for output
@@ -65,7 +65,8 @@ echo "  Extraction Complete!              "
 echo "======================================${NC}"
 echo ""
 echo "Sprites extracted to: $OUTPUT_PATH"
-echo "Master manifest: $OUTPUT_PATH/npc_sprites_manifest.json"
+echo "  - Players: $OUTPUT_PATH/Players/brendan/, $OUTPUT_PATH/Players/may/"
+echo "  - NPCs: $OUTPUT_PATH/NPCs/generic/, $OUTPUT_PATH/NPCs/elite_four/, etc."
 echo ""
 echo "You can now use these sprites in PokeSharp.Game!"
 

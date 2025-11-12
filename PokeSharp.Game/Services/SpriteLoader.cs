@@ -5,7 +5,10 @@ using Microsoft.Extensions.Logging;
 namespace PokeSharp.Game.Services;
 
 /// <summary>
-/// Service for loading sprites extracted from Pokemon Emerald (NPCs, Players, etc.)
+/// Service for loading sprites extracted from Pokemon Emerald.
+/// Sprites are organized in two main categories:
+/// - Players: brendan/, may/ (each with variants like normal, surfing, machbike)
+/// - NPCs: generic/, elite_four/, gym_leaders/, team_aqua/, team_magma/, frontier_brains/
 /// </summary>
 public class SpriteLoader
 {
@@ -20,13 +23,14 @@ public class SpriteLoader
         _logger = logger;
         _spritesBasePaths = new List<string>
         {
-            "Assets/Sprites/NPCs",
-            "Assets/Sprites/Players"
+            "Assets/Sprites/Players",
+            "Assets/Sprites/NPCs"
         };
     }
 
     /// <summary>
-    /// Load all available sprites (NPCs and Players) by scanning directories for individual manifests
+    /// Load all available sprites by scanning directories for individual manifests.
+    /// Scans both Assets/Sprites/Players and Assets/Sprites/NPCs.
     /// </summary>
     public async Task<List<SpriteManifest>> LoadAllSpritesAsync()
     {
@@ -82,7 +86,7 @@ public class SpriteLoader
             }
         }
 
-        _logger.LogInformation("Loaded {Count} total sprites (NPCs + Players)", _allSprites.Count);
+        _logger.LogInformation("Loaded {Count} total sprites from all categories", _allSprites.Count);
 
         return _allSprites;
     }
@@ -177,7 +181,8 @@ public class SpriteLoader
 }
 
 /// <summary>
-/// Manifest for a sprite extracted from Pokemon Emerald (NPC, Player, etc.)
+/// Manifest for a sprite extracted from Pokemon Emerald.
+/// Contains metadata about frames, animations, and the sprite's category.
 /// </summary>
 public class SpriteManifest
 {

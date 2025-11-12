@@ -17,28 +17,42 @@ This tool extracts NPC sprites and animations from the Pokemon Emerald source co
 dotnet run [pokeemerald_path] [output_path]
 
 # Example:
-dotnet run ../../pokeemerald ../../PokeSharp.Game/Assets/Sprites/NPCs
+dotnet run ../../pokeemerald ../../PokeSharp.Game/Assets/Sprites
 ```
 
 ## Output Structure
 
 ```
-PokeSharp.Game/Assets/Sprites/NPCs/
-├── npc_sprites_manifest.json          # Master manifest of all sprites
-├── generic/                            # Generic NPCs
-│   ├── boy_1/
-│   │   ├── manifest.json              # Sprite-specific manifest
-│   │   ├── spritesheet.png            # Original sprite sheet
-│   │   ├── frame_00.png               # Individual frames
-│   │   ├── frame_01.png
+PokeSharp.Game/Assets/Sprites/
+├── Players/
+│   ├── brendan/                       # Player character (Brendan) variants
+│   │   ├── normal/
+│   │   │   ├── manifest.json          # Sprite-specific manifest
+│   │   │   └── spritesheet.png        # Sprite sheet
+│   │   ├── surfing/
+│   │   ├── machbike/
 │   │   └── ...
-│   └── ...
-├── gym_leaders/                        # Gym leader sprites
-│   ├── brawly/
-│   ├── flannery/
-│   └── ...
-└── team_aqua/                          # Team Aqua sprites
-    └── ...
+│   └── may/                           # Player character (May) variants
+│       ├── normal/
+│       ├── surfing/
+│       └── ...
+└── NPCs/
+    ├── generic/                       # Generic NPCs
+    │   ├── boy1/
+    │   │   ├── manifest.json
+    │   │   └── spritesheet.png
+    │   └── ...
+    ├── gym_leaders/                   # Gym leader sprites
+    │   ├── brawly/
+    │   ├── flannery/
+    │   └── ...
+    ├── elite_four/                    # Elite Four members
+    │   ├── sidney/
+    │   └── ...
+    ├── team_aqua/                     # Team Aqua sprites
+    │   └── ...
+    └── team_magma/                    # Team Magma sprites
+        └── ...
 ```
 
 ## Manifest Format
@@ -47,10 +61,10 @@ Each sprite has a `manifest.json` file containing:
 
 ```json
 {
-  "Name": "boy_1",
+  "Name": "boy1",
   "Category": "generic",
   "OriginalPath": "boy_1.png",
-  "OutputDirectory": "generic/boy_1",
+  "OutputDirectory": "generic/boy1",
   "SpriteSheet": "spritesheet.png",
   "FrameWidth": 16,
   "FrameHeight": 32,
@@ -58,32 +72,72 @@ Each sprite has a `manifest.json` file containing:
   "Frames": [
     {
       "Index": 0,
-      "FileName": "frame_00.png",
+      "X": 0,
+      "Y": 0,
       "Width": 16,
       "Height": 32
     }
   ],
   "Animations": [
     {
-      "Name": "walk_down",
+      "Name": "face_south",
       "Loop": true,
-      "FrameIndices": [0, 1, 0, 2],
-      "FrameDuration": 0.15
+      "Frames": [
+        {
+          "FrameIndex": 0,
+          "Duration": 1,
+          "HorizontalFlip": false
+        }
+      ]
+    },
+    {
+      "Name": "go_south",
+      "Loop": true,
+      "Frames": [
+        {
+          "FrameIndex": 1,
+          "Duration": 8,
+          "HorizontalFlip": false
+        },
+        {
+          "FrameIndex": 0,
+          "Duration": 8,
+          "HorizontalFlip": false
+        },
+        {
+          "FrameIndex": 2,
+          "Duration": 8,
+          "HorizontalFlip": false
+        }
+      ]
     }
   ]
 }
 ```
 
-## Standard Animation Patterns
+## Animation Data
 
-### 9-Frame Sprites (Most NPCs)
-- Frames 0-2: Facing down (idle + 2 walk frames)
-- Frames 3-5: Facing up (idle + 2 walk frames)
-- Frames 6-8: Facing side (idle + 2 walk frames)
+All animations are extracted directly from pokeemerald's source code, including:
+- Frame indices (with proper logical-to-physical frame mapping)
+- Frame durations
+- Horizontal flip flags
+- Animation names (e.g., `face_south`, `go_south`, `go_fast_south`)
 
-### 18-Frame Sprites (Player characters)
-- Frames 0-8: Walking animations
-- Frames 9-17: Running animations
+### Standard Animation Table (9 frames, 20 animations)
+Most NPCs and some player sprites use the standard animation table:
+- `face_south`, `face_north`, `face_west`, `face_east` (idle/facing)
+- `go_south`, `go_north`, `go_west`, `go_east` (walking)
+- `go_fast_*`, `go_faster_*`, `go_fastest_*` (running speeds)
+
+### Player Character Normal Sprites (18 frames, 24 animations)
+Player characters in their normal state combine walking and running animations:
+- All standard animations plus additional running variations
+
+### Special Sprites
+- **Surfing**: 12 frames, 24 animations
+- **Acro Bike**: 27 frames, 40 animations
+- **Fishing**: 12 frames, 12 animations
+- **Field Move**: 5 frames, 1 animation
 
 ## Integration with PokeSharp
 

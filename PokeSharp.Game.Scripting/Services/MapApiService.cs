@@ -107,9 +107,9 @@ public class MapApiService(
 
         // Prioritize horizontal movement over vertical
         if (Math.Abs(dx) > Math.Abs(dy))
-            return dx > 0 ? Direction.Right : Direction.Left;
+            return dx > 0 ? Direction.East : Direction.West;
 
-        return dy > 0 ? Direction.Down : Direction.Up;
+        return dy > 0 ? Direction.South : Direction.North;
     }
 
     /// <summary>

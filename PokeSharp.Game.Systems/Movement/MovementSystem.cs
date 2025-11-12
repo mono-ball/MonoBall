@@ -240,16 +240,16 @@ public class MovementSystem : SystemBase, IUpdateSystem
 
         switch (direction)
         {
-            case Direction.Up:
+            case Direction.North:
                 targetY--;
                 break;
-            case Direction.Down:
+            case Direction.South:
                 targetY++;
                 break;
-            case Direction.Left:
+            case Direction.West:
                 targetX--;
                 break;
-            case Direction.Right:
+            case Direction.East:
                 targetX++;
                 break;
             default:
@@ -289,16 +289,16 @@ public class MovementSystem : SystemBase, IUpdateSystem
 
                 switch (allowedJumpDir)
                 {
-                    case Direction.Down:
+                    case Direction.South:
                         jumpLandY++;
                         break;
-                    case Direction.Up:
+                    case Direction.North:
                         jumpLandY--;
                         break;
-                    case Direction.Left:
+                    case Direction.West:
                         jumpLandX--;
                         break;
-                    case Direction.Right:
+                    case Direction.East:
                         jumpLandX++;
                         break;
                 }

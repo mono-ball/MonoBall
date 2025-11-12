@@ -71,10 +71,10 @@ public class WanderBehavior : TypeScriptBase
         {
             var directions = new[]
             {
-                Direction.Up,
-                Direction.Down,
-                Direction.Left,
-                Direction.Right,
+                Direction.North,
+                Direction.South,
+                Direction.West,
+                Direction.East,
             };
             state.CurrentDirection = directions[ctx.GameState.RandomRange(0, directions.Length)];
             state.StartPosition = new Point(position.X, position.Y);
@@ -165,10 +165,10 @@ public class WanderBehavior : TypeScriptBase
             // Pick a NEW random direction immediately (don't wait)
             var directions = new[]
             {
-                Direction.Up,
-                Direction.Down,
-                Direction.Left,
-                Direction.Right,
+                Direction.North,
+                Direction.South,
+                Direction.West,
+                Direction.East,
             };
             state.CurrentDirection = directions[ctx.GameState.RandomRange(0, directions.Length)];
             state.StartPosition = new Point(position.X, position.Y);

@@ -96,10 +96,10 @@ public static class ComponentDeserializerSetup
             var directionStr = json.GetProperty("direction").GetString();
             var direction = directionStr switch
             {
-                "up" or "Up" => Direction.Up,
-                "down" or "Down" => Direction.Down,
-                "left" or "Left" => Direction.Left,
-                "right" or "Right" => Direction.Right,
+                "north" or "North" or "up" or "Up" => Direction.North,
+                "south" or "South" or "down" or "Down" => Direction.South,
+                "west" or "West" or "left" or "Left" => Direction.West,
+                "east" or "East" or "right" or "Right" => Direction.East,
                 _ => throw new ArgumentException($"Invalid direction: {directionStr}")
             };
             return new TileLedge(direction);
@@ -233,10 +233,10 @@ public static class ComponentDeserializerSetup
             return directionStr switch
             {
                 "none" or "None" => Direction.None,
-                "up" or "Up" => Direction.Up,
-                "down" or "Down" => Direction.Down,
-                "left" or "Left" => Direction.Left,
-                "right" or "Right" => Direction.Right,
+                "north" or "North" or "up" or "Up" => Direction.North,
+                "south" or "South" or "down" or "Down" => Direction.South,
+                "west" or "West" or "left" or "Left" => Direction.West,
+                "east" or "East" or "right" or "Right" => Direction.East,
                 _ => throw new ArgumentException($"Invalid direction: {directionStr}")
             };
         });
@@ -250,10 +250,10 @@ public static class ComponentDeserializerSetup
                 var dirStr = dirElement.GetString();
                 pressedDirection = dirStr switch
                 {
-                    "up" or "Up" => Direction.Up,
-                    "down" or "Down" => Direction.Down,
-                    "left" or "Left" => Direction.Left,
-                    "right" or "Right" => Direction.Right,
+                    "north" or "North" or "up" or "Up" => Direction.North,
+                    "south" or "South" or "down" or "Down" => Direction.South,
+                    "west" or "West" or "left" or "Left" => Direction.West,
+                    "east" or "East" or "right" or "Right" => Direction.East,
                     _ => Direction.None
                 };
             }

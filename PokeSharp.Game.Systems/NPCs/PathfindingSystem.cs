@@ -151,9 +151,9 @@ public class PathfindingSystem : SystemBase, IUpdateSystem
 
         // Prioritize movement based on larger delta
         if (Math.Abs(dx) > Math.Abs(dy))
-            moveDirection = dx > 0 ? Direction.Right : Direction.Left;
+            moveDirection = dx > 0 ? Direction.East : Direction.West;
         else if (Math.Abs(dy) > 0)
-            moveDirection = dy > 0 ? Direction.Down : Direction.Up;
+            moveDirection = dy > 0 ? Direction.South : Direction.North;
         else
             // Already at target
             return true;

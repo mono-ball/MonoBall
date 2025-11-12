@@ -83,6 +83,13 @@ public class AnimationSystem : SystemBase, IUpdateSystem
         if (!animation.IsPlaying || animation.IsComplete)
             return;
 
+        // Skip sprite-based animations (handled by SpriteAnimationSystem)
+        // These sprites have Category and SpriteName set and use manifest-based animations
+        if (!string.IsNullOrEmpty(sprite.Category) && !string.IsNullOrEmpty(sprite.SpriteName))
+        {
+            return;
+        }
+
         // Get the animation definition
         if (!_animationLibrary.TryGetAnimation(animation.CurrentAnimation, out var animDef))
         {

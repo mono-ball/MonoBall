@@ -146,7 +146,7 @@ public sealed class ScriptContext
     /// <example>
     ///     <code>
     /// ctx.Npc.FaceEntity(npcEntity, playerEntity);
-    /// ctx.Npc.MoveNPC(npcEntity, Direction.Up);
+    /// ctx.Npc.MoveNPC(npcEntity, Direction.North);
     /// </code>
     /// </example>
     public NpcApiService Npc => _apis.Npc;

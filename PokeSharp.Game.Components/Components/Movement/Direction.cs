@@ -2,6 +2,7 @@ namespace PokeSharp.Game.Components.Movement;
 
 /// <summary>
 ///     Represents the four cardinal directions for movement and facing.
+///     Uses pokeemerald's naming convention (North/South/East/West).
 /// </summary>
 public enum Direction
 {
@@ -11,24 +12,24 @@ public enum Direction
     None = -1,
 
     /// <summary>
-    ///     Facing down (south).
+    ///     Facing south (down on screen).
     /// </summary>
-    Down = 0,
+    South = 0,
 
     /// <summary>
-    ///     Facing left (west).
+    ///     Facing west (left on screen).
     /// </summary>
-    Left = 1,
+    West = 1,
 
     /// <summary>
-    ///     Facing right (east).
+    ///     Facing east (right on screen).
     /// </summary>
-    Right = 2,
+    East = 2,
 
     /// <summary>
-    ///     Facing up (north).
+    ///     Facing north (up on screen).
     /// </summary>
-    Up = 3,
+    North = 3,
 }
 
 /// <summary>
@@ -45,46 +46,52 @@ public static class DirectionExtensions
     {
         return direction switch
         {
-            Direction.Down => (0, 1),
-            Direction.Left => (-1, 0),
-            Direction.Right => (1, 0),
-            Direction.Up => (0, -1),
+            Direction.South => (0, 1),
+            Direction.West => (-1, 0),
+            Direction.East => (1, 0),
+            Direction.North => (0, -1),
             _ => (0, 0),
         };
     }
 
     /// <summary>
-    ///     Gets the animation name for walking in this direction.
+    ///     Converts a direction to its lowercase string representation for animation names.
+    ///     (e.g., Direction.South -> "south")
     /// </summary>
     /// <param name="direction">The direction.</param>
-    /// <returns>The walk animation name.</returns>
-    public static string ToWalkAnimation(this Direction direction)
+    /// <returns>The lowercase direction name.</returns>
+    public static string ToAnimationSuffix(this Direction direction)
     {
         return direction switch
         {
-            Direction.Down => "walk_down",
-            Direction.Left => "walk_left",
-            Direction.Right => "walk_right",
-            Direction.Up => "walk_up",
-            _ => "walk_down",
+            Direction.South => "south",
+            Direction.North => "north",
+            Direction.West => "west",
+            Direction.East => "east",
+            _ => "south",
         };
     }
 
     /// <summary>
-    ///     Gets the animation name for idling in this direction.
+    ///     Gets the animation name for walking in this direction.
+    ///     Uses pokeemerald's "go_*" naming convention.
     /// </summary>
     /// <param name="direction">The direction.</param>
-    /// <returns>The idle animation name.</returns>
+    /// <returns>The walk animation name (e.g., "go_south").</returns>
+    public static string ToWalkAnimation(this Direction direction)
+    {
+        return $"go_{direction.ToAnimationSuffix()}";
+    }
+
+    /// <summary>
+    ///     Gets the animation name for idling/facing in this direction.
+    ///     Uses pokeemerald's "face_*" naming convention.
+    /// </summary>
+    /// <param name="direction">The direction.</param>
+    /// <returns>The idle animation name (e.g., "face_south").</returns>
     public static string ToIdleAnimation(this Direction direction)
     {
-        return direction switch
-        {
-            Direction.Down => "idle_down",
-            Direction.Left => "idle_left",
-            Direction.Right => "idle_right",
-            Direction.Up => "idle_up",
-            _ => "idle_down",
-        };
+        return $"face_{direction.ToAnimationSuffix()}";
     }
 
     /// <summary>
@@ -96,10 +103,10 @@ public static class DirectionExtensions
     {
         return direction switch
         {
-            Direction.Down => Direction.Up,
-            Direction.Left => Direction.Right,
-            Direction.Right => Direction.Left,
-            Direction.Up => Direction.Down,
+            Direction.South => Direction.North,
+            Direction.West => Direction.East,
+            Direction.East => Direction.West,
+            Direction.North => Direction.South,
             _ => direction,
         };
     }

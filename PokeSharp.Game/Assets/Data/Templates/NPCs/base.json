@@ -27,13 +27,13 @@
     {
       "type": "Direction",
       "data": {
-        "direction": "down"
+        "direction": "south"
       }
     },
     {
       "type": "Animation",
       "data": {
-        "animationName": "idle_down"
+        "animationName": "face_south"
       }
     },
     {
