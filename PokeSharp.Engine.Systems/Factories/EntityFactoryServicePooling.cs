@@ -527,7 +527,9 @@ public sealed class EntityFactoryServicePooling : IEntityFactoryService
     )
     {
         var components = new List<object>();
+        var addedTypes = new HashSet<string>();
 
+        // Add template components (with overrides)
         foreach (var componentTemplate in template.Components)
         {
             var componentTypeName = componentTemplate.ComponentType.Name;
@@ -535,6 +537,19 @@ public sealed class EntityFactoryServicePooling : IEntityFactoryService
                 context?.Overrides?.GetValueOrDefault(componentTypeName)
                 ?? componentTemplate.InitialData;
             components.Add(componentData);
+            addedTypes.Add(componentTypeName);
+        }
+
+        // Add new components from overrides that aren't in template
+        if (context?.Overrides != null)
+        {
+            foreach (var (typeName, componentData) in context.Overrides)
+            {
+                if (!addedTypes.Contains(typeName))
+                {
+                    components.Add(componentData);
+                }
+            }
         }
 
         return components;

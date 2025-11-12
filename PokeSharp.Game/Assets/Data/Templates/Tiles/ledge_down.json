@@ -1,0 +1,16 @@
+{
+  "templateId": "tile/ledge/down",
+  "name": "Ledge (down)",
+  "tag": "tile",
+  "baseTemplateId": "tile/wall",
+  "version": "1.0.0",
+  "components": [
+    {
+      "type": "TileLedge",
+      "data": {
+        "direction": "down"
+      }
+    }
+  ]
+}
+

@@ -75,11 +75,12 @@ public class LayerValidator : IMapValidator
 
         const uint TILE_ID_MASK = 0x1FFFFFFF; // Mask out flip flags
 
-        for (var y = 0; y < layer.Data.GetLength(0); y++)
+        for (var y = 0; y < layer.Height; y++)
         {
-            for (var x = 0; x < layer.Data.GetLength(1); x++)
+            for (var x = 0; x < layer.Width; x++)
             {
-                var rawGid = (uint)layer.Data[y, x];
+                var index = y * layer.Width + x;
+                var rawGid = (uint)layer.Data[index];
                 var tileGid = (int)(rawGid & TILE_ID_MASK);
 
                 // Skip empty tiles

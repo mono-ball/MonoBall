@@ -1,0 +1,9 @@
+{
+  "templateId": "npc/gym-leader",
+  "name": "Gym Leader",
+  "tag": "npc",
+  "baseTemplateId": "npc/trainer",
+  "version": "1.0.0",
+  "components": []
+}
+

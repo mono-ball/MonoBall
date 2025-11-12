@@ -1,0 +1,16 @@
+{
+  "templateId": "npc/fast",
+  "name": "Fast NPC",
+  "tag": "npc",
+  "baseTemplateId": "npc/generic",
+  "version": "1.0.0",
+  "components": [
+    {
+      "type": "GridMovement",
+      "data": {
+        "tilesPerSecond": 4.0
+      }
+    }
+  ]
+}
+

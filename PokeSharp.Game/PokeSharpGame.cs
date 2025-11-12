@@ -13,6 +13,8 @@ using PokeSharp.Game.Initialization;
 using PokeSharp.Game.Input;
 using PokeSharp.Engine.Rendering.Assets;
 using PokeSharp.Game.Data.MapLoading.Tiled;
+using PokeSharp.Game.Data.Loading;
+using PokeSharp.Game.Data.Services;
 
 namespace PokeSharp.Game;
 
@@ -28,6 +30,9 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game, IAsyncDisposable
     private readonly IInitializationProvider _initialization;
     private readonly IGameTimeService _gameTime;
     private readonly EntityPoolManager _poolManager;
+    private readonly GameDataLoader _dataLoader;
+    private readonly NpcDefinitionService _npcDefinitionService;
+    private readonly MapDefinitionService _mapDefinitionService;
     private readonly GraphicsDeviceManager _graphics;
 
     // Services that depend on GraphicsDevice (created in Initialize)
@@ -49,7 +54,10 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game, IAsyncDisposable
         IInitializationProvider initialization,
         IScriptingApiProvider apiProvider,
         IGameTimeService gameTime,
-        EntityPoolManager poolManager
+        EntityPoolManager poolManager,
+        GameDataLoader dataLoader,
+        NpcDefinitionService npcDefinitionService,
+        MapDefinitionService mapDefinitionService
     )
     {
         _logging = logging ?? throw new ArgumentNullException(nameof(logging));
@@ -60,6 +68,9 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game, IAsyncDisposable
         _apiProvider = apiProvider ?? throw new ArgumentNullException(nameof(apiProvider));
         _gameTime = gameTime ?? throw new ArgumentNullException(nameof(gameTime));
         _poolManager = poolManager ?? throw new ArgumentNullException(nameof(poolManager));
+        _dataLoader = dataLoader ?? throw new ArgumentNullException(nameof(dataLoader));
+        _npcDefinitionService = npcDefinitionService ?? throw new ArgumentNullException(nameof(npcDefinitionService));
+        _mapDefinitionService = mapDefinitionService ?? throw new ArgumentNullException(nameof(mapDefinitionService));
 
         _graphics = new GraphicsDeviceManager(this);
         Content.RootDirectory = "Content";
@@ -96,6 +107,25 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game, IAsyncDisposable
     {
         base.Initialize();
 
+        // Load game data definitions (NPCs, trainers, etc.) BEFORE initializing any systems
+        try
+        {
+            _dataLoader.LoadAllAsync("Assets/Data").GetAwaiter().GetResult();
+            _logging.CreateLogger<PokeSharpGame>().LogInformation(
+                "Game data definitions loaded successfully"
+            );
+        }
+        catch (Exception ex)
+        {
+            _logging.CreateLogger<PokeSharpGame>().LogError(
+                ex,
+                "Failed to load game data definitions - continuing with default templates"
+            );
+        }
+
+        // JSON templates are loaded during DI setup (see ServiceCollectionExtensions.cs)
+        // No additional loading needed here
+
         // Create services that depend on GraphicsDevice
         var assetManagerLogger = _logging.CreateLogger<AssetManager>();
         var assetManager = new AssetManager(GraphicsDevice, "Assets", assetManagerLogger);
@@ -105,7 +135,15 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game, IAsyncDisposable
         var propertyMapperRegistry = PropertyMapperServiceExtensions.CreatePropertyMapperRegistry(mapperRegistryLogger);
 
         var mapLoaderLogger = _logging.CreateLogger<MapLoader>();
-        var mapLoader = new MapLoader(assetManager, _systemManager, propertyMapperRegistry, entityFactory: _gameServices.EntityFactory, logger: mapLoaderLogger);
+        var mapLoader = new MapLoader(
+            assetManager,
+            _systemManager,
+            propertyMapperRegistry,
+            entityFactory: _gameServices.EntityFactory,
+            npcDefinitionService: _npcDefinitionService,
+            mapDefinitionService: _mapDefinitionService,
+            logger: mapLoaderLogger
+        );
 
         // Create initializers
         var gameInitializerLogger = _logging.CreateLogger<GameInitializer>();
@@ -148,8 +186,8 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game, IAsyncDisposable
         // Initialize NPC behavior system
         _npcBehaviorInitializer.Initialize();
 
-        // Load test map and create map entity
-        _mapInitializer.LoadMap("Assets/Maps/test-map.json");
+        // Load test map and create map entity (NEW: Definition-based loading)
+        _mapInitializer.LoadMap("test-map");
 
         // Create test player entity
         _initialization.PlayerFactory.CreatePlayer(

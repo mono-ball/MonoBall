@@ -1,0 +1,22 @@
+{
+  "templateId": "tile/wall",
+  "name": "Wall Tile",
+  "tag": "tile",
+  "baseTemplateId": "tile/base",
+  "version": "1.0.0",
+  "components": [
+    {
+      "type": "Collision",
+      "data": {
+        "isSolid": true
+      }
+    },
+    {
+      "type": "Elevation",
+      "data": {
+        "level": 0
+      }
+    }
+  ]
+}
+

@@ -1,0 +1,13 @@
+{
+  "trainerId": "youngster_joey",
+  "displayName": "YOUNGSTER JOEY",
+  "trainerClass": "youngster",
+  "spriteId": "trainer-youngster-sprite",
+  "prizeMoney": 100,
+  "introDialogue": "Hi! I like shorts! They're comfy and easy to wear!",
+  "defeatDialogue": "Aww! My Rattata!",
+  "partyJson": "[{\"species\":\"rattata\",\"level\":5,\"moves\":[\"tackle\",\"tail_whip\"]}]",
+  "aiScript": "AI/basic_trainer.csx",
+  "isRematchable": false,
+  "version": "1.0.0"
+}

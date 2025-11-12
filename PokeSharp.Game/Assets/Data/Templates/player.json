@@ -1,0 +1,75 @@
+{
+  "templateId": "player",
+  "name": "Player Character",
+  "tag": "player",
+  "version": "1.0.0",
+  "components": [
+    {
+      "type": "Player",
+      "data": {}
+    },
+    {
+      "type": "Name",
+      "data": {
+        "name": "PLAYER"
+      }
+    },
+    {
+      "type": "Wallet",
+      "data": {
+        "money": 3000
+      }
+    },
+    {
+      "type": "Position",
+      "data": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "type": "Sprite",
+      "data": {
+        "textureId": "player-spritesheet"
+      }
+    },
+    {
+      "type": "Elevation",
+      "data": {
+        "level": 3
+      }
+    },
+    {
+      "type": "GridMovement",
+      "data": {
+        "tilesPerSecond": 4.0
+      }
+    },
+    {
+      "type": "Direction",
+      "data": {
+        "direction": "down"
+      }
+    },
+    {
+      "type": "Animation",
+      "data": {
+        "animationName": "idle_down"
+      }
+    },
+    {
+      "type": "InputState",
+      "data": {
+        "pressedDirection": "none",
+        "actionPressed": false
+      }
+    },
+    {
+      "type": "Collision",
+      "data": {
+        "isSolid": true
+      }
+    }
+  ]
+}
+

@@ -1,0 +1,9 @@
+{
+  "templateId": "npc/trainer",
+  "name": "Trainer NPC",
+  "tag": "npc",
+  "baseTemplateId": "npc/generic",
+  "version": "1.0.0",
+  "components": []
+}
+

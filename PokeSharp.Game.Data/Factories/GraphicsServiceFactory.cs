@@ -5,18 +5,22 @@ using PokeSharp.Game.Data.PropertyMapping;
 using PokeSharp.Engine.Rendering.Assets;
 using PokeSharp.Game.Data.MapLoading.Tiled;
 using PokeSharp.Engine.Systems.Management;
+using PokeSharp.Game.Data.Services;
 
 namespace PokeSharp.Game.Data.Factories;
 
 /// <summary>
 ///     Concrete implementation of IGraphicsServiceFactory using Dependency Injection.
-///     Resolves loggers, PropertyMapperRegistry, and SystemManager from the service provider.
+///     Resolves loggers, PropertyMapperRegistry, SystemManager, NpcDefinitionService,
+///     and MapDefinitionService from the service provider.
 /// </summary>
 public class GraphicsServiceFactory : IGraphicsServiceFactory
 {
     private readonly ILoggerFactory _loggerFactory;
     private readonly PropertyMapperRegistry? _propertyMapperRegistry;
     private readonly SystemManager _systemManager;
+    private readonly NpcDefinitionService? _npcDefinitionService;
+    private readonly MapDefinitionService? _mapDefinitionService;
 
     /// <summary>
     ///     Initializes a new instance of the GraphicsServiceFactory.
@@ -24,14 +28,20 @@ public class GraphicsServiceFactory : IGraphicsServiceFactory
     /// <param name="loggerFactory">Factory for creating loggers for graphics services.</param>
     /// <param name="systemManager">System manager for accessing SpatialHashSystem.</param>
     /// <param name="propertyMapperRegistry">Optional property mapper registry for map loading.</param>
+    /// <param name="npcDefinitionService">Optional NPC definition service for data-driven NPC loading.</param>
+    /// <param name="mapDefinitionService">Optional map definition service for definition-based map loading.</param>
     public GraphicsServiceFactory(
         ILoggerFactory loggerFactory,
         SystemManager systemManager,
-        PropertyMapperRegistry? propertyMapperRegistry = null)
+        PropertyMapperRegistry? propertyMapperRegistry = null,
+        NpcDefinitionService? npcDefinitionService = null,
+        MapDefinitionService? mapDefinitionService = null)
     {
         _loggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
         _systemManager = systemManager ?? throw new ArgumentNullException(nameof(systemManager));
         _propertyMapperRegistry = propertyMapperRegistry;
+        _npcDefinitionService = npcDefinitionService;
+        _mapDefinitionService = mapDefinitionService;
     }
 
     /// <inheritdoc />
@@ -57,6 +67,14 @@ public class GraphicsServiceFactory : IGraphicsServiceFactory
             throw new ArgumentNullException(nameof(assetManager));
 
         var logger = _loggerFactory.CreateLogger<MapLoader>();
-        return new MapLoader(assetManager, _systemManager, _propertyMapperRegistry, entityFactory, logger);
+        return new MapLoader(
+            assetManager,
+            _systemManager,
+            _propertyMapperRegistry,
+            entityFactory,
+            _npcDefinitionService,
+            _mapDefinitionService,
+            logger
+        );
     }
 }

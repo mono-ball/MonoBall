@@ -142,9 +142,8 @@ public static class TmxParser
         return layers;
     }
 
-    private static int[,] ParseCsvData(string csv, int width, int height)
+    private static int[] ParseCsvData(string csv, int width, int height)
     {
-        var data = new int[height, width];
         var values = csv.Split(',', StringSplitOptions.RemoveEmptyEntries)
             .Select(s => int.Parse(s.Trim(), CultureInfo.InvariantCulture))
             .ToArray();
@@ -154,26 +153,20 @@ public static class TmxParser
                 $"CSV data length mismatch. Expected {width * height}, got {values.Length}"
             );
 
-        for (var y = 0; y < height; y++)
-        for (var x = 0; x < width; x++)
-            data[y, x] = values[y * width + x];
-
-        return data;
+        return values; // Return flat array (row-major order)
     }
 
-    private static int[,] ParseXmlData(XElement dataElement, int width, int height)
+    private static int[] ParseXmlData(XElement dataElement, int width, int height)
     {
-        var data = new int[height, width];
+        var data = new int[width * height];
         var tiles = dataElement.Elements("tile").ToArray();
 
-        for (var i = 0; i < tiles.Length && i < width * height; i++)
+        for (var i = 0; i < tiles.Length && i < data.Length; i++)
         {
-            var y = i / width;
-            var x = i % width;
-            data[y, x] = ParseInt(tiles[i], "gid");
+            data[i] = ParseInt(tiles[i], "gid");
         }
 
-        return data;
+        return data; // Return flat array (row-major order)
     }
 
     private static List<TmxObjectGroup> ParseObjectGroups(XElement mapElement)

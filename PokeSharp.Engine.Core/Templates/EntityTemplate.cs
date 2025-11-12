@@ -119,8 +119,9 @@ public sealed class EntityTemplate
         if (string.IsNullOrWhiteSpace(Tag))
             errors.Add("Tag is required");
 
-        if (Components.Count == 0)
-            errors.Add("Template must have at least one component");
+        // Allow empty components if template inherits from another template
+        if (Components.Count == 0 && string.IsNullOrWhiteSpace(BaseTemplateId))
+            errors.Add("Template must have at least one component or inherit from a base template");
 
         // Validate component types
         foreach (var component in Components)

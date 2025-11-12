@@ -272,7 +272,7 @@ public static class TiledMapLoader
             // Decode layer data (handles plain arrays, base64, and compression)
             var flatData = DecodeLayerData(tiledLayer);
             if (flatData.Length > 0)
-                layer.Data = ConvertFlatArrayTo2D(flatData, layer.Width, layer.Height);
+                layer.Data = flatData; // Store as flat array (row-major order)
 
             result.Add(layer);
         }

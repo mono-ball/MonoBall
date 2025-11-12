@@ -1,0 +1,14 @@
+{
+  "trainerId": "rival_brendan",
+  "displayName": "BRENDAN",
+  "trainerClass": "rival",
+  "spriteId": "trainer-rival-sprite",
+  "prizeMoney": 500,
+  "introDialogue": "So you're the new kid? Let's see what you've got!",
+  "defeatDialogue": "Not bad! You're pretty good!",
+  "partyJson": "[{\"species\":\"treecko\",\"level\":7,\"moves\":[\"pound\",\"leer\",\"absorb\"]}]",
+  "aiScript": "AI/rival_trainer.csx",
+  "isRematchable": true,
+  "version": "1.0.0"
+}
+

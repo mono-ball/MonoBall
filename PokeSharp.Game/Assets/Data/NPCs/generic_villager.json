@@ -1,0 +1,10 @@
+{
+  "npcId": "generic_villager",
+  "displayName": "VILLAGER",
+  "npcType": "generic",
+  "spriteId": "npc-spritesheet",
+  "behaviorScript": "stationary",
+  "dialogueScript": "Dialogue/generic_greeting.csx",
+  "movementSpeed": 1.5,
+  "version": "1.0.0"
+}

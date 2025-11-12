@@ -1,0 +1,17 @@
+{
+  "templateId": "tile/grass",
+  "name": "Grass Tile",
+  "tag": "tile",
+  "baseTemplateId": "tile/base",
+  "version": "1.0.0",
+  "components": [
+    {
+      "type": "EncounterZone",
+      "data": {
+        "zoneId": "default",
+        "encounterRate": 10
+      }
+    }
+  ]
+}
+

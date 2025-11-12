@@ -121,11 +121,28 @@ public class NPCBehaviorSystem : SystemBase, IUpdateSystem
         var behaviorCount = 0;
         var errorCount = 0;
 
+        // Debug: Log first tick to confirm system is running
+        if (_tickCounter == 0)
+        {
+            _logger.LogInformation("NPCBehaviorSystem: First update tick");
+        }
+
         // Use centralized query for NPCs with behavior
         world.Query(
             in EcsQueries.NpcsWithBehavior,
             (Entity entity, ref Npc npc, ref Behavior behavior) =>
             {
+                // Debug: Log first entity found
+                if (_tickCounter == 0)
+                {
+                    _logger.LogInformation(
+                        "Found NPC with behavior: npcId={NpcId}, behaviorTypeId={BehaviorTypeId}, isActive={IsActive}",
+                        npc.NpcId,
+                        behavior.BehaviorTypeId,
+                        behavior.IsActive
+                    );
+                }
+
                 try
                 {
                     // Skip if behavior is not active

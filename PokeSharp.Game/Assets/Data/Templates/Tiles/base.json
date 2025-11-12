@@ -1,0 +1,29 @@
+{
+  "templateId": "tile/base",
+  "name": "Base Tile",
+  "tag": "tile",
+  "version": "1.0.0",
+  "components": [
+    {
+      "type": "TilePosition",
+      "data": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "type": "TileSprite",
+      "data": {
+        "tilesetId": "default",
+        "tileId": 0
+      }
+    },
+    {
+      "type": "Elevation",
+      "data": {
+        "level": 0
+      }
+    }
+  ]
+}
+

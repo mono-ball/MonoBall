@@ -1,0 +1,16 @@
+{
+  "templateId": "npc/generic",
+  "name": "Generic NPC",
+  "tag": "npc",
+  "baseTemplateId": "npc/base",
+  "version": "1.0.0",
+  "components": [
+    {
+      "type": "GridMovement",
+      "data": {
+        "tilesPerSecond": 2.0
+      }
+    }
+  ]
+}
+

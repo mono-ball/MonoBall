@@ -1,0 +1,16 @@
+{
+  "templateId": "tile/ledge/right",
+  "name": "Ledge (right)",
+  "tag": "tile",
+  "baseTemplateId": "tile/wall",
+  "version": "1.0.0",
+  "components": [
+    {
+      "type": "TileLedge",
+      "data": {
+        "direction": "right"
+      }
+    }
+  ]
+}
+

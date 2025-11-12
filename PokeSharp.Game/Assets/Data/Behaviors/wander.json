@@ -1,0 +1,10 @@
+{
+  "typeId": "wander",
+  "displayName": "Wander Behavior",
+  "description": "NPC wanders randomly around the map, changing direction occasionally",
+  "behaviorScript": "Behaviors/wander_behavior.csx",
+  "defaultSpeed": 1.5,
+  "pauseAtWaypoint": 0.0,
+  "allowInteractionWhileMoving": true
+}
+

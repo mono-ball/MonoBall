@@ -66,6 +66,9 @@ public class GameInitializer(
     /// <param name="graphicsDevice">The graphics device for rendering.</param>
     public void Initialize(GraphicsDevice graphicsDevice)
     {
+        // NOTE: GameDataLoader is called earlier in PokeSharpGame.Initialize
+        // before GameInitializer.Initialize is invoked.
+
         // Load asset manifest
         try
         {

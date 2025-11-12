@@ -4,6 +4,9 @@ obj/
 riderModule.iml
 /_ReSharper.Caches/
 
+*.log
+
+pokeemerald/
 
 # Removed Windows wrapper files per user request
 hive-mind-prompt-*.txt

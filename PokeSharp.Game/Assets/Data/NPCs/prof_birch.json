@@ -1,0 +1,10 @@
+{
+  "npcId": "prof_birch",
+  "displayName": "PROF. BIRCH",
+  "npcType": "professor",
+  "spriteId": "npc-spritesheet",
+  "behaviorScript": "stationary",
+  "dialogueScript": "Dialogue/prof_birch_intro.csx",
+  "movementSpeed": 2.0,
+  "version": "1.0.0"
+}

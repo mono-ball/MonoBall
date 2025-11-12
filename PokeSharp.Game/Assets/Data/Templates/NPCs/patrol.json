@@ -1,0 +1,9 @@
+{
+  "templateId": "npc/patrol",
+  "name": "Patrol NPC",
+  "tag": "npc",
+  "baseTemplateId": "npc/generic",
+  "version": "1.0.0",
+  "components": []
+}
+

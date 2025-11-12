@@ -46,7 +46,8 @@ public class TmxLayer
     public int OffsetY { get; set; }
 
     /// <summary>
-    ///     Gets or sets the tile data as a 2D array [y, x].
+    ///     Gets or sets the tile data as a flat array (row-major order).
+    ///     Use: tileGid = Data[y * Width + x]
     /// </summary>
-    public int[,] Data { get; set; } = new int[0, 0];
+    public int[]? Data { get; set; }
 }

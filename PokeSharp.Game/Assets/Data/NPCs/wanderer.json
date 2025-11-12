@@ -1,0 +1,11 @@
+{
+  "npcId": "wanderer",
+  "displayName": "WANDERER",
+  "npcType": "wanderer",
+  "spriteId": "npc-spritesheet",
+  "behaviorScript": "wander",
+  "dialogueScript": "Dialogue/generic_greeting.csx",
+  "movementSpeed": 1.5,
+  "version": "1.0.0"
+}
+

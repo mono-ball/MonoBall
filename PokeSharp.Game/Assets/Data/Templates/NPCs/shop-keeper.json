@@ -1,0 +1,9 @@
+{
+  "templateId": "npc/shop-keeper",
+  "name": "Shop Keeper",
+  "tag": "npc",
+  "baseTemplateId": "npc/stationary",
+  "version": "1.0.0",
+  "components": []
+}
+

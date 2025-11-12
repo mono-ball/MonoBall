@@ -1,0 +1,46 @@
+{
+  "templateId": "npc/base",
+  "name": "Base NPC",
+  "tag": "npc",
+  "version": "1.0.0",
+  "components": [
+    {
+      "type": "Position",
+      "data": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "type": "Sprite",
+      "data": {
+        "textureId": "npc-spritesheet"
+      }
+    },
+    {
+      "type": "Elevation",
+      "data": {
+        "level": 3
+      }
+    },
+    {
+      "type": "Direction",
+      "data": {
+        "direction": "down"
+      }
+    },
+    {
+      "type": "Animation",
+      "data": {
+        "animationName": "idle_down"
+      }
+    },
+    {
+      "type": "Collision",
+      "data": {
+        "isSolid": true
+      }
+    }
+  ]
+}
+
