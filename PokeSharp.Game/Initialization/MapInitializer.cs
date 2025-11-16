@@ -21,16 +21,26 @@ public class MapInitializer(
     MapLoader mapLoader,
     SpatialHashSystem spatialHashSystem,
     ElevationRenderSystem renderSystem,
-    MapLifecycleManager mapLifecycleManager
+    MapLifecycleManager mapLifecycleManager,
+    SpriteTextureLoader? spriteTextureLoader = null
 )
 {
+    private SpriteTextureLoader _spriteTextureLoader = spriteTextureLoader!;
+
+    /// <summary>
+    ///     Sets the sprite texture loader after construction (for delayed initialization).
+    /// </summary>
+    public void SetSpriteTextureLoader(SpriteTextureLoader loader)
+    {
+        _spriteTextureLoader = loader ?? throw new ArgumentNullException(nameof(loader));
+    }
     /// <summary>
     ///     Loads a map from EF Core definition (NEW: Definition-based loading).
     ///     Creates individual entities for each tile with appropriate components.
     /// </summary>
     /// <param name="mapId">The map identifier (e.g., "test-map", "littleroot_town").</param>
     /// <returns>The MapInfo entity containing map metadata.</returns>
-    public Entity? LoadMap(string mapId)
+    public async Task<Entity?> LoadMap(string mapId)
     {
         try
         {
@@ -42,10 +52,39 @@ public class MapInitializer(
 
             // Get MapInfo to extract map ID and name for lifecycle tracking
             var mapInfo = mapInfoEntity.Get<MapInfo>();
-            var textureIds = mapLoader.GetLoadedTextureIds(mapInfo.MapId);
+            var tilesetTextureIds = mapLoader.GetLoadedTextureIds(mapInfo.MapId);
+
+            // PHASE 2: Load sprites for NPCs in this map
+            HashSet<string> spriteTextureKeys;
+            if (_spriteTextureLoader != null)
+            {
+                var requiredSpriteIds = mapLoader.GetRequiredSpriteIds();
+                try
+                {
+                    spriteTextureKeys = await _spriteTextureLoader.LoadSpritesForMapAsync(mapInfo.MapId, requiredSpriteIds);
+                    logger.LogInformation(
+                        "Map {MapId} loaded with {SpriteCount} sprites",
+                        mapId, spriteTextureKeys.Count);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogWarning(ex,
+                        "Failed to load sprites for map {MapId}, using fallback textures",
+                        mapId);
+                    spriteTextureKeys = new HashSet<string>();
+                }
+            }
+            else
+            {
+                logger.LogWarning("SpriteTextureLoader not set - skipping sprite loading for map {MapId}", mapId);
+                spriteTextureKeys = new HashSet<string>();
+            }
 
             // Register map with lifecycle manager BEFORE transitioning
-            mapLifecycleManager.RegisterMap(mapInfo.MapId, mapInfo.MapName, textureIds);
+            var safeMapName = mapInfo.MapName ?? mapId; // Fallback to mapId if DisplayName is null
+            var safeTilesetIds = tilesetTextureIds ?? new HashSet<string>(); // Ensure non-null
+            var safeSpriteKeys = spriteTextureKeys ?? new HashSet<string>(); // Ensure non-null
+            mapLifecycleManager.RegisterMap(mapInfo.MapId, safeMapName, safeTilesetIds, safeSpriteKeys);
 
             // Transition to new map (cleans up old maps)
             mapLifecycleManager.TransitionToMap(mapInfo.MapId);
@@ -93,7 +132,7 @@ public class MapInitializer(
     /// </summary>
     /// <param name="mapPath">Path to the map file.</param>
     /// <returns>The MapInfo entity containing map metadata.</returns>
-    public Entity? LoadMapFromFile(string mapPath)
+    public async Task<Entity?> LoadMapFromFile(string mapPath)
     {
         try
         {
@@ -105,10 +144,39 @@ public class MapInitializer(
 
             // Get MapInfo to extract map ID and name for lifecycle tracking
             var mapInfo = mapInfoEntity.Get<MapInfo>();
-            var textureIds = mapLoader.GetLoadedTextureIds(mapInfo.MapId);
+            var tilesetTextureIds = mapLoader.GetLoadedTextureIds(mapInfo.MapId);
+
+            // PHASE 2: Load sprites for NPCs in this map (legacy path)
+            HashSet<string> spriteTextureKeys;
+            if (_spriteTextureLoader != null)
+            {
+                var requiredSpriteIds = mapLoader.GetRequiredSpriteIds();
+                try
+                {
+                    spriteTextureKeys = await _spriteTextureLoader.LoadSpritesForMapAsync(mapInfo.MapId, requiredSpriteIds);
+                    logger.LogInformation(
+                        "Map {MapPath} loaded with {SpriteCount} sprites",
+                        mapPath, spriteTextureKeys.Count);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogWarning(ex,
+                        "Failed to load sprites for map {MapPath}, using fallback textures",
+                        mapPath);
+                    spriteTextureKeys = new HashSet<string>();
+                }
+            }
+            else
+            {
+                logger.LogWarning("SpriteTextureLoader not set - skipping sprite loading for map {MapPath}", mapPath);
+                spriteTextureKeys = new HashSet<string>();
+            }
 
             // Register map with lifecycle manager BEFORE transitioning
-            mapLifecycleManager.RegisterMap(mapInfo.MapId, mapInfo.MapName, textureIds);
+            var safeMapName = mapInfo.MapName ?? mapPath; // Fallback to mapPath if DisplayName is null
+            var safeTilesetIds = tilesetTextureIds ?? new HashSet<string>(); // Ensure non-null
+            var safeSpriteKeys = spriteTextureKeys ?? new HashSet<string>(); // Ensure non-null
+            mapLifecycleManager.RegisterMap(mapInfo.MapId, safeMapName, safeTilesetIds, safeSpriteKeys);
 
             // Transition to new map (cleans up old maps)
             mapLifecycleManager.TransitionToMap(mapInfo.MapId);

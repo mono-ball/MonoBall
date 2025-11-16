@@ -9,11 +9,14 @@ namespace PokeSharp.Game.Services;
 /// Sprites are organized in two main categories:
 /// - Players: brendan/, may/ (each with variants like normal, surfing, machbike)
 /// - NPCs: generic/, elite_four/, gym_leaders/, team_aqua/, team_magma/, frontier_brains/
+/// Implements caching for performance - use ClearCache() to free memory when needed.
 /// </summary>
 public class SpriteLoader
 {
     private readonly ILogger<SpriteLoader> _logger;
     private readonly List<string> _spritesBasePaths;
+    // PERFORMANCE: Manifest cache for O(1) lookups
+    // MEMORY: Call ClearCache() during map transitions to prevent memory buildup
     private Dictionary<string, SpriteManifest>? _spriteCache;
     private Dictionary<string, string>? _spritePathLookup; // Maps "category/spriteId" -> full directory path
     private List<SpriteManifest>? _allSprites;
@@ -144,18 +147,21 @@ public class SpriteLoader
     }
 
     /// <summary>
-    /// Get the full path to a sprite's directory by category and name
+    /// Get the full path to a sprite's directory by category and name.
+    /// NOTE: LoadAllSpritesAsync() must be called before using this method.
     /// </summary>
     public string? GetSpritePath(string category, string spriteName)
     {
-        // Ensure sprites are loaded
+        // Ensure sprites are loaded (defensive check)
         if (_spritePathLookup == null)
         {
-            LoadAllSpritesAsync().Wait();
+            throw new InvalidOperationException(
+                "Sprite manifests have not been loaded. Call LoadAllSpritesAsync() during initialization."
+            );
         }
 
         var lookupKey = $"{category}/{spriteName}";
-        if (_spritePathLookup != null && _spritePathLookup.TryGetValue(lookupKey, out var path))
+        if (_spritePathLookup.TryGetValue(lookupKey, out var path))
         {
             return path;
         }
@@ -187,6 +193,52 @@ public class SpriteLoader
     public string? GetSpriteSheetPath(SpriteManifest manifest)
     {
         return GetSpriteSheetPath(manifest.Category, manifest.Name);
+    }
+
+    /// <summary>
+    /// Clears the manifest cache to free memory.
+    /// Call this when transitioning between maps or during cleanup.
+    /// </summary>
+    public void ClearCache()
+    {
+        _spriteCache?.Clear();
+        _spriteCache = null;
+
+        _allSprites?.Clear();
+        _allSprites = null;
+
+        _spritePathLookup?.Clear();
+        _spritePathLookup = null;
+
+        _logger.LogDebug("Sprite manifest cache cleared");
+    }
+
+    /// <summary>
+    /// Clears specific sprite from cache by ID.
+    /// Useful for selective cleanup of unused sprites.
+    /// </summary>
+    public void ClearSprite(string category, string spriteName)
+    {
+        var key = $"{category}/{spriteName}";
+
+        if (_spriteCache?.Remove(key) == true)
+        {
+            _logger.LogDebug("Cleared sprite manifest from cache: {SpriteKey}", key);
+        }
+
+        // Note: We don't remove from _allSprites or _spritePathLookup as those are
+        // rebuilt from disk on next LoadAllSpritesAsync() call
+    }
+
+    /// <summary>
+    /// Gets current cache statistics for monitoring.
+    /// </summary>
+    public (int ManifestCount, int PathCount) GetCacheStats()
+    {
+        return (
+            _spriteCache?.Count ?? 0,
+            _spritePathLookup?.Count ?? 0
+        );
     }
 }
 

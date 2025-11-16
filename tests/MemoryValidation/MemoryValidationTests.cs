@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
+using Microsoft.Xna.Framework.Graphics;
 using PokeSharp.Engine.Rendering.Assets;
 using Xunit;
 using Xunit.Abstractions;
@@ -41,7 +42,8 @@ namespace PokeSharp.Tests.MemoryValidation
 
             // ACT
             // Simulate game initialization (minimal setup)
-            var assetManager = new AssetManager("PokeSharp.Game/Assets");
+            var graphicsDevice = CreateMockGraphicsDevice();
+            var assetManager = new AssetManager(graphicsDevice, "PokeSharp.Game/Assets");
 
             // Wait for any async initialization
             Thread.Sleep(1000);
@@ -72,7 +74,8 @@ namespace PokeSharp.Tests.MemoryValidation
             _output.WriteLine("=== MAP LOAD MEMORY TEST ===");
             _output.WriteLine("Target: <100MB increase per map load");
 
-            var assetManager = new AssetManager("PokeSharp.Game/Assets");
+            var graphicsDevice = CreateMockGraphicsDevice();
+            var assetManager = new AssetManager(graphicsDevice, "PokeSharp.Game/Assets");
             ForceGarbageCollection();
             var beforeLoadMemoryMB = GetCurrentMemoryMB();
             _output.WriteLine($"Memory Before Load: {beforeLoadMemoryMB:F1}MB");
@@ -116,7 +119,8 @@ namespace PokeSharp.Tests.MemoryValidation
             _output.WriteLine("=== MAP TRANSITION MEMORY TEST ===");
             _output.WriteLine("Target: Memory returns to baseline + 1 map after transition");
 
-            var assetManager = new AssetManager("PokeSharp.Game/Assets");
+            var graphicsDevice = CreateMockGraphicsDevice();
+            var assetManager = new AssetManager(graphicsDevice, "PokeSharp.Game/Assets");
             ForceGarbageCollection();
             var baselineMemoryMB = GetCurrentMemoryMB();
             _output.WriteLine($"Baseline Memory: {baselineMemoryMB:F1}MB");
@@ -167,7 +171,8 @@ namespace PokeSharp.Tests.MemoryValidation
             _output.WriteLine("=== STRESS TEST: 10 SEQUENTIAL MAP LOADS ===");
             _output.WriteLine($"Target: Memory stays <{TARGET_STRESS_TEST_MAX_MB}MB throughout");
 
-            var assetManager = new AssetManager("PokeSharp.Game/Assets");
+            var graphicsDevice = CreateMockGraphicsDevice();
+            var assetManager = new AssetManager(graphicsDevice, "PokeSharp.Game/Assets");
             ForceGarbageCollection();
             var baselineMemoryMB = GetCurrentMemoryMB();
             _output.WriteLine($"Baseline Memory: {baselineMemoryMB:F1}MB");
@@ -247,7 +252,8 @@ namespace PokeSharp.Tests.MemoryValidation
             _output.WriteLine("=== LRU CACHE EVICTION TEST ===");
             _output.WriteLine("Target: Cache evicts oldest textures when limit hit (50MB)");
 
-            var assetManager = new AssetManager("PokeSharp.Game/Assets");
+            var graphicsDevice = CreateMockGraphicsDevice();
+            var assetManager = new AssetManager(graphicsDevice, "PokeSharp.Game/Assets");
             const long MAX_CACHE_SIZE_MB = 50;
 
             _output.WriteLine($"Cache Limit: {MAX_CACHE_SIZE_MB}MB");
@@ -305,6 +311,25 @@ namespace PokeSharp.Tests.MemoryValidation
             GC.WaitForPendingFinalizers();
             GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true, compacting: true);
             Thread.Sleep(100); // Allow cleanup to complete
+        }
+
+        private GraphicsDevice CreateMockGraphicsDevice()
+        {
+            var presentationParameters = new PresentationParameters
+            {
+                BackBufferWidth = 800,
+                BackBufferHeight = 600,
+                BackBufferFormat = SurfaceFormat.Color,
+                DepthStencilFormat = DepthFormat.Depth24,
+                DeviceWindowHandle = IntPtr.Zero,
+                IsFullScreen = false
+            };
+
+            return new GraphicsDevice(
+                GraphicsAdapter.DefaultAdapter,
+                GraphicsProfile.HiDef,
+                presentationParameters
+            );
         }
 
         public void Dispose()

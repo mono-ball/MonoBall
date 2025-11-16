@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Text.Json;
 using Arch.Core;
 using Microsoft.Extensions.Logging;
@@ -59,6 +60,10 @@ public class MapLoader(
     private readonly ILogger<MapLoader>? _logger = logger;
     private readonly Dictionary<string, int> _mapNameToId = new();
     private readonly Dictionary<int, HashSet<string>> _mapTextureIds = new(); // Track texture IDs per map
+
+    // PHASE 2: Track sprite IDs for lazy loading
+    private HashSet<string> _requiredSpriteIds = new();
+
     private int _nextMapId;
 
     /// <summary>
@@ -142,6 +147,13 @@ public class MapLoader(
     /// </summary>
     private Entity LoadMapFromDocument(World world, TmxDocument tmxDoc, MapDefinition mapDef)
     {
+        // PHASE 2: Clear sprite IDs from previous map
+        _requiredSpriteIds.Clear();
+
+        // PHASE 2: Always include player sprites
+        _requiredSpriteIds.Add("players/brendan");
+        _requiredSpriteIds.Add("players/may");
+
         var mapId = GetMapIdFromString(mapDef.MapId);
         var mapName = mapDef.DisplayName;
 
@@ -182,7 +194,7 @@ public class MapLoader(
         );
 
         // Spawn map objects (NPCs, items, etc.)
-        var objectsCreated = SpawnMapObjects(world, tmxDoc, mapId, tmxDoc.TileHeight);
+        var objectsCreated = SpawnMapObjects(world, tmxDoc, mapId, tmxDoc.TileWidth, tmxDoc.TileHeight);
 
         // Log summary
         LogLoadingSummary(
@@ -195,6 +207,21 @@ public class MapLoader(
             mapId,
             DescribeTilesetsForLog(loadedTilesets)
         );
+
+        // PHASE 2: Log sprite collection summary
+        _logger?.LogInformation(
+            "Collected {Count} unique sprite IDs for map {MapId}",
+            _requiredSpriteIds.Count,
+            mapDef.MapId
+        );
+
+        if (_logger != null && _logger.IsEnabled(LogLevel.Debug))
+        {
+            foreach (var spriteId in _requiredSpriteIds.OrderBy(x => x))
+            {
+                _logger.LogDebug("  - {SpriteId}", spriteId);
+            }
+        }
 
         // Invalidate spatial hash to rebuild with new tiles
         var spatialHashSystem = _systemManager.GetSystem<SpatialHashSystem>();
@@ -213,6 +240,13 @@ public class MapLoader(
     /// </summary>
     private Entity LoadMapEntitiesInternal(World world, string mapPath)
     {
+        // PHASE 2: Clear sprite IDs from previous map
+        _requiredSpriteIds.Clear();
+
+        // PHASE 2: Always include player sprites
+        _requiredSpriteIds.Add("players/brendan");
+        _requiredSpriteIds.Add("players/may");
+
         var tmxDoc = TiledMapLoader.Load(mapPath);
         var mapId = GetMapId(mapPath);
         var mapName = Path.GetFileNameWithoutExtension(mapPath);
@@ -248,7 +282,7 @@ public class MapLoader(
         var imageLayersCreated = CreateImageLayerEntities(world, tmxDoc, mapPath, totalLayerCount);
 
         // Spawn map objects (NPCs, items, etc.)
-        var objectsCreated = SpawnMapObjects(world, tmxDoc, mapId, tmxDoc.TileHeight);
+        var objectsCreated = SpawnMapObjects(world, tmxDoc, mapId, tmxDoc.TileWidth, tmxDoc.TileHeight);
 
         // Log summary
         LogLoadingSummary(
@@ -261,6 +295,21 @@ public class MapLoader(
             mapId,
             DescribeTilesetsForLog(loadedTilesets)
         );
+
+        // PHASE 2: Log sprite collection summary
+        _logger?.LogInformation(
+            "Collected {Count} unique sprite IDs for map {MapId}",
+            _requiredSpriteIds.Count,
+            mapName
+        );
+
+        if (_logger != null && _logger.IsEnabled(LogLevel.Debug))
+        {
+            foreach (var spriteId in _requiredSpriteIds.OrderBy(x => x))
+            {
+                _logger.LogDebug("  - {SpriteId}", spriteId);
+            }
+        }
 
         // Invalidate spatial hash to rebuild with new tiles
         var spatialHashSystem = _systemManager.GetSystem<SpatialHashSystem>();
@@ -1241,6 +1290,16 @@ public class MapLoader(
     }
 
     /// <summary>
+    ///     Gets the collection of sprite IDs required for the most recently loaded map.
+    ///     Used for lazy sprite loading to reduce memory usage.
+    /// </summary>
+    /// <returns>Set of sprite IDs in format "category/spriteName"</returns>
+    public IReadOnlySet<string> GetRequiredSpriteIds()
+    {
+        return _requiredSpriteIds;
+    }
+
+    /// <summary>
     ///     Tracks texture IDs used by a map for lifecycle management.
     /// </summary>
     private void TrackMapTextures(int mapId, IReadOnlyList<LoadedTileset> tilesets)
@@ -1641,9 +1700,10 @@ public class MapLoader(
     /// <param name="world">The ECS world.</param>
     /// <param name="tmxDoc">The Tiled map document.</param>
     /// <param name="mapId">The map identifier.</param>
-    /// <param name="tileHeight">Tile height for coordinate conversion.</param>
+    /// <param name="tileWidth">Tile width for X coordinate conversion.</param>
+    /// <param name="tileHeight">Tile height for Y coordinate conversion.</param>
     /// <returns>Number of entities created from objects.</returns>
-    private int SpawnMapObjects(World world, TmxDocument tmxDoc, int mapId, int tileHeight)
+    private int SpawnMapObjects(World world, TmxDocument tmxDoc, int mapId, int tileWidth, int tileHeight)
     {
         if (_entityFactory == null)
             // No entity factory - can't spawn from templates
@@ -1677,7 +1737,7 @@ public class MapLoader(
 
             // Convert pixel coordinates to tile coordinates
             // Tiled Y coordinate is from top of object, use top-left corner for positioning
-            var tileX = (int)Math.Floor(obj.X / tileHeight);
+            var tileX = (int)Math.Floor(obj.X / tileWidth);
             var tileY = (int)Math.Floor(obj.Y / tileHeight);
 
             try
@@ -1765,6 +1825,10 @@ public class MapLoader(
 
                     if (!string.IsNullOrEmpty(npcDef.SpriteId))
                     {
+                        // PHASE 2: Collect sprite ID for lazy loading
+                        _requiredSpriteIds.Add(npcDef.SpriteId);
+                        _logger?.LogTrace("Collected sprite ID for lazy loading: {SpriteId}", npcDef.SpriteId);
+
                         // Parse sprite ID format: "category/spriteName" or fallback to "generic/spriteName"
                         var (category, spriteName) = ParseSpriteId(npcDef.SpriteId);
                         builder.OverrideComponent(new Sprite(spriteName, category));
@@ -1814,6 +1878,10 @@ public class MapLoader(
 
                     if (!string.IsNullOrEmpty(trainerDef.SpriteId))
                     {
+                        // PHASE 2: Collect sprite ID for lazy loading
+                        _requiredSpriteIds.Add(trainerDef.SpriteId);
+                        _logger?.LogTrace("Collected sprite ID for lazy loading: {SpriteId}", trainerDef.SpriteId);
+
                         // Parse sprite ID format: "category/spriteName" or fallback to "generic/spriteName"
                         var (category, spriteName) = ParseSpriteId(trainerDef.SpriteId);
                         builder.OverrideComponent(new Sprite(spriteName, category));

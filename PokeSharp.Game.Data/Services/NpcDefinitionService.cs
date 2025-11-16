@@ -53,18 +53,26 @@ public class NpcDefinitionService
 
     /// <summary>
     /// Get all NPCs of a specific type.
+    /// Uses AsNoTracking for read-only query performance.
     /// </summary>
     public async Task<List<NpcDefinition>> GetNpcsByTypeAsync(string npcType)
     {
-        return await _context.Npcs.Where(n => n.NpcType == npcType).ToListAsync();
+        return await _context.Npcs
+            .AsNoTracking()
+            .Where(n => n.NpcType == npcType)
+            .ToListAsync();
     }
 
     /// <summary>
     /// Get all NPCs from a specific mod.
+    /// Uses AsNoTracking for read-only query performance.
     /// </summary>
     public async Task<List<NpcDefinition>> GetNpcsByModAsync(string modId)
     {
-        return await _context.Npcs.Where(n => n.SourceMod == modId).ToListAsync();
+        return await _context.Npcs
+            .AsNoTracking()
+            .Where(n => n.SourceMod == modId)
+            .ToListAsync();
     }
 
     /// <summary>
@@ -106,18 +114,26 @@ public class NpcDefinitionService
 
     /// <summary>
     /// Get all trainers of a specific class (e.g., "gym_leader", "youngster").
+    /// Uses AsNoTracking for read-only query performance.
     /// </summary>
     public async Task<List<TrainerDefinition>> GetTrainersByClassAsync(string trainerClass)
     {
-        return await _context.Trainers.Where(t => t.TrainerClass == trainerClass).ToListAsync();
+        return await _context.Trainers
+            .AsNoTracking()
+            .Where(t => t.TrainerClass == trainerClass)
+            .ToListAsync();
     }
 
     /// <summary>
     /// Get all trainers from a specific mod.
+    /// Uses AsNoTracking for read-only query performance.
     /// </summary>
     public async Task<List<TrainerDefinition>> GetTrainersByModAsync(string modId)
     {
-        return await _context.Trainers.Where(t => t.SourceMod == modId).ToListAsync();
+        return await _context.Trainers
+            .AsNoTracking()
+            .Where(t => t.SourceMod == modId)
+            .ToListAsync();
     }
 
     /// <summary>

@@ -41,8 +41,8 @@ public class ElevationRenderSystem(
     ILogger<ElevationRenderSystem>? logger = null
 ) : SystemBase, IRenderSystem
 {
-    // Use centralized rendering constants
-    private int _tileSize = RenderingConstants.TileSize;
+    // Tile size is set from map data via SetTileSize()
+    private int _tileSize = 16; // Default fallback, overridden by map data
 
     /// <summary>
     ///     Gets the tile size currently used for rendering.
@@ -59,11 +59,11 @@ public class ElevationRenderSystem(
     public AssetManager AssetManager => _assetManager;
 
     /// <summary>
-    ///     Updates the tile size used by the renderer (falls back to default if invalid).
+    ///     Updates the tile size used by the renderer (falls back to 16 if invalid).
     /// </summary>
     public void SetTileSize(int tileSize)
     {
-        var clamped = tileSize > 0 ? tileSize : RenderingConstants.TileSize;
+        var clamped = tileSize > 0 ? tileSize : 16; // Fallback to 16 if invalid
         if (_tileSize == clamped)
             return;
 

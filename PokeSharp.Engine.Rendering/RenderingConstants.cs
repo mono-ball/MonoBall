@@ -7,22 +7,6 @@ namespace PokeSharp.Engine.Rendering;
 public static class RenderingConstants
 {
     /// <summary>
-    ///     Default image dimensions used as fallback when actual dimensions cannot be determined.
-    ///     This is used when tileset images don't have width/height metadata available.
-    /// </summary>
-    /// <remarks>
-    ///     256x256 is chosen as a common tileset size for 16x16 tiles (16 tiles per row/column).
-    ///     If your tilesets use different dimensions, they should be specified in the TMX file.
-    /// </remarks>
-    public const int DefaultImageWidth = 256;
-
-    /// <summary>
-    ///     Default image height used as fallback when actual dimensions cannot be determined.
-    /// </summary>
-    /// <seealso cref="DefaultImageWidth" />
-    public const int DefaultImageHeight = 256;
-
-    /// <summary>
     ///     Maximum Y coordinate for render distance normalization in z-ordering.
     ///     Used to calculate depth values for proper sprite layering.
     /// </summary>
@@ -44,15 +28,6 @@ public static class RenderingConstants
     ///     - Layer 2+: Overhead (trees, roofs, etc.)
     /// </remarks>
     public const int SpriteRenderAfterLayer = 1;
-
-    /// <summary>
-    ///     Standard tile size in pixels (width and height).
-    /// </summary>
-    /// <remarks>
-    ///     Most Pokemon-style games use 16x16 pixel tiles.
-    ///     If your game uses different tile sizes, they should be specified in the TMX file.
-    /// </remarks>
-    public const int TileSize = 16;
 
     /// <summary>
     ///     Frame interval for performance logging (in frames).

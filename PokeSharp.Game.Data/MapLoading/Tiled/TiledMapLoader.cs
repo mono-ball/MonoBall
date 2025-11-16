@@ -131,7 +131,7 @@ public static class TiledMapLoader
             Height = tiledMap.Height,
             TileWidth = tiledMap.TileWidth,
             TileHeight = tiledMap.TileHeight,
-            Tilesets = ConvertTilesets(tiledMap.Tilesets, mapPath),
+            Tilesets = ConvertTilesets(tiledMap.Tilesets, mapPath, tiledMap.TileWidth, tiledMap.TileHeight),
             Layers = ConvertLayers(tiledMap.Layers, tiledMap.Width, tiledMap.Height),
             ObjectGroups = ConvertObjectGroups(tiledMap.Layers),
             ImageLayers = ConvertImageLayers(tiledMap.Layers),
@@ -142,7 +142,9 @@ public static class TiledMapLoader
 
     private static List<TmxTileset> ConvertTilesets(
         List<TiledJsonTileset>? tilesets,
-        string mapPath
+        string mapPath,
+        int mapTileWidth,
+        int mapTileHeight
     )
     {
         if (tilesets == null)
@@ -157,8 +159,8 @@ public static class TiledMapLoader
             {
                 FirstGid = tiledTileset.FirstGid,
                 Name = tiledTileset.Name ?? string.Empty,
-                TileWidth = tiledTileset.TileWidth ?? 16,
-                TileHeight = tiledTileset.TileHeight ?? 16,
+                TileWidth = tiledTileset.TileWidth ?? mapTileWidth,
+                TileHeight = tiledTileset.TileHeight ?? mapTileHeight,
                 TileCount = tiledTileset.TileCount ?? 0,
                 Spacing = tiledTileset.Spacing ?? 0,
                 Margin = tiledTileset.Margin ?? 0,

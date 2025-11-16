@@ -63,6 +63,11 @@ public class GameInitializer(
     public MapLifecycleManager MapLifecycleManager { get; private set; } = null!;
 
     /// <summary>
+    ///     Gets the sprite texture loader (set after Initialize is called).
+    /// </summary>
+    public SpriteTextureLoader SpriteTextureLoader { get; private set; } = null!;
+
+    /// <summary>
     ///     Initializes all game systems and infrastructure.
     /// </summary>
     /// <param name="graphicsDevice">The graphics device for rendering.</param>
@@ -161,14 +166,24 @@ public class GameInitializer(
         RenderSystem = new ElevationRenderSystem(graphicsDevice, _assetManager, renderLogger);
         _systemManager.RegisterRenderSystem(RenderSystem);
 
-        // Initialize MapLifecycleManager (after AssetManager is available)
-        var mapLifecycleLogger = _loggerFactory.CreateLogger<MapLifecycleManager>();
-        MapLifecycleManager = new MapLifecycleManager(_world, _assetManager, mapLifecycleLogger);
-        _logger.LogInformation("MapLifecycleManager initialized");
-
         // Initialize all systems
         _systemManager.Initialize(_world);
 
         _logger.LogWorkflowStatus("Game initialization complete");
+    }
+
+    /// <summary>
+    ///     Completes initialization after SpriteTextureLoader is created.
+    ///     Must be called after Initialize(graphicsDevice).
+    /// </summary>
+    /// <param name="spriteTextureLoader">The sprite texture loader instance.</param>
+    public void SetSpriteTextureLoader(SpriteTextureLoader spriteTextureLoader)
+    {
+        SpriteTextureLoader = spriteTextureLoader ?? throw new ArgumentNullException(nameof(spriteTextureLoader));
+
+        // Initialize MapLifecycleManager with SpriteTextureLoader dependency
+        var mapLifecycleLogger = _loggerFactory.CreateLogger<MapLifecycleManager>();
+        MapLifecycleManager = new MapLifecycleManager(_world, _assetManager, spriteTextureLoader, mapLifecycleLogger);
+        _logger.LogInformation("MapLifecycleManager initialized with sprite texture support");
     }
 }
