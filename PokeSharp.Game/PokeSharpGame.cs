@@ -1,7 +1,9 @@
 using Arch.Core;
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
+using PokeSharp.Engine.Core.Types;
 using PokeSharp.Engine.Rendering.Assets;
+using PokeSharp.Engine.Systems.Factories;
 using PokeSharp.Engine.Systems.Management;
 using PokeSharp.Engine.Systems.Pooling;
 using PokeSharp.Game.Data.Loading;
@@ -25,16 +27,21 @@ namespace PokeSharp.Game;
 /// </summary>
 public class PokeSharpGame : Microsoft.Xna.Framework.Game, IAsyncDisposable
 {
-    private readonly IGameServicesProvider _gameServices;
+    private readonly IEntityFactoryService _entityFactory;
+    private readonly ScriptService _scriptService;
+    private readonly TypeRegistry<BehaviorDefinition> _behaviorRegistry;
     private readonly IScriptingApiProvider _apiProvider;
-    private readonly ILoggingProvider _logging;
-    private readonly IInitializationProvider _initialization;
+    private readonly ILoggerFactory _loggerFactory;
+    private readonly PerformanceMonitor _performanceMonitor;
+    private readonly InputManager _inputManager;
+    private readonly PlayerFactory _playerFactory;
     private readonly IGameTimeService _gameTime;
     private readonly EntityPoolManager _poolManager;
     private readonly GameDataLoader _dataLoader;
     private readonly NpcDefinitionService _npcDefinitionService;
     private readonly MapDefinitionService _mapDefinitionService;
     private readonly SpriteLoader _spriteLoader;
+    private readonly TemplateCacheInitializer _templateCacheInitializer;
     private readonly GraphicsDeviceManager _graphics;
 
     // Services that depend on GraphicsDevice (created in Initialize)
@@ -53,43 +60,38 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game, IAsyncDisposable
     /// <summary>
     ///     Initializes a new instance of the PokeSharpGame class.
     /// </summary>
-    public PokeSharpGame(
-        ILoggingProvider logging,
-        World world,
-        SystemManager systemManager,
-        IGameServicesProvider gameServices,
-        IInitializationProvider initialization,
-        IScriptingApiProvider apiProvider,
-        IGameTimeService gameTime,
-        EntityPoolManager poolManager,
-        GameDataLoader dataLoader,
-        NpcDefinitionService npcDefinitionService,
-        MapDefinitionService mapDefinitionService,
-        SpriteLoader spriteLoader
-    )
+    public PokeSharpGame(ILoggerFactory loggerFactory, PokeSharpGameOptions options)
     {
-        _logging = logging ?? throw new ArgumentNullException(nameof(logging));
-        _world = world;
-        _systemManager = systemManager;
-        _gameServices = gameServices ?? throw new ArgumentNullException(nameof(gameServices));
-        _initialization = initialization ?? throw new ArgumentNullException(nameof(initialization));
-        _apiProvider = apiProvider ?? throw new ArgumentNullException(nameof(apiProvider));
-        _gameTime = gameTime ?? throw new ArgumentNullException(nameof(gameTime));
-        _poolManager = poolManager ?? throw new ArgumentNullException(nameof(poolManager));
-        _dataLoader = dataLoader ?? throw new ArgumentNullException(nameof(dataLoader));
-        _npcDefinitionService =
-            npcDefinitionService ?? throw new ArgumentNullException(nameof(npcDefinitionService));
-        _mapDefinitionService =
-            mapDefinitionService ?? throw new ArgumentNullException(nameof(mapDefinitionService));
-        _spriteLoader = spriteLoader ?? throw new ArgumentNullException(nameof(spriteLoader));
+        ArgumentNullException.ThrowIfNull(loggerFactory);
+        ArgumentNullException.ThrowIfNull(options);
+
+        _loggerFactory = loggerFactory;
+        _world = options.World ?? throw new ArgumentNullException(nameof(options), $"{nameof(options.World)} cannot be null");
+        _systemManager = options.SystemManager ?? throw new ArgumentNullException(nameof(options), $"{nameof(options.SystemManager)} cannot be null");
+        _entityFactory = options.EntityFactory ?? throw new ArgumentNullException(nameof(options), $"{nameof(options.EntityFactory)} cannot be null");
+        _scriptService = options.ScriptService ?? throw new ArgumentNullException(nameof(options), $"{nameof(options.ScriptService)} cannot be null");
+        _behaviorRegistry = options.BehaviorRegistry ?? throw new ArgumentNullException(nameof(options), $"{nameof(options.BehaviorRegistry)} cannot be null");
+        _performanceMonitor = options.PerformanceMonitor ?? throw new ArgumentNullException(nameof(options), $"{nameof(options.PerformanceMonitor)} cannot be null");
+        _inputManager = options.InputManager ?? throw new ArgumentNullException(nameof(options), $"{nameof(options.InputManager)} cannot be null");
+        _playerFactory = options.PlayerFactory ?? throw new ArgumentNullException(nameof(options), $"{nameof(options.PlayerFactory)} cannot be null");
+        _apiProvider = options.ApiProvider ?? throw new ArgumentNullException(nameof(options), $"{nameof(options.ApiProvider)} cannot be null");
+        _gameTime = options.GameTime ?? throw new ArgumentNullException(nameof(options), $"{nameof(options.GameTime)} cannot be null");
+        _poolManager = options.PoolManager ?? throw new ArgumentNullException(nameof(options), $"{nameof(options.PoolManager)} cannot be null");
+        _dataLoader = options.DataLoader ?? throw new ArgumentNullException(nameof(options), $"{nameof(options.DataLoader)} cannot be null");
+        _npcDefinitionService = options.NpcDefinitionService ?? throw new ArgumentNullException(nameof(options), $"{nameof(options.NpcDefinitionService)} cannot be null");
+        _mapDefinitionService = options.MapDefinitionService ?? throw new ArgumentNullException(nameof(options), $"{nameof(options.MapDefinitionService)} cannot be null");
+        _spriteLoader = options.SpriteLoader ?? throw new ArgumentNullException(nameof(options), $"{nameof(options.SpriteLoader)} cannot be null");
+        _templateCacheInitializer = options.TemplateCacheInitializer ?? throw new ArgumentNullException(nameof(options), $"{nameof(options.TemplateCacheInitializer)} cannot be null");
 
         _graphics = new GraphicsDeviceManager(this);
         Content.RootDirectory = "Content";
-        IsMouseVisible = true;
-
-        // Set window properties
-        _graphics.PreferredBackBufferWidth = 800;
-        _graphics.PreferredBackBufferHeight = 600;
+        
+        // Window configuration - defaults to 800x600
+        // Can be overridden via configuration in the future
+        var windowConfig = Configuration.GameWindowConfig.CreateDefault();
+        _graphics.PreferredBackBufferWidth = windowConfig.Width;
+        _graphics.PreferredBackBufferHeight = windowConfig.Height;
+        IsMouseVisible = windowConfig.IsMouseVisible;
         _graphics.ApplyChanges();
 
         Window.Title = "PokeSharp - Week 1 Demo";
@@ -100,10 +102,10 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game, IAsyncDisposable
     /// </summary>
     public async ValueTask DisposeAsync()
     {
-        if (_gameServices.ScriptService is IAsyncDisposable scriptServiceDisposable)
+        if (_scriptService is IAsyncDisposable scriptServiceDisposable)
             await scriptServiceDisposable.DisposeAsync();
 
-        if (_gameServices.BehaviorRegistry is IAsyncDisposable registryDisposable)
+        if (_behaviorRegistry is IAsyncDisposable registryDisposable)
             await registryDisposable.DisposeAsync();
 
         _world?.Dispose();
@@ -137,13 +139,13 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game, IAsyncDisposable
             try
             {
                 await _dataLoader.LoadAllAsync("Assets/Data");
-                _logging
+                _loggerFactory
                     .CreateLogger<PokeSharpGame>()
                     .LogInformation("Game data definitions loaded successfully");
             }
             catch (Exception ex)
             {
-                _logging
+                _loggerFactory
                     .CreateLogger<PokeSharpGame>()
                     .LogError(
                         ex,
@@ -151,61 +153,64 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game, IAsyncDisposable
                     );
             }
 
-            // JSON templates are loaded during DI setup (see ServiceCollectionExtensions.cs)
-            // No additional loading needed here
+            // Initialize template cache asynchronously (loads base templates, mods, and applies patches)
+            await _templateCacheInitializer.InitializeAsync();
+            _loggerFactory
+                .CreateLogger<PokeSharpGame>()
+                .LogInformation("Template cache initialized successfully");
 
             // Create services that depend on GraphicsDevice
-            var assetManagerLogger = _logging.CreateLogger<AssetManager>();
+            var assetManagerLogger = _loggerFactory.CreateLogger<AssetManager>();
             var assetManager = new AssetManager(GraphicsDevice, "Assets", assetManagerLogger);
 
             // Create PropertyMapperRegistry for tile property mapping (collision, ledges, etc.)
-            var mapperRegistryLogger = _logging.CreateLogger<PropertyMapperRegistry>();
+            var mapperRegistryLogger = _loggerFactory.CreateLogger<PropertyMapperRegistry>();
             var propertyMapperRegistry = PropertyMapperServiceExtensions.CreatePropertyMapperRegistry(
                 mapperRegistryLogger
             );
 
-            var mapLoaderLogger = _logging.CreateLogger<MapLoader>();
+            var mapLoaderLogger = _loggerFactory.CreateLogger<MapLoader>();
             var mapLoader = new MapLoader(
                 assetManager,
                 _systemManager,
                 propertyMapperRegistry,
-                entityFactory: _gameServices.EntityFactory,
+                entityFactory: _entityFactory,
                 npcDefinitionService: _npcDefinitionService,
                 mapDefinitionService: _mapDefinitionService,
                 logger: mapLoaderLogger
             );
 
             // Create initializers
-            var gameInitializerLogger = _logging.CreateLogger<GameInitializer>();
+            var gameInitializerLogger = _loggerFactory.CreateLogger<GameInitializer>();
             _gameInitializer = new GameInitializer(
                 gameInitializerLogger,
-                _logging.LoggerFactory,
+                _loggerFactory,
                 _world,
                 _systemManager,
                 assetManager,
-                _gameServices.EntityFactory,
+                _entityFactory,
                 mapLoader,
                 _poolManager,
                 _spriteLoader
             );
 
-            // Initialize core game systems
+            // Pre-load sprite manifests FIRST (required before SpriteAnimationSystem runs)
+            await _spriteLoader.LoadAllSpritesAsync();
+            _loggerFactory
+                .CreateLogger<PokeSharpGame>()
+                .LogInformation("Sprite manifests loaded");
+
+            // Initialize core game systems (SpriteAnimationSystem needs sprite cache ready)
             _gameInitializer.Initialize(GraphicsDevice);
 
             // Set SpatialQuery on the MapApiService that was created by DI (used by ScriptService)
             _apiProvider.Map.SetSpatialQuery(_gameInitializer.SpatialHashSystem);
 
-            // Pre-load sprite manifests asynchronously (required for sprite path lookups)
-            await _spriteLoader.LoadAllSpritesAsync();
-            _logging
-                .CreateLogger<PokeSharpGame>()
-                .LogInformation("Sprite manifests loaded");
-
             // Load sprite textures FIRST (creates MapLifecycleManager via SetSpriteTextureLoader)
             LoadSpriteTextures();
 
             // NOW create MapInitializer (MapLifecycleManager exists now)
-            var mapInitializerLogger = _logging.CreateLogger<MapInitializer>();
+            var mapInitializerLogger = _loggerFactory.CreateLogger<MapInitializer>();
             _mapInitializer = new MapInitializer(
                 mapInitializerLogger,
                 _world,
@@ -215,18 +220,19 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game, IAsyncDisposable
                 _gameInitializer.MapLifecycleManager // This is now initialized!
             );
 
-            var npcBehaviorInitializerLogger = _logging.CreateLogger<NPCBehaviorInitializer>();
+            var npcBehaviorInitializerLogger = _loggerFactory.CreateLogger<NPCBehaviorInitializer>();
             _npcBehaviorInitializer = new NPCBehaviorInitializer(
                 npcBehaviorInitializerLogger,
-                _logging.LoggerFactory,
+                _loggerFactory,
                 _world,
                 _systemManager,
-                _gameServices,
+                _behaviorRegistry,
+                _scriptService,
                 _apiProvider
             );
 
             // Initialize NPC behavior system
-            _npcBehaviorInitializer.Initialize();
+            await _npcBehaviorInitializer.InitializeAsync();
 
             // Set sprite texture loader in MapInitializer (must be called after MapInitializer is created)
             // This was moved from LoadSpriteTextures() to here due to initialization order
@@ -239,7 +245,7 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game, IAsyncDisposable
             await _mapInitializer.LoadMap("LittlerootTown");
 
             // Create test player entity
-            _initialization.PlayerFactory.CreatePlayer(
+            _playerFactory.CreatePlayer(
                 10,
                 8,
                 _graphics.PreferredBackBufferWidth,
@@ -249,13 +255,13 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game, IAsyncDisposable
             // Mark initialization as complete
             _isInitialized = true;
 
-            _logging
+            _loggerFactory
                 .CreateLogger<PokeSharpGame>()
                 .LogInformation("Game initialization completed successfully");
         }
         catch (Exception ex)
         {
-            _logging
+            _loggerFactory
                 .CreateLogger<PokeSharpGame>()
                 .LogCritical(ex, "Fatal error during game initialization");
 
@@ -266,11 +272,10 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game, IAsyncDisposable
 
     /// <summary>
     ///     Loads game content. Called by MonoGame during initialization.
+    ///     Content loading is handled in LoadSpriteTextures() after initialization.
     /// </summary>
     protected override void LoadContent()
     {
-        // Content loading is handled in LoadSpriteTextures() after initialization
-        // This is called too early (before _gameInitializer is created)
     }
 
     /// <summary>
@@ -280,7 +285,7 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game, IAsyncDisposable
     {
         // Create sprite texture loader for lazy loading
         // Sprites will be loaded on-demand when first rendered
-        var spriteTextureLogger = _logging.CreateLogger<SpriteTextureLoader>();
+        var spriteTextureLogger = _loggerFactory.CreateLogger<SpriteTextureLoader>();
         _spriteTextureLoader = new SpriteTextureLoader(
             _spriteLoader,
             _gameInitializer.RenderSystem.AssetManager,
@@ -295,7 +300,7 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game, IAsyncDisposable
         // IMPORTANT: This creates MapLifecycleManager, so must be called BEFORE creating MapInitializer
         _gameInitializer.SetSpriteTextureLoader(_spriteTextureLoader);
 
-        _logging
+        _loggerFactory
             .CreateLogger<PokeSharpGame>()
             .LogInformation("Sprite lazy loading initialized - sprites will load on-demand");
     }
@@ -315,7 +320,7 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game, IAsyncDisposable
                 // Check for initialization errors
                 if (_initializationTask.IsFaulted)
                 {
-                    _logging
+                    _loggerFactory
                         .CreateLogger<PokeSharpGame>()
                         .LogCritical(
                             _initializationTask.Exception,
@@ -324,6 +329,8 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game, IAsyncDisposable
                     Exit();
                     return;
                 }
+                // Task completed successfully - mark as initialized
+                _isInitialized = true;
             }
             else
             {
@@ -340,11 +347,11 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game, IAsyncDisposable
         _gameTime.Update(totalSeconds, deltaTime);
 
         // Update performance monitoring
-        _initialization.PerformanceMonitor.Update(frameTimeMs);
+        _performanceMonitor.Update(frameTimeMs);
 
         // Handle input (zoom, debug controls)
         // Pass render system so InputManager can control profiling when P is pressed
-        _initialization.InputManager.ProcessInput(_world, deltaTime, _gameInitializer.RenderSystem);
+        _inputManager.ProcessInput(_world, deltaTime, _gameInitializer.RenderSystem);
 
         // ✅ FIXED: Removed GraphicsDevice.Clear() from here
         // Update all systems

@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using PokeSharp.Engine.Core.Types;
 
 namespace PokeSharp.Game.Systems.Services;
 
@@ -9,9 +10,9 @@ namespace PokeSharp.Game.Systems.Services;
 /// </summary>
 public class MapRegistry
 {
-    private readonly ConcurrentDictionary<int, string> _mapIdToName = new();
-    private readonly ConcurrentDictionary<string, int> _mapNameToId = new();
-    private readonly ConcurrentDictionary<int, byte> _loadedMaps = new();
+    private readonly ConcurrentDictionary<MapRuntimeId, string> _mapIdToName = new();
+    private readonly ConcurrentDictionary<string, MapRuntimeId> _mapNameToId = new();
+    private readonly ConcurrentDictionary<MapRuntimeId, byte> _loadedMaps = new();
     private int _nextMapId;
 
     /// <summary>
@@ -19,14 +20,14 @@ public class MapRegistry
     ///     Thread-safe using ConcurrentDictionary.GetOrAdd pattern.
     /// </summary>
     /// <param name="mapName">The map name (without extension).</param>
-    /// <returns>Unique map ID.</returns>
-    public int GetOrCreateMapId(string mapName)
+    /// <returns>Unique map runtime ID.</returns>
+    public MapRuntimeId GetOrCreateMapId(string mapName)
     {
         return _mapNameToId.GetOrAdd(
             mapName,
             name =>
             {
-                var newId = Interlocked.Increment(ref _nextMapId) - 1;
+                var newId = new MapRuntimeId(Interlocked.Increment(ref _nextMapId) - 1);
                 _mapIdToName.TryAdd(newId, name);
                 return newId;
             }
@@ -37,18 +38,18 @@ public class MapRegistry
     ///     Gets the map ID for a map name.
     /// </summary>
     /// <param name="mapName">The map name.</param>
-    /// <returns>Map ID if found, -1 if not registered.</returns>
-    public int GetMapId(string mapName)
+    /// <returns>Map runtime ID if found, null if not registered.</returns>
+    public MapRuntimeId? GetMapId(string mapName)
     {
-        return _mapNameToId.TryGetValue(mapName, out var id) ? id : -1;
+        return _mapNameToId.TryGetValue(mapName, out var id) ? id : null;
     }
 
     /// <summary>
     ///     Gets the map name for a map ID.
     /// </summary>
-    /// <param name="mapId">The map ID.</param>
+    /// <param name="mapId">The map runtime ID.</param>
     /// <returns>Map name if found, null if not registered.</returns>
-    public string? GetMapName(int mapId)
+    public string? GetMapName(MapRuntimeId mapId)
     {
         return _mapIdToName.TryGetValue(mapId, out var name) ? name : null;
     }
@@ -57,8 +58,8 @@ public class MapRegistry
     ///     Marks a map as loaded.
     ///     Thread-safe using ConcurrentDictionary.
     /// </summary>
-    /// <param name="mapId">The map ID.</param>
-    public void MarkMapLoaded(int mapId)
+    /// <param name="mapId">The map runtime ID.</param>
+    public void MarkMapLoaded(MapRuntimeId mapId)
     {
         _loadedMaps.TryAdd(mapId, 0);
     }
@@ -67,8 +68,8 @@ public class MapRegistry
     ///     Marks a map as unloaded.
     ///     Thread-safe using ConcurrentDictionary.
     /// </summary>
-    /// <param name="mapId">The map ID.</param>
-    public void MarkMapUnloaded(int mapId)
+    /// <param name="mapId">The map runtime ID.</param>
+    public void MarkMapUnloaded(MapRuntimeId mapId)
     {
         _loadedMaps.TryRemove(mapId, out _);
     }
@@ -77,9 +78,9 @@ public class MapRegistry
     ///     Checks if a map is currently loaded.
     ///     Thread-safe using ConcurrentDictionary.
     /// </summary>
-    /// <param name="mapId">The map ID.</param>
+    /// <param name="mapId">The map runtime ID.</param>
     /// <returns>True if loaded, false otherwise.</returns>
-    public bool IsMapLoaded(int mapId)
+    public bool IsMapLoaded(MapRuntimeId mapId)
     {
         return _loadedMaps.ContainsKey(mapId);
     }
@@ -88,8 +89,8 @@ public class MapRegistry
     ///     Gets all currently loaded map IDs.
     ///     Thread-safe snapshot using ConcurrentDictionary.Keys.
     /// </summary>
-    /// <returns>Collection of loaded map IDs.</returns>
-    public IEnumerable<int> GetLoadedMapIds()
+    /// <returns>Collection of loaded map runtime IDs.</returns>
+    public IEnumerable<MapRuntimeId> GetLoadedMapIds()
     {
         return _loadedMaps.Keys;
     }

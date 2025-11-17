@@ -4,8 +4,8 @@ using PokeSharp.Engine.Common.Logging;
 using PokeSharp.Engine.Core.Types;
 using PokeSharp.Engine.Systems.Management;
 using PokeSharp.Game.Scripting.Api;
+using PokeSharp.Game.Scripting.Services;
 using PokeSharp.Game.Scripting.Systems;
-using PokeSharp.Game.Services;
 
 namespace PokeSharp.Game.Initialization;
 
@@ -17,25 +17,26 @@ public class NPCBehaviorInitializer(
     ILoggerFactory loggerFactory,
     World world,
     SystemManager systemManager,
-    IGameServicesProvider gameServices,
+    TypeRegistry<BehaviorDefinition> behaviorRegistry,
+    ScriptService scriptService,
     IScriptingApiProvider apiProvider
 )
 {
     /// <summary>
     ///     Initializes the NPC behavior system with TypeRegistry and ScriptService.
     /// </summary>
-    public void Initialize()
+    public async Task InitializeAsync()
     {
         try
         {
             // Load all behavior definitions from JSON
-            var loadedCount = gameServices.BehaviorRegistry.LoadAllAsync().Result;
+            var loadedCount = await behaviorRegistry.LoadAllAsync();
             logger.LogWorkflowStatus("Behavior definitions loaded", ("count", loadedCount));
 
             // Load and compile behavior scripts for each type
-            foreach (var typeId in gameServices.BehaviorRegistry.GetAllTypeIds())
+            foreach (var typeId in behaviorRegistry.GetAllTypeIds())
             {
-                var definition = gameServices.BehaviorRegistry.Get(typeId);
+                var definition = behaviorRegistry.Get(typeId);
                 if (
                     definition is IScriptedType scripted
                     && !string.IsNullOrEmpty(scripted.BehaviorScript)
@@ -47,17 +48,16 @@ public class NPCBehaviorInitializer(
                         ("script", scripted.BehaviorScript)
                     );
 
-                    var scriptInstance = gameServices
-                        .ScriptService.LoadScriptAsync(scripted.BehaviorScript)
-                        .Result;
+                    var scriptInstance = await scriptService
+                        .LoadScriptAsync(scripted.BehaviorScript);
 
                     if (scriptInstance != null)
                     {
                         // Initialize script with world
-                        gameServices.ScriptService.InitializeScript(scriptInstance, world);
+                        scriptService.InitializeScript(scriptInstance, world);
 
                         // Register script instance in the registry
-                        gameServices.BehaviorRegistry.RegisterScript(typeId, scriptInstance);
+                        behaviorRegistry.RegisterScript(typeId, scriptInstance);
 
                         logger.LogWorkflowStatus(
                             "Behavior ready",
@@ -83,7 +83,7 @@ public class NPCBehaviorInitializer(
                 loggerFactory,
                 apiProvider
             );
-            npcBehaviorSystem.SetBehaviorRegistry(gameServices.BehaviorRegistry);
+            npcBehaviorSystem.SetBehaviorRegistry(behaviorRegistry);
             systemManager.RegisterUpdateSystem(npcBehaviorSystem);
 
             logger.LogSystemInitialized("NPCBehaviorSystem", ("behaviors", loadedCount));

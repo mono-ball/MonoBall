@@ -1,5 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
+using PokeSharp.Engine.Core.Types;
+using PokeSharp.Game.Data.ValueConverters;
 
 namespace PokeSharp.Game.Data.Entities;
 
@@ -33,7 +36,8 @@ public class TrainerDefinition
     /// Sprite ID for battle sprite.
     /// </summary>
     [MaxLength(100)]
-    public string? SpriteId { get; set; }
+    [Column(TypeName = "nvarchar(100)")]
+    public SpriteId? SpriteId { get; set; }
 
     /// <summary>
     /// Prize money (base amount, multiplied by highest level).

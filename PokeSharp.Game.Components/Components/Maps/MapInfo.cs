@@ -1,3 +1,5 @@
+using PokeSharp.Engine.Core.Types;
+
 namespace PokeSharp.Game.Components.Maps;
 
 /// <summary>
@@ -9,7 +11,7 @@ public struct MapInfo
     /// <summary>
     ///     Gets or sets the map identifier (0-based).
     /// </summary>
-    public int MapId { get; set; }
+    public MapRuntimeId MapId { get; set; }
 
     /// <summary>
     ///     Gets or sets the map name.
@@ -49,7 +51,7 @@ public struct MapInfo
     /// <param name="width">Map width in tiles.</param>
     /// <param name="height">Map height in tiles.</param>
     /// <param name="tileSize">Tile size in pixels (default: 16).</param>
-    public MapInfo(int mapId, string mapName, int width, int height, int tileSize = 16)
+    public MapInfo(MapRuntimeId mapId, string mapName, int width, int height, int tileSize = 16)
     {
         MapId = mapId;
         MapName = mapName;

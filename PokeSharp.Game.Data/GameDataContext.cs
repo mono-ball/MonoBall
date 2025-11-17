@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using PokeSharp.Engine.Core.Types;
 using PokeSharp.Game.Data.Entities;
+using PokeSharp.Game.Data.ValueConverters;
 
 namespace PokeSharp.Game.Data;
 
@@ -47,7 +49,9 @@ public class GameDataContext : DbContext
             entity.HasIndex(n => n.NpcType);
             entity.HasIndex(n => n.DisplayName);
 
-            // Value conversions for complex types (if needed)
+            // Value converter for SpriteId
+            entity.Property(n => n.SpriteId)
+                .HasConversion(new SpriteIdValueConverter());
         });
     }
 
@@ -63,6 +67,10 @@ public class GameDataContext : DbContext
             // Indexes for common queries
             entity.HasIndex(t => t.TrainerClass);
             entity.HasIndex(t => t.DisplayName);
+
+            // Value converter for SpriteId
+            entity.Property(t => t.SpriteId)
+                .HasConversion(new SpriteIdValueConverter());
 
             // PartyJson will be deserialized on-demand
         });
@@ -81,6 +89,19 @@ public class GameDataContext : DbContext
             entity.HasIndex(m => m.Region);
             entity.HasIndex(m => m.MapType);
             entity.HasIndex(m => m.DisplayName);
+
+            // Value converters for MapIdentifier
+            var mapIdConverter = new MapIdentifierValueConverter();
+            entity.Property(m => m.MapId)
+                .HasConversion(mapIdConverter);
+            entity.Property(m => m.NorthMapId)
+                .HasConversion(mapIdConverter);
+            entity.Property(m => m.SouthMapId)
+                .HasConversion(mapIdConverter);
+            entity.Property(m => m.EastMapId)
+                .HasConversion(mapIdConverter);
+            entity.Property(m => m.WestMapId)
+                .HasConversion(mapIdConverter);
 
             // TiledDataJson stores complete Tiled map data
             // Will be deserialized on-demand by MapLoader

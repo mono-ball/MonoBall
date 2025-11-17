@@ -9,6 +9,7 @@ using PokeSharp.Engine.Rendering.Systems;
 using PokeSharp.Engine.Systems.Factories;
 using PokeSharp.Engine.Systems.Management;
 using PokeSharp.Engine.Systems.Pooling;
+using PokeSharp.Game.Configuration;
 using PokeSharp.Game.Data.MapLoading.Tiled;
 using PokeSharp.Game.Services;
 using PokeSharp.Game.Systems;
@@ -75,27 +76,23 @@ public class GameInitializer(
         // NOTE: GameDataLoader is called earlier in PokeSharpGame.Initialize
         // before GameInitializer.Initialize is invoked.
 
-        // REMOVED: manifest.json loading (obsolete - replaced by EF Core definitions)
-        // Assets are now loaded on-demand via MapLoader and definition-based loading
-
-        // CRITICAL FIX: EntityPoolManager is now injected via constructor (same instance as EntityFactoryService)
-        // This ensures pools registered here are available to EntityFactoryService
-
         // Register and warmup pools for common entity types
-        _poolManager.RegisterPool("player", initialSize: 1, maxSize: 10, warmup: true);
-        _poolManager.RegisterPool("npc", initialSize: 20, maxSize: 100, warmup: true);
-        _poolManager.RegisterPool("tile", initialSize: 2000, maxSize: 5000, warmup: true);
+        var gameplayConfig = Configuration.GameplayConfig.CreateDefault();
+        var playerPool = gameplayConfig.Pools.Player;
+        var npcPool = gameplayConfig.Pools.Npc;
+        var tilePool = gameplayConfig.Pools.Tile;
+
+        _poolManager.RegisterPool("player", initialSize: playerPool.InitialSize, maxSize: playerPool.MaxSize, warmup: playerPool.Warmup);
+        _poolManager.RegisterPool("npc", initialSize: npcPool.InitialSize, maxSize: npcPool.MaxSize, warmup: npcPool.Warmup);
+        _poolManager.RegisterPool("tile", initialSize: tilePool.InitialSize, maxSize: tilePool.MaxSize, warmup: tilePool.Warmup);
 
         _logger.LogInformation(
             "Entity pool manager initialized with {NPCPoolSize} NPC, {PlayerPoolSize} player, and {TilePoolSize} tile pool capacity",
-            20,
-            1,
-            2000
+            npcPool.InitialSize,
+            playerPool.InitialSize,
+            tilePool.InitialSize
         );
 
-        // Note: ComponentPoolManager was removed as it was never used.
-        // ECS systems work directly with component references, not temporary copies.
-        // If needed in the future, add it back with actual usage in systems.
 
         // Create and register systems in priority order
 
@@ -110,9 +107,10 @@ public class GameInitializer(
         var poolCleanupLogger = _loggerFactory.CreateLogger<PoolCleanupSystem>();
         _systemManager.RegisterUpdateSystem(new PoolCleanupSystem(_poolManager, poolCleanupLogger));
 
-        // InputSystem with Pokemon-style input buffering (5 inputs, 200ms timeout)
+        // InputSystem with Pokemon-style input buffering
+        var inputBuffer = gameplayConfig.InputBuffer;
         var inputLogger = _loggerFactory.CreateLogger<InputSystem>();
-        var inputSystem = new InputSystem(5, 0.2f, inputLogger);
+        var inputSystem = new InputSystem(inputBuffer.MaxBufferedInputs, inputBuffer.TimeoutSeconds, inputLogger);
         _systemManager.RegisterUpdateSystem(inputSystem);
 
         // Register CollisionService (not a system, but a service used by MovementSystem)
@@ -120,13 +118,9 @@ public class GameInitializer(
         var collisionService = new CollisionService(SpatialHashSystem, collisionServiceLogger);
 
         // Register MovementSystem (Priority: 100, handles movement and collision checking)
-        // Note: MovementSystem now uses ICollisionService, not ISpatialQuery directly
         var movementLogger = _loggerFactory.CreateLogger<MovementSystem>();
         var movementSystem = new MovementSystem(collisionService, movementLogger);
         _systemManager.RegisterUpdateSystem(movementSystem);
-
-        // CollisionSystem removed - converted to CollisionService (registered in DI container)
-        // Collision checking is now a service, not a system (no per-frame Update() needed)
 
         // Register PathfindingSystem (Priority: 300, processes MovementRoute waypoints with A* pathfinding)
         var pathfindingLogger = _loggerFactory.CreateLogger<PathfindingSystem>();

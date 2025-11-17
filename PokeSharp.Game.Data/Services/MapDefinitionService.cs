@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using PokeSharp.Engine.Common.Logging;
+using PokeSharp.Engine.Core.Types;
 using PokeSharp.Game.Data.Entities;
 
 namespace PokeSharp.Game.Data.Services;
@@ -16,7 +17,7 @@ public class MapDefinitionService
     private readonly ILogger<MapDefinitionService> _logger;
 
     // Cache for O(1) lookups (hot paths like map loading)
-    private readonly ConcurrentDictionary<string, MapDefinition> _mapCache = new();
+    private readonly ConcurrentDictionary<string, MapDefinition> _mapCache = new(); // Key is MapIdentifier.Value
 
     public MapDefinitionService(GameDataContext context, ILogger<MapDefinitionService> logger)
     {
@@ -30,13 +31,10 @@ public class MapDefinitionService
     /// Get map definition by ID (O(1) cached).
     /// Uses AsNoTracking for read-only access to prevent memory tracking.
     /// </summary>
-    public MapDefinition? GetMap(string mapId)
+    public MapDefinition? GetMap(MapIdentifier mapId)
     {
-        if (string.IsNullOrWhiteSpace(mapId))
-            return null;
-
         // Check cache first
-        if (_mapCache.TryGetValue(mapId, out var cached))
+        if (_mapCache.TryGetValue(mapId.Value, out var cached))
             return cached;
 
         // Query database with AsNoTracking (read-only, no change tracking overhead)
@@ -45,8 +43,8 @@ public class MapDefinitionService
         // Cache for next time
         if (map != null)
         {
-            _mapCache[mapId] = map;
-            _logger.LogMapCached(mapId);
+            _mapCache[mapId.Value] = map;
+            _logger.LogMapCached(mapId.Value);
         }
 
         return map;
@@ -94,7 +92,7 @@ public class MapDefinitionService
     /// <summary>
     /// Get connected map in a specific direction.
     /// </summary>
-    public MapDefinition? GetConnectedMap(string mapId, MapDirection direction)
+    public MapDefinition? GetConnectedMap(MapIdentifier mapId, MapDirection direction)
     {
         var map = GetMap(mapId);
         if (map == null)
@@ -109,7 +107,7 @@ public class MapDefinitionService
             _ => null,
         };
 
-        return connectedMapId != null ? GetMap(connectedMapId) : null;
+        return connectedMapId.HasValue ? GetMap(connectedMapId.Value) : null;
     }
 
     /// <summary>
@@ -127,7 +125,7 @@ public class MapDefinitionService
     /// <summary>
     /// Check if map definition exists.
     /// </summary>
-    public bool HasMap(string mapId)
+    public bool HasMap(MapIdentifier mapId)
     {
         return GetMap(mapId) != null;
     }
@@ -136,12 +134,12 @@ public class MapDefinitionService
     /// Get all map IDs (useful for debugging/tools).
     /// Uses AsNoTracking for read-only query performance.
     /// </summary>
-    public async Task<List<string>> GetAllMapIdsAsync()
+    public async Task<List<MapIdentifier>> GetAllMapIdsAsync()
     {
         return await _context.Maps
             .AsNoTracking()
             .Select(m => m.MapId)
-            .OrderBy(id => id)
+            .OrderBy(id => id.Value)
             .ToListAsync();
     }
 

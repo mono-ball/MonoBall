@@ -2,6 +2,7 @@ using Arch.Core;
 using Arch.Core.Extensions;
 using Microsoft.Extensions.Logging;
 using PokeSharp.Engine.Common.Logging;
+using PokeSharp.Engine.Core.Types;
 using PokeSharp.Engine.Rendering.Assets;
 using PokeSharp.Engine.Systems.Queries;
 using PokeSharp.Game.Components.Maps;
@@ -14,44 +15,36 @@ namespace PokeSharp.Game.Systems;
 /// Manages map lifecycle: loading, unloading, and memory cleanup.
 /// Ensures only active maps remain in memory to prevent entity/texture accumulation.
 /// </summary>
-public class MapLifecycleManager
+public class MapLifecycleManager(
+    World world,
+    IAssetProvider assetProvider,
+    SpriteTextureLoader spriteTextureLoader,
+    ILogger<MapLifecycleManager>? logger = null
+)
 {
-    private readonly World _world;
-    private readonly IAssetProvider _assetProvider;
-    private readonly SpriteTextureLoader _spriteTextureLoader;
-    private readonly ILogger<MapLifecycleManager>? _logger;
-    private readonly Dictionary<int, MapMetadata> _loadedMaps = new();
-    private int _currentMapId = -1;
-    private int _previousMapId = -1;
-
-    public MapLifecycleManager(
-        World world,
-        IAssetProvider assetProvider,
-        SpriteTextureLoader spriteTextureLoader,
-        ILogger<MapLifecycleManager>? logger = null
-    )
-    {
-        _world = world ?? throw new ArgumentNullException(nameof(world));
-        _assetProvider = assetProvider ?? throw new ArgumentNullException(nameof(assetProvider));
-        _spriteTextureLoader = spriteTextureLoader ?? throw new ArgumentNullException(nameof(spriteTextureLoader));
-        _logger = logger;
-    }
+    private readonly World _world = world ?? throw new ArgumentNullException(nameof(world));
+    private readonly IAssetProvider _assetProvider = assetProvider ?? throw new ArgumentNullException(nameof(assetProvider));
+    private readonly SpriteTextureLoader _spriteTextureLoader = spriteTextureLoader ?? throw new ArgumentNullException(nameof(spriteTextureLoader));
+    private readonly ILogger<MapLifecycleManager>? _logger = logger;
+    private readonly Dictionary<MapRuntimeId, MapMetadata> _loadedMaps = new();
+    private MapRuntimeId? _currentMapId;
+    private MapRuntimeId? _previousMapId;
 
     /// <summary>
     /// Gets the current active map ID
     /// </summary>
-    public int CurrentMapId => _currentMapId;
+    public MapRuntimeId? CurrentMapId => _currentMapId;
 
     /// <summary>
     /// Registers a newly loaded map with tileset and sprite textures
     /// </summary>
-    public void RegisterMap(int mapId, string mapName, HashSet<string> tilesetTextureIds, HashSet<string> spriteTextureIds)
+    public void RegisterMap(MapRuntimeId mapId, string mapName, HashSet<string> tilesetTextureIds, HashSet<string> spriteTextureIds)
     {
         _loadedMaps[mapId] = new MapMetadata(mapName, tilesetTextureIds, spriteTextureIds);
         _logger?.LogWorkflowStatus(
             "Registered map",
             ("mapName", mapName),
-            ("mapId", mapId),
+            ("mapId", mapId.Value),
             ("tilesetCount", tilesetTextureIds.Count),
             ("spriteCount", spriteTextureIds.Count)
         );
@@ -60,11 +53,11 @@ public class MapLifecycleManager
     /// <summary>
     /// Transitions to a new map, cleaning up old map entities and textures
     /// </summary>
-    public void TransitionToMap(int newMapId)
+    public void TransitionToMap(MapRuntimeId newMapId)
     {
-        if (newMapId == _currentMapId)
+        if (_currentMapId.HasValue && _currentMapId.Value == newMapId)
         {
-            _logger?.LogDebug("Already on map {MapId}, skipping transition", newMapId);
+            _logger?.LogDebug("Already on map {MapId}, skipping transition", newMapId.Value);
             return;
         }
 
@@ -74,8 +67,8 @@ public class MapLifecycleManager
 
         _logger?.LogWorkflowStatus(
             "Map transition",
-            ("from", oldMapId),
-            ("to", newMapId)
+            ("from", oldMapId?.Value ?? -1),
+            ("to", newMapId.Value)
         );
 
         // Clean up old maps (keep current + previous for smooth transitions)
@@ -92,15 +85,15 @@ public class MapLifecycleManager
     /// <summary>
     /// Unloads a specific map: destroys entities and unloads textures
     /// </summary>
-    public void UnloadMap(int mapId)
+    public void UnloadMap(MapRuntimeId mapId)
     {
         if (!_loadedMaps.TryGetValue(mapId, out var metadata))
         {
-            _logger?.LogWarning("Attempted to unload unknown map: {MapId}", mapId);
+            _logger?.LogWarning("Attempted to unload unknown map: {MapId}", mapId.Value);
             return;
         }
 
-        _logger?.LogWorkflowStatus("Unloading map", ("mapName", metadata.Name), ("mapId", mapId));
+        _logger?.LogWorkflowStatus("Unloading map", ("mapName", metadata.Name), ("mapId", mapId.Value));
 
         // 1. Destroy all tile entities for this map
         var tilesDestroyed = DestroyMapEntities(mapId);
@@ -125,7 +118,7 @@ public class MapLifecycleManager
     /// <summary>
     /// Destroys all entities belonging to a specific map
     /// </summary>
-    private int DestroyMapEntities(int mapId)
+    private int DestroyMapEntities(MapRuntimeId mapId)
     {
         // CRITICAL FIX: Collect entities first, then destroy (can't modify during query)
         var entitiesToDestroy = new List<Entity>();
@@ -160,7 +153,7 @@ public class MapLifecycleManager
         _logger?.LogDebug(
             "Destroyed {Count} entities for map {MapId} (including image layers)",
             entitiesToDestroy.Count,
-            mapId
+            mapId.Value
         );
 
         return entitiesToDestroy.Count;
@@ -195,17 +188,17 @@ public class MapLifecycleManager
     /// <summary>
     /// PHASE 2: Unloads sprite textures for a map (with reference counting).
     /// </summary>
-    private int UnloadSpriteTextures(int mapId, HashSet<string> spriteTextureKeys)
+    private int UnloadSpriteTextures(MapRuntimeId mapId, HashSet<string> spriteTextureKeys)
     {
         try
         {
             var unloaded = _spriteTextureLoader.UnloadSpritesForMap(mapId);
-            _logger?.LogDebug("Unloaded {Count} sprite textures for map {MapId}", unloaded, mapId);
+            _logger?.LogDebug("Unloaded {Count} sprite textures for map {MapId}", unloaded, mapId.Value);
             return unloaded;
         }
         catch (Exception ex)
         {
-            _logger?.LogWarning(ex, "Failed to unload sprite textures for map {MapId}", mapId);
+            _logger?.LogWarning(ex, "Failed to unload sprite textures for map {MapId}", mapId.Value);
             return 0;
         }
     }

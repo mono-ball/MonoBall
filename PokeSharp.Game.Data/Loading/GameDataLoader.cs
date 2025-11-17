@@ -2,6 +2,7 @@ using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using PokeSharp.Engine.Common.Logging;
+using PokeSharp.Engine.Core.Types;
 using PokeSharp.Game.Data.Entities;
 
 namespace PokeSharp.Game.Data.Loading;
@@ -97,7 +98,7 @@ public class GameDataLoader
                     NpcId = dto.NpcId,
                     DisplayName = dto.DisplayName ?? dto.NpcId,
                     NpcType = dto.NpcType,
-                    SpriteId = dto.SpriteId,
+                    SpriteId = SpriteId.TryCreate(dto.SpriteId),
                     BehaviorScript = dto.BehaviorScript,
                     DialogueScript = dto.DialogueScript,
                     MovementSpeed = dto.MovementSpeed ?? 2.0f,
@@ -169,7 +170,7 @@ public class GameDataLoader
                     TrainerId = dto.TrainerId,
                     DisplayName = dto.DisplayName ?? dto.TrainerId,
                     TrainerClass = dto.TrainerClass ?? "trainer",
-                    SpriteId = dto.SpriteId,
+                    SpriteId = SpriteId.TryCreate(dto.SpriteId),
                     PrizeMoney = dto.PrizeMoney ?? 100,
                     Items = dto.Items != null ? string.Join(",", dto.Items) : null,
                     AiScript = dto.AiScript,
@@ -265,7 +266,7 @@ public class GameDataLoader
 
                 var mapDef = new MapDefinition
                 {
-                    MapId = mapId,
+                    MapId = new MapIdentifier(mapId),
                     DisplayName = GetPropertyString(properties, "displayName") ?? mapId,
                     Region = GetPropertyString(properties, "region") ?? "hoenn",
                     MapType = GetPropertyString(properties, "mapType"),
@@ -275,10 +276,10 @@ public class GameDataLoader
                     ShowMapName = GetPropertyBool(properties, "showMapName") ?? true,
                     CanFly = GetPropertyBool(properties, "canFly") ?? false,
                     BackgroundImage = GetPropertyString(properties, "backgroundImage"),
-                    NorthMapId = GetPropertyString(properties, "northMap"),
-                    SouthMapId = GetPropertyString(properties, "southMap"),
-                    EastMapId = GetPropertyString(properties, "eastMap"),
-                    WestMapId = GetPropertyString(properties, "westMap"),
+                    NorthMapId = MapIdentifier.TryCreate(GetPropertyString(properties, "northMap")),
+                    SouthMapId = MapIdentifier.TryCreate(GetPropertyString(properties, "southMap")),
+                    EastMapId = MapIdentifier.TryCreate(GetPropertyString(properties, "eastMap")),
+                    WestMapId = MapIdentifier.TryCreate(GetPropertyString(properties, "westMap")),
                     EncounterDataJson = GetPropertyString(properties, "encounters"),
                     SourceMod = GetPropertyString(properties, "sourceMod"),
                     Version = GetPropertyString(properties, "version") ?? "1.0.0",

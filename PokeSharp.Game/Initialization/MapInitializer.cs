@@ -3,6 +3,7 @@ using Arch.Core.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
 using PokeSharp.Engine.Common.Logging;
+using PokeSharp.Engine.Core.Types;
 using PokeSharp.Engine.Rendering.Systems;
 using PokeSharp.Game.Components.Maps;
 using PokeSharp.Game.Components.Movement;
@@ -40,11 +41,11 @@ public class MapInitializer(
     /// </summary>
     /// <param name="mapId">The map identifier (e.g., "test-map", "littleroot_town").</param>
     /// <returns>The MapInfo entity containing map metadata.</returns>
-    public async Task<Entity?> LoadMap(string mapId)
+    public async Task<Entity?> LoadMap(MapIdentifier mapId)
     {
         try
         {
-            logger.LogWorkflowStatus("Loading map from definition", ("mapId", mapId));
+            logger.LogWorkflowStatus("Loading map from definition", ("mapId", mapId.Value));
 
             // Load map from EF Core definition (NEW: Definition-based)
             var mapInfoEntity = mapLoader.LoadMap(world, mapId);
@@ -52,68 +53,12 @@ public class MapInitializer(
 
             // Get MapInfo to extract map ID and name for lifecycle tracking
             var mapInfo = mapInfoEntity.Get<MapInfo>();
-            var tilesetTextureIds = mapLoader.GetLoadedTextureIds(mapInfo.MapId);
+            var mapName = mapInfo.MapName ?? mapId.Value;
 
-            // PHASE 2: Load sprites for NPCs in this map
-            HashSet<string> spriteTextureKeys;
-            if (_spriteTextureLoader != null)
-            {
-                var requiredSpriteIds = mapLoader.GetRequiredSpriteIds();
-                try
-                {
-                    spriteTextureKeys = await _spriteTextureLoader.LoadSpritesForMapAsync(mapInfo.MapId, requiredSpriteIds);
-                    logger.LogAssetStatus(
-                        "Map sprites loaded",
-                        ("mapId", mapId),
-                        ("spriteCount", spriteTextureKeys.Count));
-                }
-                catch (Exception ex)
-                {
-                    logger.LogWarning(ex,
-                        "[steelblue1]WF[/] [orange3]⚠[/] Failed to load sprites for map [cyan]{MapId}[/], using fallback textures",
-                        mapId);
-                    spriteTextureKeys = new HashSet<string>();
-                }
-            }
-            else
-            {
-                logger.LogWarning("[steelblue1]WF[/] [orange3]⚠[/] SpriteTextureLoader not set - skipping sprite loading for map [cyan]{MapId}[/]", mapId);
-                spriteTextureKeys = new HashSet<string>();
-            }
+            // Complete post-loading steps (shared logic)
+            await CompleteMapLoadingAsync(mapInfoEntity, mapInfo, mapName);
 
-            // Register map with lifecycle manager BEFORE transitioning
-            var safeMapName = mapInfo.MapName ?? mapId; // Fallback to mapId if DisplayName is null
-            var safeTilesetIds = tilesetTextureIds ?? new HashSet<string>(); // Ensure non-null
-            var safeSpriteKeys = spriteTextureKeys ?? new HashSet<string>(); // Ensure non-null
-            mapLifecycleManager.RegisterMap(mapInfo.MapId, safeMapName, safeTilesetIds, safeSpriteKeys);
-
-            // Transition to new map (cleans up old maps)
-            mapLifecycleManager.TransitionToMap(mapInfo.MapId);
-            logger.LogWorkflowStatus("Map lifecycle transition complete", ("mapId", mapInfo.MapId));
-
-            // Invalidate spatial hash to reindex static tiles
-            spatialHashSystem.InvalidateStaticTiles();
-            logger.LogWorkflowStatus("Spatial hash invalidated", ("cells", "static"));
-
-            // Preload all textures used by the map to avoid loading spikes during gameplay
-            renderSystem.PreloadMapAssets(world);
-            logger.LogWorkflowStatus("Render assets preloaded");
-
-            // Set camera bounds and tile size from MapInfo
-            world.Query(
-                in EcsQueries.MapInfo,
-                (ref MapInfo mapInfo) =>
-                {
-                    renderSystem.SetTileSize(mapInfo.TileSize);
-                    logger.LogWorkflowStatus(
-                        "Camera bounds updated",
-                        ("widthPx", mapInfo.PixelWidth),
-                        ("heightPx", mapInfo.PixelHeight)
-                    );
-                }
-            );
-
-            logger.LogWorkflowStatus("Map load complete", ("mapId", mapId));
+            logger.LogWorkflowStatus("Map load complete", ("mapId", mapId.Value));
             return mapInfoEntity;
         }
         catch (Exception ex)
@@ -121,7 +66,7 @@ public class MapInitializer(
             logger.LogExceptionWithContext(
                 ex,
                 "Failed to load map: {MapId}. Game will continue without map",
-                mapId
+                mapId.Value
             );
             return null;
         }
@@ -145,66 +90,10 @@ public class MapInitializer(
 
             // Get MapInfo to extract map ID and name for lifecycle tracking
             var mapInfo = mapInfoEntity.Get<MapInfo>();
-            var tilesetTextureIds = mapLoader.GetLoadedTextureIds(mapInfo.MapId);
+            var mapName = mapInfo.MapName ?? mapPath;
 
-            // PHASE 2: Load sprites for NPCs in this map (legacy path)
-            HashSet<string> spriteTextureKeys;
-            if (_spriteTextureLoader != null)
-            {
-                var requiredSpriteIds = mapLoader.GetRequiredSpriteIds();
-                try
-                {
-                    spriteTextureKeys = await _spriteTextureLoader.LoadSpritesForMapAsync(mapInfo.MapId, requiredSpriteIds);
-                    logger.LogAssetStatus(
-                        "Map sprites loaded",
-                        ("mapPath", mapPath),
-                        ("spriteCount", spriteTextureKeys.Count));
-                }
-                catch (Exception ex)
-                {
-                    logger.LogWarning(ex,
-                        "Failed to load sprites for map {MapPath}, using fallback textures",
-                        mapPath);
-                    spriteTextureKeys = new HashSet<string>();
-                }
-            }
-            else
-            {
-                logger.LogWarning("SpriteTextureLoader not set - skipping sprite loading for map {MapPath}", mapPath);
-                spriteTextureKeys = new HashSet<string>();
-            }
-
-            // Register map with lifecycle manager BEFORE transitioning
-            var safeMapName = mapInfo.MapName ?? mapPath; // Fallback to mapPath if DisplayName is null
-            var safeTilesetIds = tilesetTextureIds ?? new HashSet<string>(); // Ensure non-null
-            var safeSpriteKeys = spriteTextureKeys ?? new HashSet<string>(); // Ensure non-null
-            mapLifecycleManager.RegisterMap(mapInfo.MapId, safeMapName, safeTilesetIds, safeSpriteKeys);
-
-            // Transition to new map (cleans up old maps)
-            mapLifecycleManager.TransitionToMap(mapInfo.MapId);
-            logger.LogWorkflowStatus("Map lifecycle transition complete", ("mapId", mapInfo.MapId));
-
-            // Invalidate spatial hash to reindex static tiles
-            spatialHashSystem.InvalidateStaticTiles();
-            logger.LogWorkflowStatus("Spatial hash invalidated", ("cells", "static"));
-
-            // Preload all textures used by the map to avoid loading spikes during gameplay
-            renderSystem.PreloadMapAssets(world);
-            logger.LogWorkflowStatus("Render assets preloaded");
-
-            // Set camera bounds and tile size from MapInfo
-            world.Query(
-                in EcsQueries.MapInfo,
-                (ref MapInfo mapInfo) =>
-                {
-                    renderSystem.SetTileSize(mapInfo.TileSize);
-                    logger.LogWorkflowStatus(
-                        "Camera bounds updated",
-                        ("widthPx", mapInfo.PixelWidth),
-                        ("heightPx", mapInfo.PixelHeight)
-                    );
-                }
-            );
+            // Complete post-loading steps (shared logic)
+            await CompleteMapLoadingAsync(mapInfoEntity, mapInfo, mapName);
 
             logger.LogWorkflowStatus("Map load complete (LEGACY)", ("path", mapPath));
             return mapInfoEntity;
@@ -217,6 +106,79 @@ public class MapInitializer(
                 mapPath
             );
             return null;
+        }
+    }
+
+    /// <summary>
+    ///     Completes post-loading steps for a map: sprite loading, lifecycle registration,
+    ///     spatial hash invalidation, and render system setup.
+    /// </summary>
+    private async Task CompleteMapLoadingAsync(Entity mapInfoEntity, MapInfo mapInfo, string mapName)
+    {
+        var tilesetTextureIds = mapLoader.GetLoadedTextureIds(mapInfo.MapId);
+
+        // Load sprites for NPCs in this map
+        var spriteTextureKeys = await LoadMapSpritesAsync(mapInfo.MapId);
+
+        // Register map with lifecycle manager BEFORE transitioning
+        var safeTilesetIds = tilesetTextureIds ?? new HashSet<string>();
+        var safeSpriteKeys = spriteTextureKeys ?? new HashSet<string>();
+        mapLifecycleManager.RegisterMap(mapInfo.MapId, mapName, safeTilesetIds, safeSpriteKeys);
+
+        // Transition to new map (cleans up old maps)
+        mapLifecycleManager.TransitionToMap(mapInfo.MapId);
+        logger.LogWorkflowStatus("Map lifecycle transition complete", ("mapId", mapInfo.MapId));
+
+        // Invalidate spatial hash to reindex static tiles
+        spatialHashSystem.InvalidateStaticTiles();
+        logger.LogWorkflowStatus("Spatial hash invalidated", ("cells", "static"));
+
+        // Preload all textures used by the map to avoid loading spikes during gameplay
+        renderSystem.PreloadMapAssets(world);
+        logger.LogWorkflowStatus("Render assets preloaded");
+
+        // Set camera bounds and tile size from MapInfo
+        world.Query(
+            in EcsQueries.MapInfo,
+            (ref MapInfo info) =>
+            {
+                renderSystem.SetTileSize(info.TileSize);
+                logger.LogWorkflowStatus(
+                    "Camera bounds updated",
+                    ("widthPx", info.PixelWidth),
+                    ("heightPx", info.PixelHeight)
+                );
+            }
+        );
+    }
+
+    /// <summary>
+    ///     Loads sprites required for the map's NPCs.
+    /// </summary>
+    private async Task<HashSet<string>> LoadMapSpritesAsync(MapRuntimeId mapId)
+    {
+        if (_spriteTextureLoader == null)
+        {
+            logger.LogWarning("SpriteTextureLoader not set - skipping sprite loading for map {MapId}", mapId.Value);
+            return new HashSet<string>();
+        }
+
+        var requiredSpriteIds = mapLoader.GetRequiredSpriteIds();
+        try
+        {
+            var spriteTextureKeys = await _spriteTextureLoader.LoadSpritesForMapAsync(mapId, requiredSpriteIds);
+            logger.LogAssetStatus(
+                "Map sprites loaded",
+                ("mapId", mapId.Value),
+                ("spriteCount", spriteTextureKeys.Count));
+            return spriteTextureKeys;
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex,
+                "Failed to load sprites for map {MapId}, using fallback textures",
+                mapId.Value);
+            return new HashSet<string>();
         }
     }
 }

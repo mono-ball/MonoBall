@@ -1,5 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
+using PokeSharp.Engine.Core.Types;
+using PokeSharp.Game.Data.ValueConverters;
 
 namespace PokeSharp.Game.Data.Entities;
 
@@ -15,7 +18,8 @@ public class MapDefinition
     /// </summary>
     [Key]
     [MaxLength(100)]
-    public string MapId { get; set; } = string.Empty;
+    [Column(TypeName = "nvarchar(100)")]
+    public MapIdentifier MapId { get; set; }
 
     /// <summary>
     /// Display name shown in-game (e.g., "Littleroot Town", "Route 101").
@@ -76,25 +80,29 @@ public class MapDefinition
     /// Map connected to the north.
     /// </summary>
     [MaxLength(100)]
-    public string? NorthMapId { get; set; }
+    [Column(TypeName = "nvarchar(100)")]
+    public MapIdentifier? NorthMapId { get; set; }
 
     /// <summary>
     /// Map connected to the south.
     /// </summary>
     [MaxLength(100)]
-    public string? SouthMapId { get; set; }
+    [Column(TypeName = "nvarchar(100)")]
+    public MapIdentifier? SouthMapId { get; set; }
 
     /// <summary>
     /// Map connected to the east.
     /// </summary>
     [MaxLength(100)]
-    public string? EastMapId { get; set; }
+    [Column(TypeName = "nvarchar(100)")]
+    public MapIdentifier? EastMapId { get; set; }
 
     /// <summary>
     /// Map connected to the west.
     /// </summary>
     [MaxLength(100)]
-    public string? WestMapId { get; set; }
+    [Column(TypeName = "nvarchar(100)")]
+    public MapIdentifier? WestMapId { get; set; }
 
     /// <summary>
     /// Wild Pokémon encounter data as JSON.

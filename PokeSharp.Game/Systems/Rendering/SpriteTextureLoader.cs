@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework.Graphics;
 using PokeSharp.Engine.Common.Logging;
+using PokeSharp.Engine.Core.Types;
 using PokeSharp.Engine.Rendering.Assets;
 using PokeSharp.Game.Services;
 
@@ -19,7 +20,7 @@ public class SpriteTextureLoader
     private readonly string _spritesBasePath;
 
     // PHASE 2: Per-map sprite tracking for lazy loading
-    private readonly Dictionary<int, HashSet<string>> _mapSpriteIds = new();
+    private readonly Dictionary<MapRuntimeId, HashSet<SpriteId>> _mapSpriteIds = new();
     private readonly Dictionary<string, int> _spriteReferenceCount = new();
     // Persistent sprites that should never be unloaded (e.g., UI elements)
     // Player sprites load on-demand from entity templates
@@ -156,31 +157,23 @@ public class SpriteTextureLoader
     /// Implements lazy loading to reduce memory usage by 75%.
     /// </summary>
     /// <param name="mapId">Map ID to load sprites for</param>
-    /// <param name="spriteIds">Collection of sprite IDs needed for this map (format: "category/spriteName")</param>
+    /// <param name="spriteIds">Collection of sprite IDs needed for this map</param>
     /// <returns>HashSet of loaded texture keys</returns>
-    public async Task<HashSet<string>> LoadSpritesForMapAsync(int mapId, IEnumerable<string> spriteIds)
+    public async Task<HashSet<string>> LoadSpritesForMapAsync(MapRuntimeId mapId, IEnumerable<SpriteId> spriteIds)
     {
         var loadedCount = 0;
         var skippedCount = 0;
-        var spriteIdSet = new HashSet<string>(spriteIds);
+        var spriteIdSet = new HashSet<SpriteId>(spriteIds);
 
         // Track which sprites belong to this map
         _mapSpriteIds[mapId] = spriteIdSet;
 
-        _logger?.LogSpritesRequiredForMap(mapId, spriteIdSet.Count);
+        _logger?.LogSpritesRequiredForMap(mapId.Value, spriteIdSet.Count);
 
         foreach (var spriteId in spriteIdSet)
         {
-            // Parse sprite ID (format: "category/spriteName")
-            var parts = spriteId.Split('/');
-            if (parts.Length != 2)
-            {
-                _logger?.LogInvalidSpriteIdFormat(spriteId);
-                continue;
-            }
-
-            var category = parts[0];
-            var spriteName = parts[1];
+            var category = spriteId.Category;
+            var spriteName = spriteId.SpriteName;
             var textureKey = $"sprites/{category}/{spriteName}";
 
             // Skip if already loaded
@@ -204,9 +197,9 @@ public class SpriteTextureLoader
             }
         }
 
-        _logger?.LogSpritesLoadedForMap(loadedCount, mapId, skippedCount);
+        _logger?.LogSpritesLoadedForMap(loadedCount, mapId.Value, skippedCount);
 
-        return spriteIdSet.Select(id => $"sprites/{id}").ToHashSet();
+        return spriteIdSet.Select(id => $"sprites/{id.Value}").ToHashSet();
     }
 
     /// <summary>
@@ -281,11 +274,11 @@ public class SpriteTextureLoader
     /// </summary>
     /// <param name="mapId">Map ID to unload sprites for</param>
     /// <returns>Number of sprites unloaded</returns>
-    public int UnloadSpritesForMap(int mapId)
+    public int UnloadSpritesForMap(MapRuntimeId mapId)
     {
         if (!_mapSpriteIds.TryGetValue(mapId, out var spriteIds))
         {
-            _logger?.LogNoSpritesForMap(mapId);
+            _logger?.LogNoSpritesForMap(mapId.Value);
             return 0;
         }
 
@@ -293,10 +286,7 @@ public class SpriteTextureLoader
 
         foreach (var spriteId in spriteIds)
         {
-            var parts = spriteId.Split('/');
-            if (parts.Length != 2) continue;
-
-            var textureKey = $"sprites/{parts[0]}/{parts[1]}";
+            var textureKey = $"sprites/{spriteId.Category}/{spriteId.SpriteName}";
 
             // Never unload persistent sprites (player sprites)
             if (_persistentSprites.Contains(textureKey))

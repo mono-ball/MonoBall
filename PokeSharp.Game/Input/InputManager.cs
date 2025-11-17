@@ -16,7 +16,6 @@ namespace PokeSharp.Game.Input;
 /// </summary>
 public class InputManager(ILogger<InputManager> logger)
 {
-    private readonly ILogger<InputManager> _logger = logger;
     private KeyboardState _previousKeyboardState;
 
     /// <summary>
@@ -60,7 +59,7 @@ public class InputManager(ILogger<InputManager> logger)
                 )
                 {
                     camera.SetZoomSmooth(camera.TargetZoom + 0.5f);
-                    _logger.LogZoomChanged("Manual", camera.TargetZoom);
+                    logger.LogZoomChanged("Manual", camera.TargetZoom);
                 }
 
                 // Zoom out with - key
@@ -70,7 +69,7 @@ public class InputManager(ILogger<InputManager> logger)
                 )
                 {
                     camera.SetZoomSmooth(camera.TargetZoom - 0.5f);
-                    _logger.LogZoomChanged("Manual", camera.TargetZoom);
+                    logger.LogZoomChanged("Manual", camera.TargetZoom);
                 }
 
                 // Preset zoom levels
@@ -78,20 +77,20 @@ public class InputManager(ILogger<InputManager> logger)
                 {
                     var gbaZoom = camera.CalculateGbaZoom();
                     camera.SetZoomSmooth(gbaZoom);
-                    _logger.LogZoomChanged("GBA (240x160)", gbaZoom);
+                    logger.LogZoomChanged("GBA (240x160)", gbaZoom);
                 }
 
                 if (IsKeyPressed(currentKeyboardState, Keys.D2))
                 {
                     var ndsZoom = camera.CalculateNdsZoom();
                     camera.SetZoomSmooth(ndsZoom);
-                    _logger.LogZoomChanged("NDS (256x192)", ndsZoom);
+                    logger.LogZoomChanged("NDS (256x192)", ndsZoom);
                 }
 
                 if (IsKeyPressed(currentKeyboardState, Keys.D3))
                 {
                     camera.SetZoomSmooth(3.0f);
-                    _logger.LogZoomChanged("Default", 3.0f);
+                    logger.LogZoomChanged("Default", 3.0f);
                 }
             }
         );
@@ -112,7 +111,7 @@ public class InputManager(ILogger<InputManager> logger)
         {
             IsDetailedProfilingEnabled = !IsDetailedProfilingEnabled;
             renderSystem?.SetDetailedProfiling(IsDetailedProfilingEnabled);
-            _logger.LogInformation(
+            logger.LogInformation(
                 "Detailed profiling: {State}",
                 IsDetailedProfilingEnabled ? "ON" : "OFF"
             );

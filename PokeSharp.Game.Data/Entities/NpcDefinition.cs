@@ -1,4 +1,8 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
+using PokeSharp.Engine.Core.Types;
+using PokeSharp.Game.Data.ValueConverters;
 
 namespace PokeSharp.Game.Data.Entities;
 
@@ -32,7 +36,8 @@ public class NpcDefinition
     /// Sprite/appearance ID (references sprite in AssetManager).
     /// </summary>
     [MaxLength(100)]
-    public string? SpriteId { get; set; }
+    [Column(TypeName = "nvarchar(100)")]
+    public SpriteId? SpriteId { get; set; }
 
     /// <summary>
     /// Default behavior script path (e.g., "Behaviors/wander_behavior.csx").

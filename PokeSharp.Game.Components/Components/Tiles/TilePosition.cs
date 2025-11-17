@@ -1,3 +1,5 @@
+using PokeSharp.Engine.Core.Types;
+
 namespace PokeSharp.Game.Components.Tiles;
 
 /// <summary>
@@ -20,7 +22,7 @@ public struct TilePosition
     /// <summary>
     ///     Gets or sets the map identifier for multi-map support.
     /// </summary>
-    public int MapId { get; set; }
+    public MapRuntimeId MapId { get; set; }
 
     /// <summary>
     ///     Initializes a new instance of the TilePosition struct.
@@ -28,7 +30,7 @@ public struct TilePosition
     /// <param name="x">X coordinate in tile space.</param>
     /// <param name="y">Y coordinate in tile space.</param>
     /// <param name="mapId">Map identifier.</param>
-    public TilePosition(int x, int y, int mapId = 0)
+    public TilePosition(int x, int y, MapRuntimeId mapId = default)
     {
         X = x;
         Y = y;

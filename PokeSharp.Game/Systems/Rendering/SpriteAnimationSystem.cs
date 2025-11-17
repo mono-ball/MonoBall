@@ -81,23 +81,18 @@ public class SpriteAnimationSystem : SystemBase, IUpdateSystem
 
         if (!_manifestCache.TryGetValue(manifestKey, out var manifest))
         {
-            try
-            {
-                // Load manifest synchronously (cached by SpriteLoader internally)
-                // CRITICAL FIX: Use category + name to avoid loading wrong sprite
-                manifest = _spriteLoader.LoadSpriteAsync(sprite.Category, sprite.SpriteName).Result;
+            // Load manifest from cache synchronously (cache populated during initialization)
+            // CRITICAL FIX: Use category + name to avoid loading wrong sprite
+            manifest = _spriteLoader.GetSprite(sprite.Category, sprite.SpriteName);
 
-                if (manifest == null)
-                    return;
-
-                _manifestCache[manifestKey] = manifest;
-            }
-            catch (Exception ex)
+            if (manifest == null)
             {
-                _logger?.LogError(ex, "Failed to load manifest for {Category}/{SpriteName}",
+                _logger?.LogWarning("Sprite manifest not found for {Category}/{SpriteName}",
                     sprite.Category, sprite.SpriteName);
                 return;
             }
+
+            _manifestCache[manifestKey] = manifest;
         }
 
         // Find the current animation in the manifest

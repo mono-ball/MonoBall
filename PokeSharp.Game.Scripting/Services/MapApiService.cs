@@ -2,6 +2,7 @@ using Arch.Core;
 using Microsoft.Extensions.Logging;
 using PokeSharp.Engine.Common.Logging;
 using PokeSharp.Engine.Core.Systems;
+using PokeSharp.Engine.Core.Types;
 using PokeSharp.Game.Components.Maps;
 using PokeSharp.Game.Components.Movement;
 using PokeSharp.Game.Components.Player;
@@ -26,7 +27,7 @@ public class MapApiService(
     private readonly World _world = world ?? throw new ArgumentNullException(nameof(world));
     private ISpatialQuery? _spatialQuery = spatialQuery;
 
-    public bool IsPositionWalkable(int mapId, int x, int y)
+    public bool IsPositionWalkable(MapRuntimeId mapId, int x, int y)
     {
         if (_spatialQuery == null)
         {
@@ -34,7 +35,7 @@ public class MapApiService(
             return true; // Default to walkable if system not ready
         }
 
-        var entities = _spatialQuery.GetEntitiesAt(mapId, x, y);
+        var entities = _spatialQuery.GetEntitiesAt(mapId.Value, x, y);
         foreach (var entity in entities)
             if (_world.Has<Collision>(entity))
             {
@@ -46,7 +47,7 @@ public class MapApiService(
         return true;
     }
 
-    public Entity[] GetEntitiesAt(int mapId, int x, int y)
+    public Entity[] GetEntitiesAt(MapRuntimeId mapId, int x, int y)
     {
         if (_spatialQuery == null)
         {
@@ -54,10 +55,10 @@ public class MapApiService(
             return [];
         }
 
-        return [.. _spatialQuery.GetEntitiesAt(mapId, x, y)];
+        return [.. _spatialQuery.GetEntitiesAt(mapId.Value, x, y)];
     }
 
-    public int GetCurrentMapId()
+    public MapRuntimeId GetCurrentMapId()
     {
         var playerEntity = GetPlayerEntity();
         if (playerEntity.HasValue && _world.Has<Position>(playerEntity.Value))
@@ -66,10 +67,10 @@ public class MapApiService(
             return position.MapId;
         }
 
-        return 0;
+        return new MapRuntimeId(0);
     }
 
-    public void TransitionToMap(int mapId, int x, int y)
+    public void TransitionToMap(MapRuntimeId mapId, int x, int y)
     {
         var playerEntity = GetPlayerEntity();
         if (playerEntity.HasValue && _world.Has<Position>(playerEntity.Value))
@@ -80,11 +81,11 @@ public class MapApiService(
             position.Y = y;
             var tileSize = GetTileSize(mapId);
             position.SyncPixelsToGrid(tileSize);
-            _logger.LogInformation("Transitioned to map {MapId} at ({X}, {Y})", mapId, x, y);
+            _logger.LogInformation("Transitioned to map {MapId} at ({X}, {Y})", mapId.Value, x, y);
         }
     }
 
-    public (int width, int height)? GetMapDimensions(int mapId)
+    public (int width, int height)? GetMapDimensions(MapRuntimeId mapId)
     {
         (int width, int height)? result = null;
 
@@ -137,7 +138,7 @@ public class MapApiService(
         return playerEntity;
     }
 
-    private int GetTileSize(int mapId)
+    private int GetTileSize(MapRuntimeId mapId)
     {
         var tileSize = 16;
 

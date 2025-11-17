@@ -7,6 +7,7 @@ using PokeSharp.Engine.Systems.Factories;
 using PokeSharp.Engine.Systems.Management;
 using PokeSharp.Game.Components.Maps;
 using PokeSharp.Game.Components.Movement;
+using PokeSharp.Game.Configuration;
 using PokeSharp.Game.Systems;
 
 namespace PokeSharp.Game.Initialization;
@@ -20,9 +21,6 @@ public class PlayerFactory(
     IEntityFactoryService entityFactory
 )
 {
-    private readonly IEntityFactoryService _entityFactory = entityFactory;
-    private readonly ILogger<PlayerFactory> _logger = logger;
-    private readonly World _world = world;
 
     /// <summary>
     ///     Creates a player entity at the specified position with a camera.
@@ -34,10 +32,11 @@ public class PlayerFactory(
     /// <returns>The created player entity.</returns>
     public Entity CreatePlayer(int x, int y, int viewportWidth, int viewportHeight)
     {
-        // Capture tile size from MapInfo (default to 16 if not found)
-        var tileSize = 16;
+        // Capture tile size from MapInfo (default from config if not found)
+        var gameplayConfig = Configuration.GameplayConfig.CreateDefault();
+        var tileSize = gameplayConfig.DefaultTileSize;
         var mapInfoQuery = QueryCache.Get<MapInfo>();
-        _world.Query(
+        world.Query(
             in mapInfoQuery,
             (ref MapInfo mapInfo) =>
             {
@@ -49,14 +48,14 @@ public class PlayerFactory(
         var viewport = new Rectangle(0, 0, viewportWidth, viewportHeight);
         var camera = new Camera(viewport)
         {
-            Zoom = 3.0f,
-            TargetZoom = 3.0f,
-            ZoomTransitionSpeed = 0.1f,
+            Zoom = gameplayConfig.DefaultZoom,
+            TargetZoom = gameplayConfig.DefaultZoom,
+            ZoomTransitionSpeed = gameplayConfig.ZoomTransitionSpeed,
             Position = new Vector2(x * tileSize, y * tileSize), // Start at player's position (grid to pixels)
         };
 
         // Set map bounds on camera from MapInfo
-        _world.Query(
+        world.Query(
             in mapInfoQuery,
             (ref MapInfo mapInfo) =>
             {
@@ -65,9 +64,9 @@ public class PlayerFactory(
         );
 
         // Spawn player entity from template with position override
-        var playerEntity = _entityFactory.SpawnFromTemplate(
+        var playerEntity = entityFactory.SpawnFromTemplate(
             "player",
-            _world,
+            world,
             builder =>
             {
                 builder.OverrideComponent(new Position(x, y, mapId: 0, tileSize));
@@ -75,9 +74,9 @@ public class PlayerFactory(
         );
 
         // Add Camera component (not in template as it's created per-instance)
-        _world.Add(playerEntity, camera);
+        world.Add(playerEntity, camera);
 
-        _logger.LogEntityCreated(
+        logger.LogEntityCreated(
             "Player",
             playerEntity.Id,
             ("Position", $"{x},{y}"),
@@ -87,8 +86,8 @@ public class PlayerFactory(
             ("Animation", "idle"),
             ("Camera", "attached")
         );
-        _logger.LogControlsHint("Use WASD or Arrow Keys to move!");
-        _logger.LogControlsHint("Zoom: +/- to zoom in/out, 1=GBA, 2=NDS, 3=Default");
+        logger.LogControlsHint("Use WASD or Arrow Keys to move!");
+        logger.LogControlsHint("Zoom: +/- to zoom in/out, 1=GBA, 2=NDS, 3=Default");
 
         return playerEntity;
     }

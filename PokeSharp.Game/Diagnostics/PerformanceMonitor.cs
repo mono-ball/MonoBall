@@ -15,8 +15,6 @@ public class PerformanceMonitor(ILogger<PerformanceMonitor> logger)
     private const int PerformanceLogIntervalFrames = 300; // Log every 5 seconds at 60fps
     private readonly RollingAverage _frameTimeTracker = new(60); // Track last 60 frames (1 second)
 
-    private readonly ILogger<PerformanceMonitor> _logger = logger;
-
     private ulong _frameCounter;
     private int _lastGen0Count;
     private int _lastGen1Count;
@@ -33,14 +31,14 @@ public class PerformanceMonitor(ILogger<PerformanceMonitor> logger)
 
         // Warn about slow frames (>50% over budget)
         if (frameTimeMs > TargetFrameTime * 1.5f)
-            _logger.LogSlowFrame(frameTimeMs, TargetFrameTime);
+            logger.LogSlowFrame(frameTimeMs, TargetFrameTime);
 
         // Log frame time statistics every 5 seconds (300 frames at 60fps)
         if (_frameCounter % PerformanceLogIntervalFrames == 0)
         {
             var avgMs = _frameTimeTracker.Average;
             var fps = 1000.0f / avgMs;
-            _logger.LogFramePerformance(avgMs, fps, _frameTimeTracker.Min, _frameTimeTracker.Max);
+            logger.LogFramePerformance(avgMs, fps, _frameTimeTracker.Min, _frameTimeTracker.Max);
 
             // Log memory stats every 5 seconds
             LogMemoryStats();
@@ -60,11 +58,11 @@ public class PerformanceMonitor(ILogger<PerformanceMonitor> logger)
         var gen2 = GC.CollectionCount(2);
 
         // Log memory stats using template
-        _logger.LogMemoryStatistics(totalMemoryMb, gen0, gen1, gen2);
+        logger.LogMemoryStatistics(totalMemoryMb, gen0, gen1, gen2);
 
         // Warn about high memory usage
         if (totalMemoryMb > HighMemoryThresholdMb)
-            _logger.LogHighMemoryUsage(totalMemoryMb, HighMemoryThresholdMb);
+            logger.LogHighMemoryUsage(totalMemoryMb, HighMemoryThresholdMb);
 
         // Warn about excessive GC activity (more than 10 collections per second)
         var gen0Delta = gen0 - _lastGen0Count;
@@ -72,14 +70,14 @@ public class PerformanceMonitor(ILogger<PerformanceMonitor> logger)
         var gen2Delta = gen2 - _lastGen2Count;
 
         if (gen0Delta > MaxGen0CollectionsPerInterval) // >50 Gen0 collections in 5 seconds = >10/sec
-            _logger.LogWarning(
+            logger.LogWarning(
                 "High Gen0 GC activity: {Count} collections in last 5 seconds ({PerSec:F1}/sec)",
                 gen0Delta,
                 gen0Delta / 5.0
             );
 
         if (gen2Delta > 0) // Any Gen2 collection is notable
-            _logger.LogWarning(
+            logger.LogWarning(
                 "Gen2 GC occurred: {Count} collections (indicates memory pressure)",
                 gen2Delta
             );

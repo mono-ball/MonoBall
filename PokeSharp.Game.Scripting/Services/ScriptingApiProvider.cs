@@ -16,39 +16,21 @@ public class ScriptingApiProvider(
     EffectApiService effectApi
 ) : IScriptingApiProvider
 {
-    private readonly DialogueApiService _dialogueApi =
-        dialogueApi ?? throw new ArgumentNullException(nameof(dialogueApi));
-
-    private readonly EffectApiService _effectApi =
-        effectApi ?? throw new ArgumentNullException(nameof(effectApi));
-
-    private readonly GameStateApiService _gameStateApi =
-        gameStateApi ?? throw new ArgumentNullException(nameof(gameStateApi));
-
-    private readonly MapApiService _mapApi =
-        mapApi ?? throw new ArgumentNullException(nameof(mapApi));
-
-    private readonly NpcApiService _npcApi =
-        npcApi ?? throw new ArgumentNullException(nameof(npcApi));
-
-    private readonly PlayerApiService _playerApi =
-        playerApi ?? throw new ArgumentNullException(nameof(playerApi));
+    /// <inheritdoc />
+    public PlayerApiService Player { get; } = playerApi ?? throw new ArgumentNullException(nameof(playerApi));
 
     /// <inheritdoc />
-    public PlayerApiService Player => _playerApi;
+    public NpcApiService Npc { get; } = npcApi ?? throw new ArgumentNullException(nameof(npcApi));
 
     /// <inheritdoc />
-    public NpcApiService Npc => _npcApi;
+    public MapApiService Map { get; } = mapApi ?? throw new ArgumentNullException(nameof(mapApi));
 
     /// <inheritdoc />
-    public MapApiService Map => _mapApi;
+    public GameStateApiService GameState { get; } = gameStateApi ?? throw new ArgumentNullException(nameof(gameStateApi));
 
     /// <inheritdoc />
-    public GameStateApiService GameState => _gameStateApi;
+    public DialogueApiService Dialogue { get; } = dialogueApi ?? throw new ArgumentNullException(nameof(dialogueApi));
 
     /// <inheritdoc />
-    public DialogueApiService Dialogue => _dialogueApi;
-
-    /// <inheritdoc />
-    public EffectApiService Effects => _effectApi;
+    public EffectApiService Effects { get; } = effectApi ?? throw new ArgumentNullException(nameof(effectApi));
 }
