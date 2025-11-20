@@ -119,58 +119,8 @@ public class ConsoleOutputRenderer
             : Scroll_Thumb;
 
         DrawRectangle(scrollBarX, thumbY, scrollBarWidth, thumbHeight, thumbColor);
-
-        // Draw triangle indicators for more content (centered on scrollbar)
-        const int triangleWidth = ConsoleConstants.Rendering.ScrollTriangleWidth;
-        const int triangleHeight = ConsoleConstants.Rendering.ScrollTriangleHeight;
-        const int triangleGap = ConsoleConstants.Rendering.ScrollTriangleGap;
-        int triangleCenterX = scrollBarX + (scrollBarWidth / 2);
-        var indicatorColor = Scroll_Indicator;
-
-        if (!output.IsAtTop)
-        {
-            // Draw up triangle above the scrollbar
-            int upTriangleY = scrollBarY - triangleHeight - triangleGap;
-            DrawUpTriangle(triangleCenterX, upTriangleY, triangleWidth, triangleHeight, indicatorColor);
-        }
-
-        if (!output.IsAtBottom)
-        {
-            // Draw down triangle below the scrollbar
-            int downTriangleY = scrollBarY + scrollBarHeight + triangleGap;
-            DrawDownTriangle(triangleCenterX, downTriangleY, triangleWidth, triangleHeight, indicatorColor);
-        }
     }
 
-    /// <summary>
-    /// Draws an upward-pointing triangle (for scroll indicators).
-    /// </summary>
-    private void DrawUpTriangle(int centerX, int topY, int width, int height, Color color)
-    {
-        // Draw triangle row by row from top to bottom
-        for (int row = 0; row < height; row++)
-        {
-            float progress = (float)row / height;
-            int rowWidth = (int)(width * progress);
-            int x = centerX - rowWidth / 2;
-            DrawRectangle(x, topY + row, Math.Max(1, rowWidth), 1, color);
-        }
-    }
-
-    /// <summary>
-    /// Draws a downward-pointing triangle (for scroll indicators).
-    /// </summary>
-    private void DrawDownTriangle(int centerX, int topY, int width, int height, Color color)
-    {
-        // Draw triangle row by row from top (wide) to bottom (point)
-        for (int row = 0; row < height; row++)
-        {
-            float progress = 1.0f - ((float)row / height);
-            int rowWidth = (int)(width * progress);
-            int x = centerX - rowWidth / 2;
-            DrawRectangle(x, topY + row, Math.Max(1, rowWidth), 1, color);
-        }
-    }
 
     /// <summary>
     /// Draws a right-pointing triangle (for collapsed sections).

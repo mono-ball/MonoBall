@@ -93,8 +93,9 @@ public class ConsoleScene : SceneBase
         var currentKeyboard = Keyboard.GetState();
         var currentMouse = Mouse.GetState();
 
-        // Check for console toggle key (~ or `)
-        if (WasKeyPressed(currentKeyboard, Keys.OemTilde) || WasKeyPressed(currentKeyboard, Keys.OemQuotes))
+        // Check for console toggle key (`) only (not ~ with shift)
+        bool isShiftPressed = currentKeyboard.IsKeyDown(Keys.LeftShift) || currentKeyboard.IsKeyDown(Keys.RightShift);
+        if (WasKeyPressed(currentKeyboard, Keys.OemTilde) && !isShiftPressed)
         {
             // Close the console scene by popping from stack
             Logger.LogDebug("Console toggle key pressed, closing console");
@@ -114,6 +115,15 @@ public class ConsoleScene : SceneBase
                 _previousMouseState);
 
             // Handle input result
+            if (inputResult.ShouldCloseConsole)
+            {
+                // Input handler wants to close console (e.g., Escape key pressed)
+                Logger.LogDebug("Input handler requested console close");
+                OnClosed();
+                _sceneManager.PopScene();
+                return;
+            }
+
             if (inputResult.ShouldExecuteCommand && !string.IsNullOrWhiteSpace(inputResult.Command))
             {
                 // Command execution will be handled by ConsoleSystem via event/callback

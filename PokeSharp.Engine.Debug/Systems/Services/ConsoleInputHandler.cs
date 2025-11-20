@@ -41,6 +41,53 @@ public class ConsoleInputHandler : IConsoleInputHandler
     private float _navKeyHoldTime;
     private float _lastNavKeyRepeatTime;
 
+    // Key repeat tracking for page scrolling (PageUp/PageDown)
+    private Keys? _lastHeldPageKey;
+    private float _pageKeyHoldTime;
+    private float _lastPageKeyRepeatTime;
+
+    // Key repeat tracking for word navigation (Ctrl+Left/Right)
+    private Keys? _lastHeldWordNavKey;
+    private float _wordNavKeyHoldTime;
+    private float _lastWordNavKeyRepeatTime;
+
+    // Key repeat tracking for word deletion (Ctrl+Backspace/Delete)
+    private Keys? _lastHeldDeleteWordKey;
+    private float _deleteWordKeyHoldTime;
+    private float _lastDeleteWordKeyRepeatTime;
+
+    // Key repeat tracking for search navigation (F3/Shift+F3)
+    private Keys? _lastHeldSearchNavKey;
+    private float _searchNavKeyHoldTime;
+    private float _lastSearchNavKeyRepeatTime;
+
+    // Key repeat tracking for font size changes (Ctrl+Plus/Minus)
+    private Keys? _lastHeldFontSizeKey;
+    private float _fontSizeKeyHoldTime;
+    private float _lastFontSizeKeyRepeatTime;
+
+    // Key repeat tracking for reverse-i-search navigation (Ctrl+R/S)
+    private Keys? _lastHeldReverseSearchNavKey;
+    private float _reverseSearchNavKeyHoldTime;
+    private float _lastReverseSearchNavKeyRepeatTime;
+
+    // Key repeat tracking for parameter hint overload cycling (Ctrl+Shift+Up/Down)
+    private Keys? _lastHeldParamHintKey;
+    private float _paramHintKeyHoldTime;
+    private float _lastParamHintKeyRepeatTime;
+
+    // Key repeat tracking for undo/redo (Ctrl+Z/Y)
+    private Keys? _lastHeldUndoRedoKey;
+    private float _undoRedoKeyHoldTime;
+    private float _lastUndoRedoKeyRepeatTime;
+
+    // Output area text selection state
+    private bool _isOutputDragging = false;
+    private Point _outputDragStartPosition;
+    private Point _outputLastDragPosition;
+    private int _outputDragStartLine = -1;
+    private int _outputDragStartColumn = -1;
+
     // Debouncing for filtering to prevent excessive operations
     private string _lastFilteredText = "";
     private const float FilterDebounceDelay = 0.05f; // 50ms debounce
@@ -88,20 +135,8 @@ public class ConsoleInputHandler : IConsoleInputHandler
     {
         var isShiftPressed = keyboardState.IsKeyDown(Keys.LeftShift) || keyboardState.IsKeyDown(Keys.RightShift);
 
-        // Toggle console with backtick (`) key only
-        if (WasKeyJustPressed(Keys.OemTilde, keyboardState, previousKeyboardState))
-        {
-            _console.Toggle();
-            _logger.LogInformation("Console toggled: {IsVisible}", _console.IsVisible);
-
-            // Save history when closing console
-            if (!_console.IsVisible && _console.Config.PersistHistory)
-            {
-                _persistence.SaveHistory(_history.GetAll());
-            }
-
-            return InputHandlingResult.Consumed;
-        }
+        // Note: Backtick toggle is handled by ConsoleScene directly
+        // Don't handle it here to avoid double-processing
 
         // Only process console input if visible
         if (!_console.IsVisible)
@@ -195,9 +230,10 @@ public class ConsoleInputHandler : IConsoleInputHandler
             return InputHandlingResult.Consumed;
         }
 
-        // Handle Ctrl/Cmd+C - copy
+        // Handle Ctrl/Cmd+C - copy (from whichever area has a selection)
         if (WasKeyJustPressed(Keys.C, keyboardState, previousKeyboardState) && (isCtrlPressed || isCmdPressed))
         {
+            // Try input field first, then output (only one can be active)
             if (_console.Input.HasSelection)
             {
                 try
@@ -205,6 +241,23 @@ public class ConsoleInputHandler : IConsoleInputHandler
                     var selectedText = _console.Input.SelectedText;
                     ClipboardService.SetText(selectedText);
                     _logger.LogInformation("Copied {Length} characters to clipboard", selectedText.Length);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to copy to clipboard");
+                    _console.AppendOutput("Failed to copy to clipboard", Output_Warning);
+                }
+            }
+            else if (_console.Output.HasOutputSelection)
+            {
+                try
+                {
+                    var selectedText = _console.Output.GetSelectedOutputText();
+                    if (!string.IsNullOrEmpty(selectedText))
+                    {
+                        ClipboardService.SetText(selectedText);
+                        _logger.LogInformation("Copied {Length} characters to clipboard", selectedText.Length);
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -284,38 +337,15 @@ public class ConsoleInputHandler : IConsoleInputHandler
             return InputHandlingResult.TriggerAutoComplete();
         }
 
-        // Handle font size changes
-        var fontSizeResult = HandleFontSizeChanges(keyboardState, previousKeyboardState, isShiftPressed, isCtrlPressed, isCmdPressed);
+        // Handle font size changes with key repeat
+        var fontSizeResult = HandleFontSizeChanges(keyboardState, previousKeyboardState, deltaTime, isShiftPressed, isCtrlPressed, isCmdPressed);
         if (fontSizeResult != InputHandlingResult.None)
             return fontSizeResult;
 
-        // Handle Ctrl/Cmd+Z - undo
-        if (WasKeyJustPressed(Keys.Z, keyboardState, previousKeyboardState) &&
-            (isCtrlPressed || isCmdPressed) && !isShiftPressed)
-        {
-            if (_console.Input.Undo())
-            {
-                _logger.LogDebug("Undo performed");
-                // Re-evaluate parameter hints after undo
-                UpdateParameterHints();
-                return InputHandlingResult.Consumed;
-            }
-            return InputHandlingResult.Consumed; // Consume even if no undo available
-        }
-
-        // Handle Ctrl/Cmd+Y (or Ctrl/Cmd+Shift+Z) - redo
-        if (((WasKeyJustPressed(Keys.Y, keyboardState, previousKeyboardState) && (isCtrlPressed || isCmdPressed)) ||
-             (WasKeyJustPressed(Keys.Z, keyboardState, previousKeyboardState) && (isCtrlPressed || isCmdPressed) && isShiftPressed)))
-        {
-            if (_console.Input.Redo())
-            {
-                _logger.LogDebug("Redo performed");
-                // Re-evaluate parameter hints after redo
-                UpdateParameterHints();
-                return InputHandlingResult.Consumed;
-            }
-            return InputHandlingResult.Consumed; // Consume even if no redo available
-        }
+        // Handle Ctrl/Cmd+Z/Y with key repeat - undo/redo
+        var undoRedoResult = HandleUndoRedo(keyboardState, previousKeyboardState, deltaTime, isCtrlPressed, isCmdPressed, isShiftPressed);
+        if (undoRedoResult != InputHandlingResult.None)
+            return undoRedoResult;
 
         // Handle Ctrl/Cmd+F - open search mode
         if (WasKeyJustPressed(Keys.F, keyboardState, previousKeyboardState) &&
@@ -335,28 +365,13 @@ public class ConsoleInputHandler : IConsoleInputHandler
             return InputHandlingResult.Consumed;
         }
 
-        // Handle Ctrl/Cmd+R in reverse-i-search - cycle to next match
-        if (_console.IsReverseSearchMode &&
-            WasKeyJustPressed(Keys.R, keyboardState, previousKeyboardState) &&
-            (isCtrlPressed || isCmdPressed))
-        {
-            _console.ReverseSearchNextMatch();
-            _logger.LogDebug("Reverse-i-search next match");
-            return InputHandlingResult.Consumed;
-        }
+        // Handle Ctrl/Cmd+R/S in reverse-i-search with key repeat - cycle through matches
+        var reverseSearchNavResult = HandleReverseSearchNavigation(keyboardState, previousKeyboardState, deltaTime, isCtrlPressed, isCmdPressed);
+        if (reverseSearchNavResult != InputHandlingResult.None)
+            return reverseSearchNavResult;
 
-        // Handle Ctrl/Cmd+S in reverse-i-search - cycle to previous match
-        if (_console.IsReverseSearchMode &&
-            WasKeyJustPressed(Keys.S, keyboardState, previousKeyboardState) &&
-            (isCtrlPressed || isCmdPressed))
-        {
-            _console.ReverseSearchPreviousMatch();
-            _logger.LogDebug("Reverse-i-search previous match");
-            return InputHandlingResult.Consumed;
-        }
-
-        // Handle function keys (F1-F12)
-        var functionKeyResult = HandleFunctionKeys(keyboardState, previousKeyboardState, isShiftPressed);
+        // Handle function keys (F1-F12) with key repeat for F3
+        var functionKeyResult = HandleFunctionKeys(keyboardState, previousKeyboardState, deltaTime, isShiftPressed);
         if (functionKeyResult != InputHandlingResult.None)
             return functionKeyResult;
 
@@ -365,21 +380,10 @@ public class ConsoleInputHandler : IConsoleInputHandler
         bool isCtrlShiftPressed = (keyboardState.IsKeyDown(Keys.LeftControl) || keyboardState.IsKeyDown(Keys.RightControl)) &&
                                    (keyboardState.IsKeyDown(Keys.LeftShift) || keyboardState.IsKeyDown(Keys.RightShift));
 
-        if (isCtrlShiftPressed && _console.HasParameterHints())
-        {
-            if (WasKeyJustPressed(Keys.Up, keyboardState, previousKeyboardState))
-            {
-                _console.PreviousParameterHintOverload();
-                _logger.LogDebug("Cycled to previous parameter hint overload");
-                return InputHandlingResult.Consumed;
-            }
-            else if (WasKeyJustPressed(Keys.Down, keyboardState, previousKeyboardState))
-            {
-                _console.NextParameterHintOverload();
-                _logger.LogDebug("Cycled to next parameter hint overload");
-                return InputHandlingResult.Consumed;
-            }
-        }
+        // Handle Ctrl+Shift+Up/Down with key repeat - cycle parameter hint overloads
+        var paramHintResult = HandleParameterHintNavigation(keyboardState, previousKeyboardState, deltaTime, isCtrlShiftPressed);
+        if (paramHintResult != InputHandlingResult.None)
+            return paramHintResult;
 
         if (WasKeyJustPressed(Keys.Escape, keyboardState, previousKeyboardState))
         {
@@ -425,49 +429,20 @@ public class ConsoleInputHandler : IConsoleInputHandler
                 return InputHandlingResult.Consumed;
             }
 
-            // No suggestions, close the console
-            _console.Hide();
-
+            // No suggestions, close the console (scene will handle popping itself)
             // Save history when closing
             if (_console.Config.PersistHistory)
             {
                 _persistence.SaveHistory(_history.GetAll());
             }
 
-            return InputHandlingResult.Consumed;
+            return InputHandlingResult.CloseConsole();
         }
 
-        // Handle PageUp - scroll suggestions OR scroll output up
-        if (WasKeyJustPressed(Keys.PageUp, keyboardState, previousKeyboardState))
-        {
-            if (_console.HasSuggestions())
-            {
-                // Scroll suggestions up by multiple items (5 at a time)
-                _console.ScrollSuggestions(-5);
-                return InputHandlingResult.Consumed;
-            }
-            else
-        {
-            _console.Output.PageUp();
-            return InputHandlingResult.Consumed;
-            }
-        }
-
-        // Handle PageDown - scroll suggestions OR scroll output down
-        if (WasKeyJustPressed(Keys.PageDown, keyboardState, previousKeyboardState))
-        {
-            if (_console.HasSuggestions())
-            {
-                // Scroll suggestions down by multiple items (5 at a time)
-                _console.ScrollSuggestions(5);
-                return InputHandlingResult.Consumed;
-            }
-            else
-        {
-            _console.Output.PageDown();
-            return InputHandlingResult.Consumed;
-            }
-        }
+        // Handle PageUp/PageDown with key repeat - scroll suggestions OR scroll output
+        var pageScrollResult = HandlePageScrolling(keyboardState, previousKeyboardState, deltaTime);
+        if (pageScrollResult != InputHandlingResult.None)
+            return pageScrollResult;
 
         // Handle Ctrl+Home - scroll to top
         if (WasKeyJustPressed(Keys.Home, keyboardState, previousKeyboardState) &&
@@ -485,55 +460,15 @@ public class ConsoleInputHandler : IConsoleInputHandler
             return InputHandlingResult.Consumed;
         }
 
-        // Handle Ctrl/Cmd+Left (+ Shift for selection) - move to previous word
-        if (WasKeyJustPressed(Keys.Left, keyboardState, previousKeyboardState) && (isCtrlPressed || isCmdPressed))
-        {
-            _console.Input.MoveToPreviousWord(extendSelection: isShiftPressed);
-            return InputHandlingResult.Consumed;
-        }
+        // Handle Ctrl/Cmd+Left/Right with key repeat - word navigation
+        var wordNavResult = HandleWordNavigation(keyboardState, previousKeyboardState, deltaTime, isCtrlPressed, isCmdPressed, isShiftPressed);
+        if (wordNavResult != InputHandlingResult.None)
+            return wordNavResult;
 
-        // Handle Ctrl/Cmd+Right (+ Shift for selection) - move to next word
-        if (WasKeyJustPressed(Keys.Right, keyboardState, previousKeyboardState) && (isCtrlPressed || isCmdPressed))
-        {
-            _console.Input.MoveToNextWord(extendSelection: isShiftPressed);
-            return InputHandlingResult.Consumed;
-        }
-
-        // Handle Ctrl+Backspace (Cmd+Backspace on macOS) - delete previous word
-        if (WasKeyJustPressed(Keys.Back, keyboardState, previousKeyboardState) && (isCtrlPressed || isCmdPressed))
-        {
-            _console.Input.DeleteWordBackward();
-
-            // Clear suggestions if present
-            if (_console.HasSuggestions())
-            {
-                _console.ClearAutoCompleteSuggestions();
-                _lastFilteredText = "";
-            }
-
-            // Re-evaluate parameter hints after deletion
-            UpdateParameterHints();
-
-            return InputHandlingResult.Consumed;
-        }
-
-        // Handle Ctrl+Delete (Cmd+Delete on macOS) - delete next word
-        if (WasKeyJustPressed(Keys.Delete, keyboardState, previousKeyboardState) && (isCtrlPressed || isCmdPressed))
-        {
-            _console.Input.DeleteWordForward();
-
-            // Clear suggestions if present
-            if (_console.HasSuggestions())
-            {
-                _console.ClearAutoCompleteSuggestions();
-                _lastFilteredText = "";
-            }
-
-            // Re-evaluate parameter hints after deletion
-            UpdateParameterHints();
-
-            return InputHandlingResult.Consumed;
-        }
+        // Handle Ctrl+Backspace/Delete with key repeat - delete words
+        var deleteWordResult = HandleWordDeletion(keyboardState, previousKeyboardState, deltaTime, isCtrlPressed, isCmdPressed);
+        if (deleteWordResult != InputHandlingResult.None)
+            return deleteWordResult;
 
         // Handle Alt+[ and Alt+] - Collapse/Expand all sections
         var isAltPressed = keyboardState.IsKeyDown(Keys.LeftAlt) || keyboardState.IsKeyDown(Keys.RightAlt);
@@ -769,6 +704,18 @@ public class ConsoleInputHandler : IConsoleInputHandler
     /// </summary>
     private InputHandlingResult HandleSuggestionNavigation(KeyboardState keyboardState, KeyboardState previousKeyboardState, float deltaTime)
     {
+        // Don't handle navigation in search modes - let them handle their own input
+        if (_console.IsReverseSearchMode || _console.IsSearchMode)
+        {
+            return InputHandlingResult.None;
+        }
+
+        // Don't handle if in multi-line mode - let arrow keys navigate within the text
+        if (_console.Input.IsMultiLine)
+        {
+            return InputHandlingResult.None;
+        }
+
         Keys? currentNavKey = null;
 
         // Determine which navigation key is pressed
@@ -863,6 +810,12 @@ public class ConsoleInputHandler : IConsoleInputHandler
 
     private InputHandlingResult HandleSuggestionScrolling(KeyboardState keyboardState, KeyboardState previousKeyboardState, float deltaTime)
     {
+        // Don't handle scrolling in search modes - let them handle their own input
+        if (_console.IsReverseSearchMode || _console.IsSearchMode)
+        {
+            return InputHandlingResult.None;
+        }
+
         // Only handle if suggestions are visible
         if (!_console.HasSuggestions())
         {
@@ -933,6 +886,436 @@ public class ConsoleInputHandler : IConsoleInputHandler
             _lastHeldScrollKey = null;
             _scrollKeyHoldTime = 0;
             _lastScrollKeyRepeatTime = 0;
+            return InputHandlingResult.None;
+        }
+    }
+
+    /// <summary>
+    /// Handles PageUp/PageDown with key repeat support for scrolling output or suggestions.
+    /// </summary>
+    private InputHandlingResult HandlePageScrolling(KeyboardState keyboardState, KeyboardState previousKeyboardState, float deltaTime)
+    {
+        Keys? currentPageKey = null;
+
+        // Determine which page key is pressed
+        if (keyboardState.IsKeyDown(Keys.PageUp))
+            currentPageKey = Keys.PageUp;
+        else if (keyboardState.IsKeyDown(Keys.PageDown))
+            currentPageKey = Keys.PageDown;
+
+        if (currentPageKey.HasValue)
+        {
+            bool shouldScroll = false;
+
+            // Check if key was just pressed
+            if (!previousKeyboardState.IsKeyDown(currentPageKey.Value))
+            {
+                _lastHeldPageKey = currentPageKey.Value;
+                _pageKeyHoldTime = 0;
+                _lastPageKeyRepeatTime = 0;
+                shouldScroll = true;
+            }
+            // Check for key repeat
+            else if (_lastHeldPageKey == currentPageKey.Value)
+            {
+                _pageKeyHoldTime += deltaTime;
+
+                if (_pageKeyHoldTime >= InitialKeyRepeatDelay)
+                {
+                    _lastPageKeyRepeatTime += deltaTime;
+
+                    if (_lastPageKeyRepeatTime >= KeyRepeatInterval)
+                    {
+                        shouldScroll = true;
+                        _lastPageKeyRepeatTime = 0;
+                    }
+                }
+            }
+
+            if (shouldScroll)
+            {
+                if (_console.HasSuggestions())
+                {
+                    // Scroll suggestions
+                    _console.ScrollSuggestions(currentPageKey.Value == Keys.PageUp ? -5 : 5);
+                }
+                else
+                {
+                    // Scroll output
+                    if (currentPageKey.Value == Keys.PageUp)
+                        _console.Output.PageUp();
+                    else
+                        _console.Output.PageDown();
+                }
+            }
+
+            return InputHandlingResult.Consumed;
+        }
+        else
+        {
+            // Reset state
+            _lastHeldPageKey = null;
+            _pageKeyHoldTime = 0;
+            _lastPageKeyRepeatTime = 0;
+            return InputHandlingResult.None;
+        }
+    }
+
+    /// <summary>
+    /// Handles Ctrl+Left/Right with key repeat support for word navigation.
+    /// </summary>
+    private InputHandlingResult HandleWordNavigation(KeyboardState keyboardState, KeyboardState previousKeyboardState, 
+                                                     float deltaTime, bool isCtrlPressed, bool isCmdPressed, bool isShiftPressed)
+    {
+        if (!isCtrlPressed && !isCmdPressed)
+            return InputHandlingResult.None;
+
+        Keys? currentWordNavKey = null;
+
+        if (keyboardState.IsKeyDown(Keys.Left))
+            currentWordNavKey = Keys.Left;
+        else if (keyboardState.IsKeyDown(Keys.Right))
+            currentWordNavKey = Keys.Right;
+
+        if (currentWordNavKey.HasValue)
+        {
+            bool shouldNavigate = false;
+
+            if (!previousKeyboardState.IsKeyDown(currentWordNavKey.Value))
+            {
+                _lastHeldWordNavKey = currentWordNavKey.Value;
+                _wordNavKeyHoldTime = 0;
+                _lastWordNavKeyRepeatTime = 0;
+                shouldNavigate = true;
+            }
+            else if (_lastHeldWordNavKey == currentWordNavKey.Value)
+            {
+                _wordNavKeyHoldTime += deltaTime;
+
+                if (_wordNavKeyHoldTime >= InitialKeyRepeatDelay)
+                {
+                    _lastWordNavKeyRepeatTime += deltaTime;
+
+                    if (_lastWordNavKeyRepeatTime >= KeyRepeatInterval)
+                    {
+                        shouldNavigate = true;
+                        _lastWordNavKeyRepeatTime = 0;
+                    }
+                }
+            }
+
+            if (shouldNavigate)
+            {
+                if (currentWordNavKey.Value == Keys.Left)
+                    _console.Input.MoveToPreviousWord(extendSelection: isShiftPressed);
+                else
+                    _console.Input.MoveToNextWord(extendSelection: isShiftPressed);
+            }
+
+            return InputHandlingResult.Consumed;
+        }
+        else
+        {
+            _lastHeldWordNavKey = null;
+            _wordNavKeyHoldTime = 0;
+            _lastWordNavKeyRepeatTime = 0;
+            return InputHandlingResult.None;
+        }
+    }
+
+    /// <summary>
+    /// Handles Ctrl+Backspace/Delete with key repeat support for word deletion.
+    /// </summary>
+    private InputHandlingResult HandleWordDeletion(KeyboardState keyboardState, KeyboardState previousKeyboardState,
+                                                   float deltaTime, bool isCtrlPressed, bool isCmdPressed)
+    {
+        if (!isCtrlPressed && !isCmdPressed)
+            return InputHandlingResult.None;
+
+        Keys? currentDeleteWordKey = null;
+
+        if (keyboardState.IsKeyDown(Keys.Back))
+            currentDeleteWordKey = Keys.Back;
+        else if (keyboardState.IsKeyDown(Keys.Delete))
+            currentDeleteWordKey = Keys.Delete;
+
+        if (currentDeleteWordKey.HasValue)
+        {
+            bool shouldDelete = false;
+
+            if (!previousKeyboardState.IsKeyDown(currentDeleteWordKey.Value))
+            {
+                _lastHeldDeleteWordKey = currentDeleteWordKey.Value;
+                _deleteWordKeyHoldTime = 0;
+                _lastDeleteWordKeyRepeatTime = 0;
+                shouldDelete = true;
+            }
+            else if (_lastHeldDeleteWordKey == currentDeleteWordKey.Value)
+            {
+                _deleteWordKeyHoldTime += deltaTime;
+
+                if (_deleteWordKeyHoldTime >= InitialKeyRepeatDelay)
+                {
+                    _lastDeleteWordKeyRepeatTime += deltaTime;
+
+                    if (_lastDeleteWordKeyRepeatTime >= KeyRepeatInterval)
+                    {
+                        shouldDelete = true;
+                        _lastDeleteWordKeyRepeatTime = 0;
+                    }
+                }
+            }
+
+            if (shouldDelete)
+            {
+                if (currentDeleteWordKey.Value == Keys.Back)
+                    _console.Input.DeleteWordBackward();
+                else
+                    _console.Input.DeleteWordForward();
+
+                // Clear suggestions if present
+                if (_console.HasSuggestions())
+                {
+                    _console.ClearAutoCompleteSuggestions();
+                    _lastFilteredText = "";
+                }
+
+                // Re-evaluate parameter hints after deletion
+                UpdateParameterHints();
+            }
+
+            return InputHandlingResult.Consumed;
+        }
+        else
+        {
+            _lastHeldDeleteWordKey = null;
+            _deleteWordKeyHoldTime = 0;
+            _lastDeleteWordKeyRepeatTime = 0;
+            return InputHandlingResult.None;
+        }
+    }
+
+    /// <summary>
+    /// Handles Ctrl+R/S in reverse-i-search with key repeat support.
+    /// </summary>
+    private InputHandlingResult HandleReverseSearchNavigation(KeyboardState keyboardState, KeyboardState previousKeyboardState,
+                                                              float deltaTime, bool isCtrlPressed, bool isCmdPressed)
+    {
+        if (!_console.IsReverseSearchMode || (!isCtrlPressed && !isCmdPressed))
+            return InputHandlingResult.None;
+
+        Keys? currentReverseSearchNavKey = null;
+
+        if (keyboardState.IsKeyDown(Keys.R))
+            currentReverseSearchNavKey = Keys.R;
+        else if (keyboardState.IsKeyDown(Keys.S))
+            currentReverseSearchNavKey = Keys.S;
+
+        if (currentReverseSearchNavKey.HasValue)
+        {
+            bool shouldNavigate = false;
+
+            if (!previousKeyboardState.IsKeyDown(currentReverseSearchNavKey.Value))
+            {
+                _lastHeldReverseSearchNavKey = currentReverseSearchNavKey.Value;
+                _reverseSearchNavKeyHoldTime = 0;
+                _lastReverseSearchNavKeyRepeatTime = 0;
+                shouldNavigate = true;
+            }
+            else if (_lastHeldReverseSearchNavKey == currentReverseSearchNavKey.Value)
+            {
+                _reverseSearchNavKeyHoldTime += deltaTime;
+
+                if (_reverseSearchNavKeyHoldTime >= InitialKeyRepeatDelay)
+                {
+                    _lastReverseSearchNavKeyRepeatTime += deltaTime;
+
+                    if (_lastReverseSearchNavKeyRepeatTime >= KeyRepeatInterval)
+                    {
+                        shouldNavigate = true;
+                        _lastReverseSearchNavKeyRepeatTime = 0;
+                    }
+                }
+            }
+
+            if (shouldNavigate)
+            {
+                if (currentReverseSearchNavKey.Value == Keys.R)
+                {
+                    _console.ReverseSearchNextMatch();
+                    _logger.LogDebug("Reverse-i-search next match");
+                }
+                else
+                {
+                    _console.ReverseSearchPreviousMatch();
+                    _logger.LogDebug("Reverse-i-search previous match");
+                }
+            }
+
+            return InputHandlingResult.Consumed;
+        }
+        else
+        {
+            _lastHeldReverseSearchNavKey = null;
+            _reverseSearchNavKeyHoldTime = 0;
+            _lastReverseSearchNavKeyRepeatTime = 0;
+            return InputHandlingResult.None;
+        }
+    }
+
+    /// <summary>
+    /// Handles Ctrl+Shift+Up/Down with key repeat support for parameter hint overload cycling.
+    /// </summary>
+    private InputHandlingResult HandleParameterHintNavigation(KeyboardState keyboardState, KeyboardState previousKeyboardState,
+                                                              float deltaTime, bool isCtrlShiftPressed)
+    {
+        if (!isCtrlShiftPressed || !_console.HasParameterHints())
+            return InputHandlingResult.None;
+
+        Keys? currentParamHintKey = null;
+
+        if (keyboardState.IsKeyDown(Keys.Up))
+            currentParamHintKey = Keys.Up;
+        else if (keyboardState.IsKeyDown(Keys.Down))
+            currentParamHintKey = Keys.Down;
+
+        if (currentParamHintKey.HasValue)
+        {
+            bool shouldNavigate = false;
+
+            if (!previousKeyboardState.IsKeyDown(currentParamHintKey.Value))
+            {
+                _lastHeldParamHintKey = currentParamHintKey.Value;
+                _paramHintKeyHoldTime = 0;
+                _lastParamHintKeyRepeatTime = 0;
+                shouldNavigate = true;
+            }
+            else if (_lastHeldParamHintKey == currentParamHintKey.Value)
+            {
+                _paramHintKeyHoldTime += deltaTime;
+
+                if (_paramHintKeyHoldTime >= InitialKeyRepeatDelay)
+                {
+                    _lastParamHintKeyRepeatTime += deltaTime;
+
+                    if (_lastParamHintKeyRepeatTime >= KeyRepeatInterval)
+                    {
+                        shouldNavigate = true;
+                        _lastParamHintKeyRepeatTime = 0;
+                    }
+                }
+            }
+
+            if (shouldNavigate)
+            {
+                if (currentParamHintKey.Value == Keys.Up)
+                {
+                    _console.PreviousParameterHintOverload();
+                    _logger.LogDebug("Cycled to previous parameter hint overload");
+                }
+                else
+                {
+                    _console.NextParameterHintOverload();
+                    _logger.LogDebug("Cycled to next parameter hint overload");
+                }
+            }
+
+            return InputHandlingResult.Consumed;
+        }
+        else
+        {
+            _lastHeldParamHintKey = null;
+            _paramHintKeyHoldTime = 0;
+            _lastParamHintKeyRepeatTime = 0;
+            return InputHandlingResult.None;
+        }
+    }
+
+    /// <summary>
+    /// Handles Ctrl+Z/Y with key repeat support for undo/redo operations.
+    /// </summary>
+    private InputHandlingResult HandleUndoRedo(KeyboardState keyboardState, KeyboardState previousKeyboardState,
+                                               float deltaTime, bool isCtrlPressed, bool isCmdPressed, bool isShiftPressed)
+    {
+        if (!isCtrlPressed && !isCmdPressed)
+            return InputHandlingResult.None;
+
+        Keys? currentUndoRedoKey = null;
+        bool isUndo = false;
+        bool isRedo = false;
+
+        // Ctrl+Z (without Shift) = Undo
+        if (keyboardState.IsKeyDown(Keys.Z) && !isShiftPressed)
+        {
+            currentUndoRedoKey = Keys.Z;
+            isUndo = true;
+        }
+        // Ctrl+Y OR Ctrl+Shift+Z = Redo
+        else if (keyboardState.IsKeyDown(Keys.Y) || 
+                 (keyboardState.IsKeyDown(Keys.Z) && isShiftPressed))
+        {
+            currentUndoRedoKey = keyboardState.IsKeyDown(Keys.Y) ? Keys.Y : Keys.Z;
+            isRedo = true;
+        }
+
+        if (currentUndoRedoKey.HasValue)
+        {
+            bool shouldProcess = false;
+
+            // Check if key was just pressed
+            if (!previousKeyboardState.IsKeyDown(currentUndoRedoKey.Value))
+            {
+                _lastHeldUndoRedoKey = currentUndoRedoKey.Value;
+                _undoRedoKeyHoldTime = 0;
+                _lastUndoRedoKeyRepeatTime = 0;
+                shouldProcess = true;
+            }
+            // Check for key repeat
+            else if (_lastHeldUndoRedoKey == currentUndoRedoKey.Value)
+            {
+                _undoRedoKeyHoldTime += deltaTime;
+
+                if (_undoRedoKeyHoldTime >= InitialKeyRepeatDelay)
+                {
+                    _lastUndoRedoKeyRepeatTime += deltaTime;
+
+                    if (_lastUndoRedoKeyRepeatTime >= KeyRepeatInterval)
+                    {
+                        shouldProcess = true;
+                        _lastUndoRedoKeyRepeatTime = 0;
+                    }
+                }
+            }
+
+            if (shouldProcess)
+            {
+                if (isUndo)
+                {
+                    if (_console.Input.Undo())
+                    {
+                        _logger.LogDebug("Undo performed");
+                        // Re-evaluate parameter hints after undo
+                        UpdateParameterHints();
+                    }
+                }
+                else if (isRedo)
+                {
+                    if (_console.Input.Redo())
+                    {
+                        _logger.LogDebug("Redo performed");
+                        // Re-evaluate parameter hints after redo
+                        UpdateParameterHints();
+                    }
+                }
+            }
+
+            return InputHandlingResult.Consumed;
+        }
+        else
+        {
+            _lastHeldUndoRedoKey = null;
+            _undoRedoKeyHoldTime = 0;
+            _lastUndoRedoKeyRepeatTime = 0;
             return InputHandlingResult.None;
         }
     }
@@ -1328,6 +1711,10 @@ public class ConsoleInputHandler : IConsoleInputHandler
 
             if (autoCompleteItemIndex >= 0)
             {
+                // Clear all selections
+                _console.Input.ClearSelection();
+                _console.Output.ClearOutputSelection();
+
                 // Get the suggestion BEFORE we change anything
                 _console.SelectAutoCompleteItem(autoCompleteItemIndex);
                 var suggestion = _console.GetSelectedSuggestion();
@@ -1350,7 +1737,41 @@ public class ConsoleInputHandler : IConsoleInputHandler
 
             if (sectionClicked)
             {
+                // Clear all selections
+                _console.Input.ClearSelection();
+                _console.Output.ClearOutputSelection();
+
                 return InputHandlingResult.Consumed;
+            }
+
+            // Check for output area click - this might start a text selection drag
+            if (_console.IsMouseOverOutputArea(clickPosition))
+            {
+                var (line, column) = _console.GetOutputPositionAtMouse(clickPosition);
+                if (line >= 0 && column >= 0)
+                {
+                    // Clear input selection (only one selection active at a time)
+                    _console.Input.ClearSelection();
+
+                    // Start output text selection drag
+                    _isOutputDragging = true;
+                    _outputDragStartPosition = clickPosition;
+                    _outputLastDragPosition = clickPosition;
+                    _outputDragStartLine = line;
+                    _outputDragStartColumn = column;
+
+                    // Start selection at this position
+                    _console.Output.StartOutputSelection(line, column);
+
+                    return InputHandlingResult.Consumed;
+                }
+                else
+                {
+                    // Clicked in output area but not on valid text - clear all selections
+                    _console.Input.ClearSelection();
+                    _console.Output.ClearOutputSelection();
+                    return InputHandlingResult.Consumed;
+                }
             }
 
             // Check for input field click - this might start a drag selection
@@ -1359,6 +1780,9 @@ public class ConsoleInputHandler : IConsoleInputHandler
                 int charPosition = _console.GetCharacterPositionAtMouse(clickPosition);
                 if (charPosition >= 0)
                 {
+                    // Clear output selection (only one selection active at a time)
+                    _console.Output.ClearOutputSelection();
+
                     // Start potential drag operation
                     _isDragging = true;
                     _dragStartPosition = clickPosition;
@@ -1372,9 +1796,41 @@ public class ConsoleInputHandler : IConsoleInputHandler
                     return InputHandlingResult.Consumed;
                 }
             }
+
+            // Click anywhere else - clear all selections
+            _console.Input.ClearSelection();
+            _console.Output.ClearOutputSelection();
         }
 
-        // Handle mouse dragging for text selection
+        // Handle mouse dragging for output area text selection
+        if (_isOutputDragging && mouseState.LeftButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed)
+        {
+            Point currentPosition = new Point(mouseState.X, mouseState.Y);
+
+            // Only process if mouse has moved since last check (performance optimization)
+            if (currentPosition.X != _outputLastDragPosition.X || currentPosition.Y != _outputLastDragPosition.Y)
+            {
+                // Check if we've moved enough to start selection (avoid accidental selection on click)
+                int dragDistance = Math.Abs(currentPosition.X - _outputDragStartPosition.X) +
+                                 Math.Abs(currentPosition.Y - _outputDragStartPosition.Y);
+
+                if (dragDistance > 5) // 5 pixel threshold
+                {
+                    var (line, column) = _console.GetOutputPositionAtMouse(currentPosition);
+                    if (line >= 0 && column >= 0)
+                    {
+                        // Update selection range
+                        _console.Output.ExtendOutputSelection(line, column);
+                    }
+                }
+
+                _outputLastDragPosition = currentPosition;
+            }
+
+            return InputHandlingResult.Consumed;
+        }
+
+        // Handle mouse dragging for input field text selection
         if (_isDragging && mouseState.LeftButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed)
         {
             Point currentPosition = new Point(mouseState.X, mouseState.Y);
@@ -1402,7 +1858,16 @@ public class ConsoleInputHandler : IConsoleInputHandler
             return InputHandlingResult.Consumed;
         }
 
-        // Handle mouse button release (end of drag)
+        // Handle mouse button release (end of output drag)
+        if (_isOutputDragging && mouseState.LeftButton == Microsoft.Xna.Framework.Input.ButtonState.Released)
+        {
+            _isOutputDragging = false;
+            _outputDragStartLine = -1;
+            _outputDragStartColumn = -1;
+            return InputHandlingResult.Consumed;
+        }
+
+        // Handle mouse button release (end of input drag)
         if (_isDragging && mouseState.LeftButton == Microsoft.Xna.Framework.Input.ButtonState.Released)
         {
             _isDragging = false;
@@ -1414,38 +1879,22 @@ public class ConsoleInputHandler : IConsoleInputHandler
     }
 
     /// <summary>
-    /// Handles font size changes with Ctrl/Cmd key combinations.
+    /// Handles font size changes with Ctrl/Cmd key combinations with key repeat support.
     /// </summary>
     private InputHandlingResult HandleFontSizeChanges(
         KeyboardState keyboardState,
         KeyboardState previousKeyboardState,
+        float deltaTime,
         bool isShiftPressed,
         bool isCtrlPressed,
         bool isCmdPressed)
     {
         bool isModifierPressed = isCtrlPressed || isCmdPressed;
 
-        // Handle Ctrl/Cmd+Plus (or Equals) - increase font size
-        if ((WasKeyJustPressed(Keys.OemPlus, keyboardState, previousKeyboardState) ||
-             (WasKeyJustPressed(Keys.D0, keyboardState, previousKeyboardState) && isShiftPressed)) &&
-            isModifierPressed)
-        {
-            int newSize = _console.IncreaseFontSize();
-            _console.AppendOutput($"Font size increased to {newSize}pt", Success_Bright);
-            _logger.LogInformation("Font size increased to {Size}pt", newSize);
-            return InputHandlingResult.Consumed;
-        }
+        if (!isModifierPressed)
+            return InputHandlingResult.None;
 
-        // Handle Ctrl/Cmd+Minus - decrease font size
-        if (WasKeyJustPressed(Keys.OemMinus, keyboardState, previousKeyboardState) && isModifierPressed)
-        {
-            int newSize = _console.DecreaseFontSize();
-            _console.AppendOutput($"Font size decreased to {newSize}pt", Success_Bright);
-            _logger.LogInformation("Font size decreased to {Size}pt", newSize);
-            return InputHandlingResult.Consumed;
-        }
-
-        // Handle Ctrl/Cmd+0 - reset font size to default
+        // Handle Ctrl/Cmd+0 (without Shift) - reset font size (no repeat)
         if (WasKeyJustPressed(Keys.D0, keyboardState, previousKeyboardState) &&
             !isShiftPressed && isModifierPressed)
         {
@@ -1455,18 +1904,91 @@ public class ConsoleInputHandler : IConsoleInputHandler
             return InputHandlingResult.Consumed;
         }
 
-        return InputHandlingResult.None;
+        // Determine which font size key is pressed (with repeat support)
+        Keys? currentFontSizeKey = null;
+        
+        // Plus key or Shift+0 for increase
+        if (keyboardState.IsKeyDown(Keys.OemPlus) || 
+            (keyboardState.IsKeyDown(Keys.D0) && isShiftPressed))
+        {
+            currentFontSizeKey = Keys.OemPlus; // Use OemPlus as identifier for increase
+        }
+        // Minus key for decrease
+        else if (keyboardState.IsKeyDown(Keys.OemMinus))
+        {
+            currentFontSizeKey = Keys.OemMinus;
+        }
+
+        if (currentFontSizeKey.HasValue)
+        {
+            bool shouldChange = false;
+
+            if (!previousKeyboardState.IsKeyDown(currentFontSizeKey.Value) &&
+                !previousKeyboardState.IsKeyDown(Keys.D0)) // Check both for Shift+0 case
+            {
+                _lastHeldFontSizeKey = currentFontSizeKey.Value;
+                _fontSizeKeyHoldTime = 0;
+                _lastFontSizeKeyRepeatTime = 0;
+                shouldChange = true;
+            }
+            else if (_lastHeldFontSizeKey == currentFontSizeKey.Value)
+            {
+                _fontSizeKeyHoldTime += deltaTime;
+
+                if (_fontSizeKeyHoldTime >= InitialKeyRepeatDelay)
+                {
+                    _lastFontSizeKeyRepeatTime += deltaTime;
+
+                    if (_lastFontSizeKeyRepeatTime >= KeyRepeatInterval)
+                    {
+                        shouldChange = true;
+                        _lastFontSizeKeyRepeatTime = 0;
+                    }
+                }
+            }
+
+            if (shouldChange)
+            {
+                int newSize;
+                if (currentFontSizeKey.Value == Keys.OemPlus)
+                {
+                    newSize = _console.IncreaseFontSize();
+                    _logger.LogInformation("Font size increased to {Size}pt", newSize);
+                }
+                else
+                {
+                    newSize = _console.DecreaseFontSize();
+                    _logger.LogInformation("Font size decreased to {Size}pt", newSize);
+                }
+                // Only output on first press, not every repeat
+                if (_fontSizeKeyHoldTime == 0)
+                {
+                    _console.AppendOutput($"Font size: {newSize}pt", Success_Bright);
+                }
+            }
+
+            return InputHandlingResult.Consumed;
+        }
+        else
+        {
+            _lastHeldFontSizeKey = null;
+            _fontSizeKeyHoldTime = 0;
+            _lastFontSizeKeyRepeatTime = 0;
+            return InputHandlingResult.None;
+        }
     }
 
     /// <summary>
     /// Handles function keys (F1-F12) for bookmarks, search navigation, and documentation.
+    /// F3 has key repeat support for fast search navigation.
     /// </summary>
     private InputHandlingResult HandleFunctionKeys(
         KeyboardState keyboardState,
         KeyboardState previousKeyboardState,
+        float deltaTime,
         bool isShiftPressed)
     {
-        // Handle F1-F12 - execute bookmarked commands
+        // Handle F1-F12 - execute bookmarked commands (no repeat - single fire)
         var fKeyNumber = GetFKeyNumber(keyboardState, previousKeyboardState);
         if (fKeyNumber.HasValue && _bookmarksManager != null)
         {
@@ -1480,10 +2002,35 @@ public class ConsoleInputHandler : IConsoleInputHandler
             // If no bookmark for this F-key, fall through to other handlers
         }
 
-        // Handle F3 / Shift+F3 - navigate search results
-        if (WasKeyJustPressed(Keys.F3, keyboardState, previousKeyboardState))
+        // Handle F3 / Shift+F3 with key repeat - navigate search results
+        if (_console.IsSearchMode && _console.OutputSearcher.IsSearching && keyboardState.IsKeyDown(Keys.F3))
         {
-            if (_console.IsSearchMode && _console.OutputSearcher.IsSearching)
+            bool shouldNavigate = false;
+
+            if (!previousKeyboardState.IsKeyDown(Keys.F3))
+            {
+                _lastHeldSearchNavKey = Keys.F3;
+                _searchNavKeyHoldTime = 0;
+                _lastSearchNavKeyRepeatTime = 0;
+                shouldNavigate = true;
+            }
+            else if (_lastHeldSearchNavKey == Keys.F3)
+            {
+                _searchNavKeyHoldTime += deltaTime;
+
+                if (_searchNavKeyHoldTime >= InitialKeyRepeatDelay)
+                {
+                    _lastSearchNavKeyRepeatTime += deltaTime;
+
+                    if (_lastSearchNavKeyRepeatTime >= KeyRepeatInterval)
+                    {
+                        shouldNavigate = true;
+                        _lastSearchNavKeyRepeatTime = 0;
+                    }
+                }
+            }
+
+            if (shouldNavigate)
             {
                 if (isShiftPressed)
                 {
@@ -1495,8 +2042,16 @@ public class ConsoleInputHandler : IConsoleInputHandler
                     _console.NextSearchMatch();
                     _logger.LogDebug("Moved to next search match");
                 }
-                return InputHandlingResult.Consumed;
             }
+
+            return InputHandlingResult.Consumed;
+        }
+        else if (!keyboardState.IsKeyDown(Keys.F3))
+        {
+            // Reset F3 repeat state when not pressed
+            _lastHeldSearchNavKey = null;
+            _searchNavKeyHoldTime = 0;
+            _lastSearchNavKeyRepeatTime = 0;
         }
 
         // Handle F1 - show/hide documentation for selected autocomplete item (if no bookmark)

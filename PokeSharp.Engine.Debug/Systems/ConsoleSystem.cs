@@ -162,10 +162,18 @@ public class ConsoleSystem : IUpdateSystem
             {
                 _loggerProvider.SetConsoleWriter((message, color) =>
                 {
-                    if (_console != null && _console.IsVisible && _console.Config.LoggingEnabled)
+                    // Write logs to console buffer even when closed, so they're visible when reopened
+                    if (_console != null && _console.Config.LoggingEnabled)
                     {
                         _console.AppendOutput(message, color);
                     }
+                });
+                
+                // Set up log level filter based on console config
+                _loggerProvider.SetLogLevelFilter(logLevel =>
+                {
+                    if (_console == null) return false;
+                    return logLevel >= _console.Config.MinimumLogLevel;
                 });
             }
 
@@ -208,13 +216,15 @@ public class ConsoleSystem : IUpdateSystem
 
         try
         {
-            // Check for console toggle key (~ or `) when console is closed
+            // Check for console toggle key (`) when console is closed (not ~ with shift)
             // When console is open, ConsoleScene handles the toggle
             if (!_isConsoleOpen)
             {
                 var currentKeyboard = Keyboard.GetState();
-                bool togglePressed = (currentKeyboard.IsKeyDown(Keys.OemTilde) && _previousKeyboardState.IsKeyUp(Keys.OemTilde)) ||
-                                     (currentKeyboard.IsKeyDown(Keys.OemQuotes) && _previousKeyboardState.IsKeyUp(Keys.OemQuotes));
+                bool isShiftPressed = currentKeyboard.IsKeyDown(Keys.LeftShift) || currentKeyboard.IsKeyDown(Keys.RightShift);
+                bool togglePressed = currentKeyboard.IsKeyDown(Keys.OemTilde) && 
+                                     _previousKeyboardState.IsKeyUp(Keys.OemTilde) &&
+                                     !isShiftPressed;
 
                 if (togglePressed)
                 {

@@ -43,10 +43,22 @@ public class ConsoleOutput
     private readonly List<OutputSection> _sections = new();
     private OutputSection? _currentSection = null;
 
+    // Output text selection state
+    private bool _hasSelection = false;
+    private int _selectionStartLine = 0;
+    private int _selectionStartColumn = 0;
+    private int _selectionEndLine = 0;
+    private int _selectionEndColumn = 0;
+
     /// <summary>
     ///     Gets the number of visible lines based on console height.
     /// </summary>
     public int VisibleLines { get; set; } = 25;
+
+    /// <summary>
+    /// Gets whether there is an active selection in the output area.
+    /// </summary>
+    public bool HasOutputSelection => _hasSelection;
 
     /// <summary>
     ///     Appends a line to the output with default color (white).
@@ -368,6 +380,57 @@ public class ConsoleOutput
         _scrollOffset = targetOffset;
     }
 
+    /// <summary>
+    /// Converts an absolute line index to an effective/visible line index (accounting for filtering and folding).
+    /// </summary>
+    /// <param name="absoluteLineIndex">The absolute line index from GetAllLines().</param>
+    /// <returns>The effective line index, or -1 if the line is not visible.</returns>
+    public int ConvertAbsoluteToEffectiveIndex(int absoluteLineIndex)
+    {
+        if (absoluteLineIndex < 0 || absoluteLineIndex >= _lines.Count)
+            return -1;
+
+        int effectiveIndex = 0;
+
+        for (int i = 0; i < _lines.Count; i++)
+        {
+            var line = _lines[i];
+            
+            // Check if this line should be included based on filters
+            if (ShouldIncludeLine(line))
+            {
+                var section = GetSectionContainingLine(i);
+
+                // If line is in a folded section, only count the header
+                if (section != null && section.IsFolded)
+                {
+                    if (i == section.StartLine)
+                    {
+                        // This is the header, it's visible
+                        if (i == absoluteLineIndex)
+                            return effectiveIndex;
+                        effectiveIndex++;
+                    }
+                    else
+                    {
+                        // Line is hidden in a folded section
+                        if (i == absoluteLineIndex)
+                            return -1; // Line is not visible
+                    }
+                }
+                else
+                {
+                    // Line is visible
+                    if (i == absoluteLineIndex)
+                        return effectiveIndex;
+                    effectiveIndex++;
+                }
+            }
+        }
+
+        return -1; // Line not found
+    }
+
     #region Filtering
 
     /// <summary>
@@ -643,6 +706,55 @@ public class ConsoleOutput
     public IReadOnlyList<OutputSection> GetAllSections() => _sections.AsReadOnly();
 
     /// <summary>
+    /// Checks if a line is inside a collapsed section (not the header).
+    /// </summary>
+    /// <param name="lineIndex">The line index to check.</param>
+    /// <returns>True if the line is hidden in a collapsed section.</returns>
+    public bool IsLineInCollapsedSection(int lineIndex)
+    {
+        var section = GetSectionContainingLine(lineIndex);
+        if (section == null || !section.IsFolded)
+            return false;
+
+        // If it's the header line, it's not hidden
+        return lineIndex != section.StartLine;
+    }
+
+    /// <summary>
+    /// Expands the section containing the specified line if it's collapsed.
+    /// </summary>
+    /// <param name="lineIndex">The line index.</param>
+    /// <returns>The section that was expanded, or null if no section was expanded.</returns>
+    public OutputSection? ExpandSectionContainingLine(int lineIndex)
+    {
+        var section = GetSectionContainingLine(lineIndex);
+        if (section != null && section.IsFolded)
+        {
+            section.IsFolded = false;
+            UpdateSectionHeaderText(section);
+            return section;
+        }
+        return null;
+    }
+
+    /// <summary>
+    /// Collapses a specific section by its ID.
+    /// </summary>
+    /// <param name="sectionId">The section ID.</param>
+    /// <returns>True if the section was found and collapsed.</returns>
+    public bool CollapseSectionById(string sectionId)
+    {
+        var section = _sections.FirstOrDefault(s => s.Id == sectionId);
+        if (section != null && !section.IsFolded)
+        {
+            section.IsFolded = true;
+            UpdateSectionHeaderText(section);
+            return true;
+        }
+        return false;
+    }
+
+    /// <summary>
     /// Gets visible section headers with their visual line indices (after filtering/folding).
     /// </summary>
     /// <returns>List of (section, visualLineIndex) tuples for currently visible sections.</returns>
@@ -733,6 +845,151 @@ public class ConsoleOutput
             SectionType.Search => Section_Search,
             _ => Color.LightGray
         };
+    }
+
+    #endregion
+
+    #region Output Text Selection
+
+    /// <summary>
+    /// Starts a new text selection at the specified line and column.
+    /// </summary>
+    /// <param name="line">The line index (in visible lines).</param>
+    /// <param name="column">The column index.</param>
+    public void StartOutputSelection(int line, int column)
+    {
+        _hasSelection = true;
+        _selectionStartLine = line;
+        _selectionStartColumn = column;
+        _selectionEndLine = line;
+        _selectionEndColumn = column;
+    }
+
+    /// <summary>
+    /// Extends the current selection to the specified line and column.
+    /// </summary>
+    /// <param name="line">The line index (in visible lines).</param>
+    /// <param name="column">The column index.</param>
+    public void ExtendOutputSelection(int line, int column)
+    {
+        _selectionEndLine = line;
+        _selectionEndColumn = column;
+
+        // Clear selection if start and end are the same
+        if (_selectionStartLine == _selectionEndLine && _selectionStartColumn == _selectionEndColumn)
+        {
+            ClearOutputSelection();
+        }
+    }
+
+    /// <summary>
+    /// Clears the output text selection.
+    /// </summary>
+    public void ClearOutputSelection()
+    {
+        _hasSelection = false;
+        _selectionStartLine = 0;
+        _selectionStartColumn = 0;
+        _selectionEndLine = 0;
+        _selectionEndColumn = 0;
+    }
+
+    /// <summary>
+    /// Gets the selected text from the output area.
+    /// </summary>
+    /// <returns>The selected text, or empty string if no selection.</returns>
+    public string GetSelectedOutputText()
+    {
+        if (!_hasSelection)
+            return string.Empty;
+
+        var visibleLines = GetVisibleLines();
+        if (visibleLines.Count == 0)
+            return string.Empty;
+
+        // Normalize selection (ensure start is before end)
+        int startLine = Math.Min(_selectionStartLine, _selectionEndLine);
+        int endLine = Math.Max(_selectionStartLine, _selectionEndLine);
+        int startCol, endCol;
+
+        if (_selectionStartLine < _selectionEndLine ||
+            (_selectionStartLine == _selectionEndLine && _selectionStartColumn <= _selectionEndColumn))
+        {
+            startCol = _selectionStartColumn;
+            endCol = _selectionEndColumn;
+        }
+        else
+        {
+            startCol = _selectionEndColumn;
+            endCol = _selectionStartColumn;
+        }
+
+        // Build selected text
+        var selectedText = new StringBuilder();
+
+        for (int i = startLine; i <= endLine && i < visibleLines.Count; i++)
+        {
+            string lineText = visibleLines[i].Text;
+
+            if (i == startLine && i == endLine)
+            {
+                // Selection is within a single line
+                int actualStartCol = Math.Min(startCol, lineText.Length);
+                int actualEndCol = Math.Min(endCol, lineText.Length);
+                if (actualStartCol < actualEndCol)
+                {
+                    selectedText.Append(lineText.Substring(actualStartCol, actualEndCol - actualStartCol));
+                }
+            }
+            else if (i == startLine)
+            {
+                // First line of multi-line selection
+                int actualStartCol = Math.Min(startCol, lineText.Length);
+                selectedText.AppendLine(lineText.Substring(actualStartCol));
+            }
+            else if (i == endLine)
+            {
+                // Last line of multi-line selection
+                int actualEndCol = Math.Min(endCol, lineText.Length);
+                selectedText.Append(lineText.Substring(0, actualEndCol));
+            }
+            else
+            {
+                // Middle lines
+                selectedText.AppendLine(lineText);
+            }
+        }
+
+        return selectedText.ToString();
+    }
+
+    /// <summary>
+    /// Gets the selection range for rendering (normalized).
+    /// </summary>
+    /// <returns>Tuple of (startLine, startCol, endLine, endCol).</returns>
+    public (int StartLine, int StartCol, int EndLine, int EndCol) GetSelectionRange()
+    {
+        if (!_hasSelection)
+            return (0, 0, 0, 0);
+
+        // Normalize selection (ensure start is before end)
+        int startLine = Math.Min(_selectionStartLine, _selectionEndLine);
+        int endLine = Math.Max(_selectionStartLine, _selectionEndLine);
+        int startCol, endCol;
+
+        if (_selectionStartLine < _selectionEndLine ||
+            (_selectionStartLine == _selectionEndLine && _selectionStartColumn <= _selectionEndColumn))
+        {
+            startCol = _selectionStartColumn;
+            endCol = _selectionEndColumn;
+        }
+        else
+        {
+            startCol = _selectionEndColumn;
+            endCol = _selectionStartColumn;
+        }
+
+        return (startLine, startCol, endLine, endCol);
     }
 
     #endregion

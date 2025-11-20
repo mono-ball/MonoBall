@@ -30,6 +30,11 @@ public enum ConsoleSize
 public record ConsoleConfig
 {
     /// <summary>
+    /// Configuration section name in appsettings.json.
+    /// </summary>
+    public const string SectionName = "DebugConsole";
+
+    /// <summary>
     /// Gets the console size.
     /// </summary>
     public ConsoleSize Size { get; init; } = ConsoleSize.Full;

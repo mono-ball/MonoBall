@@ -286,6 +286,44 @@ public class ConsoleInputField
                 }
                 return true;
 
+            case Keys.Up:
+                // Move cursor up one line in multi-line mode
+                if (_multiLineMode)
+                {
+                    if (isShiftPressed)
+                    {
+                        int newPos = GetPositionLineAbove(_cursorPosition);
+                        ExtendSelection(newPos);
+                    }
+                    else
+                    {
+                        ClearSelection();
+                        _cursorPosition = GetPositionLineAbove(_cursorPosition);
+                        InvalidateCursorCache();
+                    }
+                    return true;
+                }
+                break;
+
+            case Keys.Down:
+                // Move cursor down one line in multi-line mode
+                if (_multiLineMode)
+                {
+                    if (isShiftPressed)
+                    {
+                        int newPos = GetPositionLineBelow(_cursorPosition);
+                        ExtendSelection(newPos);
+                    }
+                    else
+                    {
+                        ClearSelection();
+                        _cursorPosition = GetPositionLineBelow(_cursorPosition);
+                        InvalidateCursorCache();
+                    }
+                    return true;
+                }
+                break;
+
             default:
                 if (character.HasValue && !char.IsControl(character.Value))
                 {
@@ -533,6 +571,76 @@ public class ConsoleInputField
     private static bool IsWordSeparator(char c)
     {
         return char.IsWhiteSpace(c) || char.IsPunctuation(c) || char.IsSymbol(c);
+    }
+
+    /// <summary>
+    /// Gets the cursor position that would be one line above the current position.
+    /// Attempts to maintain the same column position.
+    /// </summary>
+    private int GetPositionLineAbove(int currentPosition)
+    {
+        if (!_multiLineMode || currentPosition == 0)
+            return 0;
+
+        var lines = _text.Split('\n');
+        int currentLine = GetCursorLine();
+        int currentColumn = GetCursorColumn();
+
+        // Already at first line
+        if (currentLine == 0)
+            return 0;
+
+        // Move to the line above
+        int targetLine = currentLine - 1;
+        int lineLength = lines[targetLine].Length;
+
+        // Maintain column position, but clamp to line length
+        int targetColumn = Math.Min(currentColumn, lineLength);
+
+        // Calculate absolute position
+        int position = 0;
+        for (int i = 0; i < targetLine; i++)
+        {
+            position += lines[i].Length + 1; // +1 for newline
+        }
+        position += targetColumn;
+
+        return position;
+    }
+
+    /// <summary>
+    /// Gets the cursor position that would be one line below the current position.
+    /// Attempts to maintain the same column position.
+    /// </summary>
+    private int GetPositionLineBelow(int currentPosition)
+    {
+        if (!_multiLineMode)
+            return _text.Length;
+
+        var lines = _text.Split('\n');
+        int currentLine = GetCursorLine();
+        int currentColumn = GetCursorColumn();
+
+        // Already at last line
+        if (currentLine >= lines.Length - 1)
+            return _text.Length;
+
+        // Move to the line below
+        int targetLine = currentLine + 1;
+        int lineLength = lines[targetLine].Length;
+
+        // Maintain column position, but clamp to line length
+        int targetColumn = Math.Min(currentColumn, lineLength);
+
+        // Calculate absolute position
+        int position = 0;
+        for (int i = 0; i < targetLine; i++)
+        {
+            position += lines[i].Length + 1; // +1 for newline
+        }
+        position += targetColumn;
+
+        return Math.Min(position, _text.Length);
     }
 
     // ===== TEXT SELECTION METHODS =====

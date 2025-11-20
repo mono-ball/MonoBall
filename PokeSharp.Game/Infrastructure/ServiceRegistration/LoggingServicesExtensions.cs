@@ -2,6 +2,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using PokeSharp.Engine.Common.Logging;
+using PokeSharp.Engine.Debug.Logging;
 using Serilog;
 
 namespace PokeSharp.Game.Infrastructure.ServiceRegistration;
@@ -30,6 +31,11 @@ public static class LoggingServicesExtensions
         {
             loggingBuilder.ClearProviders();
             loggingBuilder.AddSerilog(logger, true);
+            
+            // Add console logger provider for in-game debug console
+            // This provider will be configured later by ConsoleSystem
+            loggingBuilder.Services.AddSingleton<ILoggerProvider>(sp => 
+                sp.GetRequiredService<ConsoleLoggerProvider>());
         });
 
         return services;

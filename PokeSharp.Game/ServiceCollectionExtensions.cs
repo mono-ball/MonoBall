@@ -52,8 +52,8 @@ public static class ServiceCollectionExtensions
         services.AddScriptingServices();
         services.AddGameRuntimeServices();
 
-        // Debug Console Services
-        services.AddDebugConsole();
+        // Debug Console Services (pass configuration for console settings)
+        services.AddDebugConsole(configuration);
 
         return services;
     }

@@ -1,5 +1,7 @@
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.Xna.Framework.Graphics;
 using PokeSharp.Engine.Debug.Console.Configuration;
 using PokeSharp.Engine.Debug.Console.Features;
@@ -22,26 +24,40 @@ public static class DebugServiceCollectionExtensions
     /// This enables dependency injection for the console system and its components.
     /// </summary>
     /// <param name="services">The service collection.</param>
+    /// <param name="configuration">Optional configuration to load console settings from appsettings.json.</param>
     /// <returns>The service collection for chaining.</returns>
-    public static IServiceCollection AddDebugConsole(this IServiceCollection services)
+    public static IServiceCollection AddDebugConsole(this IServiceCollection services, IConfiguration? configuration = null)
     {
         // Console Logger Provider
         services.AddSingleton<ConsoleLoggerProvider>();
 
-        // Console Configuration
-        services.AddSingleton<ConsoleConfig>(sp =>
+        // Console Configuration - load from appsettings.json or use defaults
+        if (configuration != null)
         {
-            return new ConsoleConfig
+            // Get configuration from appsettings.json using Get<T>() which supports records
+            var consoleConfigSection = configuration.GetSection(ConsoleConfig.SectionName);
+            var consoleConfig = consoleConfigSection.Get<ConsoleConfig>() ?? new ConsoleConfig();
+            
+            // Register as singleton
+            services.AddSingleton(consoleConfig);
+        }
+        else
+        {
+            // Fallback to hardcoded defaults if no configuration provided
+            services.AddSingleton<ConsoleConfig>(sp =>
             {
-                Size = ConsoleSize.Medium,
-                FontSize = 16,
-                SyntaxHighlightingEnabled = true,
-                AutoCompleteEnabled = true,
-                PersistHistory = true,
-                LoggingEnabled = true,
-                MinimumLogLevel = LogLevel.Debug
-            };
-        });
+                return new ConsoleConfig
+                {
+                    Size = ConsoleSize.Medium,
+                    FontSize = 16,
+                    SyntaxHighlightingEnabled = true,
+                    AutoCompleteEnabled = true,
+                    PersistHistory = true,
+                    LoggingEnabled = true,
+                    MinimumLogLevel = LogLevel.Debug
+                };
+            });
+        }
 
         // Console UI Components
         services.AddSingleton<ConsoleCommandHistory>();

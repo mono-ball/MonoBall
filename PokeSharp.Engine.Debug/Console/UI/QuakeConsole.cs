@@ -328,7 +328,7 @@ public class QuakeConsole : IDisposable
     /// <summary>
     /// Exits search mode.
     /// </summary>
-    public void ExitSearch() => _searchManager.ExitSearch();
+    public void ExitSearch() => _searchManager.ExitSearch(_output);
 
     /// <summary>
     /// Updates the search query.
@@ -461,7 +461,13 @@ public class QuakeConsole : IDisposable
             // Draw search highlights first (if searching)
             if (_searchManager.OutputSearcher.IsSearching)
             {
-                _searchRenderer.DrawSearchHighlights((int)outputY, lineHeight, _searchManager.OutputSearcher, _output.ScrollOffset, _output.GetAllLines());
+                _searchRenderer.DrawSearchHighlights((int)outputY, lineHeight, _searchManager.OutputSearcher, _output.ScrollOffset, _output.GetAllLines(), _output);
+            }
+
+            // Draw output text selection highlight (if any)
+            if (_output.HasOutputSelection)
+            {
+                DrawOutputSelectionHighlight((int)outputY, lineHeight, visibleLines);
             }
 
             // Draw text on top of highlights
@@ -1183,6 +1189,102 @@ public class QuakeConsole : IDisposable
     }
 
     /// <summary>
+    /// Checks if the mouse is over the console output area.
+    /// </summary>
+    /// <param name="mousePosition">Mouse position.</param>
+    /// <returns>True if mouse is over output area.</returns>
+    public bool IsMouseOverOutputArea(Point mousePosition)
+    {
+        float yPos = _animator.CurrentY;
+        int lineHeight = _fontRenderer.GetLineHeight();
+        
+        // Calculate input area height
+        int inputAreaHeight = lineHeight * Math.Max(1, _input.LineCount) + 10;
+        if (_input.LineCount > 1)
+        {
+            inputAreaHeight += lineHeight + 6; // Multi-line indicator
+        }
+
+        // Output area is between top padding and input area
+        int outputY = (int)(yPos + Padding);
+        int outputHeight = (int)(_consoleHeight - inputAreaHeight - Padding * 3);
+
+        return mousePosition.Y >= outputY &&
+               mousePosition.Y < outputY + outputHeight &&
+               mousePosition.X >= Padding &&
+               mousePosition.X <= _screenWidth - Padding;
+    }
+
+    /// <summary>
+    /// Gets the line and column position in the output area at the given mouse position.
+    /// </summary>
+    /// <param name="mousePosition">Mouse position.</param>
+    /// <returns>Tuple of (line, column) or (-1, -1) if not over output.</returns>
+    public (int Line, int Column) GetOutputPositionAtMouse(Point mousePosition)
+    {
+        if (!IsMouseOverOutputArea(mousePosition))
+            return (-1, -1);
+
+        float yPos = _animator.CurrentY;
+        int lineHeight = _fontRenderer.GetLineHeight();
+        int outputY = (int)(yPos + Padding);
+
+        // Calculate which visible line was clicked
+        int relativeY = mousePosition.Y - outputY;
+        int clickedLine = relativeY / lineHeight;
+
+        // Check if line is within visible range
+        var visibleLines = _output.GetVisibleLines();
+        if (clickedLine < 0 || clickedLine >= visibleLines.Count)
+            return (-1, -1);
+
+        // Get the line text
+        string lineText = visibleLines[clickedLine].Text;
+
+        // Calculate column position
+        int relativeX = mousePosition.X - Padding;
+        if (relativeX <= 0)
+            return (clickedLine, 0);
+
+        // Quick check: if click is beyond the entire text, return end position
+        float totalWidth = _fontRenderer.MeasureString(lineText).X;
+        if (relativeX >= totalWidth)
+            return (clickedLine, lineText.Length);
+
+        // Binary search for the character position
+        int left = 0;
+        int right = lineText.Length;
+
+        while (left < right)
+        {
+            int mid = (left + right) / 2;
+            float widthAtMid = _fontRenderer.MeasureString(lineText.Substring(0, mid)).X;
+
+            if (widthAtMid < relativeX)
+            {
+                left = mid + 1;
+            }
+            else
+            {
+                right = mid;
+            }
+        }
+
+        // Check if we should round to the previous or next character
+        if (left > 0)
+        {
+            float widthAtLeft = _fontRenderer.MeasureString(lineText.Substring(0, left)).X;
+            float widthAtPrev = _fontRenderer.MeasureString(lineText.Substring(0, left - 1)).X;
+            float midPoint = (widthAtPrev + widthAtLeft) / 2;
+
+            if (relativeX < midPoint)
+                return (clickedLine, left - 1);
+        }
+
+        return (clickedLine, left);
+    }
+
+    /// <summary>
     /// Gets the auto-complete item index at the given mouse position.
     /// Returns -1 if no item is at that position.
     /// </summary>
@@ -1548,6 +1650,79 @@ public class QuakeConsole : IDisposable
         }
 
         return true;
+    }
+
+    /// <summary>
+    /// Draws the output text selection highlight.
+    /// </summary>
+    /// <param name="outputY">Y position of output area.</param>
+    /// <param name="lineHeight">Height of each line.</param>
+    /// <param name="visibleLines">The visible lines being rendered.</param>
+    private void DrawOutputSelectionHighlight(int outputY, int lineHeight, IReadOnlyList<ConsoleLine> visibleLines)
+    {
+        var (startLine, startCol, endLine, endCol) = _output.GetSelectionRange();
+
+        // Clamp to visible range
+        if (startLine >= visibleLines.Count || endLine < 0)
+            return;
+
+        startLine = Math.Max(0, startLine);
+        endLine = Math.Min(endLine, visibleLines.Count - 1);
+
+        // Selection highlight color (semi-transparent blue, similar to most text editors)
+        Color selectionColor = new Color(51, 153, 255, 80); // Light blue with alpha
+
+        for (int i = startLine; i <= endLine && i < visibleLines.Count; i++)
+        {
+            string lineText = visibleLines[i].Text;
+            int lineY = outputY + (i * lineHeight);
+
+            if (i == startLine && i == endLine)
+            {
+                // Selection is within a single line
+                int actualStartCol = Math.Min(startCol, lineText.Length);
+                int actualEndCol = Math.Min(endCol, lineText.Length);
+
+                if (actualStartCol < actualEndCol)
+                {
+                    string beforeSelection = lineText.Substring(0, actualStartCol);
+                    string selection = lineText.Substring(actualStartCol, actualEndCol - actualStartCol);
+
+                    float startX = Padding + _fontRenderer.MeasureString(beforeSelection).X;
+                    float selectionWidth = _fontRenderer.MeasureString(selection).X;
+
+                    DrawRectangle((int)startX, lineY, (int)selectionWidth, lineHeight, selectionColor);
+                }
+            }
+            else if (i == startLine)
+            {
+                // First line of multi-line selection
+                int actualStartCol = Math.Min(startCol, lineText.Length);
+                string beforeSelection = lineText.Substring(0, actualStartCol);
+                string selection = lineText.Substring(actualStartCol);
+
+                float startX = Padding + _fontRenderer.MeasureString(beforeSelection).X;
+                float selectionWidth = _fontRenderer.MeasureString(selection).X;
+
+                DrawRectangle((int)startX, lineY, (int)selectionWidth, lineHeight, selectionColor);
+            }
+            else if (i == endLine)
+            {
+                // Last line of multi-line selection
+                int actualEndCol = Math.Min(endCol, lineText.Length);
+                string selection = lineText.Substring(0, actualEndCol);
+
+                float selectionWidth = _fontRenderer.MeasureString(selection).X;
+
+                DrawRectangle(Padding, lineY, (int)selectionWidth, lineHeight, selectionColor);
+            }
+            else
+            {
+                // Middle lines - select entire line
+                float lineWidth = _fontRenderer.MeasureString(lineText).X;
+                DrawRectangle(Padding, lineY, (int)lineWidth, lineHeight, selectionColor);
+            }
+        }
     }
 }
 

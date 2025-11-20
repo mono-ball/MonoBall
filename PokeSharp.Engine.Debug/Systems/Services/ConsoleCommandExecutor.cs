@@ -226,21 +226,63 @@ public class ConsoleCommandExecutor : IConsoleCommandExecutor
         }
 
         // load command
-        if (command.StartsWith("load ", StringComparison.OrdinalIgnoreCase))
+        if (command.StartsWith("load", StringComparison.OrdinalIgnoreCase))
         {
-            var scriptName = command.Substring(5).Trim();
-            LoadScript(scriptName);
-            result = CommandExecutionResult.SuccessNoOutput(isBuiltIn: true);
-            return true;
+            if (command.Equals("load", StringComparison.OrdinalIgnoreCase))
+            {
+                // No filename provided
+                _console.AppendOutput("Usage: load <filename>", Output_Warning);
+                _console.AppendOutput("Example: load startup.csx", Color.LightGray);
+                _console.AppendOutput("Use 'scripts' to list available scripts.", Color.LightGray);
+                result = CommandExecutionResult.SuccessNoOutput(isBuiltIn: true);
+                return true;
+            }
+            
+            if (command.StartsWith("load ", StringComparison.OrdinalIgnoreCase))
+            {
+                var scriptName = command.Substring(5).Trim();
+                if (string.IsNullOrWhiteSpace(scriptName))
+                {
+                    _console.AppendOutput("Usage: load <filename>", Output_Warning);
+                    _console.AppendOutput("Example: load startup.csx", Color.LightGray);
+                }
+                else
+                {
+                    LoadScript(scriptName);
+                }
+                result = CommandExecutionResult.SuccessNoOutput(isBuiltIn: true);
+                return true;
+            }
         }
 
         // save command
-        if (command.StartsWith("save ", StringComparison.OrdinalIgnoreCase))
+        if (command.StartsWith("save", StringComparison.OrdinalIgnoreCase))
         {
-            var scriptName = command.Substring(5).Trim();
-            SaveScript(scriptName);
-            result = CommandExecutionResult.SuccessNoOutput(isBuiltIn: true);
-            return true;
+            if (command.Equals("save", StringComparison.OrdinalIgnoreCase))
+            {
+                // No filename provided
+                _console.AppendOutput("Usage: save <filename>", Output_Warning);
+                _console.AppendOutput("Example: save myscript.csx", Color.LightGray);
+                _console.AppendOutput("Saves the current multi-line input to a script file.", Color.LightGray);
+                result = CommandExecutionResult.SuccessNoOutput(isBuiltIn: true);
+                return true;
+            }
+            
+            if (command.StartsWith("save ", StringComparison.OrdinalIgnoreCase))
+            {
+                var scriptName = command.Substring(5).Trim();
+                if (string.IsNullOrWhiteSpace(scriptName))
+                {
+                    _console.AppendOutput("Usage: save <filename>", Output_Warning);
+                    _console.AppendOutput("Example: save myscript.csx", Color.LightGray);
+                }
+                else
+                {
+                    SaveScript(scriptName);
+                }
+                result = CommandExecutionResult.SuccessNoOutput(isBuiltIn: true);
+                return true;
+            }
         }
 
         // alias commands

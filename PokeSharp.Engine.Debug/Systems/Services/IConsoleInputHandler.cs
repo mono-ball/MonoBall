@@ -12,12 +12,14 @@ public record InputHandlingResult
     public bool ShouldTriggerAutoComplete { get; init; }
     public bool ShouldNavigateHistory { get; init; }
     public HistoryDirection? HistoryDirection { get; init; }
+    public bool ShouldCloseConsole { get; init; }
     public bool ConsumedInput { get; init; }
 
     public static InputHandlingResult None => new() { ConsumedInput = false };
     public static InputHandlingResult Execute(string command) => new() { ShouldExecuteCommand = true, Command = command, ConsumedInput = true };
     public static InputHandlingResult TriggerAutoComplete() => new() { ShouldTriggerAutoComplete = true, ConsumedInput = true };
     public static InputHandlingResult NavigateHistory(HistoryDirection direction) => new() { ShouldNavigateHistory = true, HistoryDirection = direction, ConsumedInput = true };
+    public static InputHandlingResult CloseConsole() => new() { ShouldCloseConsole = true, ConsumedInput = true };
     public static InputHandlingResult Consumed => new() { ConsumedInput = true };
 }
 

@@ -22,6 +22,11 @@ public class ConsoleSearchManager
     private List<string> _reverseSearchMatches = new();
     private int _reverseSearchIndex = 0;
 
+    // Section folding state for search
+    // Tracks sections that were auto-expanded for search results
+    private readonly HashSet<string> _autoExpandedSections = new();
+    private int? _lastSearchMatchLineIndex = null;
+
     /// <summary>
     /// Gets the output searcher instance.
     /// </summary>
@@ -79,11 +84,14 @@ public class ConsoleSearchManager
     /// <summary>
     /// Exits forward search mode.
     /// </summary>
-    public void ExitSearch()
+    public void ExitSearch(ConsoleOutput output)
     {
         _isSearchMode = false;
         _searchInput = string.Empty;
         _outputSearcher.ClearSearch();
+
+        // Restore folding state for auto-expanded sections
+        RestoreAutoExpandedSections(output);
     }
 
     /// <summary>
@@ -101,7 +109,7 @@ public class ConsoleSearchManager
             var match = _outputSearcher.GetCurrentMatch();
             if (match != null)
             {
-                output.ScrollToLine(match.LineIndex);
+                NavigateToMatch(match.LineIndex, output);
             }
         }
     }
@@ -118,7 +126,7 @@ public class ConsoleSearchManager
         var match = _outputSearcher.GetCurrentMatch();
         if (match != null)
         {
-            output.ScrollToLine(match.LineIndex);
+            NavigateToMatch(match.LineIndex, output);
         }
     }
 
@@ -134,7 +142,7 @@ public class ConsoleSearchManager
         var match = _outputSearcher.GetCurrentMatch();
         if (match != null)
         {
-            output.ScrollToLine(match.LineIndex);
+            NavigateToMatch(match.LineIndex, output);
         }
     }
 
@@ -217,6 +225,61 @@ public class ConsoleSearchManager
     public string? GetCurrentMatch()
     {
         return CurrentReverseSearchMatch;
+    }
+
+    #endregion
+
+    #region Section Folding for Search
+
+    /// <summary>
+    /// Navigates to a search match, handling section expansion/collapse automatically.
+    /// </summary>
+    private void NavigateToMatch(int absoluteLineIndex, ConsoleOutput output)
+    {
+        // If navigating to a different match, collapse the previous auto-expanded section
+        if (_lastSearchMatchLineIndex.HasValue && _lastSearchMatchLineIndex != absoluteLineIndex)
+        {
+            var prevSection = output.GetSectionContainingLine(_lastSearchMatchLineIndex.Value);
+            if (prevSection != null && _autoExpandedSections.Contains(prevSection.Id))
+            {
+                output.CollapseSectionById(prevSection.Id);
+                _autoExpandedSections.Remove(prevSection.Id);
+            }
+        }
+
+        // Expand the section containing the new match if it's collapsed
+        if (output.IsLineInCollapsedSection(absoluteLineIndex))
+        {
+            var expandedSection = output.ExpandSectionContainingLine(absoluteLineIndex);
+            if (expandedSection != null)
+            {
+                _autoExpandedSections.Add(expandedSection.Id);
+            }
+        }
+
+        // Update the last match line index (absolute)
+        _lastSearchMatchLineIndex = absoluteLineIndex;
+
+        // Convert absolute line index to effective line index (accounting for collapsed sections)
+        int effectiveLineIndex = output.ConvertAbsoluteToEffectiveIndex(absoluteLineIndex);
+        if (effectiveLineIndex >= 0)
+        {
+            // Scroll to the effective line position
+            output.ScrollToLine(effectiveLineIndex);
+        }
+    }
+
+    /// <summary>
+    /// Restores the folding state for all auto-expanded sections.
+    /// </summary>
+    private void RestoreAutoExpandedSections(ConsoleOutput output)
+    {
+        foreach (var sectionId in _autoExpandedSections)
+        {
+            output.CollapseSectionById(sectionId);
+        }
+        _autoExpandedSections.Clear();
+        _lastSearchMatchLineIndex = null;
     }
 
     #endregion
