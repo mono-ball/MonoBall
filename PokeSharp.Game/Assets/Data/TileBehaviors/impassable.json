@@ -1,0 +1,8 @@
+{
+  "typeId": "impassable",
+  "displayName": "Impassable",
+  "description": "Blocks movement",
+  "behaviorScript": "TileBehaviors/impassable.csx",
+  "flags": "BlocksMovement"
+}
+
