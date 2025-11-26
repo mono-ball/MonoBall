@@ -1,0 +1,13 @@
+{
+  "columns": 16,
+  "image": "victory_road_1f.png",
+  "imageheight": 48,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "victory_road_1f",
+  "spacing": 0,
+  "tilecount": 35,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset"
+}

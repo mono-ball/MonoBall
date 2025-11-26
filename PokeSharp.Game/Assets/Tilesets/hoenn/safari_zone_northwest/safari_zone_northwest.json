@@ -1,0 +1,13 @@
+{
+  "columns": 16,
+  "image": "safari_zone_northwest.png",
+  "imageheight": 64,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "safari_zone_northwest",
+  "spacing": 0,
+  "tilecount": 62,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset"
+}

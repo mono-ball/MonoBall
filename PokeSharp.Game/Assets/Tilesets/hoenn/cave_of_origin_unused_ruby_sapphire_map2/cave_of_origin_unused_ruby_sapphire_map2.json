@@ -1,0 +1,13 @@
+{
+  "columns": 16,
+  "image": "cave_of_origin_unused_ruby_sapphire_map2.png",
+  "imageheight": 16,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "cave_of_origin_unused_ruby_sapphire_map2",
+  "spacing": 0,
+  "tilecount": 16,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset"
+}

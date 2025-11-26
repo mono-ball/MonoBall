@@ -1,0 +1,13 @@
+{
+  "columns": 16,
+  "image": "sootopolis_city_mart.png",
+  "imageheight": 64,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "sootopolis_city_mart",
+  "spacing": 0,
+  "tilecount": 55,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset"
+}

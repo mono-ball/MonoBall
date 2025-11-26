@@ -1,0 +1,13 @@
+{
+  "columns": 16,
+  "image": "mt_pyre_1f.png",
+  "imageheight": 32,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "mt_pyre_1f",
+  "spacing": 0,
+  "tilecount": 25,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset"
+}

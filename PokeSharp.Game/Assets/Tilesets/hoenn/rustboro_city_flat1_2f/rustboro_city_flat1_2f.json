@@ -1,0 +1,13 @@
+{
+  "columns": 16,
+  "image": "rustboro_city_flat1_2f.png",
+  "imageheight": 64,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "rustboro_city_flat1_2f",
+  "spacing": 0,
+  "tilecount": 51,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset"
+}

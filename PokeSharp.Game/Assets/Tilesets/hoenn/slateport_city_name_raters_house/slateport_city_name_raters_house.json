@@ -1,0 +1,13 @@
+{
+  "columns": 16,
+  "image": "slateport_city_name_raters_house.png",
+  "imageheight": 48,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "slateport_city_name_raters_house",
+  "spacing": 0,
+  "tilecount": 33,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset"
+}

@@ -1,0 +1,13 @@
+{
+  "columns": 16,
+  "image": "mt_chimney_cable_car_station.png",
+  "imageheight": 48,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "mt_chimney_cable_car_station",
+  "spacing": 0,
+  "tilecount": 40,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset"
+}

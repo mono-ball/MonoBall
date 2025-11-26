@@ -1,0 +1,13 @@
+{
+  "columns": 16,
+  "image": "slateport_city_pokemon_fan_club.png",
+  "imageheight": 80,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "slateport_city_pokemon_fan_club",
+  "spacing": 0,
+  "tilecount": 65,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset"
+}

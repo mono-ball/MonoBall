@@ -1,0 +1,13 @@
+{
+  "columns": 16,
+  "image": "battle_frontier_battle_pike_room_final.png",
+  "imageheight": 48,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "battle_frontier_battle_pike_room_final",
+  "spacing": 0,
+  "tilecount": 39,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset"
+}

@@ -1,0 +1,347 @@
+{
+  "compressionlevel": -1,
+  "height": 5,
+  "infinite": false,
+  "layers": [
+    {
+      "data": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "height": 5,
+      "id": 1,
+      "name": "Ground",
+      "opacity": 1,
+      "type": "tilelayer",
+      "visible": true,
+      "width": 5,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "data": [
+        1,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        15,
+        17,
+        18,
+        19,
+        20,
+        12,
+        21,
+        23,
+        24,
+        25,
+        24,
+        25,
+        26
+      ],
+      "height": 5,
+      "id": 2,
+      "name": "Objects",
+      "opacity": 1,
+      "type": "tilelayer",
+      "visible": true,
+      "width": 5,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "data": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        14,
+        16,
+        2,
+        2,
+        2,
+        2,
+        2,
+        22,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "height": 5,
+      "id": 3,
+      "name": "Overhead",
+      "opacity": 1,
+      "type": "tilelayer",
+      "visible": true,
+      "width": 5,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "id": 4,
+      "name": "Triggers",
+      "type": "objectgroup",
+      "visible": true,
+      "opacity": 1,
+      "x": 0,
+      "y": 0,
+      "objects": [
+        {
+          "id": 1,
+          "name": "Trigger: VAR_LITTLEROOT_INTRO_STATE == 0",
+          "type": "trigger_event",
+          "x": 48,
+          "y": 16,
+          "width": 16,
+          "height": 16,
+          "properties": [
+            {
+              "name": "trigger",
+              "propertytype": "Trigger",
+              "type": "class",
+              "value": {
+                "variable": "VAR_LITTLEROOT_INTRO_STATE",
+                "value": 0,
+                "triggerScript": "Triggers/InsideOfTruck_EventScript_SetIntroFlags.csx",
+                "elevation": 3
+              }
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "name": "Trigger: VAR_LITTLEROOT_INTRO_STATE == 0",
+          "type": "trigger_event",
+          "x": 48,
+          "y": 32,
+          "width": 16,
+          "height": 16,
+          "properties": [
+            {
+              "name": "trigger",
+              "propertytype": "Trigger",
+              "type": "class",
+              "value": {
+                "variable": "VAR_LITTLEROOT_INTRO_STATE",
+                "value": 0,
+                "triggerScript": "Triggers/InsideOfTruck_EventScript_SetIntroFlags.csx",
+                "elevation": 3
+              }
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "name": "Trigger: VAR_LITTLEROOT_INTRO_STATE == 0",
+          "type": "trigger_event",
+          "x": 48,
+          "y": 48,
+          "width": 16,
+          "height": 16,
+          "properties": [
+            {
+              "name": "trigger",
+              "propertytype": "Trigger",
+              "type": "class",
+              "value": {
+                "variable": "VAR_LITTLEROOT_INTRO_STATE",
+                "value": 0,
+                "triggerScript": "Triggers/InsideOfTruck_EventScript_SetIntroFlags.csx",
+                "elevation": 3
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Interactions",
+      "type": "objectgroup",
+      "visible": true,
+      "opacity": 1,
+      "x": 0,
+      "y": 0,
+      "objects": [
+        {
+          "id": 4,
+          "name": "Sign: InsideOfTruck_EventScript_MovingBox",
+          "type": "sign_event",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "properties": [
+            {
+              "name": "sign",
+              "propertytype": "SignEvent",
+              "type": "class",
+              "value": {
+                "interactionScript": "Interactions/InsideOfTruck_EventScript_MovingBox.csx",
+                "elevation": 0
+              }
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "name": "Sign: InsideOfTruck_EventScript_MovingBox",
+          "type": "sign_event",
+          "x": 48,
+          "y": 64,
+          "width": 16,
+          "height": 16,
+          "properties": [
+            {
+              "name": "sign",
+              "propertytype": "SignEvent",
+              "type": "class",
+              "value": {
+                "interactionScript": "Interactions/InsideOfTruck_EventScript_MovingBox.csx",
+                "elevation": 0
+              }
+            }
+          ]
+        },
+        {
+          "id": 6,
+          "name": "Sign: InsideOfTruck_EventScript_MovingBox",
+          "type": "sign_event",
+          "x": 32,
+          "y": 48,
+          "width": 16,
+          "height": 16,
+          "properties": [
+            {
+              "name": "sign",
+              "propertytype": "SignEvent",
+              "type": "class",
+              "value": {
+                "interactionScript": "Interactions/InsideOfTruck_EventScript_MovingBox.csx",
+                "elevation": 0
+              }
+            }
+          ]
+        },
+        {
+          "id": 7,
+          "name": "Sign: InsideOfTruck_EventScript_MovingBox",
+          "type": "sign_event",
+          "x": 0,
+          "y": 16,
+          "width": 16,
+          "height": 16,
+          "properties": [
+            {
+              "name": "sign",
+              "propertytype": "SignEvent",
+              "type": "class",
+              "value": {
+                "interactionScript": "Interactions/InsideOfTruck_EventScript_MovingBox.csx",
+                "elevation": 0
+              }
+            }
+          ]
+        },
+        {
+          "id": 8,
+          "name": "Sign: InsideOfTruck_EventScript_MovingBox",
+          "type": "sign_event",
+          "x": 0,
+          "y": 32,
+          "width": 16,
+          "height": 16,
+          "properties": [
+            {
+              "name": "sign",
+              "propertytype": "SignEvent",
+              "type": "class",
+              "value": {
+                "interactionScript": "Interactions/InsideOfTruck_EventScript_MovingBox.csx",
+                "elevation": 0
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "nextlayerid": 1,
+  "nextobjectid": 9,
+  "orientation": "orthogonal",
+  "renderorder": "right-down",
+  "tiledversion": "1.11.2",
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "map",
+  "version": "1.11",
+  "width": 5,
+  "properties": [
+    {
+      "name": "display_name",
+      "type": "string",
+      "value": "InsideOfTruck"
+    },
+    {
+      "name": "border",
+      "propertytype": "Border",
+      "type": "class",
+      "value": {
+        "top_left": 27,
+        "top_right": 27,
+        "bottom_left": 27,
+        "bottom_right": 27,
+        "top_left_top": 2,
+        "top_right_top": 2,
+        "bottom_left_top": 2,
+        "bottom_right_top": 2
+      }
+    }
+  ],
+  "tilesets": [
+    {
+      "firstgid": 1,
+      "source": "../../../Tilesets/hoenn/inside_of_truck/inside_of_truck.json"
+    }
+  ]
+}

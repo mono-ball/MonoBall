@@ -1,0 +1,13 @@
+{
+  "columns": 16,
+  "image": "route110_trick_house_puzzle7.png",
+  "imageheight": 64,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "route110_trick_house_puzzle7",
+  "spacing": 0,
+  "tilecount": 50,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset"
+}

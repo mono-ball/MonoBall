@@ -1,0 +1,57 @@
+{
+  "columns": 16,
+  "image": "underwater_route126.png",
+  "imageheight": 64,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "underwater_route126",
+  "spacing": 0,
+  "tilecount": 64,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset",
+  "tiles": [
+    {
+      "id": 13,
+      "animation": [
+        {
+          "tileid": 44,
+          "duration": 200
+        },
+        {
+          "tileid": 45,
+          "duration": 200
+        },
+        {
+          "tileid": 46,
+          "duration": 200
+        },
+        {
+          "tileid": 47,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 27,
+      "animation": [
+        {
+          "tileid": 48,
+          "duration": 200
+        },
+        {
+          "tileid": 49,
+          "duration": 200
+        },
+        {
+          "tileid": 50,
+          "duration": 200
+        },
+        {
+          "tileid": 51,
+          "duration": 200
+        }
+      ]
+    }
+  ]
+}

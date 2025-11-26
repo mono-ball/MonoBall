@@ -1,0 +1,13 @@
+{
+  "columns": 16,
+  "image": "contest_hall_beauty.png",
+  "imageheight": 48,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "contest_hall_beauty",
+  "spacing": 0,
+  "tilecount": 44,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset"
+}

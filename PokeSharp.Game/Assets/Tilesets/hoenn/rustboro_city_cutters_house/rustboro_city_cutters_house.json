@@ -1,0 +1,13 @@
+{
+  "columns": 16,
+  "image": "rustboro_city_cutters_house.png",
+  "imageheight": 64,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "rustboro_city_cutters_house",
+  "spacing": 0,
+  "tilecount": 49,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset"
+}

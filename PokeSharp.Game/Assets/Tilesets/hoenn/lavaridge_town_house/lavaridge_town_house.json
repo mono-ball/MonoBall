@@ -1,0 +1,13 @@
+{
+  "columns": 16,
+  "image": "lavaridge_town_house.png",
+  "imageheight": 48,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "lavaridge_town_house",
+  "spacing": 0,
+  "tilecount": 48,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset"
+}

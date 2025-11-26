@@ -1,0 +1,36 @@
+{
+  "columns": 16,
+  "image": "southern_island_interior.png",
+  "imageheight": 32,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "southern_island_interior",
+  "spacing": 0,
+  "tilecount": 32,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset",
+  "tiles": [
+    {
+      "id": 11,
+      "animation": [
+        {
+          "tileid": 28,
+          "duration": 200
+        },
+        {
+          "tileid": 29,
+          "duration": 200
+        },
+        {
+          "tileid": 28,
+          "duration": 200
+        },
+        {
+          "tileid": 30,
+          "duration": 200
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "columns": 16,
+  "image": "oldale_town_house2.png",
+  "imageheight": 48,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "oldale_town_house2",
+  "spacing": 0,
+  "tilecount": 39,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset"
+}

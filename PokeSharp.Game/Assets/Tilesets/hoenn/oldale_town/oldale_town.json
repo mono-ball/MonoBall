@@ -1,0 +1,36 @@
+{
+  "columns": 16,
+  "image": "oldale_town.png",
+  "imageheight": 96,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "oldale_town",
+  "spacing": 0,
+  "tilecount": 96,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset",
+  "tiles": [
+    {
+      "id": 28,
+      "animation": [
+        {
+          "tileid": 84,
+          "duration": 200
+        },
+        {
+          "tileid": 85,
+          "duration": 200
+        },
+        {
+          "tileid": 84,
+          "duration": 200
+        },
+        {
+          "tileid": 86,
+          "duration": 200
+        }
+      ]
+    }
+  ]
+}

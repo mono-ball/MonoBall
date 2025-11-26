@@ -1,0 +1,13 @@
+{
+  "columns": 16,
+  "image": "verdanturf_town.png",
+  "imageheight": 128,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "verdanturf_town",
+  "spacing": 0,
+  "tilecount": 118,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset"
+}

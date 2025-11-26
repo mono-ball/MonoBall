@@ -1,0 +1,36 @@
+{
+  "columns": 16,
+  "image": "fiery_path.png",
+  "imageheight": 48,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "fiery_path",
+  "spacing": 0,
+  "tilecount": 48,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset",
+  "tiles": [
+    {
+      "id": 7,
+      "animation": [
+        {
+          "tileid": 26,
+          "duration": 200
+        },
+        {
+          "tileid": 27,
+          "duration": 200
+        },
+        {
+          "tileid": 28,
+          "duration": 200
+        },
+        {
+          "tileid": 29,
+          "duration": 200
+        }
+      ]
+    }
+  ]
+}

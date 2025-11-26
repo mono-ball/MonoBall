@@ -1,0 +1,13 @@
+{
+  "columns": 16,
+  "image": "aqua_hideout_unused_ruby_map2.png",
+  "imageheight": 128,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "aqua_hideout_unused_ruby_map2",
+  "spacing": 0,
+  "tilecount": 128,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset"
+}

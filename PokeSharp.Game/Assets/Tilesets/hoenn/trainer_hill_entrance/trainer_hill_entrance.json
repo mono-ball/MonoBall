@@ -1,0 +1,13 @@
+{
+  "columns": 16,
+  "image": "trainer_hill_entrance.png",
+  "imageheight": 96,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "trainer_hill_entrance",
+  "spacing": 0,
+  "tilecount": 85,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset"
+}

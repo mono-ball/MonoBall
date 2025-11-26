@@ -1,0 +1,36 @@
+{
+  "columns": 16,
+  "image": "littleroot_town.png",
+  "imageheight": 96,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "littleroot_town",
+  "spacing": 0,
+  "tilecount": 96,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset",
+  "tiles": [
+    {
+      "id": 33,
+      "animation": [
+        {
+          "tileid": 78,
+          "duration": 200
+        },
+        {
+          "tileid": 79,
+          "duration": 200
+        },
+        {
+          "tileid": 78,
+          "duration": 200
+        },
+        {
+          "tileid": 80,
+          "duration": 200
+        }
+      ]
+    }
+  ]
+}

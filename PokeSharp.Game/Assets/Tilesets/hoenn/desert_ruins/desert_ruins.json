@@ -1,0 +1,13 @@
+{
+  "columns": 16,
+  "image": "desert_ruins.png",
+  "imageheight": 48,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "desert_ruins",
+  "spacing": 0,
+  "tilecount": 42,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset"
+}

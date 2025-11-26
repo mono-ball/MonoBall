@@ -1,0 +1,13 @@
+{
+  "columns": 16,
+  "image": "battle_frontier_battle_dome_lobby.png",
+  "imageheight": 96,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "battle_frontier_battle_dome_lobby",
+  "spacing": 0,
+  "tilecount": 93,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset"
+}

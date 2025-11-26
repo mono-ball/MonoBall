@@ -1,0 +1,13 @@
+{
+  "columns": 16,
+  "image": "lilycove_city_pokemon_center_1f.png",
+  "imageheight": 96,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "lilycove_city_pokemon_center_1f",
+  "spacing": 0,
+  "tilecount": 84,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset"
+}

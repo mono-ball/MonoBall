@@ -1,0 +1,36 @@
+{
+  "columns": 16,
+  "image": "verdanturf_town_battle_tent_battle_room.png",
+  "imageheight": 64,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "verdanturf_town_battle_tent_battle_room",
+  "spacing": 0,
+  "tilecount": 64,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset",
+  "tiles": [
+    {
+      "id": 11,
+      "animation": [
+        {
+          "tileid": 48,
+          "duration": 200
+        },
+        {
+          "tileid": 49,
+          "duration": 200
+        },
+        {
+          "tileid": 48,
+          "duration": 200
+        },
+        {
+          "tileid": 50,
+          "duration": 200
+        }
+      ]
+    }
+  ]
+}

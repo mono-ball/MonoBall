@@ -1,0 +1,13 @@
+{
+  "columns": 16,
+  "image": "abandoned_ship_corridors_b1f.png",
+  "imageheight": 48,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "abandoned_ship_corridors_b1f",
+  "spacing": 0,
+  "tilecount": 39,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset"
+}

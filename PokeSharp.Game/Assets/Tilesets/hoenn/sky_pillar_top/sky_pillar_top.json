@@ -1,0 +1,13 @@
+{
+  "columns": 16,
+  "image": "sky_pillar_top.png",
+  "imageheight": 32,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "sky_pillar_top",
+  "spacing": 0,
+  "tilecount": 30,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset"
+}

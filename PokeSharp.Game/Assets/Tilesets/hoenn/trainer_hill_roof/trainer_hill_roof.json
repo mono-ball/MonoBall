@@ -1,0 +1,13 @@
+{
+  "columns": 16,
+  "image": "trainer_hill_roof.png",
+  "imageheight": 128,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "trainer_hill_roof",
+  "spacing": 0,
+  "tilecount": 117,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset"
+}

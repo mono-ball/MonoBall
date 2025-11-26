@@ -1,0 +1,13 @@
+{
+  "columns": 16,
+  "image": "battle_frontier_battle_tower_multi_battle_room.png",
+  "imageheight": 48,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "battle_frontier_battle_tower_multi_battle_room",
+  "spacing": 0,
+  "tilecount": 42,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset"
+}

@@ -1,0 +1,13 @@
+{
+  "columns": 16,
+  "image": "battle_frontier_reception_gate.png",
+  "imageheight": 48,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "battle_frontier_reception_gate",
+  "spacing": 0,
+  "tilecount": 35,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset"
+}

@@ -1,0 +1,36 @@
+{
+  "columns": 16,
+  "image": "route102.png",
+  "imageheight": 64,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "route102",
+  "spacing": 0,
+  "tilecount": 64,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset",
+  "tiles": [
+    {
+      "id": 33,
+      "animation": [
+        {
+          "tileid": 50,
+          "duration": 200
+        },
+        {
+          "tileid": 51,
+          "duration": 200
+        },
+        {
+          "tileid": 50,
+          "duration": 200
+        },
+        {
+          "tileid": 52,
+          "duration": 200
+        }
+      ]
+    }
+  ]
+}

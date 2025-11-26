@@ -1,0 +1,237 @@
+{
+  "columns": 16,
+  "image": "battle_frontier_battle_pyramid_lobby.png",
+  "imageheight": 128,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "battle_frontier_battle_pyramid_lobby",
+  "spacing": 0,
+  "tilecount": 128,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset",
+  "tiles": [
+    {
+      "id": 21,
+      "animation": [
+        {
+          "tileid": 57,
+          "duration": 200
+        },
+        {
+          "tileid": 58,
+          "duration": 200
+        },
+        {
+          "tileid": 59,
+          "duration": 200
+        },
+        {
+          "tileid": 60,
+          "duration": 200
+        },
+        {
+          "tileid": 61,
+          "duration": 200
+        },
+        {
+          "tileid": 62,
+          "duration": 200
+        },
+        {
+          "tileid": 63,
+          "duration": 200
+        },
+        {
+          "tileid": 64,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 28,
+      "animation": [
+        {
+          "tileid": 65,
+          "duration": 200
+        },
+        {
+          "tileid": 66,
+          "duration": 200
+        },
+        {
+          "tileid": 67,
+          "duration": 200
+        },
+        {
+          "tileid": 68,
+          "duration": 200
+        },
+        {
+          "tileid": 69,
+          "duration": 200
+        },
+        {
+          "tileid": 70,
+          "duration": 200
+        },
+        {
+          "tileid": 71,
+          "duration": 200
+        },
+        {
+          "tileid": 72,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "animation": [
+        {
+          "tileid": 73,
+          "duration": 200
+        },
+        {
+          "tileid": 74,
+          "duration": 200
+        },
+        {
+          "tileid": 75,
+          "duration": 200
+        },
+        {
+          "tileid": 76,
+          "duration": 200
+        },
+        {
+          "tileid": 77,
+          "duration": 200
+        },
+        {
+          "tileid": 78,
+          "duration": 200
+        },
+        {
+          "tileid": 79,
+          "duration": 200
+        },
+        {
+          "tileid": 80,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "animation": [
+        {
+          "tileid": 97,
+          "duration": 200
+        },
+        {
+          "tileid": 98,
+          "duration": 200
+        },
+        {
+          "tileid": 99,
+          "duration": 200
+        },
+        {
+          "tileid": 100,
+          "duration": 200
+        },
+        {
+          "tileid": 101,
+          "duration": 200
+        },
+        {
+          "tileid": 102,
+          "duration": 200
+        },
+        {
+          "tileid": 103,
+          "duration": 200
+        },
+        {
+          "tileid": 104,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 17,
+      "animation": [
+        {
+          "tileid": 105,
+          "duration": 200
+        },
+        {
+          "tileid": 106,
+          "duration": 200
+        },
+        {
+          "tileid": 107,
+          "duration": 200
+        },
+        {
+          "tileid": 108,
+          "duration": 200
+        },
+        {
+          "tileid": 109,
+          "duration": 200
+        },
+        {
+          "tileid": 110,
+          "duration": 200
+        },
+        {
+          "tileid": 111,
+          "duration": 200
+        },
+        {
+          "tileid": 112,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 19,
+      "animation": [
+        {
+          "tileid": 113,
+          "duration": 200
+        },
+        {
+          "tileid": 114,
+          "duration": 200
+        },
+        {
+          "tileid": 115,
+          "duration": 200
+        },
+        {
+          "tileid": 116,
+          "duration": 200
+        },
+        {
+          "tileid": 117,
+          "duration": 200
+        },
+        {
+          "tileid": 118,
+          "duration": 200
+        },
+        {
+          "tileid": 119,
+          "duration": 200
+        },
+        {
+          "tileid": 120,
+          "duration": 200
+        }
+      ]
+    }
+  ]
+}

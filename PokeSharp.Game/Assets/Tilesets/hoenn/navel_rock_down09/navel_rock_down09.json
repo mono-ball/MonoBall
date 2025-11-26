@@ -1,0 +1,13 @@
+{
+  "columns": 16,
+  "image": "navel_rock_down09.png",
+  "imageheight": 16,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "navel_rock_down09",
+  "spacing": 0,
+  "tilecount": 12,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset"
+}

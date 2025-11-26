@@ -1,0 +1,57 @@
+{
+  "columns": 16,
+  "image": "lavaridge_town.png",
+  "imageheight": 176,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "lavaridge_town",
+  "spacing": 0,
+  "tilecount": 176,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset",
+  "tiles": [
+    {
+      "id": 50,
+      "animation": [
+        {
+          "tileid": 155,
+          "duration": 200
+        },
+        {
+          "tileid": 156,
+          "duration": 200
+        },
+        {
+          "tileid": 155,
+          "duration": 200
+        },
+        {
+          "tileid": 157,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 27,
+      "animation": [
+        {
+          "tileid": 164,
+          "duration": 200
+        },
+        {
+          "tileid": 165,
+          "duration": 200
+        },
+        {
+          "tileid": 166,
+          "duration": 200
+        },
+        {
+          "tileid": 167,
+          "duration": 200
+        }
+      ]
+    }
+  ]
+}

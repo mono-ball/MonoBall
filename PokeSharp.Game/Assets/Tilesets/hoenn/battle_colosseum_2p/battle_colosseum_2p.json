@@ -1,0 +1,13 @@
+{
+  "columns": 16,
+  "image": "battle_colosseum_2p.png",
+  "imageheight": 80,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "battle_colosseum_2p",
+  "spacing": 0,
+  "tilecount": 71,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset"
+}

@@ -1,0 +1,36 @@
+{
+  "columns": 16,
+  "image": "petalburg_city.png",
+  "imageheight": 160,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "petalburg_city",
+  "spacing": 0,
+  "tilecount": 160,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset",
+  "tiles": [
+    {
+      "id": 51,
+      "animation": [
+        {
+          "tileid": 149,
+          "duration": 200
+        },
+        {
+          "tileid": 150,
+          "duration": 200
+        },
+        {
+          "tileid": 149,
+          "duration": 200
+        },
+        {
+          "tileid": 151,
+          "duration": 200
+        }
+      ]
+    }
+  ]
+}

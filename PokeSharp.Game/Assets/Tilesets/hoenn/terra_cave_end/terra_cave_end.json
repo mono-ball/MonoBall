@@ -1,0 +1,78 @@
+{
+  "columns": 16,
+  "image": "terra_cave_end.png",
+  "imageheight": 144,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "terra_cave_end",
+  "spacing": 0,
+  "tilecount": 144,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset",
+  "tiles": [
+    {
+      "id": 32,
+      "animation": [
+        {
+          "tileid": 43,
+          "duration": 200
+        },
+        {
+          "tileid": 44,
+          "duration": 200
+        },
+        {
+          "tileid": 45,
+          "duration": 200
+        },
+        {
+          "tileid": 46,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 34,
+      "animation": [
+        {
+          "tileid": 51,
+          "duration": 200
+        },
+        {
+          "tileid": 52,
+          "duration": 200
+        },
+        {
+          "tileid": 53,
+          "duration": 200
+        },
+        {
+          "tileid": 54,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 30,
+      "animation": [
+        {
+          "tileid": 123,
+          "duration": 200
+        },
+        {
+          "tileid": 124,
+          "duration": 200
+        },
+        {
+          "tileid": 125,
+          "duration": 200
+        },
+        {
+          "tileid": 126,
+          "duration": 200
+        }
+      ]
+    }
+  ]
+}

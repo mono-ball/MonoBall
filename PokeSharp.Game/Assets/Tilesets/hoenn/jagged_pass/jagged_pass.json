@@ -1,0 +1,13 @@
+{
+  "columns": 16,
+  "image": "jagged_pass.png",
+  "imageheight": 96,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "jagged_pass",
+  "spacing": 0,
+  "tilecount": 87,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset"
+}

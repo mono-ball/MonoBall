@@ -1,0 +1,459 @@
+{
+  "columns": 16,
+  "image": "dewford_town.png",
+  "imageheight": 240,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "dewford_town",
+  "spacing": 0,
+  "tilecount": 240,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset",
+  "tiles": [
+    {
+      "id": 6,
+      "animation": [
+        {
+          "tileid": 94,
+          "duration": 200
+        },
+        {
+          "tileid": 95,
+          "duration": 200
+        },
+        {
+          "tileid": 96,
+          "duration": 200
+        },
+        {
+          "tileid": 97,
+          "duration": 200
+        },
+        {
+          "tileid": 98,
+          "duration": 200
+        },
+        {
+          "tileid": 99,
+          "duration": 200
+        },
+        {
+          "tileid": 100,
+          "duration": 200
+        },
+        {
+          "tileid": 101,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "animation": [
+        {
+          "tileid": 102,
+          "duration": 200
+        },
+        {
+          "tileid": 103,
+          "duration": 200
+        },
+        {
+          "tileid": 104,
+          "duration": 200
+        },
+        {
+          "tileid": 105,
+          "duration": 200
+        },
+        {
+          "tileid": 106,
+          "duration": 200
+        },
+        {
+          "tileid": 107,
+          "duration": 200
+        },
+        {
+          "tileid": 108,
+          "duration": 200
+        },
+        {
+          "tileid": 109,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 47,
+      "animation": [
+        {
+          "tileid": 134,
+          "duration": 200
+        },
+        {
+          "tileid": 135,
+          "duration": 200
+        },
+        {
+          "tileid": 136,
+          "duration": 200
+        },
+        {
+          "tileid": 137,
+          "duration": 200
+        },
+        {
+          "tileid": 138,
+          "duration": 200
+        },
+        {
+          "tileid": 139,
+          "duration": 200
+        },
+        {
+          "tileid": 140,
+          "duration": 200
+        },
+        {
+          "tileid": 141,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 55,
+      "animation": [
+        {
+          "tileid": 150,
+          "duration": 200
+        },
+        {
+          "tileid": 151,
+          "duration": 200
+        },
+        {
+          "tileid": 152,
+          "duration": 200
+        },
+        {
+          "tileid": 153,
+          "duration": 200
+        },
+        {
+          "tileid": 154,
+          "duration": 200
+        },
+        {
+          "tileid": 155,
+          "duration": 200
+        },
+        {
+          "tileid": 156,
+          "duration": 200
+        },
+        {
+          "tileid": 157,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 56,
+      "animation": [
+        {
+          "tileid": 158,
+          "duration": 200
+        },
+        {
+          "tileid": 159,
+          "duration": 200
+        },
+        {
+          "tileid": 160,
+          "duration": 200
+        },
+        {
+          "tileid": 161,
+          "duration": 200
+        },
+        {
+          "tileid": 162,
+          "duration": 200
+        },
+        {
+          "tileid": 163,
+          "duration": 200
+        },
+        {
+          "tileid": 164,
+          "duration": 200
+        },
+        {
+          "tileid": 165,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 58,
+      "animation": [
+        {
+          "tileid": 182,
+          "duration": 200
+        },
+        {
+          "tileid": 183,
+          "duration": 200
+        },
+        {
+          "tileid": 184,
+          "duration": 200
+        },
+        {
+          "tileid": 185,
+          "duration": 200
+        },
+        {
+          "tileid": 186,
+          "duration": 200
+        },
+        {
+          "tileid": 187,
+          "duration": 200
+        },
+        {
+          "tileid": 188,
+          "duration": 200
+        },
+        {
+          "tileid": 189,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 59,
+      "animation": [
+        {
+          "tileid": 190,
+          "duration": 200
+        },
+        {
+          "tileid": 191,
+          "duration": 200
+        },
+        {
+          "tileid": 192,
+          "duration": 200
+        },
+        {
+          "tileid": 193,
+          "duration": 200
+        },
+        {
+          "tileid": 194,
+          "duration": 200
+        },
+        {
+          "tileid": 195,
+          "duration": 200
+        },
+        {
+          "tileid": 196,
+          "duration": 200
+        },
+        {
+          "tileid": 197,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 60,
+      "animation": [
+        {
+          "tileid": 198,
+          "duration": 200
+        },
+        {
+          "tileid": 199,
+          "duration": 200
+        },
+        {
+          "tileid": 200,
+          "duration": 200
+        },
+        {
+          "tileid": 201,
+          "duration": 200
+        },
+        {
+          "tileid": 202,
+          "duration": 200
+        },
+        {
+          "tileid": 203,
+          "duration": 200
+        },
+        {
+          "tileid": 204,
+          "duration": 200
+        },
+        {
+          "tileid": 205,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 63,
+      "animation": [
+        {
+          "tileid": 206,
+          "duration": 200
+        },
+        {
+          "tileid": 207,
+          "duration": 200
+        },
+        {
+          "tileid": 208,
+          "duration": 200
+        },
+        {
+          "tileid": 209,
+          "duration": 200
+        },
+        {
+          "tileid": 210,
+          "duration": 200
+        },
+        {
+          "tileid": 211,
+          "duration": 200
+        },
+        {
+          "tileid": 212,
+          "duration": 200
+        },
+        {
+          "tileid": 213,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 64,
+      "animation": [
+        {
+          "tileid": 214,
+          "duration": 200
+        },
+        {
+          "tileid": 215,
+          "duration": 200
+        },
+        {
+          "tileid": 216,
+          "duration": 200
+        },
+        {
+          "tileid": 217,
+          "duration": 200
+        },
+        {
+          "tileid": 218,
+          "duration": 200
+        },
+        {
+          "tileid": 219,
+          "duration": 200
+        },
+        {
+          "tileid": 220,
+          "duration": 200
+        },
+        {
+          "tileid": 221,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 61,
+      "animation": [
+        {
+          "tileid": 222,
+          "duration": 200
+        },
+        {
+          "tileid": 223,
+          "duration": 200
+        },
+        {
+          "tileid": 224,
+          "duration": 200
+        },
+        {
+          "tileid": 225,
+          "duration": 200
+        },
+        {
+          "tileid": 226,
+          "duration": 200
+        },
+        {
+          "tileid": 227,
+          "duration": 200
+        },
+        {
+          "tileid": 228,
+          "duration": 200
+        },
+        {
+          "tileid": 229,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 62,
+      "animation": [
+        {
+          "tileid": 230,
+          "duration": 200
+        },
+        {
+          "tileid": 231,
+          "duration": 200
+        },
+        {
+          "tileid": 232,
+          "duration": 200
+        },
+        {
+          "tileid": 233,
+          "duration": 200
+        },
+        {
+          "tileid": 234,
+          "duration": 200
+        },
+        {
+          "tileid": 235,
+          "duration": 200
+        },
+        {
+          "tileid": 236,
+          "duration": 200
+        },
+        {
+          "tileid": 237,
+          "duration": 200
+        }
+      ]
+    }
+  ]
+}

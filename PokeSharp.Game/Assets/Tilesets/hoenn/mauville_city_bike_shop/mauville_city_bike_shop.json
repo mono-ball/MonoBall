@@ -1,0 +1,13 @@
+{
+  "columns": 16,
+  "image": "mauville_city_bike_shop.png",
+  "imageheight": 96,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "mauville_city_bike_shop",
+  "spacing": 0,
+  "tilecount": 86,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset"
+}

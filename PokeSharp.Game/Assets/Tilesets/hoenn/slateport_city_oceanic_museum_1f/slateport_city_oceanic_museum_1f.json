@@ -1,0 +1,13 @@
+{
+  "columns": 16,
+  "image": "slateport_city_oceanic_museum_1f.png",
+  "imageheight": 64,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "slateport_city_oceanic_museum_1f",
+  "spacing": 0,
+  "tilecount": 50,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset"
+}

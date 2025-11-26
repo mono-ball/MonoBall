@@ -1,0 +1,147 @@
+{
+  "columns": 16,
+  "image": "route123.png",
+  "imageheight": 144,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "route123",
+  "spacing": 0,
+  "tilecount": 144,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset",
+  "tiles": [
+    {
+      "id": 91,
+      "animation": [
+        {
+          "tileid": 104,
+          "duration": 200
+        },
+        {
+          "tileid": 105,
+          "duration": 200
+        },
+        {
+          "tileid": 104,
+          "duration": 200
+        },
+        {
+          "tileid": 106,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "animation": [
+        {
+          "tileid": 107,
+          "duration": 200
+        },
+        {
+          "tileid": 108,
+          "duration": 200
+        },
+        {
+          "tileid": 109,
+          "duration": 200
+        },
+        {
+          "tileid": 110,
+          "duration": 200
+        },
+        {
+          "tileid": 111,
+          "duration": 200
+        },
+        {
+          "tileid": 112,
+          "duration": 200
+        },
+        {
+          "tileid": 113,
+          "duration": 200
+        },
+        {
+          "tileid": 114,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "animation": [
+        {
+          "tileid": 115,
+          "duration": 200
+        },
+        {
+          "tileid": 116,
+          "duration": 200
+        },
+        {
+          "tileid": 117,
+          "duration": 200
+        },
+        {
+          "tileid": 118,
+          "duration": 200
+        },
+        {
+          "tileid": 119,
+          "duration": 200
+        },
+        {
+          "tileid": 120,
+          "duration": 200
+        },
+        {
+          "tileid": 121,
+          "duration": 200
+        },
+        {
+          "tileid": 122,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "animation": [
+        {
+          "tileid": 123,
+          "duration": 200
+        },
+        {
+          "tileid": 124,
+          "duration": 200
+        },
+        {
+          "tileid": 125,
+          "duration": 200
+        },
+        {
+          "tileid": 126,
+          "duration": 200
+        },
+        {
+          "tileid": 127,
+          "duration": 200
+        },
+        {
+          "tileid": 128,
+          "duration": 200
+        },
+        {
+          "tileid": 129,
+          "duration": 200
+        },
+        {
+          "tileid": 130,
+          "duration": 200
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "columns": 16,
+  "image": "route117.png",
+  "imageheight": 112,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "route117",
+  "spacing": 0,
+  "tilecount": 112,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset",
+  "tiles": [
+    {
+      "id": 8,
+      "animation": [
+        {
+          "tileid": 105,
+          "duration": 200
+        },
+        {
+          "tileid": 106,
+          "duration": 200
+        },
+        {
+          "tileid": 107,
+          "duration": 200
+        },
+        {
+          "tileid": 108,
+          "duration": 200
+        },
+        {
+          "tileid": 109,
+          "duration": 200
+        }
+      ]
+    }
+  ]
+}

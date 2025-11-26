@@ -1,0 +1,13 @@
+{
+  "columns": 16,
+  "image": "route112.png",
+  "imageheight": 112,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "route112",
+  "spacing": 0,
+  "tilecount": 110,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset"
+}

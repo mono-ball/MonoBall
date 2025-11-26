@@ -1,0 +1,13 @@
+{
+  "columns": 16,
+  "image": "contest_hall_tough.png",
+  "imageheight": 48,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "contest_hall_tough",
+  "spacing": 0,
+  "tilecount": 44,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset"
+}

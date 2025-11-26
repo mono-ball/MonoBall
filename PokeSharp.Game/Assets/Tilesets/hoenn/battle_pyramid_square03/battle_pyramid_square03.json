@@ -1,0 +1,13 @@
+{
+  "columns": 16,
+  "image": "battle_pyramid_square03.png",
+  "imageheight": 16,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "battle_pyramid_square03",
+  "spacing": 0,
+  "tilecount": 14,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset"
+}

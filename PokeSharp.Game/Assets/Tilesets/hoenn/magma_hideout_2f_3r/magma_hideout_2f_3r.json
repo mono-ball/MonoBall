@@ -1,0 +1,36 @@
+{
+  "columns": 16,
+  "image": "magma_hideout_2f_3r.png",
+  "imageheight": 48,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "magma_hideout_2f_3r",
+  "spacing": 0,
+  "tilecount": 48,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset",
+  "tiles": [
+    {
+      "id": 10,
+      "animation": [
+        {
+          "tileid": 34,
+          "duration": 200
+        },
+        {
+          "tileid": 35,
+          "duration": 200
+        },
+        {
+          "tileid": 36,
+          "duration": 200
+        },
+        {
+          "tileid": 37,
+          "duration": 200
+        }
+      ]
+    }
+  ]
+}

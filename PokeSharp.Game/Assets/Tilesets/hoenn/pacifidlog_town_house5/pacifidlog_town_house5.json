@@ -1,0 +1,13 @@
+{
+  "columns": 16,
+  "image": "pacifidlog_town_house5.png",
+  "imageheight": 64,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "pacifidlog_town_house5",
+  "spacing": 0,
+  "tilecount": 52,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset"
+}

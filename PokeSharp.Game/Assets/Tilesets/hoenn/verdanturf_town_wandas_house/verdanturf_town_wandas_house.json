@@ -1,0 +1,13 @@
+{
+  "columns": 16,
+  "image": "verdanturf_town_wandas_house.png",
+  "imageheight": 80,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "verdanturf_town_wandas_house",
+  "spacing": 0,
+  "tilecount": 70,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset"
+}

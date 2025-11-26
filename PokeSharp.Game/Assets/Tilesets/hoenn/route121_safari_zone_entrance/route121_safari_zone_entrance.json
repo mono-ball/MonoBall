@@ -1,0 +1,13 @@
+{
+  "columns": 16,
+  "image": "route121_safari_zone_entrance.png",
+  "imageheight": 48,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "route121_safari_zone_entrance",
+  "spacing": 0,
+  "tilecount": 40,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset"
+}

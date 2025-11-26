@@ -1,0 +1,73 @@
+{
+  "columns": 16,
+  "image": "route120.png",
+  "imageheight": 144,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "route120",
+  "spacing": 0,
+  "tilecount": 144,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset",
+  "tiles": [
+    {
+      "id": 119,
+      "animation": [
+        {
+          "tileid": 122,
+          "duration": 200
+        },
+        {
+          "tileid": 123,
+          "duration": 200
+        },
+        {
+          "tileid": 122,
+          "duration": 200
+        },
+        {
+          "tileid": 124,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 108,
+      "animation": [
+        {
+          "tileid": 125,
+          "duration": 200
+        },
+        {
+          "tileid": 126,
+          "duration": 200
+        },
+        {
+          "tileid": 127,
+          "duration": 200
+        },
+        {
+          "tileid": 128,
+          "duration": 200
+        },
+        {
+          "tileid": 129,
+          "duration": 200
+        },
+        {
+          "tileid": 130,
+          "duration": 200
+        },
+        {
+          "tileid": 131,
+          "duration": 200
+        },
+        {
+          "tileid": 132,
+          "duration": 200
+        }
+      ]
+    }
+  ]
+}

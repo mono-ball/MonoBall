@@ -1,0 +1,13 @@
+{
+  "columns": 16,
+  "image": "fortree_city.png",
+  "imageheight": 128,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "fortree_city",
+  "spacing": 0,
+  "tilecount": 124,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset"
+}

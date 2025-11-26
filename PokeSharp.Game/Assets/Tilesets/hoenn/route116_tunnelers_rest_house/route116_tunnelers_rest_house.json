@@ -1,0 +1,13 @@
+{
+  "columns": 16,
+  "image": "route116_tunnelers_rest_house.png",
+  "imageheight": 48,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "route116_tunnelers_rest_house",
+  "spacing": 0,
+  "tilecount": 43,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset"
+}

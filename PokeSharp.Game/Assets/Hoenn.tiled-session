@@ -1,0 +1,347 @@
+{
+    "activeFile": "Data/Maps/hoenn/route126.json",
+    "expandedProjectPaths": [
+        ".",
+        "Data",
+        "Data/Maps",
+        "Data/Maps/hoenn",
+        "Data/Worlds"
+    ],
+    "fileStates": {
+        "Data/Maps/hoenn/dewford_town.json": {
+            "scale": 2,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 1504.25,
+                "y": 85.75
+            }
+        },
+        "Data/Maps/hoenn/lilycove_city.json": {
+            "scale": 2,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": -4869.25,
+                "y": 1470.25
+            }
+        },
+        "Data/Maps/hoenn/littleroot_town.json": {
+            "scale": 0.75,
+            "selectedLayer": 3,
+            "viewCenter": {
+                "x": 1138,
+                "y": -1843.3333333333333
+            }
+        },
+        "Data/Maps/hoenn/mauville_city.json": {
+            "scale": 1,
+            "selectedLayer": 3,
+            "viewCenter": {
+                "x": 1007.5,
+                "y": 1884.5
+            }
+        },
+        "Data/Maps/hoenn/oldale_town.json": {
+            "scale": 1.5,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": -1323.6666666666665,
+                "y": -11
+            }
+        },
+        "Data/Maps/hoenn/petalburg_city.json": {
+            "scale": 1.5,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 633,
+                "y": 2068.333333333333
+            }
+        },
+        "Data/Maps/hoenn/route101.json": {
+            "scale": 2,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 119.75,
+                "y": 13.75
+            }
+        },
+        "Data/Maps/hoenn/route102.json": {
+            "scale": 0.25,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 3138,
+                "y": 502
+            }
+        },
+        "Data/Maps/hoenn/route103.json": {
+            "scale": 4,
+            "selectedLayer": 3,
+            "viewCenter": {
+                "x": 195.125,
+                "y": 1115.375
+            }
+        },
+        "Data/Maps/hoenn/route104.json": {
+            "scale": 2,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 9211.75,
+                "y": -242.25
+            }
+        },
+        "Data/Maps/hoenn/route105.json": {
+            "scale": 2,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 726.25,
+                "y": -785.75
+            }
+        },
+        "Data/Maps/hoenn/route107.json": {
+            "scale": 2,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 1184.25,
+                "y": 85.75
+            }
+        },
+        "Data/Maps/hoenn/route108.json": {
+            "scale": 1.5,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": -1667.6666666666665,
+                "y": -2003
+            }
+        },
+        "Data/Maps/hoenn/route109.json": {
+            "scale": 1,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 455.5,
+                "y": 64.5
+            }
+        },
+        "Data/Maps/hoenn/route110.json": {
+            "scale": 4,
+            "selectedLayer": 3,
+            "viewCenter": {
+                "x": -1084.875,
+                "y": 2075.375
+            }
+        },
+        "Data/Maps/hoenn/route111.json": {
+            "scale": 1.5,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": -2870.333333333333,
+                "y": 4103
+            }
+        },
+        "Data/Maps/hoenn/route112.json": {
+            "scale": 1.5,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 591,
+                "y": 743
+            }
+        },
+        "Data/Maps/hoenn/route113.json": {
+            "scale": 0.25,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 2658,
+                "y": 954
+            }
+        },
+        "Data/Maps/hoenn/route115.json": {
+            "scale": 0.25,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 4258,
+                "y": 282
+            }
+        },
+        "Data/Maps/hoenn/route116.json": {
+            "scale": 0.25,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 3618,
+                "y": 2438
+            }
+        },
+        "Data/Maps/hoenn/route117.json": {
+            "scale": 0.25,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 2018,
+                "y": 2118
+            }
+        },
+        "Data/Maps/hoenn/route126.json": {
+            "scale": 1.5,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": -8248.333333333332,
+                "y": 1450.3333333333335
+            }
+        },
+        "Data/Maps/hoenn/route133.json": {
+            "scale": 2,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 168.75,
+                "y": 229.25
+            }
+        },
+        "Data/Maps/hoenn/route134.json": {
+            "scale": 1,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": -184.5,
+                "y": 1024.5
+            }
+        },
+        "Data/Maps/hoenn/rustboro_city.json": {
+            "scale": 0.25,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 4258,
+                "y": 2422
+            }
+        },
+        "Data/Maps/hoenn/slateport_city.json": {
+            "scale": 1,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 455.5,
+                "y": 1024.5
+            }
+        },
+        "Data/Maps/hoenn/verdanturf_town.json": {
+            "scale": 1,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 3821.5,
+                "y": 2275.5
+            }
+        },
+        "Tilesets/hoenn/dewford_town/dewford_town.json": {
+            "scaleInDock": 1
+        },
+        "Tilesets/hoenn/lilycove_city/lilycove_city.json": {
+            "scaleInDock": 1
+        },
+        "Tilesets/hoenn/littleroot_town/littleroot_town.json": {
+            "scaleInDock": 1
+        },
+        "Tilesets/hoenn/mauville_city/mauville_city.json": {
+            "scaleInDock": 1
+        },
+        "Tilesets/hoenn/oldale_town/oldale_town.json": {
+            "scaleInDock": 1
+        },
+        "Tilesets/hoenn/petalburg_city/petalburg_city.json": {
+            "scaleInDock": 1
+        },
+        "Tilesets/hoenn/route101/route101.json": {
+            "scaleInDock": 1
+        },
+        "Tilesets/hoenn/route102/route102.json": {
+            "scaleInDock": 1
+        },
+        "Tilesets/hoenn/route103/route103.json": {
+            "scaleInDock": 1
+        },
+        "Tilesets/hoenn/route104/route104.json": {
+            "scaleInDock": 2
+        },
+        "Tilesets/hoenn/route105/route105.json": {
+            "scaleInDock": 1
+        },
+        "Tilesets/hoenn/route107/route107.json": {
+            "scaleInDock": 1
+        },
+        "Tilesets/hoenn/route108/route108.json": {
+            "scaleInDock": 1
+        },
+        "Tilesets/hoenn/route109/route109.json": {
+            "scaleInDock": 1
+        },
+        "Tilesets/hoenn/route110/route110.json": {
+            "scaleInDock": 1
+        },
+        "Tilesets/hoenn/route111/route111.json": {
+            "scaleInDock": 2
+        },
+        "Tilesets/hoenn/route112/route112.json": {
+            "scaleInDock": 1.5
+        },
+        "Tilesets/hoenn/route113/route113.json": {
+            "scaleInDock": 1
+        },
+        "Tilesets/hoenn/route115/route115.json": {
+            "scaleInDock": 1
+        },
+        "Tilesets/hoenn/route116/route116.json": {
+            "scaleInDock": 1
+        },
+        "Tilesets/hoenn/route117/route117.json": {
+            "scaleInDock": 1
+        },
+        "Tilesets/hoenn/route126/route126.json": {
+            "scaleInDock": 1
+        },
+        "Tilesets/hoenn/route133/route133.json": {
+            "scaleInDock": 1
+        },
+        "Tilesets/hoenn/route134/route134.json": {
+            "scaleInDock": 1
+        },
+        "Tilesets/hoenn/rustboro_city/rustboro_city.json": {
+            "scaleInDock": 1
+        },
+        "Tilesets/hoenn/slateport_city/slateport_city.json": {
+            "scaleInDock": 3
+        },
+        "Tilesets/hoenn/verdanturf_town/verdanturf_town.json": {
+            "scaleInDock": 1
+        }
+    },
+    "loadedWorlds": [
+        "C:/Users/nate0/RiderProjects/PokeSharp/PokeSharp.Game/Assets/Data/Worlds/hoenn.world"
+    ],
+    "openFiles": [
+        "Data/Maps/hoenn/route112.json",
+        "Data/Maps/hoenn/route104.json",
+        "Data/Maps/hoenn/route105.json",
+        "Data/Maps/hoenn/route134.json",
+        "Data/Maps/hoenn/route109.json",
+        "Data/Maps/hoenn/slateport_city.json",
+        "Data/Maps/hoenn/petalburg_city.json",
+        "Data/Maps/hoenn/route102.json",
+        "Data/Maps/hoenn/rustboro_city.json",
+        "Data/Maps/hoenn/route116.json",
+        "Data/Maps/hoenn/route117.json",
+        "Data/Maps/hoenn/route115.json",
+        "Data/Maps/hoenn/route113.json",
+        "Data/Maps/hoenn/route111.json",
+        "Data/Maps/hoenn/oldale_town.json",
+        "Data/Maps/hoenn/route126.json"
+    ],
+    "project": "Hoenn.tiled-project",
+    "property.type": "object",
+    "recentFiles": [
+        "Data/Maps/hoenn/route112.json",
+        "Data/Maps/hoenn/route126.json",
+        "Data/Maps/hoenn/oldale_town.json",
+        "Data/Maps/hoenn/route111.json",
+        "Data/Maps/hoenn/route113.json",
+        "Data/Maps/hoenn/route115.json",
+        "Data/Maps/hoenn/route117.json",
+        "Data/Maps/hoenn/route116.json",
+        "Data/Maps/hoenn/rustboro_city.json",
+        "Data/Maps/hoenn/route102.json",
+        "Data/Maps/hoenn/petalburg_city.json",
+        "Data/Maps/hoenn/slateport_city.json"
+    ],
+    "textEdit.monospace": true
+}

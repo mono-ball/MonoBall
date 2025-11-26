@@ -1,0 +1,13 @@
+{
+  "columns": 16,
+  "image": "route114_fossil_maniacs_tunnel.png",
+  "imageheight": 48,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "route114_fossil_maniacs_tunnel",
+  "spacing": 0,
+  "tilecount": 35,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset"
+}

@@ -1,0 +1,13 @@
+{
+  "columns": 16,
+  "image": "ever_grande_city_hall_of_fame.png",
+  "imageheight": 64,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "ever_grande_city_hall_of_fame",
+  "spacing": 0,
+  "tilecount": 63,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset"
+}

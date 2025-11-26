@@ -1,0 +1,13 @@
+{
+  "columns": 16,
+  "image": "pacifidlog_town_pokemon_center_1f.png",
+  "imageheight": 96,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "pacifidlog_town_pokemon_center_1f",
+  "spacing": 0,
+  "tilecount": 84,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset"
+}

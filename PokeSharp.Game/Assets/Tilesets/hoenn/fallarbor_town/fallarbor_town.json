@@ -1,0 +1,13 @@
+{
+  "columns": 16,
+  "image": "fallarbor_town.png",
+  "imageheight": 144,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "fallarbor_town",
+  "spacing": 0,
+  "tilecount": 132,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset"
+}

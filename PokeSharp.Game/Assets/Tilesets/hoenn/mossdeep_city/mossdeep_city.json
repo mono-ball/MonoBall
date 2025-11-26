@@ -1,0 +1,1294 @@
+{
+  "columns": 16,
+  "image": "mossdeep_city.png",
+  "imageheight": 1056,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "mossdeep_city",
+  "spacing": 0,
+  "tilecount": 1056,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset",
+  "tiles": [
+    {
+      "id": 67,
+      "animation": [
+        {
+          "tileid": 287,
+          "duration": 200
+        },
+        {
+          "tileid": 288,
+          "duration": 200
+        },
+        {
+          "tileid": 287,
+          "duration": 200
+        },
+        {
+          "tileid": 289,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 24,
+      "animation": [
+        {
+          "tileid": 290,
+          "duration": 200
+        },
+        {
+          "tileid": 291,
+          "duration": 200
+        },
+        {
+          "tileid": 292,
+          "duration": 200
+        },
+        {
+          "tileid": 293,
+          "duration": 200
+        },
+        {
+          "tileid": 294,
+          "duration": 200
+        },
+        {
+          "tileid": 295,
+          "duration": 200
+        },
+        {
+          "tileid": 296,
+          "duration": 200
+        },
+        {
+          "tileid": 297,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 26,
+      "animation": [
+        {
+          "tileid": 298,
+          "duration": 200
+        },
+        {
+          "tileid": 299,
+          "duration": 200
+        },
+        {
+          "tileid": 300,
+          "duration": 200
+        },
+        {
+          "tileid": 301,
+          "duration": 200
+        },
+        {
+          "tileid": 302,
+          "duration": 200
+        },
+        {
+          "tileid": 303,
+          "duration": 200
+        },
+        {
+          "tileid": 304,
+          "duration": 200
+        },
+        {
+          "tileid": 305,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "animation": [
+        {
+          "tileid": 306,
+          "duration": 200
+        },
+        {
+          "tileid": 307,
+          "duration": 200
+        },
+        {
+          "tileid": 308,
+          "duration": 200
+        },
+        {
+          "tileid": 309,
+          "duration": 200
+        },
+        {
+          "tileid": 310,
+          "duration": 200
+        },
+        {
+          "tileid": 311,
+          "duration": 200
+        },
+        {
+          "tileid": 312,
+          "duration": 200
+        },
+        {
+          "tileid": 313,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "animation": [
+        {
+          "tileid": 314,
+          "duration": 200
+        },
+        {
+          "tileid": 315,
+          "duration": 200
+        },
+        {
+          "tileid": 316,
+          "duration": 200
+        },
+        {
+          "tileid": 317,
+          "duration": 200
+        },
+        {
+          "tileid": 318,
+          "duration": 200
+        },
+        {
+          "tileid": 319,
+          "duration": 200
+        },
+        {
+          "tileid": 320,
+          "duration": 200
+        },
+        {
+          "tileid": 321,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 29,
+      "animation": [
+        {
+          "tileid": 322,
+          "duration": 200
+        },
+        {
+          "tileid": 323,
+          "duration": 200
+        },
+        {
+          "tileid": 324,
+          "duration": 200
+        },
+        {
+          "tileid": 325,
+          "duration": 200
+        },
+        {
+          "tileid": 326,
+          "duration": 200
+        },
+        {
+          "tileid": 327,
+          "duration": 200
+        },
+        {
+          "tileid": 328,
+          "duration": 200
+        },
+        {
+          "tileid": 329,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 42,
+      "animation": [
+        {
+          "tileid": 330,
+          "duration": 200
+        },
+        {
+          "tileid": 331,
+          "duration": 200
+        },
+        {
+          "tileid": 332,
+          "duration": 200
+        },
+        {
+          "tileid": 333,
+          "duration": 200
+        },
+        {
+          "tileid": 334,
+          "duration": 200
+        },
+        {
+          "tileid": 335,
+          "duration": 200
+        },
+        {
+          "tileid": 336,
+          "duration": 200
+        },
+        {
+          "tileid": 337,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 43,
+      "animation": [
+        {
+          "tileid": 338,
+          "duration": 200
+        },
+        {
+          "tileid": 339,
+          "duration": 200
+        },
+        {
+          "tileid": 340,
+          "duration": 200
+        },
+        {
+          "tileid": 341,
+          "duration": 200
+        },
+        {
+          "tileid": 342,
+          "duration": 200
+        },
+        {
+          "tileid": 343,
+          "duration": 200
+        },
+        {
+          "tileid": 344,
+          "duration": 200
+        },
+        {
+          "tileid": 345,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 44,
+      "animation": [
+        {
+          "tileid": 346,
+          "duration": 200
+        },
+        {
+          "tileid": 347,
+          "duration": 200
+        },
+        {
+          "tileid": 348,
+          "duration": 200
+        },
+        {
+          "tileid": 349,
+          "duration": 200
+        },
+        {
+          "tileid": 350,
+          "duration": 200
+        },
+        {
+          "tileid": 351,
+          "duration": 200
+        },
+        {
+          "tileid": 352,
+          "duration": 200
+        },
+        {
+          "tileid": 353,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 96,
+      "animation": [
+        {
+          "tileid": 370,
+          "duration": 200
+        },
+        {
+          "tileid": 371,
+          "duration": 200
+        },
+        {
+          "tileid": 372,
+          "duration": 200
+        },
+        {
+          "tileid": 373,
+          "duration": 200
+        },
+        {
+          "tileid": 374,
+          "duration": 200
+        },
+        {
+          "tileid": 375,
+          "duration": 200
+        },
+        {
+          "tileid": 376,
+          "duration": 200
+        },
+        {
+          "tileid": 377,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 219,
+      "animation": [
+        {
+          "tileid": 410,
+          "duration": 200
+        },
+        {
+          "tileid": 411,
+          "duration": 200
+        },
+        {
+          "tileid": 412,
+          "duration": 200
+        },
+        {
+          "tileid": 413,
+          "duration": 200
+        },
+        {
+          "tileid": 414,
+          "duration": 200
+        },
+        {
+          "tileid": 415,
+          "duration": 200
+        },
+        {
+          "tileid": 416,
+          "duration": 200
+        },
+        {
+          "tileid": 417,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 245,
+      "animation": [
+        {
+          "tileid": 426,
+          "duration": 200
+        },
+        {
+          "tileid": 427,
+          "duration": 200
+        },
+        {
+          "tileid": 428,
+          "duration": 200
+        },
+        {
+          "tileid": 429,
+          "duration": 200
+        },
+        {
+          "tileid": 430,
+          "duration": 200
+        },
+        {
+          "tileid": 431,
+          "duration": 200
+        },
+        {
+          "tileid": 432,
+          "duration": 200
+        },
+        {
+          "tileid": 433,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 246,
+      "animation": [
+        {
+          "tileid": 442,
+          "duration": 200
+        },
+        {
+          "tileid": 443,
+          "duration": 200
+        },
+        {
+          "tileid": 444,
+          "duration": 200
+        },
+        {
+          "tileid": 445,
+          "duration": 200
+        },
+        {
+          "tileid": 446,
+          "duration": 200
+        },
+        {
+          "tileid": 447,
+          "duration": 200
+        },
+        {
+          "tileid": 448,
+          "duration": 200
+        },
+        {
+          "tileid": 449,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 247,
+      "animation": [
+        {
+          "tileid": 458,
+          "duration": 200
+        },
+        {
+          "tileid": 459,
+          "duration": 200
+        },
+        {
+          "tileid": 460,
+          "duration": 200
+        },
+        {
+          "tileid": 461,
+          "duration": 200
+        },
+        {
+          "tileid": 462,
+          "duration": 200
+        },
+        {
+          "tileid": 463,
+          "duration": 200
+        },
+        {
+          "tileid": 464,
+          "duration": 200
+        },
+        {
+          "tileid": 465,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 251,
+      "animation": [
+        {
+          "tileid": 474,
+          "duration": 200
+        },
+        {
+          "tileid": 475,
+          "duration": 200
+        },
+        {
+          "tileid": 476,
+          "duration": 200
+        },
+        {
+          "tileid": 477,
+          "duration": 200
+        },
+        {
+          "tileid": 478,
+          "duration": 200
+        },
+        {
+          "tileid": 479,
+          "duration": 200
+        },
+        {
+          "tileid": 480,
+          "duration": 200
+        },
+        {
+          "tileid": 481,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 252,
+      "animation": [
+        {
+          "tileid": 482,
+          "duration": 200
+        },
+        {
+          "tileid": 483,
+          "duration": 200
+        },
+        {
+          "tileid": 484,
+          "duration": 200
+        },
+        {
+          "tileid": 485,
+          "duration": 200
+        },
+        {
+          "tileid": 486,
+          "duration": 200
+        },
+        {
+          "tileid": 487,
+          "duration": 200
+        },
+        {
+          "tileid": 488,
+          "duration": 200
+        },
+        {
+          "tileid": 489,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 253,
+      "animation": [
+        {
+          "tileid": 490,
+          "duration": 200
+        },
+        {
+          "tileid": 491,
+          "duration": 200
+        },
+        {
+          "tileid": 492,
+          "duration": 200
+        },
+        {
+          "tileid": 493,
+          "duration": 200
+        },
+        {
+          "tileid": 494,
+          "duration": 200
+        },
+        {
+          "tileid": 495,
+          "duration": 200
+        },
+        {
+          "tileid": 496,
+          "duration": 200
+        },
+        {
+          "tileid": 497,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 262,
+      "animation": [
+        {
+          "tileid": 506,
+          "duration": 200
+        },
+        {
+          "tileid": 507,
+          "duration": 200
+        },
+        {
+          "tileid": 508,
+          "duration": 200
+        },
+        {
+          "tileid": 509,
+          "duration": 200
+        },
+        {
+          "tileid": 510,
+          "duration": 200
+        },
+        {
+          "tileid": 511,
+          "duration": 200
+        },
+        {
+          "tileid": 512,
+          "duration": 200
+        },
+        {
+          "tileid": 513,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 272,
+      "animation": [
+        {
+          "tileid": 522,
+          "duration": 200
+        },
+        {
+          "tileid": 523,
+          "duration": 200
+        },
+        {
+          "tileid": 524,
+          "duration": 200
+        },
+        {
+          "tileid": 525,
+          "duration": 200
+        },
+        {
+          "tileid": 526,
+          "duration": 200
+        },
+        {
+          "tileid": 527,
+          "duration": 200
+        },
+        {
+          "tileid": 528,
+          "duration": 200
+        },
+        {
+          "tileid": 529,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 273,
+      "animation": [
+        {
+          "tileid": 530,
+          "duration": 200
+        },
+        {
+          "tileid": 531,
+          "duration": 200
+        },
+        {
+          "tileid": 532,
+          "duration": 200
+        },
+        {
+          "tileid": 533,
+          "duration": 200
+        },
+        {
+          "tileid": 534,
+          "duration": 200
+        },
+        {
+          "tileid": 535,
+          "duration": 200
+        },
+        {
+          "tileid": 536,
+          "duration": 200
+        },
+        {
+          "tileid": 537,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 274,
+      "animation": [
+        {
+          "tileid": 538,
+          "duration": 200
+        },
+        {
+          "tileid": 539,
+          "duration": 200
+        },
+        {
+          "tileid": 540,
+          "duration": 200
+        },
+        {
+          "tileid": 541,
+          "duration": 200
+        },
+        {
+          "tileid": 542,
+          "duration": 200
+        },
+        {
+          "tileid": 543,
+          "duration": 200
+        },
+        {
+          "tileid": 544,
+          "duration": 200
+        },
+        {
+          "tileid": 545,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 275,
+      "animation": [
+        {
+          "tileid": 546,
+          "duration": 200
+        },
+        {
+          "tileid": 547,
+          "duration": 200
+        },
+        {
+          "tileid": 548,
+          "duration": 200
+        },
+        {
+          "tileid": 549,
+          "duration": 200
+        },
+        {
+          "tileid": 550,
+          "duration": 200
+        },
+        {
+          "tileid": 551,
+          "duration": 200
+        },
+        {
+          "tileid": 552,
+          "duration": 200
+        },
+        {
+          "tileid": 553,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 276,
+      "animation": [
+        {
+          "tileid": 554,
+          "duration": 200
+        },
+        {
+          "tileid": 555,
+          "duration": 200
+        },
+        {
+          "tileid": 556,
+          "duration": 200
+        },
+        {
+          "tileid": 557,
+          "duration": 200
+        },
+        {
+          "tileid": 558,
+          "duration": 200
+        },
+        {
+          "tileid": 559,
+          "duration": 200
+        },
+        {
+          "tileid": 560,
+          "duration": 200
+        },
+        {
+          "tileid": 561,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 277,
+      "animation": [
+        {
+          "tileid": 562,
+          "duration": 200
+        },
+        {
+          "tileid": 563,
+          "duration": 200
+        },
+        {
+          "tileid": 564,
+          "duration": 200
+        },
+        {
+          "tileid": 565,
+          "duration": 200
+        },
+        {
+          "tileid": 566,
+          "duration": 200
+        },
+        {
+          "tileid": 567,
+          "duration": 200
+        },
+        {
+          "tileid": 568,
+          "duration": 200
+        },
+        {
+          "tileid": 569,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 278,
+      "animation": [
+        {
+          "tileid": 570,
+          "duration": 200
+        },
+        {
+          "tileid": 571,
+          "duration": 200
+        },
+        {
+          "tileid": 572,
+          "duration": 200
+        },
+        {
+          "tileid": 573,
+          "duration": 200
+        },
+        {
+          "tileid": 574,
+          "duration": 200
+        },
+        {
+          "tileid": 575,
+          "duration": 200
+        },
+        {
+          "tileid": 576,
+          "duration": 200
+        },
+        {
+          "tileid": 577,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 279,
+      "animation": [
+        {
+          "tileid": 578,
+          "duration": 200
+        },
+        {
+          "tileid": 579,
+          "duration": 200
+        },
+        {
+          "tileid": 580,
+          "duration": 200
+        },
+        {
+          "tileid": 581,
+          "duration": 200
+        },
+        {
+          "tileid": 582,
+          "duration": 200
+        },
+        {
+          "tileid": 583,
+          "duration": 200
+        },
+        {
+          "tileid": 584,
+          "duration": 200
+        },
+        {
+          "tileid": 585,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 280,
+      "animation": [
+        {
+          "tileid": 594,
+          "duration": 200
+        },
+        {
+          "tileid": 595,
+          "duration": 200
+        },
+        {
+          "tileid": 596,
+          "duration": 200
+        },
+        {
+          "tileid": 597,
+          "duration": 200
+        },
+        {
+          "tileid": 598,
+          "duration": 200
+        },
+        {
+          "tileid": 599,
+          "duration": 200
+        },
+        {
+          "tileid": 600,
+          "duration": 200
+        },
+        {
+          "tileid": 601,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 282,
+      "animation": [
+        {
+          "tileid": 626,
+          "duration": 200
+        },
+        {
+          "tileid": 627,
+          "duration": 200
+        },
+        {
+          "tileid": 628,
+          "duration": 200
+        },
+        {
+          "tileid": 629,
+          "duration": 200
+        },
+        {
+          "tileid": 630,
+          "duration": 200
+        },
+        {
+          "tileid": 631,
+          "duration": 200
+        },
+        {
+          "tileid": 632,
+          "duration": 200
+        },
+        {
+          "tileid": 633,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 28,
+      "animation": [
+        {
+          "tileid": 650,
+          "duration": 200
+        },
+        {
+          "tileid": 651,
+          "duration": 200
+        },
+        {
+          "tileid": 652,
+          "duration": 200
+        },
+        {
+          "tileid": 653,
+          "duration": 200
+        },
+        {
+          "tileid": 654,
+          "duration": 200
+        },
+        {
+          "tileid": 655,
+          "duration": 200
+        },
+        {
+          "tileid": 656,
+          "duration": 200
+        },
+        {
+          "tileid": 657,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 30,
+      "animation": [
+        {
+          "tileid": 658,
+          "duration": 200
+        },
+        {
+          "tileid": 659,
+          "duration": 200
+        },
+        {
+          "tileid": 660,
+          "duration": 200
+        },
+        {
+          "tileid": 661,
+          "duration": 200
+        },
+        {
+          "tileid": 662,
+          "duration": 200
+        },
+        {
+          "tileid": 663,
+          "duration": 200
+        },
+        {
+          "tileid": 664,
+          "duration": 200
+        },
+        {
+          "tileid": 665,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 218,
+      "animation": [
+        {
+          "tileid": 666,
+          "duration": 200
+        },
+        {
+          "tileid": 667,
+          "duration": 200
+        },
+        {
+          "tileid": 668,
+          "duration": 200
+        },
+        {
+          "tileid": 669,
+          "duration": 200
+        },
+        {
+          "tileid": 670,
+          "duration": 200
+        },
+        {
+          "tileid": 671,
+          "duration": 200
+        },
+        {
+          "tileid": 672,
+          "duration": 200
+        },
+        {
+          "tileid": 673,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 281,
+      "animation": [
+        {
+          "tileid": 674,
+          "duration": 200
+        },
+        {
+          "tileid": 675,
+          "duration": 200
+        },
+        {
+          "tileid": 676,
+          "duration": 200
+        },
+        {
+          "tileid": 677,
+          "duration": 200
+        },
+        {
+          "tileid": 678,
+          "duration": 200
+        },
+        {
+          "tileid": 679,
+          "duration": 200
+        },
+        {
+          "tileid": 680,
+          "duration": 200
+        },
+        {
+          "tileid": 681,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 0,
+      "animation": [
+        {
+          "tileid": 682,
+          "duration": 200
+        },
+        {
+          "tileid": 683,
+          "duration": 200
+        },
+        {
+          "tileid": 684,
+          "duration": 200
+        },
+        {
+          "tileid": 685,
+          "duration": 200
+        },
+        {
+          "tileid": 686,
+          "duration": 200
+        },
+        {
+          "tileid": 687,
+          "duration": 200
+        },
+        {
+          "tileid": 688,
+          "duration": 200
+        },
+        {
+          "tileid": 689,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 31,
+      "animation": [
+        {
+          "tileid": 826,
+          "duration": 200
+        },
+        {
+          "tileid": 827,
+          "duration": 200
+        },
+        {
+          "tileid": 828,
+          "duration": 200
+        },
+        {
+          "tileid": 829,
+          "duration": 200
+        },
+        {
+          "tileid": 830,
+          "duration": 200
+        },
+        {
+          "tileid": 831,
+          "duration": 200
+        },
+        {
+          "tileid": 832,
+          "duration": 200
+        },
+        {
+          "tileid": 833,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 119,
+      "animation": [
+        {
+          "tileid": 1026,
+          "duration": 200
+        },
+        {
+          "tileid": 1027,
+          "duration": 200
+        },
+        {
+          "tileid": 1028,
+          "duration": 200
+        },
+        {
+          "tileid": 1029,
+          "duration": 200
+        },
+        {
+          "tileid": 1030,
+          "duration": 200
+        },
+        {
+          "tileid": 1031,
+          "duration": 200
+        },
+        {
+          "tileid": 1032,
+          "duration": 200
+        },
+        {
+          "tileid": 1033,
+          "duration": 200
+        }
+      ]
+    }
+  ]
+}

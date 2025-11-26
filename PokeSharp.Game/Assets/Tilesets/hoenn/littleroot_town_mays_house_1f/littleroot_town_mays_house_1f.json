@@ -1,0 +1,13 @@
+{
+  "columns": 16,
+  "image": "littleroot_town_mays_house_1f.png",
+  "imageheight": 64,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "littleroot_town_mays_house_1f",
+  "spacing": 0,
+  "tilecount": 61,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset"
+}

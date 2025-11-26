@@ -1,0 +1,126 @@
+{
+  "columns": 16,
+  "image": "seafloor_cavern_room5.png",
+  "imageheight": 112,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "seafloor_cavern_room5",
+  "spacing": 0,
+  "tilecount": 112,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset",
+  "tiles": [
+    {
+      "id": 14,
+      "animation": [
+        {
+          "tileid": 36,
+          "duration": 200
+        },
+        {
+          "tileid": 37,
+          "duration": 200
+        },
+        {
+          "tileid": 38,
+          "duration": 200
+        },
+        {
+          "tileid": 39,
+          "duration": 200
+        },
+        {
+          "tileid": 40,
+          "duration": 200
+        },
+        {
+          "tileid": 41,
+          "duration": 200
+        },
+        {
+          "tileid": 42,
+          "duration": 200
+        },
+        {
+          "tileid": 43,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "animation": [
+        {
+          "tileid": 44,
+          "duration": 200
+        },
+        {
+          "tileid": 45,
+          "duration": 200
+        },
+        {
+          "tileid": 46,
+          "duration": 200
+        },
+        {
+          "tileid": 47,
+          "duration": 200
+        },
+        {
+          "tileid": 48,
+          "duration": 200
+        },
+        {
+          "tileid": 49,
+          "duration": 200
+        },
+        {
+          "tileid": 50,
+          "duration": 200
+        },
+        {
+          "tileid": 51,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 18,
+      "animation": [
+        {
+          "tileid": 52,
+          "duration": 200
+        },
+        {
+          "tileid": 53,
+          "duration": 200
+        },
+        {
+          "tileid": 54,
+          "duration": 200
+        },
+        {
+          "tileid": 55,
+          "duration": 200
+        },
+        {
+          "tileid": 56,
+          "duration": 200
+        },
+        {
+          "tileid": 57,
+          "duration": 200
+        },
+        {
+          "tileid": 58,
+          "duration": 200
+        },
+        {
+          "tileid": 59,
+          "duration": 200
+        }
+      ]
+    }
+  ]
+}

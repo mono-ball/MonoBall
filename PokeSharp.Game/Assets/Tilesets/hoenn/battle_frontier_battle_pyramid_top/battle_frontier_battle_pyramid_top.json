@@ -1,0 +1,13 @@
+{
+  "columns": 16,
+  "image": "battle_frontier_battle_pyramid_top.png",
+  "imageheight": 64,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "battle_frontier_battle_pyramid_top",
+  "spacing": 0,
+  "tilecount": 52,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset"
+}

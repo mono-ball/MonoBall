@@ -1,0 +1,13 @@
+{
+  "columns": 16,
+  "image": "record_corner.png",
+  "imageheight": 80,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "record_corner",
+  "spacing": 0,
+  "tilecount": 66,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset"
+}

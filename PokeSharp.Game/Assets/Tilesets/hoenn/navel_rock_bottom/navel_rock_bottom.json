@@ -1,0 +1,89 @@
+{
+  "columns": 16,
+  "image": "navel_rock_bottom.png",
+  "imageheight": 64,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "navel_rock_bottom",
+  "spacing": 0,
+  "tilecount": 64,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset",
+  "tiles": [
+    {
+      "id": 7,
+      "animation": [
+        {
+          "tileid": 32,
+          "duration": 200
+        },
+        {
+          "tileid": 33,
+          "duration": 200
+        },
+        {
+          "tileid": 34,
+          "duration": 200
+        },
+        {
+          "tileid": 35,
+          "duration": 200
+        },
+        {
+          "tileid": 36,
+          "duration": 200
+        },
+        {
+          "tileid": 37,
+          "duration": 200
+        },
+        {
+          "tileid": 38,
+          "duration": 200
+        },
+        {
+          "tileid": 39,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "animation": [
+        {
+          "tileid": 56,
+          "duration": 200
+        },
+        {
+          "tileid": 57,
+          "duration": 200
+        },
+        {
+          "tileid": 58,
+          "duration": 200
+        },
+        {
+          "tileid": 59,
+          "duration": 200
+        },
+        {
+          "tileid": 60,
+          "duration": 200
+        },
+        {
+          "tileid": 61,
+          "duration": 200
+        },
+        {
+          "tileid": 62,
+          "duration": 200
+        },
+        {
+          "tileid": 63,
+          "duration": 200
+        }
+      ]
+    }
+  ]
+}

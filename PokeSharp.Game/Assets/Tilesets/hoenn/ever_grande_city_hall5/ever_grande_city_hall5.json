@@ -1,0 +1,163 @@
+{
+  "columns": 16,
+  "image": "ever_grande_city_hall5.png",
+  "imageheight": 64,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "ever_grande_city_hall5",
+  "spacing": 0,
+  "tilecount": 64,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset",
+  "tiles": [
+    {
+      "id": 1,
+      "animation": [
+        {
+          "tileid": 29,
+          "duration": 200
+        },
+        {
+          "tileid": 30,
+          "duration": 200
+        },
+        {
+          "tileid": 31,
+          "duration": 200
+        },
+        {
+          "tileid": 32,
+          "duration": 200
+        },
+        {
+          "tileid": 33,
+          "duration": 200
+        },
+        {
+          "tileid": 34,
+          "duration": 200
+        },
+        {
+          "tileid": 35,
+          "duration": 200
+        },
+        {
+          "tileid": 36,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "animation": [
+        {
+          "tileid": 37,
+          "duration": 200
+        },
+        {
+          "tileid": 38,
+          "duration": 200
+        },
+        {
+          "tileid": 39,
+          "duration": 200
+        },
+        {
+          "tileid": 40,
+          "duration": 200
+        },
+        {
+          "tileid": 41,
+          "duration": 200
+        },
+        {
+          "tileid": 42,
+          "duration": 200
+        },
+        {
+          "tileid": 43,
+          "duration": 200
+        },
+        {
+          "tileid": 44,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "animation": [
+        {
+          "tileid": 45,
+          "duration": 200
+        },
+        {
+          "tileid": 46,
+          "duration": 200
+        },
+        {
+          "tileid": 47,
+          "duration": 200
+        },
+        {
+          "tileid": 48,
+          "duration": 200
+        },
+        {
+          "tileid": 49,
+          "duration": 200
+        },
+        {
+          "tileid": 50,
+          "duration": 200
+        },
+        {
+          "tileid": 51,
+          "duration": 200
+        },
+        {
+          "tileid": 52,
+          "duration": 200
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "animation": [
+        {
+          "tileid": 53,
+          "duration": 200
+        },
+        {
+          "tileid": 54,
+          "duration": 200
+        },
+        {
+          "tileid": 55,
+          "duration": 200
+        },
+        {
+          "tileid": 56,
+          "duration": 200
+        },
+        {
+          "tileid": 57,
+          "duration": 200
+        },
+        {
+          "tileid": 58,
+          "duration": 200
+        },
+        {
+          "tileid": 59,
+          "duration": 200
+        },
+        {
+          "tileid": 60,
+          "duration": 200
+        }
+      ]
+    }
+  ]
+}

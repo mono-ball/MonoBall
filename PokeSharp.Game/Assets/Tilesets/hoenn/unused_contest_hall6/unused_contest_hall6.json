@@ -1,0 +1,13 @@
+{
+  "columns": 16,
+  "image": "unused_contest_hall6.png",
+  "imageheight": 16,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "unused_contest_hall6",
+  "spacing": 0,
+  "tilecount": 3,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset"
+}

@@ -1,0 +1,13 @@
+{
+  "columns": 16,
+  "image": "route114_fossil_maniacs_house.png",
+  "imageheight": 64,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "route114_fossil_maniacs_house",
+  "spacing": 0,
+  "tilecount": 49,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset"
+}

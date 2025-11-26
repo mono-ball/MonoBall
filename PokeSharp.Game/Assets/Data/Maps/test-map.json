@@ -985,6 +985,11 @@
               "name": "direction",
               "type": "string",
               "value": "left"
+            },
+            {
+              "name": "npcId",
+              "type": "string",
+              "value": "generic_villager"
             }
           ]
         },

@@ -1,0 +1,13 @@
+{
+  "columns": 16,
+  "image": "fortree_city_gym.png",
+  "imageheight": 64,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "fortree_city_gym",
+  "spacing": 0,
+  "tilecount": 55,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset"
+}

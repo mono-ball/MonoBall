@@ -1,0 +1,13 @@
+{
+  "columns": 16,
+  "image": "trainer_hill_4f.png",
+  "imageheight": 48,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "trainer_hill_4f",
+  "spacing": 0,
+  "tilecount": 34,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset"
+}

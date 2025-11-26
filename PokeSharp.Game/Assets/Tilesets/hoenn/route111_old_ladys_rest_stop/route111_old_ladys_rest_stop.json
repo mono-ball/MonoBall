@@ -1,0 +1,13 @@
+{
+  "columns": 16,
+  "image": "route111_old_ladys_rest_stop.png",
+  "imageheight": 48,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "route111_old_ladys_rest_stop",
+  "spacing": 0,
+  "tilecount": 48,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset"
+}

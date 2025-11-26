@@ -1,0 +1,87 @@
+{
+  "compressionlevel": -1,
+  "height": 1,
+  "infinite": false,
+  "layers": [
+    {
+      "data": [
+        1
+      ],
+      "height": 1,
+      "id": 1,
+      "name": "Ground",
+      "opacity": 1,
+      "type": "tilelayer",
+      "visible": true,
+      "width": 1,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "data": [
+        2
+      ],
+      "height": 1,
+      "id": 2,
+      "name": "Objects",
+      "opacity": 1,
+      "type": "tilelayer",
+      "visible": true,
+      "width": 1,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "data": [
+        0
+      ],
+      "height": 1,
+      "id": 3,
+      "name": "Overhead",
+      "opacity": 1,
+      "type": "tilelayer",
+      "visible": true,
+      "width": 1,
+      "x": 0,
+      "y": 0
+    }
+  ],
+  "nextlayerid": 1,
+  "nextobjectid": 1,
+  "orientation": "orthogonal",
+  "renderorder": "right-down",
+  "tiledversion": "1.11.2",
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "map",
+  "version": "1.11",
+  "width": 1,
+  "properties": [
+    {
+      "name": "display_name",
+      "type": "string",
+      "value": "UnusedContestHall1"
+    },
+    {
+      "name": "border",
+      "propertytype": "Border",
+      "type": "class",
+      "value": {
+        "top_left": 3,
+        "top_right": 3,
+        "bottom_left": 3,
+        "bottom_right": 3,
+        "top_left_top": 1,
+        "top_right_top": 1,
+        "bottom_left_top": 1,
+        "bottom_right_top": 1
+      }
+    }
+  ],
+  "tilesets": [
+    {
+      "firstgid": 1,
+      "source": "../../../Tilesets/hoenn/unused_contest_hall1/unused_contest_hall1.json"
+    }
+  ]
+}

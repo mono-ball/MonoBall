@@ -1,0 +1,13 @@
+{
+  "columns": 16,
+  "image": "mossdeep_city_space_center_1f.png",
+  "imageheight": 48,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "mossdeep_city_space_center_1f",
+  "spacing": 0,
+  "tilecount": 43,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset"
+}

@@ -1,0 +1,13 @@
+{
+  "columns": 16,
+  "image": "route117_pokemon_day_care.png",
+  "imageheight": 64,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "route117_pokemon_day_care",
+  "spacing": 0,
+  "tilecount": 58,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset"
+}

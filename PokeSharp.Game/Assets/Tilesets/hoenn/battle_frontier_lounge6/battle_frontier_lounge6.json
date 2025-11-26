@@ -1,0 +1,13 @@
+{
+  "columns": 16,
+  "image": "battle_frontier_lounge6.png",
+  "imageheight": 32,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "battle_frontier_lounge6",
+  "spacing": 0,
+  "tilecount": 30,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset"
+}

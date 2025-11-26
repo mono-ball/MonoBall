@@ -1,0 +1,13 @@
+{
+  "columns": 16,
+  "image": "union_room.png",
+  "imageheight": 48,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "union_room",
+  "spacing": 0,
+  "tilecount": 42,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset"
+}

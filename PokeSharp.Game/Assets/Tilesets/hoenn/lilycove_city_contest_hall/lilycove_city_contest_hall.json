@@ -1,0 +1,13 @@
+{
+  "columns": 16,
+  "image": "lilycove_city_contest_hall.png",
+  "imageheight": 128,
+  "imagewidth": 256,
+  "margin": 0,
+  "name": "lilycove_city_contest_hall",
+  "spacing": 0,
+  "tilecount": 113,
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset"
+}
