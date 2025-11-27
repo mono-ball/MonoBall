@@ -2,9 +2,11 @@ using Arch.Core;
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
 using PokeSharp.Engine.Common.Logging;
+using PokeSharp.Engine.Core.Types;
 using PokeSharp.Engine.Rendering.Components;
 using PokeSharp.Engine.Systems.Factories;
 using PokeSharp.Engine.Systems.Management;
+using PokeSharp.Game.Components;
 using PokeSharp.Game.Components.Maps;
 using PokeSharp.Game.Components.Movement;
 using PokeSharp.Game.Infrastructure.Configuration;
@@ -30,15 +32,17 @@ public class PlayerFactory(
     /// <returns>The created player entity.</returns>
     public Entity CreatePlayer(int x, int y, int viewportWidth, int viewportHeight)
     {
-        // Capture tile size from MapInfo (default from config if not found)
+        // Capture tile size and current map info from MapInfo
         var gameplayConfig = GameplayConfig.CreateDefault();
         var tileSize = gameplayConfig.DefaultTileSize;
+        string? currentMapName = null;
         var mapInfoQuery = QueryCache.Get<MapInfo>();
         world.Query(
             in mapInfoQuery,
             (ref MapInfo mapInfo) =>
             {
                 tileSize = mapInfo.TileSize;
+                currentMapName = mapInfo.MapName;
             }
         );
 
@@ -52,14 +56,8 @@ public class PlayerFactory(
             Position = new Vector2(x * tileSize, y * tileSize), // Start at player's position (grid to pixels)
         };
 
-        // Set map bounds on camera from MapInfo
-        world.Query(
-            in mapInfoQuery,
-            (ref MapInfo mapInfo) =>
-            {
-                camera.MapBounds = new Rectangle(0, 0, mapInfo.PixelWidth, mapInfo.PixelHeight);
-            }
-        );
+        // Map bounds removed - camera moves freely without restrictions (Pokemon Emerald style)
+        // camera.MapBounds remains Rectangle.Empty (default) to allow free camera movement
 
         // Spawn player entity from template with position override
         var playerEntity = entityFactory.SpawnFromTemplate(
@@ -73,6 +71,20 @@ public class PlayerFactory(
 
         // Add Camera component (not in template as it's created per-instance)
         world.Add(playerEntity, camera);
+
+        // Add MapStreaming component for seamless map transitions
+        if (currentMapName != null)
+        {
+            var mapStreaming = new MapStreaming(
+                new MapIdentifier(currentMapName)
+            );
+            world.Add(playerEntity, mapStreaming);
+            logger.LogInformation("MapStreaming component added to player");
+        }
+        else
+        {
+            logger.LogWarning("No map found - MapStreaming component not added");
+        }
 
         logger.LogEntityCreated(
             "Player",

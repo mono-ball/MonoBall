@@ -1,53 +1,25 @@
 {
   "maps": [
     {
-      "fileName": "../Maps/hoenn/route111.json",
-      "height": 140,
-      "width": 40,
-      "x": 1280,
-      "y": -4512
-    },
-    {
-      "fileName": "../Maps/hoenn/route127.json",
-      "height": 80,
-      "width": 80,
-      "x": 8320,
-      "y": -2272
-    },
-    {
-      "fileName": "../Maps/hoenn/route107.json",
-      "height": 20,
-      "width": 60,
-      "x": -640,
-      "y": 1280
-    },
-    {
-      "fileName": "../Maps/hoenn/oldale_town.json",
-      "height": 20,
-      "width": 20,
-      "x": 0,
-      "y": -640
-    },
-    {
-      "fileName": "../Maps/hoenn/route106.json",
-      "height": 20,
-      "width": 80,
-      "x": -1920,
-      "y": 960
-    },
-    {
-      "fileName": "../Maps/hoenn/lilycove_city.json",
+      "fileName": "../Maps/hoenn/route125.json",
       "height": 40,
       "width": 80,
-      "x": 5760,
-      "y": -3392
+      "x": 8320,
+      "y": -3552
     },
     {
-      "fileName": "../Maps/hoenn/route126.json",
+      "fileName": "../Maps/hoenn/rustboro_city.json",
+      "height": 60,
+      "width": 40,
+      "x": -1920,
+      "y": -2560
+    },
+    {
+      "fileName": "../Maps/hoenn/ever_grande_city.json",
       "height": 80,
-      "width": 80,
-      "x": 7040,
-      "y": -2272
+      "width": 40,
+      "x": 10240,
+      "y": -1632
     },
     {
       "fileName": "../Maps/hoenn/route134.json",
@@ -57,81 +29,11 @@
       "y": -352
     },
     {
-      "fileName": "../Maps/hoenn/route133.json",
-      "height": 40,
-      "width": 80,
-      "x": 3200,
-      "y": -352
-    },
-    {
-      "fileName": "../Maps/hoenn/route117.json",
-      "height": 20,
-      "width": 60,
-      "x": 320,
-      "y": -2256
-    },
-    {
-      "fileName": "../Maps/hoenn/mossdeep_city.json",
-      "height": 40,
-      "width": 80,
-      "x": 8320,
-      "y": -2912
-    },
-    {
-      "fileName": "../Maps/hoenn/verdanturf_town.json",
-      "height": 20,
-      "width": 20,
-      "x": 0,
-      "y": -2256
-    },
-    {
-      "fileName": "../Maps/hoenn/route102.json",
-      "height": 20,
-      "width": 50,
-      "x": -800,
-      "y": -640
-    },
-    {
-      "fileName": "../Maps/hoenn/route110.json",
-      "height": 100,
+      "fileName": "../Maps/hoenn/route115.json",
+      "height": 80,
       "width": 40,
-      "x": 1280,
-      "y": -1952
-    },
-    {
-      "fileName": "../Maps/hoenn/slateport_city.json",
-      "height": 60,
-      "width": 40,
-      "x": 1280,
-      "y": -352
-    },
-    {
-      "fileName": "../Maps/hoenn/route120.json",
-      "height": 100,
-      "width": 40,
-      "x": 3840,
-      "y": -4512
-    },
-    {
-      "fileName": "../Maps/hoenn/route103.json",
-      "height": 22,
-      "width": 80,
-      "x": 0,
-      "y": -992
-    },
-    {
-      "fileName": "../Maps/hoenn/lavaridge_town.json",
-      "height": 20,
-      "width": 20,
-      "x": 320,
-      "y": -3552
-    },
-    {
-      "fileName": "../Maps/hoenn/pacifidlog_town.json",
-      "height": 40,
-      "width": 20,
-      "x": 5760,
-      "y": -352
+      "x": -1920,
+      "y": -3840
     },
     {
       "fileName": "../Maps/hoenn/route124.json",
@@ -141,10 +43,122 @@
       "y": -3552
     },
     {
+      "fileName": "../Maps/hoenn/route104.json",
+      "height": 80,
+      "width": 40,
+      "x": -1920,
+      "y": -1600
+    },
+    {
+      "fileName": "../Maps/hoenn/route112.json",
+      "height": 60,
+      "width": 40,
+      "x": 640,
+      "y": -4192
+    },
+    {
+      "fileName": "../Maps/hoenn/route108.json",
+      "height": 20,
+      "width": 60,
+      "x": 320,
+      "y": 1248
+    },
+    {
       "fileName": "../Maps/hoenn/route132.json",
       "height": 40,
       "width": 80,
       "x": 4480,
+      "y": -352
+    },
+    {
+      "fileName": "../Maps/hoenn/route119.json",
+      "height": 140,
+      "width": 40,
+      "x": 2560,
+      "y": -4512
+    },
+    {
+      "fileName": "../Maps/hoenn/petalburg_city.json",
+      "height": 30,
+      "width": 30,
+      "x": -1280,
+      "y": -800
+    },
+    {
+      "fileName": "../Maps/hoenn/route114.json",
+      "height": 80,
+      "width": 40,
+      "x": -1280,
+      "y": -4512
+    },
+    {
+      "fileName": "../Maps/hoenn/route121.json",
+      "height": 20,
+      "width": 80,
+      "x": 4480,
+      "y": -3232
+    },
+    {
+      "fileName": "../Maps/hoenn/route105.json",
+      "height": 80,
+      "width": 40,
+      "x": -1920,
+      "y": -320
+    },
+    {
+      "fileName": "../Maps/hoenn/lavaridge_town.json",
+      "height": 20,
+      "width": 20,
+      "x": 320,
+      "y": -3552
+    },
+    {
+      "fileName": "../Maps/hoenn/route109.json",
+      "height": 63,
+      "width": 40,
+      "x": 1280,
+      "y": 608
+    },
+    {
+      "fileName": "../Maps/hoenn/route106.json",
+      "height": 20,
+      "width": 80,
+      "x": -1920,
+      "y": 960
+    },
+    {
+      "fileName": "../Maps/hoenn/route133.json",
+      "height": 40,
+      "width": 80,
+      "x": 3200,
+      "y": -352
+    },
+    {
+      "fileName": "../Maps/hoenn/route102.json",
+      "height": 20,
+      "width": 50,
+      "x": -800,
+      "y": -640
+    },
+    {
+      "fileName": "../Maps/hoenn/mossdeep_city.json",
+      "height": 40,
+      "width": 80,
+      "x": 8320,
+      "y": -2912
+    },
+    {
+      "fileName": "../Maps/hoenn/route129.json",
+      "height": 40,
+      "width": 80,
+      "x": 8320,
+      "y": -352
+    },
+    {
+      "fileName": "../Maps/hoenn/route131.json",
+      "height": 40,
+      "width": 60,
+      "x": 6080,
       "y": -352
     },
     {
@@ -155,62 +169,6 @@
       "y": -4512
     },
     {
-      "fileName": "../Maps/hoenn/route104.json",
-      "height": 80,
-      "width": 40,
-      "x": -1920,
-      "y": -1600
-    },
-    {
-      "fileName": "../Maps/hoenn/route119.json",
-      "height": 140,
-      "width": 40,
-      "x": 2560,
-      "y": -4512
-    },
-    {
-      "fileName": "../Maps/hoenn/route131.json",
-      "height": 40,
-      "width": 60,
-      "x": 6080,
-      "y": -352
-    },
-    {
-      "fileName": "../Maps/hoenn/fortree_city.json",
-      "height": 20,
-      "width": 40,
-      "x": 3200,
-      "y": -4512
-    },
-    {
-      "fileName": "../Maps/hoenn/route108.json",
-      "height": 20,
-      "width": 60,
-      "x": 320,
-      "y": 1248
-    },
-    {
-      "fileName": "../Maps/hoenn/dewford_town.json",
-      "height": 20,
-      "width": 20,
-      "x": -960,
-      "y": 1280
-    },
-    {
-      "fileName": "../Maps/hoenn/littleroot_town.json",
-      "height": 20,
-      "width": 20,
-      "x": 0,
-      "y": 0
-    },
-    {
-      "fileName": "../Maps/hoenn/route112.json",
-      "height": 60,
-      "width": 40,
-      "x": 640,
-      "y": -4192
-    },
-    {
       "fileName": "../Maps/hoenn/route116.json",
       "height": 20,
       "width": 100,
@@ -218,18 +176,25 @@
       "y": -2576
     },
     {
-      "fileName": "../Maps/hoenn/route130.json",
-      "height": 40,
+      "fileName": "../Maps/hoenn/route127.json",
+      "height": 80,
       "width": 80,
-      "x": 7040,
-      "y": -352
+      "x": 8320,
+      "y": -2272
     },
     {
-      "fileName": "../Maps/hoenn/ever_grande_city.json",
-      "height": 80,
-      "width": 40,
-      "x": 10240,
-      "y": -1632
+      "fileName": "../Maps/hoenn/oldale_town.json",
+      "height": 20,
+      "width": 20,
+      "x": 0,
+      "y": -640
+    },
+    {
+      "fileName": "../Maps/hoenn/route117.json",
+      "height": 20,
+      "width": 60,
+      "x": 320,
+      "y": -2256
     },
     {
       "fileName": "../Maps/hoenn/route118.json",
@@ -239,95 +204,32 @@
       "y": -2272
     },
     {
-      "fileName": "../Maps/hoenn/route128.json",
+      "fileName": "../Maps/hoenn/pacifidlog_town.json",
       "height": 40,
-      "width": 120,
-      "x": 8320,
-      "y": -992
-    },
-    {
-      "fileName": "../Maps/hoenn/route123.json",
-      "height": 20,
-      "width": 140,
-      "x": 3200,
-      "y": -2272
-    },
-    {
-      "fileName": "../Maps/hoenn/route125.json",
-      "height": 40,
-      "width": 80,
-      "x": 8320,
-      "y": -3552
-    },
-    {
-      "fileName": "../Maps/hoenn/route105.json",
-      "height": 80,
-      "width": 40,
-      "x": -1920,
-      "y": -320
-    },
-    {
-      "fileName": "../Maps/hoenn/rustboro_city.json",
-      "height": 60,
-      "width": 40,
-      "x": -1920,
-      "y": -2560
-    },
-    {
-      "fileName": "../Maps/hoenn/route114.json",
-      "height": 80,
-      "width": 40,
-      "x": -1280,
-      "y": -4512
-    },
-    {
-      "fileName": "../Maps/hoenn/mauville_city.json",
-      "height": 20,
-      "width": 40,
-      "x": 1280,
-      "y": -2272
-    },
-    {
-      "fileName": "../Maps/hoenn/route121.json",
-      "height": 20,
-      "width": 80,
-      "x": 4480,
-      "y": -3232
-    },
-    {
-      "fileName": "../Maps/hoenn/route122.json",
-      "height": 40,
-      "width": 40,
-      "x": 4800,
-      "y": -2912
-    },
-    {
-      "fileName": "../Maps/hoenn/route109.json",
-      "height": 63,
-      "width": 40,
-      "x": 1280,
-      "y": 608
-    },
-    {
-      "fileName": "../Maps/hoenn/route101.json",
-      "height": 20,
       "width": 20,
-      "x": 0,
-      "y": -320
+      "x": 5760,
+      "y": -352
     },
     {
-      "fileName": "../Maps/hoenn/petalburg_city.json",
-      "height": 30,
-      "width": 30,
-      "x": -1280,
-      "y": -800
+      "fileName": "../Maps/hoenn/route107.json",
+      "height": 20,
+      "width": 60,
+      "x": -640,
+      "y": 1280
     },
     {
-      "fileName": "../Maps/hoenn/route115.json",
-      "height": 80,
+      "fileName": "../Maps/hoenn/route130.json",
+      "height": 40,
+      "width": 80,
+      "x": 7040,
+      "y": -352
+    },
+    {
+      "fileName": "../Maps/hoenn/route111.json",
+      "height": 140,
       "width": 40,
-      "x": -1920,
-      "y": -3840
+      "x": 1280,
+      "y": -4512
     },
     {
       "fileName": "../Maps/hoenn/route113.json",
@@ -337,11 +239,109 @@
       "y": -4512
     },
     {
-      "fileName": "../Maps/hoenn/route129.json",
+      "fileName": "../Maps/hoenn/route120.json",
+      "height": 100,
+      "width": 40,
+      "x": 3840,
+      "y": -4512
+    },
+    {
+      "fileName": "../Maps/hoenn/route110.json",
+      "height": 100,
+      "width": 40,
+      "x": 1280,
+      "y": -1952
+    },
+    {
+      "fileName": "../Maps/hoenn/littleroot_town.json",
+      "height": 20,
+      "width": 20,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "fileName": "../Maps/hoenn/fortree_city.json",
+      "height": 20,
+      "width": 40,
+      "x": 3200,
+      "y": -4512
+    },
+    {
+      "fileName": "../Maps/hoenn/route101.json",
+      "height": 20,
+      "width": 20,
+      "x": 0,
+      "y": -320
+    },
+    {
+      "fileName": "../Maps/hoenn/route126.json",
+      "height": 80,
+      "width": 80,
+      "x": 7040,
+      "y": -2272
+    },
+    {
+      "fileName": "../Maps/hoenn/dewford_town.json",
+      "height": 20,
+      "width": 20,
+      "x": -960,
+      "y": 1280
+    },
+    {
+      "fileName": "../Maps/hoenn/verdanturf_town.json",
+      "height": 20,
+      "width": 20,
+      "x": 0,
+      "y": -2256
+    },
+    {
+      "fileName": "../Maps/hoenn/route122.json",
+      "height": 40,
+      "width": 40,
+      "x": 4800,
+      "y": -2912
+    },
+    {
+      "fileName": "../Maps/hoenn/mauville_city.json",
+      "height": 20,
+      "width": 40,
+      "x": 1280,
+      "y": -2272
+    },
+    {
+      "fileName": "../Maps/hoenn/route123.json",
+      "height": 20,
+      "width": 140,
+      "x": 3200,
+      "y": -2272
+    },
+    {
+      "fileName": "../Maps/hoenn/lilycove_city.json",
       "height": 40,
       "width": 80,
-      "x": 8320,
+      "x": 5760,
+      "y": -3392
+    },
+    {
+      "fileName": "../Maps/hoenn/slateport_city.json",
+      "height": 60,
+      "width": 40,
+      "x": 1280,
       "y": -352
+    },
+    {
+      "fileName": "../Maps/hoenn/route103.json",
+      "height": 22,
+      "width": 80,
+      "x": 0,
+      "y": -992
+    },
+    {
+      "fileName": "../Maps/hoenn/route128.json",
+      "height": 40,
+      "width": 120,
+      "x": 8320,
+      "y": -992
     }
   ],
   "onlyShowAdjacentMaps": false,

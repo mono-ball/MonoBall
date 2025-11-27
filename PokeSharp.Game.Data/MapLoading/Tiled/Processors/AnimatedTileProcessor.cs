@@ -1,10 +1,12 @@
 using Arch.Core;
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
+using PokeSharp.Engine.Core.Types;
 using PokeSharp.Engine.Systems.Management;
 using PokeSharp.Game.Components.Tiles;
 using PokeSharp.Game.Data.MapLoading.Tiled.Services;
 using PokeSharp.Game.Data.MapLoading.Tiled.Tmx;
+using PokeSharp.Game.Data.MapLoading.Tiled.Utilities;
 
 namespace PokeSharp.Game.Data.MapLoading.Tiled.Processors;
 
@@ -12,7 +14,7 @@ namespace PokeSharp.Game.Data.MapLoading.Tiled.Processors;
 ///     Handles creation of animated tile entities from tileset animations.
 ///     Uses optimized batch processing to add AnimatedTile components to existing tile entities.
 /// </summary>
-public class AnimatedTileProcessor
+public class AnimatedTileProcessor : IAnimatedTileProcessor
 {
     private readonly ILogger<AnimatedTileProcessor>? _logger;
 
@@ -24,10 +26,15 @@ public class AnimatedTileProcessor
     /// <summary>
     ///     Creates animated tile entities for all tilesets in a map.
     /// </summary>
+    /// <param name="world">The ECS world.</param>
+    /// <param name="tmxDoc">The TMX document.</param>
+    /// <param name="tilesets">Loaded tilesets.</param>
+    /// <param name="mapId">The map ID to filter tiles by (prevents cross-map corruption).</param>
     public int CreateAnimatedTileEntities(
         World world,
         TmxDocument tmxDoc,
-        IReadOnlyList<LoadedTileset> tilesets
+        IReadOnlyList<LoadedTileset> tilesets,
+        int mapId
     )
     {
         if (tilesets.Count == 0)
@@ -35,7 +42,7 @@ public class AnimatedTileProcessor
 
         var created = 0;
         foreach (var loadedTileset in tilesets)
-            created += CreateAnimatedTileEntitiesForTileset(world, loadedTileset.Tileset);
+            created += CreateAnimatedTileEntitiesForTileset(world, loadedTileset.Tileset, mapId);
 
         return created;
     }
@@ -44,14 +51,17 @@ public class AnimatedTileProcessor
     ///     Creates animated tile entities for a single tileset.
     ///     Uses optimized batch processing to minimize queries.
     /// </summary>
-    private int CreateAnimatedTileEntitiesForTileset(World world, TmxTileset tileset)
+    /// <param name="world">The ECS world.</param>
+    /// <param name="tileset">The tileset to process.</param>
+    /// <param name="mapId">The map ID to filter tiles by (prevents cross-map corruption).</param>
+    private int CreateAnimatedTileEntitiesForTileset(World world, TmxTileset tileset, int mapId)
     {
         if (tileset.Animations.Count == 0)
             return 0;
 
         var created = 0;
 
-        var tilesPerRow = CalculateTilesPerRow(tileset);
+        var tilesPerRow = TilesetUtilities.CalculateTilesPerRow(tileset);
         var tileWidth = tileset.TileWidth;
         var tileHeight = tileset.TileHeight;
         var tileSpacing = tileset.Spacing;
@@ -94,17 +104,7 @@ public class AnimatedTileProcessor
             // PERFORMANCE OPTIMIZATION: Precalculate ALL source rectangles at load time
             // This eliminates expensive runtime calculations, dictionary lookups, and lock contention
             var frameSourceRects = globalFrameIds
-                .Select(frameGid =>
-                    CalculateTileSourceRect(
-                        frameGid,
-                        firstGid,
-                        tileWidth,
-                        tileHeight,
-                        tilesPerRow,
-                        tileSpacing,
-                        tileMargin
-                    )
-                )
+                .Select(frameGid => TilesetUtilities.CalculateSourceRect(frameGid, tileset))
                 .ToArray();
 
             // Create AnimatedTile component with precalculated source rects
@@ -128,13 +128,21 @@ public class AnimatedTileProcessor
         // PERFORMANCE CRITICAL: Execute SINGLE query to process all animations
         // This replaces N individual queries (one per animation) with ONE batch operation
         // For maps with 50 animations × 10,000 tiles, this eliminates 500,000 unnecessary iterations
+        //
+        // CRITICAL FIX: Filter by MapId to prevent cross-map animation corruption!
+        // Without this filter, tiles from OTHER maps with matching GIDs would get
+        // incorrect AnimatedTile components, causing visual corruption.
         if (animationsByTileId.Count > 0)
         {
-            var tileQuery = QueryCache.Get<TileSprite>();
+            var tileQuery = QueryCache.Get<TilePosition, TileSprite>();
             world.Query(
                 in tileQuery,
-                (Entity entity, ref TileSprite sprite) =>
+                (Entity entity, ref TilePosition pos, ref TileSprite sprite) =>
                 {
+                    // CRITICAL: Only process tiles belonging to THIS map
+                    if (pos.MapId.Value != mapId)
+                        return;
+
                     // Check if this tile has an animation component
                     if (animationsByTileId.TryGetValue(sprite.TileGid, out var animatedTile))
                     {
@@ -146,84 +154,5 @@ public class AnimatedTileProcessor
         }
 
         return created;
-    }
-
-    /// <summary>
-    ///     Calculates the number of tiles per row in a tileset.
-    /// </summary>
-    private static int CalculateTilesPerRow(TmxTileset tileset)
-    {
-        if (tileset.TileWidth <= 0)
-            throw new InvalidOperationException(
-                $"Tileset '{tileset.Name ?? "unnamed"}' has invalid tile width {tileset.TileWidth}."
-            );
-
-        if (tileset.Image == null || tileset.Image.Width <= 0)
-            throw new InvalidOperationException(
-                $"Tileset '{tileset.Name ?? "unnamed"}' is missing a valid image width."
-            );
-
-        var spacing = tileset.Spacing;
-        var margin = tileset.Margin;
-
-        if (spacing < 0)
-            throw new InvalidOperationException(
-                $"Tileset '{tileset.Name ?? "unnamed"}' has negative spacing value {spacing}."
-            );
-        if (margin < 0)
-            throw new InvalidOperationException(
-                $"Tileset '{tileset.Name ?? "unnamed"}' has negative margin value {margin}."
-            );
-
-        var usableWidth = tileset.Image.Width - margin * 2;
-        if (usableWidth <= 0)
-            throw new InvalidOperationException(
-                $"Tileset '{tileset.Name ?? "unnamed"}' has unusable image width after margins."
-            );
-
-        var step = tileset.TileWidth + spacing;
-        if (step <= 0)
-            throw new InvalidOperationException(
-                $"Tileset '{tileset.Name ?? "unnamed"}' has invalid step size {step}."
-            );
-
-        var tilesPerRow = (usableWidth + spacing) / step;
-        if (tilesPerRow <= 0)
-            throw new InvalidOperationException(
-                $"Tileset '{tileset.Name ?? "unnamed"}' produced non-positive tiles-per-row."
-            );
-
-        return tilesPerRow;
-    }
-
-    /// <summary>
-    ///     Calculates the source rectangle for a tile in a tileset texture.
-    /// </summary>
-    private static Rectangle CalculateTileSourceRect(
-        int tileGid,
-        int firstGid,
-        int tileWidth,
-        int tileHeight,
-        int tilesPerRow,
-        int spacing,
-        int margin
-    )
-    {
-        var localId = tileGid - firstGid;
-        if (localId < 0)
-            throw new InvalidOperationException(
-                $"Tile GID {tileGid} is not part of tileset starting at {firstGid}."
-            );
-
-        spacing = Math.Max(0, spacing);
-        margin = Math.Max(0, margin);
-
-        var tileX = localId % tilesPerRow;
-        var tileY = localId / tilesPerRow;
-
-        var sourceX = margin + tileX * (tileWidth + spacing);
-        var sourceY = margin + tileY * (tileHeight + spacing);
-
-        return new Rectangle(sourceX, sourceY, tileWidth, tileHeight);
     }
 }

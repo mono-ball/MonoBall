@@ -82,11 +82,23 @@ public class MapDefinition
     public MapIdentifier? NorthMapId { get; set; }
 
     /// <summary>
+    ///     Connection offset for north map in tiles.
+    ///     Shifts the connected map horizontally (positive = right, negative = left).
+    /// </summary>
+    public int NorthConnectionOffset { get; set; } = 0;
+
+    /// <summary>
     ///     Map connected to the south.
     /// </summary>
     [MaxLength(100)]
     [Column(TypeName = "nvarchar(100)")]
     public MapIdentifier? SouthMapId { get; set; }
+
+    /// <summary>
+    ///     Connection offset for south map in tiles.
+    ///     Shifts the connected map horizontally (positive = right, negative = left).
+    /// </summary>
+    public int SouthConnectionOffset { get; set; } = 0;
 
     /// <summary>
     ///     Map connected to the east.
@@ -96,11 +108,23 @@ public class MapDefinition
     public MapIdentifier? EastMapId { get; set; }
 
     /// <summary>
+    ///     Connection offset for east map in tiles.
+    ///     Shifts the connected map vertically (positive = down, negative = up).
+    /// </summary>
+    public int EastConnectionOffset { get; set; } = 0;
+
+    /// <summary>
     ///     Map connected to the west.
     /// </summary>
     [MaxLength(100)]
     [Column(TypeName = "nvarchar(100)")]
     public MapIdentifier? WestMapId { get; set; }
+
+    /// <summary>
+    ///     Connection offset for west map in tiles.
+    ///     Shifts the connected map vertically (positive = down, negative = up).
+    /// </summary>
+    public int WestConnectionOffset { get; set; } = 0;
 
     /// <summary>
     ///     Wild Pokémon encounter data as JSON.

@@ -24,18 +24,19 @@ public class GameConfiguration
 
 /// <summary>
 ///     Configuration for game window settings.
+///     Default resolution is 4x GBA (240x160 = 960x640).
 /// </summary>
 public class GameWindowConfig
 {
     /// <summary>
-    ///     Window width in pixels.
+    ///     Window width in pixels. Default: 960 (4x GBA width of 240).
     /// </summary>
-    public int Width { get; set; } = 800;
+    public int Width { get; set; } = 960;
 
     /// <summary>
-    ///     Window height in pixels.
+    ///     Window height in pixels. Default: 640 (4x GBA height of 160).
     /// </summary>
-    public int Height { get; set; } = 600;
+    public int Height { get; set; } = 640;
 
     /// <summary>
     ///     Whether the mouse cursor should be visible.
@@ -71,7 +72,7 @@ public class GameInitializationConfig
     /// <summary>
     ///     Initial map ID to load when the game starts.
     /// </summary>
-    public string InitialMap { get; set; } = "test-map";
+    public string InitialMap { get; set; }
 
     /// <summary>
     ///     Default X coordinate for initial player spawn (in tiles).

@@ -10,8 +10,9 @@ using PokeSharp.Game.Components.Player;
 namespace PokeSharp.Engine.Rendering.Systems;
 
 /// <summary>
-///     System for camera following with smooth transitions and map bounds clamping.
+///     System for camera following with smooth transitions.
 ///     Sets the camera's follow target and calls camera.Update() to handle all logic.
+///     Camera moves freely without bounds restrictions (Pokemon Emerald style).
 /// </summary>
 public class CameraFollowSystem(ILogger<CameraFollowSystem>? logger = null)
     : SystemBase,

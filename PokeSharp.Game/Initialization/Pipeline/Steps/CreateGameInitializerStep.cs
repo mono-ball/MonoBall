@@ -32,6 +32,10 @@ public class CreateGameInitializerStep : InitializationStepBase
             throw new InvalidOperationException(
                 "AssetManager must be created before GameInitializer"
             );
+        if (context.MapLoader == null)
+            throw new InvalidOperationException(
+                "MapLoader must be created before GameInitializer"
+            );
 
         var logger = context.LoggerFactory.CreateLogger<CreateGameInitializerStep>();
         var gameInitializerLogger = context.LoggerFactory.CreateLogger<GameInitializer>();
@@ -43,7 +47,9 @@ public class CreateGameInitializerStep : InitializationStepBase
             context.SystemManager,
             context.AssetManager,
             context.PoolManager,
-            context.SpriteLoader
+            context.SpriteLoader,
+            context.MapLoader,
+            context.MapDefinitionService
         );
 
         context.GameInitializer = gameInitializer;

@@ -7,8 +7,9 @@ public class GameplayConfig
 {
     /// <summary>
     ///     Default camera zoom level.
+    ///     4.0 = GBA style (240x160 native resolution scaled to 960x640 window).
     /// </summary>
-    public float DefaultZoom { get; set; } = 3.0f;
+    public float DefaultZoom { get; set; } = 4.0f;
 
     /// <summary>
     ///     Camera zoom transition speed (0.0 to 1.0).

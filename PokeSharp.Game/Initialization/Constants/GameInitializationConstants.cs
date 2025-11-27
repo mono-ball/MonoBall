@@ -19,7 +19,7 @@ public static class GameInitializationConstants
     /// <summary>
     ///     Default initial map to load when the game starts.
     /// </summary>
-    public const string DefaultInitialMap = "test-map";
+    public const string DefaultInitialMap = "littleroot_town";
 
     /// <summary>
     ///     Default X coordinate for initial player spawn (in tiles).

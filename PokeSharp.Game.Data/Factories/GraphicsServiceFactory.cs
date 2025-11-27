@@ -4,6 +4,7 @@ using PokeSharp.Engine.Rendering.Assets;
 using PokeSharp.Engine.Systems.Factories;
 using PokeSharp.Engine.Systems.Management;
 using PokeSharp.Game.Data.MapLoading.Tiled.Core;
+using PokeSharp.Game.Data.MapLoading.Tiled.Processors;
 using PokeSharp.Game.Data.PropertyMapping;
 using PokeSharp.Game.Data.Services;
 
@@ -67,15 +68,31 @@ public class GraphicsServiceFactory : IGraphicsServiceFactory
         if (assetManager == null)
             throw new ArgumentNullException(nameof(assetManager));
 
-        var logger = _loggerFactory.CreateLogger<MapLoader>();
+        // Create processors with proper loggers
+        var layerProcessor = new LayerProcessor(
+            _propertyMapperRegistry,
+            _loggerFactory.CreateLogger<LayerProcessor>()
+        );
+
+        var animatedTileProcessor = new AnimatedTileProcessor(
+            _loggerFactory.CreateLogger<AnimatedTileProcessor>()
+        );
+
+        var borderProcessor = new BorderProcessor(
+            _loggerFactory.CreateLogger<BorderProcessor>()
+        );
+
         return new MapLoader(
             assetManager,
             _systemManager,
+            layerProcessor,
+            animatedTileProcessor,
+            borderProcessor,
             _propertyMapperRegistry,
             entityFactory,
             _npcDefinitionService,
             _mapDefinitionService,
-            logger
+            _loggerFactory.CreateLogger<MapLoader>()
         );
     }
 }

@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
 using PokeSharp.Engine.Common.Logging;
 using PokeSharp.Engine.Core.Systems;
+using PokeSharp.Game.Components;
 using PokeSharp.Game.Components.Interfaces;
 using PokeSharp.Game.Components.Maps;
 using PokeSharp.Game.Components.Movement;
@@ -45,6 +46,10 @@ public class MovementSystem : SystemBase, IUpdateSystem
 
     // Cache for tile sizes per map (reduces redundant queries)
     private readonly Dictionary<int, int> _tileSizeCache = new();
+
+    // Cache for map world offsets (reduces redundant queries)
+    private readonly Dictionary<int, Vector2> _mapWorldOffsetCache = new(10);
+
     private ITileBehaviorSystem? _tileBehaviorSystem;
 
     /// <summary>
@@ -67,14 +72,40 @@ public class MovementSystem : SystemBase, IUpdateSystem
 
     /// <summary>
     ///     Gets the priority for execution order. Lower values execute first.
-    ///     Movement executes at priority 100, after input (0) and spatial hash (25).
+    ///     Movement executes at priority 90, before MapStreaming (100).
+    ///     This ensures grid position is updated before map streaming checks boundaries.
     /// </summary>
-    public override int Priority => SystemPriority.Movement;
+    public override int Priority => 90;
+
+    /// <summary>
+    ///     Invalidates cached map world offset when maps are loaded/unloaded.
+    ///     Call this from MapStreamingSystem when map entities change.
+    /// </summary>
+    /// <param name="mapId">Specific map ID to invalidate, or -1 to clear all cached offsets.</param>
+    public void InvalidateMapWorldOffset(int mapId = -1)
+    {
+        if (mapId < 0)
+        {
+            _mapWorldOffsetCache.Clear();
+            _tileSizeCache.Clear();
+            _logger?.LogDebug("Cleared all map world offset cache entries");
+        }
+        else
+        {
+            _mapWorldOffsetCache.Remove(mapId);
+            _tileSizeCache.Remove(mapId);
+            _logger?.LogDebug("Invalidated cache for MapId={MapId}", mapId);
+        }
+    }
 
     /// <inheritdoc />
     public override void Update(World world, float deltaTime)
     {
         EnsureInitialized();
+
+        // NOTE: Cache is NOT cleared per-frame - map offsets are stable during gameplay.
+        // Use InvalidateMapWorldOffset() when maps are loaded/unloaded.
+        // Previous per-frame clearing eliminated all cache benefits (~15 ECS queries/frame wasted).
 
         // Process movement requests first (before updating existing movements)
         ProcessMovementRequests(world);
@@ -153,8 +184,12 @@ public class MovementSystem : SystemBase, IUpdateSystem
                 position.PixelX = movement.TargetPosition.X;
                 position.PixelY = movement.TargetPosition.Y;
 
-                // Grid coordinates were already updated when movement started
-                // No need to update them here
+                // Recalculate grid coordinates from world pixels in case MapId changed during movement
+                // (e.g., player crossed map boundary during interpolation)
+                var tileSize = GetTileSize(world, position.MapId);
+                var mapOffset = GetMapWorldOffset(world, position.MapId);
+                position.X = (int)((position.PixelX - mapOffset.X) / tileSize);
+                position.Y = (int)((position.PixelY - mapOffset.Y) / tileSize);
 
                 movement.CompleteMovement();
 
@@ -185,8 +220,11 @@ public class MovementSystem : SystemBase, IUpdateSystem
         else
         {
             // Ensure pixel position matches grid position when not moving.
+            // Must apply world offset for multi-map support
             var tileSize = GetTileSize(world, position.MapId);
-            position.SyncPixelsToGrid(tileSize);
+            var mapOffset = GetMapWorldOffset(world, position.MapId);
+            position.PixelX = position.X * tileSize + mapOffset.X;
+            position.PixelY = position.Y * tileSize + mapOffset.Y;
 
             // Ensure idle animation is playing
             var expectedAnimation = movement.FacingDirection.ToIdleAnimation();
@@ -217,8 +255,12 @@ public class MovementSystem : SystemBase, IUpdateSystem
                 position.PixelX = movement.TargetPosition.X;
                 position.PixelY = movement.TargetPosition.Y;
 
-                // Grid coordinates were already updated when movement started
-                // No need to update them here
+                // Recalculate grid coordinates from world pixels in case MapId changed during movement
+                // (e.g., player crossed map boundary during interpolation)
+                var tileSize = GetTileSize(world, position.MapId);
+                var mapOffset = GetMapWorldOffset(world, position.MapId);
+                position.X = (int)((position.PixelX - mapOffset.X) / tileSize);
+                position.Y = (int)((position.PixelY - mapOffset.Y) / tileSize);
 
                 movement.CompleteMovement();
             }
@@ -241,8 +283,11 @@ public class MovementSystem : SystemBase, IUpdateSystem
         else
         {
             // Ensure pixel position matches grid position when not moving
+            // Must apply world offset for multi-map support
             var tileSize = GetTileSize(world, position.MapId);
-            position.SyncPixelsToGrid(tileSize);
+            var mapOffset = GetMapWorldOffset(world, position.MapId);
+            position.PixelX = position.X * tileSize + mapOffset.X;
+            position.PixelY = position.Y * tileSize + mapOffset.Y;
         }
     }
 
@@ -264,8 +309,8 @@ public class MovementSystem : SystemBase, IUpdateSystem
                 ref MovementRequest request
             ) =>
             {
-                // Only process active requests for entities that aren't already moving
-                if (request.Active && !movement.IsMoving)
+                // Only process active requests for entities that aren't already moving and aren't locked
+                if (request.Active && !movement.IsMoving && !movement.MovementLocked)
                 {
                     // Process the movement request
                     TryStartMovement(world, entity, ref position, ref movement, request.Direction);
@@ -436,7 +481,13 @@ public class MovementSystem : SystemBase, IUpdateSystem
 
                 // Perform the jump (2 tiles in jump direction)
                 var jumpStart = new Vector2(position.PixelX, position.PixelY);
-                var jumpEnd = new Vector2(jumpLandX * tileSize, jumpLandY * tileSize);
+
+                // Get map world offset for multi-map support
+                var jumpMapOffset = GetMapWorldOffset(world, position.MapId);
+                var jumpEnd = new Vector2(
+                    jumpLandX * tileSize + jumpMapOffset.X,
+                    jumpLandY * tileSize + jumpMapOffset.Y
+                );
                 movement.StartMovement(jumpStart, jumpEnd);
 
                 // Update grid position immediately to the landing position
@@ -468,7 +519,14 @@ public class MovementSystem : SystemBase, IUpdateSystem
 
         // Start the grid movement
         var startPixels = new Vector2(position.PixelX, position.PixelY);
-        var targetPixels = new Vector2(targetX * tileSize, targetY * tileSize);
+
+        // Get map world offset for multi-map support
+        // Position.PixelX/PixelY must be in world space for rendering and map streaming
+        var mapOffset = GetMapWorldOffset(world, position.MapId);
+        var targetPixels = new Vector2(
+            targetX * tileSize + mapOffset.X,
+            targetY * tileSize + mapOffset.Y
+        );
         movement.StartMovement(startPixels, targetPixels);
 
         // Update grid position immediately to prevent entities from passing through each other
@@ -509,14 +567,45 @@ public class MovementSystem : SystemBase, IUpdateSystem
     }
 
     /// <summary>
-    ///     Checks if the given tile coordinates are within the map boundaries.
+    ///     Gets the world offset for a specific map from MapWorldPosition component.
+    ///     Required for multi-map support where pixel coordinates must be in world space.
+    ///     Uses caching to minimize redundant queries.
+    /// </summary>
+    /// <param name="world">The ECS world.</param>
+    /// <param name="mapId">The map identifier.</param>
+    /// <returns>World offset in pixels (default: Vector2.Zero).</returns>
+    private Vector2 GetMapWorldOffset(World world, int mapId)
+    {
+        // Cache lookup with lazy initialization
+        if (_mapWorldOffsetCache.TryGetValue(mapId, out var cachedOffset))
+            return cachedOffset;
+
+        var worldOffset = Vector2.Zero;
+
+        // Query MapWorldPosition for the world offset
+        world.Query(
+            in EcsQueries.MapInfo,
+            (ref MapInfo mapInfo, ref MapWorldPosition worldPos) =>
+            {
+                if (mapInfo.MapId == mapId)
+                    worldOffset = worldPos.WorldOrigin;
+            }
+        );
+
+        _mapWorldOffsetCache[mapId] = worldOffset;
+        return worldOffset;
+    }
+
+    /// <summary>
+    ///     Checks if the given tile coordinates are within valid movement range.
+    ///     Allows movement slightly outside current map bounds to support map streaming.
     ///     If no MapInfo is found for the given mapId, returns true (no boundaries enforced).
     /// </summary>
     /// <param name="world">The ECS world.</param>
     /// <param name="mapId">The map identifier.</param>
     /// <param name="tileX">The X coordinate in tile space.</param>
     /// <param name="tileY">The Y coordinate in tile space.</param>
-    /// <returns>True if within bounds or no map bounds exist, false if outside.</returns>
+    /// <returns>True if within bounds or adjacent to map edge (map connection possible), false if far outside.</returns>
     private bool IsWithinMapBounds(World world, int mapId, int tileX, int tileY)
     {
         // Use centralized query cache to avoid allocation
@@ -527,9 +616,29 @@ public class MovementSystem : SystemBase, IUpdateSystem
             (ref MapInfo mapInfo) =>
             {
                 if (mapInfo.MapId == mapId)
-                    // Check if coordinates are within bounds [0, width) and [0, height)
-                    withinBounds =
-                        tileX >= 0 && tileX < mapInfo.Width && tileY >= 0 && tileY < mapInfo.Height;
+                {
+                    // Allow movement within current map bounds
+                    if (tileX >= 0 && tileX < mapInfo.Width && tileY >= 0 && tileY < mapInfo.Height)
+                    {
+                        withinBounds = true;
+                    }
+                    // Also allow movement 1 tile outside bounds (map connections)
+                    // MapStreamingSystem will handle boundary crossing and map transitions
+                    else if (
+                        tileX >= -1
+                        && tileX <= mapInfo.Width
+                        && tileY >= -1
+                        && tileY <= mapInfo.Height
+                    )
+                    {
+                        withinBounds = true;
+                    }
+                    else
+                    {
+                        // Too far outside map bounds - block movement
+                        withinBounds = false;
+                    }
+                }
             }
         );
 

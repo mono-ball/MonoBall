@@ -2,12 +2,15 @@ using Arch.Core;
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
 using PokeSharp.Engine.Common.Logging;
+using PokeSharp.Engine.Core.Types;
 using PokeSharp.Engine.Systems.BulkOperations;
 using PokeSharp.Game.Components.Rendering;
 using PokeSharp.Game.Components.Tiles;
 using PokeSharp.Game.Data.MapLoading.Tiled.Services;
 using PokeSharp.Game.Data.MapLoading.Tiled.Tmx;
+using PokeSharp.Game.Data.MapLoading.Tiled.Utilities;
 using PokeSharp.Game.Data.PropertyMapping;
+using System.Text.Json;
 
 namespace PokeSharp.Game.Data.MapLoading.Tiled.Processors;
 
@@ -15,13 +18,8 @@ namespace PokeSharp.Game.Data.MapLoading.Tiled.Processors;
 ///     Handles processing of map layers and creation of tile entities.
 ///     Responsible for parsing layer data, determining elevation, and creating tile entities with bulk operations.
 /// </summary>
-public class LayerProcessor
+public class LayerProcessor : ILayerProcessor
 {
-    // Tiled flip flags (stored in upper 3 bits of GID)
-    private const uint FLIPPED_HORIZONTALLY_FLAG = 0x80000000;
-    private const uint FLIPPED_VERTICALLY_FLAG = 0x40000000;
-    private const uint FLIPPED_DIAGONALLY_FLAG = 0x20000000;
-    private const uint TILE_ID_MASK = 0x1FFFFFFF;
     private readonly ILogger<LayerProcessor>? _logger;
 
     private readonly PropertyMapperRegistry? _propertyMapperRegistry;
@@ -99,10 +97,10 @@ public class LayerProcessor
             // Extract flip flags from GID (flat array: row-major order)
             var index = y * layer.Width + x;
             var rawGid = layer.Data![index];
-            var tileGid = (int)(rawGid & TILE_ID_MASK);
-            var flipH = (rawGid & FLIPPED_HORIZONTALLY_FLAG) != 0;
-            var flipV = (rawGid & FLIPPED_VERTICALLY_FLAG) != 0;
-            var flipD = (rawGid & FLIPPED_DIAGONALLY_FLAG) != 0;
+            var tileGid = (int)(rawGid & TiledConstants.FlipFlags.TileIdMask);
+            var flipH = (rawGid & TiledConstants.FlipFlags.HorizontalFlip) != 0;
+            var flipV = (rawGid & TiledConstants.FlipFlags.VerticalFlip) != 0;
+            var flipD = (rawGid & TiledConstants.FlipFlags.DiagonalFlip) != 0;
 
             if (tileGid == 0)
                 continue; // Skip empty tiles
@@ -188,11 +186,12 @@ public class LayerProcessor
     ///     Determines elevation from layer name, custom properties, or index.
     ///     Follows Pokemon Emerald's elevation model:
     ///     - Ground layer (0) = elevation 0 (water, pits)
-    ///     - Standard layer (1) = elevation 3 (most tiles)
-    ///     - Overhead layer (2+) = elevation 9 (tall structures)
+    ///     - Objects layer (1) = elevation 2 (renders behind player at elevation 3)
+    ///     - Overhead layer (2+) = elevation 9 (tall structures, renders in front)
     /// </summary>
     /// <remarks>
     ///     Layers can override this by setting a custom "elevation" property in Tiled.
+    ///     Objects layer uses elevation 2 so the player (elevation 3) renders in front.
     /// </remarks>
     private byte DetermineElevation(TmxLayer layer, int layerIndex)
     {
@@ -206,6 +205,8 @@ public class LayerProcessor
                 return Elevation.Overhead; // 9
             if (normalized.Contains("bridge"))
                 return Elevation.Bridge; // 6
+            if (normalized.Contains("objects"))
+                return 2; // Objects layer - render behind player
         }
 
         // Fallback to index-based elevation
@@ -214,14 +215,18 @@ public class LayerProcessor
 
     /// <summary>
     ///     Determines elevation from layer index.
-    ///     Index 0 = Ground (0), Index 1 = Standard (3), Index 2+ = Overhead (9).
+    ///     Index 0 = Ground (0), Index 1 = Objects (2, renders behind player), Index 2+ = Overhead (9).
     /// </summary>
+    /// <remarks>
+    ///     Objects layer uses elevation 2 (instead of 3) so it renders behind the player (elevation 3).
+    ///     This allows the player to walk in front of objects when moving up.
+    /// </remarks>
     private static byte DetermineElevationFromIndex(int layerIndex)
     {
         return layerIndex switch
         {
             0 => Elevation.Ground, // 0
-            1 => Elevation.Default, // 3
+            1 => 2, // Objects layer - render behind player (elevation 3)
             _ => Elevation.Overhead, // 9 (2+)
         };
     }
@@ -241,102 +246,11 @@ public class LayerProcessor
         return new TileSprite(
             loadedTileset.TilesetId,
             tileGid,
-            CalculateSourceRect(tileGid, tileset),
+            TilesetUtilities.CalculateSourceRect(tileGid, tileset),
             flipH,
             flipV,
             flipD
         );
-    }
-
-    /// <summary>
-    ///     Calculates the source rectangle for a tile in a tileset texture.
-    /// </summary>
-    private Rectangle CalculateSourceRect(int tileGid, TmxTileset tileset)
-    {
-        // Convert global ID to local ID
-        var localTileId = tileGid - tileset.FirstGid;
-
-        // Get tileset dimensions
-        var tileWidth = tileset.TileWidth;
-        var tileHeight = tileset.TileHeight;
-
-        // Validate tile dimensions to prevent division by zero
-        if (tileWidth <= 0 || tileHeight <= 0)
-        {
-            _logger?.LogError("Invalid tile dimensions: {Width}x{Height}", tileWidth, tileHeight);
-            throw new InvalidOperationException(
-                $"Invalid tile dimensions: {tileWidth}x{tileHeight}"
-            );
-        }
-
-        if (tileset.Image == null || tileset.Image.Width <= 0 || tileset.Image.Height <= 0)
-            throw new InvalidOperationException(
-                $"Tileset '{tileset.Name ?? "unnamed"}' is missing valid image dimensions."
-            );
-
-        // Calculate tiles per row
-        var tilesPerRow = CalculateTilesPerRow(tileset);
-
-        // Calculate position in tileset
-        var tileX = localTileId % tilesPerRow;
-        var tileY = localTileId / tilesPerRow;
-
-        // Calculate source rectangle with spacing and margin
-        var spacing = Math.Max(0, tileset.Spacing);
-        var margin = Math.Max(0, tileset.Margin);
-
-        var sourceX = margin + tileX * (tileWidth + spacing);
-        var sourceY = margin + tileY * (tileHeight + spacing);
-
-        return new Rectangle(sourceX, sourceY, tileWidth, tileHeight);
-    }
-
-    /// <summary>
-    ///     Calculates the number of tiles per row in a tileset.
-    /// </summary>
-    private static int CalculateTilesPerRow(TmxTileset tileset)
-    {
-        if (tileset.TileWidth <= 0)
-            throw new InvalidOperationException(
-                $"Tileset '{tileset.Name ?? "unnamed"}' has invalid tile width {tileset.TileWidth}."
-            );
-
-        if (tileset.Image == null || tileset.Image.Width <= 0)
-            throw new InvalidOperationException(
-                $"Tileset '{tileset.Name ?? "unnamed"}' is missing a valid image width."
-            );
-
-        var spacing = tileset.Spacing;
-        var margin = tileset.Margin;
-
-        if (spacing < 0)
-            throw new InvalidOperationException(
-                $"Tileset '{tileset.Name ?? "unnamed"}' has negative spacing value {spacing}."
-            );
-        if (margin < 0)
-            throw new InvalidOperationException(
-                $"Tileset '{tileset.Name ?? "unnamed"}' has negative margin value {margin}."
-            );
-
-        var usableWidth = tileset.Image.Width - margin * 2;
-        if (usableWidth <= 0)
-            throw new InvalidOperationException(
-                $"Tileset '{tileset.Name ?? "unnamed"}' has unusable image width after margins."
-            );
-
-        var step = tileset.TileWidth + spacing;
-        if (step <= 0)
-            throw new InvalidOperationException(
-                $"Tileset '{tileset.Name ?? "unnamed"}' has invalid step size {step}."
-            );
-
-        var tilesPerRow = (usableWidth + spacing) / step;
-        if (tilesPerRow <= 0)
-            throw new InvalidOperationException(
-                $"Tileset '{tileset.Name ?? "unnamed"}' produced non-positive tiles-per-row."
-            );
-
-        return tilesPerRow;
     }
 
     /// <summary>
@@ -409,6 +323,121 @@ public class LayerProcessor
                 return i;
 
         return -1;
+    }
+
+    /// <summary>
+    ///     Parses map connection properties from Tiled custom properties.
+    ///     Extracts connection_* properties that define how maps connect to each other.
+    /// </summary>
+    /// <param name="tmxDoc">The Tiled document to parse connections from.</param>
+    /// <returns>A list of map connections parsed from the document.</returns>
+    /// <remarks>
+    ///     Connections are stored as custom properties with names like "connection_north", "connection_south", etc.
+    ///     Each connection contains:
+    ///     - direction: The direction of the connection (North, South, East, West)
+    ///     - map: The identifier of the connected map
+    ///     - offset: Optional alignment offset in tiles (default: 0)
+    /// </remarks>
+    public List<MapConnection> ParseMapConnections(TmxDocument tmxDoc)
+    {
+        var connections = new List<MapConnection>();
+
+        // Tiled stores custom properties at the map level
+        // We need to check if the document has custom properties exposed
+        // For now, we'll return an empty list and implement this when the TmxDocument
+        // structure is extended to include custom properties
+
+        // TODO: Once TmxDocument.Properties is added, implement parsing like this:
+        // foreach (var property in tmxDoc.Properties ?? Enumerable.Empty<TmxProperty>())
+        // {
+        //     if (property.Name?.StartsWith("connection_", StringComparison.OrdinalIgnoreCase) == true)
+        //     {
+        //         var connection = ParseConnectionProperty(property);
+        //         if (connection.HasValue)
+        //             connections.Add(connection.Value);
+        //     }
+        // }
+
+        return connections;
+    }
+
+    /// <summary>
+    ///     Parses a single connection property from Tiled.
+    ///     Extracts direction, target map, and offset from the property value.
+    /// </summary>
+    /// <param name="propertyValue">The JSON property value containing connection data.</param>
+    /// <returns>A MapConnection if parsing succeeds; otherwise, null.</returns>
+    /// <remarks>
+    ///     Expected property structure:
+    ///     {
+    ///         "direction": "North",
+    ///         "map": "route101",
+    ///         "offset": 0
+    ///     }
+    /// </remarks>
+    private MapConnection? ParseConnectionProperty(object? propertyValue)
+    {
+        if (propertyValue == null)
+            return null;
+
+        try
+        {
+            // Handle both JsonElement and Dictionary<string, object> cases
+            Dictionary<string, object>? connectionData = null;
+
+            if (propertyValue is JsonElement jsonElement)
+            {
+                connectionData = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonElement.GetRawText());
+            }
+            else if (propertyValue is Dictionary<string, object> dict)
+            {
+                connectionData = dict;
+            }
+
+            if (connectionData == null)
+                return null;
+
+            // Extract direction
+            if (!connectionData.TryGetValue("direction", out var directionObj))
+                return null;
+
+            var direction = ConnectionDirectionExtensions.Parse(directionObj?.ToString());
+            if (!direction.HasValue)
+            {
+                _logger?.LogWarning("Invalid connection direction: {Direction}", directionObj);
+                return null;
+            }
+
+            // Extract target map
+            if (!connectionData.TryGetValue("map", out var mapObj) || mapObj == null)
+                return null;
+
+            var mapId = MapIdentifier.TryCreate(mapObj.ToString());
+            if (mapId == null)
+            {
+                _logger?.LogWarning("Invalid connection map identifier: {Map}", mapObj);
+                return null;
+            }
+
+            // Extract offset (optional, defaults to 0)
+            var offset = 0;
+            if (connectionData.TryGetValue("offset", out var offsetObj))
+            {
+                if (offsetObj is int intOffset)
+                    offset = intOffset;
+                else if (offsetObj is JsonElement offsetElement && offsetElement.ValueKind == JsonValueKind.Number)
+                    offset = offsetElement.GetInt32();
+                else if (int.TryParse(offsetObj?.ToString(), out var parsedOffset))
+                    offset = parsedOffset;
+            }
+
+            return new MapConnection(direction.Value, mapId.Value, offset);
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError(ex, "Failed to parse connection property: {Value}", propertyValue);
+            return null;
+        }
     }
 
     /// <summary>

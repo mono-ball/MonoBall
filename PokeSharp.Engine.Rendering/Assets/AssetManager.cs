@@ -105,7 +105,16 @@ public class AssetManager(
     /// <returns>True if texture is loaded.</returns>
     public bool HasTexture(string id)
     {
+        ArgumentException.ThrowIfNullOrEmpty(id);
         return _textures.TryGetValue(id, out _);
+    }
+
+    /// <summary>
+    ///     Gets all loaded texture IDs (for debugging).
+    /// </summary>
+    public IEnumerable<string> GetLoadedTextureIds()
+    {
+        return _textures.Keys;
     }
 
     /// <summary>
@@ -191,9 +200,12 @@ public class AssetManager(
     /// </summary>
     /// <param name="id">The texture identifier.</param>
     /// <returns>The cached texture.</returns>
+    /// <exception cref="ArgumentException">Thrown if id is null or empty.</exception>
     /// <exception cref="KeyNotFoundException">Thrown if texture not found.</exception>
     public Texture2D GetTexture(string id)
     {
+        ArgumentException.ThrowIfNullOrEmpty(id);
+
         if (_textures.TryGetValue(id, out var texture) && texture != null)
             return texture;
 
@@ -226,6 +238,8 @@ public class AssetManager(
     /// <returns>True if texture was found and removed.</returns>
     public bool UnregisterTexture(string id)
     {
+        ArgumentException.ThrowIfNullOrEmpty(id);
+
         var removed = _textures.Remove(id); // LruCache handles disposal
         if (removed)
             _logger?.LogSpriteTextureUnregistered(id);

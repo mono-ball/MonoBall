@@ -43,6 +43,20 @@ public class LruCache<TKey, TValue>
     public int Count => _cache.Count;
 
     /// <summary>
+    ///     Gets all keys currently in the cache (for debugging).
+    /// </summary>
+    public IEnumerable<TKey> Keys
+    {
+        get
+        {
+            lock (_lock)
+            {
+                return _cache.Keys.ToList();
+            }
+        }
+    }
+
+    /// <summary>
     ///     Adds or updates an item in the cache, evicting LRU items if needed
     /// </summary>
     public void AddOrUpdate(TKey key, TValue value)

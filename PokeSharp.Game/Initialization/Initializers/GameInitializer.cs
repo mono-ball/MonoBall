@@ -9,6 +9,7 @@ using PokeSharp.Engine.Systems.Factories;
 using PokeSharp.Engine.Systems.Management;
 using PokeSharp.Engine.Systems.Pooling;
 using PokeSharp.Game.Data.MapLoading.Tiled.Core;
+using PokeSharp.Game.Data.Services;
 using PokeSharp.Game.Infrastructure.Configuration;
 using PokeSharp.Game.Infrastructure.Services;
 using PokeSharp.Game.Systems;
@@ -25,7 +26,9 @@ public class GameInitializer(
     SystemManager systemManager,
     AssetManager assetManager,
     EntityPoolManager poolManager,
-    SpriteLoader spriteLoader
+    SpriteLoader spriteLoader,
+    MapLoader mapLoader,
+    MapDefinitionService mapDefinitionService
 ) : IGameInitializer
 {
     /// <summary>
@@ -130,6 +133,15 @@ public class GameInitializer(
         var pathfindingLogger = loggerFactory.CreateLogger<PathfindingSystem>();
         var pathfindingSystem = new PathfindingSystem(SpatialHashSystem, pathfindingLogger);
         systemManager.RegisterUpdateSystem(pathfindingSystem);
+
+        // Register MapStreamingSystem (Priority: 100, same as movement for seamless streaming)
+        var mapStreamingLogger = loggerFactory.CreateLogger<MapStreamingSystem>();
+        var mapStreamingSystem = new MapStreamingSystem(
+            mapLoader,
+            mapDefinitionService,
+            mapStreamingLogger
+        );
+        systemManager.RegisterUpdateSystem(mapStreamingSystem);
 
         // Register CameraFollowSystem (Priority: 825, after PathfindingSystem, before TileAnimation)
         var cameraFollowLogger = loggerFactory.CreateLogger<CameraFollowSystem>();

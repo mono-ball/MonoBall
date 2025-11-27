@@ -79,10 +79,12 @@ public class MapMetadataFactory
         IReadOnlyList<LoadedTileset> tilesets
     )
     {
-        // Create MapInfo entity for map metadata (use MapDefinition display name)
+        // Create MapInfo entity for map metadata
+        // CRITICAL: Use MapId.Value (identifier like "oldale_town") NOT DisplayName ("Oldale Town")
+        // MapStreamingSystem compares MapInfo.MapName against MapIdentifier.Value for lookups
         var mapInfo = new MapInfo(
             mapId,
-            mapDef.DisplayName,
+            mapDef.MapId.Value,
             tmxDoc.Width,
             tmxDoc.Height,
             tmxDoc.TileWidth

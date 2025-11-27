@@ -283,9 +283,8 @@ public struct Camera
             else
                 Position = targetPosition;
 
-            // Clamp to map bounds
-            if (MapBounds != Rectangle.Empty)
-                Position = ClampPositionToMapBounds(Position);
+            // Note: Camera clamping removed to replicate Pokemon Emerald behavior
+            // The camera can now move freely without map bounds restrictions
 
             // Mark dirty if position changed
             if (Position != oldPosition)

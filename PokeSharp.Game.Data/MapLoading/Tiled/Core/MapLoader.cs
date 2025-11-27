@@ -1,11 +1,15 @@
 using System.Text.Json;
 using Arch.Core;
+using Arch.Core.Extensions;
 using Microsoft.Extensions.Logging;
+using Microsoft.Xna.Framework;
 using PokeSharp.Engine.Common.Logging;
 using PokeSharp.Engine.Core.Types;
 using PokeSharp.Engine.Rendering.Assets;
 using PokeSharp.Engine.Systems.Factories;
 using PokeSharp.Engine.Systems.Management;
+using PokeSharp.Game.Components;
+using PokeSharp.Game.Components.Movement;
 using PokeSharp.Game.Data.Entities;
 using PokeSharp.Game.Data.MapLoading.Tiled.Processors;
 using PokeSharp.Game.Data.MapLoading.Tiled.Services;
@@ -27,6 +31,9 @@ namespace PokeSharp.Game.Data.MapLoading.Tiled.Core;
 public class MapLoader(
     IAssetProvider assetManager,
     SystemManager systemManager,
+    ILayerProcessor layerProcessor,
+    IAnimatedTileProcessor animatedTileProcessor,
+    IBorderProcessor borderProcessor,
     PropertyMapperRegistry? propertyMapperRegistry = null,
     IEntityFactoryService? entityFactory = null,
     NpcDefinitionService? npcDefinitionService = null,
@@ -40,11 +47,16 @@ public class MapLoader(
     private const uint FLIPPED_DIAGONALLY_FLAG = 0x20000000;
     private const uint TILE_ID_MASK = 0x1FFFFFFF;
 
-    // Initialize AnimatedTileProcessor (logger handled by MapLoader, so pass null)
-    private readonly AnimatedTileProcessor _animatedTileProcessor = new();
+    // Processors injected via DI (required dependencies)
+    private readonly IAnimatedTileProcessor _animatedTileProcessor =
+        animatedTileProcessor ?? throw new ArgumentNullException(nameof(animatedTileProcessor));
 
     private readonly IAssetProvider _assetManager =
         assetManager ?? throw new ArgumentNullException(nameof(assetManager));
+
+    // Border processor for Pokemon Emerald-style border rendering
+    private readonly IBorderProcessor _borderProcessor =
+        borderProcessor ?? throw new ArgumentNullException(nameof(borderProcessor));
 
     private readonly IEntityFactoryService? _entityFactory = entityFactory;
 
@@ -53,8 +65,9 @@ public class MapLoader(
         assetManager ?? throw new ArgumentNullException(nameof(assetManager))
     );
 
-    // Initialize LayerProcessor (logger handled by MapLoader, so pass null)
-    private readonly LayerProcessor _layerProcessor = new(propertyMapperRegistry);
+    // Layer processor injected via DI (required dependency)
+    private readonly ILayerProcessor _layerProcessor =
+        layerProcessor ?? throw new ArgumentNullException(nameof(layerProcessor));
 
     private readonly ILogger<MapLoader>? _logger = logger;
     private readonly MapDefinitionService? _mapDefinitionService = mapDefinitionService;
@@ -161,6 +174,111 @@ public class MapLoader(
     }
 
     /// <summary>
+    ///     Loads a map at a specific world offset position (for multi-map streaming).
+    ///     This method loads the map using the standard flow, then applies world-space
+    ///     offsets to all created entities and attaches MapWorldPosition component.
+    /// </summary>
+    /// <param name="world">The ECS world to create entities in.</param>
+    /// <param name="mapId">The map identifier (e.g., "littleroot_town").</param>
+    /// <param name="worldOffset">The world-space offset in pixels (e.g., Vector2(0, -320) for route north).</param>
+    /// <returns>The MapInfo entity containing map metadata.</returns>
+    /// <exception cref="InvalidOperationException">If MapDefinitionService is not configured.</exception>
+    /// <exception cref="FileNotFoundException">If map definition is not found.</exception>
+    public Entity LoadMapAtOffset(World world, MapIdentifier mapId, Vector2 worldOffset)
+    {
+        if (_mapDefinitionService == null)
+            throw new InvalidOperationException(
+                "MapDefinitionService is required for definition-based map loading. "
+                    + "Use LoadMapEntities(world, mapPath) for file-based loading."
+            );
+
+        // Get map definition from EF Core
+        var mapDef = _mapDefinitionService.GetMap(mapId);
+        if (mapDef == null)
+            throw new FileNotFoundException($"Map definition not found: {mapId.Value}");
+
+        _logger?.LogWorkflowStatus(
+            "Loading map at world offset",
+            ("mapId", mapDef.MapId.Value),
+            ("displayName", mapDef.DisplayName),
+            ("offsetX", worldOffset.X),
+            ("offsetY", worldOffset.Y)
+        );
+
+        // Read Tiled JSON from file using stored path
+        var assetRoot = _mapPathResolver.ResolveAssetRoot();
+        var fullPath = Path.Combine(assetRoot, mapDef.TiledDataPath);
+
+        if (!File.Exists(fullPath))
+            throw new FileNotFoundException(
+                $"Map file not found: {fullPath} (relative: {mapDef.TiledDataPath})"
+            );
+
+        var tiledJson = File.ReadAllText(fullPath);
+
+        // Parse Tiled JSON
+        var jsonOptions = new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true,
+            ReadCommentHandling = JsonCommentHandling.Skip,
+            AllowTrailingCommas = true,
+        };
+
+        var tmxDoc = TiledMapLoader.LoadFromJson(tiledJson, fullPath);
+
+        // Load external tileset files (Tiled JSON format supports external tilesets)
+        var mapDirectoryBase =
+            Path.GetDirectoryName(fullPath) ?? _mapPathResolver.ResolveMapDirectoryBase();
+        _tilesetLoader.LoadExternalTilesets(tmxDoc, mapDirectoryBase);
+
+        // Parse mixed layer types from JSON (Tiled stores all layers in one array)
+        _tiledJsonParser.ParseMixedLayers(tmxDoc, tiledJson, jsonOptions);
+
+        // Use scoped logging
+        using (_logger?.BeginScope($"Loading:{mapDef.MapId}"))
+        {
+            return LoadMapFromDocument(world, tmxDoc, mapDef, worldOffset);
+        }
+    }
+
+    /// <summary>
+    ///     Gets map dimensions (width, height in tiles, and tile size) without fully loading the map.
+    ///     Used by MapStreamingSystem to calculate correct offsets for adjacent maps.
+    /// </summary>
+    /// <param name="mapId">The map identifier (e.g., "oldale_town").</param>
+    /// <returns>Tuple of (Width in tiles, Height in tiles, TileSize in pixels).</returns>
+    /// <exception cref="InvalidOperationException">If MapDefinitionService is not configured.</exception>
+    /// <exception cref="FileNotFoundException">If map definition is not found.</exception>
+    public (int Width, int Height, int TileSize) GetMapDimensions(MapIdentifier mapId)
+    {
+        if (_mapDefinitionService == null)
+            throw new InvalidOperationException(
+                "MapDefinitionService is required for GetMapDimensions."
+            );
+
+        // Get map definition from EF Core
+        var mapDef = _mapDefinitionService.GetMap(mapId);
+        if (mapDef == null)
+            throw new FileNotFoundException($"Map definition not found: {mapId.Value}");
+
+        // Read Tiled JSON from file using stored path
+        var assetRoot = _mapPathResolver.ResolveAssetRoot();
+        var fullPath = Path.Combine(assetRoot, mapDef.TiledDataPath);
+
+        if (!File.Exists(fullPath))
+            throw new FileNotFoundException(
+                $"Map file not found: {fullPath} (relative: {mapDef.TiledDataPath})"
+            );
+
+        var tiledJson = File.ReadAllText(fullPath);
+
+        // Parse only the header info from Tiled JSON
+        var tmxDoc = TiledMapLoader.LoadFromJson(tiledJson, fullPath);
+
+        return (tmxDoc.Width, tmxDoc.Height, tmxDoc.TileWidth);
+    }
+
+    /// <summary>
     ///     Loads a complete map by creating tile entities for each non-empty tile.
     ///     This is the legacy file-based approach for backward compatibility.
     ///     Consider using LoadMap(world, mapId) for definition-based loading.
@@ -179,12 +297,24 @@ public class MapLoader(
 
     /// <summary>
     ///     Loads map entities from a TmxDocument and MapDefinition (definition-based flow).
-    ///     Used by LoadMap(world, mapId).
+    ///     Used by LoadMap(world, mapId) and LoadMapAtOffset(world, mapId, worldOffset).
     /// </summary>
-    private Entity LoadMapFromDocument(World world, TmxDocument tmxDoc, MapDefinition mapDef)
+    /// <param name="world">The ECS world to create entities in.</param>
+    /// <param name="tmxDoc">The parsed Tiled map document.</param>
+    /// <param name="mapDef">The map definition from EF Core.</param>
+    /// <param name="worldOffset">Optional world-space offset in pixels (for multi-map streaming).</param>
+    /// <returns>The MapInfo entity containing map metadata.</returns>
+    private Entity LoadMapFromDocument(
+        World world,
+        TmxDocument tmxDoc,
+        MapDefinition mapDef,
+        Vector2? worldOffset = null
+    )
     {
         var mapId = _mapIdService.GetMapIdFromIdentifier(mapDef.MapId);
-        var mapName = mapDef.DisplayName;
+        // Use MapId.Value (identifier like "oldale_town") NOT DisplayName ("Oldale Town")
+        // MapStreamingSystem compares MapInfo.MapName against MapIdentifier.Value
+        var mapName = mapDef.MapId.Value;
 
         var context = new MapLoadContext
         {
@@ -192,6 +322,7 @@ public class MapLoader(
             MapName = mapName,
             ImageLayerPath = $"Data/Maps/{mapDef.MapId.Value}",
             LogIdentifier = mapDef.MapId.Value,
+            WorldOffset = worldOffset ?? Vector2.Zero,
         };
 
         return LoadMapEntitiesCore(
@@ -273,9 +404,10 @@ public class MapLoader(
         );
 
         // Setup animations (only if tilesets exist)
+        // CRITICAL: Pass mapId to prevent cross-map animation corruption
         var animatedTilesCreated =
             loadedTilesets.Count > 0
-                ? _animatedTileProcessor.CreateAnimatedTileEntities(world, tmxDoc, loadedTilesets)
+                ? _animatedTileProcessor.CreateAnimatedTileEntities(world, tmxDoc, loadedTilesets, context.MapId)
                 : 0;
 
         // Create image layers
@@ -320,6 +452,47 @@ public class MapLoader(
             foreach (var spriteId in _requiredSpriteIds.OrderBy(x => x))
                 _logger.LogDebug("  - {SpriteId}", spriteId);
 
+        // Apply world offset to all entities if specified
+        if (context.WorldOffset != Vector2.Zero)
+        {
+            ApplyWorldOffsetToMapEntities(world, context.MapId, context.WorldOffset, tmxDoc);
+
+            _logger?.LogWorkflowStatus(
+                "Applied world offset to map entities",
+                ("mapId", context.MapId),
+                ("offsetX", context.WorldOffset.X),
+                ("offsetY", context.WorldOffset.Y)
+            );
+        }
+
+        // ALWAYS add MapWorldPosition component (even for origin map at 0,0)
+        // This is required by MapStreamingSystem to query and track loaded maps
+        var mapWorldPos = new MapWorldPosition(
+            context.WorldOffset,
+            tmxDoc.Width,
+            tmxDoc.Height,
+            tmxDoc.TileWidth
+        );
+        mapInfoEntity.Add(mapWorldPos);
+
+        // Process border data (Pokemon Emerald-style 2x2 border pattern)
+        // Adds MapBorder component to map entity if border property exists
+        if (loadedTilesets.Count > 0)
+        {
+            var hasBorder = _borderProcessor.AddBorderToEntity(world, mapInfoEntity, tmxDoc, loadedTilesets);
+            if (hasBorder)
+                _logger?.LogInformation("Border data loaded for map '{MapName}'", context.MapName);
+        }
+
+        _logger?.LogWorkflowStatus(
+            "MapWorldPosition component added",
+            ("mapId", context.MapId),
+            ("offsetX", context.WorldOffset.X),
+            ("offsetY", context.WorldOffset.Y),
+            ("widthPixels", mapWorldPos.WidthInPixels),
+            ("heightPixels", mapWorldPos.HeightInPixels)
+        );
+
         // Invalidate spatial hash to rebuild with new tiles
         var spatialHashSystem = _systemManager.GetSystem<SpatialHashSystem>();
         if (spatialHashSystem != null)
@@ -349,6 +522,50 @@ public class MapLoader(
     // Use LoadMapEntities() instead
 
     // ExtractTilesetId and LoadTilesetTexture moved to TilesetLoader class
+
+    /// <summary>
+    ///     Applies a world-space offset to all tile entities belonging to a specific map.
+    ///     This enables multi-map rendering by positioning maps in a shared world coordinate space.
+    /// </summary>
+    /// <param name="world">The ECS world containing the entities.</param>
+    /// <param name="mapId">The map runtime ID to filter entities by.</param>
+    /// <param name="worldOffset">The world-space offset in pixels.</param>
+    /// <param name="tmxDoc">The Tiled map document (for map dimensions).</param>
+    private void ApplyWorldOffsetToMapEntities(
+        World world,
+        int mapId,
+        Vector2 worldOffset,
+        TmxDocument tmxDoc
+    )
+    {
+        var entitiesUpdated = 0;
+
+        // Query all entities with Position component belonging to this map
+        var query = new QueryDescription().WithAll<Position>();
+        world.Query(
+            in query,
+            (Entity entity, ref Position pos) =>
+            {
+                // Only update entities from this map
+                if (pos.MapId.Value != mapId)
+                    return;
+
+                // Apply world offset to pixel positions
+                pos.PixelX += worldOffset.X;
+                pos.PixelY += worldOffset.Y;
+
+                entitiesUpdated++;
+            }
+        );
+
+        _logger?.LogInformation(
+            "Applied world offset to {Count} entities for map {MapId} (offset: {OffsetX}, {OffsetY})",
+            entitiesUpdated,
+            mapId,
+            worldOffset.X,
+            worldOffset.Y
+        );
+    }
 
     /// <summary>
     ///     Gets the map ID for a map name without loading it.
@@ -391,6 +608,7 @@ public class MapLoader(
         public string MapName { get; init; } = string.Empty;
         public string ImageLayerPath { get; init; } = string.Empty;
         public string LogIdentifier { get; init; } = string.Empty;
+        public Vector2 WorldOffset { get; init; } = Vector2.Zero;
     }
 
     // Texture tracking moved to MapTextureTracker class

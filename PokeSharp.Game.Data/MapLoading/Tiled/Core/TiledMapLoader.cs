@@ -127,6 +127,7 @@ public static class TiledMapLoader
             Layers = ConvertLayers(tiledMap.Layers, tiledMap.Width, tiledMap.Height),
             ObjectGroups = ConvertObjectGroups(tiledMap.Layers),
             ImageLayers = ConvertImageLayers(tiledMap.Layers),
+            Properties = ConvertProperties(tiledMap.Properties),
         };
 
         return doc;

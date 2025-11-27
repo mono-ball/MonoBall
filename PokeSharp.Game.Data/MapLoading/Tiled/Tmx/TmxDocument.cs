@@ -55,4 +55,9 @@ public class TmxDocument
     ///     Gets or sets the image layers in this map.
     /// </summary>
     public List<TmxImageLayer> ImageLayers { get; set; } = new();
+
+    /// <summary>
+    ///     Gets or sets the custom map-level properties (e.g., border, connections).
+    /// </summary>
+    public Dictionary<string, object> Properties { get; set; } = new();
 }

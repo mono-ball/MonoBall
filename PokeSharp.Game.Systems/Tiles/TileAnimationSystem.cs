@@ -12,6 +12,7 @@ namespace PokeSharp.Game.Systems;
 ///     Handles Pokemon-style tile animations (water ripples, grass swaying, flowers).
 ///     Priority: 850 (after Animation:800, before Render:1000).
 ///     OPTIMIZED: Uses precalculated source rectangles for zero runtime overhead.
+///     POKEMON-ACCURATE: Uses a global timer so all tile animations are synchronized.
 /// </summary>
 public class TileAnimationSystem(ILogger<TileAnimationSystem>? logger = null)
     : SystemBase,
@@ -19,6 +20,12 @@ public class TileAnimationSystem(ILogger<TileAnimationSystem>? logger = null)
 {
     private readonly ILogger<TileAnimationSystem>? _logger = logger;
     private int _animatedTileCount = -1; // Track for logging on first update
+
+    /// <summary>
+    ///     Global animation timer shared by all tiles.
+    ///     Pokemon synchronizes all tile animations to a global clock.
+    /// </summary>
+    private float _globalAnimationTimer;
 
     /// <summary>
     ///     Gets the priority for execution order. Lower values execute first.
@@ -34,6 +41,12 @@ public class TileAnimationSystem(ILogger<TileAnimationSystem>? logger = null)
         if (!Enabled)
             return;
 
+        // Update global animation timer (shared by all tiles for Pokemon-accurate sync)
+        _globalAnimationTimer += deltaTime;
+
+        // Capture timer for lambda (avoid closure issues)
+        var globalTimer = _globalAnimationTimer;
+
         // CRITICAL OPTIMIZATION: Use sequential query instead of ParallelQuery
         // For 100-200 tiles, parallel overhead (task scheduling, thread sync) is MORE EXPENSIVE
         // than just iterating sequentially. ParallelQuery only helps with 500+ entities.
@@ -45,7 +58,7 @@ public class TileAnimationSystem(ILogger<TileAnimationSystem>? logger = null)
             in EcsQueries.AnimatedTiles,
             (Entity entity, ref AnimatedTile animTile, ref TileSprite sprite) =>
             {
-                UpdateTileAnimation(ref animTile, ref sprite, deltaTime);
+                UpdateTileAnimation(ref animTile, ref sprite, globalTimer);
             }
         );
 
@@ -84,17 +97,17 @@ public class TileAnimationSystem(ILogger<TileAnimationSystem>? logger = null)
     }
 
     /// <summary>
-    ///     Updates a single animated tile's frame timer and advances frames when needed.
-    ///     Updates the TileSprite component's SourceRect to display the new frame.
+    ///     Updates a single animated tile's frame based on the global timer.
+    ///     All tiles with the same animation timing will display the same frame (Pokemon-accurate sync).
     ///     OPTIMIZED: Uses precalculated source rectangles - zero dictionary lookups or calculations.
     /// </summary>
     /// <param name="animTile">The animated tile data.</param>
     /// <param name="sprite">The tile sprite to update.</param>
-    /// <param name="deltaTime">Time elapsed since last frame in seconds.</param>
+    /// <param name="globalTimer">Global animation timer shared by all tiles.</param>
     private static void UpdateTileAnimation(
         ref AnimatedTile animTile,
         ref TileSprite sprite,
-        float deltaTime
+        float globalTimer
     )
     {
         // Validate animation data
@@ -108,29 +121,39 @@ public class TileAnimationSystem(ILogger<TileAnimationSystem>? logger = null)
         )
             return;
 
-        // Update frame timer
-        animTile.FrameTimer += deltaTime;
+        // Calculate total animation cycle duration
+        var totalCycleDuration = 0f;
+        for (var i = 0; i < animTile.FrameDurations.Length; i++)
+            totalCycleDuration += animTile.FrameDurations[i];
 
-        // Get current frame duration
-        var currentIndex = animTile.CurrentFrameIndex;
-        if (currentIndex < 0 || currentIndex >= animTile.FrameDurations.Length)
+        if (totalCycleDuration <= 0f)
+            return;
+
+        // Calculate position within the animation cycle using global timer
+        // This ensures all tiles with the same animation are perfectly synchronized
+        var timeInCycle = globalTimer % totalCycleDuration;
+
+        // Find which frame we should be displaying
+        var accumulatedTime = 0f;
+        var frameIndex = 0;
+        for (var i = 0; i < animTile.FrameDurations.Length; i++)
         {
-            currentIndex = 0;
-            animTile.CurrentFrameIndex = 0;
+            accumulatedTime += animTile.FrameDurations[i];
+            if (timeInCycle < accumulatedTime)
+            {
+                frameIndex = i;
+                break;
+            }
         }
 
-        var currentDuration = animTile.FrameDurations[currentIndex];
-
-        // Check if we need to advance to next frame
-        if (animTile.FrameTimer >= currentDuration)
+        // Only update if frame changed (avoid unnecessary writes)
+        if (animTile.CurrentFrameIndex != frameIndex)
         {
-            // Advance to next frame
-            animTile.CurrentFrameIndex = (currentIndex + 1) % animTile.FrameTileIds.Length;
-            animTile.FrameTimer = 0f;
+            animTile.CurrentFrameIndex = frameIndex;
 
             // PERFORMANCE CRITICAL: Direct array access to precalculated source rectangle
             // No calculations, no dictionary lookups, no lock contention - just a simple array index
-            sprite.SourceRect = animTile.FrameSourceRects[animTile.CurrentFrameIndex];
+            sprite.SourceRect = animTile.FrameSourceRects[frameIndex];
         }
     }
 }

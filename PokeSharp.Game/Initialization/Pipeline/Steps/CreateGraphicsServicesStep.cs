@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using PokeSharp.Engine.Rendering.Assets;
 using PokeSharp.Engine.Scenes;
 using PokeSharp.Game.Data.MapLoading.Tiled.Core;
+using PokeSharp.Game.Data.MapLoading.Tiled.Processors;
 using PokeSharp.Game.Data.PropertyMapping;
 using PokeSharp.Game.Initialization.Pipeline;
 
@@ -45,16 +46,30 @@ public class CreateGraphicsServicesStep : InitializationStepBase
         var propertyMapperRegistry =
             PropertyMapperServiceExtensions.CreatePropertyMapperRegistry(mapperRegistryLogger);
 
-        // Create MapLoader
-        var mapLoaderLogger = context.LoggerFactory.CreateLogger<MapLoader>();
+        // Create processors with proper loggers
+        var layerProcessor = new LayerProcessor(
+            propertyMapperRegistry,
+            context.LoggerFactory.CreateLogger<LayerProcessor>()
+        );
+        var animatedTileProcessor = new AnimatedTileProcessor(
+            context.LoggerFactory.CreateLogger<AnimatedTileProcessor>()
+        );
+        var borderProcessor = new BorderProcessor(
+            context.LoggerFactory.CreateLogger<BorderProcessor>()
+        );
+
+        // Create MapLoader with required processor dependencies
         var mapLoader = new MapLoader(
             assetManager,
             context.SystemManager,
+            layerProcessor,
+            animatedTileProcessor,
+            borderProcessor,
             propertyMapperRegistry,
             context.EntityFactory,
             context.NpcDefinitionService,
             context.MapDefinitionService,
-            mapLoaderLogger
+            context.LoggerFactory.CreateLogger<MapLoader>()
         );
         context.MapLoader = mapLoader;
 

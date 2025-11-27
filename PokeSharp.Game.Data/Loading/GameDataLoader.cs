@@ -263,6 +263,10 @@ public class GameDataLoader
                 // Calculate relative path from Assets root
                 var relativePath = Path.GetRelativePath(assetsRoot, file);
 
+                // Parse map connections from structured Connection properties (includes offsets)
+                var (northMapId, northOffset, southMapId, southOffset,
+                     eastMapId, eastOffset, westMapId, westOffset) = ParseMapConnections(properties);
+
                 var mapDef = new MapDefinition
                 {
                     MapId = new MapIdentifier(mapId),
@@ -275,10 +279,14 @@ public class GameDataLoader
                     ShowMapName = GetPropertyBool(properties, "showMapName") ?? true,
                     CanFly = GetPropertyBool(properties, "canFly") ?? false,
                     BackgroundImage = GetPropertyString(properties, "backgroundImage"),
-                    NorthMapId = MapIdentifier.TryCreate(GetPropertyString(properties, "northMap")),
-                    SouthMapId = MapIdentifier.TryCreate(GetPropertyString(properties, "southMap")),
-                    EastMapId = MapIdentifier.TryCreate(GetPropertyString(properties, "eastMap")),
-                    WestMapId = MapIdentifier.TryCreate(GetPropertyString(properties, "westMap")),
+                    NorthMapId = northMapId,
+                    NorthConnectionOffset = northOffset,
+                    SouthMapId = southMapId,
+                    SouthConnectionOffset = southOffset,
+                    EastMapId = eastMapId,
+                    EastConnectionOffset = eastOffset,
+                    WestMapId = westMapId,
+                    WestConnectionOffset = westOffset,
                     EncounterDataJson = GetPropertyString(properties, "encounters"),
                     SourceMod = GetPropertyString(properties, "sourceMod"),
                     Version = GetPropertyString(properties, "version") ?? "1.0.0",
@@ -376,6 +384,124 @@ public class GameDataLoader
         }
 
         return null;
+    }
+
+    /// <summary>
+    ///     Parses map connections from structured Connection class properties.
+    ///     Looks for properties named connection_north, connection_south, etc.
+    ///     and extracts both the "map" field and "offset" field from the value object.
+    /// </summary>
+    private static (MapIdentifier? North, int NorthOffset, MapIdentifier? South, int SouthOffset,
+        MapIdentifier? East, int EastOffset, MapIdentifier? West, int WestOffset)
+        ParseMapConnections(Dictionary<string, object> properties)
+    {
+        MapIdentifier? north = null, south = null, east = null, west = null;
+        int northOffset = 0, southOffset = 0, eastOffset = 0, westOffset = 0;
+
+        // Check for connection_north
+        if (properties.TryGetValue("connection_north", out var northValue))
+        {
+            var (mapId, offset) = ExtractConnectionData(northValue);
+            north = MapIdentifier.TryCreate(mapId);
+            northOffset = offset;
+        }
+
+        // Check for connection_south
+        if (properties.TryGetValue("connection_south", out var southValue))
+        {
+            var (mapId, offset) = ExtractConnectionData(southValue);
+            south = MapIdentifier.TryCreate(mapId);
+            southOffset = offset;
+        }
+
+        // Check for connection_east
+        if (properties.TryGetValue("connection_east", out var eastValue))
+        {
+            var (mapId, offset) = ExtractConnectionData(eastValue);
+            east = MapIdentifier.TryCreate(mapId);
+            eastOffset = offset;
+        }
+
+        // Check for connection_west
+        if (properties.TryGetValue("connection_west", out var westValue))
+        {
+            var (mapId, offset) = ExtractConnectionData(westValue);
+            west = MapIdentifier.TryCreate(mapId);
+            westOffset = offset;
+        }
+
+        return (north, northOffset, south, southOffset, east, eastOffset, west, westOffset);
+    }
+
+    /// <summary>
+    ///     Extracts both "map" and "offset" fields from a Connection property value.
+    ///     Handles both JsonElement and Dictionary formats.
+    /// </summary>
+    /// <returns>A tuple of (mapId, offset) where offset defaults to 0 if not present.</returns>
+    private static (string? MapId, int Offset) ExtractConnectionData(object? connectionValue)
+    {
+        if (connectionValue == null)
+            return (null, 0);
+
+        try
+        {
+            // Handle JsonElement case
+            if (connectionValue is JsonElement jsonElement && jsonElement.ValueKind == JsonValueKind.Object)
+            {
+                string? mapId = null;
+                int offset = 0;
+
+                if (jsonElement.TryGetProperty("map", out var mapProp))
+                {
+                    mapId = mapProp.GetString();
+                }
+
+                if (jsonElement.TryGetProperty("offset", out var offsetProp))
+                {
+                    if (offsetProp.ValueKind == JsonValueKind.Number)
+                    {
+                        offset = offsetProp.GetInt32();
+                    }
+                }
+
+                return (mapId, offset);
+            }
+            // Handle Dictionary case
+            else if (connectionValue is Dictionary<string, object> dict)
+            {
+                string? mapId = null;
+                int offset = 0;
+
+                if (dict.TryGetValue("map", out var mapValue))
+                {
+                    mapId = mapValue?.ToString();
+                }
+
+                if (dict.TryGetValue("offset", out var offsetValue))
+                {
+                    if (offsetValue is int intOffset)
+                    {
+                        offset = intOffset;
+                    }
+                    else if (offsetValue is JsonElement je && je.ValueKind == JsonValueKind.Number)
+                    {
+                        offset = je.GetInt32();
+                    }
+                    else if (int.TryParse(offsetValue?.ToString(), out var parsedOffset))
+                    {
+                        offset = parsedOffset;
+                    }
+                }
+
+                return (mapId, offset);
+            }
+        }
+        catch
+        {
+            return (null, 0);
+        }
+
+        return (null, 0);
     }
 
     /// <summary>

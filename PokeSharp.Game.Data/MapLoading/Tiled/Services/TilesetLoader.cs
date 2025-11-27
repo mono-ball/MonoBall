@@ -242,10 +242,12 @@ public class TilesetLoader
         try
         {
             _assetManager.LoadTexture(tilesetId, pathForLoader);
-            _logger?.LogDebug(
-                "Loaded tileset texture: {TilesetId} from {PathForLoader}",
+            _logger?.LogInformation(
+                "[TilesetDebug] Loaded tileset texture: TilesetId='{TilesetId}', Path='{PathForLoader}', " +
+                "ImageSource='{ImageSource}'",
                 tilesetId,
-                pathForLoader
+                pathForLoader,
+                tileset.Image?.Source ?? "null"
             );
         }
         catch (Exception ex)
@@ -267,10 +269,19 @@ public class TilesetLoader
     {
         // If tileset has an image, use the image filename as ID
         if (tileset.Image != null && !string.IsNullOrEmpty(tileset.Image.Source))
-            return Path.GetFileNameWithoutExtension(tileset.Image.Source);
+        {
+            var id = Path.GetFileNameWithoutExtension(tileset.Image.Source);
+            if (!string.IsNullOrEmpty(id))
+                return id;
+        }
 
-        // Fallback to tileset name
-        return tileset.Name ?? "default-tileset";
+        // Fallback to tileset name (handle both null and empty string)
+        if (!string.IsNullOrEmpty(tileset.Name))
+            return tileset.Name;
+
+        // Last resort: generate ID from map path
+        var mapName = Path.GetFileNameWithoutExtension(mapPath);
+        return !string.IsNullOrEmpty(mapName) ? mapName : "default-tileset";
     }
 }
 
