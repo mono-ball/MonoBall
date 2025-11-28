@@ -2,14 +2,16 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
+using PokeSharp.Engine.Core.Services;
 
 namespace PokeSharp.Engine.Scenes;
 
 /// <summary>
 ///     Manages scene transitions and the current active scene.
 ///     Uses a two-step transition pattern to prevent mid-frame scene changes.
+///     Implements IInputBlocker to allow systems to check if input is blocked by a stacked scene.
 /// </summary>
-public class SceneManager
+public class SceneManager : IInputBlocker
 {
     private readonly ILogger<SceneManager> _logger;
     private IScene? _currentScene;
@@ -62,6 +64,21 @@ public class SceneManager
                 return _sceneStack.Peek();
 
             return _currentScene;
+        }
+    }
+
+    /// <summary>
+    ///     Gets a value indicating whether input is blocked for scenes below the top of the stack.
+    ///     Returns true if there is a stacked scene with ExclusiveInput = true.
+    ///     Scenes should check this property before processing input if they are updated
+    ///     while a scene above them has exclusive input.
+    /// </summary>
+    public bool IsInputBlocked
+    {
+        get
+        {
+            // If there's at least one stacked scene with ExclusiveInput, input is blocked for scenes below
+            return _sceneStack.Count > 0 && _sceneStack.Any(s => s.ExclusiveInput);
         }
     }
 
@@ -201,14 +218,14 @@ public class SceneManager
             }
         }
 
-        // Update scenes based on exclusive input property
+        // Update scenes based on UpdateScenesBelow property
         if (_sceneStack.Count > 0)
         {
             // Get the top scene (most recently pushed)
             var topScene = _sceneStack.Peek();
 
-            // If top scene doesn't take exclusive input, update from bottom to top
-            if (!topScene.ExclusiveInput)
+            // If top scene allows scenes below to update, update from bottom to top
+            if (topScene.UpdateScenesBelow)
             {
                 // Update base scene first
                 if (_currentScene != null)
@@ -216,7 +233,7 @@ public class SceneManager
                     _currentScene.Update(gameTime);
                 }
 
-                // Update all stacked scenes in order (input falls through)
+                // Update all stacked scenes in order
                 foreach (var scene in _sceneStack)
                 {
                     scene.Update(gameTime);
@@ -224,7 +241,7 @@ public class SceneManager
             }
             else
             {
-                // Top scene takes exclusive input, only update it
+                // Top scene pauses lower scenes, only update it
                 topScene.Update(gameTime);
             }
         }

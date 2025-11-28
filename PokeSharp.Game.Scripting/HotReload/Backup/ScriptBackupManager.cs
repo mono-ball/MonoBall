@@ -57,24 +57,6 @@ public class ScriptBackupManager
     }
 
     /// <summary>
-    ///     Synchronous backup creation for backward compatibility.
-    ///     NOTE: Prefer CreateBackupAsync for better performance.
-    /// </summary>
-    [Obsolete("Use CreateBackupAsync for better performance (non-blocking I/O)")]
-    public void CreateBackup(
-        string typeId,
-        Type currentType,
-        object? currentInstance,
-        int currentVersion
-    )
-    {
-        // Synchronous wrapper for backward compatibility
-        CreateBackupAsync(typeId, currentType, currentInstance, currentVersion)
-            .GetAwaiter()
-            .GetResult();
-    }
-
-    /// <summary>
     ///     Restore a script from backup after compilation failure.
     /// </summary>
     public (Type type, object? instance, int version)? RestoreBackup(string typeId)

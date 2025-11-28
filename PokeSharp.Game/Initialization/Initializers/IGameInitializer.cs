@@ -1,4 +1,5 @@
 using Microsoft.Xna.Framework.Graphics;
+using PokeSharp.Engine.Core.Services;
 using PokeSharp.Engine.Rendering.Systems;
 using PokeSharp.Engine.Systems.Pooling;
 using PokeSharp.Game.Systems;
@@ -45,7 +46,8 @@ public interface IGameInitializer
     ///     Initializes all game systems and infrastructure.
     /// </summary>
     /// <param name="graphicsDevice">The graphics device for rendering.</param>
-    void Initialize(GraphicsDevice graphicsDevice);
+    /// <param name="inputBlocker">Optional input blocker (e.g., SceneManager) that systems can check to skip input processing.</param>
+    void Initialize(GraphicsDevice graphicsDevice, IInputBlocker? inputBlocker = null);
 
     /// <summary>
     ///     Completes initialization after SpriteTextureLoader is created.

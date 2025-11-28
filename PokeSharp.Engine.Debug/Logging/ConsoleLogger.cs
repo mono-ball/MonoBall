@@ -1,6 +1,4 @@
 using Microsoft.Extensions.Logging;
-using Microsoft.Xna.Framework;
-using PokeSharp.Engine.UI.Debug.Core;
 using System;
 using System.Text.RegularExpressions;
 
@@ -12,18 +10,15 @@ namespace PokeSharp.Engine.Debug.Logging;
 public class ConsoleLogger : ILogger
 {
     private readonly string _categoryName;
-    private readonly Action<string, Color> _writeToConsole;
     private readonly Action<LogLevel, string, string> _addLogEntry;
     private readonly Func<LogLevel, bool> _isEnabled;
 
     public ConsoleLogger(
         string categoryName,
-        Action<string, Color> writeToConsole,
         Action<LogLevel, string, string> addLogEntry,
         Func<LogLevel, bool> isEnabled)
     {
         _categoryName = categoryName;
-        _writeToConsole = writeToConsole;
         _addLogEntry = addLogEntry;
         _isEnabled = isEnabled;
     }
@@ -53,38 +48,9 @@ public class ConsoleLogger : ILogger
         // Get short category name for display
         var category = GetShortCategoryName(_categoryName);
 
-        // Add to Logs panel (structured data)
+        // Add to Logs panel only (not console output)
         var logMessage = exception != null ? $"{message}\n{exception}" : message;
         _addLogEntry(logLevel, logMessage, category);
-
-        // Also write formatted message to console output
-        var timestamp = DateTime.Now.ToString("HH:mm:ss.fff");
-        var level = GetLogLevelString(logLevel);
-        var formattedMessage = $"[{timestamp}] [{level}] \"{category}\": {message}";
-
-        if (exception != null)
-        {
-            formattedMessage += $"\n{exception}";
-        }
-
-        // Get color based on log level
-        var color = GetColorForLogLevel(logLevel);
-
-        _writeToConsole(formattedMessage, color);
-    }
-
-    private static string GetLogLevelString(LogLevel logLevel)
-    {
-        return logLevel switch
-        {
-            LogLevel.Trace => "TRACE",
-            LogLevel.Debug => "DEBUG",
-            LogLevel.Information => "INFOR",
-            LogLevel.Warning => "WARNI",
-            LogLevel.Error => "ERROR",
-            LogLevel.Critical => "CRIT!",
-            _ => "UNKNO"
-        };
     }
 
     private static string GetShortCategoryName(string category)
@@ -96,21 +62,6 @@ public class ConsoleLogger : ILogger
             return category.Substring(lastDot + 1);
         }
         return category;
-    }
-
-    private static Color GetColorForLogLevel(LogLevel logLevel)
-    {
-        var theme = ThemeManager.Current;
-        return logLevel switch
-        {
-            LogLevel.Trace => theme.TextDim,
-            LogLevel.Debug => theme.Info,
-            LogLevel.Information => theme.TextPrimary,
-            LogLevel.Warning => theme.Warning,
-            LogLevel.Error => theme.Error,
-            LogLevel.Critical => theme.Error,  // Use same as error, could add theme.Critical
-            _ => theme.TextSecondary
-        };
     }
 
     /// <summary>

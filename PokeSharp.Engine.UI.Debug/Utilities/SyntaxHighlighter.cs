@@ -1,4 +1,5 @@
 using Microsoft.Xna.Framework;
+using PokeSharp.Engine.UI.Debug.Core;
 
 namespace PokeSharp.Engine.UI.Debug.Utilities;
 
@@ -10,9 +11,12 @@ public readonly record struct ColoredSegment(string Text, Color Color, int Start
 /// <summary>
 /// Reusable syntax highlighter for C# code.
 /// Provides comprehensive highlighting with support for methods, types, strings, comments, and more.
+/// Uses ThemeManager for theme-aware colors.
 /// </summary>
 public static class SyntaxHighlighter
 {
+    // Theme-aware color accessors
+    private static UITheme Theme => ThemeManager.Current;
     // C# Keywords
     private static readonly HashSet<string> Keywords = new(StringComparer.Ordinal)
     {
@@ -66,21 +70,21 @@ public static class SyntaxHighlighter
         "Color", "Rectangle", "Point", "GameTime", "SpriteBatch", "Texture2D"
     };
 
-    // Color scheme (VS Code Dark+ inspired)
-    public static readonly Color DefaultColor = new Color(212, 212, 212); // Light gray
-    public static readonly Color KeywordColor = new Color(86, 156, 214); // Blue
-    public static readonly Color ControlColor = new Color(197, 134, 192); // Purple/Pink
-    public static readonly Color TypeColor = new Color(78, 201, 176); // Cyan/Teal
-    public static readonly Color StringColor = new Color(206, 145, 120); // Orange/Brown
-    public static readonly Color CommentColor = new Color(106, 153, 85); // Green
-    public static readonly Color NumberColor = new Color(181, 206, 168); // Light green
-    public static readonly Color MethodColor = new Color(220, 220, 170); // Yellow
-    public static readonly Color PropertyColor = new Color(156, 220, 254); // Light blue
-    public static readonly Color ParameterColor = new Color(156, 220, 254); // Light blue
-    public static readonly Color LiteralColor = new Color(86, 156, 214); // Blue (same as keyword)
-    public static readonly Color OperatorColor = new Color(212, 212, 212); // Light gray
-    public static readonly Color AttributeColor = new Color(78, 201, 176); // Cyan
-    public static readonly Color InterpolationColor = new Color(220, 220, 170); // Yellow
+    // Theme-aware color scheme - delegates to current theme's syntax colors
+    public static Color DefaultColor => Theme.SyntaxDefault;
+    public static Color KeywordColor => Theme.SyntaxKeyword;
+    public static Color ControlColor => Theme.SyntaxKeyword; // Use keyword color for control flow
+    public static Color TypeColor => Theme.SyntaxType;
+    public static Color StringColor => Theme.SyntaxString;
+    public static Color CommentColor => Theme.SyntaxComment;
+    public static Color NumberColor => Theme.SyntaxNumber;
+    public static Color MethodColor => Theme.SyntaxMethod;
+    public static Color PropertyColor => Theme.SyntaxDefault; // Properties use default color
+    public static Color ParameterColor => Theme.SyntaxDefault; // Parameters use default color
+    public static Color LiteralColor => Theme.SyntaxKeyword; // Literals use keyword color
+    public static Color OperatorColor => Theme.SyntaxOperator;
+    public static Color AttributeColor => Theme.SyntaxType; // Attributes use type color
+    public static Color InterpolationColor => Theme.SyntaxStringInterpolation;
 
     /// <summary>
     /// Highlights C# code and returns colored segments.

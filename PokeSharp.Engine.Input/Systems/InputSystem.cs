@@ -3,6 +3,7 @@ using Arch.Core.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using PokeSharp.Engine.Core.Services;
 using PokeSharp.Engine.Core.Systems;
 using PokeSharp.Engine.Input.Components;
 using PokeSharp.Engine.Input.Services;
@@ -16,16 +17,18 @@ namespace PokeSharp.Engine.Input.Systems;
 ///     System that processes keyboard and gamepad input and converts it to movement requests.
 ///     Implements Pokemon-style grid-locked input with queue-based buffering for responsive controls.
 ///     Movement validation and collision checking happens in MovementSystem.
-///     Input blocking is handled by the scene manager (scenes with ExclusiveInput=true).
+///     Input blocking is handled via IInputBlocker (e.g., when console has ExclusiveInput=true).
 /// </summary>
 public class InputSystem(
     int maxBufferSize = 5,
     float bufferTimeout = 0.2f,
-    ILogger<InputSystem>? logger = null
+    ILogger<InputSystem>? logger = null,
+    IInputBlocker? inputBlocker = null
 ) : SystemBase, IUpdateSystem
 {
     private readonly InputBuffer _inputBuffer = new(maxBufferSize, bufferTimeout);
     private readonly ILogger<InputSystem>? _logger = logger;
+    private readonly IInputBlocker? _inputBlocker = inputBlocker;
 
     // Cache query description to avoid allocation every frame
     private readonly QueryDescription _playerQuery = QueryCache.Get<
@@ -62,9 +65,13 @@ public class InputSystem(
 
         _totalTime += deltaTime;
 
-        // Note: Input blocking is handled by the scene manager.
-        // Scenes with ExclusiveInput=true prevent this system from receiving input.
-        // The scene manager only updates scenes that should receive input.
+        // Check if input is blocked by a higher-priority scene (e.g., console with ExclusiveInput=true)
+        if (_inputBlocker?.IsInputBlocked == true)
+        {
+            // Still update previous state to avoid stale key detection when input unblocks
+            _prevKeyboardState = _keyboardState;
+            return;
+        }
 
         // Poll input states once per frame (not per entity)
         _prevKeyboardState = _keyboardState;

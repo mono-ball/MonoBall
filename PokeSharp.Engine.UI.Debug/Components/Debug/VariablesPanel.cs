@@ -1,7 +1,6 @@
 using Microsoft.Xna.Framework;
 using PokeSharp.Engine.UI.Debug.Components.Base;
 using PokeSharp.Engine.UI.Debug.Components.Controls;
-using PokeSharp.Engine.UI.Debug.Components.Layout;
 using PokeSharp.Engine.UI.Debug.Core;
 using PokeSharp.Engine.UI.Debug.Interfaces;
 using PokeSharp.Engine.UI.Debug.Layout;
@@ -18,10 +17,9 @@ namespace PokeSharp.Engine.UI.Debug.Components.Debug;
 /// Supports object expansion, inline editing, search, and pinning.
 /// Implements <see cref="IVariableOperations"/> for command access.
 /// </summary>
-public class VariablesPanel : Panel, IVariableOperations
+public class VariablesPanel : DebugPanelBase, IVariableOperations
 {
     private readonly TextBuffer _variablesBuffer;
-    private readonly StatusBar _statusBar;
     private readonly Dictionary<string, VariableInfo> _variables = new();
     private readonly List<GlobalInfo> _globals = new();
 
@@ -29,13 +27,10 @@ public class VariablesPanel : Panel, IVariableOperations
     private readonly HashSet<string> _expandedPaths = new();
     private readonly HashSet<string> _pinnedVariables = new();
     private string _searchFilter = "";
-    private int _selectedLine = -1;
     private const int MaxExpansionDepth = 5;
     private const int MaxCollectionItems = 20;
 
-    // Edit state
-    private string? _editingPath = null;
-    private string _editValue = "";
+    // Edit callback (for future edit functionality)
     private Action<string, object?>? _onVariableEdited;
 
     public class VariableInfo
@@ -78,22 +73,19 @@ public class VariablesPanel : Panel, IVariableOperations
     /// Use <see cref="VariablesPanelBuilder"/> to construct instances.
     /// </summary>
     internal VariablesPanel(TextBuffer variablesBuffer, StatusBar statusBar)
+        : base(statusBar)
     {
         _variablesBuffer = variablesBuffer;
-        _statusBar = statusBar;
 
         Id = "variables_panel";
-        // Colors set dynamically in OnRenderContainer for theme switching
-        BorderThickness = 1;
-        Constraint.Padding = 8;
 
-        // StatusBar anchored to bottom
-        _statusBar.Constraint.Anchor = Anchor.StretchBottom;
-        _statusBar.Constraint.OffsetY = 0;
+        // TextBuffer fills space above StatusBar
+        _variablesBuffer.Constraint.Anchor = Anchor.StretchTop;
 
         AddChild(_variablesBuffer);
-        AddChild(_statusBar);
     }
+
+    protected override UIComponent GetContentComponent() => _variablesBuffer;
 
     /// <summary>
     /// Sets the callback for when a variable is edited.
@@ -320,7 +312,7 @@ public class VariablesPanel : Panel, IVariableOperations
         var pinnedRows = filteredRows.Where(r => r.Depth == 0 && r.IsPinned).ToList();
         if (pinnedRows.Count > 0)
         {
-            _variablesBuffer.AppendLine("  [*] PINNED", ThemeManager.Current.Warning);
+            _variablesBuffer.AppendLine($"  {Core.NerdFontIcons.Pinned} PINNED", ThemeManager.Current.Warning);
             foreach (var row in pinnedRows)
             {
                 RenderRow(row);
@@ -368,7 +360,7 @@ public class VariablesPanel : Panel, IVariableOperations
     /// <summary>
     /// Updates the status bar with current variable stats.
     /// </summary>
-    private void UpdateStatusBar()
+    protected override void UpdateStatusBar()
     {
         // Build stats text
         var stats = $"Variables: {_variables.Count}";
@@ -379,30 +371,8 @@ public class VariablesPanel : Panel, IVariableOperations
         // Build hints text
         var hints = !string.IsNullOrEmpty(_searchFilter) ? "Search active" : "'variables' to manage";
 
-        _statusBar.Set(stats, hints);
+        SetStatusBar(stats, hints);
         // StatsColor uses theme fallback (Success) - don't set explicitly for dynamic theme support
-    }
-
-    /// <summary>
-    /// Handles layout to position StatusBar at bottom and sets theme colors.
-    /// </summary>
-    protected override void OnRenderContainer(UIContext context)
-    {
-        // Set theme colors dynamically for theme switching
-        BackgroundColor = ThemeManager.Current.ConsoleBackground;
-        BorderColor = ThemeManager.Current.BorderPrimary;
-
-        base.OnRenderContainer(context);
-
-        // Layout: Position StatusBar at bottom and size TextBuffer above it
-        var statusBarHeight = _statusBar.GetDesiredHeight(context.Renderer);
-        _statusBar.Constraint.Height = statusBarHeight;
-
-        // TextBuffer fills remaining space above StatusBar
-        var paddingTop = Constraint.GetPaddingTop();
-        var paddingBottom = Constraint.GetPaddingBottom();
-        var contentHeight = Rect.Height - paddingTop - paddingBottom;
-        _variablesBuffer.Constraint.Height = contentHeight - statusBarHeight;
     }
 
     /// <summary>
@@ -626,11 +596,11 @@ public class VariablesPanel : Panel, IVariableOperations
         string expandIndicator;
         if (row.IsExpandable)
         {
-            expandIndicator = row.IsExpanded ? "▼ " : "▶ ";
+            expandIndicator = row.IsExpanded ? Core.NerdFontIcons.ExpandedWithSpace : Core.NerdFontIcons.CollapsedWithSpace;
         }
         else
         {
-            expandIndicator = "  ";
+            expandIndicator = Core.NerdFontIcons.UnselectedSpace;
         }
 
         // Build the line

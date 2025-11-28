@@ -318,13 +318,16 @@ public class SuggestionsDropdown : UIComponent
 
         _selectedIndex = Math.Clamp(_selectedIndex, 0, filteredItems.Count - 1);
 
+        // Use the actual visible count from last render, fall back to max if not yet rendered
+        var visibleCount = _actualVisibleCount > 0 ? _actualVisibleCount : _maxVisibleItems;
+
         if (_selectedIndex < _scrollOffset)
         {
             _scrollOffset = _selectedIndex;
         }
-        else if (_selectedIndex >= _scrollOffset + _maxVisibleItems)
+        else if (_selectedIndex >= _scrollOffset + visibleCount)
         {
-            _scrollOffset = _selectedIndex - _maxVisibleItems + 1;
+            _scrollOffset = _selectedIndex - visibleCount + 1;
         }
     }
 
@@ -485,7 +488,7 @@ public class SuggestionsDropdown : UIComponent
         renderer.DrawRectangle(dropdownRect, BackgroundColor);
 
         // Draw border
-        DrawBorder(renderer, dropdownRect);
+        renderer.DrawRectangleOutline(dropdownRect, BorderColor, (int)BorderThickness);
 
         // Check if scrollbar is needed
         var hasScrollbar = filteredItems.Count > visibleCount;
@@ -626,21 +629,6 @@ public class SuggestionsDropdown : UIComponent
                 _hoveredIndex = -1;
             }
         }
-    }
-
-    private void DrawBorder(UIRenderer renderer, LayoutRect rect)
-    {
-        if (BorderThickness <= 0)
-            return;
-
-        // Top
-        renderer.DrawRectangle(new LayoutRect(rect.X, rect.Y, rect.Width, BorderThickness), BorderColor);
-        // Bottom
-        renderer.DrawRectangle(new LayoutRect(rect.X, rect.Bottom - BorderThickness, rect.Width, BorderThickness), BorderColor);
-        // Left
-        renderer.DrawRectangle(new LayoutRect(rect.X, rect.Y, BorderThickness, rect.Height), BorderColor);
-        // Right
-        renderer.DrawRectangle(new LayoutRect(rect.Right - BorderThickness, rect.Y, BorderThickness, rect.Height), BorderColor);
     }
 
     private void DrawScrollIndicator(UIRenderer renderer, LayoutRect rect, int totalItems, int visibleCount)

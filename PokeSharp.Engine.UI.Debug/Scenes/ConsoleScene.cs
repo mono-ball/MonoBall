@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using PokeSharp.Engine.Scenes;
+using PokeSharp.Engine.Systems.Management;
 using PokeSharp.Engine.UI.Debug.Components.Controls;
 using PokeSharp.Engine.UI.Debug.Components.Debug;
 using PokeSharp.Engine.UI.Debug.Core;
@@ -29,6 +30,8 @@ public class ConsoleScene : SceneBase
     private LogsPanel? _logsPanel;
     private VariablesPanel? _variablesPanel;
     private EntitiesPanel? _entitiesPanel;
+    private ProfilerPanel? _profilerPanel;
+    private StatsPanel? _statsPanel;
 
     // Events for integration with ConsoleSystem
     public event Action<string>? OnCommandSubmitted;
@@ -47,6 +50,10 @@ public class ConsoleScene : SceneBase
     public IVariableOperations? VariableOperations => _variablesPanel;
     /// <summary>Gets the log operations interface, or null if panel not loaded.</summary>
     public ILogOperations? LogOperations => _logsPanel;
+    /// <summary>Gets the profiler operations interface, or null if panel not loaded.</summary>
+    public IProfilerOperations? ProfilerOperations => _profilerPanel;
+    /// <summary>Gets the stats operations interface, or null if panel not loaded.</summary>
+    public IStatsOperations? StatsOperations => _statsPanel;
 
     // Configuration
     private float _consoleHeightPercent = 0.5f; // 50% of screen height by default
@@ -62,6 +69,9 @@ public class ConsoleScene : SceneBase
 
         // Render scenes below so game is visible behind console
         RenderScenesBelow = true;
+
+        // Let the game keep updating while console is open
+        UpdateScenesBelow = true;
     }
 
     /// <summary>
@@ -160,36 +170,6 @@ public class ConsoleScene : SceneBase
     }
 
     /// <summary>
-    /// Adds a watch variable to the watch panel.
-    /// </summary>
-    /// <param name="name">Display name for the watch</param>
-    /// <param name="expression">The expression being watched (for display)</param>
-    /// <param name="valueGetter">Function that returns the current value</param>
-    public bool AddWatch(string name, string expression, Func<object?> valueGetter,
-                        string? group = null, string? condition = null, Func<bool>? conditionEvaluator = null)
-    {
-        if (_watchPanel == null)
-            return false;
-
-        try
-        {
-            return _watchPanel.AddWatch(name, expression, valueGetter, group, condition, conditionEvaluator);
-        }
-        catch
-        {
-            return false;
-        }
-    }
-
-    /// <summary>
-    /// Removes a watch variable from the watch panel.
-    /// </summary>
-    public bool RemoveWatch(string name)
-    {
-        return _watchPanel?.RemoveWatch(name) ?? false;
-    }
-
-    /// <summary>
     /// Gets the active tab index.
     /// </summary>
     public int GetActiveTab()
@@ -222,131 +202,6 @@ public class ConsoleScene : SceneBase
     }
 
     /// <summary>
-    /// Exports watches to CSV format.
-    /// </summary>
-    public string ExportWatchesToCsv()
-    {
-        return _watchPanel?.ExportToCsv() ?? string.Empty;
-    }
-
-    /// <summary>
-    /// Copies watches to clipboard.
-    /// </summary>
-    public void CopyWatchesToClipboard(bool asCsv = false)
-    {
-        _watchPanel?.CopyToClipboard(asCsv);
-    }
-
-    /// <summary>
-    /// Gets watch statistics.
-    /// </summary>
-    public (int Total, int Pinned, int WithErrors, int WithAlerts, int Groups) GetWatchStatistics()
-    {
-        return _watchPanel?.GetStatistics() ?? (0, 0, 0, 0, 0);
-    }
-
-    // ═══════════════════════════════════════════════════════════════════════════
-    // Variables Tab Methods
-    // ═══════════════════════════════════════════════════════════════════════════
-
-    /// <summary>
-    /// Gets variable statistics.
-    /// </summary>
-    public (int Variables, int Globals, int Pinned, int Expanded) GetVariableStatistics()
-    {
-        return _variablesPanel?.GetStatistics() ?? (0, 0, 0, 0);
-    }
-
-    /// <summary>
-    /// Gets all variable names.
-    /// </summary>
-    public IEnumerable<string> GetVariableNames()
-    {
-        return _variablesPanel?.GetVariableNames() ?? Enumerable.Empty<string>();
-    }
-
-    /// <summary>
-    /// Gets a variable's current value.
-    /// </summary>
-    public object? GetVariableValue(string name)
-    {
-        return _variablesPanel?.GetVariableValue(name);
-    }
-
-    /// <summary>
-    /// Sets the search filter for variables.
-    /// </summary>
-    public void SetVariableSearchFilter(string filter)
-    {
-        _variablesPanel?.SetSearchFilter(filter);
-    }
-
-    /// <summary>
-    /// Clears the variable search filter.
-    /// </summary>
-    public void ClearVariableSearchFilter()
-    {
-        _variablesPanel?.ClearSearchFilter();
-    }
-
-    /// <summary>
-    /// Expands a variable to show its properties.
-    /// </summary>
-    public bool ExpandVariable(string path)
-    {
-        _variablesPanel?.ExpandVariable(path);
-        return _variablesPanel != null;
-    }
-
-    /// <summary>
-    /// Collapses an expanded variable.
-    /// </summary>
-    public void CollapseVariable(string path)
-    {
-        _variablesPanel?.CollapseVariable(path);
-    }
-
-    /// <summary>
-    /// Expands all expandable variables.
-    /// </summary>
-    public void ExpandAllVariables()
-    {
-        _variablesPanel?.ExpandAll();
-    }
-
-    /// <summary>
-    /// Collapses all expanded variables.
-    /// </summary>
-    public void CollapseAllVariables()
-    {
-        _variablesPanel?.CollapseAll();
-    }
-
-    /// <summary>
-    /// Pins a variable to the top.
-    /// </summary>
-    public void PinVariable(string name)
-    {
-        _variablesPanel?.PinVariable(name);
-    }
-
-    /// <summary>
-    /// Unpins a variable.
-    /// </summary>
-    public void UnpinVariable(string name)
-    {
-        _variablesPanel?.UnpinVariable(name);
-    }
-
-    /// <summary>
-    /// Clears all user-defined variables.
-    /// </summary>
-    public void ClearVariables()
-    {
-        _variablesPanel?.ClearVariables();
-    }
-
-    /// <summary>
     /// Sets a script-defined variable in the Variables panel.
     /// </summary>
     public void SetScriptVariable(string name, string typeName, Func<object?> valueGetter)
@@ -355,7 +210,7 @@ public class ConsoleScene : SceneBase
     }
 
     // ═══════════════════════════════════════════════════════════════════════════
-    // Entities Tab Methods
+    // Entities Tab Methods (Setup only - operations via EntityOperations interface)
     // ═══════════════════════════════════════════════════════════════════════════
 
     /// <summary>
@@ -367,14 +222,6 @@ public class ConsoleScene : SceneBase
     }
 
     /// <summary>
-    /// Refreshes the entity list.
-    /// </summary>
-    public void RefreshEntities()
-    {
-        _entitiesPanel?.RefreshEntities();
-    }
-
-    /// <summary>
     /// Sets entities directly (alternative to using a provider).
     /// </summary>
     public void SetEntities(IEnumerable<EntityInfo> entities)
@@ -382,248 +229,24 @@ public class ConsoleScene : SceneBase
         _entitiesPanel?.SetEntities(entities);
     }
 
+    // ═══════════════════════════════════════════════════════════════════════════
+    // Profiler Tab Methods (Setup only - operations via ProfilerOperations interface)
+    // ═══════════════════════════════════════════════════════════════════════════
+
     /// <summary>
-    /// Sets the entity tag filter.
+    /// Sets the system metrics provider function for the Profiler panel.
     /// </summary>
-    public void SetEntityTagFilter(string tag)
+    public void SetSystemMetricsProvider(Func<IReadOnlyDictionary<string, SystemMetrics>?>? provider)
     {
-        _entitiesPanel?.SetTagFilter(tag);
+        _profilerPanel?.SetMetricsProvider(provider);
     }
 
     /// <summary>
-    /// Sets the entity search filter.
+    /// Sets the stats data provider function for the Stats panel.
     /// </summary>
-    public void SetEntitySearchFilter(string search)
+    public void SetStatsProvider(Func<StatsData>? provider)
     {
-        _entitiesPanel?.SetSearchFilter(search);
-    }
-
-    /// <summary>
-    /// Sets the entity component filter.
-    /// </summary>
-    public void SetEntityComponentFilter(string componentName)
-    {
-        _entitiesPanel?.SetComponentFilter(componentName);
-    }
-
-    /// <summary>
-    /// Clears all entity filters.
-    /// </summary>
-    public void ClearEntityFilters()
-    {
-        _entitiesPanel?.ClearFilters();
-    }
-
-    /// <summary>
-    /// Gets the current entity filters.
-    /// </summary>
-    public (string Tag, string Search, string Component) GetEntityFilters()
-    {
-        return _entitiesPanel?.GetFilters() ?? ("", "", "");
-    }
-
-    /// <summary>
-    /// Selects an entity by ID.
-    /// </summary>
-    public void SelectEntity(int entityId)
-    {
-        _entitiesPanel?.SelectEntity(entityId);
-    }
-
-    /// <summary>
-    /// Expands an entity to show its components.
-    /// </summary>
-    public void ExpandEntity(int entityId)
-    {
-        _entitiesPanel?.ExpandEntity(entityId);
-    }
-
-    /// <summary>
-    /// Collapses an entity.
-    /// </summary>
-    public void CollapseEntity(int entityId)
-    {
-        _entitiesPanel?.CollapseEntity(entityId);
-    }
-
-    /// <summary>
-    /// Toggles entity expansion.
-    /// </summary>
-    public bool ToggleEntity(int entityId)
-    {
-        return _entitiesPanel?.ToggleEntity(entityId) ?? false;
-    }
-
-    /// <summary>
-    /// Expands all entities.
-    /// </summary>
-    public void ExpandAllEntities()
-    {
-        _entitiesPanel?.ExpandAll();
-    }
-
-    /// <summary>
-    /// Collapses all entities.
-    /// </summary>
-    public void CollapseAllEntities()
-    {
-        _entitiesPanel?.CollapseAll();
-    }
-
-    /// <summary>
-    /// Pins an entity to the top.
-    /// </summary>
-    public void PinEntity(int entityId)
-    {
-        _entitiesPanel?.PinEntity(entityId);
-    }
-
-    /// <summary>
-    /// Unpins an entity.
-    /// </summary>
-    public void UnpinEntity(int entityId)
-    {
-        _entitiesPanel?.UnpinEntity(entityId);
-    }
-
-    /// <summary>
-    /// Gets entity statistics.
-    /// </summary>
-    public (int Total, int Filtered, int Pinned, int Expanded) GetEntityStatistics()
-    {
-        return _entitiesPanel?.GetStatistics() ?? (0, 0, 0, 0);
-    }
-
-    /// <summary>
-    /// Gets entity session statistics.
-    /// </summary>
-    public (int Spawned, int Removed, int CurrentlyHighlighted) GetEntitySessionStats()
-    {
-        return _entitiesPanel?.GetSessionStats() ?? (0, 0, 0);
-    }
-
-    /// <summary>
-    /// Clears entity session statistics.
-    /// </summary>
-    public void ClearEntitySessionStats()
-    {
-        _entitiesPanel?.ClearSessionStats();
-    }
-
-    /// <summary>
-    /// Gets or sets entity auto-refresh enabled.
-    /// </summary>
-    public bool EntityAutoRefresh
-    {
-        get => _entitiesPanel?.AutoRefresh ?? true;
-        set { if (_entitiesPanel != null) _entitiesPanel.AutoRefresh = value; }
-    }
-
-    /// <summary>
-    /// Gets or sets entity refresh interval in seconds.
-    /// </summary>
-    public float EntityRefreshInterval
-    {
-        get => _entitiesPanel?.RefreshInterval ?? 1.0f;
-        set { if (_entitiesPanel != null) _entitiesPanel.RefreshInterval = value; }
-    }
-
-    /// <summary>
-    /// Gets or sets entity highlight duration in seconds.
-    /// </summary>
-    public float EntityHighlightDuration
-    {
-        get => _entitiesPanel?.HighlightDuration ?? 3.0f;
-        set { if (_entitiesPanel != null) _entitiesPanel.HighlightDuration = value; }
-    }
-
-    /// <summary>
-    /// Gets the IDs of newly spawned entities.
-    /// </summary>
-    public IEnumerable<int> GetNewEntityIds()
-    {
-        return _entitiesPanel?.GetNewEntityIds() ?? Enumerable.Empty<int>();
-    }
-
-    /// <summary>
-    /// Exports entity list to text format.
-    /// </summary>
-    public string ExportEntitiesToText(bool includeComponents = true, bool includeProperties = true)
-    {
-        return _entitiesPanel?.ExportToText(includeComponents, includeProperties) ?? "";
-    }
-
-    /// <summary>
-    /// Exports entity list to CSV format.
-    /// </summary>
-    public string ExportEntitiesToCsv()
-    {
-        return _entitiesPanel?.ExportToCsv() ?? "";
-    }
-
-    /// <summary>
-    /// Exports the selected entity to text.
-    /// </summary>
-    public string? ExportSelectedEntity()
-    {
-        return _entitiesPanel?.ExportSelectedEntity();
-    }
-
-    /// <summary>
-    /// Copies entities to clipboard.
-    /// </summary>
-    public void CopyEntitiesToClipboard(bool asCsv = false)
-    {
-        var content = asCsv ? ExportEntitiesToCsv() : ExportEntitiesToText();
-        if (!string.IsNullOrEmpty(content))
-        {
-            TextCopy.ClipboardService.SetText(content);
-        }
-    }
-
-    /// <summary>
-    /// Gets the currently selected entity ID.
-    /// </summary>
-    public int? SelectedEntityId => _entitiesPanel?.SelectedEntityId;
-
-    /// <summary>
-    /// Gets entity tag counts.
-    /// </summary>
-    public Dictionary<string, int> GetEntityTagCounts()
-    {
-        return _entitiesPanel?.GetTagCounts() ?? new Dictionary<string, int>();
-    }
-
-    /// <summary>
-    /// Gets all unique component names from entities.
-    /// </summary>
-    public IEnumerable<string> GetEntityComponentNames()
-    {
-        return _entitiesPanel?.GetAllComponentNames() ?? Enumerable.Empty<string>();
-    }
-
-    /// <summary>
-    /// Gets all unique entity tags.
-    /// </summary>
-    public IEnumerable<string> GetEntityTags()
-    {
-        return _entitiesPanel?.GetAllTags() ?? Enumerable.Empty<string>();
-    }
-
-    /// <summary>
-    /// Finds an entity by ID.
-    /// </summary>
-    public EntityInfo? FindEntity(int entityId)
-    {
-        return _entitiesPanel?.FindEntity(entityId);
-    }
-
-    /// <summary>
-    /// Finds entities by name.
-    /// </summary>
-    public IEnumerable<EntityInfo> FindEntitiesByName(string name)
-    {
-        return _entitiesPanel?.FindEntitiesByName(name) ?? Enumerable.Empty<EntityInfo>();
+        _statsPanel?.SetStatsProvider(provider);
     }
 
     /// <summary>
@@ -635,326 +258,12 @@ public class ConsoleScene : SceneBase
     }
 
     /// <summary>
-    /// Clears all watches.
-    /// </summary>
-    public void ClearWatches()
-    {
-        _watchPanel?.ClearWatches();
-    }
-
-    /// <summary>
-    /// Toggles watch auto-update.
-    /// </summary>
-    public bool ToggleWatchAutoUpdate()
-    {
-        if (_watchPanel == null)
-            return false;
-
-        _watchPanel.AutoUpdate = !_watchPanel.AutoUpdate;
-        return _watchPanel.AutoUpdate;
-    }
-
-    /// <summary>
-    /// Gets watch count.
-    /// </summary>
-    public int GetWatchCount()
-    {
-        return _watchPanel?.Count ?? 0;
-    }
-
-    /// <summary>
-    /// Pins a watch to the top.
-    /// </summary>
-    public bool PinWatch(string name)
-    {
-        return _watchPanel?.PinWatch(name) ?? false;
-    }
-
-    /// <summary>
-    /// Unpins a watch.
-    /// </summary>
-    public bool UnpinWatch(string name)
-    {
-        return _watchPanel?.UnpinWatch(name) ?? false;
-    }
-
-    /// <summary>
-    /// Checks if a watch is pinned.
-    /// </summary>
-    public bool IsWatchPinned(string name)
-    {
-        return _watchPanel?.IsWatchPinned(name) ?? false;
-    }
-
-    /// <summary>
-    /// Sets the watch update interval.
-    /// </summary>
-    public bool SetWatchInterval(double intervalSeconds)
-    {
-        if (_watchPanel == null)
-            return false;
-
-        // Validate interval
-        if (intervalSeconds < WatchPanel.MinUpdateInterval || intervalSeconds > WatchPanel.MaxUpdateInterval)
-            return false;
-
-        _watchPanel.UpdateInterval = intervalSeconds;
-        return true;
-    }
-
-    /// <summary>
-    /// Collapses a watch group.
-    /// </summary>
-    public bool CollapseWatchGroup(string groupName)
-    {
-        return _watchPanel?.CollapseGroup(groupName) ?? false;
-    }
-
-    /// <summary>
-    /// Expands a watch group.
-    /// </summary>
-    public bool ExpandWatchGroup(string groupName)
-    {
-        return _watchPanel?.ExpandGroup(groupName) ?? false;
-    }
-
-    /// <summary>
-    /// Toggles a watch group's collapsed state.
-    /// </summary>
-    public bool ToggleWatchGroup(string groupName)
-    {
-        return _watchPanel?.ToggleGroup(groupName) ?? false;
-    }
-
-    /// <summary>
-    /// Gets all watch group names.
-    /// </summary>
-    public IEnumerable<string> GetWatchGroups()
-    {
-        return _watchPanel?.GetGroups() ?? Enumerable.Empty<string>();
-    }
-
-    /// <summary>
-    /// Sets an alert on a watch.
-    /// </summary>
-    public bool SetWatchAlert(string name, string alertType, object? threshold)
-    {
-        return _watchPanel?.SetAlert(name, alertType, threshold, OnWatchAlertTriggered) ?? false;
-    }
-
-    /// <summary>
-    /// Removes an alert from a watch.
-    /// </summary>
-    public bool RemoveWatchAlert(string name)
-    {
-        return _watchPanel?.RemoveAlert(name) ?? false;
-    }
-
-    /// <summary>
-    /// Gets all watches with alerts.
-    /// </summary>
-    public IEnumerable<(string Name, string AlertType, bool Triggered)> GetWatchesWithAlerts()
-    {
-        return _watchPanel?.GetWatchesWithAlerts() ?? Enumerable.Empty<(string, string, bool)>();
-    }
-
-    /// <summary>
-    /// Clears alert triggered status for a watch.
-    /// </summary>
-    public bool ClearWatchAlertStatus(string name)
-    {
-        return _watchPanel?.ClearAlertStatus(name) ?? false;
-    }
-
-    /// <summary>
-    /// Sets up a comparison between two watches.
-    /// </summary>
-    public bool SetWatchComparison(string watchName, string compareWithName, string comparisonLabel = "Expected")
-    {
-        return _watchPanel?.SetComparison(watchName, compareWithName, comparisonLabel) ?? false;
-    }
-
-    /// <summary>
-    /// Removes comparison from a watch.
-    /// </summary>
-    public bool RemoveWatchComparison(string name)
-    {
-        return _watchPanel?.RemoveComparison(name) ?? false;
-    }
-
-    /// <summary>
-    /// Gets all watches with comparisons.
-    /// </summary>
-    public IEnumerable<(string Name, string ComparedWith)> GetWatchesWithComparisons()
-    {
-        return _watchPanel?.GetWatchesWithComparisons() ?? Enumerable.Empty<(string, string)>();
-    }
-
-    /// <summary>
-    /// Called when a watch alert is triggered.
-    /// </summary>
-    private void OnWatchAlertTriggered(string watchName, object? value, object? threshold)
-    {
-        // Log the alert to console output
-        var thresholdStr = threshold != null ? $" (threshold: {threshold})" : "";
-        AppendOutput($"⚠ WATCH ALERT: '{watchName}' = {value}{thresholdStr}", ThemeManager.Current.Error);
-    }
-
-    /// <summary>
-    /// Sets log filter level.
-    /// </summary>
-    public void SetLogFilter(Microsoft.Extensions.Logging.LogLevel level)
-    {
-        _logsPanel?.SetFilterLevel(level);
-    }
-
-    /// <summary>
-    /// Sets log search filter.
-    /// </summary>
-    public void SetLogSearch(string? searchText)
-    {
-        _logsPanel?.SetSearchFilter(searchText);
-    }
-
-    /// <summary>
-    /// Adds a log entry with current timestamp.
-    /// </summary>
-    public void AddLog(Microsoft.Extensions.Logging.LogLevel level, string message, string category = "General")
-    {
-        _logsPanel?.AddLog(level, message, category);
-    }
-
-    /// <summary>
     /// Adds a log entry with a specific timestamp (used for replaying buffered logs).
+    /// This is kept because ILogOperations.Add doesn't support custom timestamps.
     /// </summary>
     public void AddLog(Microsoft.Extensions.Logging.LogLevel level, string message, string category, DateTime timestamp)
     {
         _logsPanel?.AddLog(level, message, category, timestamp);
-    }
-
-    /// <summary>
-    /// Clears all logs.
-    /// </summary>
-    public void ClearLogs()
-    {
-        _logsPanel?.ClearLogs();
-    }
-
-    /// <summary>
-    /// Gets total log count.
-    /// </summary>
-    public int GetLogCount()
-    {
-        return _logsPanel?.GetTotalLogCount() ?? 0;
-    }
-
-    /// <summary>
-    /// Sets the log category filter.
-    /// </summary>
-    public void SetLogCategoryFilter(IEnumerable<string>? categories)
-    {
-        _logsPanel?.SetCategoryFilter(categories);
-    }
-
-    /// <summary>
-    /// Clears the log category filter.
-    /// </summary>
-    public void ClearLogCategoryFilter()
-    {
-        _logsPanel?.ClearCategoryFilter();
-    }
-
-    /// <summary>
-    /// Gets all available log categories.
-    /// </summary>
-    public IEnumerable<string> GetLogCategories()
-    {
-        return _logsPanel?.GetAvailableCategories() ?? Enumerable.Empty<string>();
-    }
-
-    /// <summary>
-    /// Gets log counts per category.
-    /// </summary>
-    public Dictionary<string, int> GetLogCategoryCounts()
-    {
-        return _logsPanel?.GetCategoryCounts() ?? new Dictionary<string, int>();
-    }
-
-    /// <summary>
-    /// Exports logs to a formatted string.
-    /// </summary>
-    public string ExportLogs(bool includeTimestamp = true, bool includeLevel = true, bool includeCategory = false)
-    {
-        return _logsPanel?.ExportToString(includeTimestamp, includeLevel, includeCategory) ?? string.Empty;
-    }
-
-    /// <summary>
-    /// Exports logs to CSV format.
-    /// </summary>
-    public string ExportLogsToCsv()
-    {
-        return _logsPanel?.ExportToCsv() ?? string.Empty;
-    }
-
-    /// <summary>
-    /// Copies logs to clipboard.
-    /// </summary>
-    public void CopyLogsToClipboard()
-    {
-        _logsPanel?.CopyToClipboard();
-    }
-
-    /// <summary>
-    /// Gets log statistics summary.
-    /// </summary>
-    public (int Total, int Filtered, int Errors, int Warnings, int LastMinute, int Categories) GetLogStatistics()
-    {
-        var stats = _logsPanel?.GetStatistics();
-        if (stats == null)
-            return (0, 0, 0, 0, 0, 0);
-
-        return (
-            stats.TotalCount,
-            stats.FilteredCount,
-            stats.ErrorCount + stats.CriticalCount,
-            stats.WarningCount,
-            stats.LogsLastMinute,
-            stats.CategoryCount
-        );
-    }
-
-    /// <summary>
-    /// Gets log counts by level.
-    /// </summary>
-    public Dictionary<Microsoft.Extensions.Logging.LogLevel, int> GetLogLevelCounts()
-    {
-        return _logsPanel?.GetLevelCounts() ?? new Dictionary<Microsoft.Extensions.Logging.LogLevel, int>();
-    }
-
-    /// <summary>
-    /// Exports current watch configuration.
-    /// </summary>
-    public (List<(string Name, string Expression, string? Group, string? Condition, bool IsPinned,
-                   string? AlertType, object? AlertThreshold, string? ComparisonWith, string? ComparisonLabel)> Watches,
-            double UpdateInterval,
-            bool AutoUpdateEnabled)? ExportWatchConfiguration()
-    {
-        return _watchPanel?.ExportConfiguration();
-    }
-
-    /// <summary>
-    /// Imports watch configuration. Note: This only sets the configuration metadata.
-    /// Actual watch entries must be added separately with AddWatch() since they require
-    /// function delegates that can't be serialized.
-    /// </summary>
-    public void ImportWatchConfiguration(double updateInterval, bool autoUpdateEnabled)
-    {
-        if (_watchPanel == null)
-            return;
-
-        _watchPanel.ClearWatches();
-        _watchPanel.UpdateInterval = updateInterval;
-        _watchPanel.AutoUpdate = autoUpdateEnabled;
     }
 
     /// <summary>
@@ -1010,11 +319,12 @@ public class ConsoleScene : SceneBase
 
         try
         {
-            // Load font system
-            var fontSystem = Utilities.FontLoader.LoadSystemMonospaceFont();
+            // Load font system (bundled Iosevka Nerd Font with system fallback)
+            var fontSystem = Utilities.FontLoader.LoadFont();
             if (fontSystem == null)
             {
-                Logger.LogError("Failed to load font system for console");
+                Logger.LogError("Failed to load font system for console. Bundled: {Available}",
+                    Utilities.FontLoader.IsBundledFontAvailable());
                 throw new InvalidOperationException("Font system loading failed");
             }
 
@@ -1111,12 +421,32 @@ public class ConsoleScene : SceneBase
             _entitiesPanel.BorderThickness = 0;
             _entitiesPanel.Constraint = new LayoutConstraint { Anchor = Anchor.Fill, Padding = 0 };
 
+            // Create profiler panel
+            _profilerPanel = ProfilerPanelBuilder.Create()
+                .WithTargetFrameTime(16.67f) // 60 FPS
+                .WithWarningThreshold(2.0f)   // Warn if >2ms
+                .WithRefreshInterval(0.1f)    // 10 FPS refresh
+                .Build();
+            _profilerPanel.BackgroundColor = Color.Transparent;
+            _profilerPanel.BorderColor = Color.Transparent;
+            _profilerPanel.BorderThickness = 0;
+            _profilerPanel.Constraint = new LayoutConstraint { Anchor = Anchor.Fill, Padding = 0 };
+
+            // Create stats panel
+            _statsPanel = StatsPanelBuilder.Create().Build();
+            _statsPanel.BackgroundColor = Color.Transparent;
+            _statsPanel.BorderColor = Color.Transparent;
+            _statsPanel.BorderThickness = 0;
+            _statsPanel.Constraint = new LayoutConstraint { Anchor = Anchor.Fill, Padding = 0 };
+
             // Add tabs to container
             _tabContainer.AddTab("Console", _consolePanel);
             _tabContainer.AddTab("Watch", _watchPanel);
             _tabContainer.AddTab("Logs", _logsPanel);
             _tabContainer.AddTab("Variables", _variablesPanel);
             _tabContainer.AddTab("Entities", _entitiesPanel);
+            _tabContainer.AddTab("Profiler", _profilerPanel);
+            _tabContainer.AddTab("Stats", _statsPanel);
             _tabContainer.SetActiveTab(0);
 
             // Show the console
@@ -1171,7 +501,7 @@ public class ConsoleScene : SceneBase
     /// </summary>
     private void HandleTabShortcuts()
     {
-        if (_tabContainer == null || _inputState == null)
+        if (_tabContainer == null)
             return;
 
         // Check if Ctrl is held

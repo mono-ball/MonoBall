@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using PokeSharp.Engine.Core.Services;
 using PokeSharp.Engine.Systems.Management;
 using PokeSharp.Game.Data.Factories;
 using PokeSharp.Game.Infrastructure.Diagnostics;
@@ -26,8 +27,11 @@ public static class GameServicesExtensions
         // GraphicsDevice is available at runtime (in PokeSharpGame.Initialize)
         services.AddSingleton<IGraphicsServiceFactory, GraphicsServiceFactory>();
 
-        // Game Time Service
-        services.AddSingleton<IGameTimeService, GameTimeService>();
+        // Game Time Service - register as singleton so both IGameTimeService and ITimeControl
+        // resolve to the same instance
+        services.AddSingleton<GameTimeService>();
+        services.AddSingleton<IGameTimeService>(sp => sp.GetRequiredService<GameTimeService>());
+        services.AddSingleton<ITimeControl>(sp => sp.GetRequiredService<GameTimeService>());
 
         // Collision Service - provides on-demand collision checking (not a system)
         services.AddSingleton<ICollisionService>(sp =>

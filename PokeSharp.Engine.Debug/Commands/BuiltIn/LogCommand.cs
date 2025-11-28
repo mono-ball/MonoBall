@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using PokeSharp.Engine.UI.Debug.Core;
 using System;
 using System.Threading.Tasks;
 
@@ -10,16 +11,17 @@ public class LogCommand : IConsoleCommand
     public string Name => "log";
     public string Description => "Manage and view system logs";
     public string Usage => @"log [subcommand]
-  (no args)         Show log count and stats summary
+  (no args)         Show log count and status summary
+  show              Switch to Logs tab
+  on|off            Enable or disable logging to console
+  minlevel <level>  Set minimum capture level (Trace|Debug|Info|Warning|Error|Critical)
+  level <level>     Filter displayed logs by level
   clear             Clear all logs
-  level <level>     Filter by log level (Trace|Debug|Info|Warning|Error|Critical)
   category <name>   Filter by category (or 'all' to show all)
   categories        List all available categories with counts
   search <text>     Search logs by text (no args to clear)
   stats             Show log statistics
-  export [csv]      Copy logs to clipboard (use 'csv' for CSV format)
-
-Use 'tab logs' to switch to the Logs tab.";
+  export [csv]      Copy logs to clipboard (use 'csv' for CSV format)";
 
     public Task ExecuteAsync(IConsoleContext context, string[] args)
     {
@@ -27,10 +29,11 @@ Use 'tab logs' to switch to the Logs tab.";
 
         if (args.Length == 0)
         {
-            // Show log count and stats summary
+            // Show log count and status summary
             var logCount = context.Logs.Count;
             var (total, filtered, errors, warnings, lastMinute, categories) = context.Logs.GetStatistics();
 
+            context.WriteLine($"Logging: {(context.IsLoggingEnabled ? "ON" : "OFF")} (min level: {context.MinimumLogLevel})", theme.Info);
             context.WriteLine($"Logs: {logCount} total", theme.Info);
             if (errors > 0)
                 context.WriteLine($"  Errors: {errors}", theme.Error);
@@ -39,7 +42,52 @@ Use 'tab logs' to switch to the Logs tab.";
             if (categories > 0)
                 context.WriteLine($"  Categories: {categories}", theme.TextSecondary);
             context.WriteLine("", theme.TextPrimary);
-            context.WriteLine("Use 'tab logs' to view the Logs panel", theme.TextDim);
+            context.WriteLine("Use 'log show' to switch to the Logs tab", theme.TextDim);
+        }
+        else if (args[0].Equals("show", StringComparison.OrdinalIgnoreCase))
+        {
+            context.SwitchToTab(ConsoleTabs.Logs.Index);
+            context.WriteLine("Switched to Logs tab", theme.Success);
+        }
+        else if (args[0].Equals("on", StringComparison.OrdinalIgnoreCase) ||
+                 args[0].Equals("enable", StringComparison.OrdinalIgnoreCase) ||
+                 args[0].Equals("true", StringComparison.OrdinalIgnoreCase) ||
+                 args[0].Equals("1", StringComparison.OrdinalIgnoreCase))
+        {
+            context.SetLoggingEnabled(true);
+            context.WriteLine("Logging enabled", theme.Success);
+            context.WriteLine($"Capturing logs at level {context.MinimumLogLevel} and above", theme.TextSecondary);
+        }
+        else if (args[0].Equals("off", StringComparison.OrdinalIgnoreCase) ||
+                 args[0].Equals("disable", StringComparison.OrdinalIgnoreCase) ||
+                 args[0].Equals("false", StringComparison.OrdinalIgnoreCase) ||
+                 args[0].Equals("0", StringComparison.OrdinalIgnoreCase))
+        {
+            context.SetLoggingEnabled(false);
+            context.WriteLine("Logging disabled", theme.Info);
+        }
+        else if (args[0].Equals("minlevel", StringComparison.OrdinalIgnoreCase))
+        {
+            // Set minimum capture level
+            if (args.Length < 2)
+            {
+                context.WriteLine($"Current minimum log level: {context.MinimumLogLevel}", theme.Info);
+                context.WriteLine("Usage: log minlevel <level>", theme.TextSecondary);
+                context.WriteLine("Levels: Trace, Debug, Information, Warning, Error, Critical", theme.TextSecondary);
+                return Task.CompletedTask;
+            }
+
+            var levelStr = args[1];
+            if (Enum.TryParse<LogLevel>(levelStr, ignoreCase: true, out var level))
+            {
+                context.SetMinimumLogLevel(level);
+                context.WriteLine($"Minimum log level set to: {level}", theme.Success);
+            }
+            else
+            {
+                context.WriteLine($"Invalid log level: '{levelStr}'", theme.Error);
+                context.WriteLine("Valid levels: Trace, Debug, Information, Warning, Error, Critical", theme.TextSecondary);
+            }
         }
         else if (args[0].Equals("clear", StringComparison.OrdinalIgnoreCase))
         {

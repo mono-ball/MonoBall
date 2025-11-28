@@ -66,7 +66,7 @@ public static class DebugComponentRegistryFactory
         );
 
         registry.Register<MovementRequest>("MovementRequest", category: "Movement", priority: 3);
-        
+
         registry.Register<Collision>(
             "Collision",
             col => new Dictionary<string, string>

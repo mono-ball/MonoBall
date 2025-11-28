@@ -32,6 +32,14 @@ public interface IScene : IDisposable
     bool RenderScenesBelow { get; }
 
     /// <summary>
+    ///     Gets a value indicating whether the scenes below this one should be updated.
+    ///     When true, the base scene (and any scenes below) will receive Update calls.
+    ///     When false, only this scene will be updated (pauses lower scenes).
+    ///     Default is false (lower scenes are paused).
+    /// </summary>
+    bool UpdateScenesBelow { get; }
+
+    /// <summary>
     ///     Gets a value indicating whether this scene takes exclusive input.
     ///     When true, input handling will not fall through to scenes below this one.
     ///     When false, input will be processed by this scene and then fall through to scenes below.

@@ -49,7 +49,8 @@ public class CreateGameplaySceneStep : InitializationStepBase
             context.MapInitializer,
             context.InputManager,
             context.PerformanceMonitor,
-            context.GameTime
+            context.GameTime,
+            context.SceneManager
         );
 
         context.GameplayScene = gameplayScene;

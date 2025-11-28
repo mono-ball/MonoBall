@@ -53,13 +53,15 @@ public static class ConsoleTabs
     public static readonly TabDefinition Logs = new(2, "Logs", ["logs", "log", "l"], Keys.D3);
     public static readonly TabDefinition Variables = new(3, "Variables", ["variables", "vars", "var", "v"], Keys.D4);
     public static readonly TabDefinition Entities = new(4, "Entities", ["entities", "entity", "e"], Keys.D5);
+    public static readonly TabDefinition Profiler = new(5, "Profiler", ["profiler", "perf", "p"], Keys.D6);
+    public static readonly TabDefinition Stats = new(6, "Stats", ["stats", "stat", "s", "perf"], Keys.D7);
 
     /// <summary>
     /// All tab definitions in order.
     /// </summary>
     public static readonly IReadOnlyList<TabDefinition> All = new[]
     {
-        Console, Watch, Logs, Variables, Entities
+        Console, Watch, Logs, Variables, Entities, Profiler, Stats
     };
 
     /// <summary>

@@ -57,6 +57,9 @@ public interface IWatchOperations
     /// <summary>Clears alert triggered status for a watch.</summary>
     bool ClearAlertStatus(string name);
 
+    /// <summary>Checks if a watch's alert is currently triggered.</summary>
+    bool IsAlertActive(string name);
+
     /// <summary>Sets up a comparison between two watches.</summary>
     bool SetComparison(string watchName, string compareWithName, string comparisonLabel = "Expected");
 

@@ -139,7 +139,7 @@ public class EntityInspector : Panel
                 var componentLabel = new Label
                 {
                     Id = $"{Id}_comp_{component}",
-                    Text = $"• {component}",
+                    Text = $"- {component}",
                     Color = context.Theme.Success,
                     Constraint = new LayoutConstraint
                     {

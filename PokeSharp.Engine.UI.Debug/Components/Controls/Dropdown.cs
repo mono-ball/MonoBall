@@ -63,12 +63,12 @@ public class Dropdown : UIComponent
 
     private void DrawDropdownArrow(UIContext context)
     {
-        // Simple down arrow indicator
+        // Dropdown arrow indicator using Nerd Font icon
         float arrowX = Rect.Right - 20;
         float arrowY = Rect.CenterY;
 
-        // Draw small triangle (simplified)
-        context.Renderer.DrawText("▼", arrowX, arrowY - 8, Theme.TextSecondary);
+        // Draw dropdown arrow icon
+        context.Renderer.DrawText(Core.NerdFontIcons.DropdownArrow, arrowX, arrowY - 8, Theme.TextSecondary);
     }
 
     private void DrawDropdownList(UIContext context)

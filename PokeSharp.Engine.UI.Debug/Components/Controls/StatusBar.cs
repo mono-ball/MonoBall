@@ -31,7 +31,11 @@ public class StatusBar : UIComponent
 
     /// <summary>Resets HintsColor to use theme default.</summary>
     public void ResetHintsColor() => _hintsColor = null;
-    public float Padding { get; set; } = 4f;
+
+    /// <summary>
+    /// Padding around text content. Matches TextBuffer.LinePadding for consistent alignment.
+    /// </summary>
+    public float Padding { get; set; } = 5f;
     public bool ShowSeparator { get; set; } = true;
 
     public StatusBar(string id)

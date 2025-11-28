@@ -268,7 +268,7 @@ public class ParameterHintTooltip : UIComponent
         if (_hintInfo.Overloads.Count > 1)
         {
             yPos += lineHeight;
-            var counterText = $"↑↓ {_hintInfo.CurrentOverloadIndex + 1} of {_hintInfo.Overloads.Count}";
+            var counterText = $"[{_hintInfo.CurrentOverloadIndex + 1}/{_hintInfo.Overloads.Count}]";
             var counterSize = renderer.MeasureText(counterText);
             var counterX = resolvedRect.Right - Padding - counterSize.X;
             renderer.DrawText(counterText, new Vector2(counterX, yPos), CounterColor);
@@ -380,7 +380,7 @@ public class ParameterHintTooltip : UIComponent
         // Overload counter
         if (_hintInfo.Overloads.Count > 1)
         {
-            var counterText = $"↑↓ {_hintInfo.CurrentOverloadIndex + 1} of {_hintInfo.Overloads.Count}";
+            var counterText = $"[{_hintInfo.CurrentOverloadIndex + 1}/{_hintInfo.Overloads.Count}]";
             var counterWidth = r.MeasureText(counterText).X + 40; // Extra space
             maxWidth = Math.Max(maxWidth, counterWidth);
         }

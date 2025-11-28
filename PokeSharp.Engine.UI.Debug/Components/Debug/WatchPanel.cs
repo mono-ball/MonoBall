@@ -1,7 +1,6 @@
 using Microsoft.Xna.Framework;
 using PokeSharp.Engine.UI.Debug.Components.Base;
 using PokeSharp.Engine.UI.Debug.Components.Controls;
-using PokeSharp.Engine.UI.Debug.Components.Layout;
 using PokeSharp.Engine.UI.Debug.Core;
 using PokeSharp.Engine.UI.Debug.Interfaces;
 using PokeSharp.Engine.UI.Debug.Layout;
@@ -17,10 +16,9 @@ namespace PokeSharp.Engine.UI.Debug.Components.Debug;
 /// Uses background thread evaluation to prevent blocking the game loop.
 /// Implements <see cref="IWatchOperations"/> for command access.
 /// </summary>
-public class WatchPanel : Panel, IDisposable, IWatchOperations
+public class WatchPanel : DebugPanelBase, IDisposable, IWatchOperations
 {
     private readonly TextBuffer _watchBuffer;
-    private readonly StatusBar _statusBar;
     private readonly Dictionary<string, WatchEntry> _watches = new();
     private readonly List<string> _watchKeys = new(); // Maintain insertion order
     private readonly Dictionary<string, bool> _groupCollapsedState = new(); // Track collapsed groups
@@ -93,27 +91,24 @@ public class WatchPanel : Panel, IDisposable, IWatchOperations
     /// Use <see cref="WatchPanelBuilder"/> to construct instances.
     /// </summary>
     internal WatchPanel(TextBuffer watchBuffer, StatusBar statusBar, double updateInterval, bool autoUpdate)
+        : base(statusBar)
     {
         _watchBuffer = watchBuffer;
-        _statusBar = statusBar;
         UpdateInterval = updateInterval;
         AutoUpdate = autoUpdate;
 
         Id = "watch_panel";
-        // Colors set dynamically in OnRenderContainer for theme switching
-        BorderThickness = 1;
-        Constraint.Padding = 8;
 
-        // StatusBar anchored to bottom
-        _statusBar.Constraint.Anchor = Anchor.StretchBottom;
-        _statusBar.Constraint.OffsetY = 0;
+        // TextBuffer fills space above StatusBar
+        _watchBuffer.Constraint.Anchor = Anchor.StretchTop;
 
         AddChild(_watchBuffer);
-        AddChild(_statusBar);
 
         // Initialize status bar with default content
         UpdateStatusBar();
     }
+
+    protected override UIComponent GetContentComponent() => _watchBuffer;
 
     /// <summary>
     /// Adds a watch expression.
@@ -348,6 +343,23 @@ public class WatchPanel : Panel, IDisposable, IWatchOperations
 
         UpdateWatchDisplay();
         return true;
+    }
+
+    /// <summary>
+    /// Checks if a watch's alert is currently triggered.
+    /// </summary>
+    public bool IsAlertActive(string name)
+    {
+        if (name == "*")
+        {
+            // Wildcard - check if ANY watch has an active alert
+            return _watches.Values.Any(w => w.AlertTriggered);
+        }
+
+        if (!_watches.TryGetValue(name, out var entry))
+            return false;
+
+        return entry.AlertTriggered;
     }
 
     /// <summary>
@@ -693,7 +705,7 @@ public class WatchPanel : Panel, IDisposable, IWatchOperations
         // Display pinned watches first (regardless of group)
         if (pinnedWatches.Any())
         {
-            _watchBuffer.AppendLine("  ═══ PINNED ═══", ThemeManager.Current.Warning);
+            _watchBuffer.AppendLine($"  {Core.NerdFontIcons.Pinned} PINNED", ThemeManager.Current.Warning);
             _watchBuffer.AppendLine("", ThemeManager.Current.TextDim);
 
             foreach (var entry in pinnedWatches.OrderBy(w => _watchKeys.IndexOf(w.Name)))
@@ -713,7 +725,7 @@ public class WatchPanel : Panel, IDisposable, IWatchOperations
             {
                 // Display group header
                 var isCollapsed = IsGroupCollapsed(group.Key);
-                var collapseIndicator = isCollapsed ? "[+]" : "[-]";
+                var collapseIndicator = isCollapsed ? Core.NerdFontIcons.Collapsed : Core.NerdFontIcons.Expanded;
                 var groupCount = group.Count();
 
                 _watchBuffer.AppendLine($"  {collapseIndicator} {group.Key.ToUpper()} ({groupCount} watch{(groupCount == 1 ? "" : "es")})", ThemeManager.Current.Info);
@@ -750,7 +762,7 @@ public class WatchPanel : Panel, IDisposable, IWatchOperations
         // Watch header with index and indicators
         var conditionalIndicator = entry.Condition != null ? " [COND]" : "";
         var alertIndicator = entry.AlertType != null ? " [ALERT]" : "";
-        var alertTriggeredIndicator = entry.AlertTriggered ? " ⚠" : "";
+        var alertTriggeredIndicator = entry.AlertTriggered ? " [!]" : "";
 
         var nameColor = entry.IsPinned ? ThemeManager.Current.Warning :
                        entry.AlertTriggered ? ThemeManager.Current.Error :
@@ -907,7 +919,7 @@ public class WatchPanel : Panel, IDisposable, IWatchOperations
     /// <summary>
     /// Updates the status bar with current watch stats.
     /// </summary>
-    private void UpdateStatusBar()
+    protected override void UpdateStatusBar()
     {
         var errorCount = _watches.Values.Count(w => w.HasError);
         var pinnedCount = _watches.Values.Count(w => w.IsPinned);
@@ -917,17 +929,13 @@ public class WatchPanel : Panel, IDisposable, IWatchOperations
         var stats = $"Watches: {_watchKeys.Count}";
         if (pinnedCount > 0) stats += $" | Pinned: {pinnedCount}";
         if (errorCount > 0) stats += $" | Errors: {errorCount}";
-        if (alertCount > 0) stats += $" | ⚠ Alerts: {alertCount}";
+        if (alertCount > 0) stats += $" | [!] Alerts: {alertCount}";
 
         // Build hints text
         var hints = AutoUpdate ? $"Auto: {UpdateInterval:F1}s" : "Manual";
 
-        _statusBar.Set(stats, hints);
-        // Only set color explicitly for non-default (Warning), otherwise use null for theme fallback
-        if (errorCount > 0)
-            _statusBar.StatsColor = ThemeManager.Current.Warning;
-        else
-            _statusBar.ResetStatsColor(); // Use theme default (Success)
+        SetStatusBar(stats, hints);
+        SetStatusBarHealthColor(isHealthy: errorCount == 0, isWarning: errorCount > 0);
     }
 
     /// <summary>
@@ -995,21 +1003,7 @@ public class WatchPanel : Panel, IDisposable, IWatchOperations
 
     protected override void OnRenderContainer(UIContext context)
     {
-        // Set theme colors dynamically for theme switching
-        BackgroundColor = ThemeManager.Current.ConsoleBackground;
-        BorderColor = ThemeManager.Current.BorderPrimary;
-
         base.OnRenderContainer(context);
-
-        // Layout: Position StatusBar at bottom and size TextBuffer above it
-        var statusBarHeight = _statusBar.GetDesiredHeight(context.Renderer);
-        _statusBar.Constraint.Height = statusBarHeight;
-
-        // TextBuffer fills remaining space above StatusBar
-        var paddingTop = Constraint.GetPaddingTop();
-        var paddingBottom = Constraint.GetPaddingBottom();
-        var contentHeight = Rect.Height - paddingTop - paddingBottom;
-        _watchBuffer.Constraint.Height = contentHeight - statusBarHeight;
 
         // Auto-update if enabled
         if (AutoUpdate && context.Input?.GameTime != null)
@@ -1077,7 +1071,7 @@ public class WatchPanel : Panel, IDisposable, IWatchOperations
 
             foreach (var watch in group.OrderBy(w => w.IsPinned ? 0 : 1).ThenBy(w => w.Name))
             {
-                var pin = watch.IsPinned ? "★ " : "  ";
+                var pin = watch.IsPinned ? "* " : "  ";
                 var value = watch.HasError
                     ? $"ERROR: {watch.ErrorMessage}"
                     : FormatValue(watch.LastValue) ?? "null";

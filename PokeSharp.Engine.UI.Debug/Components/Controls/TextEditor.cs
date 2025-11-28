@@ -145,9 +145,9 @@ public class TextEditor : UIComponent, ITextInput
         }
     }
 
-    // Prompt string (e.g., "> ")
+    // Prompt string (e.g., " ")
     private Color? _promptColor;
-    public string Prompt { get; set; } = "> ";
+    public string Prompt { get; set; } = Core.NerdFontIcons.Prompt;
     public Color PromptColor { get => _promptColor ?? ThemeManager.Current.Prompt; set => _promptColor = value; }
 
     // Properties
@@ -898,6 +898,16 @@ public class TextEditor : UIComponent, ITextInput
 
     private void DeleteBackward()
     {
+        // Safety check: ensure cursor is within valid bounds
+        if (_lines.Count == 0)
+        {
+            _lines.Add("");
+            _cursorLine = 0;
+            _cursorColumn = 0;
+            return;
+        }
+        _cursorLine = Math.Clamp(_cursorLine, 0, _lines.Count - 1);
+
         // Save state for undo
         SaveUndoState();
 
@@ -956,6 +966,16 @@ public class TextEditor : UIComponent, ITextInput
 
     private void DeleteForward()
     {
+        // Safety check: ensure cursor is within valid bounds
+        if (_lines.Count == 0)
+        {
+            _lines.Add("");
+            _cursorLine = 0;
+            _cursorColumn = 0;
+            return;
+        }
+        _cursorLine = Math.Clamp(_cursorLine, 0, _lines.Count - 1);
+
         // Save state for undo
         SaveUndoState();
 
@@ -1661,7 +1681,7 @@ public class TextEditor : UIComponent, ITextInput
 
         // Draw border
         var borderColor = IsFocused() ? FocusBorderColor : BorderColor;
-        DrawBorder(renderer, resolvedRect, borderColor);
+        renderer.DrawRectangleOutline(resolvedRect, borderColor, (int)BorderThickness);
 
         // Calculate text area
         var lineHeight = renderer.GetLineHeight();
@@ -2298,7 +2318,7 @@ public class TextEditor : UIComponent, ITextInput
         {
             if (input.IsKeyPressedWithRepeat(key))
             {
-                var ch = KeyToChar(key, input.IsShiftDown());
+                var ch = Utilities.KeyboardHelper.KeyToChar(key, input.IsShiftDown());
                 if (ch.HasValue)
                 {
                     // Try auto-close first, fall back to normal insert
@@ -2388,72 +2408,6 @@ public class TextEditor : UIComponent, ITextInput
         _cursorColumn += text.Length;
 
         _historyIndex = -1;
-    }
-
-    private char? KeyToChar(Keys key, bool shift)
-    {
-        // Letters
-        if (key >= Keys.A && key <= Keys.Z)
-        {
-            char c = (char)('a' + (key - Keys.A));
-            return shift ? char.ToUpper(c) : c;
-        }
-
-        // Numbers and symbols
-        if (key >= Keys.D0 && key <= Keys.D9)
-        {
-            if (shift)
-            {
-                return key switch
-                {
-                    Keys.D0 => ')',
-                    Keys.D1 => '!',
-                    Keys.D2 => '@',
-                    Keys.D3 => '#',
-                    Keys.D4 => '$',
-                    Keys.D5 => '%',
-                    Keys.D6 => '^',
-                    Keys.D7 => '&',
-                    Keys.D8 => '*',
-                    Keys.D9 => '(',
-                    _ => null
-                };
-            }
-            return (char)('0' + (key - Keys.D0));
-        }
-
-        // Special keys
-        return key switch
-        {
-            Keys.Space => ' ',
-            Keys.OemPeriod => shift ? '>' : '.',
-            Keys.OemComma => shift ? '<' : ',',
-            Keys.OemSemicolon => shift ? ':' : ';',
-            Keys.OemQuotes => shift ? '"' : '\'',
-            Keys.OemQuestion => shift ? '?' : '/',
-            Keys.OemPlus => shift ? '+' : '=',
-            Keys.OemMinus => shift ? '_' : '-',
-            Keys.OemOpenBrackets => shift ? '{' : '[',
-            Keys.OemCloseBrackets => shift ? '}' : ']',
-            Keys.OemPipe => shift ? '|' : '\\',
-            Keys.OemTilde => shift ? '~' : '`',
-            _ => null
-        };
-    }
-
-    private void DrawBorder(UIRenderer renderer, LayoutRect rect, Color color)
-    {
-        if (BorderThickness <= 0)
-            return;
-
-        // Top
-        renderer.DrawRectangle(new LayoutRect(rect.X, rect.Y, rect.Width, BorderThickness), color);
-        // Bottom
-        renderer.DrawRectangle(new LayoutRect(rect.X, rect.Bottom - BorderThickness, rect.Width, BorderThickness), color);
-        // Left
-        renderer.DrawRectangle(new LayoutRect(rect.X, rect.Y, BorderThickness, rect.Height), color);
-        // Right
-        renderer.DrawRectangle(new LayoutRect(rect.Right - BorderThickness, rect.Y, BorderThickness, rect.Height), color);
     }
 
     protected override bool IsInteractive() => true;

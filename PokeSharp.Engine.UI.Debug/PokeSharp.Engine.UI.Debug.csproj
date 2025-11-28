@@ -13,6 +13,14 @@
   <ItemGroup>
     <ProjectReference Include="..\PokeSharp.Engine.Common\PokeSharp.Engine.Common.csproj" />
     <ProjectReference Include="..\PokeSharp.Engine.Scenes\PokeSharp.Engine.Scenes.csproj" />
+    <ProjectReference Include="..\PokeSharp.Engine.Systems\PokeSharp.Engine.Systems.csproj" />
+  </ItemGroup>
+
+  <!-- Embedded 0xProto Nerd Font for debug console (SIL OFL licensed) -->
+  <ItemGroup>
+    <EmbeddedResource Include="Assets/Fonts/0xProtoNerdFontMono-Regular.ttf">
+      <LogicalName>PokeSharp.Engine.UI.Debug.Assets.Fonts.0xProtoNerdFontMono-Regular.ttf</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
 </Project>
 

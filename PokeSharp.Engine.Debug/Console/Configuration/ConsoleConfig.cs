@@ -40,6 +40,12 @@ public record ConsoleConfig
     public ConsoleSize Size { get; init; } = ConsoleSize.Full;
 
     /// <summary>
+    /// Gets the UI theme name.
+    /// Available themes: onedark, monokai, dracula, gruvbox, nord, solarized, solarized-light, pokeball
+    /// </summary>
+    public string Theme { get; init; } = "pokeball";
+
+    /// <summary>
     /// Gets whether syntax highlighting is enabled.
     /// </summary>
     public bool SyntaxHighlightingEnabled { get; init; } = true;

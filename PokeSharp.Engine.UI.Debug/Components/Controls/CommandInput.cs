@@ -30,12 +30,6 @@ public class CommandInput : UIComponent, ITextInput
     private string _temporaryInput = string.Empty; // Stores current input when navigating history
     private int _maxHistory = 100;
 
-    // Auto-completion (managed externally by parent component like ConsolePanel)
-    // These are kept for backward compatibility but not used in the new architecture
-    private List<string> _completionSuggestions = new();
-    private int _selectedSuggestionIndex = -1;
-    private bool _showSuggestions = false;
-
     // Multi-line support
     private bool _multiLineMode = false;
 
@@ -57,8 +51,8 @@ public class CommandInput : UIComponent, ITextInput
     public float BorderThickness { get; set; } = 1;
     public float Padding { get; set; } = 8f;
 
-    // Prompt string (e.g., "> ")
-    public string Prompt { get; set; } = "> ";
+    // Prompt string (e.g., " ")
+    public string Prompt { get; set; } = Core.NerdFontIcons.Prompt;
     public Color PromptColor { get => _promptColor ?? ThemeManager.Current.Prompt; set => _promptColor = value; }
 
     // Properties
@@ -235,53 +229,6 @@ public class CommandInput : UIComponent, ITextInput
     /// </summary>
     public List<string> GetHistory() => new List<string>(_history);
 
-    /// <summary>
-    /// Sets auto-completion suggestions.
-    /// </summary>
-    public void SetCompletions(List<string> completions)
-    {
-        _completionSuggestions = completions;
-        _selectedSuggestionIndex = completions.Count > 0 ? 0 : -1;
-        _showSuggestions = completions.Count > 0;
-    }
-
-    /// <summary>
-    /// Accepts the currently selected completion suggestion.
-    /// </summary>
-    public void AcceptCompletion()
-    {
-        if (_selectedSuggestionIndex >= 0 && _selectedSuggestionIndex < _completionSuggestions.Count)
-        {
-            SetText(_completionSuggestions[_selectedSuggestionIndex]);
-            _cursorPosition = _text.Length;
-            _showSuggestions = false;
-        }
-    }
-
-    /// <summary>
-    /// Selects the next completion suggestion.
-    /// </summary>
-    public void NextCompletion()
-    {
-        if (_completionSuggestions.Count == 0)
-            return;
-
-        _selectedSuggestionIndex = (_selectedSuggestionIndex + 1) % _completionSuggestions.Count;
-    }
-
-    /// <summary>
-    /// Selects the previous completion suggestion.
-    /// </summary>
-    public void PreviousCompletion()
-    {
-        if (_completionSuggestions.Count == 0)
-            return;
-
-        _selectedSuggestionIndex--;
-        if (_selectedSuggestionIndex < 0)
-            _selectedSuggestionIndex = _completionSuggestions.Count - 1;
-    }
-
     private void ClearSelection()
     {
         _hasSelection = false;
@@ -366,7 +313,7 @@ public class CommandInput : UIComponent, ITextInput
 
         // Draw border
         var borderColor = IsFocused() ? FocusBorderColor : BorderColor;
-        DrawBorder(renderer, resolvedRect, borderColor);
+        renderer.DrawRectangleOutline(resolvedRect, borderColor, (int)BorderThickness);
 
         // Calculate text position
         var textPos = new Vector2(resolvedRect.X + Padding, resolvedRect.Y + Padding);
@@ -428,21 +375,6 @@ public class CommandInput : UIComponent, ITextInput
                 renderer.DrawRectangle(cursorRect, CursorColor);
             }
         }
-    }
-
-    private void DrawBorder(UIRenderer renderer, LayoutRect rect, Color color)
-    {
-        if (BorderThickness <= 0)
-            return;
-
-        // Top
-        renderer.DrawRectangle(new LayoutRect(rect.X, rect.Y, rect.Width, BorderThickness), color);
-        // Bottom
-        renderer.DrawRectangle(new LayoutRect(rect.X, rect.Bottom - BorderThickness, rect.Width, BorderThickness), color);
-        // Left
-        renderer.DrawRectangle(new LayoutRect(rect.X, rect.Y, BorderThickness, rect.Height), color);
-        // Right
-        renderer.DrawRectangle(new LayoutRect(rect.Right - BorderThickness, rect.Y, BorderThickness, rect.Height), color);
     }
 
     /// <summary>
@@ -782,7 +714,7 @@ public class CommandInput : UIComponent, ITextInput
         {
             if (input.IsKeyPressedWithRepeat(key))
             {
-                var ch = KeyToChar(key, input.IsShiftDown());
+                var ch = Utilities.KeyboardHelper.KeyToChar(key, input.IsShiftDown());
                 if (ch.HasValue)
                 {
                     InsertText(ch.Value.ToString());
@@ -791,61 +723,5 @@ public class CommandInput : UIComponent, ITextInput
         }
     }
 
-    private char? KeyToChar(Keys key, bool shift)
-    {
-        // Letters
-        if (key >= Keys.A && key <= Keys.Z)
-        {
-            char c = (char)('a' + (key - Keys.A));
-            return shift ? char.ToUpper(c) : c;
-        }
-
-        // Numbers
-        if (key >= Keys.D0 && key <= Keys.D9)
-        {
-            if (shift)
-            {
-                return key switch
-                {
-                    Keys.D1 => '!',
-                    Keys.D2 => '@',
-                    Keys.D3 => '#',
-                    Keys.D4 => '$',
-                    Keys.D5 => '%',
-                    Keys.D6 => '^',
-                    Keys.D7 => '&',
-                    Keys.D8 => '*',
-                    Keys.D9 => '(',
-                    Keys.D0 => ')',
-                    _ => null
-                };
-            }
-            return (char)('0' + (key - Keys.D0));
-        }
-
-        // Numpad
-        if (key >= Keys.NumPad0 && key <= Keys.NumPad9)
-        {
-            return (char)('0' + (key - Keys.NumPad0));
-        }
-
-        // Special keys
-        return key switch
-        {
-            Keys.Space => ' ',
-            Keys.OemPeriod => shift ? '>' : '.',
-            Keys.OemComma => shift ? '<' : ',',
-            Keys.OemQuestion => shift ? '?' : '/',
-            Keys.OemSemicolon => shift ? ':' : ';',
-            Keys.OemQuotes => shift ? '"' : '\'',
-            Keys.OemOpenBrackets => shift ? '{' : '[',
-            Keys.OemCloseBrackets => shift ? '}' : ']',
-            Keys.OemPipe => shift ? '|' : '\\',
-            Keys.OemPlus => shift ? '+' : '=',
-            Keys.OemMinus => shift ? '_' : '-',
-            Keys.OemTilde => shift ? '~' : '`',
-            _ => null
-        };
-    }
 }
 

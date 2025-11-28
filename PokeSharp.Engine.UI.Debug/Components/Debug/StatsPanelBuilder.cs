@@ -1,3 +1,8 @@
+using PokeSharp.Engine.UI.Debug.Components.Controls;
+using PokeSharp.Engine.UI.Debug.Core;
+using PokeSharp.Engine.UI.Debug.Layout;
+using System;
+
 namespace PokeSharp.Engine.UI.Debug.Components.Debug;
 
 /// <summary>
@@ -5,40 +10,66 @@ namespace PokeSharp.Engine.UI.Debug.Components.Debug;
 /// </summary>
 public class StatsPanelBuilder
 {
-    private float _initialFps = 60.0f;
-    private long _initialMemoryMB = 128;
-    private int _initialEntityCount = 0;
-    private int _initialDrawCalls = 0;
+    private Func<StatsData>? _statsProvider;
+    private int _refreshInterval = 2; // frames
 
     public static StatsPanelBuilder Create() => new();
 
-    public StatsPanelBuilder WithInitialFps(float fps)
+    /// <summary>
+    /// Sets the stats data provider function that will be called periodically to refresh stats.
+    /// </summary>
+    public StatsPanelBuilder WithStatsProvider(Func<StatsData>? provider)
     {
-        _initialFps = fps;
+        _statsProvider = provider;
         return this;
     }
 
-    public StatsPanelBuilder WithInitialMemory(long memoryMB)
+    /// <summary>
+    /// Sets the refresh interval in frames (1-60).
+    /// Lower values = more frequent updates.
+    /// Default: 2 (~30fps updates at 60fps game).
+    /// </summary>
+    public StatsPanelBuilder WithRefreshInterval(int frameInterval)
     {
-        _initialMemoryMB = memoryMB;
-        return this;
-    }
-
-    public StatsPanelBuilder WithInitialEntityCount(int count)
-    {
-        _initialEntityCount = count;
-        return this;
-    }
-
-    public StatsPanelBuilder WithInitialDrawCalls(int count)
-    {
-        _initialDrawCalls = count;
+        _refreshInterval = Math.Clamp(frameInterval, 1, 60);
         return this;
     }
 
     public StatsPanel Build()
     {
-        return new StatsPanel(_initialFps, _initialMemoryMB, _initialEntityCount, _initialDrawCalls);
+        var content = CreateDefaultContent();
+        var statusBar = CreateDefaultStatusBar();
+
+        var panel = new StatsPanel(content, statusBar);
+        panel.SetRefreshInterval(_refreshInterval);
+
+        if (_statsProvider != null)
+        {
+            panel.SetStatsProvider(_statsProvider);
+        }
+
+        return panel;
+    }
+
+    private static StatsContent CreateDefaultContent()
+    {
+        return new StatsContent("stats_content")
+        {
+            Constraint = new LayoutConstraint
+            {
+                Anchor = Anchor.StretchTop
+            }
+        };
+    }
+
+    private static StatusBar CreateDefaultStatusBar()
+    {
+        return new StatusBar("stats_status")
+        {
+            Constraint = new LayoutConstraint
+            {
+                Anchor = Anchor.StretchBottom
+            }
+        };
     }
 }
-

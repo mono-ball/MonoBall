@@ -32,7 +32,8 @@ public class InitializeGameSystemsStep : InitializationStepBase
             );
 
         var logger = context.LoggerFactory.CreateLogger<InitializeGameSystemsStep>();
-        context.GameInitializer.Initialize(context.GraphicsDevice);
+        // Pass SceneManager as IInputBlocker so InputSystem can check for exclusive input scenes
+        context.GameInitializer.Initialize(context.GraphicsDevice, context.SceneManager);
         logger.LogInformation("Game systems initialized successfully");
         return Task.CompletedTask;
     }

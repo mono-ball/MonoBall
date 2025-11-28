@@ -63,6 +63,7 @@ public class UITheme
         SuccessDim = new Color(120, 160, 95),
         Warning = new Color(229, 192, 123),                  // #e5c07b (yellow)
         WarningDim = new Color(190, 155, 90),
+        WarningMild = new Color(255, 200, 50),               // Light orange for mild warnings
         Error = new Color(224, 108, 117),                    // #e06c75 (red)
         ErrorDim = new Color(180, 85, 95),
         Info = new Color(97, 175, 239),                      // #61afef (blue)
@@ -248,6 +249,7 @@ public class UITheme
         SuccessDim = new Color(130, 180, 35),
         Warning = new Color(230, 219, 116),
         WarningDim = new Color(190, 180, 90),
+        WarningMild = new Color(253, 235, 110),              // Light yellow for mild warnings
         Error = new Color(249, 38, 114),
         ErrorDim = new Color(200, 30, 90),
         Info = new Color(102, 217, 239),
@@ -357,6 +359,7 @@ public class UITheme
         SuccessDim = new Color(60, 200, 95),
         Warning = new Color(241, 250, 140),
         WarningDim = new Color(200, 205, 110),
+        WarningMild = new Color(255, 230, 100),              // Light yellow for mild warnings
         Error = new Color(255, 85, 85),
         ErrorDim = new Color(210, 70, 70),
         Info = new Color(139, 233, 253),
@@ -466,6 +469,7 @@ public class UITheme
         SuccessDim = new Color(142, 192, 124),
         Warning = new Color(250, 189, 47),
         WarningDim = new Color(215, 153, 33),
+        WarningMild = new Color(254, 215, 90),               // Light orange for mild warnings
         Error = new Color(251, 73, 52),
         ErrorDim = new Color(204, 36, 29),
         Info = new Color(131, 165, 152),
@@ -575,6 +579,7 @@ public class UITheme
         SuccessDim = new Color(143, 188, 187),
         Warning = new Color(235, 203, 139),
         WarningDim = new Color(208, 135, 112),
+        WarningMild = new Color(245, 220, 160),              // Light warm for mild warnings
         Error = new Color(191, 97, 106),
         ErrorDim = new Color(180, 142, 173),
         Info = new Color(129, 161, 193),
@@ -684,6 +689,7 @@ public class UITheme
         SuccessDim = new Color(42, 161, 152),
         Warning = new Color(181, 137, 0),
         WarningDim = new Color(203, 75, 22),
+        WarningMild = new Color(220, 180, 50),               // Light orange for mild warnings
         Error = new Color(220, 50, 47),
         ErrorDim = new Color(211, 54, 130),
         Info = new Color(38, 139, 210),
@@ -816,6 +822,7 @@ public class UITheme
         SuccessDim = new Color(90, 160, 60),
         Warning = new Color(255, 203, 5),               // Pikachu yellow
         WarningDim = new Color(200, 160, 5),
+        WarningMild = new Color(255, 220, 80),          // Light electric yellow
         Error = new Color(238, 21, 21),                 // Pokéball red
         ErrorDim = new Color(180, 15, 15),
         Info = new Color(104, 144, 240),                // Water type blue
@@ -967,6 +974,7 @@ public class UITheme
         SuccessDim = new Color(42, 161, 152),                 // #2aa198 (cyan)
         Warning = new Color(181, 137, 0),                     // #b58900 (yellow)
         WarningDim = new Color(203, 75, 22),                  // #cb4b16 (orange)
+        WarningMild = new Color(220, 180, 50),                // Light orange for mild warnings
         Error = new Color(220, 50, 47),                       // #dc322f (red)
         ErrorDim = new Color(211, 54, 130),                   // #d33682 (magenta)
         Info = new Color(38, 139, 210),                       // #268bd2 (blue)
@@ -1106,6 +1114,7 @@ public class UITheme
     public Color SuccessDim { get; init; }
     public Color Warning { get; init; }
     public Color WarningDim { get; init; }
+    public Color WarningMild { get; init; }
     public Color Error { get; init; }
     public Color ErrorDim { get; init; }
     public Color Info { get; init; }

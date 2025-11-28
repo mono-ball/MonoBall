@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Logging;
-using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -13,7 +12,6 @@ namespace PokeSharp.Engine.Debug.Logging;
 public class ConsoleLoggerProvider : ILoggerProvider
 {
     private readonly ConcurrentDictionary<string, ConsoleLogger> _loggers = new();
-    private Action<string, Color>? _writeToConsole;
     private Action<LogLevel, string, string>? _addLogEntry; // level, message, category
     private Func<LogLevel, bool> _isEnabled = _ => true;
 
@@ -22,14 +20,6 @@ public class ConsoleLoggerProvider : ILoggerProvider
     private readonly object _pendingLogsLock = new();
     private const int MaxPendingLogs = 1000;
     private bool _handlersConfigured = false;
-
-    /// <summary>
-    ///     Sets the function to write messages to the console output.
-    /// </summary>
-    public void SetConsoleWriter(Action<string, Color> writeToConsole)
-    {
-        _writeToConsole = writeToConsole;
-    }
 
     /// <summary>
     ///     Sets the function to add structured log entries to the Logs panel.
@@ -78,7 +68,7 @@ public class ConsoleLoggerProvider : ILoggerProvider
     {
         // Pass a wrapper that always calls the current _isEnabled, not a captured copy
         return _loggers.GetOrAdd(categoryName, name =>
-            new ConsoleLogger(name, WriteToConsole, AddLogEntry, IsLogLevelEnabled));
+            new ConsoleLogger(name, AddLogEntry, IsLogLevelEnabled));
     }
 
     /// <summary>
@@ -88,11 +78,6 @@ public class ConsoleLoggerProvider : ILoggerProvider
     private bool IsLogLevelEnabled(LogLevel level)
     {
         return _isEnabled(level);
-    }
-
-    private void WriteToConsole(string message, Color color)
-    {
-        _writeToConsole?.Invoke(message, color);
     }
 
     private void AddLogEntry(LogLevel level, string message, string category)

@@ -2,6 +2,7 @@ using Arch.Core;
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework.Graphics;
 using PokeSharp.Engine.Common.Logging;
+using PokeSharp.Engine.Core.Services;
 using PokeSharp.Engine.Input.Systems;
 using PokeSharp.Engine.Rendering.Assets;
 using PokeSharp.Engine.Rendering.Systems;
@@ -62,7 +63,8 @@ public class GameInitializer(
     ///     Initializes all game systems and infrastructure.
     /// </summary>
     /// <param name="graphicsDevice">The graphics device for rendering.</param>
-    public void Initialize(GraphicsDevice graphicsDevice)
+    /// <param name="inputBlocker">Optional input blocker (e.g., SceneManager) that systems can check to skip input processing.</param>
+    public void Initialize(GraphicsDevice graphicsDevice, IInputBlocker? inputBlocker = null)
     {
         // NOTE: GameDataLoader is called earlier in PokeSharpGame.Initialize
         // before GameInitializer.Initialize is invoked.
@@ -122,12 +124,14 @@ public class GameInitializer(
         systemManager.RegisterUpdateSystem(new PoolCleanupSystem(poolManager, poolCleanupLogger));
 
         // InputSystem with Pokemon-style input buffering
+        // Pass inputBlocker so InputSystem can skip processing when console/menus have exclusive input
         var inputBuffer = gameplayConfig.InputBuffer;
         var inputLogger = loggerFactory.CreateLogger<InputSystem>();
         var inputSystem = new InputSystem(
             inputBuffer.MaxBufferedInputs,
             inputBuffer.TimeoutSeconds,
-            inputLogger
+            inputLogger,
+            inputBlocker
         );
         systemManager.RegisterUpdateSystem(inputSystem);
 

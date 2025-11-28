@@ -1,7 +1,6 @@
 using Microsoft.Xna.Framework;
 using PokeSharp.Engine.UI.Debug.Components.Base;
 using PokeSharp.Engine.UI.Debug.Components.Controls;
-using PokeSharp.Engine.UI.Debug.Components.Layout;
 using PokeSharp.Engine.UI.Debug.Core;
 using PokeSharp.Engine.UI.Debug.Interfaces;
 using PokeSharp.Engine.UI.Debug.Layout;
@@ -19,10 +18,9 @@ namespace PokeSharp.Engine.UI.Debug.Components.Debug;
 /// Supports filtering, search, and entity inspection.
 /// Implements <see cref="IEntityOperations"/> for command access.
 /// </summary>
-public class EntitiesPanel : Panel, IEntityOperations
+public class EntitiesPanel : DebugPanelBase, IEntityOperations
 {
     private readonly TextBuffer _entityListBuffer;
-    private readonly StatusBar _statusBar;
     private readonly List<EntityInfo> _entities = new();
     private readonly List<EntityInfo> _filteredEntities = new();
 
@@ -69,22 +67,19 @@ public class EntitiesPanel : Panel, IEntityOperations
     /// Use <see cref="EntitiesPanelBuilder"/> to construct instances.
     /// </summary>
     internal EntitiesPanel(TextBuffer entityListBuffer, StatusBar statusBar)
+        : base(statusBar)
     {
         _entityListBuffer = entityListBuffer;
-        _statusBar = statusBar;
 
         Id = "entities_panel";
-        // Colors set dynamically in OnRenderContainer for theme switching
-        BorderThickness = 1;
-        Constraint.Padding = 8;
 
-        // StatusBar is anchored to bottom
-        _statusBar.Constraint.Anchor = Anchor.StretchBottom;
-        _statusBar.Constraint.OffsetY = 0;
+        // TextBuffer fills space above StatusBar
+        _entityListBuffer.Constraint.Anchor = Anchor.StretchTop;
 
         AddChild(_entityListBuffer);
-        AddChild(_statusBar);
     }
+
+    protected override UIComponent GetContentComponent() => _entityListBuffer;
 
     /// <summary>
     /// Sets the entity provider function that returns all entities.
@@ -572,21 +567,7 @@ public class EntitiesPanel : Panel, IEntityOperations
     /// </summary>
     protected override void OnRenderContainer(UIContext context)
     {
-        // Set theme colors dynamically for theme switching
-        BackgroundColor = ThemeManager.Current.ConsoleBackground;
-        BorderColor = ThemeManager.Current.BorderPrimary;
-
         base.OnRenderContainer(context);
-
-        // Layout: Position StatusBar at bottom and size TextBuffer above it
-        var statusBarHeight = _statusBar.GetDesiredHeight(context.Renderer);
-        _statusBar.Constraint.Height = statusBarHeight;
-
-        // TextBuffer fills remaining space above StatusBar
-        var paddingTop = Constraint.GetPaddingTop();
-        var paddingBottom = Constraint.GetPaddingBottom();
-        var contentHeight = Rect.Height - paddingTop - paddingBottom;
-        _entityListBuffer.Constraint.Height = contentHeight - statusBarHeight;
 
         // Auto-refresh if enabled (similar to WatchPanel pattern)
         if (_autoRefresh && _entityProvider != null && context.Input?.GameTime != null)
@@ -597,7 +578,6 @@ public class EntitiesPanel : Panel, IEntityOperations
                 _lastUpdateTime = currentTime;
 
                 // Update highlight timings
-                var deltaTime = (float)(currentTime - _lastUpdateTime);
                 _timeSinceLastChange += _refreshInterval;
 
                 // Clear highlights after duration expires
@@ -870,7 +850,7 @@ public class EntitiesPanel : Panel, IEntityOperations
         // Display pinned entities first
         if (pinnedEntities.Count > 0)
         {
-            _entityListBuffer.AppendLine("  [*] PINNED", ThemeManager.Current.Warning);
+            _entityListBuffer.AppendLine($"  {Core.NerdFontIcons.Pinned} PINNED", ThemeManager.Current.Warning);
             foreach (var entity in pinnedEntities)
             {
                 // Track which line this entity header starts on
@@ -918,7 +898,7 @@ public class EntitiesPanel : Panel, IEntityOperations
     /// <summary>
     /// Updates the status bar with current stats and hints.
     /// </summary>
-    private void UpdateStatusBar()
+    protected override void UpdateStatusBar()
     {
         // Build stats text
         var stats = $"Entities: {_entities.Count}";
@@ -939,10 +919,10 @@ public class EntitiesPanel : Panel, IEntityOperations
         var hints = "";
         if (_keyboardNavEnabled && _navigableEntityIds.Count > 0)
         {
-            hints = $"[{_selectedIndex + 1}/{_navigableEntityIds.Count}] ↑↓:Scroll  N/B:Next/Prev  Enter:Expand  P:Pin";
+            hints = $"[{_selectedIndex + 1}/{_navigableEntityIds.Count}] Up/Down:Scroll  N/B:Next/Prev  Enter:Expand  P:Pin";
         }
 
-        _statusBar.Set(stats, hints);
+        SetStatusBar(stats, hints);
         // StatsColor uses theme fallback (Success) - don't set explicitly for dynamic theme support
     }
 
@@ -956,8 +936,8 @@ public class EntitiesPanel : Panel, IEntityOperations
         var isNew = _newEntityIds.Contains(entity.Id);
 
         // Entity header line
-        var expandIndicator = isExpanded ? "▼ " : "▶ ";
-        var selectedMarker = isSelected ? "► " : "  ";
+        var expandIndicator = isExpanded ? Core.NerdFontIcons.ExpandedWithSpace : Core.NerdFontIcons.CollapsedWithSpace;
+        var selectedMarker = isSelected ? Core.NerdFontIcons.SelectedWithSpace : Core.NerdFontIcons.UnselectedSpace;
         var newMarker = isNew ? "* " : "";
 
         // Determine color based on state
@@ -1014,7 +994,7 @@ public class EntitiesPanel : Panel, IEntityOperations
             foreach (var component in entity.Components.Take(MaxComponentsToShow))
             {
                 var componentColor = GetComponentColor(component);
-                _entityListBuffer.AppendLine($"        • {component}", componentColor);
+                _entityListBuffer.AppendLine($"        - {component}", componentColor);
             }
 
             if (entity.Components.Count > MaxComponentsToShow)

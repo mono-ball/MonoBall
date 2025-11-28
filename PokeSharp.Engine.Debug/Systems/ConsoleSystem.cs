@@ -7,7 +7,9 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System.Reflection;
 using System.Text;
+using PokeSharp.Engine.Core.Services;
 using PokeSharp.Engine.Core.Systems;
+using PokeSharp.Engine.Debug.Breakpoints;
 using PokeSharp.Engine.Debug.Commands;
 using PokeSharp.Engine.Debug.Console.Configuration;
 using PokeSharp.Engine.Debug.Console.Features;
@@ -20,6 +22,7 @@ using PokeSharp.Engine.Debug.Services;
 using PokeSharp.Engine.Scenes;
 using PokeSharp.Engine.Systems.Management;
 using PokeSharp.Game.Scripting.Api;
+using PokeSharp.Engine.UI.Debug.Components.Debug;
 using PokeSharp.Engine.UI.Debug.Scenes;
 using PokeSharp.Engine.UI.Debug.Components.Controls;
 using PokeSharp.Engine.UI.Debug.Utilities;
@@ -63,6 +66,9 @@ public class ConsoleSystem : IUpdateSystem
 
     // Entity component registry
     private DebugComponentRegistry _componentRegistry = null!;
+
+    // Breakpoint manager for conditional game pausing
+    private BreakpointManager? _breakpointManager;
 
     // Persistent log buffer - stores logs even when console is closed
     private readonly List<(Microsoft.Extensions.Logging.LogLevel Level, string Message, string Category, DateTime Timestamp)> _persistentLogBuffer = new();
@@ -125,6 +131,11 @@ public class ConsoleSystem : IUpdateSystem
             // Create console globals (script API)
             _globals = new ConsoleGlobals(_apiProvider, _world, _systemManager, _graphicsDevice, _logger);
 
+            // Create breakpoint manager (requires evaluator, globals, and time control)
+            var timeControl = GetTimeControl();
+            _breakpointManager = new BreakpointManager(_evaluator, _globals, timeControl, _logger);
+            _breakpointManager.OnBreakpointHit += OnBreakpointHit;
+
             // Create parameter hint provider (shared component)
             _parameterHintProvider = new ParameterHintProvider(_logger);
             _parameterHintProvider.SetGlobals(_globals);
@@ -150,15 +161,7 @@ public class ConsoleSystem : IUpdateSystem
             // Set up console logger if provided
             if (_loggerProvider != null)
             {
-                _loggerProvider.SetConsoleWriter((message, color) =>
-                {
-                    // Write logs to console output if it's open and logging is enabled
-                    if (_consoleScene != null && _loggingEnabled)
-                    {
-                        _consoleScene.AppendOutput(message, color, "Log");
-                    }
-                });
-
+                // Logs only go to the Logs panel, not the console output
                 // Set up log entry handler for the Logs panel
                 _loggerProvider.SetLogEntryHandler((level, message, category) =>
                 {
@@ -179,7 +182,7 @@ public class ConsoleSystem : IUpdateSystem
                     }
 
                     // Also add to console scene if it's open
-                    _consoleScene?.AddLog(level, message, category);
+                    _consoleScene?.AddLog(level, message, category, DateTime.Now);
                 });
 
                 // Set up log level filter - always capture logs for the persistent buffer
@@ -223,6 +226,10 @@ public class ConsoleSystem : IUpdateSystem
             }
 
             _previousKeyboardState = currentKeyboard;
+
+            // Evaluate breakpoints (runs every frame, even when console is closed)
+            // This allows breakpoints to pause the game at any time
+            _breakpointManager?.EvaluateBreakpoints();
         }
         catch (Exception ex)
         {
@@ -330,6 +337,12 @@ public class ConsoleSystem : IUpdateSystem
         // Set up entity provider for the Entities panel
         _consoleScene?.SetEntityProvider(GetAllEntitiesAsInfo);
 
+        // Set up system metrics provider for the Profiler panel
+        _consoleScene?.SetSystemMetricsProvider(() => _systemManager.GetMetrics());
+
+        // Set up stats provider for the Stats panel
+        _consoleScene?.SetStatsProvider(CreateStatsProvider());
+
         // Welcome message - use theme colors
         var theme = ThemeManager.Current;
         _consoleScene?.AppendOutput("=== PokeSharp Debug Console ===", theme.ConsolePrimary);
@@ -339,6 +352,28 @@ public class ConsoleSystem : IUpdateSystem
 
         // Execute startup script if it exists
         ExecuteStartupScript();
+    }
+
+    /// <summary>
+    /// Handles a breakpoint being hit.
+    /// </summary>
+    private void OnBreakpointHit(IBreakpoint breakpoint)
+    {
+        // Open the console if not already open
+        if (!_isConsoleOpen)
+        {
+            ToggleConsole();
+        }
+
+        // Display breakpoint hit message
+        var theme = ThemeManager.Current;
+        _consoleScene?.AppendOutput("", theme.TextPrimary);
+        _consoleScene?.AppendOutput($"⏸ BREAKPOINT #{breakpoint.Id} HIT", theme.Warning);
+        _consoleScene?.AppendOutput($"  Condition: {breakpoint.Description}", theme.TextSecondary);
+        _consoleScene?.AppendOutput($"  Hit count: {breakpoint.HitCount}", theme.TextSecondary);
+        _consoleScene?.AppendOutput("", theme.TextPrimary);
+        _consoleScene?.AppendOutput("Game paused. Use 'resume' or 'step' to continue.", theme.TextDim);
+        _consoleScene?.AppendOutput("", theme.TextPrimary);
     }
 
     /// <summary>
@@ -367,7 +402,15 @@ public class ConsoleSystem : IUpdateSystem
             }
             else
             {
-                // Start fresh
+                // Check if this is a built-in command - if so, execute immediately without multi-line check
+                // Built-in commands should not go through C# syntax validation
+                if (IsBuiltInCommand(command))
+                {
+                    _ = ExecuteConsoleCommand(command);
+                    return;
+                }
+
+                // Start fresh for C# scripting
                 _multiLineBuffer.Clear();
                 _multiLineBuffer.Append(command);
             }
@@ -399,6 +442,68 @@ public class ConsoleSystem : IUpdateSystem
             _multiLineBuffer.Clear();
             _consoleScene?.SetPrompt("> ");
         }
+    }
+
+    /// <summary>
+    /// Checks if a command should bypass C# multi-line syntax checking.
+    /// This includes built-in commands, aliases, and command-like inputs (to get proper error messages).
+    /// </summary>
+    private bool IsBuiltInCommand(string command)
+    {
+        if (string.IsNullOrWhiteSpace(command))
+            return false;
+
+        // Get the first word of the command
+        var trimmed = command.TrimStart();
+        var spaceIndex = trimmed.IndexOf(' ');
+        var firstWord = spaceIndex > 0 ? trimmed[..spaceIndex] : trimmed;
+
+        // Check if it's a registered command
+        if (_commandRegistry.GetCommand(firstWord) != null)
+            return true;
+
+        // Check if it's an alias
+        var aliasManager = _services.GetService<AliasMacroManager>();
+        if (aliasManager?.TryExpandAlias(firstWord, out _) == true)
+            return true;
+
+        // Check if input looks like a command (simple words) rather than C# code
+        // This ensures typos like "itme scale 2.0" give an error instead of entering multi-line mode
+        if (LooksLikeCommand(trimmed))
+            return true;
+
+        return false;
+    }
+
+    /// <summary>
+    /// Heuristic to detect if input looks like a console command rather than C# code.
+    /// Commands are typically: word [args...] without complex C# syntax.
+    /// </summary>
+    private static bool LooksLikeCommand(string input)
+    {
+        if (string.IsNullOrWhiteSpace(input))
+            return false;
+
+        // Must start with a letter (command name)
+        if (!char.IsLetter(input[0]))
+            return false;
+
+        // C# code indicators that suggest this is NOT a simple command
+        var csharpIndicators = new[] { "=", "{", "}", "(", ")", "[", "]", "=>", "++", "--", "&&", "||", "<<", ">>", "::" };
+        foreach (var indicator in csharpIndicators)
+        {
+            if (input.Contains(indicator))
+                return false;
+        }
+
+        // Check for C# keywords that start statements (not command names)
+        var firstWord = input.Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? "";
+        var csharpKeywords = new[] { "var", "int", "float", "double", "string", "bool", "if", "else", "for", "foreach", "while", "do", "switch", "try", "catch", "finally", "throw", "return", "class", "struct", "interface", "enum", "namespace", "using", "new", "public", "private", "protected", "static", "async", "await" };
+        if (csharpKeywords.Contains(firstWord, StringComparer.Ordinal))
+            return false;
+
+        // Looks like a command
+        return true;
     }
 
     /// <summary>
@@ -587,8 +692,114 @@ public class ConsoleSystem : IUpdateSystem
 
     /// <summary>
     /// Executes a command from the console.
+    /// Supports command chaining with semicolons (e.g., "clear; help; time").
     /// </summary>
     private async Task ExecuteConsoleCommand(string command)
+    {
+        try
+        {
+            // Check for command chaining (semicolon-separated commands)
+            // Only split if not inside quotes
+            var chainedCommands = SplitChainedCommands(command);
+            if (chainedCommands.Count > 1)
+            {
+                _logger.LogDebug("Executing {Count} chained commands", chainedCommands.Count);
+                foreach (var chainedCmd in chainedCommands)
+                {
+                    var trimmedCmd = chainedCmd.Trim();
+                    if (!string.IsNullOrEmpty(trimmedCmd))
+                    {
+                        await ExecuteSingleCommand(trimmedCmd);
+                    }
+                }
+                return;
+            }
+
+            // Single command - execute directly
+            await ExecuteSingleCommand(command);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error executing command in console");
+            _consoleScene?.AppendOutput($"Error: {ex.Message}", Theme.Error);
+        }
+    }
+
+    /// <summary>
+    /// Splits a command string by semicolons, respecting quoted strings and nested brackets.
+    /// This ensures that semicolons inside for loops, method calls, etc. are not split points.
+    /// </summary>
+    private static List<string> SplitChainedCommands(string input)
+    {
+        var commands = new List<string>();
+        var current = new StringBuilder();
+        var inDoubleQuote = false;
+        var inSingleQuote = false;
+        var parenDepth = 0;   // ()
+        var braceDepth = 0;   // {}
+        var bracketDepth = 0; // []
+
+        foreach (var c in input)
+        {
+            if (c == '"' && !inSingleQuote)
+            {
+                inDoubleQuote = !inDoubleQuote;
+                current.Append(c);
+            }
+            else if (c == '\'' && !inDoubleQuote)
+            {
+                inSingleQuote = !inSingleQuote;
+                current.Append(c);
+            }
+            else if (!inDoubleQuote && !inSingleQuote)
+            {
+                // Track bracket depth
+                switch (c)
+                {
+                    case '(': parenDepth++; break;
+                    case ')': parenDepth--; break;
+                    case '{': braceDepth++; break;
+                    case '}': braceDepth--; break;
+                    case '[': bracketDepth++; break;
+                    case ']': bracketDepth--; break;
+                }
+
+                // Only split on semicolons at the top level (not inside any brackets)
+                if (c == ';' && parenDepth == 0 && braceDepth == 0 && bracketDepth == 0)
+                {
+                    // Split point - add current command and start new one
+                    var cmd = current.ToString().Trim();
+                    if (!string.IsNullOrEmpty(cmd))
+                    {
+                        commands.Add(cmd);
+                    }
+                    current.Clear();
+                }
+                else
+                {
+                    current.Append(c);
+                }
+            }
+            else
+            {
+                current.Append(c);
+            }
+        }
+
+        // Add final command
+        var lastCmd = current.ToString().Trim();
+        if (!string.IsNullOrEmpty(lastCmd))
+        {
+            commands.Add(lastCmd);
+        }
+
+        return commands;
+    }
+
+    /// <summary>
+    /// Executes a single command (no chaining).
+    /// </summary>
+    private async Task ExecuteSingleCommand(string command)
     {
         try
         {
@@ -604,6 +815,22 @@ public class ConsoleSystem : IUpdateSystem
                 _logger.LogDebug("Alias expanded: {Original} -> {Expanded}", command, expandedCommand);
                 _consoleScene?.AppendOutput($"[alias] {expandedCommand}", Theme.TextSecondary);
                 command = expandedCommand;
+
+                // Check if expanded alias contains chained commands
+                var chainedFromAlias = SplitChainedCommands(command);
+                if (chainedFromAlias.Count > 1)
+                {
+                    // Execute chained commands from alias
+                    foreach (var chainedCmd in chainedFromAlias)
+                    {
+                        var trimmedCmd = chainedCmd.Trim();
+                        if (!string.IsNullOrEmpty(trimmedCmd))
+                        {
+                            await ExecuteSingleCommand(trimmedCmd);
+                        }
+                    }
+                    return;
+                }
             }
 
             // Parse command
@@ -622,6 +849,9 @@ public class ConsoleSystem : IUpdateSystem
                 (level) => _minimumLogLevel = level
             );
 
+            // Get time control from DI (may be null if not registered)
+            var timeControl = GetTimeControl();
+
             var services = new ConsoleServices(
                 _commandRegistry,
                 aliasManager,
@@ -629,13 +859,15 @@ public class ConsoleSystem : IUpdateSystem
                 _evaluator,
                 _globals,
                 bookmarkManager,
-                watchPresetManager
+                watchPresetManager,
+                _breakpointManager
             );
 
             var context = new ConsoleContext(
                 _consoleScene!,
                 () => ToggleConsole(),
                 loggingCallbacks,
+                timeControl,
                 services
             );
 
@@ -707,6 +939,32 @@ public class ConsoleSystem : IUpdateSystem
     }
 
     /// <summary>
+    /// Gets the time control interface from DI if available.
+    /// </summary>
+    /// <returns>The ITimeControl instance, or null if not registered.</returns>
+    private ITimeControl? GetTimeControl()
+    {
+        try
+        {
+            // Get ITimeControl from DI - this is implemented by IGameTimeService in Game.Systems
+            var timeControl = _services.GetService<ITimeControl>();
+            if (timeControl == null)
+            {
+                _logger.LogDebug("ITimeControl not registered in DI, time control disabled");
+                return null;
+            }
+
+            _logger.LogDebug("ITimeControl resolved successfully, time control enabled");
+            return timeControl;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to get time control from DI");
+            return null;
+        }
+    }
+
+    /// <summary>
     /// Executes the startup script if it exists.
     /// </summary>
     private void ExecuteStartupScript()
@@ -765,6 +1023,102 @@ public class ConsoleSystem : IUpdateSystem
         {
             _consoleScene.SetScriptVariable(name, typeName, valueGetter);
         }
+    }
+
+    /// <summary>
+    /// Creates a stats data provider that gathers performance metrics.
+    /// Uses reflection to access PerformanceMonitor if available.
+    /// </summary>
+    private Func<StatsData> CreateStatsProvider()
+    {
+        // Try to get PerformanceMonitor via reflection (to avoid direct project reference)
+        var perfMonitorType = Type.GetType("PokeSharp.Game.Infrastructure.Diagnostics.PerformanceMonitor, PokeSharp.Game");
+        object? perfMonitor = null;
+
+        if (perfMonitorType != null)
+        {
+            try
+            {
+                // Try to get it from services
+                var getServiceMethod = typeof(ServiceProviderServiceExtensions)
+                    .GetMethods()
+                    .FirstOrDefault(m => m.Name == "GetService" && m.IsGenericMethod && m.GetParameters().Length == 1);
+
+                if (getServiceMethod != null)
+                {
+                    var genericMethod = getServiceMethod.MakeGenericMethod(perfMonitorType);
+                    perfMonitor = genericMethod.Invoke(null, new object[] { _services });
+                }
+            }
+            catch
+            {
+                // Ignore - will use fallback
+            }
+        }
+
+        // Cache reflection results for performance
+        var fpsProperty = perfMonitorType?.GetProperty("Fps");
+        var frameTimeMsProperty = perfMonitorType?.GetProperty("FrameTimeMs");
+        var minFrameTimeMsProperty = perfMonitorType?.GetProperty("MinFrameTimeMs");
+        var maxFrameTimeMsProperty = perfMonitorType?.GetProperty("MaxFrameTimeMs");
+        var memoryMbProperty = perfMonitorType?.GetProperty("MemoryMb");
+        var gen0Property = perfMonitorType?.GetProperty("Gen0Collections");
+        var gen1Property = perfMonitorType?.GetProperty("Gen1Collections");
+        var gen2Property = perfMonitorType?.GetProperty("Gen2Collections");
+        var frameCountProperty = perfMonitorType?.GetProperty("FrameCount");
+
+        // Frame time tracking for fallback
+        var frameTimeHistory = new List<float>(60);
+        var lastFrameTime = DateTime.Now;
+        ulong frameCounter = 0;
+
+        return () =>
+        {
+            var stats = new StatsData();
+
+            // If we have PerformanceMonitor, use it
+            if (perfMonitor != null && fpsProperty != null)
+            {
+                stats.Fps = (float)(fpsProperty.GetValue(perfMonitor) ?? 60f);
+                stats.FrameTimeMs = (float)(frameTimeMsProperty?.GetValue(perfMonitor) ?? 16.67f);
+                stats.MinFrameTimeMs = (float)(minFrameTimeMsProperty?.GetValue(perfMonitor) ?? 16f);
+                stats.MaxFrameTimeMs = (float)(maxFrameTimeMsProperty?.GetValue(perfMonitor) ?? 17f);
+                stats.MemoryMB = (double)(memoryMbProperty?.GetValue(perfMonitor) ?? GC.GetTotalMemory(false) / 1024.0 / 1024.0);
+                stats.Gen0Collections = (int)(gen0Property?.GetValue(perfMonitor) ?? GC.CollectionCount(0));
+                stats.Gen1Collections = (int)(gen1Property?.GetValue(perfMonitor) ?? GC.CollectionCount(1));
+                stats.Gen2Collections = (int)(gen2Property?.GetValue(perfMonitor) ?? GC.CollectionCount(2));
+                stats.FrameNumber = (ulong)(frameCountProperty?.GetValue(perfMonitor) ?? 0);
+            }
+            else
+            {
+                // Fallback: use GC data and simple timing
+                var now = DateTime.Now;
+                var elapsed = (float)(now - lastFrameTime).TotalMilliseconds;
+                lastFrameTime = now;
+                frameCounter++;
+
+                // Keep track of frame times
+                frameTimeHistory.Add(elapsed);
+                if (frameTimeHistory.Count > 60)
+                    frameTimeHistory.RemoveAt(0);
+
+                stats.Fps = elapsed > 0 ? 1000f / elapsed : 60f;
+                stats.FrameTimeMs = elapsed;
+                stats.MinFrameTimeMs = frameTimeHistory.Count > 0 ? frameTimeHistory.Min() : 16f;
+                stats.MaxFrameTimeMs = frameTimeHistory.Count > 0 ? frameTimeHistory.Max() : 17f;
+                stats.MemoryMB = GC.GetTotalMemory(false) / 1024.0 / 1024.0;
+                stats.Gen0Collections = GC.CollectionCount(0);
+                stats.Gen1Collections = GC.CollectionCount(1);
+                stats.Gen2Collections = GC.CollectionCount(2);
+                stats.FrameNumber = frameCounter;
+            }
+
+            // Entity and system counts
+            stats.EntityCount = _world.CountEntities(new Arch.Core.QueryDescription());
+            stats.SystemCount = _systemManager.GetMetrics()?.Count ?? 0;
+
+            return stats;
+        };
     }
 
     /// <summary>

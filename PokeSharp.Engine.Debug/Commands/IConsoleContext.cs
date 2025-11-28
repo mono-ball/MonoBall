@@ -1,4 +1,7 @@
 using Microsoft.Xna.Framework;
+using PokeSharp.Engine.Core.Services;
+using PokeSharp.Engine.Debug.Breakpoints;
+using PokeSharp.Engine.UI.Debug.Components.Debug;
 using PokeSharp.Engine.UI.Debug.Core;
 using PokeSharp.Engine.UI.Debug.Interfaces;
 
@@ -20,6 +23,10 @@ namespace PokeSharp.Engine.Debug.Commands;
 /// - <see cref="IConsoleBookmarks"/> - Bookmark management
 /// - <see cref="IConsoleNavigation"/> - Tab navigation
 /// - <see cref="IConsoleExport"/> - Console output export
+/// </para>
+/// <para>
+/// Optional features exposed as nullable properties:
+/// - <see cref="TimeControl"/> - Game time control (pause, step, speed) - null if unavailable
 /// </para>
 /// <para>
 /// Panel operations are exposed as properties to reduce boilerplate delegation:
@@ -44,14 +51,48 @@ public interface IConsoleContext :
     IConsoleExport
 {
     /// <summary>
+    /// Gets the time control interface, or null if time control is not available.
+    /// </summary>
+    /// <remarks>
+    /// Time control may be unavailable if:
+    /// - ITimeControl service is not registered in DI
+    /// - The game doesn't support time manipulation
+    /// Commands should check for null before using time control features.
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// if (context.TimeControl != null)
+    /// {
+    ///     context.TimeControl.Pause();
+    /// }
+    /// </code>
+    /// </example>
+    ITimeControl? TimeControl { get; }
+
+    /// <summary>
+    /// Gets the breakpoint operations for conditional game pausing.
+    /// </summary>
+    /// <remarks>
+    /// May be null if:
+    /// - BreakpointManager was not initialized
+    /// - Required dependencies (ScriptEvaluator, ConsoleGlobals) are unavailable
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// context.Breakpoints?.AddExpressionBreakpoint("Player.Health &lt; 20");
+    /// </code>
+    /// </example>
+    IBreakpointOperations? Breakpoints { get; }
+
+    /// <summary>
     /// Gets the entity browser operations.
     /// Use for entity inspection, filtering, and management.
     /// </summary>
+    /// <remarks>Always available - panels are created with the console.</remarks>
     /// <example>
     /// <code>
     /// context.Entities.Refresh();
     /// context.Entities.SetTagFilter("Player");
-    /// var stats = context.Entities.GetStatistics();
     /// </code>
     /// </example>
     IEntityOperations Entities { get; }
@@ -60,6 +101,7 @@ public interface IConsoleContext :
     /// Gets the watch panel operations.
     /// Use for adding, removing, and managing watch expressions.
     /// </summary>
+    /// <remarks>Always available - panels are created with the console.</remarks>
     /// <example>
     /// <code>
     /// context.Watches.Add("playerPos", "player.Position", () => player.Position);
@@ -72,6 +114,7 @@ public interface IConsoleContext :
     /// Gets the variables panel operations.
     /// Use for viewing and managing script variables.
     /// </summary>
+    /// <remarks>Always available - panels are created with the console.</remarks>
     /// <example>
     /// <code>
     /// context.Variables.SetSearchFilter("position");
@@ -84,6 +127,7 @@ public interface IConsoleContext :
     /// Gets the logs panel operations.
     /// Use for filtering and exporting logs.
     /// </summary>
+    /// <remarks>Always available - panels are created with the console.</remarks>
     /// <example>
     /// <code>
     /// context.Logs.SetFilterLevel(LogLevel.Warning);
@@ -91,6 +135,41 @@ public interface IConsoleContext :
     /// </code>
     /// </example>
     ILogOperations Logs { get; }
+
+    /// <summary>
+    /// Gets the profiler panel operations, or null if metrics provider not available.
+    /// Use for viewing and sorting system performance metrics.
+    /// </summary>
+    /// <remarks>
+    /// May be null if:
+    /// - SystemMetrics provider not configured
+    /// - SystemPerformanceTracker not available
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// if (context.Profiler != null)
+    /// {
+    ///     context.Profiler.SetSortMode(ProfilerSortMode.ByExecutionTime);
+    ///     context.Profiler.Refresh();
+    /// }
+    /// </code>
+    /// </example>
+    IProfilerOperations? Profiler { get; }
+
+    /// <summary>
+    /// Gets the stats panel operations, or null if stats provider not available.
+    /// Use for viewing performance statistics (FPS, memory, GC).
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// if (context.Stats != null)
+    /// {
+    ///     var fps = context.Stats.CurrentFps;
+    ///     var mem = context.Stats.CurrentMemoryMB;
+    /// }
+    /// </code>
+    /// </example>
+    IStatsOperations? Stats { get; }
 
     // ═══════════════════════════════════════════════════════════════════════════
     // Expression-based Watch Operations (require script evaluation)

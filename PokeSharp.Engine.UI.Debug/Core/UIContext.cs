@@ -92,8 +92,11 @@ public class UIContext : IDisposable
         _containerStack.Clear();
 
         // Reset hover tracking for this frame
+        // IMPORTANT: Clear HoveredComponentId so it's only set if mouse is actually over a component
+        // This fixes the bug where hover would persist when moving mouse out of interactive areas
         _currentHoveredZOrder = int.MinValue;
         _currentHoveredId = null;
+        _frame.HoveredComponentId = null;
 
         // Create root container (entire screen)
         _rootContainer = new LayoutContainer(new LayoutConstraint
@@ -325,10 +328,8 @@ public class UIContext : IDisposable
                 }
             }
 
-            if (hoveredComponent != null)
-            {
-                _frame.HoveredComponentId = hoveredComponent.Id;
-            }
+            // Always update hover state when mouse moves - either to a new component or to null
+            _frame.HoveredComponentId = hoveredComponent?.Id;
         }
         // If mouse hasn't moved, keep previous hover state (optimization)
     }

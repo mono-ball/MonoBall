@@ -241,11 +241,11 @@ public static class ConsoleConstants
         // Multi-line indicator format
         public const string MultiLineIndicatorFormat = "({0} lines) [Enter] submit • [Shift+Enter] new line";
 
-        // Symbols
-        public const string PromptSymbol = ">";
+        // Symbols (Nerd Font icons when available, ASCII fallback)
+        public const string PromptSymbol = ""; // Nerd Font chevron
         // Note: Scroll indicators use programmatic drawing (DrawUpTriangle/DrawDownTriangle)
         // instead of text symbols for pixel-perfect control and consistent scaling
-        public const string CursorSymbol = "_";
+        public const string CursorSymbol = "▌"; // Block cursor
 
         // Descriptions
         public const string PropertyDescription = "property";

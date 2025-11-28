@@ -147,14 +147,12 @@ public class HelpCommand : IConsoleCommand
             ("clear", "Clear all console output"),
             ("exit", "Close the console (same as quit)"),
             ("quit", "Close the console"),
-            ("logging", "Enable/disable console logging"),
-            ("loglevel", "Set minimum log level"),
+            ("log", "Manage logging (on/off, level, filter, search, clear)"),
             ("history", "Manage command history (list, clear, save, load)"),
             ("alias", "Manage aliases (list, create, remove)"),
             ("script", "Manage scripts (list, load, save, reset)"),
             ("bookmark", "Manage bookmarks (F-key shortcuts)"),
-            ("watch", "Manage watch expressions (real-time monitoring)"),
-            ("log", "Manage console logs (filter, search, clear)")
+            ("watch", "Manage watch expressions (real-time monitoring)")
         };
 
         foreach (var (name, desc) in commonCommands)

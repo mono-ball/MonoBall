@@ -169,7 +169,7 @@ public class ConsolePanelBuilder
     {
         return new TextEditor("console_input")
         {
-            Prompt = "> ",
+            Prompt = Core.NerdFontIcons.Prompt,
             // BackgroundColor uses theme fallback - don't set explicitly
             MinVisibleLines = 1,
             MaxVisibleLines = 10,

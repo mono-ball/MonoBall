@@ -313,18 +313,20 @@ public class LogsPanel : Panel, ILogOperations
 
     /// <summary>
     /// Gets the color for a log level.
+    /// Uses distinct console output colors for better visibility.
     /// </summary>
     private Color GetLogLevelColor(LogLevel level)
     {
+        var theme = ThemeManager.Current;
         return level switch
         {
-            LogLevel.Trace => ThemeManager.Current.TextDim,
-            LogLevel.Debug => ThemeManager.Current.Info,
-            LogLevel.Information => ThemeManager.Current.TextPrimary,
-            LogLevel.Warning => ThemeManager.Current.Warning,
-            LogLevel.Error => ThemeManager.Current.Error,
-            LogLevel.Critical => ThemeManager.Current.Error,
-            _ => ThemeManager.Current.TextPrimary
+            LogLevel.Trace => theme.TextDim,
+            LogLevel.Debug => theme.ConsoleOutputInfo,      // Cyan - distinct from info
+            LogLevel.Information => theme.TextSecondary,    // Slightly dimmer than primary
+            LogLevel.Warning => theme.ConsoleOutputWarning, // Yellow - matches console
+            LogLevel.Error => theme.ConsoleOutputError,     // Red - matches console
+            LogLevel.Critical => theme.Error,               // Bright red for critical
+            _ => theme.TextPrimary
         };
     }
 

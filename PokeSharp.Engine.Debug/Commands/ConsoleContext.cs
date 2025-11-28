@@ -1,6 +1,9 @@
 using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Extensions.DependencyInjection;
+using PokeSharp.Engine.Core.Services;
+using PokeSharp.Engine.Debug.Breakpoints;
+using PokeSharp.Engine.UI.Debug.Components.Debug;
 using PokeSharp.Engine.UI.Debug.Core;
 using PokeSharp.Engine.UI.Debug.Interfaces;
 using PokeSharp.Engine.UI.Debug.Scenes;
@@ -19,55 +22,49 @@ public class ConsoleContext : IConsoleContext
     private readonly ConsoleScene _consoleScene;
     private readonly Action _closeAction;
     private readonly ConsoleLoggingCallbacks _loggingCallbacks;
+    private readonly ITimeControl? _timeControl;
     private readonly ConsoleServices _services;
 
     /// <summary>
     /// Creates a new ConsoleContext with aggregated services.
     /// This is the preferred constructor for new code.
     /// </summary>
+    /// <param name="consoleScene">The console scene for output and UI operations.</param>
+    /// <param name="closeAction">Action to close the console.</param>
+    /// <param name="loggingCallbacks">Callbacks for logging control.</param>
+    /// <param name="timeControl">Optional time control interface (null if unavailable).</param>
+    /// <param name="services">Aggregated console services.</param>
     public ConsoleContext(
         ConsoleScene consoleScene,
         Action closeAction,
         ConsoleLoggingCallbacks loggingCallbacks,
+        ITimeControl? timeControl,
         ConsoleServices services)
     {
         _consoleScene = consoleScene ?? throw new ArgumentNullException(nameof(consoleScene));
         _closeAction = closeAction ?? throw new ArgumentNullException(nameof(closeAction));
         _loggingCallbacks = loggingCallbacks ?? throw new ArgumentNullException(nameof(loggingCallbacks));
+        _timeControl = timeControl; // Can be null - time control is optional
         _services = services ?? throw new ArgumentNullException(nameof(services));
     }
 
     /// <summary>
-    /// Creates a new ConsoleContext with individual parameters.
-    /// This constructor is maintained for backward compatibility.
-    /// Prefer using the constructor with ConsoleServices and ConsoleLoggingCallbacks.
+    /// Creates a new ConsoleContext without time control.
     /// </summary>
-    [Obsolete("Use the constructor with ConsoleServices and ConsoleLoggingCallbacks instead")]
     public ConsoleContext(
         ConsoleScene consoleScene,
         Action closeAction,
-        Func<bool> isLoggingEnabledFunc,
-        Action<bool> setLoggingEnabledAction,
-        Func<Microsoft.Extensions.Logging.LogLevel> getLogLevelFunc,
-        Action<Microsoft.Extensions.Logging.LogLevel> setLogLevelAction,
-        ConsoleCommandRegistry commandRegistry,
-        AliasMacroManager aliasManager,
-        ScriptManager scriptManager,
-        ConsoleScriptEvaluator scriptEvaluator,
-        ConsoleGlobals consoleGlobals,
-        BookmarkedCommandsManager bookmarkManager,
-        WatchPresetManager watchPresetManager)
-        : this(
-            consoleScene,
-            closeAction,
-            new ConsoleLoggingCallbacks(isLoggingEnabledFunc, setLoggingEnabledAction, getLogLevelFunc, setLogLevelAction),
-            new ConsoleServices(commandRegistry, aliasManager, scriptManager, scriptEvaluator, consoleGlobals, bookmarkManager, watchPresetManager))
+        ConsoleLoggingCallbacks loggingCallbacks,
+        ConsoleServices services)
+        : this(consoleScene, closeAction, loggingCallbacks, null, services)
     {
     }
 
     public UITheme Theme => UITheme.Dark;
 
     // Panel operation interfaces - expose panels directly for commands
+    // These are non-nullable because panels are always created with the console (in LoadContent)
+    // Commands can only run after the console is visible, so panels are guaranteed to exist
     public IEntityOperations Entities => _consoleScene.EntityOperations
         ?? throw new InvalidOperationException("Entities panel not initialized");
     public IWatchOperations Watches => _consoleScene.WatchOperations
@@ -76,6 +73,14 @@ public class ConsoleContext : IConsoleContext
         ?? throw new InvalidOperationException("Variables panel not initialized");
     public ILogOperations Logs => _consoleScene.LogOperations
         ?? throw new InvalidOperationException("Logs panel not initialized");
+
+    // External dependencies - nullable because they may not be available
+    // TimeControl: requires ITimeControl service in DI
+    // Profiler: requires SystemMetrics provider
+    // Breakpoints: requires time control and script evaluator
+    public IProfilerOperations? Profiler => _consoleScene.ProfilerOperations;
+    public IStatsOperations? Stats => _consoleScene.StatsOperations;
+    public IBreakpointOperations? Breakpoints => _services.BreakpointManager;
 
     public void WriteLine(string text)
     {
@@ -332,179 +337,94 @@ public class ConsoleContext : IConsoleContext
             };
         }
 
-        return _consoleScene.AddWatch(name, expression, valueGetter, group, condition, conditionEvaluator);
+        return Watches.Add(name, expression, valueGetter, group, condition, conditionEvaluator);
     }
 
-    public bool RemoveWatch(string name)
-    {
-        return _consoleScene.RemoveWatch(name);
-    }
+    public bool RemoveWatch(string name) => Watches.Remove(name);
 
-    public void ClearWatches()
-    {
-        _consoleScene.ClearWatches();
-    }
+    public void ClearWatches() => Watches.Clear();
 
     public bool ToggleWatchAutoUpdate()
     {
-        return _consoleScene.ToggleWatchAutoUpdate();
+        Watches.AutoUpdate = !Watches.AutoUpdate;
+        return Watches.AutoUpdate;
     }
 
-    public int GetWatchCount()
-    {
-        return _consoleScene.GetWatchCount();
-    }
+    public int GetWatchCount() => Watches.Count;
 
-    public bool PinWatch(string name)
-    {
-        return _consoleScene.PinWatch(name);
-    }
+    public bool PinWatch(string name) => Watches.Pin(name);
 
-    public bool UnpinWatch(string name)
-    {
-        return _consoleScene.UnpinWatch(name);
-    }
+    public bool UnpinWatch(string name) => Watches.Unpin(name);
 
-    public bool IsWatchPinned(string name)
-    {
-        return _consoleScene.IsWatchPinned(name);
-    }
+    public bool IsWatchPinned(string name) => Watches.IsPinned(name);
 
     public bool SetWatchInterval(double intervalSeconds)
     {
-        return _consoleScene.SetWatchInterval(intervalSeconds);
+        if (intervalSeconds < WatchPanel.MinUpdateInterval || intervalSeconds > WatchPanel.MaxUpdateInterval)
+            return false;
+        Watches.UpdateInterval = intervalSeconds;
+        return true;
     }
 
-    public bool CollapseWatchGroup(string groupName)
-    {
-        return _consoleScene.CollapseWatchGroup(groupName);
-    }
+    public bool CollapseWatchGroup(string groupName) => Watches.CollapseGroup(groupName);
 
-    public bool ExpandWatchGroup(string groupName)
-    {
-        return _consoleScene.ExpandWatchGroup(groupName);
-    }
+    public bool ExpandWatchGroup(string groupName) => Watches.ExpandGroup(groupName);
 
-    public bool ToggleWatchGroup(string groupName)
-    {
-        return _consoleScene.ToggleWatchGroup(groupName);
-    }
+    public bool ToggleWatchGroup(string groupName) => Watches.ToggleGroup(groupName);
 
-    public IEnumerable<string> GetWatchGroups()
-    {
-        return _consoleScene.GetWatchGroups();
-    }
+    public IEnumerable<string> GetWatchGroups() => Watches.GetGroups();
 
-    public bool SetWatchAlert(string name, string alertType, object? threshold)
-    {
-        return _consoleScene.SetWatchAlert(name, alertType, threshold);
-    }
+    public bool SetWatchAlert(string name, string alertType, object? threshold) => Watches.SetAlert(name, alertType, threshold);
 
-    public bool RemoveWatchAlert(string name)
-    {
-        return _consoleScene.RemoveWatchAlert(name);
-    }
+    public bool RemoveWatchAlert(string name) => Watches.RemoveAlert(name);
 
-    public IEnumerable<(string Name, string AlertType, bool Triggered)> GetWatchesWithAlerts()
-    {
-        return _consoleScene.GetWatchesWithAlerts();
-    }
+    public IEnumerable<(string Name, string AlertType, bool Triggered)> GetWatchesWithAlerts() => Watches.GetWatchesWithAlerts();
 
-    public bool ClearWatchAlertStatus(string name)
-    {
-        return _consoleScene.ClearWatchAlertStatus(name);
-    }
+    public bool ClearWatchAlertStatus(string name) => Watches.ClearAlertStatus(name);
 
     public bool SetWatchComparison(string watchName, string compareWithName, string comparisonLabel = "Expected")
-    {
-        return _consoleScene.SetWatchComparison(watchName, compareWithName, comparisonLabel);
-    }
+        => Watches.SetComparison(watchName, compareWithName, comparisonLabel);
 
-    public bool RemoveWatchComparison(string name)
-    {
-        return _consoleScene.RemoveWatchComparison(name);
-    }
+    public bool RemoveWatchComparison(string name) => Watches.RemoveComparison(name);
 
-    public IEnumerable<(string Name, string ComparedWith)> GetWatchesWithComparisons()
-    {
-        return _consoleScene.GetWatchesWithComparisons();
-    }
+    public IEnumerable<(string Name, string ComparedWith)> GetWatchesWithComparisons() => Watches.GetWatchesWithComparisons();
 
-    public void SetLogFilter(Microsoft.Extensions.Logging.LogLevel level)
-    {
-        _consoleScene.SetLogFilter(level);
-    }
+    public void SetLogFilter(Microsoft.Extensions.Logging.LogLevel level) => Logs.SetFilterLevel(level);
 
-    public void SetLogSearch(string? searchText)
-    {
-        _consoleScene.SetLogSearch(searchText);
-    }
+    public void SetLogSearch(string? searchText) => Logs.SetSearch(searchText);
 
     public void AddLog(Microsoft.Extensions.Logging.LogLevel level, string message, string category = "General")
-    {
-        _consoleScene.AddLog(level, message, category);
-    }
+        => Logs.Add(level, message, category);
 
-    public void ClearLogs()
-    {
-        _consoleScene.ClearLogs();
-    }
+    public void ClearLogs() => Logs.Clear();
 
-    public int GetLogCount()
-    {
-        return _consoleScene.GetLogCount();
-    }
+    public int GetLogCount() => Logs.Count;
 
-    public void SetLogCategoryFilter(IEnumerable<string>? categories)
-    {
-        _consoleScene.SetLogCategoryFilter(categories);
-    }
+    public void SetLogCategoryFilter(IEnumerable<string>? categories) => Logs.SetCategoryFilter(categories);
 
-    public void ClearLogCategoryFilter()
-    {
-        _consoleScene.ClearLogCategoryFilter();
-    }
+    public void ClearLogCategoryFilter() => Logs.ClearCategoryFilter();
 
-    public IEnumerable<string> GetLogCategories()
-    {
-        return _consoleScene.GetLogCategories();
-    }
+    public IEnumerable<string> GetLogCategories() => Logs.GetCategories();
 
-    public Dictionary<string, int> GetLogCategoryCounts()
-    {
-        return _consoleScene.GetLogCategoryCounts();
-    }
+    public Dictionary<string, int> GetLogCategoryCounts() => Logs.GetCategoryCounts();
 
     public string ExportLogs(bool includeTimestamp = true, bool includeLevel = true, bool includeCategory = false)
-    {
-        return _consoleScene.ExportLogs(includeTimestamp, includeLevel, includeCategory);
-    }
+        => Logs.Export(includeTimestamp, includeLevel, includeCategory);
 
-    public string ExportLogsToCsv()
-    {
-        return _consoleScene.ExportLogsToCsv();
-    }
+    public string ExportLogsToCsv() => Logs.ExportToCsv();
 
-    public void CopyLogsToClipboard()
-    {
-        _consoleScene.CopyLogsToClipboard();
-    }
+    public void CopyLogsToClipboard() => Logs.CopyToClipboard();
 
     public (int Total, int Filtered, int Errors, int Warnings, int LastMinute, int Categories) GetLogStatistics()
-    {
-        return _consoleScene.GetLogStatistics();
-    }
+        => Logs.GetStatistics();
 
-    public Dictionary<Microsoft.Extensions.Logging.LogLevel, int> GetLogLevelCounts()
-    {
-        return _consoleScene.GetLogLevelCounts();
-    }
+    public Dictionary<Microsoft.Extensions.Logging.LogLevel, int> GetLogLevelCounts() => Logs.GetLevelCounts();
 
     public bool SaveWatchPreset(string name, string description)
     {
         try
         {
-            var config = _consoleScene.ExportWatchConfiguration();
+            var config = Watches.ExportConfiguration();
             if (config == null)
                 return false;
 
@@ -554,7 +474,9 @@ public class ConsoleContext : IConsoleContext
                 return false;
 
             // Import configuration (clears watches and sets update settings)
-            _consoleScene.ImportWatchConfiguration(preset.UpdateInterval, preset.AutoUpdateEnabled);
+            Watches.Clear();
+            Watches.UpdateInterval = preset.UpdateInterval;
+            Watches.AutoUpdate = preset.AutoUpdateEnabled;
 
             // Add watches from preset
             foreach (var watch in preset.Watches)
@@ -691,242 +613,130 @@ public class ConsoleContext : IConsoleContext
         return _consoleScene.GetConsoleOutputStats();
     }
 
-    public string ExportWatchesToCsv()
-    {
-        return _consoleScene.ExportWatchesToCsv();
-    }
+    public string ExportWatchesToCsv() => Watches.ExportToCsv();
 
-    public void CopyWatchesToClipboard(bool asCsv = false)
-    {
-        _consoleScene.CopyWatchesToClipboard(asCsv);
-    }
+    public void CopyWatchesToClipboard(bool asCsv = false) => Watches.CopyToClipboard(asCsv);
 
-    public (int Total, int Pinned, int WithErrors, int WithAlerts, int Groups) GetWatchStatistics()
-    {
-        return _consoleScene.GetWatchStatistics();
-    }
+    public (int Total, int Pinned, int WithErrors, int WithAlerts, int Groups) GetWatchStatistics() => Watches.GetStatistics();
 
     // ═══════════════════════════════════════════════════════════════════════════
     // Variables Tab
     // ═══════════════════════════════════════════════════════════════════════════
 
-    public (int Variables, int Globals, int Pinned, int Expanded) GetVariableStatistics()
-    {
-        return _consoleScene.GetVariableStatistics();
-    }
+    public (int Variables, int Globals, int Pinned, int Expanded) GetVariableStatistics() => Variables.GetStatistics();
 
-    public IEnumerable<string> GetVariableNames()
-    {
-        return _consoleScene.GetVariableNames();
-    }
+    public IEnumerable<string> GetVariableNames() => Variables.GetNames();
 
-    public object? GetVariableValue(string name)
-    {
-        return _consoleScene.GetVariableValue(name);
-    }
+    public object? GetVariableValue(string name) => Variables.GetValue(name);
 
-    public void SetVariableSearchFilter(string filter)
-    {
-        _consoleScene.SetVariableSearchFilter(filter);
-    }
+    public void SetVariableSearchFilter(string filter) => Variables.SetSearchFilter(filter);
 
-    public void ClearVariableSearchFilter()
-    {
-        _consoleScene.ClearVariableSearchFilter();
-    }
+    public void ClearVariableSearchFilter() => Variables.ClearSearchFilter();
 
     public bool ExpandVariable(string path)
     {
-        return _consoleScene.ExpandVariable(path);
+        Variables.Expand(path);
+        return true;
     }
 
-    public void CollapseVariable(string path)
-    {
-        _consoleScene.CollapseVariable(path);
-    }
+    public void CollapseVariable(string path) => Variables.Collapse(path);
 
-    public void ExpandAllVariables()
-    {
-        _consoleScene.ExpandAllVariables();
-    }
+    public void ExpandAllVariables() => Variables.ExpandAll();
 
-    public void CollapseAllVariables()
-    {
-        _consoleScene.CollapseAllVariables();
-    }
+    public void CollapseAllVariables() => Variables.CollapseAll();
 
-    public void PinVariable(string name)
-    {
-        _consoleScene.PinVariable(name);
-    }
+    public void PinVariable(string name) => Variables.Pin(name);
 
-    public void UnpinVariable(string name)
-    {
-        _consoleScene.UnpinVariable(name);
-    }
+    public void UnpinVariable(string name) => Variables.Unpin(name);
 
-    public void ClearVariables()
-    {
-        _consoleScene.ClearVariables();
-    }
+    public void ClearVariables() => Variables.Clear();
 
     // ═══════════════════════════════════════════════════════════════════════════
     // Entities Tab
     // ═══════════════════════════════════════════════════════════════════════════
 
-    public void RefreshEntities()
-    {
-        _consoleScene.RefreshEntities();
-    }
+    public void RefreshEntities() => Entities.Refresh();
 
-    public void SetEntityTagFilter(string tag)
-    {
-        _consoleScene.SetEntityTagFilter(tag);
-    }
+    public void SetEntityTagFilter(string tag) => Entities.SetTagFilter(tag);
 
-    public void SetEntitySearchFilter(string search)
-    {
-        _consoleScene.SetEntitySearchFilter(search);
-    }
+    public void SetEntitySearchFilter(string search) => Entities.SetSearchFilter(search);
 
-    public void SetEntityComponentFilter(string componentName)
-    {
-        _consoleScene.SetEntityComponentFilter(componentName);
-    }
+    public void SetEntityComponentFilter(string componentName) => Entities.SetComponentFilter(componentName);
 
-    public void ClearEntityFilters()
-    {
-        _consoleScene.ClearEntityFilters();
-    }
+    public void ClearEntityFilters() => Entities.ClearFilters();
 
-    public (string Tag, string Search, string Component) GetEntityFilters()
-    {
-        return _consoleScene.GetEntityFilters();
-    }
+    public (string Tag, string Search, string Component) GetEntityFilters() => Entities.GetFilters();
 
-    public void SelectEntity(int entityId)
-    {
-        _consoleScene.SelectEntity(entityId);
-    }
+    public void SelectEntity(int entityId) => Entities.Select(entityId);
 
-    public void ExpandEntity(int entityId)
-    {
-        _consoleScene.ExpandEntity(entityId);
-    }
+    public void ExpandEntity(int entityId) => Entities.Expand(entityId);
 
-    public void CollapseEntity(int entityId)
-    {
-        _consoleScene.CollapseEntity(entityId);
-    }
+    public void CollapseEntity(int entityId) => Entities.Collapse(entityId);
 
-    public bool ToggleEntity(int entityId)
-    {
-        return _consoleScene.ToggleEntity(entityId);
-    }
+    public bool ToggleEntity(int entityId) => Entities.Toggle(entityId);
 
-    public void ExpandAllEntities()
-    {
-        _consoleScene.ExpandAllEntities();
-    }
+    public void ExpandAllEntities() => Entities.ExpandAll();
 
-    public void CollapseAllEntities()
-    {
-        _consoleScene.CollapseAllEntities();
-    }
+    public void CollapseAllEntities() => Entities.CollapseAll();
 
-    public void PinEntity(int entityId)
-    {
-        _consoleScene.PinEntity(entityId);
-    }
+    public void PinEntity(int entityId) => Entities.Pin(entityId);
 
-    public void UnpinEntity(int entityId)
-    {
-        _consoleScene.UnpinEntity(entityId);
-    }
+    public void UnpinEntity(int entityId) => Entities.Unpin(entityId);
 
-    public (int Total, int Filtered, int Pinned, int Expanded) GetEntityStatistics()
-    {
-        return _consoleScene.GetEntityStatistics();
-    }
+    public (int Total, int Filtered, int Pinned, int Expanded) GetEntityStatistics() => Entities.GetStatistics();
 
-    public Dictionary<string, int> GetEntityTagCounts()
-    {
-        return _consoleScene.GetEntityTagCounts();
-    }
+    public Dictionary<string, int> GetEntityTagCounts() => Entities.GetTagCounts();
 
-    public IEnumerable<string> GetEntityComponentNames()
-    {
-        return _consoleScene.GetEntityComponentNames();
-    }
+    public IEnumerable<string> GetEntityComponentNames() => Entities.GetComponentNames();
 
-    public IEnumerable<string> GetEntityTags()
-    {
-        return _consoleScene.GetEntityTags();
-    }
+    public IEnumerable<string> GetEntityTags() => Entities.GetTags();
 
-    public PokeSharp.Engine.UI.Debug.Models.EntityInfo? FindEntity(int entityId)
-    {
-        return _consoleScene.FindEntity(entityId);
-    }
+    public PokeSharp.Engine.UI.Debug.Models.EntityInfo? FindEntity(int entityId) => Entities.Find(entityId);
 
-    public IEnumerable<PokeSharp.Engine.UI.Debug.Models.EntityInfo> FindEntitiesByName(string name)
-    {
-        return _consoleScene.FindEntitiesByName(name);
-    }
+    public IEnumerable<PokeSharp.Engine.UI.Debug.Models.EntityInfo> FindEntitiesByName(string name) => Entities.FindByName(name);
 
-    public (int Spawned, int Removed, int CurrentlyHighlighted) GetEntitySessionStats()
-    {
-        return _consoleScene.GetEntitySessionStats();
-    }
+    public (int Spawned, int Removed, int CurrentlyHighlighted) GetEntitySessionStats() => Entities.GetSessionStats();
 
-    public void ClearEntitySessionStats()
-    {
-        _consoleScene.ClearEntitySessionStats();
-    }
+    public void ClearEntitySessionStats() => Entities.ClearSessionStats();
 
     public bool EntityAutoRefresh
     {
-        get => _consoleScene.EntityAutoRefresh;
-        set => _consoleScene.EntityAutoRefresh = value;
+        get => Entities.AutoRefresh;
+        set => Entities.AutoRefresh = value;
     }
 
     public float EntityRefreshInterval
     {
-        get => _consoleScene.EntityRefreshInterval;
-        set => _consoleScene.EntityRefreshInterval = value;
+        get => Entities.RefreshInterval;
+        set => Entities.RefreshInterval = value;
     }
 
     public float EntityHighlightDuration
     {
-        get => _consoleScene.EntityHighlightDuration;
-        set => _consoleScene.EntityHighlightDuration = value;
+        get => Entities.HighlightDuration;
+        set => Entities.HighlightDuration = value;
     }
 
-    public IEnumerable<int> GetNewEntityIds()
-    {
-        return _consoleScene.GetNewEntityIds();
-    }
+    public IEnumerable<int> GetNewEntityIds() => Entities.GetNewEntityIds();
 
     public string ExportEntitiesToText(bool includeComponents = true, bool includeProperties = true)
-    {
-        return _consoleScene.ExportEntitiesToText(includeComponents, includeProperties);
-    }
+        => Entities.ExportToText(includeComponents, includeProperties);
 
-    public string ExportEntitiesToCsv()
-    {
-        return _consoleScene.ExportEntitiesToCsv();
-    }
+    public string ExportEntitiesToCsv() => Entities.ExportToCsv();
 
-    public string? ExportSelectedEntity()
-    {
-        return _consoleScene.ExportSelectedEntity();
-    }
+    public string? ExportSelectedEntity() => Entities.ExportSelected();
 
-    public void CopyEntitiesToClipboard(bool asCsv = false)
-    {
-        _consoleScene.CopyEntitiesToClipboard(asCsv);
-    }
+    public void CopyEntitiesToClipboard(bool asCsv = false) => Entities.CopyToClipboard(asCsv);
 
-    public int? SelectedEntityId => _consoleScene.SelectedEntityId;
+    public int? SelectedEntityId => Entities.SelectedId;
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // Time Control
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    /// <summary>
+    /// Gets the time control interface, or null if time control is not available.
+    /// </summary>
+    public ITimeControl? TimeControl => _timeControl;
 }
 

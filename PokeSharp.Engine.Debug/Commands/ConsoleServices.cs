@@ -1,3 +1,4 @@
+using PokeSharp.Engine.Debug.Breakpoints;
 using PokeSharp.Engine.Debug.Console.Features;
 using PokeSharp.Engine.Debug.Console.Scripting;
 using PokeSharp.Engine.Debug.Features;
@@ -46,6 +47,11 @@ public class ConsoleServices
     /// </summary>
     public WatchPresetManager WatchPresetManager { get; }
 
+    /// <summary>
+    /// Manager for conditional breakpoints that pause the game.
+    /// </summary>
+    public BreakpointManager? BreakpointManager { get; }
+
     public ConsoleServices(
         ConsoleCommandRegistry commandRegistry,
         AliasMacroManager aliasManager,
@@ -53,7 +59,8 @@ public class ConsoleServices
         ConsoleScriptEvaluator scriptEvaluator,
         ConsoleGlobals scriptGlobals,
         BookmarkedCommandsManager bookmarkManager,
-        WatchPresetManager watchPresetManager)
+        WatchPresetManager watchPresetManager,
+        BreakpointManager? breakpointManager = null)
     {
         CommandRegistry = commandRegistry ?? throw new ArgumentNullException(nameof(commandRegistry));
         AliasManager = aliasManager ?? throw new ArgumentNullException(nameof(aliasManager));
@@ -62,6 +69,7 @@ public class ConsoleServices
         ScriptGlobals = scriptGlobals ?? throw new ArgumentNullException(nameof(scriptGlobals));
         BookmarkManager = bookmarkManager ?? throw new ArgumentNullException(nameof(bookmarkManager));
         WatchPresetManager = watchPresetManager ?? throw new ArgumentNullException(nameof(watchPresetManager));
+        BreakpointManager = breakpointManager; // Optional - can be null
     }
 }
 

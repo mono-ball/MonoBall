@@ -10,6 +10,7 @@ using PokeSharp.Engine.Debug.Features;
 using PokeSharp.Engine.Debug.Logging;
 using PokeSharp.Engine.Debug.Scripting;
 using PokeSharp.Engine.Debug.Systems;
+using PokeSharp.Engine.UI.Debug.Core;
 using PokeSharp.Game.Scripting.Api;
 
 namespace PokeSharp.Engine.Debug;
@@ -37,6 +38,12 @@ public static class DebugServiceCollectionExtensions
             // Get configuration from appsettings.json using Get<T>() which supports records
             var consoleConfigSection = configuration.GetSection(ConsoleConfig.SectionName);
             var consoleConfig = consoleConfigSection.Get<ConsoleConfig>() ?? new ConsoleConfig();
+
+            // Set default theme from config (must be done before ThemeManager is accessed)
+            if (!string.IsNullOrEmpty(consoleConfig.Theme))
+            {
+                ThemeManager.SetDefaultTheme(consoleConfig.Theme);
+            }
 
             // Register as singleton
             services.AddSingleton(consoleConfig);

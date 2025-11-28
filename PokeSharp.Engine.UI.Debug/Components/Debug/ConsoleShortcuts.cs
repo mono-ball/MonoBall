@@ -79,7 +79,7 @@ public static class ConsoleShortcuts
     /// </summary>
     public static string GetNormalModeHints()
     {
-        return string.Join(" • ",
+        return string.Join(" | ",
             Search.ToHintString(),
             HistorySearch.ToHintString(),
             Complete.ToHintString(),
@@ -93,7 +93,7 @@ public static class ConsoleShortcuts
     /// </summary>
     public static string GetMultiLineModeHints(int lineCount)
     {
-        return $"({lineCount} lines) {MultiLineSubmit.ToHintString()} • {NewLine.ToHintString()}";
+        return $"({lineCount} lines) {MultiLineSubmit.ToHintString()} | {NewLine.ToHintString()}";
     }
 
     /// <summary>
@@ -101,7 +101,7 @@ public static class ConsoleShortcuts
     /// </summary>
     public static string GetHistorySearchModeHints()
     {
-        return string.Join(" • ",
+        return string.Join(" | ",
             ToggleHistorySearch.ToHintString(),
             "[Type] Filter",
             "[Up/Down] Navigate",
@@ -115,7 +115,7 @@ public static class ConsoleShortcuts
     /// </summary>
     public static string GetSuggestionsModeHints()
     {
-        return string.Join(" • ",
+        return string.Join(" | ",
             "[Up/Down] Navigate",
             "[Tab/Enter] Select",
             Documentation.ToHintString(),

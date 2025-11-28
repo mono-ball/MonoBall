@@ -21,7 +21,7 @@ This directory contains reusable UI controls for the PokeSharp debug framework.
 ```csharp
 var editor = new TextEditor("my_editor")
 {
-    Prompt = "> ",
+    Prompt = NerdFontIcons.Prompt, // Or "> " for ASCII fallback
     MinVisibleLines = 1,
     MaxVisibleLines = 10
 };

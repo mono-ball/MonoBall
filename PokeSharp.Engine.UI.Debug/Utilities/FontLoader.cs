@@ -1,15 +1,103 @@
+using System.Reflection;
 using FontStashSharp;
 
 namespace PokeSharp.Engine.UI.Debug.Utilities;
 
 /// <summary>
-/// Utility for loading system fonts for debug UI.
-/// Tries multiple common font paths across different operating systems.
+/// Utility for loading fonts for debug UI.
+/// Loads the bundled Iosevka Nerd Font first, with system font fallback.
 /// </summary>
 public static class FontLoader
 {
     /// <summary>
+    /// The name of the bundled font resource.
+    /// </summary>
+    private const string BundledFontResourceName = "PokeSharp.Engine.UI.Debug.Assets.Fonts.0xProtoNerdFontMono-Regular.ttf";
+
+    /// <summary>
+    /// Alternative resource name patterns to try.
+    /// </summary>
+    private static readonly string[] AlternativeResourcePatterns =
+    {
+        "0xProtoNerdFontMono-Regular.ttf",
+        "0xProtoNerdFont-Regular.ttf",
+        "0xProto"
+    };
+
+    /// <summary>
+    /// Attempts to load the bundled Iosevka Nerd Font, falling back to system fonts if not found.
+    /// </summary>
+    /// <returns>A FontSystem with a loaded font, or null if none found.</returns>
+    public static FontSystem? LoadFont()
+    {
+        // Try bundled font first
+        var fontSystem = LoadBundledFont();
+        if (fontSystem != null)
+        {
+            return fontSystem;
+        }
+
+        // Fall back to system fonts
+        return LoadSystemMonospaceFont();
+    }
+
+    /// <summary>
+    /// Attempts to load the bundled Iosevka Nerd Font from embedded resources.
+    /// </summary>
+    /// <returns>A FontSystem with the bundled font, or null if not found.</returns>
+    public static FontSystem? LoadBundledFont()
+    {
+        var assembly = Assembly.GetExecutingAssembly();
+
+        // Try the primary resource name
+        var stream = assembly.GetManifestResourceStream(BundledFontResourceName);
+
+        // If not found, search for any matching resource
+        if (stream == null)
+        {
+            var resourceNames = assembly.GetManifestResourceNames();
+            foreach (var pattern in AlternativeResourcePatterns)
+            {
+                var matchingResource = resourceNames.FirstOrDefault(r =>
+                    r.Contains(pattern, StringComparison.OrdinalIgnoreCase));
+
+                if (matchingResource != null)
+                {
+                    stream = assembly.GetManifestResourceStream(matchingResource);
+                    if (stream != null)
+                    {
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (stream == null)
+        {
+            return null;
+        }
+
+        try
+        {
+            using (stream)
+            {
+                var fontData = new byte[stream.Length];
+                stream.ReadExactly(fontData);
+
+                var fontSystem = new FontSystem();
+                fontSystem.AddFont(fontData);
+                return fontSystem;
+            }
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    /// <summary>
     /// Attempts to load a monospace font from system paths.
+    /// Used as fallback if bundled font is not available.
     /// </summary>
     /// <returns>A FontSystem with a loaded font, or null if none found.</returns>
     public static FontSystem? LoadSystemMonospaceFont()
@@ -56,7 +144,20 @@ public static class FontLoader
     }
 
     /// <summary>
-    /// Gets a list of font paths that were checked.
+    /// Gets a list of available embedded font resources.
+    /// Useful for debugging font loading issues.
+    /// </summary>
+    public static string[] GetEmbeddedFontResources()
+    {
+        var assembly = Assembly.GetExecutingAssembly();
+        return assembly.GetManifestResourceNames()
+            .Where(r => r.EndsWith(".ttf", StringComparison.OrdinalIgnoreCase) ||
+                        r.EndsWith(".otf", StringComparison.OrdinalIgnoreCase))
+            .ToArray();
+    }
+
+    /// <summary>
+    /// Gets a list of font paths that were checked for system fonts.
     /// </summary>
     public static string[] GetCheckedFontPaths()
     {
@@ -71,8 +172,18 @@ public static class FontLoader
             "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
         };
     }
+
+    /// <summary>
+    /// Checks if the bundled font is available.
+    /// </summary>
+    public static bool IsBundledFontAvailable()
+    {
+        var assembly = Assembly.GetExecutingAssembly();
+        var resourceNames = assembly.GetManifestResourceNames();
+
+        return resourceNames.Any(r =>
+            r.Contains("0xProto", StringComparison.OrdinalIgnoreCase) &&
+            (r.EndsWith(".ttf", StringComparison.OrdinalIgnoreCase) ||
+             r.EndsWith(".otf", StringComparison.OrdinalIgnoreCase)));
+    }
 }
-
-
-
-

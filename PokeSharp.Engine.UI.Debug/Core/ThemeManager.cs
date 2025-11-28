@@ -19,7 +19,19 @@ public static class ThemeManager
     // Persistence
     private const string AppDataFolderName = "PokeSharp";
     private const string ThemePreferenceFileName = "theme_preference.json";
-    private const string DefaultTheme = "pokeball";
+    private static string _defaultTheme = "pokeball";
+
+    /// <summary>
+    /// Sets the default theme to use when no user preference is saved.
+    /// Must be called before any theme access to take effect.
+    /// </summary>
+    public static void SetDefaultTheme(string themeName)
+    {
+        if (!_initialized)
+        {
+            _defaultTheme = themeName;
+        }
+    }
 
     /// <summary>
     /// Event fired when the theme changes.
@@ -68,15 +80,19 @@ public static class ThemeManager
         _themes["solarized-light"] = UITheme.SolarizedLight;
         _themes["pokeball"] = UITheme.Pokeball;
 
-        // Load saved theme preference, or use default
+        // Load saved theme preference, or use default from config
         var savedTheme = LoadThemePreference();
         if (savedTheme != null && _themes.TryGetValue(savedTheme, out var theme))
         {
             _currentTheme = theme;
         }
+        else if (_themes.TryGetValue(_defaultTheme, out var defaultTheme))
+        {
+            _currentTheme = defaultTheme;
+        }
         else
         {
-            // Set default theme - Pokéball for PokeSharp!
+            // Ultimate fallback - Pokéball for PokeSharp!
             _currentTheme = UITheme.Pokeball;
         }
     }

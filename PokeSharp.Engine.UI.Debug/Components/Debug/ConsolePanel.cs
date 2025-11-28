@@ -42,7 +42,7 @@ public class ConsolePanel : Panel
     private bool _closeRequested = false; // Defer close until after rendering
     private ConsoleSize _currentSize = ConsoleSize.Medium; // Default to 50% height
     private bool _wasVisible = false; // Track visibility changes for focus management
-    private string _prompt = "> "; // Input prompt (changes for multi-line mode)
+    private string _prompt = Core.NerdFontIcons.Prompt; // Input prompt (changes for multi-line mode)
 
     // Events
     public Action<string>? OnCommandSubmitted { get; set; }
@@ -641,7 +641,7 @@ public class ConsolePanel : Panel
             _hintBar.Visible = false;
 
             // Update search hint bar
-            var searchHintText = "[Enter]/[F3] next • [Shift+F3] previous • [Esc] close";
+            var searchHintText = "[Enter]/[F3] next | [Shift+F3] previous | [Esc] close";
             _searchHintBar.SetText(searchHintText);
 
             // Calculate search heights
