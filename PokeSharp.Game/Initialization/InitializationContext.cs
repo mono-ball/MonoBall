@@ -1,27 +1,28 @@
 using Arch.Core;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using PokeSharp.Engine.Core.Types;
 using PokeSharp.Engine.Rendering.Assets;
-using PokeSharp.Engine.Rendering.Systems;
+using PokeSharp.Engine.Scenes;
+using PokeSharp.Engine.Systems.Factories;
 using PokeSharp.Engine.Systems.Management;
+using PokeSharp.Engine.Systems.Pooling;
 using PokeSharp.Game.Data.Loading;
 using PokeSharp.Game.Data.MapLoading.Tiled.Core;
 using PokeSharp.Game.Data.Services;
+using PokeSharp.Game.Infrastructure.Configuration;
+using PokeSharp.Game.Infrastructure.Diagnostics;
 using PokeSharp.Game.Infrastructure.Services;
+using PokeSharp.Game.Initialization.Factories;
+using PokeSharp.Game.Initialization.Initializers;
 using PokeSharp.Game.Input;
 using PokeSharp.Game.Scenes;
 using PokeSharp.Game.Scripting.Api;
 using PokeSharp.Game.Scripting.Services;
 using PokeSharp.Game.Systems;
 using PokeSharp.Game.Systems.Services;
-using PokeSharp.Engine.Core.Types;
-using PokeSharp.Engine.Systems.Factories;
-using PokeSharp.Engine.Systems.Pooling;
-using PokeSharp.Game.Infrastructure.Configuration;
-using PokeSharp.Game.Infrastructure.Diagnostics;
-using PokeSharp.Game.Initialization.Initializers;
-using PokeSharp.Game.Initialization.Factories;
 
 namespace PokeSharp.Game.Initialization;
 
@@ -31,6 +32,65 @@ namespace PokeSharp.Game.Initialization;
 /// </summary>
 public class InitializationContext
 {
+    /// <summary>
+    ///     Initializes a new instance of the <see cref="InitializationContext" /> class.
+    /// </summary>
+    public InitializationContext(
+        GraphicsDevice graphicsDevice,
+        ILoggerFactory loggerFactory,
+        GameDataLoader dataLoader,
+        TemplateCacheInitializer templateCacheInitializer,
+        World world,
+        SystemManager systemManager,
+        IEntityFactoryService entityFactory,
+        EntityPoolManager poolManager,
+        SpriteLoader spriteLoader,
+        TypeRegistry<BehaviorDefinition> behaviorRegistry,
+        TypeRegistry<TileBehaviorDefinition> tileBehaviorRegistry,
+        ScriptService scriptService,
+        IScriptingApiProvider apiProvider,
+        NpcDefinitionService npcDefinitionService,
+        MapDefinitionService mapDefinitionService,
+        PlayerFactory playerFactory,
+        InputManager inputManager,
+        PerformanceMonitor performanceMonitor,
+        IGameTimeService gameTime,
+        GraphicsDeviceManager graphics,
+        IServiceProvider services,
+        GameConfiguration configuration
+    )
+    {
+        GraphicsDevice = graphicsDevice ?? throw new ArgumentNullException(nameof(graphicsDevice));
+        LoggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
+        DataLoader = dataLoader ?? throw new ArgumentNullException(nameof(dataLoader));
+        TemplateCacheInitializer =
+            templateCacheInitializer
+            ?? throw new ArgumentNullException(nameof(templateCacheInitializer));
+        World = world ?? throw new ArgumentNullException(nameof(world));
+        SystemManager = systemManager ?? throw new ArgumentNullException(nameof(systemManager));
+        EntityFactory = entityFactory ?? throw new ArgumentNullException(nameof(entityFactory));
+        PoolManager = poolManager ?? throw new ArgumentNullException(nameof(poolManager));
+        SpriteLoader = spriteLoader ?? throw new ArgumentNullException(nameof(spriteLoader));
+        BehaviorRegistry =
+            behaviorRegistry ?? throw new ArgumentNullException(nameof(behaviorRegistry));
+        TileBehaviorRegistry =
+            tileBehaviorRegistry ?? throw new ArgumentNullException(nameof(tileBehaviorRegistry));
+        ScriptService = scriptService ?? throw new ArgumentNullException(nameof(scriptService));
+        ApiProvider = apiProvider ?? throw new ArgumentNullException(nameof(apiProvider));
+        NpcDefinitionService =
+            npcDefinitionService ?? throw new ArgumentNullException(nameof(npcDefinitionService));
+        MapDefinitionService =
+            mapDefinitionService ?? throw new ArgumentNullException(nameof(mapDefinitionService));
+        PlayerFactory = playerFactory ?? throw new ArgumentNullException(nameof(playerFactory));
+        InputManager = inputManager ?? throw new ArgumentNullException(nameof(inputManager));
+        PerformanceMonitor =
+            performanceMonitor ?? throw new ArgumentNullException(nameof(performanceMonitor));
+        GameTime = gameTime ?? throw new ArgumentNullException(nameof(gameTime));
+        Graphics = graphics ?? throw new ArgumentNullException(nameof(graphics));
+        Services = services ?? throw new ArgumentNullException(nameof(services));
+        Configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+    }
+
     /// <summary>
     ///     Gets or sets the asset manager (created in Phase 2).
     /// </summary>
@@ -64,7 +124,7 @@ public class InitializationContext
     /// <summary>
     ///     Gets or sets the scene manager (available after Initialize()).
     /// </summary>
-    public PokeSharp.Engine.Scenes.SceneManager? SceneManager { get; set; }
+    public SceneManager? SceneManager { get; set; }
 
     /// <summary>
     ///     Gets the graphics device (available from start).
@@ -99,68 +159,9 @@ public class InitializationContext
     public GameConfiguration Configuration { get; }
 
     /// <summary>
-    ///     Initializes a new instance of the <see cref="InitializationContext" /> class.
+    ///     Gets the asset path resolver for resolving asset paths.
+    ///     Lazily resolved from the service provider.
     /// </summary>
-    public InitializationContext(
-        GraphicsDevice graphicsDevice,
-        ILoggerFactory loggerFactory,
-        GameDataLoader dataLoader,
-        TemplateCacheInitializer templateCacheInitializer,
-        World world,
-        SystemManager systemManager,
-        IEntityFactoryService entityFactory,
-        EntityPoolManager poolManager,
-        SpriteLoader spriteLoader,
-        TypeRegistry<BehaviorDefinition> behaviorRegistry,
-        TypeRegistry<TileBehaviorDefinition> tileBehaviorRegistry,
-        ScriptService scriptService,
-        IScriptingApiProvider apiProvider,
-        NpcDefinitionService npcDefinitionService,
-        MapDefinitionService mapDefinitionService,
-        PlayerFactory playerFactory,
-        InputManager inputManager,
-        PerformanceMonitor performanceMonitor,
-        IGameTimeService gameTime,
-        GraphicsDeviceManager graphics,
-        IServiceProvider services,
-        GameConfiguration configuration
-    )
-    {
-        GraphicsDevice = graphicsDevice
-            ?? throw new ArgumentNullException(nameof(graphicsDevice));
-        LoggerFactory = loggerFactory
-            ?? throw new ArgumentNullException(nameof(loggerFactory));
-        DataLoader = dataLoader ?? throw new ArgumentNullException(nameof(dataLoader));
-        TemplateCacheInitializer = templateCacheInitializer
-            ?? throw new ArgumentNullException(nameof(templateCacheInitializer));
-        World = world ?? throw new ArgumentNullException(nameof(world));
-        SystemManager = systemManager
-            ?? throw new ArgumentNullException(nameof(systemManager));
-        EntityFactory = entityFactory
-            ?? throw new ArgumentNullException(nameof(entityFactory));
-        PoolManager = poolManager ?? throw new ArgumentNullException(nameof(poolManager));
-        SpriteLoader = spriteLoader ?? throw new ArgumentNullException(nameof(spriteLoader));
-        BehaviorRegistry = behaviorRegistry
-            ?? throw new ArgumentNullException(nameof(behaviorRegistry));
-        TileBehaviorRegistry = tileBehaviorRegistry
-            ?? throw new ArgumentNullException(nameof(tileBehaviorRegistry));
-        ScriptService = scriptService
-            ?? throw new ArgumentNullException(nameof(scriptService));
-        ApiProvider = apiProvider ?? throw new ArgumentNullException(nameof(apiProvider));
-        NpcDefinitionService = npcDefinitionService
-            ?? throw new ArgumentNullException(nameof(npcDefinitionService));
-        MapDefinitionService = mapDefinitionService
-            ?? throw new ArgumentNullException(nameof(mapDefinitionService));
-        PlayerFactory = playerFactory
-            ?? throw new ArgumentNullException(nameof(playerFactory));
-        InputManager = inputManager
-            ?? throw new ArgumentNullException(nameof(inputManager));
-        PerformanceMonitor = performanceMonitor
-            ?? throw new ArgumentNullException(nameof(performanceMonitor));
-        GameTime = gameTime ?? throw new ArgumentNullException(nameof(gameTime));
-        Graphics = graphics ?? throw new ArgumentNullException(nameof(graphics));
-        Services = services ?? throw new ArgumentNullException(nameof(services));
-        Configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
-    }
+    public IAssetPathResolver PathResolver =>
+        Services.GetRequiredService<IAssetPathResolver>();
 }
-

@@ -45,7 +45,7 @@ public class TypedEntityPool<T>
     /// <returns>Entity with components initialized</returns>
     public Entity Acquire()
     {
-        var entity = _pool.Acquire();
+        Entity entity = _pool.Acquire();
 
         // Initialize components for this entity
         _componentInitializer(entity);
@@ -104,7 +104,7 @@ public class TypedEntityPool<T1, T2>
 
     public Entity Acquire()
     {
-        var entity = _pool.Acquire();
+        Entity entity = _pool.Acquire();
         _componentInitializer(entity);
         return entity;
     }
@@ -152,7 +152,7 @@ public class TypedEntityPool<T1, T2, T3>
 
     public Entity Acquire()
     {
-        var entity = _pool.Acquire();
+        Entity entity = _pool.Acquire();
         _componentInitializer(entity);
         return entity;
     }
@@ -201,7 +201,7 @@ public class TypedEntityPool<T1, T2, T3, T4>
 
     public Entity Acquire()
     {
-        var entity = _pool.Acquire();
+        Entity entity = _pool.Acquire();
         _componentInitializer(entity);
         return entity;
     }

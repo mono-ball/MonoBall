@@ -5,7 +5,7 @@ using PokeSharp.Engine.UI.Debug.Core;
 namespace PokeSharp.Engine.UI.Debug.Components.Layout;
 
 /// <summary>
-/// A simple panel component with background and optional border.
+///     A simple panel component with background and optional border.
 /// </summary>
 public class Panel : UIContainer
 {
@@ -33,7 +33,3 @@ public class Panel : UIContainer
         }
     }
 }
-
-
-
-

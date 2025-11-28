@@ -7,10 +7,8 @@ using PokeSharp.Engine.Scenes;
 using PokeSharp.Engine.Systems.Management;
 using PokeSharp.Engine.Systems.Pooling;
 using PokeSharp.Game.Infrastructure.Diagnostics;
-using PokeSharp.Game.Infrastructure.Services;
-using PokeSharp.Game.Input;
-using PokeSharp.Game.Initialization;
 using PokeSharp.Game.Initialization.Initializers;
+using PokeSharp.Game.Input;
 using PokeSharp.Game.Systems.Services;
 
 namespace PokeSharp.Game.Scenes;
@@ -21,15 +19,15 @@ namespace PokeSharp.Game.Scenes;
 /// </summary>
 public class GameplayScene : SceneBase
 {
-    private readonly World _world;
-    private readonly SystemManager _systemManager;
     private readonly IGameInitializer _gameInitializer;
-    private readonly IMapInitializer _mapInitializer;
-    private readonly InputManager _inputManager;
-    private readonly PerformanceMonitor _performanceMonitor;
     private readonly IGameTimeService _gameTime;
+    private readonly InputManager _inputManager;
+    private readonly IMapInitializer _mapInitializer;
+    private readonly PerformanceMonitor _performanceMonitor;
     private readonly PerformanceOverlay _performanceOverlay;
     private readonly SceneManager? _sceneManager;
+    private readonly SystemManager _systemManager;
+    private readonly World _world;
 
     /// <summary>
     ///     Initializes a new instance of the GameplayScene class.
@@ -78,12 +76,13 @@ public class GameplayScene : SceneBase
         _sceneManager = sceneManager;
 
         // Create performance overlay
-        var poolManager = services.GetService<EntityPoolManager>();
+        EntityPoolManager? poolManager = services.GetService<EntityPoolManager>();
         _performanceOverlay = new PerformanceOverlay(
             graphicsDevice,
             performanceMonitor,
             world,
-            poolManager);
+            poolManager
+        );
 
         // Hook up F3 toggle
         _inputManager.OnPerformanceOverlayToggled += () => _performanceOverlay.Toggle();
@@ -92,9 +91,9 @@ public class GameplayScene : SceneBase
     /// <inheritdoc />
     public override void Update(GameTime gameTime)
     {
-        var rawDeltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
-        var totalSeconds = (float)gameTime.TotalGameTime.TotalSeconds;
-        var frameTimeMs = (float)gameTime.ElapsedGameTime.TotalMilliseconds;
+        float rawDeltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+        float totalSeconds = (float)gameTime.TotalGameTime.TotalSeconds;
+        float frameTimeMs = (float)gameTime.ElapsedGameTime.TotalMilliseconds;
 
         // Update game time service (applies time scale)
         _gameTime.Update(totalSeconds, rawDeltaTime);
@@ -107,7 +106,11 @@ public class GameplayScene : SceneBase
         // Pass render system so InputManager can control profiling when P is pressed
         if (_sceneManager?.IsInputBlocked != true)
         {
-            _inputManager.ProcessInput(_world, _gameTime.UnscaledDeltaTime, _gameInitializer.RenderSystem);
+            _inputManager.ProcessInput(
+                _world,
+                _gameTime.UnscaledDeltaTime,
+                _gameInitializer.RenderSystem
+            );
         }
 
         // Update all systems using scaled delta time
@@ -141,7 +144,7 @@ public class GameplayScene : SceneBase
         {
             _performanceOverlay.Dispose();
         }
+
         base.Dispose(disposing);
     }
 }
-

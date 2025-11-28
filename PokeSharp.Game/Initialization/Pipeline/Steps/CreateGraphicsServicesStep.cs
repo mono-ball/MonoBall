@@ -1,15 +1,13 @@
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using PokeSharp.Engine.Rendering.Assets;
 using PokeSharp.Engine.Scenes;
-using PokeSharp.Game.Data.MapLoading.Tiled.Core;
-using PokeSharp.Game.Data.MapLoading.Tiled.Processors;
-using PokeSharp.Game.Data.PropertyMapping;
-using PokeSharp.Game.Initialization.Pipeline;
+using PokeSharp.Game.Data.Factories;
 
 namespace PokeSharp.Game.Initialization.Pipeline.Steps;
 
 /// <summary>
 ///     Initialization step that creates services that depend on GraphicsDevice (AssetManager, MapLoader).
+///     Uses IGraphicsServiceFactory to create these services consistently.
 /// </summary>
 public class CreateGraphicsServicesStep : InitializationStepBase
 {
@@ -30,51 +28,26 @@ public class CreateGraphicsServicesStep : InitializationStepBase
         CancellationToken cancellationToken
     )
     {
-        var logger = context.LoggerFactory.CreateLogger<CreateGraphicsServicesStep>();
+        ILogger<CreateGraphicsServicesStep> logger =
+            context.LoggerFactory.CreateLogger<CreateGraphicsServicesStep>();
 
-        // Create AssetManager
-        var assetManagerLogger = context.LoggerFactory.CreateLogger<AssetManager>();
-        var assetManager = new AssetManager(
-            context.GraphicsDevice,
-            context.Configuration.Initialization.AssetRoot,
-            assetManagerLogger
-        );
+        // Use the factory pattern to create graphics services consistently
+        // This eliminates duplicate service creation code
+        IGraphicsServiceFactory factory =
+            context.Services.GetRequiredService<IGraphicsServiceFactory>();
+
+        // Use path resolver to get the correct asset root path
+        string assetRoot = context.PathResolver.AssetRoot;
+
+        // Create AssetManager via factory
+        var assetManager = factory.CreateAssetManager(context.GraphicsDevice, assetRoot);
         context.AssetManager = assetManager;
 
-        // Create PropertyMapperRegistry for tile property mapping
-        var mapperRegistryLogger = context.LoggerFactory.CreateLogger<PropertyMapperRegistry>();
-        var propertyMapperRegistry =
-            PropertyMapperServiceExtensions.CreatePropertyMapperRegistry(mapperRegistryLogger);
-
-        // Create processors with proper loggers
-        var layerProcessor = new LayerProcessor(
-            propertyMapperRegistry,
-            context.LoggerFactory.CreateLogger<LayerProcessor>()
-        );
-        var animatedTileProcessor = new AnimatedTileProcessor(
-            context.LoggerFactory.CreateLogger<AnimatedTileProcessor>()
-        );
-        var borderProcessor = new BorderProcessor(
-            context.LoggerFactory.CreateLogger<BorderProcessor>()
-        );
-
-        // Create MapLoader with required processor dependencies
-        var mapLoader = new MapLoader(
-            assetManager,
-            context.SystemManager,
-            layerProcessor,
-            animatedTileProcessor,
-            borderProcessor,
-            propertyMapperRegistry,
-            context.EntityFactory,
-            context.NpcDefinitionService,
-            context.MapDefinitionService,
-            context.LoggerFactory.CreateLogger<MapLoader>()
-        );
+        // Create MapLoader via factory (factory handles all processor creation)
+        var mapLoader = factory.CreateMapLoader(assetManager, context.EntityFactory);
         context.MapLoader = mapLoader;
 
         logger.LogInformation("Graphics services created successfully");
         return Task.CompletedTask;
     }
 }
-

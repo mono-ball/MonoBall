@@ -24,7 +24,10 @@ public class CompilationResult
         get
         {
             if (Diagnostics.Count > 0)
+            {
                 return Diagnostics.Count(d => d.Severity == DiagnosticSeverity.Error);
+            }
+
             return Errors.Count;
         }
     }
@@ -41,7 +44,7 @@ public class CompilationResult
     {
         if (Diagnostics.Count > 0 && HasErrors)
         {
-            var errors = Diagnostics
+            List<string> errors = Diagnostics
                 .FindAll(d => d.Severity == DiagnosticSeverity.Error)
                 .ConvertAll(d => d.ToString());
 
@@ -49,7 +52,9 @@ public class CompilationResult
         }
 
         if (Errors.Count > 0)
+        {
             return string.Join("\n  ", Errors);
+        }
 
         return "No errors";
     }

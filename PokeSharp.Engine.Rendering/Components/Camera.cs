@@ -137,8 +137,8 @@ public struct Camera
     {
         get
         {
-            var halfWidth = Viewport.Width / (2f * Zoom);
-            var halfHeight = Viewport.Height / (2f * Zoom);
+            float halfWidth = Viewport.Width / (2f * Zoom);
+            float halfHeight = Viewport.Height / (2f * Zoom);
 
             return new RectangleF(
                 Position.X - halfWidth,
@@ -158,8 +158,8 @@ public struct Camera
     {
         // Round camera position to nearest pixel after zoom to prevent texture bleeding/seams
         // This ensures tiles always render at integer screen coordinates
-        var roundedX = MathF.Round(Position.X * Zoom) / Zoom;
-        var roundedY = MathF.Round(Position.Y * Zoom) / Zoom;
+        float roundedX = MathF.Round(Position.X * Zoom) / Zoom;
+        float roundedY = MathF.Round(Position.Y * Zoom) / Zoom;
 
         return Matrix.CreateTranslation(-roundedX, -roundedY, 0)
             * Matrix.CreateRotationZ(Rotation)
@@ -175,8 +175,8 @@ public struct Camera
     /// <returns>Position in world space.</returns>
     public readonly Vector2 ScreenToWorld(Vector2 screenPosition)
     {
-        var matrix = GetTransformMatrix();
-        Matrix.Invert(ref matrix, out var invertedMatrix);
+        Matrix matrix = GetTransformMatrix();
+        Matrix.Invert(ref matrix, out Matrix invertedMatrix);
         return Vector2.Transform(screenPosition, invertedMatrix);
     }
 
@@ -258,7 +258,7 @@ public struct Camera
     /// <param name="deltaTime">Time elapsed since last frame (for frame-independent smoothing).</param>
     public void Update(float deltaTime)
     {
-        var dirty = false;
+        bool dirty = false;
 
         // 1. Smooth zoom transition
         if (Math.Abs(Zoom - TargetZoom) > 0.001f)
@@ -268,32 +268,42 @@ public struct Camera
 
             // Snap to target when very close
             if (Math.Abs(Zoom - TargetZoom) < 0.001f)
+            {
                 Zoom = TargetZoom;
+            }
         }
 
         // 2. Follow target if set
         if (FollowTarget.HasValue)
         {
-            var oldPosition = Position;
-            var targetPosition = FollowTarget.Value;
+            Vector2 oldPosition = Position;
+            Vector2 targetPosition = FollowTarget.Value;
 
             // Apply smoothing if enabled
             if (SmoothingSpeed > 0)
+            {
                 Position = Vector2.Lerp(Position, targetPosition, SmoothingSpeed);
+            }
             else
+            {
                 Position = targetPosition;
+            }
 
             // Note: Camera clamping removed to replicate Pokemon Emerald behavior
             // The camera can now move freely without map bounds restrictions
 
             // Mark dirty if position changed
             if (Position != oldPosition)
+            {
                 dirty = true;
+            }
         }
 
         // Mark transform as dirty if camera changed
         if (dirty)
+        {
             IsDirty = true;
+        }
     }
 
     /// <summary>
@@ -305,8 +315,8 @@ public struct Camera
         const int gbaWidth = 240;
         const int gbaHeight = 160;
 
-        var zoomX = (float)Viewport.Width / gbaWidth;
-        var zoomY = (float)Viewport.Height / gbaHeight;
+        float zoomX = (float)Viewport.Width / gbaWidth;
+        float zoomY = (float)Viewport.Height / gbaHeight;
         return Math.Min(zoomX, zoomY); // Use smaller zoom to fit entirely
     }
 
@@ -319,8 +329,8 @@ public struct Camera
         const int ndsWidth = 256;
         const int ndsHeight = 192;
 
-        var zoomX = (float)Viewport.Width / ndsWidth;
-        var zoomY = (float)Viewport.Height / ndsHeight;
+        float zoomX = (float)Viewport.Width / ndsWidth;
+        float zoomY = (float)Viewport.Height / ndsHeight;
         return Math.Min(zoomX, zoomY); // Use smaller zoom to fit entirely
     }
 
@@ -353,20 +363,25 @@ public struct Camera
     private readonly Vector2 ClampPositionToMapBounds(Vector2 position)
     {
         // Calculate half viewport dimensions in world coordinates (accounting for zoom)
-        var halfViewportWidth = Viewport.Width / (2f * Zoom);
-        var halfViewportHeight = Viewport.Height / (2f * Zoom);
+        float halfViewportWidth = Viewport.Width / (2f * Zoom);
+        float halfViewportHeight = Viewport.Height / (2f * Zoom);
 
         // Calculate the bounds where the camera should stop
-        var minX = MapBounds.Left + halfViewportWidth;
-        var maxX = MapBounds.Right - halfViewportWidth;
-        var minY = MapBounds.Top + halfViewportHeight;
-        var maxY = MapBounds.Bottom - halfViewportHeight;
+        float minX = MapBounds.Left + halfViewportWidth;
+        float maxX = MapBounds.Right - halfViewportWidth;
+        float minY = MapBounds.Top + halfViewportHeight;
+        float maxY = MapBounds.Bottom - halfViewportHeight;
 
         // Handle cases where viewport is larger than map (center the camera)
         if (maxX < minX)
+        {
             minX = maxX = (MapBounds.Left + MapBounds.Right) / 2f;
+        }
+
         if (maxY < minY)
+        {
             minY = maxY = (MapBounds.Top + MapBounds.Bottom) / 2f;
+        }
 
         // Clamp position
         return new Vector2(

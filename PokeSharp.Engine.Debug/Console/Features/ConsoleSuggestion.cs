@@ -3,60 +3,25 @@ using Microsoft.CodeAnalysis.Completion;
 namespace PokeSharp.Engine.Debug.Console.Features;
 
 /// <summary>
-/// Represents a unified suggestion that can be either from API completion or command history.
+///     Represents a unified suggestion that can be either from API completion or command history.
 /// </summary>
 public class ConsoleSuggestion
 {
     /// <summary>
-    /// Type of suggestion.
+    ///     Type of suggestion.
     /// </summary>
     public enum SuggestionType
     {
         /// <summary>
-        /// API/code completion from Roslyn (methods, properties, etc.)
+        ///     API/code completion from Roslyn (methods, properties, etc.)
         /// </summary>
         ApiCompletion,
 
         /// <summary>
-        /// Command from history.
+        ///     Command from history.
         /// </summary>
-        History
+        History,
     }
-
-    /// <summary>
-    /// Gets the type of this suggestion.
-    /// </summary>
-    public SuggestionType Type { get; init; }
-
-    /// <summary>
-    /// Gets the display text for this suggestion.
-    /// </summary>
-    public string DisplayText { get; init; }
-
-    /// <summary>
-    /// Gets the text to insert when this suggestion is accepted.
-    /// </summary>
-    public string InsertText { get; init; }
-
-    /// <summary>
-    /// Gets the description/documentation for this suggestion.
-    /// </summary>
-    public string? Description { get; init; }
-
-    /// <summary>
-    /// Gets the underlying CompletionItem for API completions (null for history).
-    /// </summary>
-    public CompletionItem? CompletionItem { get; init; }
-
-    /// <summary>
-    /// Gets the use count for history suggestions (0 for API).
-    /// </summary>
-    public int UseCount { get; init; }
-
-    /// <summary>
-    /// Gets the relevance score for sorting (higher = more relevant).
-    /// </summary>
-    public double RelevanceScore { get; init; }
 
     private ConsoleSuggestion()
     {
@@ -65,7 +30,42 @@ public class ConsoleSuggestion
     }
 
     /// <summary>
-    /// Creates a suggestion from an API completion item.
+    ///     Gets the type of this suggestion.
+    /// </summary>
+    public SuggestionType Type { get; init; }
+
+    /// <summary>
+    ///     Gets the display text for this suggestion.
+    /// </summary>
+    public string DisplayText { get; init; }
+
+    /// <summary>
+    ///     Gets the text to insert when this suggestion is accepted.
+    /// </summary>
+    public string InsertText { get; init; }
+
+    /// <summary>
+    ///     Gets the description/documentation for this suggestion.
+    /// </summary>
+    public string? Description { get; init; }
+
+    /// <summary>
+    ///     Gets the underlying CompletionItem for API completions (null for history).
+    /// </summary>
+    public CompletionItem? CompletionItem { get; init; }
+
+    /// <summary>
+    ///     Gets the use count for history suggestions (0 for API).
+    /// </summary>
+    public int UseCount { get; init; }
+
+    /// <summary>
+    ///     Gets the relevance score for sorting (higher = more relevant).
+    /// </summary>
+    public double RelevanceScore { get; init; }
+
+    /// <summary>
+    ///     Creates a suggestion from an API completion item.
     /// </summary>
     public static ConsoleSuggestion FromApiCompletion(CompletionItem item, double score = 100)
     {
@@ -77,12 +77,12 @@ public class ConsoleSuggestion
             Description = item.InlineDescription,
             CompletionItem = item,
             UseCount = 0,
-            RelevanceScore = score
+            RelevanceScore = score,
         };
     }
 
     /// <summary>
-    /// Creates a suggestion from command history.
+    ///     Creates a suggestion from command history.
     /// </summary>
     public static ConsoleSuggestion FromHistory(string command, int useCount, double score)
     {
@@ -94,21 +94,20 @@ public class ConsoleSuggestion
             Description = $"Used {useCount} time{(useCount != 1 ? "s" : "")}",
             CompletionItem = null,
             UseCount = useCount,
-            RelevanceScore = score
+            RelevanceScore = score,
         };
     }
 
     /// <summary>
-    /// Gets a visual prefix for display (icon/indicator).
-    /// Note: Triangles are now rendered programmatically, not as text characters.
+    ///     Gets a visual prefix for display (icon/indicator).
+    ///     Note: Triangles are now rendered programmatically, not as text characters.
     /// </summary>
     public string GetVisualPrefix()
     {
         return Type switch
         {
-            SuggestionType.History => "@",        // At-sign for history
-            _ => string.Empty  // No text prefix (triangles rendered separately if needed)
+            SuggestionType.History => "@", // At-sign for history
+            _ => string.Empty, // No text prefix (triangles rendered separately if needed)
         };
     }
 }
-

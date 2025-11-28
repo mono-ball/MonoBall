@@ -1,26 +1,21 @@
 using Arch.Core;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.Xna.Framework;
-using PokeSharp.Engine.Core.Services;
 using PokeSharp.Engine.Core.Types;
-using PokeSharp.Engine.Input.Systems;
-using PokeSharp.Engine.Rendering.Assets;
 using PokeSharp.Engine.Scenes;
 using PokeSharp.Engine.Scenes.Scenes;
 using PokeSharp.Engine.Systems.Factories;
 using PokeSharp.Engine.Systems.Management;
 using PokeSharp.Engine.Systems.Pooling;
 using PokeSharp.Game.Data.Loading;
-using PokeSharp.Game.Data.MapLoading.Tiled.Core;
 using PokeSharp.Game.Data.Services;
 using PokeSharp.Game.Infrastructure.Configuration;
 using PokeSharp.Game.Infrastructure.Diagnostics;
 using PokeSharp.Game.Infrastructure.Services;
-using Microsoft.Extensions.Options;
 using PokeSharp.Game.Initialization;
-using PokeSharp.Game.Initialization.Initializers;
 using PokeSharp.Game.Initialization.Factories;
+using PokeSharp.Game.Initialization.Initializers;
 using PokeSharp.Game.Initialization.Pipeline;
 using PokeSharp.Game.Initialization.Pipeline.Steps;
 using PokeSharp.Game.Input;
@@ -29,8 +24,6 @@ using PokeSharp.Game.Scripting.Api;
 using PokeSharp.Game.Scripting.Services;
 using PokeSharp.Game.Systems;
 using PokeSharp.Game.Systems.Services;
-using PokeSharp.Engine.Debug.Systems;
-using PokeSharp.Engine.Debug.Logging;
 
 namespace PokeSharp.Game;
 
@@ -44,17 +37,18 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game, IAsyncDisposable
     private readonly TypeRegistry<BehaviorDefinition> _behaviorRegistry;
     private readonly GameDataLoader _dataLoader;
     private readonly IEntityFactoryService _entityFactory;
+    private readonly GameConfiguration _gameConfig;
     private readonly IGameTimeService _gameTime;
     private readonly GraphicsDeviceManager _graphics;
     private readonly InputManager _inputManager;
     private readonly ILoggerFactory _loggerFactory;
-    private readonly GameConfiguration _gameConfig;
     private readonly MapDefinitionService _mapDefinitionService;
     private readonly NpcDefinitionService _npcDefinitionService;
     private readonly PerformanceMonitor _performanceMonitor;
     private readonly PlayerFactory _playerFactory;
     private readonly EntityPoolManager _poolManager;
     private readonly ScriptService _scriptService;
+    private readonly IServiceProvider _services; // Required for SceneManager and scenes that need DI
     private readonly SpriteLoader _spriteLoader;
 
     // Services that depend on GraphicsDevice (created in Initialize)
@@ -66,11 +60,10 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game, IAsyncDisposable
     private IGameInitializer _gameInitializer = null!;
     private Task<GameplayScene>? _initializationTask;
     private LoadingProgress? _loadingProgress;
-    private SceneManager? _sceneManager;
-    private readonly IServiceProvider _services; // Required for SceneManager and scenes that need DI
 
     // Async initialization state
     private IMapInitializer _mapInitializer = null!;
+    private SceneManager? _sceneManager;
     private SpriteTextureLoader? _spriteTextureLoader;
 
     /// <summary>
@@ -214,16 +207,18 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game, IAsyncDisposable
         // Service provider is required for SceneManager and scenes that use dependency injection
         // Note: This is not a service locator anti-pattern - it's passed to SceneManager which
         // provides it to scenes for their own DI needs (e.g., LoadingScene, GameplayScene)
-        _services = services ?? throw new ArgumentNullException(
-            nameof(services),
-            "Service provider is required for scene management"
-        );
+        _services =
+            services
+            ?? throw new ArgumentNullException(
+                nameof(services),
+                "Service provider is required for scene management"
+            );
 
         _graphics = new GraphicsDeviceManager(this);
         Content.RootDirectory = _gameConfig.Initialization.ContentRoot;
 
         // Window configuration from appsettings.json
-        var windowConfig = _gameConfig.Window;
+        GameWindowConfig windowConfig = _gameConfig.Window;
         _graphics.PreferredBackBufferWidth = windowConfig.Width;
         _graphics.PreferredBackBufferHeight = windowConfig.Height;
         IsMouseVisible = windowConfig.IsMouseVisible;
@@ -248,13 +243,19 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game, IAsyncDisposable
     public async ValueTask DisposeAsync()
     {
         if (_scriptService is IAsyncDisposable scriptServiceDisposable)
+        {
             await scriptServiceDisposable.DisposeAsync();
+        }
 
         if (_behaviorRegistry is IAsyncDisposable behaviorRegistryDisposable)
+        {
             await behaviorRegistryDisposable.DisposeAsync();
+        }
 
         if (_tileBehaviorRegistry is IAsyncDisposable tileBehaviorRegistryDisposable)
+        {
             await tileBehaviorRegistryDisposable.DisposeAsync();
+        }
 
         _world?.Dispose();
 
@@ -271,7 +272,7 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game, IAsyncDisposable
         base.Initialize();
 
         // Create SceneManager (GraphicsDevice is now available after base.Initialize())
-        var sceneManagerLogger = _loggerFactory.CreateLogger<SceneManager>();
+        ILogger<SceneManager> sceneManagerLogger = _loggerFactory.CreateLogger<SceneManager>();
         _sceneManager = new SceneManager(GraphicsDevice, _services, sceneManagerLogger);
 
         // Create LoadingProgress
@@ -281,9 +282,11 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game, IAsyncDisposable
         _initializationTask = InitializeGameplaySceneAsync(_loadingProgress);
 
         // Create and show loading scene immediately
-        var loadingSceneLogger = _loggerFactory.CreateLogger<LoadingScene>();
+        ILogger<LoadingScene> loadingSceneLogger = _loggerFactory.CreateLogger<LoadingScene>();
         // Convert Task<GameplayScene> to Task<IScene> for LoadingScene
-        Task<IScene> initializationTaskAsIScene = _initializationTask.ContinueWith(t => (IScene)t.Result);
+        Task<IScene> initializationTaskAsIScene = _initializationTask.ContinueWith(t =>
+            (IScene)t.Result
+        );
         var loadingScene = new LoadingScene(
             GraphicsDevice,
             _services,
@@ -307,7 +310,7 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game, IAsyncDisposable
     {
         try
         {
-            var logger = _loggerFactory.CreateLogger<PokeSharpGame>();
+            ILogger<PokeSharpGame> logger = _loggerFactory.CreateLogger<PokeSharpGame>();
 
             // Create initialization context with all dependencies
             var context = new InitializationContext(
@@ -339,7 +342,7 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game, IAsyncDisposable
             context.SceneManager = _sceneManager;
 
             // Build and execute the initialization pipeline
-            var pipeline = BuildInitializationPipeline(logger);
+            InitializationPipeline pipeline = BuildInitializationPipeline(logger);
             await pipeline.ExecuteAsync(context, progress);
 
             // Extract initialized components from context
@@ -373,7 +376,8 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game, IAsyncDisposable
     /// <returns>The configured initialization pipeline.</returns>
     private InitializationPipeline BuildInitializationPipeline(ILogger logger)
     {
-        var pipelineLogger = _loggerFactory.CreateLogger<InitializationPipeline>();
+        ILogger<InitializationPipeline> pipelineLogger =
+            _loggerFactory.CreateLogger<InitializationPipeline>();
         var pipeline = new InitializationPipeline(pipelineLogger);
 
         // Phase 1: Load game data and templates
@@ -428,7 +432,8 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game, IAsyncDisposable
         // LoadingScene will handle displaying the error, but we should still log it
         if (_initializationTask?.IsFaulted == true)
         {
-            var exception = _initializationTask.Exception?.GetBaseException()
+            Exception exception =
+                _initializationTask.Exception?.GetBaseException()
                 ?? _initializationTask.Exception
                 ?? new Exception("Unknown initialization error");
 
@@ -473,7 +478,9 @@ public class PokeSharpGame : Microsoft.Xna.Framework.Game, IAsyncDisposable
     protected override void Dispose(bool disposing)
     {
         if (disposing)
+        {
             _world?.Dispose();
+        }
 
         base.Dispose(disposing);
     }

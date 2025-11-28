@@ -17,7 +17,9 @@ public readonly record struct MapRuntimeId
     public MapRuntimeId(int value)
     {
         if (value < 0)
+        {
             throw new ArgumentException("Map runtime ID cannot be negative.", nameof(value));
+        }
 
         Value = value;
     }

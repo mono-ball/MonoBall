@@ -18,11 +18,13 @@ public class MapIdService
     /// <returns>Unique map runtime ID for the map.</returns>
     public MapRuntimeId GetMapId(string mapPath)
     {
-        var mapName = Path.GetFileNameWithoutExtension(mapPath);
+        string mapName = Path.GetFileNameWithoutExtension(mapPath);
 
         // Get or create unique map ID
-        if (_mapNameToId.TryGetValue(mapName, out var existingId))
+        if (_mapNameToId.TryGetValue(mapName, out MapRuntimeId existingId))
+        {
             return existingId;
+        }
 
         var newId = new MapRuntimeId(_nextMapId++);
         _mapNameToId[mapName] = newId;
@@ -36,11 +38,13 @@ public class MapIdService
     /// <returns>Unique map runtime ID for the map.</returns>
     public MapRuntimeId GetMapIdFromIdentifier(MapIdentifier mapIdentifier)
     {
-        var identifierString = mapIdentifier.Value;
+        string identifierString = mapIdentifier.Value;
 
         // Get or create unique map ID
-        if (_mapNameToId.TryGetValue(identifierString, out var existingId))
+        if (_mapNameToId.TryGetValue(identifierString, out MapRuntimeId existingId))
+        {
             return existingId;
+        }
 
         var newId = new MapRuntimeId(_nextMapId++);
         _mapNameToId[identifierString] = newId;
@@ -54,6 +58,6 @@ public class MapIdService
     /// <returns>Map runtime ID if the map has been loaded, null otherwise.</returns>
     public MapRuntimeId? GetMapIdByName(string mapName)
     {
-        return _mapNameToId.TryGetValue(mapName, out var id) ? id : null;
+        return _mapNameToId.TryGetValue(mapName, out MapRuntimeId id) ? id : null;
     }
 }

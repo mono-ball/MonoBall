@@ -17,7 +17,9 @@ public class RollingAverage
     public RollingAverage(int windowSize)
     {
         if (windowSize <= 0)
+        {
             throw new ArgumentException("Window size must be positive", nameof(windowSize));
+        }
 
         _samples = new float[windowSize];
         _currentIndex = 0;
@@ -38,12 +40,19 @@ public class RollingAverage
         get
         {
             if (Count == 0)
+            {
                 return 0;
+            }
 
-            var min = _samples[0];
-            for (var i = 1; i < Count; i++)
+            float min = _samples[0];
+            for (int i = 1; i < Count; i++)
+            {
                 if (_samples[i] < min)
+                {
                     min = _samples[i];
+                }
+            }
+
             return min;
         }
     }
@@ -56,12 +65,19 @@ public class RollingAverage
         get
         {
             if (Count == 0)
+            {
                 return 0;
+            }
 
-            var max = _samples[0];
-            for (var i = 1; i < Count; i++)
+            float max = _samples[0];
+            for (int i = 1; i < Count; i++)
+            {
                 if (_samples[i] > max)
+                {
                     max = _samples[i];
+                }
+            }
+
             return max;
         }
     }
@@ -79,9 +95,13 @@ public class RollingAverage
     {
         // If buffer is full, subtract the oldest value from sum
         if (Count == _samples.Length)
+        {
             _sum -= _samples[_currentIndex];
+        }
         else
+        {
             Count++;
+        }
 
         // Add new value
         _samples[_currentIndex] = value;

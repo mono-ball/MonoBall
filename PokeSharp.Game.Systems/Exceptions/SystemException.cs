@@ -36,7 +36,7 @@ public class MovementException : SystemException
         WithContext("EntityId", entityId);
     }
 
-    public int EntityId => Context.TryGetValue("EntityId", out var id) && id is int i ? i : 0;
+    public int EntityId => Context.TryGetValue("EntityId", out object? id) && id is int i ? i : 0;
 
     public override bool IsRecoverable => true; // Can skip movement update
 
@@ -63,7 +63,7 @@ public class CollisionException : SystemException
         WithContext("EntityId", entityId);
     }
 
-    public int EntityId => Context.TryGetValue("EntityId", out var id) && id is int i ? i : 0;
+    public int EntityId => Context.TryGetValue("EntityId", out object? id) && id is int i ? i : 0;
 
     public override bool IsRecoverable => true; // Can allow movement without collision
 
@@ -90,7 +90,7 @@ public class PathfindingException : SystemException
         WithContext("EntityId", entityId);
     }
 
-    public int EntityId => Context.TryGetValue("EntityId", out var id) && id is int i ? i : 0;
+    public int EntityId => Context.TryGetValue("EntityId", out object? id) && id is int i ? i : 0;
 
     public override bool IsRecoverable => true; // NPC can stay idle
 
@@ -117,7 +117,7 @@ public class TileAnimationException : SystemException
         WithContext("TileId", tileId);
     }
 
-    public int TileId => Context.TryGetValue("TileId", out var id) && id is int i ? i : 0;
+    public int TileId => Context.TryGetValue("TileId", out object? id) && id is int i ? i : 0;
 
     public override bool IsRecoverable => true; // Static tiles still work
 
@@ -144,7 +144,8 @@ public class SpatialHashException : SystemException
         WithContext("Operation", operation);
     }
 
-    public string Operation => Context.TryGetValue("Operation", out var op) ? op?.ToString() ?? "" : "";
+    public string Operation =>
+        Context.TryGetValue("Operation", out object? op) ? op?.ToString() ?? "" : "";
 
     public override bool IsRecoverable => true; // Can fallback to brute force queries
 
@@ -171,7 +172,7 @@ public class MapStreamingException : SystemException
         WithContext("MapId", mapId);
     }
 
-    public string MapId => Context.TryGetValue("MapId", out var id) ? id?.ToString() ?? "" : "";
+    public string MapId => Context.TryGetValue("MapId", out object? id) ? id?.ToString() ?? "" : "";
 
     public override bool IsRecoverable => true; // Current map still works
 
@@ -189,19 +190,24 @@ public class NpcBehaviorException : SystemException
     public NpcBehaviorException(int npcEntityId, string scriptName, string message)
         : base("SYSTEM_NPC_BEHAVIOR_ERROR", message)
     {
-        WithContext("NpcEntityId", npcEntityId)
-            .WithContext("ScriptName", scriptName);
+        WithContext("NpcEntityId", npcEntityId).WithContext("ScriptName", scriptName);
     }
 
-    public NpcBehaviorException(int npcEntityId, string scriptName, string message, Exception innerException)
+    public NpcBehaviorException(
+        int npcEntityId,
+        string scriptName,
+        string message,
+        Exception innerException
+    )
         : base("SYSTEM_NPC_BEHAVIOR_ERROR", message, innerException)
     {
-        WithContext("NpcEntityId", npcEntityId)
-            .WithContext("ScriptName", scriptName);
+        WithContext("NpcEntityId", npcEntityId).WithContext("ScriptName", scriptName);
     }
 
-    public int NpcEntityId => Context.TryGetValue("NpcEntityId", out var id) && id is int i ? i : 0;
-    public string ScriptName => Context.TryGetValue("ScriptName", out var name) ? name?.ToString() ?? "" : "";
+    public int NpcEntityId =>
+        Context.TryGetValue("NpcEntityId", out object? id) && id is int i ? i : 0;
+    public string ScriptName =>
+        Context.TryGetValue("ScriptName", out object? name) ? name?.ToString() ?? "" : "";
 
     public override bool IsRecoverable => true; // NPC can use default behavior
 

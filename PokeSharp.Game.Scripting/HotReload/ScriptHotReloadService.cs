@@ -108,7 +108,10 @@ public class ScriptHotReloadService : IDisposable
     public void Dispose()
     {
         if (_disposed)
+        {
             return;
+        }
+
         _disposed = true;
 
         // Synchronously stop watching
@@ -124,7 +127,7 @@ public class ScriptHotReloadService : IDisposable
         _cleanupTimer?.Dispose();
 
         // Cancel any pending operations
-        foreach (var kvp in _debouncers)
+        foreach (KeyValuePair<string, CancellationTokenSource> kvp in _debouncers)
         {
             kvp.Value?.Cancel();
             kvp.Value?.Dispose();
@@ -195,7 +198,9 @@ public class ScriptHotReloadService : IDisposable
     public async Task StopAsync()
     {
         if (!IsRunning)
+        {
             return;
+        }
 
         _logger.LogInformation("Stopping enhanced hot-reload service");
 
@@ -242,7 +247,7 @@ public class ScriptHotReloadService : IDisposable
     private async void OnScriptChanged(object? sender, ScriptChangedEventArgs e)
     {
         // Cancel any existing debouncer for this file (per-file debouncing)
-        if (_debouncers.TryRemove(e.FilePath, out var oldCts))
+        if (_debouncers.TryRemove(e.FilePath, out CancellationTokenSource? oldCts))
         {
             oldCts.Cancel();
             oldCts.Dispose();
@@ -314,7 +319,7 @@ public class ScriptHotReloadService : IDisposable
         {
             _logger.LogInformation("Script changed: {FilePath}", e.FilePath);
 
-            var typeId = ExtractTypeId(e.FilePath);
+            string typeId = ExtractTypeId(e.FilePath);
             if (string.IsNullOrEmpty(typeId))
             {
                 _logger.LogWarning("Could not extract type ID from {FilePath}", e.FilePath);
@@ -323,11 +328,11 @@ public class ScriptHotReloadService : IDisposable
 
             // Create backup of current version BEFORE attempting compilation
             // This ensures we can rollback even if compilation crashes unexpectedly
-            var currentVersion = ScriptCache.GetVersion(typeId);
+            int currentVersion = ScriptCache.GetVersion(typeId);
             if (currentVersion >= 0)
             {
-                var (_, instance) = ScriptCache.GetInstance(typeId);
-                var currentType = ScriptCache.GetScriptType(typeId);
+                (_, object? instance) = ScriptCache.GetInstance(typeId);
+                Type? currentType = ScriptCache.GetScriptType(typeId);
                 if (currentType != null)
                 {
                     await _backupManager.CreateBackupAsync(
@@ -346,7 +351,7 @@ public class ScriptHotReloadService : IDisposable
 
             // Attempt compilation
             var compileSw = Stopwatch.StartNew();
-            var compileResult = await _compiler.CompileScriptAsync(e.FilePath);
+            CompilationResult compileResult = await _compiler.CompileScriptAsync(e.FilePath);
             compileSw.Stop();
 
             // Check for compilation success
@@ -357,7 +362,7 @@ public class ScriptHotReloadService : IDisposable
             )
             {
                 // SUCCESS: Update cache with new version
-                var newVersion = ScriptCache.UpdateVersion(typeId, compileResult.CompiledType);
+                int newVersion = ScriptCache.UpdateVersion(typeId, compileResult.CompiledType);
 
                 sw.Stop();
                 _statistics.SuccessfulReloads++;
@@ -415,9 +420,11 @@ public class ScriptHotReloadService : IDisposable
             _logger.LogError(ex, "Unexpected error during hot-reload for {FilePath}", e.FilePath);
 
             // Emergency rollback on unexpected errors
-            var typeId = ExtractTypeId(e.FilePath);
+            string typeId = ExtractTypeId(e.FilePath);
             if (!string.IsNullOrEmpty(typeId))
+            {
                 await PerformEmergencyRollbackAsync(typeId, ex.Message);
+            }
 
             _notificationService.ShowNotification(
                 new HotReloadNotification
@@ -455,8 +462,10 @@ public class ScriptHotReloadService : IDisposable
         if (compileResult.Diagnostics != null && compileResult.Diagnostics.Count > 0)
         {
             _logger.LogError("Compilation diagnostics for {TypeId}:", typeId);
-            foreach (var diagnostic in compileResult.Diagnostics)
+            foreach (CompilationDiagnostic diagnostic in compileResult.Diagnostics)
+            {
                 if (diagnostic.Severity == DiagnosticSeverity.Error)
+                {
                     _logger.LogError(
                         "  Line {Line}, Col {Column}: {Message} [{Code}]",
                         diagnostic.Line,
@@ -464,11 +473,15 @@ public class ScriptHotReloadService : IDisposable
                         diagnostic.Message,
                         diagnostic.Code ?? "N/A"
                     );
+                }
+            }
         }
         else if (compileResult.Errors.Count > 0)
         {
-            foreach (var error in compileResult.Errors)
+            foreach (string error in compileResult.Errors)
+            {
                 _logger.LogError("  {Error}", error);
+            }
         }
 
         // Trigger compilation failed event
@@ -483,11 +496,11 @@ public class ScriptHotReloadService : IDisposable
         );
 
         // Attempt automatic rollback
-        var rollbackSuccess = await PerformRollbackAsync(typeId);
+        bool rollbackSuccess = await PerformRollbackAsync(typeId);
 
         if (rollbackSuccess)
         {
-            var errorSummary = compileResult.GetErrorSummary();
+            string errorSummary = compileResult.GetErrorSummary();
             _notificationService.ShowNotification(
                 new HotReloadNotification
                 {
@@ -501,7 +514,7 @@ public class ScriptHotReloadService : IDisposable
         }
         else
         {
-            var errorSummary = compileResult.GetErrorSummary();
+            string errorSummary = compileResult.GetErrorSummary();
             _notificationService.ShowNotification(
                 new HotReloadNotification
                 {
@@ -523,7 +536,7 @@ public class ScriptHotReloadService : IDisposable
         if (ScriptCache.Rollback(typeId))
         {
             _statistics.RollbacksPerformed++;
-            var rolledBackVersion = ScriptCache.GetVersion(typeId);
+            int rolledBackVersion = ScriptCache.GetVersion(typeId);
 
             _logger.LogWarning(
                 "↶ Rolled back {TypeId} to version {Version} via cache",
@@ -532,7 +545,7 @@ public class ScriptHotReloadService : IDisposable
             );
 
             // Trigger rollback event
-            var rolledBackType = ScriptCache.GetScriptType(typeId);
+            Type? rolledBackType = ScriptCache.GetScriptType(typeId);
             RollbackPerformed?.Invoke(
                 this,
                 new CompilationEventArgs
@@ -547,7 +560,7 @@ public class ScriptHotReloadService : IDisposable
         }
 
         // Fallback: try backup manager
-        var restored = _backupManager.RestoreBackup(typeId);
+        (Type type, object? instance, int version)? restored = _backupManager.RestoreBackup(typeId);
         if (restored.HasValue)
         {
             ScriptCache.UpdateVersion(typeId, restored.Value.type, restored.Value.version);
@@ -586,13 +599,17 @@ public class ScriptHotReloadService : IDisposable
             typeId
         );
 
-        var rollbackTask = PerformRollbackAsync(typeId);
-        var rollbackSuccess = rollbackTask.GetAwaiter().GetResult();
+        Task<bool> rollbackTask = PerformRollbackAsync(typeId);
+        bool rollbackSuccess = rollbackTask.GetAwaiter().GetResult();
 
         if (rollbackSuccess)
+        {
             _logger.LogWarning("⚡ Emergency rollback successful for {TypeId}", typeId);
+        }
         else
+        {
             _logger.LogError("⚡ Emergency rollback FAILED for {TypeId}", typeId);
+        }
 
         return Task.CompletedTask;
     }
@@ -605,30 +622,40 @@ public class ScriptHotReloadService : IDisposable
     private void CleanupOrphanedDebouncers(object? state)
     {
         if (_disposed)
+        {
             return;
+        }
 
-        var now = DateTime.UtcNow;
+        DateTime now = DateTime.UtcNow;
         var orphanedKeys = new List<string>();
 
         // Find debouncers that have been idle for more than 60 seconds
-        foreach (var kvp in _debouncers)
+        foreach (KeyValuePair<string, CancellationTokenSource> kvp in _debouncers)
+        {
             if (
-                !_lastDebounceTime.TryGetValue(kvp.Key, out var lastTime)
+                !_lastDebounceTime.TryGetValue(kvp.Key, out DateTime lastTime)
                 || (now - lastTime).TotalSeconds > 60
             )
+            {
                 orphanedKeys.Add(kvp.Key);
+            }
+        }
 
         // Remove orphaned debouncers
-        foreach (var key in orphanedKeys)
-            if (_debouncers.TryRemove(key, out var cts))
+        foreach (string key in orphanedKeys)
+        {
+            if (_debouncers.TryRemove(key, out CancellationTokenSource? cts))
             {
                 cts?.Cancel();
                 cts?.Dispose();
                 _lastDebounceTime.TryRemove(key, out _);
             }
+        }
 
         if (orphanedKeys.Count > 0)
+        {
             _logger.LogDebug("Cleaned up {Count} orphaned debouncers", orphanedKeys.Count);
+        }
     }
 
     private void OnWatcherError(object? sender, ScriptWatcherErrorEventArgs e)
@@ -636,6 +663,7 @@ public class ScriptHotReloadService : IDisposable
         _logger.LogError(e.Exception, "Watcher error: {Message}", e.Message);
 
         if (e.IsCritical)
+        {
             _notificationService.ShowNotification(
                 new HotReloadNotification
                 {
@@ -645,6 +673,7 @@ public class ScriptHotReloadService : IDisposable
                     IsAutoDismiss = false,
                 }
             );
+        }
     }
 
     private string ExtractTypeId(string filePath)

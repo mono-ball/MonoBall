@@ -5,7 +5,7 @@ using PokeSharp.Engine.UI.Debug.Core;
 namespace PokeSharp.Engine.UI.Debug.Components.Controls;
 
 /// <summary>
-/// A text label component.
+///     A text label component.
 /// </summary>
 public class Label : UIComponent
 {
@@ -21,11 +21,13 @@ public class Label : UIComponent
     protected override (float width, float height)? GetContentSize()
     {
         if (!AutoSize || string.IsNullOrEmpty(Text))
+        {
             return null;
+        }
 
         try
         {
-            var size = Renderer.MeasureText(Text);
+            Vector2 size = Renderer.MeasureText(Text);
             return (size.X, size.Y);
         }
         catch
@@ -37,13 +39,11 @@ public class Label : UIComponent
     protected override void OnRender(UIContext context)
     {
         if (string.IsNullOrEmpty(Text))
+        {
             return;
+        }
 
-        var color = Color ?? Theme.TextPrimary;
+        Color color = Color ?? Theme.TextPrimary;
         context.Renderer.DrawText(Text, Rect.X, Rect.Y, color);
     }
 }
-
-
-
-

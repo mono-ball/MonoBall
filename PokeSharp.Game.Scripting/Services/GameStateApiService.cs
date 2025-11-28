@@ -18,15 +18,19 @@ public class GameStateApiService(ILogger<GameStateApiService> logger) : IGameSta
     public bool GetFlag(string flagId)
     {
         if (string.IsNullOrWhiteSpace(flagId))
+        {
             return false;
+        }
 
-        return _flags.TryGetValue(flagId, out var value) && value;
+        return _flags.TryGetValue(flagId, out bool value) && value;
     }
 
     public void SetFlag(string flagId, bool value)
     {
         if (string.IsNullOrWhiteSpace(flagId))
+        {
             throw new ArgumentException("Flag ID cannot be null or empty", nameof(flagId));
+        }
 
         _flags[flagId] = value;
         _logger.LogDebug("Flag {FlagId} set to {Value}", flagId, value);
@@ -35,7 +39,9 @@ public class GameStateApiService(ILogger<GameStateApiService> logger) : IGameSta
     public bool FlagExists(string flagId)
     {
         if (string.IsNullOrWhiteSpace(flagId))
+        {
             return false;
+        }
 
         return _flags.ContainsKey(flagId);
     }
@@ -43,15 +49,19 @@ public class GameStateApiService(ILogger<GameStateApiService> logger) : IGameSta
     public string? GetVariable(string key)
     {
         if (string.IsNullOrWhiteSpace(key))
+        {
             return null;
+        }
 
-        return _variables.TryGetValue(key, out var value) ? value : null;
+        return _variables.TryGetValue(key, out string? value) ? value : null;
     }
 
     public void SetVariable(string key, string value)
     {
         if (string.IsNullOrWhiteSpace(key))
+        {
             throw new ArgumentException("Variable key cannot be null or empty", nameof(key));
+        }
 
         _variables[key] = value;
         _logger.LogDebug("Variable {Key} set to {Value}", key, value);
@@ -60,7 +70,9 @@ public class GameStateApiService(ILogger<GameStateApiService> logger) : IGameSta
     public bool VariableExists(string key)
     {
         if (string.IsNullOrWhiteSpace(key))
+        {
             return false;
+        }
 
         return _variables.ContainsKey(key);
     }
@@ -68,7 +80,9 @@ public class GameStateApiService(ILogger<GameStateApiService> logger) : IGameSta
     public void DeleteVariable(string key)
     {
         if (string.IsNullOrWhiteSpace(key))
+        {
             return;
+        }
 
         _variables.Remove(key);
         _logger.LogDebug("Variable {Key} deleted", key);
@@ -92,7 +106,9 @@ public class GameStateApiService(ILogger<GameStateApiService> logger) : IGameSta
     public int RandomRange(int min, int max)
     {
         if (min >= max)
+        {
             throw new ArgumentException("min must be less than max", nameof(min));
+        }
 
         return System.Random.Shared.Next(min, max);
     }

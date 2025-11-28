@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Reflection;
 using Arch.Core;
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
@@ -56,19 +57,14 @@ public class ElevationRenderSystem(
     /// </summary>
     private const int BorderRenderMarginTiles = 2;
 
-    // Reusable Vector2/Rectangle instances to avoid allocations (400-600 per frame eliminated)
-    private Vector2 _reusablePosition = Vector2.Zero;
-    private Vector2 _reusableTileOrigin = Vector2.Zero;
-    private Rectangle _reusableSourceRect = Rectangle.Empty;
+    // Cache border data for the current frame (avoids repeated queries)
+    private readonly List<MapBorderInfo> _cachedMapBorders = new(5);
+
+    // Cache ALL map bounds for border exclusion (includes maps without borders)
+    private readonly List<MapBoundsInfo> _cachedMapBounds = new(10);
 
     // Cache query descriptions to avoid allocation every frame
     private readonly QueryDescription _cameraQuery = QueryCache.Get<Player, Camera>();
-
-    // Query for player position (to determine current map for borders)
-    private readonly QueryDescription _playerPositionQuery = QueryCache.Get<Player, Position>();
-
-    // Cached player's current map ID (for border rendering)
-    private int _cachedPlayerMapId = -1;
 
     private readonly GraphicsDevice _graphicsDevice =
         graphicsDevice ?? throw new ArgumentNullException(nameof(graphicsDevice));
@@ -78,6 +74,22 @@ public class ElevationRenderSystem(
 
     private readonly ILogger<ElevationRenderSystem>? _logger = logger;
 
+    // Map border query for Pokemon Emerald-style border rendering
+    private readonly QueryDescription _mapBorderQuery = QueryCache.Get<
+        MapInfo,
+        MapWorldPosition,
+        MapBorder
+    >();
+
+    // Cache map world origins for multi-map rendering (updated per frame)
+    private readonly Dictionary<int, Vector2> _mapWorldOrigins = new(10);
+
+    // Map world position query for multi-map streaming
+    private readonly QueryDescription _mapWorldPosQuery = QueryCache.Get<
+        MapInfo,
+        MapWorldPosition
+    >();
+
     // Sprite queries (moving and static)
     private readonly QueryDescription _movingSpriteQuery = QueryCache.Get<
         Position,
@@ -85,6 +97,9 @@ public class ElevationRenderSystem(
         GridMovement,
         Elevation
     >();
+
+    // Query for player position (to determine current map for borders)
+    private readonly QueryDescription _playerPositionQuery = QueryCache.Get<Player, Position>();
 
     private readonly SpriteBatch _spriteBatch = new(graphicsDevice);
 
@@ -108,35 +123,13 @@ public class ElevationRenderSystem(
         Elevation
     >();
 
-    // Map world position query for multi-map streaming
-    private readonly QueryDescription _mapWorldPosQuery = QueryCache.Get<
-        MapInfo,
-        MapWorldPosition
-    >();
-
-    // Map border query for Pokemon Emerald-style border rendering
-    private readonly QueryDescription _mapBorderQuery = QueryCache.Get<
-        MapInfo,
-        MapWorldPosition,
-        MapBorder
-    >();
-
     private Rectangle? _cachedCameraBounds;
-
-    // Cache border data for the current frame (avoids repeated queries)
-    private readonly List<MapBorderInfo> _cachedMapBorders = new(5);
-
-    // Track whether we've logged the border texture warning (avoid spam)
-    private bool _loggedBorderTextureWarning;
-
-    // Cache ALL map bounds for border exclusion (includes maps without borders)
-    private readonly List<MapBoundsInfo> _cachedMapBounds = new(10);
 
     // Cache camera transform to avoid recalculating
     private Matrix _cachedCameraTransform = Matrix.Identity;
 
-    // Cache map world origins for multi-map rendering (updated per frame)
-    private readonly Dictionary<int, Vector2> _mapWorldOrigins = new(10);
+    // Cached player's current map ID (for border rendering)
+    private int _cachedPlayerMapId = -1;
 
     // Performance profiling
     private bool _enableDetailedProfiling;
@@ -145,6 +138,14 @@ public class ElevationRenderSystem(
     private int _lastEntityCount;
     private int _lastSpriteCount;
     private int _lastTileCount;
+
+    // Track whether we've logged the border texture warning (avoid spam)
+    private bool _loggedBorderTextureWarning;
+
+    // Reusable Vector2/Rectangle instances to avoid allocations (400-600 per frame eliminated)
+    private Vector2 _reusablePosition = Vector2.Zero;
+    private Rectangle _reusableSourceRect = Rectangle.Empty;
+    private Vector2 _reusableTileOrigin = Vector2.Zero;
 
     private double _setupTime,
         _batchBeginTime,
@@ -225,20 +226,21 @@ public class ElevationRenderSystem(
             );
 
             // Render image layers (they sort with everything via layerDepth)
-            var imageLayerCount = RenderImageLayers(world);
+            int imageLayerCount = RenderImageLayers(world);
 
             // Render border tiles (Pokemon Emerald-style 2x2 pattern for areas outside map bounds)
-            var borderTilesRendered = RenderBorders(world);
+            int borderTilesRendered = RenderBorders(world);
 
             // Render all tiles (elevation + Y sorting via SpriteBatch)
-            var totalTilesRendered = RenderAllTiles(world);
+            int totalTilesRendered = RenderAllTiles(world);
 
             // Render all sprites (elevation + Y sorting via SpriteBatch)
-            var spriteCount = RenderAllSprites(world);
+            int spriteCount = RenderAllSprites(world);
 
             if (_frameCounter % RenderingConstants.PerformanceLogInterval == 0)
             {
-                var totalEntities = totalTilesRendered + spriteCount + imageLayerCount + borderTilesRendered;
+                int totalEntities =
+                    totalTilesRendered + spriteCount + imageLayerCount + borderTilesRendered;
                 _logger?.LogRenderStats(
                     totalEntities,
                     totalTilesRendered + borderTilesRendered,
@@ -246,12 +248,18 @@ public class ElevationRenderSystem(
                     _frameCounter
                 );
                 if (imageLayerCount > 0)
+                {
                     _logger?.LogImageLayersRendered(imageLayerCount);
+                }
+
                 if (borderTilesRendered > 0)
+                {
                     _logger?.LogDebug("Border tiles rendered: {Count}", borderTilesRendered);
+                }
             }
 
-            _lastEntityCount = totalTilesRendered + spriteCount + imageLayerCount + borderTilesRendered;
+            _lastEntityCount =
+                totalTilesRendered + spriteCount + imageLayerCount + borderTilesRendered;
             _lastTileCount = totalTilesRendered + borderTilesRendered;
             _lastSpriteCount = spriteCount;
 
@@ -273,9 +281,11 @@ public class ElevationRenderSystem(
     /// </summary>
     public void SetTileSize(int tileSize)
     {
-        var clamped = tileSize > 0 ? tileSize : 16; // Fallback to 16 if invalid
+        int clamped = tileSize > 0 ? tileSize : 16; // Fallback to 16 if invalid
         if (TileSize == clamped)
+        {
             return;
+        }
 
         TileSize = clamped;
         _cachedCameraBounds = null;
@@ -295,8 +305,8 @@ public class ElevationRenderSystem(
         if (loader != null)
         {
             // Create delegate once during initialization to eliminate reflection overhead
-            var loaderType = loader.GetType();
-            var method = loaderType.GetMethod(
+            Type loaderType = loader.GetType();
+            MethodInfo? method = loaderType.GetMethod(
                 "LoadSpriteTexture",
                 new[] { typeof(string), typeof(string) }
             );
@@ -344,15 +354,15 @@ public class ElevationRenderSystem(
         _batchBeginTime = swBatchBegin.Elapsed.TotalMilliseconds;
 
         // Render image layers
-        var imageLayerCount = RenderImageLayers(world);
+        int imageLayerCount = RenderImageLayers(world);
 
         var swTiles = Stopwatch.StartNew();
-        var totalTilesRendered = RenderAllTiles(world);
+        int totalTilesRendered = RenderAllTiles(world);
         swTiles.Stop();
         _tileTime = swTiles.Elapsed.TotalMilliseconds;
 
         var swSprites = Stopwatch.StartNew();
-        var spriteCount = RenderAllSprites(world);
+        int spriteCount = RenderAllSprites(world);
         swSprites.Stop();
         _spriteTime = swSprites.Elapsed.TotalMilliseconds;
 
@@ -363,7 +373,7 @@ public class ElevationRenderSystem(
 
         if (_frameCounter % 300 == 0)
         {
-            var totalEntities = totalTilesRendered + spriteCount + imageLayerCount;
+            int totalEntities = totalTilesRendered + spriteCount + imageLayerCount;
             _logger?.LogRenderStats(totalEntities, totalTilesRendered, spriteCount, _frameCounter);
             _logger?.LogRenderBreakdown(
                 _setupTime,
@@ -373,7 +383,9 @@ public class ElevationRenderSystem(
                 _batchEndTime
             );
             if (imageLayerCount > 0)
+            {
                 _logger?.LogImageLayersRendered(imageLayerCount);
+            }
         }
 
         _lastEntityCount = totalTilesRendered + spriteCount + imageLayerCount;
@@ -434,18 +446,22 @@ public class ElevationRenderSystem(
 
         // Optionally preload sprite textures if lazy loader is available
         if (_spriteTextureLoader != null)
-            foreach (var textureId in texturesNeeded)
+        {
+            foreach (string textureId in texturesNeeded)
+            {
                 if (!AssetManager.HasTexture(textureId) && textureId.StartsWith("sprites/"))
                 {
                     // Parse sprite category/name from texture key
-                    var parts = textureId.Split('/');
+                    string[] parts = textureId.Split('/');
                     if (parts.Length >= 3)
                     {
-                        var category = parts[1];
-                        var spriteName = parts[2];
+                        string category = parts[1];
+                        string spriteName = parts[2];
                         TryLazyLoadSprite(category, spriteName, textureId);
                     }
                 }
+            }
+        }
 
         sw.Stop();
         _logger?.LogWorkflowStatus(
@@ -466,21 +482,27 @@ public class ElevationRenderSystem(
             {
                 // Only recalculate if camera changed (dirty flag optimization)
                 if (!camera.IsDirty && _cachedCameraTransform != Matrix.Identity)
+                {
                     return;
+                }
 
                 _cachedCameraTransform = camera.GetTransformMatrix();
 
                 // Calculate camera bounds for culling
-                var left =
+                int left =
                     (int)(camera.Position.X / TileSize)
-                    - camera.Viewport.Width / 2 / TileSize / (int)camera.Zoom
+                    - (camera.Viewport.Width / 2 / TileSize / (int)camera.Zoom)
                     - CameraViewportMarginTiles;
-                var top =
+                int top =
                     (int)(camera.Position.Y / TileSize)
-                    - camera.Viewport.Height / 2 / TileSize / (int)camera.Zoom
+                    - (camera.Viewport.Height / 2 / TileSize / (int)camera.Zoom)
                     - CameraViewportMarginTiles;
-                var width = camera.Viewport.Width / TileSize / (int)camera.Zoom + CameraViewportMarginTiles * 2;
-                var height = camera.Viewport.Height / TileSize / (int)camera.Zoom + CameraViewportMarginTiles * 2;
+                int width =
+                    (camera.Viewport.Width / TileSize / (int)camera.Zoom)
+                    + (CameraViewportMarginTiles * 2);
+                int height =
+                    (camera.Viewport.Height / TileSize / (int)camera.Zoom)
+                    + (CameraViewportMarginTiles * 2);
 
                 _cachedCameraBounds = new Rectangle(left, top, width, height);
 
@@ -515,14 +537,16 @@ public class ElevationRenderSystem(
                 _mapWorldOrigins[mapInfo.MapId.Value] = worldPos.WorldOrigin;
 
                 // Cache map bounds for border exclusion
-                _cachedMapBounds.Add(new MapBoundsInfo
-                {
-                    MapId = mapInfo.MapId.Value,
-                    WorldOrigin = worldPos.WorldOrigin,
-                    MapWidth = mapInfo.Width,
-                    MapHeight = mapInfo.Height,
-                    TileSize = mapInfo.TileSize,
-                });
+                _cachedMapBounds.Add(
+                    new MapBoundsInfo
+                    {
+                        MapId = mapInfo.MapId.Value,
+                        WorldOrigin = worldPos.WorldOrigin,
+                        MapWidth = mapInfo.Width,
+                        MapHeight = mapInfo.Height,
+                        TileSize = mapInfo.TileSize,
+                    }
+                );
             }
         );
     }
@@ -533,12 +557,12 @@ public class ElevationRenderSystem(
     /// </summary>
     private int RenderAllTiles(World world)
     {
-        var tilesRendered = 0;
-        var tilesCulled = 0;
+        int tilesRendered = 0;
+        int tilesCulled = 0;
 
         try
         {
-            var cameraBounds = _cachedCameraBounds;
+            Rectangle? cameraBounds = _cachedCameraBounds;
 
             // CRITICAL OPTIMIZATION: Use single query with optional LayerOffset
             // OLD: Two separate queries + expensive world.Has<LayerOffset>(entity) check per tile
@@ -558,16 +582,20 @@ public class ElevationRenderSystem(
                 ) =>
                 {
                     // Get map world origin for multi-map rendering (needed for culling)
-                    var worldOrigin = _mapWorldOrigins.TryGetValue(pos.MapId.Value, out var origin)
+                    Vector2 worldOrigin = _mapWorldOrigins.TryGetValue(
+                        pos.MapId.Value,
+                        out Vector2 origin
+                    )
                         ? origin
                         : Vector2.Zero;
 
                     // Convert tile position to world tile coordinates for proper culling
-                    var worldTileX = pos.X + (int)(worldOrigin.X / TileSize);
-                    var worldTileY = pos.Y + (int)(worldOrigin.Y / TileSize);
+                    int worldTileX = pos.X + (int)(worldOrigin.X / TileSize);
+                    int worldTileY = pos.Y + (int)(worldOrigin.Y / TileSize);
 
                     // Viewport culling: skip tiles outside camera bounds (in world space)
                     if (cameraBounds.HasValue)
+                    {
                         if (
                             worldTileX < cameraBounds.Value.Left
                             || worldTileX >= cameraBounds.Value.Right
@@ -578,19 +606,23 @@ public class ElevationRenderSystem(
                             tilesCulled++;
                             return;
                         }
+                    }
 
                     // Get tileset texture (cached in AssetManager)
                     if (!AssetManager.HasTexture(sprite.TilesetId))
                     {
                         if (tilesRendered == 0) // Only warn once
+                        {
                             _logger?.LogWarning(
                                 "  WARNING: Tileset '{TilesetId}' NOT FOUND - skipping tiles",
                                 sprite.TilesetId
                             );
+                        }
+
                         return;
                     }
 
-                    var texture = AssetManager.GetTexture(sprite.TilesetId);
+                    Texture2D texture = AssetManager.GetTexture(sprite.TilesetId);
 
                     // OPTIMIZATION: Check for LayerOffset inline (faster than separate query)
                     // TryGet is faster than Has() + Get() because it's a single lookup
@@ -599,25 +631,34 @@ public class ElevationRenderSystem(
                     {
                         // Apply layer offset for parallax effect + map world offset
                         // +1 to Y for bottom-left origin alignment
-                        _reusablePosition.X = pos.X * TileSize + offset.X + worldOrigin.X;
-                        _reusablePosition.Y = (pos.Y + 1) * TileSize + offset.Y + worldOrigin.Y;
+                        _reusablePosition.X = (pos.X * TileSize) + offset.X + worldOrigin.X;
+                        _reusablePosition.Y = ((pos.Y + 1) * TileSize) + offset.Y + worldOrigin.Y;
                     }
                     else
                     {
                         // Standard positioning + map world offset (+1 to Y for bottom-left origin alignment)
-                        _reusablePosition.X = pos.X * TileSize + worldOrigin.X;
-                        _reusablePosition.Y = (pos.Y + 1) * TileSize + worldOrigin.Y;
+                        _reusablePosition.X = (pos.X * TileSize) + worldOrigin.X;
+                        _reusablePosition.Y = ((pos.Y + 1) * TileSize) + worldOrigin.Y;
                     }
 
                     // Calculate elevation-based layer depth with MapId-aware sorting
-                    var layerDepth = CalculateElevationDepth(elevation.Value, _reusablePosition.Y, pos.MapId.Value);
+                    float layerDepth = CalculateElevationDepth(
+                        elevation.Value,
+                        _reusablePosition.Y,
+                        pos.MapId.Value
+                    );
 
                     // Apply flip flags from Tiled
-                    var effects = SpriteEffects.None;
+                    SpriteEffects effects = SpriteEffects.None;
                     if (sprite.FlipHorizontally)
+                    {
                         effects |= SpriteEffects.FlipHorizontally;
+                    }
+
                     if (sprite.FlipVertically)
+                    {
                         effects |= SpriteEffects.FlipVertically;
+                    }
 
                     // Render tile
                     // Reuse static Vector2 for tile origin (bottom-left for grid alignment)
@@ -655,7 +696,7 @@ public class ElevationRenderSystem(
     /// </summary>
     private int RenderAllSprites(World world)
     {
-        var spriteCount = 0;
+        int spriteCount = 0;
 
         try
         {
@@ -680,9 +721,13 @@ public class ElevationRenderSystem(
 
                     // Check if this sprite has movement component (inline optimization)
                     if (world.TryGet(entity, out GridMovement movement))
+                    {
                         RenderMovingSprite(ref position, ref sprite, ref movement, ref elevation);
+                    }
                     else
+                    {
                         RenderStaticSprite(ref position, ref sprite, ref elevation);
+                    }
                 }
             );
         }
@@ -704,12 +749,14 @@ public class ElevationRenderSystem(
         try
         {
             // Get texture with lazy loading support
-            var texture = TryGetSpriteTexture(ref sprite);
+            Texture2D? texture = TryGetSpriteTexture(ref sprite);
             if (texture == null)
+            {
                 return;
+            }
 
             // Determine source rectangle - reuse static Rectangle to avoid allocation
-            var sourceRect = sprite.SourceRect;
+            Rectangle sourceRect = sprite.SourceRect;
             if (sourceRect.IsEmpty)
             {
                 _reusableSourceRect.X = 0;
@@ -734,7 +781,7 @@ public class ElevationRenderSystem(
             if (movement.IsMoving)
             {
                 // Use target grid position for sorting
-                var targetGridY = (int)(movement.TargetPosition.Y / TileSize);
+                int targetGridY = (int)(movement.TargetPosition.Y / TileSize);
                 groundY = (targetGridY + 1) * TileSize; // +1 for bottom of tile
             }
             else
@@ -743,10 +790,14 @@ public class ElevationRenderSystem(
                 groundY = (position.Y + 1) * TileSize;
             }
 
-            var layerDepth = CalculateElevationDepth(elevation.Value, groundY, position.MapId.Value);
+            float layerDepth = CalculateElevationDepth(
+                elevation.Value,
+                groundY,
+                position.MapId.Value
+            );
 
             // Determine sprite effects (flip horizontal for left-facing)
-            var effects = sprite.FlipHorizontal
+            SpriteEffects effects = sprite.FlipHorizontal
                 ? SpriteEffects.FlipHorizontally
                 : SpriteEffects.None;
 
@@ -785,12 +836,14 @@ public class ElevationRenderSystem(
         try
         {
             // Get texture with lazy loading support
-            var texture = TryGetSpriteTexture(ref sprite);
+            Texture2D? texture = TryGetSpriteTexture(ref sprite);
             if (texture == null)
+            {
                 return;
+            }
 
             // Determine source rectangle - reuse static Rectangle to avoid allocation
-            var sourceRect = sprite.SourceRect;
+            Rectangle sourceRect = sprite.SourceRect;
             if (sourceRect.IsEmpty)
             {
                 _reusableSourceRect.X = 0;
@@ -816,10 +869,14 @@ public class ElevationRenderSystem(
             // The pixel position is just the visual interpolation for smooth movement.
             // For a 16x16 tile grid, the entity's ground Y is at the bottom of their grid tile.
             float groundY = (position.Y + 1) * TileSize; // +1 because we want bottom of tile
-            var layerDepth = CalculateElevationDepth(elevation.Value, groundY, position.MapId.Value);
+            float layerDepth = CalculateElevationDepth(
+                elevation.Value,
+                groundY,
+                position.MapId.Value
+            );
 
             // Determine sprite effects (flip horizontal for left-facing)
-            var effects = sprite.FlipHorizontal
+            SpriteEffects effects = sprite.FlipHorizontal
                 ? SpriteEffects.FlipHorizontally
                 : SpriteEffects.None;
 
@@ -857,18 +914,22 @@ public class ElevationRenderSystem(
     /// <returns>The texture if available, null otherwise.</returns>
     private Texture2D? TryGetSpriteTexture(ref Sprite sprite)
     {
-        var textureKey = sprite.TextureKey;
+        string textureKey = sprite.TextureKey;
 
         // Check if texture already loaded
         if (AssetManager.HasTexture(textureKey))
+        {
             return AssetManager.GetTexture(textureKey);
+        }
 
         // Try lazy load
         TryLazyLoadSprite(sprite.Category, sprite.SpriteName, textureKey);
 
         // Check again after lazy load
         if (AssetManager.HasTexture(textureKey))
+        {
             return AssetManager.GetTexture(textureKey);
+        }
 
         // Texture unavailable
         _logger?.LogWarning(
@@ -890,7 +951,9 @@ public class ElevationRenderSystem(
     private void TryLazyLoadSprite(string category, string spriteName, string textureKey)
     {
         if (_spriteLoadDelegate == null)
+        {
             return;
+        }
 
         try
         {
@@ -900,7 +963,9 @@ public class ElevationRenderSystem(
 
             // Verify the texture was actually loaded
             if (AssetManager.HasTexture(textureKey))
+            {
                 _logger?.LogSpriteLoadedOnDemand(textureKey);
+            }
         }
         catch (Exception ex)
         {
@@ -921,7 +986,7 @@ public class ElevationRenderSystem(
     private static float CalculateElevationDepth(byte elevation, float yPosition, int mapId)
     {
         // Normalize Y position to 0.0-1.0 range
-        var normalizedY = yPosition / MapHeight;
+        float normalizedY = yPosition / MapHeight;
 
         // Depth calculation priority:
         // 1. Elevation (0-240 range): Primary sorting by height
@@ -930,14 +995,14 @@ public class ElevationRenderSystem(
         //
         // MapId offset: 0.1 per mapId (supports 100 maps, range 0-10)
         // This ensures maps at same elevation don't z-fight (Route 102 vs Oldale Town)
-        var mapOffset = mapId * 0.1f;
+        float mapOffset = mapId * 0.1f;
 
         // Calculate depth: elevation (0-240) + mapId (0-10) + yPos (0-1) = 0-251
-        var depth = elevation * 16.0f + mapOffset + normalizedY;
+        float depth = (elevation * 16.0f) + mapOffset + normalizedY;
 
         // Invert for SpriteBatch (0.0 = front, 1.0 = back)
         // Max depth is (15 * 16) + (100 * 0.1) + 1 = 240 + 10 + 1 = 251
-        var layerDepth = 1.0f - depth / 251.0f;
+        float layerDepth = 1.0f - (depth / 251.0f);
 
         // Clamp to valid range
         return MathHelper.Clamp(layerDepth, 0.0f, 1.0f);
@@ -950,7 +1015,7 @@ public class ElevationRenderSystem(
     /// <returns>Number of image layers rendered.</returns>
     private int RenderImageLayers(World world)
     {
-        var rendered = 0;
+        int rendered = 0;
 
         try
         {
@@ -962,14 +1027,17 @@ public class ElevationRenderSystem(
                     if (!AssetManager.HasTexture(imageLayer.TextureId))
                     {
                         if (rendered == 0) // Only warn once
+                        {
                             _logger?.LogWarning(
                                 "  WARNING: Image layer texture '{TextureId}' NOT FOUND - skipping",
                                 imageLayer.TextureId
                             );
+                        }
+
                         return;
                     }
 
-                    var texture = AssetManager.GetTexture(imageLayer.TextureId);
+                    Texture2D texture = AssetManager.GetTexture(imageLayer.TextureId);
 
                     // Render the full image at the specified position
                     _spriteBatch.Draw(
@@ -1010,17 +1078,19 @@ public class ElevationRenderSystem(
             {
                 if (border.HasBorder)
                 {
-                    _cachedMapBorders.Add(new MapBorderInfo
-                    {
-                        MapId = mapInfo.MapId.Value,
-                        WorldOrigin = worldPos.WorldOrigin,
-                        WidthInPixels = worldPos.WidthInPixels,
-                        HeightInPixels = worldPos.HeightInPixels,
-                        MapWidth = mapInfo.Width,
-                        MapHeight = mapInfo.Height,
-                        TileSize = mapInfo.TileSize,
-                        Border = border,
-                    });
+                    _cachedMapBorders.Add(
+                        new MapBorderInfo
+                        {
+                            MapId = mapInfo.MapId.Value,
+                            WorldOrigin = worldPos.WorldOrigin,
+                            WidthInPixels = worldPos.WidthInPixels,
+                            HeightInPixels = worldPos.HeightInPixels,
+                            MapWidth = mapInfo.Width,
+                            MapHeight = mapInfo.Height,
+                            TileSize = mapInfo.TileSize,
+                            Border = border,
+                        }
+                    );
                 }
             }
         );
@@ -1036,11 +1106,13 @@ public class ElevationRenderSystem(
     private int RenderBorders(World world)
     {
         if (_cachedMapBorders.Count == 0 || !_cachedCameraBounds.HasValue || _cachedPlayerMapId < 0)
+        {
             return 0;
+        }
 
         // Find the border for the player's current map only
         MapBorderInfo? playerMapBorder = null;
-        foreach (var borderInfo in _cachedMapBorders)
+        foreach (MapBorderInfo borderInfo in _cachedMapBorders)
         {
             if (borderInfo.MapId == _cachedPlayerMapId)
             {
@@ -1051,38 +1123,42 @@ public class ElevationRenderSystem(
 
         // If player's current map has no border, don't render any borders
         if (!playerMapBorder.HasValue)
-            return 0;
-
-        var primaryBorder = playerMapBorder.Value;
-        var border = primaryBorder.Border;
-        var tileSize = primaryBorder.TileSize;
-
-        var cameraBounds = _cachedCameraBounds.Value;
-
-        // Check if camera extends beyond the player's current map bounds
-        // Only render borders if camera shows area outside the current map
-        var mapOriginTileX = (int)(primaryBorder.WorldOrigin.X / tileSize);
-        var mapOriginTileY = (int)(primaryBorder.WorldOrigin.Y / tileSize);
-        var mapRightTile = mapOriginTileX + primaryBorder.MapWidth;
-        var mapBottomTile = mapOriginTileY + primaryBorder.MapHeight;
-
-        // If camera is entirely within the current map bounds, no borders needed
-        if (cameraBounds.Left >= mapOriginTileX &&
-            cameraBounds.Right <= mapRightTile &&
-            cameraBounds.Top >= mapOriginTileY &&
-            cameraBounds.Bottom <= mapBottomTile)
         {
             return 0;
         }
 
-        var bordersRendered = 0;
+        MapBorderInfo primaryBorder = playerMapBorder.Value;
+        MapBorder border = primaryBorder.Border;
+        int tileSize = primaryBorder.TileSize;
+
+        Rectangle cameraBounds = _cachedCameraBounds.Value;
+
+        // Check if camera extends beyond the player's current map bounds
+        // Only render borders if camera shows area outside the current map
+        int mapOriginTileX = (int)(primaryBorder.WorldOrigin.X / tileSize);
+        int mapOriginTileY = (int)(primaryBorder.WorldOrigin.Y / tileSize);
+        int mapRightTile = mapOriginTileX + primaryBorder.MapWidth;
+        int mapBottomTile = mapOriginTileY + primaryBorder.MapHeight;
+
+        // If camera is entirely within the current map bounds, no borders needed
+        if (
+            cameraBounds.Left >= mapOriginTileX
+            && cameraBounds.Right <= mapRightTile
+            && cameraBounds.Top >= mapOriginTileY
+            && cameraBounds.Bottom <= mapBottomTile
+        )
+        {
+            return 0;
+        }
+
+        int bordersRendered = 0;
 
         // Render border tiles in the visible camera area
         // Extend render area slightly beyond camera for smooth scrolling
-        var renderLeft = cameraBounds.Left - BorderRenderMarginTiles;
-        var renderRight = cameraBounds.Right + BorderRenderMarginTiles;
-        var renderTop = cameraBounds.Top - BorderRenderMarginTiles;
-        var renderBottom = cameraBounds.Bottom + BorderRenderMarginTiles;
+        int renderLeft = cameraBounds.Left - BorderRenderMarginTiles;
+        int renderRight = cameraBounds.Right + BorderRenderMarginTiles;
+        int renderTop = cameraBounds.Top - BorderRenderMarginTiles;
+        int renderBottom = cameraBounds.Bottom + BorderRenderMarginTiles;
 
         // Get texture for border tiles
         if (!AssetManager.HasTexture(border.TilesetId))
@@ -1096,25 +1172,28 @@ public class ElevationRenderSystem(
                 );
                 _loggedBorderTextureWarning = true;
             }
+
             return 0;
         }
 
-        var texture = AssetManager.GetTexture(border.TilesetId);
+        Texture2D texture = AssetManager.GetTexture(border.TilesetId);
 
         // Render border tiles (only tiles OUTSIDE ALL map bounds)
-        for (var y = renderTop; y < renderBottom; y++)
+        for (int y = renderTop; y < renderBottom; y++)
         {
-            for (var x = renderLeft; x < renderRight; x++)
+            for (int x = renderLeft; x < renderRight; x++)
             {
                 // Skip tiles that are INSIDE ANY loaded map's bounds
                 if (IsTileInsideAnyMap(x, y, tileSize))
+                {
                     continue;
+                }
 
                 // Get the border tile for this position
                 // Use coordinates relative to the player's current map for the tiling pattern
-                var relativeX = x - mapOriginTileX;
-                var relativeY = y - mapOriginTileY;
-                var borderIndex = MapBorder.GetBorderTileIndex(relativeX, relativeY);
+                int relativeX = x - mapOriginTileX;
+                int relativeY = y - mapOriginTileY;
+                int borderIndex = MapBorder.GetBorderTileIndex(relativeX, relativeY);
 
                 // Calculate world pixel position for this border tile
                 // Use the same coordinate system as regular tiles
@@ -1122,11 +1201,15 @@ public class ElevationRenderSystem(
                 _reusablePosition.Y = (y + 1) * tileSize; // +1 for bottom-left origin alignment
 
                 // ===== RENDER BOTTOM LAYER (ground/trunk tiles) =====
-                var bottomSourceRect = border.BottomSourceRects[borderIndex];
+                Rectangle bottomSourceRect = border.BottomSourceRects[borderIndex];
                 if (!bottomSourceRect.IsEmpty)
                 {
                     // Use default elevation (3) for bottom layer - standard ground level
-                    var bottomLayerDepth = CalculateElevationDepth(Elevation.Default, _reusablePosition.Y, primaryBorder.MapId);
+                    float bottomLayerDepth = CalculateElevationDepth(
+                        Elevation.Default,
+                        _reusablePosition.Y,
+                        primaryBorder.MapId
+                    );
 
                     // Origin for bottom-left alignment (same as regular tiles)
                     _reusableTileOrigin.X = 0;
@@ -1150,11 +1233,15 @@ public class ElevationRenderSystem(
                 // ===== RENDER TOP LAYER (overhead/foliage tiles) =====
                 if (border.HasTopLayer)
                 {
-                    var topSourceRect = border.TopSourceRects[borderIndex];
+                    Rectangle topSourceRect = border.TopSourceRects[borderIndex];
                     if (!topSourceRect.IsEmpty)
                     {
                         // Use overhead elevation (9) for top layer - above player's head
-                        var topLayerDepth = CalculateElevationDepth(Elevation.Overhead, _reusablePosition.Y, primaryBorder.MapId);
+                        float topLayerDepth = CalculateElevationDepth(
+                            Elevation.Overhead,
+                            _reusablePosition.Y,
+                            primaryBorder.MapId
+                        );
 
                         _reusableTileOrigin.X = 0;
                         _reusableTileOrigin.Y = topSourceRect.Height;
@@ -1190,15 +1277,19 @@ public class ElevationRenderSystem(
     private bool IsTileInsideAnyMap(int tileX, int tileY, int tileSize)
     {
         // Check against ALL loaded maps (not just those with borders)
-        foreach (var mapInfo in _cachedMapBounds)
+        foreach (MapBoundsInfo mapInfo in _cachedMapBounds)
         {
-            var mapOriginTileX = (int)(mapInfo.WorldOrigin.X / tileSize);
-            var mapOriginTileY = (int)(mapInfo.WorldOrigin.Y / tileSize);
-            var mapRightTile = mapOriginTileX + mapInfo.MapWidth;
-            var mapBottomTile = mapOriginTileY + mapInfo.MapHeight;
+            int mapOriginTileX = (int)(mapInfo.WorldOrigin.X / tileSize);
+            int mapOriginTileY = (int)(mapInfo.WorldOrigin.Y / tileSize);
+            int mapRightTile = mapOriginTileX + mapInfo.MapWidth;
+            int mapBottomTile = mapOriginTileY + mapInfo.MapHeight;
 
-            if (tileX >= mapOriginTileX && tileX < mapRightTile &&
-                tileY >= mapOriginTileY && tileY < mapBottomTile)
+            if (
+                tileX >= mapOriginTileX
+                && tileX < mapRightTile
+                && tileY >= mapOriginTileY
+                && tileY < mapBottomTile
+            )
             {
                 return true;
             }

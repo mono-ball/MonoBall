@@ -1,5 +1,3 @@
-using Microsoft.Xna.Framework;
-using PokeSharp.Engine.UI.Debug.Components.Base;
 using PokeSharp.Engine.UI.Debug.Components.Controls;
 using PokeSharp.Engine.UI.Debug.Components.Layout;
 using PokeSharp.Engine.UI.Debug.Core;
@@ -8,26 +6,11 @@ using PokeSharp.Engine.UI.Debug.Layout;
 namespace PokeSharp.Engine.UI.Debug.Components.Debug;
 
 /// <summary>
-/// A quick command palette for executing debug actions.
-/// Similar to VS Code's command palette.
+///     A quick command palette for executing debug actions.
+///     Similar to VS Code's command palette.
 /// </summary>
 public class QuickCommandPalette : Panel
 {
-    /// <summary>
-    /// Available commands
-    /// </summary>
-    public List<DebugCommand> Commands { get; set; } = new();
-
-    /// <summary>
-    /// Search/filter text
-    /// </summary>
-    public string FilterText { get; set; } = string.Empty;
-
-    /// <summary>
-    /// Callback when command is executed
-    /// </summary>
-    public Action<DebugCommand>? OnCommandExecuted { get; set; }
-
     private InputField? _searchField;
 
     public QuickCommandPalette()
@@ -38,9 +21,24 @@ public class QuickCommandPalette : Panel
         InitializeComponents();
     }
 
+    /// <summary>
+    ///     Available commands
+    /// </summary>
+    public List<DebugCommand> Commands { get; set; } = new();
+
+    /// <summary>
+    ///     Search/filter text
+    /// </summary>
+    public string FilterText { get; set; } = string.Empty;
+
+    /// <summary>
+    ///     Callback when command is executed
+    /// </summary>
+    public Action<DebugCommand>? OnCommandExecuted { get; set; }
+
     private void InitializeComponents()
     {
-        var theme = UITheme.Dark;
+        UITheme theme = UITheme.Dark;
 
         // Title
         var titleLabel = new Label
@@ -51,8 +49,8 @@ public class QuickCommandPalette : Panel
             Constraint = new LayoutConstraint
             {
                 Anchor = Anchor.TopLeft,
-                Margin = theme.PaddingMedium
-            }
+                Margin = theme.PaddingMedium,
+            },
         };
         AddChild(titleLabel);
 
@@ -67,13 +65,13 @@ public class QuickCommandPalette : Panel
                 OffsetY = 30,
                 WidthPercent = 0.9f,
                 Height = theme.InputHeight,
-                MarginLeft = theme.PaddingMedium
+                MarginLeft = theme.PaddingMedium,
             },
-            OnTextChanged = (text) =>
+            OnTextChanged = text =>
             {
                 FilterText = text;
                 UpdateFilteredCommands();
-            }
+            },
         };
         AddChild(_searchField);
 
@@ -87,8 +85,8 @@ public class QuickCommandPalette : Panel
             {
                 Anchor = Anchor.TopLeft,
                 OffsetY = 75,
-                MarginLeft = theme.PaddingMedium
-            }
+                MarginLeft = theme.PaddingMedium,
+            },
         };
         AddChild(hintLabel);
     }
@@ -107,7 +105,7 @@ public class QuickCommandPalette : Panel
 
     private void UpdateCommandButtons(UIContext context)
     {
-        var theme = context.Theme;
+        UITheme theme = context.Theme;
 
         // Clear old buttons (skip title, search field, and hint)
         while (Children.Count > 3)
@@ -116,12 +114,17 @@ public class QuickCommandPalette : Panel
         }
 
         // Get filtered commands
-        var filteredCommands = string.IsNullOrWhiteSpace(FilterText)
+        List<DebugCommand> filteredCommands = string.IsNullOrWhiteSpace(FilterText)
             ? Commands
-            : Commands.Where(c =>
-                c.Name.Contains(FilterText, StringComparison.OrdinalIgnoreCase) ||
-                (c.Description?.Contains(FilterText, StringComparison.OrdinalIgnoreCase) ?? false)
-            ).ToList();
+            : Commands
+                .Where(c =>
+                    c.Name.Contains(FilterText, StringComparison.OrdinalIgnoreCase)
+                    || (
+                        c.Description?.Contains(FilterText, StringComparison.OrdinalIgnoreCase)
+                        ?? false
+                    )
+                )
+                .ToList();
 
         // Create buttons for filtered commands
         float yOffset = 105;
@@ -129,7 +132,7 @@ public class QuickCommandPalette : Panel
 
         for (int i = 0; i < Math.Min(filteredCommands.Count, maxVisible); i++)
         {
-            var command = filteredCommands[i];
+            DebugCommand command = filteredCommands[i];
             var button = new Button
             {
                 Id = $"{Id}_cmd_{i}",
@@ -140,13 +143,13 @@ public class QuickCommandPalette : Panel
                     OffsetY = yOffset,
                     WidthPercent = 0.9f,
                     Height = theme.ButtonHeight,
-                    MarginLeft = theme.PaddingMedium
+                    MarginLeft = theme.PaddingMedium,
                 },
                 OnClick = () =>
                 {
                     command.Execute?.Invoke();
                     OnCommandExecuted?.Invoke(command);
-                }
+                },
             };
 
             AddChild(button);
@@ -163,8 +166,8 @@ public class QuickCommandPalette : Panel
                     {
                         Anchor = Anchor.TopLeft,
                         OffsetY = yOffset + theme.ButtonHeight + 2,
-                        MarginLeft = theme.PaddingMedium + 5
-                    }
+                        MarginLeft = theme.PaddingMedium + 5,
+                    },
                 };
                 AddChild(descLabel);
                 yOffset += theme.ButtonHeight + 22;
@@ -187,8 +190,8 @@ public class QuickCommandPalette : Panel
                 {
                     Anchor = Anchor.TopLeft,
                     OffsetY = yOffset,
-                    MarginLeft = theme.PaddingMedium
-                }
+                    MarginLeft = theme.PaddingMedium,
+                },
             };
             AddChild(moreLabel);
         }
@@ -202,7 +205,7 @@ public class QuickCommandPalette : Panel
 }
 
 /// <summary>
-/// Represents a debug command that can be executed.
+///     Represents a debug command that can be executed.
 /// </summary>
 public class DebugCommand
 {
@@ -221,4 +224,3 @@ public class DebugCommand
     /// <summary>Optional keyboard shortcut hint</summary>
     public string? Shortcut { get; set; }
 }
-

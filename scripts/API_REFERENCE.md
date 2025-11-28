@@ -105,6 +105,7 @@ void Remove<T>(Entity entity)               // Remove component
 ## Common Patterns
 
 ### Get Player Info
+
 ```csharp
 var name = Player.GetPlayerName();
 var pos = Player.GetPlayerPosition();
@@ -113,6 +114,7 @@ Print($"{name} at ({pos.X}, {pos.Y}) with ${money}");
 ```
 
 ### Teleport Player
+
 ```csharp
 var currentMapId = Map.GetCurrentMapId();
 Map.TransitionToMap(currentMapId, 10, 10);
@@ -120,6 +122,7 @@ Print("Teleported to (10, 10)");
 ```
 
 ### Check Map Info
+
 ```csharp
 var mapId = Map.GetCurrentMapId();
 var dims = Map.GetMapDimensions(mapId);
@@ -128,6 +131,7 @@ if (dims.HasValue)
 ```
 
 ### Set Game Flags
+
 ```csharp
 // Set a flag
 GameState.SetFlag("defeated_gym_1", true);
@@ -138,6 +142,7 @@ if (GameState.GetFlag("defeated_gym_1"))
 ```
 
 ### Lock Player Movement (Cutscene)
+
 ```csharp
 // Lock movement
 Player.SetPlayerMovementLocked(true);
@@ -148,6 +153,7 @@ Player.SetPlayerMovementLocked(false);
 ```
 
 ### Give/Take Money
+
 ```csharp
 // Give money
 Player.GiveMoney(1000);
@@ -161,6 +167,7 @@ else
 ```
 
 ### Query Entities (Advanced)
+
 ```csharp
 // Use CountEntities() helper (handles QueryDescription correctly)
 var entityCount = CountEntities();

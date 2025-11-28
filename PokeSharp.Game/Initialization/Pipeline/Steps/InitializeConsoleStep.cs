@@ -3,7 +3,6 @@ using Microsoft.Extensions.Logging;
 using PokeSharp.Engine.Debug;
 using PokeSharp.Engine.Debug.Systems;
 using PokeSharp.Engine.Scenes;
-using PokeSharp.Game.Initialization.Pipeline;
 
 namespace PokeSharp.Game.Initialization.Pipeline.Steps;
 
@@ -22,9 +21,7 @@ public class InitializeConsoleStep : InitializationStepBase
             "Initializing debug console...",
             InitializationProgress.Complete,
             InitializationProgress.Complete
-        )
-    {
-    }
+        ) { }
 
     /// <inheritdoc />
     protected override Task ExecuteStepAsync(
@@ -33,27 +30,36 @@ public class InitializeConsoleStep : InitializationStepBase
         CancellationToken cancellationToken
     )
     {
-        var logger = context.LoggerFactory.CreateLogger<InitializeConsoleStep>();
+        ILogger<InitializeConsoleStep> logger =
+            context.LoggerFactory.CreateLogger<InitializeConsoleStep>();
 
         try
         {
             // Get SceneManager from context (should be available at this stage)
             if (context.SceneManager == null)
             {
-                logger.LogWarning("SceneManager not available in context - debug console will not be available");
+                logger.LogWarning(
+                    "SceneManager not available in context - debug console will not be available"
+                );
                 return Task.CompletedTask;
             }
 
             // Get console system factory from DI (if available)
-            var consoleSystemFactory = context.Services.GetService<ConsoleSystemFactory>();
+            ConsoleSystemFactory? consoleSystemFactory =
+                context.Services.GetService<ConsoleSystemFactory>();
             if (consoleSystemFactory == null)
             {
-                logger.LogWarning("ConsoleSystemFactory not found in DI container - debug console will not be available");
+                logger.LogWarning(
+                    "ConsoleSystemFactory not found in DI container - debug console will not be available"
+                );
                 return Task.CompletedTask;
             }
 
             // Create console system using factory (GraphicsDevice and SceneManager are now available)
-            var consoleSystem = consoleSystemFactory.Create(context.GraphicsDevice, context.SceneManager);
+            ConsoleSystem consoleSystem = consoleSystemFactory.Create(
+                context.GraphicsDevice,
+                context.SceneManager
+            );
 
             logger.LogInformation("ConsoleSystem created, registering with SystemManager...");
 
@@ -64,7 +70,9 @@ public class InitializeConsoleStep : InitializationStepBase
             consoleSystem.Initialize(context.World);
 
             logger.LogInformation("=== DEBUG CONSOLE READY === Press ~ or ` to toggle");
-            logger.LogInformation("Console is managed as a scene - input blocking handled by SceneManager");
+            logger.LogInformation(
+                "Console is managed as a scene - input blocking handled by SceneManager"
+            );
         }
         catch (Exception ex)
         {
@@ -75,4 +83,3 @@ public class InitializeConsoleStep : InitializationStepBase
         return Task.CompletedTask;
     }
 }
-

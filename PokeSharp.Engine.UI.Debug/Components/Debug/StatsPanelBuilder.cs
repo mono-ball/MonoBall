@@ -1,22 +1,23 @@
 using PokeSharp.Engine.UI.Debug.Components.Controls;
-using PokeSharp.Engine.UI.Debug.Core;
 using PokeSharp.Engine.UI.Debug.Layout;
-using System;
 
 namespace PokeSharp.Engine.UI.Debug.Components.Debug;
 
 /// <summary>
-/// Builder for creating StatsPanel with customizable configuration.
+///     Builder for creating StatsPanel with customizable configuration.
 /// </summary>
 public class StatsPanelBuilder
 {
-    private Func<StatsData>? _statsProvider;
     private int _refreshInterval = 2; // frames
+    private Func<StatsData>? _statsProvider;
 
-    public static StatsPanelBuilder Create() => new();
+    public static StatsPanelBuilder Create()
+    {
+        return new StatsPanelBuilder();
+    }
 
     /// <summary>
-    /// Sets the stats data provider function that will be called periodically to refresh stats.
+    ///     Sets the stats data provider function that will be called periodically to refresh stats.
     /// </summary>
     public StatsPanelBuilder WithStatsProvider(Func<StatsData>? provider)
     {
@@ -25,9 +26,9 @@ public class StatsPanelBuilder
     }
 
     /// <summary>
-    /// Sets the refresh interval in frames (1-60).
-    /// Lower values = more frequent updates.
-    /// Default: 2 (~30fps updates at 60fps game).
+    ///     Sets the refresh interval in frames (1-60).
+    ///     Lower values = more frequent updates.
+    ///     Default: 2 (~30fps updates at 60fps game).
     /// </summary>
     public StatsPanelBuilder WithRefreshInterval(int frameInterval)
     {
@@ -37,8 +38,8 @@ public class StatsPanelBuilder
 
     public StatsPanel Build()
     {
-        var content = CreateDefaultContent();
-        var statusBar = CreateDefaultStatusBar();
+        StatsContent content = CreateDefaultContent();
+        StatusBar statusBar = CreateDefaultStatusBar();
 
         var panel = new StatsPanel(content, statusBar);
         panel.SetRefreshInterval(_refreshInterval);
@@ -55,10 +56,7 @@ public class StatsPanelBuilder
     {
         return new StatsContent("stats_content")
         {
-            Constraint = new LayoutConstraint
-            {
-                Anchor = Anchor.StretchTop
-            }
+            Constraint = new LayoutConstraint { Anchor = Anchor.StretchTop },
         };
     }
 
@@ -66,10 +64,7 @@ public class StatsPanelBuilder
     {
         return new StatusBar("stats_status")
         {
-            Constraint = new LayoutConstraint
-            {
-                Anchor = Anchor.StretchBottom
-            }
+            Constraint = new LayoutConstraint { Anchor = Anchor.StretchBottom },
         };
     }
 }

@@ -18,27 +18,29 @@ public class CollisionMapper : IEntityPropertyMapper<Collision>
     public Collision Map(Dictionary<string, object> properties)
     {
         if (!CanMap(properties))
+        {
             throw new InvalidOperationException("Cannot map properties to Collision component");
+        }
 
         // Check for solid property
-        if (properties.TryGetValue("solid", out var solidValue))
+        if (properties.TryGetValue("solid", out object? solidValue))
         {
-            var isSolid = solidValue switch
+            bool isSolid = solidValue switch
             {
                 bool b => b,
-                string s => bool.TryParse(s, out var result) && result,
+                string s => bool.TryParse(s, out bool result) && result,
                 _ => false,
             };
             return new Collision(isSolid);
         }
 
         // Check for collidable property (alternative name)
-        if (properties.TryGetValue("collidable", out var collidableValue))
+        if (properties.TryGetValue("collidable", out object? collidableValue))
         {
-            var isCollidable = collidableValue switch
+            bool isCollidable = collidableValue switch
             {
                 bool b => b,
-                string s => bool.TryParse(s, out var result) && result,
+                string s => bool.TryParse(s, out bool result) && result,
                 _ => false,
             };
             return new Collision(isCollidable);
@@ -51,7 +53,7 @@ public class CollisionMapper : IEntityPropertyMapper<Collision>
     {
         if (CanMap(properties))
         {
-            var collision = Map(properties);
+            Collision collision = Map(properties);
             world.Add(entity, collision);
         }
     }

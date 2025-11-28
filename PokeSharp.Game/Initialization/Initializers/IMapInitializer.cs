@@ -31,4 +31,3 @@ public interface IMapInitializer
     /// <returns>The MapInfo entity containing map metadata, or null if loading failed.</returns>
     Task<Entity?> LoadMapFromFile(string mapPath);
 }
-

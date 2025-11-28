@@ -21,4 +21,3 @@ Print($"After adding $100: ${newMoney}");
 Print($"Difference: ${newMoney - currentMoney}");
 Print("");
 Print("✅ Test complete!");
-

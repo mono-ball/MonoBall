@@ -93,6 +93,7 @@ public class RelationshipSystem : SystemBase, IUpdateSystem
             || _brokenOwnersFixed > 0
             || _brokenOwnedFixed > 0
         )
+        {
             _logger.LogWarning(
                 "Relationship cleanup: {Parents} parent(s), {Children} child refs, {Owners} owner(s), {Owned} owned refs fixed",
                 _brokenParentsFixed,
@@ -100,9 +101,12 @@ public class RelationshipSystem : SystemBase, IUpdateSystem
                 _brokenOwnersFixed,
                 _brokenOwnedFixed
             );
+        }
 
         if (_orphansDetected > 0)
+        {
             _logger.LogWarning("Detected {Count} orphaned entities", _orphansDetected);
+        }
     }
 
     /// <summary>
@@ -118,7 +122,9 @@ public class RelationshipSystem : SystemBase, IUpdateSystem
             {
                 // Skip already invalid relationships
                 if (!parent.IsValid)
+                {
                     return;
+                }
 
                 if (!world.IsAlive(parent.Value))
                 {
@@ -128,11 +134,12 @@ public class RelationshipSystem : SystemBase, IUpdateSystem
             }
         );
 
-        foreach (var entity in _entitiesToFix)
+        foreach (Entity entity in _entitiesToFix)
+        {
             if (world.IsAlive(entity))
             {
                 // Mark as invalid instead of removing to avoid expensive ECS structural changes
-                ref var parent = ref entity.Get<Parent>();
+                ref Parent parent = ref entity.Get<Parent>();
                 parent.IsValid = false;
                 _brokenParentsFixed++;
 
@@ -146,6 +153,7 @@ public class RelationshipSystem : SystemBase, IUpdateSystem
                     _logger.LogDebug("Marked invalid parent reference for entity {Entity}", entity);
                 }
             }
+        }
     }
 
     /// <summary>
@@ -158,11 +166,13 @@ public class RelationshipSystem : SystemBase, IUpdateSystem
             (Entity entity, ref Children children) =>
             {
                 if (children.Values == null)
+                {
                     return;
+                }
 
-                var initialCount = children.Values.Count;
+                int initialCount = children.Values.Count;
                 children.Values.RemoveAll(child => !world.IsAlive(child));
-                var removedCount = initialCount - children.Values.Count;
+                int removedCount = initialCount - children.Values.Count;
 
                 if (removedCount > 0)
                 {
@@ -190,22 +200,28 @@ public class RelationshipSystem : SystemBase, IUpdateSystem
             {
                 // Skip already invalid relationships
                 if (!owner.IsValid)
+                {
                     return;
+                }
 
                 if (!world.IsAlive(owner.Value))
+                {
                     _entitiesToFix.Add(entity);
+                }
             }
         );
 
-        foreach (var entity in _entitiesToFix)
+        foreach (Entity entity in _entitiesToFix)
+        {
             if (world.IsAlive(entity))
             {
                 // Mark as invalid instead of removing to avoid expensive ECS structural changes
-                ref var owner = ref entity.Get<Owner>();
+                ref Owner owner = ref entity.Get<Owner>();
                 owner.IsValid = false;
                 _brokenOwnersFixed++;
                 _logger.LogDebug("Marked invalid owner reference for entity {Entity}", entity);
             }
+        }
     }
 
     /// <summary>
@@ -221,7 +237,9 @@ public class RelationshipSystem : SystemBase, IUpdateSystem
             {
                 // Skip already invalid relationships
                 if (!owned.IsValid)
+                {
                     return;
+                }
 
                 if (!world.IsAlive(owned.OwnerEntity))
                 {
@@ -231,11 +249,12 @@ public class RelationshipSystem : SystemBase, IUpdateSystem
             }
         );
 
-        foreach (var entity in _entitiesToFix)
+        foreach (Entity entity in _entitiesToFix)
+        {
             if (world.IsAlive(entity))
             {
                 // Mark as invalid instead of removing to avoid expensive ECS structural changes
-                ref var owned = ref entity.Get<Owned>();
+                ref Owned owned = ref entity.Get<Owned>();
                 owned.IsValid = false;
                 _brokenOwnedFixed++;
 
@@ -249,6 +268,7 @@ public class RelationshipSystem : SystemBase, IUpdateSystem
                     _logger.LogDebug("Marked invalid owned reference for entity {Entity}", entity);
                 }
             }
+        }
     }
 
     /// <summary>

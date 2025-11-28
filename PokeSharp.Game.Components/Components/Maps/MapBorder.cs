@@ -1,4 +1,3 @@
-using System.Linq;
 using Microsoft.Xna.Framework;
 
 namespace PokeSharp.Game.Components.Maps;
@@ -64,12 +63,14 @@ public struct MapBorder
     /// <summary>
     ///     Whether this map has valid border data.
     /// </summary>
-    public readonly bool HasBorder => BottomLayerGids is { Length: 4 } && !string.IsNullOrEmpty(TilesetId);
+    public readonly bool HasBorder =>
+        BottomLayerGids is { Length: 4 } && !string.IsNullOrEmpty(TilesetId);
 
     /// <summary>
     ///     Whether this map has overhead (top layer) border tiles.
     /// </summary>
-    public readonly bool HasTopLayer => TopLayerGids is { Length: 4 } && TopLayerGids.Any(gid => gid > 0);
+    public readonly bool HasTopLayer =>
+        TopLayerGids is { Length: 4 } && TopLayerGids.Any(gid => gid > 0);
 
     /// <summary>
     ///     Initializes a new instance of the MapBorder struct with both layers.
@@ -90,9 +91,7 @@ public struct MapBorder
     ///     Legacy constructor for backward compatibility (bottom layer only).
     /// </summary>
     public MapBorder(int topLeft, int topRight, int bottomLeft, int bottomRight, string tilesetId)
-        : this([topLeft, topRight, bottomLeft, bottomRight], [0, 0, 0, 0], tilesetId)
-    {
-    }
+        : this([topLeft, topRight, bottomLeft, bottomRight], [0, 0, 0, 0], tilesetId) { }
 
     /// <summary>
     ///     Gets the border tile index for a given world coordinate.
@@ -130,9 +129,11 @@ public struct MapBorder
     public readonly int GetBottomTileGid(int x, int y)
     {
         if (!HasBorder)
+        {
             return 0;
+        }
 
-        var index = GetBorderTileIndex(x, y);
+        int index = GetBorderTileIndex(x, y);
         return BottomLayerGids[index];
     }
 
@@ -145,9 +146,11 @@ public struct MapBorder
     public readonly int GetTopTileGid(int x, int y)
     {
         if (!HasTopLayer)
+        {
             return 0;
+        }
 
-        var index = GetBorderTileIndex(x, y);
+        int index = GetBorderTileIndex(x, y);
         return TopLayerGids[index];
     }
 
@@ -160,9 +163,11 @@ public struct MapBorder
     public readonly Rectangle GetBottomSourceRect(int x, int y)
     {
         if (BottomSourceRects == null || BottomSourceRects.Length < 4)
+        {
             return Rectangle.Empty;
+        }
 
-        var index = GetBorderTileIndex(x, y);
+        int index = GetBorderTileIndex(x, y);
         return BottomSourceRects[index];
     }
 
@@ -175,9 +180,11 @@ public struct MapBorder
     public readonly Rectangle GetTopSourceRect(int x, int y)
     {
         if (TopSourceRects == null || TopSourceRects.Length < 4)
+        {
             return Rectangle.Empty;
+        }
 
-        var index = GetBorderTileIndex(x, y);
+        int index = GetBorderTileIndex(x, y);
         return TopSourceRects[index];
     }
 }

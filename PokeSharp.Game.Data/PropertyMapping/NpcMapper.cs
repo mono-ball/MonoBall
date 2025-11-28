@@ -21,32 +21,38 @@ public class NpcMapper : IEntityPropertyMapper<Npc>
     public Npc Map(Dictionary<string, object> properties)
     {
         if (!CanMap(properties))
+        {
             throw new InvalidOperationException("Cannot map properties to Npc component");
+        }
 
         // Get NPC ID (required)
-        var npcId = properties.TryGetValue("npcId", out var idValue)
+        string npcId = properties.TryGetValue("npcId", out object? idValue)
             ? idValue?.ToString() ?? "unknown"
             : "unknown";
 
         var npc = new Npc(npcId);
 
         // Check if this NPC is a trainer
-        if (properties.TryGetValue("trainer", out var trainerValue))
+        if (properties.TryGetValue("trainer", out object? trainerValue))
+        {
             npc.IsTrainer = trainerValue switch
             {
                 bool b => b,
-                string s => bool.TryParse(s, out var result) && result,
+                string s => bool.TryParse(s, out bool result) && result,
                 _ => false,
             };
+        }
 
         // Get view range
-        if (properties.TryGetValue("view_range", out var rangeValue))
+        if (properties.TryGetValue("view_range", out object? rangeValue))
+        {
             npc.ViewRange = rangeValue switch
             {
                 int i => i,
-                string s when int.TryParse(s, out var result) => result,
+                string s when int.TryParse(s, out int result) => result,
                 _ => 0,
             };
+        }
 
         return npc;
     }
@@ -55,7 +61,7 @@ public class NpcMapper : IEntityPropertyMapper<Npc>
     {
         if (CanMap(properties))
         {
-            var npc = Map(properties);
+            Npc npc = Map(properties);
             world.Add(entity, npc);
         }
     }

@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 using PokeSharp.Engine.Scenes;
-using PokeSharp.Game.Initialization.Pipeline;
 
 namespace PokeSharp.Game.Initialization.Pipeline.Steps;
 
@@ -26,9 +25,15 @@ public class LoadGameDataStep : InitializationStepBase
         CancellationToken cancellationToken
     )
     {
-        var logger = context.LoggerFactory.CreateLogger<LoadGameDataStep>();
+        ILogger<LoadGameDataStep> logger = context.LoggerFactory.CreateLogger<LoadGameDataStep>();
 
-        var dataPath = context.Configuration.Initialization.DataPath;
+        // Use path resolver to get the correct absolute path for game data
+        string dataPath = context.PathResolver.Resolve(
+            context.Configuration.Initialization.DataPath
+        );
+
+        logger.LogDebug("Loading game data from: {Path}", dataPath);
+
         try
         {
             await context.DataLoader.LoadAllAsync(dataPath, cancellationToken);
@@ -67,4 +72,3 @@ public class LoadGameDataStep : InitializationStepBase
         }
     }
 }
-

@@ -1,5 +1,4 @@
 using PokeSharp.Engine.Scenes;
-using PokeSharp.Game.Initialization;
 
 namespace PokeSharp.Game.Initialization.Pipeline;
 
@@ -55,4 +54,3 @@ public abstract class InitializationStepBase : IInitializationStep
         CancellationToken cancellationToken
     );
 }
-

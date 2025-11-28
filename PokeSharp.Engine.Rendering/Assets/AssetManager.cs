@@ -58,12 +58,12 @@ public class AssetManager(
         ArgumentException.ThrowIfNullOrEmpty(id);
         ArgumentException.ThrowIfNullOrEmpty(relativePath);
 
-        var normalizedRelative = relativePath.Replace('/', Path.DirectorySeparatorChar);
-        var fullPath = Path.Combine(AssetRoot, normalizedRelative);
+        string normalizedRelative = relativePath.Replace('/', Path.DirectorySeparatorChar);
+        string fullPath = Path.Combine(AssetRoot, normalizedRelative);
 
         if (!File.Exists(fullPath))
         {
-            var fallbackPath = ResolveFallbackTexturePath(id, normalizedRelative);
+            string? fallbackPath = ResolveFallbackTexturePath(id, normalizedRelative);
             if (fallbackPath is not null && File.Exists(fallbackPath))
             {
                 _logger?.LogWarning(
@@ -82,11 +82,11 @@ public class AssetManager(
 
         var sw = Stopwatch.StartNew();
 
-        using var fileStream = File.OpenRead(fullPath);
+        using FileStream fileStream = File.OpenRead(fullPath);
         var texture = Texture2D.FromStream(_graphicsDevice, fileStream);
 
         sw.Stop();
-        var elapsedMs = sw.Elapsed.TotalMilliseconds;
+        double elapsedMs = sw.Elapsed.TotalMilliseconds;
 
         _textures.AddOrUpdate(id, texture); // LRU cache auto-evicts if needed
 
@@ -95,7 +95,9 @@ public class AssetManager(
 
         // Warn about slow texture loads (>100ms)
         if (elapsedMs > 100.0)
+        {
             _logger?.LogSlowTextureLoad(id, elapsedMs);
+        }
     }
 
     /// <summary>
@@ -110,20 +112,14 @@ public class AssetManager(
     }
 
     /// <summary>
-    ///     Gets all loaded texture IDs (for debugging).
-    /// </summary>
-    public IEnumerable<string> GetLoadedTextureIds()
-    {
-        return _textures.Keys;
-    }
-
-    /// <summary>
     ///     Disposes all loaded textures.
     /// </summary>
     public void Dispose()
     {
         if (_disposed)
+        {
             return;
+        }
 
         _textures.Clear(); // LruCache.Clear() disposes all textures
         _disposed = true;
@@ -131,44 +127,58 @@ public class AssetManager(
         GC.SuppressFinalize(this);
     }
 
+    /// <summary>
+    ///     Gets all loaded texture IDs (for debugging).
+    /// </summary>
+    public IEnumerable<string> GetLoadedTextureIds()
+    {
+        return _textures.Keys;
+    }
+
     private string? ResolveFallbackTexturePath(string id, string normalizedRelativePath)
     {
-        var normalized = normalizedRelativePath.Replace('\\', '/');
+        string normalized = normalizedRelativePath.Replace('\\', '/');
 
         if (normalized.StartsWith("Tilesets/", StringComparison.OrdinalIgnoreCase))
         {
-            var fileName = Path.GetFileName(normalizedRelativePath);
-            var tilesetsRoot = Path.Combine(AssetRoot, "Tilesets");
-            var tilesetDir = Path.Combine(tilesetsRoot, id);
+            string fileName = Path.GetFileName(normalizedRelativePath);
+            string tilesetsRoot = Path.Combine(AssetRoot, "Tilesets");
+            string tilesetDir = Path.Combine(tilesetsRoot, id);
 
             if (!string.IsNullOrEmpty(fileName))
             {
-                var nestedPath = Path.Combine(tilesetDir, fileName);
+                string nestedPath = Path.Combine(tilesetDir, fileName);
                 if (File.Exists(nestedPath))
+                {
                     return nestedPath;
+                }
             }
 
             // Try reading the tileset JSON for the actual image name
-            var tilesetJson = Path.Combine(tilesetDir, $"{id}.json");
+            string tilesetJson = Path.Combine(tilesetDir, $"{id}.json");
             if (File.Exists(tilesetJson))
             {
-                var imageName = TryGetTilesetImageName(tilesetJson);
+                string? imageName = TryGetTilesetImageName(tilesetJson);
                 if (!string.IsNullOrEmpty(imageName))
                 {
-                    var jsonImagePath = Path.Combine(tilesetDir, imageName);
+                    string jsonImagePath = Path.Combine(tilesetDir, imageName);
                     if (File.Exists(jsonImagePath))
+                    {
                         return jsonImagePath;
+                    }
                 }
             }
 
             // Fallback: pick the first PNG found in the tileset directory
             if (Directory.Exists(tilesetDir))
             {
-                var pngMatch = Directory
+                string? pngMatch = Directory
                     .EnumerateFiles(tilesetDir, "*.png", SearchOption.TopDirectoryOnly)
                     .FirstOrDefault();
                 if (pngMatch is not null)
+                {
                     return pngMatch;
+                }
             }
         }
 
@@ -180,8 +190,10 @@ public class AssetManager(
         try
         {
             using var doc = JsonDocument.Parse(File.ReadAllText(tilesetJsonPath));
-            if (doc.RootElement.TryGetProperty("image", out var imageProperty))
+            if (doc.RootElement.TryGetProperty("image", out JsonElement imageProperty))
+            {
                 return imageProperty.GetString();
+            }
         }
         catch (Exception ex)
         {
@@ -206,8 +218,10 @@ public class AssetManager(
     {
         ArgumentException.ThrowIfNullOrEmpty(id);
 
-        if (_textures.TryGetValue(id, out var texture) && texture != null)
+        if (_textures.TryGetValue(id, out Texture2D? texture) && texture != null)
+        {
             return texture;
+        }
 
         throw new KeyNotFoundException($"Texture '{id}' not loaded or was evicted from cache.");
     }
@@ -240,9 +254,12 @@ public class AssetManager(
     {
         ArgumentException.ThrowIfNullOrEmpty(id);
 
-        var removed = _textures.Remove(id); // LruCache handles disposal
+        bool removed = _textures.Remove(id); // LruCache handles disposal
         if (removed)
+        {
             _logger?.LogSpriteTextureUnregistered(id);
+        }
+
         return removed;
     }
 }

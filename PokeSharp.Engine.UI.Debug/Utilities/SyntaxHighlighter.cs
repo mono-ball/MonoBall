@@ -4,71 +4,227 @@ using PokeSharp.Engine.UI.Debug.Core;
 namespace PokeSharp.Engine.UI.Debug.Utilities;
 
 /// <summary>
-/// Segment of text with a specific color for syntax highlighting.
+///     Segment of text with a specific color for syntax highlighting.
 /// </summary>
 public readonly record struct ColoredSegment(string Text, Color Color, int StartIndex, int Length);
 
 /// <summary>
-/// Reusable syntax highlighter for C# code.
-/// Provides comprehensive highlighting with support for methods, types, strings, comments, and more.
-/// Uses ThemeManager for theme-aware colors.
+///     Reusable syntax highlighter for C# code.
+///     Provides comprehensive highlighting with support for methods, types, strings, comments, and more.
+///     Uses ThemeManager for theme-aware colors.
 /// </summary>
 public static class SyntaxHighlighter
 {
-    // Theme-aware color accessors
-    private static UITheme Theme => ThemeManager.Current;
     // C# Keywords
     private static readonly HashSet<string> Keywords = new(StringComparer.Ordinal)
     {
-        "abstract", "as", "base", "break", "case", "catch", "checked",
-        "class", "const", "continue", "default", "delegate", "do", "else",
-        "enum", "event", "explicit", "extern", "finally", "fixed", "for",
-        "foreach", "goto", "if", "implicit", "in", "interface", "internal", "is", "lock",
-        "namespace", "new", "operator", "out", "override", "params",
-        "private", "protected", "public", "readonly", "ref", "return", "sealed",
-        "sizeof", "stackalloc", "static", "struct", "switch", "this", "throw",
-        "try", "typeof", "unchecked", "unsafe", "using",
-        "virtual", "volatile", "while", "async", "await", "yield", "when", "where",
-        "get", "set", "add", "remove", "value", "nameof", "with", "init", "record",
-        "global", "partial", "dynamic", "required", "scoped", "file"
+        "abstract",
+        "as",
+        "base",
+        "break",
+        "case",
+        "catch",
+        "checked",
+        "class",
+        "const",
+        "continue",
+        "default",
+        "delegate",
+        "do",
+        "else",
+        "enum",
+        "event",
+        "explicit",
+        "extern",
+        "finally",
+        "fixed",
+        "for",
+        "foreach",
+        "goto",
+        "if",
+        "implicit",
+        "in",
+        "interface",
+        "internal",
+        "is",
+        "lock",
+        "namespace",
+        "new",
+        "operator",
+        "out",
+        "override",
+        "params",
+        "private",
+        "protected",
+        "public",
+        "readonly",
+        "ref",
+        "return",
+        "sealed",
+        "sizeof",
+        "stackalloc",
+        "static",
+        "struct",
+        "switch",
+        "this",
+        "throw",
+        "try",
+        "typeof",
+        "unchecked",
+        "unsafe",
+        "using",
+        "virtual",
+        "volatile",
+        "while",
+        "async",
+        "await",
+        "yield",
+        "when",
+        "where",
+        "get",
+        "set",
+        "add",
+        "remove",
+        "value",
+        "nameof",
+        "with",
+        "init",
+        "record",
+        "global",
+        "partial",
+        "dynamic",
+        "required",
+        "scoped",
+        "file",
     };
 
     // Control flow keywords (special color)
     private static readonly HashSet<string> ControlKeywords = new(StringComparer.Ordinal)
     {
-        "if", "else", "switch", "case", "default", "for", "foreach", "while", "do",
-        "break", "continue", "return", "throw", "try", "catch", "finally", "goto", "yield"
+        "if",
+        "else",
+        "switch",
+        "case",
+        "default",
+        "for",
+        "foreach",
+        "while",
+        "do",
+        "break",
+        "continue",
+        "return",
+        "throw",
+        "try",
+        "catch",
+        "finally",
+        "goto",
+        "yield",
     };
 
     // Type keywords (built-in types)
     private static readonly HashSet<string> TypeKeywords = new(StringComparer.Ordinal)
     {
-        "bool", "byte", "char", "decimal", "double", "float", "int", "long", "object",
-        "sbyte", "short", "string", "uint", "ulong", "ushort", "void", "nint", "nuint"
+        "bool",
+        "byte",
+        "char",
+        "decimal",
+        "double",
+        "float",
+        "int",
+        "long",
+        "object",
+        "sbyte",
+        "short",
+        "string",
+        "uint",
+        "ulong",
+        "ushort",
+        "void",
+        "nint",
+        "nuint",
     };
 
     // Literal keywords
     private static readonly HashSet<string> LiteralKeywords = new(StringComparer.Ordinal)
     {
-        "true", "false", "null"
+        "true",
+        "false",
+        "null",
     };
 
     // Common type names (for better highlighting of common .NET types)
     private static readonly HashSet<string> CommonTypes = new(StringComparer.Ordinal)
     {
-        "Console", "String", "Int32", "Int64", "Double", "Boolean", "Object", "Array",
-        "List", "Dictionary", "HashSet", "Queue", "Stack", "LinkedList",
-        "Task", "Action", "Func", "Predicate", "EventHandler",
-        "Exception", "ArgumentException", "InvalidOperationException", "NullReferenceException",
-        "DateTime", "TimeSpan", "Guid", "Uri", "Regex", "StringBuilder",
-        "File", "Directory", "Path", "Stream", "StreamReader", "StreamWriter",
-        "Math", "Convert", "Enum", "Tuple", "ValueTuple", "Nullable",
-        "IEnumerable", "IList", "IDictionary", "ICollection", "IDisposable", "IComparable",
-        "Type", "Attribute", "Delegate", "EventArgs",
+        "Console",
+        "String",
+        "Int32",
+        "Int64",
+        "Double",
+        "Boolean",
+        "Object",
+        "Array",
+        "List",
+        "Dictionary",
+        "HashSet",
+        "Queue",
+        "Stack",
+        "LinkedList",
+        "Task",
+        "Action",
+        "Func",
+        "Predicate",
+        "EventHandler",
+        "Exception",
+        "ArgumentException",
+        "InvalidOperationException",
+        "NullReferenceException",
+        "DateTime",
+        "TimeSpan",
+        "Guid",
+        "Uri",
+        "Regex",
+        "StringBuilder",
+        "File",
+        "Directory",
+        "Path",
+        "Stream",
+        "StreamReader",
+        "StreamWriter",
+        "Math",
+        "Convert",
+        "Enum",
+        "Tuple",
+        "ValueTuple",
+        "Nullable",
+        "IEnumerable",
+        "IList",
+        "IDictionary",
+        "ICollection",
+        "IDisposable",
+        "IComparable",
+        "Type",
+        "Attribute",
+        "Delegate",
+        "EventArgs",
         // Game-specific
-        "Player", "Game", "World", "Entity", "Component", "Scene", "Vector2", "Vector3",
-        "Color", "Rectangle", "Point", "GameTime", "SpriteBatch", "Texture2D"
+        "Player",
+        "Game",
+        "World",
+        "Entity",
+        "Component",
+        "Scene",
+        "Vector2",
+        "Vector3",
+        "Color",
+        "Rectangle",
+        "Point",
+        "GameTime",
+        "SpriteBatch",
+        "Texture2D",
     };
+
+    // Theme-aware color accessors
+    private static UITheme Theme => ThemeManager.Current;
 
     // Theme-aware color scheme - delegates to current theme's syntax colors
     public static Color DefaultColor => Theme.SyntaxDefault;
@@ -87,12 +243,14 @@ public static class SyntaxHighlighter
     public static Color InterpolationColor => Theme.SyntaxStringInterpolation;
 
     /// <summary>
-    /// Highlights C# code and returns colored segments.
+    ///     Highlights C# code and returns colored segments.
     /// </summary>
     public static List<ColoredSegment> Highlight(string code)
     {
         if (string.IsNullOrEmpty(code))
+        {
             return new List<ColoredSegment>();
+        }
 
         var segments = new List<ColoredSegment>();
         int position = 0;
@@ -105,14 +263,18 @@ public static class SyntaxHighlighter
             {
                 int start = position;
                 while (position < code.Length && char.IsWhiteSpace(code[position]))
+                {
                     position++;
+                }
 
-                segments.Add(new ColoredSegment(
-                    code.Substring(start, position - start),
-                    DefaultColor,
-                    start,
-                    position - start
-                ));
+                segments.Add(
+                    new ColoredSegment(
+                        code.Substring(start, position - start),
+                        DefaultColor,
+                        start,
+                        position - start
+                    )
+                );
                 continue;
             }
 
@@ -121,14 +283,18 @@ public static class SyntaxHighlighter
             {
                 int start = position;
                 while (position < code.Length && code[position] != '\n')
+                {
                     position++;
+                }
 
-                segments.Add(new ColoredSegment(
-                    code.Substring(start, position - start),
-                    CommentColor,
-                    start,
-                    position - start
-                ));
+                segments.Add(
+                    new ColoredSegment(
+                        code.Substring(start, position - start),
+                        CommentColor,
+                        start,
+                        position - start
+                    )
+                );
                 continue;
             }
 
@@ -137,14 +303,18 @@ public static class SyntaxHighlighter
             {
                 int start = position;
                 while (position < code.Length && code[position] != '\n')
+                {
                     position++;
+                }
 
-                segments.Add(new ColoredSegment(
-                    code.Substring(start, position - start),
-                    CommentColor,
-                    start,
-                    position - start
-                ));
+                segments.Add(
+                    new ColoredSegment(
+                        code.Substring(start, position - start),
+                        CommentColor,
+                        start,
+                        position - start
+                    )
+                );
                 continue;
             }
 
@@ -160,17 +330,23 @@ public static class SyntaxHighlighter
                         position += 2;
                         break;
                     }
+
                     position++;
                 }
-                if (position >= code.Length - 1 && position < code.Length)
-                    position = code.Length;
 
-                segments.Add(new ColoredSegment(
-                    code.Substring(start, position - start),
-                    CommentColor,
-                    start,
-                    position - start
-                ));
+                if (position >= code.Length - 1 && position < code.Length)
+                {
+                    position = code.Length;
+                }
+
+                segments.Add(
+                    new ColoredSegment(
+                        code.Substring(start, position - start),
+                        CommentColor,
+                        start,
+                        position - start
+                    )
+                );
                 continue;
             }
 
@@ -197,18 +373,22 @@ public static class SyntaxHighlighter
                             position += 2; // Escaped quote
                             continue;
                         }
+
                         position++; // Closing quote
                         break;
                     }
+
                     position++;
                 }
 
-                segments.Add(new ColoredSegment(
-                    code.Substring(start, position - start),
-                    StringColor,
-                    start,
-                    position - start
-                ));
+                segments.Add(
+                    new ColoredSegment(
+                        code.Substring(start, position - start),
+                        StringColor,
+                        start,
+                        position - start
+                    )
+                );
                 prevNonWhitespace = '"';
                 continue;
             }
@@ -226,20 +406,24 @@ public static class SyntaxHighlighter
                         position += 2; // Skip escape sequence
                         continue;
                     }
+
                     if (code[position] == '"')
                     {
                         position++; // Include closing quote
                         break;
                     }
+
                     position++;
                 }
 
-                segments.Add(new ColoredSegment(
-                    code.Substring(start, position - start),
-                    StringColor,
-                    start,
-                    position - start
-                ));
+                segments.Add(
+                    new ColoredSegment(
+                        code.Substring(start, position - start),
+                        StringColor,
+                        start,
+                        position - start
+                    )
+                );
                 prevNonWhitespace = '"';
                 continue;
             }
@@ -257,20 +441,24 @@ public static class SyntaxHighlighter
                         position += 2; // Skip escape sequence
                         continue;
                     }
+
                     if (code[position] == '\'')
                     {
                         position++; // Include closing quote
                         break;
                     }
+
                     position++;
                 }
 
-                segments.Add(new ColoredSegment(
-                    code.Substring(start, position - start),
-                    StringColor,
-                    start,
-                    position - start
-                ));
+                segments.Add(
+                    new ColoredSegment(
+                        code.Substring(start, position - start),
+                        StringColor,
+                        start,
+                        position - start
+                    )
+                );
                 prevNonWhitespace = '\'';
                 continue;
             }
@@ -279,7 +467,13 @@ public static class SyntaxHighlighter
             if (code[position] == '[')
             {
                 // Check if this looks like an attribute (not array access)
-                if (prevNonWhitespace == null || prevNonWhitespace == '\n' || prevNonWhitespace == '{' || prevNonWhitespace == ';' || prevNonWhitespace == ']')
+                if (
+                    prevNonWhitespace == null
+                    || prevNonWhitespace == '\n'
+                    || prevNonWhitespace == '{'
+                    || prevNonWhitespace == ';'
+                    || prevNonWhitespace == ']'
+                )
                 {
                     int start = position;
                     int depth = 1;
@@ -287,25 +481,40 @@ public static class SyntaxHighlighter
 
                     while (position < code.Length && depth > 0)
                     {
-                        if (code[position] == '[') depth++;
-                        else if (code[position] == ']') depth--;
+                        if (code[position] == '[')
+                        {
+                            depth++;
+                        }
+                        else if (code[position] == ']')
+                        {
+                            depth--;
+                        }
+
                         position++;
                     }
 
-                    segments.Add(new ColoredSegment(
-                        code.Substring(start, position - start),
-                        AttributeColor,
-                        start,
-                        position - start
-                    ));
+                    segments.Add(
+                        new ColoredSegment(
+                            code.Substring(start, position - start),
+                            AttributeColor,
+                            start,
+                            position - start
+                        )
+                    );
                     prevNonWhitespace = ']';
                     continue;
                 }
             }
 
             // Numbers (including hex, binary, with underscores)
-            if (char.IsDigit(code[position]) ||
-                (code[position] == '.' && position < code.Length - 1 && char.IsDigit(code[position + 1])))
+            if (
+                char.IsDigit(code[position])
+                || (
+                    code[position] == '.'
+                    && position < code.Length - 1
+                    && char.IsDigit(code[position + 1])
+                )
+            )
             {
                 int start = position;
 
@@ -315,14 +524,28 @@ public static class SyntaxHighlighter
                     if (code[position + 1] == 'x' || code[position + 1] == 'X')
                     {
                         position += 2;
-                        while (position < code.Length && (IsHexDigit(code[position]) || code[position] == '_'))
+                        while (
+                            position < code.Length
+                            && (IsHexDigit(code[position]) || code[position] == '_')
+                        )
+                        {
                             position++;
+                        }
                     }
                     else if (code[position + 1] == 'b' || code[position + 1] == 'B')
                     {
                         position += 2;
-                        while (position < code.Length && (code[position] == '0' || code[position] == '1' || code[position] == '_'))
+                        while (
+                            position < code.Length
+                            && (
+                                code[position] == '0'
+                                || code[position] == '1'
+                                || code[position] == '_'
+                            )
+                        )
+                        {
                             position++;
+                        }
                     }
                     else
                     {
@@ -336,14 +559,18 @@ public static class SyntaxHighlighter
 
                 // Suffix (f, d, m, l, u, ul, etc.)
                 while (position < code.Length && "fFdDmMlLuU".Contains(code[position]))
+                {
                     position++;
+                }
 
-                segments.Add(new ColoredSegment(
-                    code.Substring(start, position - start),
-                    NumberColor,
-                    start,
-                    position - start
-                ));
+                segments.Add(
+                    new ColoredSegment(
+                        code.Substring(start, position - start),
+                        NumberColor,
+                        start,
+                        position - start
+                    )
+                );
                 prevNonWhitespace = '0';
                 continue;
             }
@@ -353,22 +580,24 @@ public static class SyntaxHighlighter
             {
                 int start = position;
                 if (code[position] == '@')
+                {
                     position++; // Skip @ for verbatim identifiers
+                }
 
-                while (position < code.Length && (char.IsLetterOrDigit(code[position]) || code[position] == '_'))
+                while (
+                    position < code.Length
+                    && (char.IsLetterOrDigit(code[position]) || code[position] == '_')
+                )
+                {
                     position++;
+                }
 
                 string word = code.Substring(start, position - start);
                 string bareWord = word.StartsWith("@") ? word.Substring(1) : word;
 
                 Color color = GetIdentifierColor(bareWord, code, position, prevNonWhitespace);
 
-                segments.Add(new ColoredSegment(
-                    word,
-                    color,
-                    start,
-                    position - start
-                ));
+                segments.Add(new ColoredSegment(word, color, start, position - start));
                 prevNonWhitespace = word.Length > 0 ? word[^1] : null;
                 continue;
             }
@@ -382,26 +611,39 @@ public static class SyntaxHighlighter
             if (position < code.Length)
             {
                 char next = code[position];
-                if ((op == '=' && next == '=') || (op == '!' && next == '=') ||
-                    (op == '<' && next == '=') || (op == '>' && next == '=') ||
-                    (op == '&' && next == '&') || (op == '|' && next == '|') ||
-                    (op == '+' && next == '+') || (op == '-' && next == '-') ||
-                    (op == '+' && next == '=') || (op == '-' && next == '=') ||
-                    (op == '*' && next == '=') || (op == '/' && next == '=') ||
-                    (op == '?' && next == '?') || (op == '?' && next == '.') ||
-                    (op == '=' && next == '>') || (op == '-' && next == '>') ||
-                    (op == '<' && next == '<') || (op == '>' && next == '>'))
+                if (
+                    (op == '=' && next == '=')
+                    || (op == '!' && next == '=')
+                    || (op == '<' && next == '=')
+                    || (op == '>' && next == '=')
+                    || (op == '&' && next == '&')
+                    || (op == '|' && next == '|')
+                    || (op == '+' && next == '+')
+                    || (op == '-' && next == '-')
+                    || (op == '+' && next == '=')
+                    || (op == '-' && next == '=')
+                    || (op == '*' && next == '=')
+                    || (op == '/' && next == '=')
+                    || (op == '?' && next == '?')
+                    || (op == '?' && next == '.')
+                    || (op == '=' && next == '>')
+                    || (op == '-' && next == '>')
+                    || (op == '<' && next == '<')
+                    || (op == '>' && next == '>')
+                )
                 {
                     position++;
                 }
             }
 
-            segments.Add(new ColoredSegment(
-                code.Substring(opStart, position - opStart),
-                OperatorColor,
-                opStart,
-                position - opStart
-            ));
+            segments.Add(
+                new ColoredSegment(
+                    code.Substring(opStart, position - opStart),
+                    OperatorColor,
+                    opStart,
+                    position - opStart
+                )
+            );
             prevNonWhitespace = op;
         }
 
@@ -409,30 +651,45 @@ public static class SyntaxHighlighter
     }
 
     /// <summary>
-    /// Determines the color for an identifier based on context.
+    ///     Determines the color for an identifier based on context.
     /// </summary>
-    private static Color GetIdentifierColor(string word, string code, int position, char? prevNonWhitespace)
+    private static Color GetIdentifierColor(
+        string word,
+        string code,
+        int position,
+        char? prevNonWhitespace
+    )
     {
         // Literal keywords
         if (LiteralKeywords.Contains(word))
+        {
             return LiteralColor;
+        }
 
         // Built-in type keywords
         if (TypeKeywords.Contains(word))
+        {
             return TypeColor;
+        }
 
         // Control flow keywords
         if (ControlKeywords.Contains(word))
+        {
             return ControlColor;
+        }
 
         // Other keywords
         if (Keywords.Contains(word))
+        {
             return KeywordColor;
+        }
 
         // Check what comes after this identifier
         int lookAhead = position;
         while (lookAhead < code.Length && char.IsWhiteSpace(code[lookAhead]))
+        {
             lookAhead++;
+        }
 
         bool followedByParen = lookAhead < code.Length && code[lookAhead] == '(';
         bool followedByGeneric = lookAhead < code.Length && code[lookAhead] == '<';
@@ -442,7 +699,9 @@ public static class SyntaxHighlighter
         {
             // Check if it's after a dot (member method call)
             if (prevNonWhitespace == '.')
+            {
                 return MethodColor;
+            }
 
             // Check if it's a known type (constructor call)
             if (CommonTypes.Contains(word) || char.IsUpper(word[0]))
@@ -456,7 +715,9 @@ public static class SyntaxHighlighter
 
         // Generic type: identifier followed by <
         if (followedByGeneric)
+        {
             return TypeColor;
+        }
 
         // After 'new' keyword - it's a type
         if (prevNonWhitespace == 'w') // Last char of 'new'
@@ -467,22 +728,33 @@ public static class SyntaxHighlighter
 
         // After a dot - it's a member (property/field)
         if (prevNonWhitespace == '.')
+        {
             return PropertyColor;
+        }
 
         // Known types
         if (CommonTypes.Contains(word))
+        {
             return TypeColor;
+        }
 
         // PascalCase identifier starting with uppercase - likely a type
         if (word.Length > 1 && char.IsUpper(word[0]) && !word.All(char.IsUpper))
         {
             // Check context to distinguish type from property/method
             if (prevNonWhitespace == ':' || prevNonWhitespace == '<' || prevNonWhitespace == '(')
+            {
                 return TypeColor;
+            }
 
             // If followed by identifier (space then letter), likely a type declaration
-            if (lookAhead < code.Length && (char.IsLetter(code[lookAhead]) || code[lookAhead] == '_'))
+            if (
+                lookAhead < code.Length
+                && (char.IsLetter(code[lookAhead]) || code[lookAhead] == '_')
+            )
+            {
                 return TypeColor;
+            }
 
             return TypeColor; // Default to type for PascalCase
         }
@@ -491,13 +763,15 @@ public static class SyntaxHighlighter
     }
 
     /// <summary>
-    /// Parses a decimal number (with possible decimal point and exponent).
+    ///     Parses a decimal number (with possible decimal point and exponent).
     /// </summary>
     private static void ParseDecimalNumber(string code, ref int position)
     {
         // Integer part
         while (position < code.Length && (char.IsDigit(code[position]) || code[position] == '_'))
+        {
             position++;
+        }
 
         // Decimal part
         if (position < code.Length && code[position] == '.')
@@ -505,8 +779,13 @@ public static class SyntaxHighlighter
             if (position < code.Length - 1 && char.IsDigit(code[position + 1]))
             {
                 position++; // Skip .
-                while (position < code.Length && (char.IsDigit(code[position]) || code[position] == '_'))
+                while (
+                    position < code.Length
+                    && (char.IsDigit(code[position]) || code[position] == '_')
+                )
+                {
                     position++;
+                }
             }
         }
 
@@ -515,16 +794,27 @@ public static class SyntaxHighlighter
         {
             position++;
             if (position < code.Length && (code[position] == '+' || code[position] == '-'))
+            {
                 position++;
-            while (position < code.Length && (char.IsDigit(code[position]) || code[position] == '_'))
+            }
+
+            while (
+                position < code.Length && (char.IsDigit(code[position]) || code[position] == '_')
+            )
+            {
                 position++;
+            }
         }
     }
 
     /// <summary>
-    /// Highlights an interpolated string with embedded expressions.
+    ///     Highlights an interpolated string with embedded expressions.
     /// </summary>
-    private static void HighlightInterpolatedString(string code, ref int position, List<ColoredSegment> segments)
+    private static void HighlightInterpolatedString(
+        string code,
+        ref int position,
+        List<ColoredSegment> segments
+    )
     {
         int start = position;
         position += 2; // Skip $"
@@ -544,12 +834,14 @@ public static class SyntaxHighlighter
                 // End current string segment
                 if (position > stringStart)
                 {
-                    segments.Add(new ColoredSegment(
-                        code.Substring(stringStart, position - stringStart),
-                        StringColor,
-                        stringStart,
-                        position - stringStart
-                    ));
+                    segments.Add(
+                        new ColoredSegment(
+                            code.Substring(stringStart, position - stringStart),
+                            StringColor,
+                            stringStart,
+                            position - stringStart
+                        )
+                    );
                 }
 
                 // Find matching }
@@ -559,20 +851,32 @@ public static class SyntaxHighlighter
 
                 while (position < code.Length && depth > 0)
                 {
-                    if (code[position] == '{') depth++;
-                    else if (code[position] == '}') depth--;
-                    if (depth > 0) position++;
+                    if (code[position] == '{')
+                    {
+                        depth++;
+                    }
+                    else if (code[position] == '}')
+                    {
+                        depth--;
+                    }
+
+                    if (depth > 0)
+                    {
+                        position++;
+                    }
                 }
 
                 if (depth == 0)
                 {
                     // Highlight the interpolation expression
-                    segments.Add(new ColoredSegment(
-                        code.Substring(braceStart, position - braceStart + 1),
-                        InterpolationColor,
-                        braceStart,
-                        position - braceStart + 1
-                    ));
+                    segments.Add(
+                        new ColoredSegment(
+                            code.Substring(braceStart, position - braceStart + 1),
+                            InterpolationColor,
+                            braceStart,
+                            position - braceStart + 1
+                        )
+                    );
                     position++;
                 }
 
@@ -592,18 +896,19 @@ public static class SyntaxHighlighter
         // Add remaining string content
         if (position > stringStart)
         {
-            segments.Add(new ColoredSegment(
-                code.Substring(stringStart, position - stringStart),
-                StringColor,
-                stringStart,
-                position - stringStart
-            ));
+            segments.Add(
+                new ColoredSegment(
+                    code.Substring(stringStart, position - stringStart),
+                    StringColor,
+                    stringStart,
+                    position - stringStart
+                )
+            );
         }
     }
 
-    private static bool IsHexDigit(char c) =>
-        char.IsDigit(c) || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
+    private static bool IsHexDigit(char c)
+    {
+        return char.IsDigit(c) || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
+    }
 }
-
-
-

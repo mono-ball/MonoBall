@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using PokeSharp.Engine.Debug;
 using PokeSharp.Game.Infrastructure.Configuration;
 using PokeSharp.Game.Infrastructure.ServiceRegistration;
@@ -43,6 +42,9 @@ public static class ServiceCollectionExtensions
 
         // Configure logging first (other services may need ILoggerFactory)
         services.AddGameLogging(configuration, environment);
+
+        // Register infrastructure services first (path resolution depends on configuration)
+        services.AddInfrastructureServices();
 
         // Register service groups
         services.AddCoreEcsServices();

@@ -90,9 +90,11 @@ public static class QueryExtensions
     public static bool IsMoving(this Entity entity)
     {
         if (!entity.Has<GridMovement>())
+        {
             return false;
+        }
 
-        ref var movement = ref entity.Get<GridMovement>();
+        ref GridMovement movement = ref entity.Get<GridMovement>();
         return movement.IsMoving;
     }
 
@@ -128,9 +130,11 @@ public static class QueryExtensions
     public static bool IsSolid(this Entity entity)
     {
         if (!entity.Has<Collision>())
+        {
             return false;
+        }
 
-        ref var collision = ref entity.Get<Collision>();
+        ref Collision collision = ref entity.Get<Collision>();
         return collision.IsSolid;
     }
 

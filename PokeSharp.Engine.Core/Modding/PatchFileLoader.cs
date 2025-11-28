@@ -31,8 +31,8 @@ public sealed class PatchFileLoader
                 return null;
             }
 
-            var json = File.ReadAllText(filePath);
-            var patch = JsonSerializer.Deserialize<ModPatch>(
+            string json = File.ReadAllText(filePath);
+            ModPatch? patch = JsonSerializer.Deserialize<ModPatch>(
                 json,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
             );
@@ -47,8 +47,10 @@ public sealed class PatchFileLoader
             }
 
             // Validate all operations
-            foreach (var operation in patch.Operations)
+            foreach (PatchOperation operation in patch.Operations)
+            {
                 operation.Validate();
+            }
 
             _logger.LogDebug(
                 "[steelblue1]WF[/] Loaded patch file: [cyan]{Path}[/] -> {Target} ([yellow]{Count}[/] operations)",
@@ -77,13 +79,15 @@ public sealed class PatchFileLoader
     {
         var patches = new List<ModPatch>();
 
-        foreach (var patchPath in mod.Manifest.Patches)
+        foreach (string patchPath in mod.Manifest.Patches)
         {
-            var fullPath = mod.ResolvePath(patchPath);
-            var patch = LoadPatchFile(fullPath);
+            string fullPath = mod.ResolvePath(patchPath);
+            ModPatch? patch = LoadPatchFile(fullPath);
 
             if (patch != null)
+            {
                 patches.Add(patch);
+            }
         }
 
         return patches;

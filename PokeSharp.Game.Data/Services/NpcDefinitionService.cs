@@ -53,14 +53,18 @@ public class NpcDefinitionService
     public NpcDefinition? GetNpc(string npcId)
     {
         if (string.IsNullOrWhiteSpace(npcId))
+        {
             return null;
+        }
 
         // Check cache first
-        if (_npcCache.TryGetValue(npcId, out var cached))
+        if (_npcCache.TryGetValue(npcId, out NpcDefinition? cached))
+        {
             return cached;
+        }
 
         // Query database
-        var npc = _context.Npcs.Find(npcId);
+        NpcDefinition? npc = _context.Npcs.Find(npcId);
 
         // Cache for next time
         if (npc != null)
@@ -108,14 +112,18 @@ public class NpcDefinitionService
     public TrainerDefinition? GetTrainer(string trainerId)
     {
         if (string.IsNullOrWhiteSpace(trainerId))
+        {
             return null;
+        }
 
         // Check cache first
-        if (_trainerCache.TryGetValue(trainerId, out var cached))
+        if (_trainerCache.TryGetValue(trainerId, out TrainerDefinition? cached))
+        {
             return cached;
+        }
 
         // Query database
-        var trainer = _context.Trainers.Find(trainerId);
+        TrainerDefinition? trainer = _context.Trainers.Find(trainerId);
 
         // Cache for next time
         if (trainer != null)

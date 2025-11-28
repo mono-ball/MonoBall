@@ -5,8 +5,8 @@ using PokeSharp.Engine.Debug.Console.Scripting;
 namespace PokeSharp.Engine.Debug.Breakpoints;
 
 /// <summary>
-/// Manages breakpoints and evaluates them to trigger game pauses.
-/// Thread-safe for concurrent access during evaluation.
+///     Manages breakpoints and evaluates them to trigger game pauses.
+///     Thread-safe for concurrent access during evaluation.
 /// </summary>
 public class BreakpointManager : IBreakpointOperations
 {
@@ -14,19 +14,27 @@ public class BreakpointManager : IBreakpointOperations
     private readonly object _breakpointsLock = new();
     private readonly ConsoleScriptEvaluator _evaluator;
     private readonly ConsoleGlobals _globals;
-    private readonly ITimeControl? _timeControl;
     private readonly ILogger? _logger;
-    private int _nextId = 1;
+    private readonly ITimeControl? _timeControl;
     private bool _isPaused;
+    private int _nextId = 1;
+
+    public BreakpointManager(
+        ConsoleScriptEvaluator evaluator,
+        ConsoleGlobals globals,
+        ITimeControl? timeControl,
+        ILogger? logger = null
+    )
+    {
+        _evaluator = evaluator ?? throw new ArgumentNullException(nameof(evaluator));
+        _globals = globals ?? throw new ArgumentNullException(nameof(globals));
+        _timeControl = timeControl;
+        _logger = logger;
+    }
 
     /// <summary>
-    /// Fired when a breakpoint is hit.
-    /// </summary>
-    public event Action<IBreakpoint>? OnBreakpointHit;
-
-    /// <summary>
-    /// Gets all active breakpoints.
-    /// Returns a snapshot to ensure thread safety.
+    ///     Gets all active breakpoints.
+    ///     Returns a snapshot to ensure thread safety.
     /// </summary>
     public IReadOnlyCollection<IBreakpoint> Breakpoints
     {
@@ -40,33 +48,21 @@ public class BreakpointManager : IBreakpointOperations
     }
 
     /// <summary>
-    /// Gets or sets whether breakpoint evaluation is enabled.
+    ///     Gets or sets whether breakpoint evaluation is enabled.
     /// </summary>
     public bool IsEnabled { get; set; } = true;
 
-    public BreakpointManager(
-        ConsoleScriptEvaluator evaluator,
-        ConsoleGlobals globals,
-        ITimeControl? timeControl,
-        ILogger? logger = null)
-    {
-        _evaluator = evaluator ?? throw new ArgumentNullException(nameof(evaluator));
-        _globals = globals ?? throw new ArgumentNullException(nameof(globals));
-        _timeControl = timeControl;
-        _logger = logger;
-    }
-
     /// <summary>
-    /// Adds an expression breakpoint.
+    ///     Adds an expression breakpoint.
     /// </summary>
     public int AddExpressionBreakpoint(string expression, bool triggerOnChange = true)
     {
         lock (_breakpointsLock)
         {
-            var id = _nextId++;
+            int id = _nextId++;
             var breakpoint = new ExpressionBreakpoint(id, expression, _evaluator, _globals, _logger)
             {
-                TriggerOnChange = triggerOnChange
+                TriggerOnChange = triggerOnChange,
             };
             _breakpoints[id] = breakpoint;
             _logger?.LogDebug("Added expression breakpoint #{Id}: {Expression}", id, expression);
@@ -75,13 +71,13 @@ public class BreakpointManager : IBreakpointOperations
     }
 
     /// <summary>
-    /// Adds a log level breakpoint.
+    ///     Adds a log level breakpoint.
     /// </summary>
     public int AddLogLevelBreakpoint(LogLevel minLevel)
     {
         lock (_breakpointsLock)
         {
-            var id = _nextId++;
+            int id = _nextId++;
             var breakpoint = new LogLevelBreakpoint(id, minLevel);
             _breakpoints[id] = breakpoint;
             _logger?.LogDebug("Added log level breakpoint #{Id}: {Level}+", id, minLevel);
@@ -90,13 +86,13 @@ public class BreakpointManager : IBreakpointOperations
     }
 
     /// <summary>
-    /// Adds a watch alert breakpoint.
+    ///     Adds a watch alert breakpoint.
     /// </summary>
     public int AddWatchAlertBreakpoint(string watchName, Func<bool> alertChecker)
     {
         lock (_breakpointsLock)
         {
-            var id = _nextId++;
+            int id = _nextId++;
             var breakpoint = new WatchAlertBreakpoint(id, watchName, alertChecker, _logger);
             _breakpoints[id] = breakpoint;
             _logger?.LogDebug("Added watch alert breakpoint #{Id}: {WatchName}", id, watchName);
@@ -105,18 +101,18 @@ public class BreakpointManager : IBreakpointOperations
     }
 
     /// <summary>
-    /// Gets a breakpoint by ID.
+    ///     Gets a breakpoint by ID.
     /// </summary>
     public IBreakpoint? GetBreakpoint(int id)
     {
         lock (_breakpointsLock)
         {
-            return _breakpoints.TryGetValue(id, out var bp) ? bp : null;
+            return _breakpoints.TryGetValue(id, out IBreakpoint? bp) ? bp : null;
         }
     }
 
     /// <summary>
-    /// Removes a breakpoint.
+    ///     Removes a breakpoint.
     /// </summary>
     public bool RemoveBreakpoint(int id)
     {
@@ -127,12 +123,13 @@ public class BreakpointManager : IBreakpointOperations
                 _logger?.LogDebug("Removed breakpoint #{Id}", id);
                 return true;
             }
+
             return false;
         }
     }
 
     /// <summary>
-    /// Removes all breakpoints.
+    ///     Removes all breakpoints.
     /// </summary>
     public void ClearAllBreakpoints()
     {
@@ -144,39 +141,60 @@ public class BreakpointManager : IBreakpointOperations
     }
 
     /// <summary>
-    /// Enables a breakpoint.
+    ///     Enables a breakpoint.
     /// </summary>
     public bool EnableBreakpoint(int id)
     {
         lock (_breakpointsLock)
         {
-            if (_breakpoints.TryGetValue(id, out var bp))
+            if (_breakpoints.TryGetValue(id, out IBreakpoint? bp))
             {
                 bp.IsEnabled = true;
                 return true;
             }
+
             return false;
         }
     }
 
     /// <summary>
-    /// Disables a breakpoint.
+    ///     Disables a breakpoint.
     /// </summary>
     public bool DisableBreakpoint(int id)
     {
         lock (_breakpointsLock)
         {
-            if (_breakpoints.TryGetValue(id, out var bp))
+            if (_breakpoints.TryGetValue(id, out IBreakpoint? bp))
             {
                 bp.IsEnabled = false;
                 return true;
             }
+
             return false;
         }
     }
 
     /// <summary>
-    /// Notifies log level breakpoints of a new log message.
+    ///     Gets statistics about breakpoints.
+    /// </summary>
+    public (int Total, int Enabled, int Disabled, int TotalHits) GetStatistics()
+    {
+        lock (_breakpointsLock)
+        {
+            int enabled = _breakpoints.Values.Count(bp => bp.IsEnabled);
+            int disabled = _breakpoints.Count - enabled;
+            int totalHits = _breakpoints.Values.Sum(bp => bp.HitCount);
+            return (_breakpoints.Count, enabled, disabled, totalHits);
+        }
+    }
+
+    /// <summary>
+    ///     Fired when a breakpoint is hit.
+    /// </summary>
+    public event Action<IBreakpoint>? OnBreakpointHit;
+
+    /// <summary>
+    ///     Notifies log level breakpoints of a new log message.
     /// </summary>
     public void NotifyLog(LogLevel level, string message)
     {
@@ -187,7 +205,7 @@ public class BreakpointManager : IBreakpointOperations
             snapshot = _breakpoints.Values.ToList();
         }
 
-        foreach (var bp in snapshot)
+        foreach (IBreakpoint bp in snapshot)
         {
             if (bp is LogLevelBreakpoint logBp && bp.IsEnabled)
             {
@@ -196,22 +214,26 @@ public class BreakpointManager : IBreakpointOperations
         }
     }
 
-
     /// <summary>
-    /// Evaluates all breakpoints synchronously and pauses the game if any condition is met.
-    /// Should be called each frame from the update loop.
+    ///     Evaluates all breakpoints synchronously and pauses the game if any condition is met.
+    ///     Should be called each frame from the update loop.
     /// </summary>
     public void EvaluateBreakpoints()
     {
         if (!IsEnabled)
+        {
             return;
+        }
 
         // Take snapshot to avoid holding lock during evaluation
         List<IBreakpoint> snapshot;
         lock (_breakpointsLock)
         {
             if (_breakpoints.Count == 0)
+            {
                 return;
+            }
+
             snapshot = _breakpoints.Values.ToList();
         }
 
@@ -219,23 +241,31 @@ public class BreakpointManager : IBreakpointOperations
         // Check _isPaused alone - it's set whenever a breakpoint triggers,
         // regardless of whether _timeControl exists
         if (_isPaused)
+        {
             return;
+        }
 
-        foreach (var bp in snapshot)
+        foreach (IBreakpoint bp in snapshot)
         {
             if (!bp.IsEnabled)
+            {
                 continue;
+            }
 
             try
             {
                 // EvaluateAsync returns synchronously for most breakpoint types
                 // (LogLevel and WatchAlert are sync, Expression uses cached result)
-                var shouldTrigger = bp.EvaluateAsync().GetAwaiter().GetResult();
+                bool shouldTrigger = bp.EvaluateAsync().GetAwaiter().GetResult();
 
                 if (shouldTrigger)
                 {
                     bp.OnHit();
-                    _logger?.LogInformation("Breakpoint #{Id} hit: {Description}", bp.Id, bp.Description);
+                    _logger?.LogInformation(
+                        "Breakpoint #{Id} hit: {Description}",
+                        bp.Id,
+                        bp.Description
+                    );
 
                     // Mark as paused to prevent re-triggering on next frame
                     _isPaused = true;
@@ -258,25 +288,10 @@ public class BreakpointManager : IBreakpointOperations
     }
 
     /// <summary>
-    /// Resets the paused state (call when user manually resumes).
+    ///     Resets the paused state (call when user manually resumes).
     /// </summary>
     public void ResetPausedState()
     {
         _isPaused = false;
     }
-
-    /// <summary>
-    /// Gets statistics about breakpoints.
-    /// </summary>
-    public (int Total, int Enabled, int Disabled, int TotalHits) GetStatistics()
-    {
-        lock (_breakpointsLock)
-        {
-            var enabled = _breakpoints.Values.Count(bp => bp.IsEnabled);
-            var disabled = _breakpoints.Count - enabled;
-            var totalHits = _breakpoints.Values.Sum(bp => bp.HitCount);
-            return (_breakpoints.Count, enabled, disabled, totalHits);
-        }
-    }
 }
-

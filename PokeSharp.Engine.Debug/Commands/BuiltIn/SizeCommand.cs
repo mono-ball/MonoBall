@@ -3,8 +3,8 @@ using PokeSharp.Engine.UI.Debug.Components.Debug;
 namespace PokeSharp.Engine.Debug.Commands.BuiltIn;
 
 /// <summary>
-/// Command to change the console size/height.
-/// Usage: size [small|medium|large|full|25-100]
+///     Command to change the console size/height.
+///     Usage: size [small|medium|large|full|25-100]
 /// </summary>
 [ConsoleCommand("size", "Change the console height")]
 public class SizeCommand : IConsoleCommand
@@ -27,7 +27,7 @@ public class SizeCommand : IConsoleCommand
             return Task.CompletedTask;
         }
 
-        var sizeArg = args[0].ToLowerInvariant();
+        string sizeArg = args[0].ToLowerInvariant();
         float? heightPercent = null;
 
         // Try named presets first
@@ -62,22 +62,30 @@ public class SizeCommand : IConsoleCommand
 
             default:
                 // Try parsing as a percentage
-                if (int.TryParse(sizeArg.TrimEnd('%'), out var percent))
+                if (int.TryParse(sizeArg.TrimEnd('%'), out int percent))
                 {
                     if (percent < 25 || percent > 100)
                     {
-                        context.WriteLine("Error: Size must be between 25 and 100", context.Theme.Error);
+                        context.WriteLine(
+                            "Error: Size must be between 25 and 100",
+                            context.Theme.Error
+                        );
                         return Task.CompletedTask;
                     }
+
                     heightPercent = percent / 100f;
                     context.WriteLine($"Console size: {percent}%", context.Theme.Success);
                 }
                 else
                 {
                     context.WriteLine($"Unknown size: {sizeArg}", context.Theme.Error);
-                    context.WriteLine("Use: small, medium, large, full, or a percentage (25-100)", context.Theme.TextSecondary);
+                    context.WriteLine(
+                        "Use: small, medium, large, full, or a percentage (25-100)",
+                        context.Theme.TextSecondary
+                    );
                     return Task.CompletedTask;
                 }
+
                 break;
         }
 

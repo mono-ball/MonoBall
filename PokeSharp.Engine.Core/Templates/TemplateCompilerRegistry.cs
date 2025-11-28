@@ -26,7 +26,7 @@ public sealed class TemplateCompilerRegistry
     {
         ArgumentNullException.ThrowIfNull(compiler);
 
-        var entityType = typeof(TEntity);
+        Type entityType = typeof(TEntity);
         _compilers[entityType] = compiler;
 
         _logger.LogInformation("Registered compiler for entity type {EntityType}", entityType.Name);
@@ -40,8 +40,8 @@ public sealed class TemplateCompilerRegistry
     public ITemplateCompiler<TEntity>? GetCompiler<TEntity>()
         where TEntity : class
     {
-        var entityType = typeof(TEntity);
-        return _compilers.TryGetValue(entityType, out var compiler)
+        Type entityType = typeof(TEntity);
+        return _compilers.TryGetValue(entityType, out object? compiler)
             ? compiler as ITemplateCompiler<TEntity>
             : null;
     }

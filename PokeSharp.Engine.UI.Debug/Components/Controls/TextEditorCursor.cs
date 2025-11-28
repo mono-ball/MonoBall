@@ -4,16 +4,21 @@ using PokeSharp.Engine.UI.Debug.Core;
 namespace PokeSharp.Engine.UI.Debug.Components.Controls;
 
 /// <summary>
-/// Manages cursor state for a text editor including position, blinking animation, and movement.
+///     Manages cursor state for a text editor including position, blinking animation, and movement.
 /// </summary>
 public class TextEditorCursor
 {
-    private int _line;
-    private int _column;
+    /// <summary>
+    ///     Gets or sets the blink rate in seconds.
+    /// </summary>
+    private float? _blinkRate;
+
     private float _blinkTimer;
+    private int _column;
+    private int _line;
 
     /// <summary>
-    /// Gets or sets the cursor line (0-based).
+    ///     Gets or sets the cursor line (0-based).
     /// </summary>
     public int Line
     {
@@ -22,7 +27,7 @@ public class TextEditorCursor
     }
 
     /// <summary>
-    /// Gets or sets the cursor column (0-based).
+    ///     Gets or sets the cursor column (0-based).
     /// </summary>
     public int Column
     {
@@ -30,19 +35,19 @@ public class TextEditorCursor
         set => _column = Math.Max(0, value);
     }
 
-    /// <summary>
-    /// Gets or sets the blink rate in seconds.
-    /// </summary>
-    private float? _blinkRate;
-    public float BlinkRate { get => _blinkRate ?? ThemeManager.Current.CursorBlinkRate; set => _blinkRate = value; }
+    public float BlinkRate
+    {
+        get => _blinkRate ?? ThemeManager.Current.CursorBlinkRate;
+        set => _blinkRate = value;
+    }
 
     /// <summary>
-    /// Gets whether the cursor should be visible based on blink animation.
+    ///     Gets whether the cursor should be visible based on blink animation.
     /// </summary>
     public bool IsVisible => _blinkTimer < BlinkRate;
 
     /// <summary>
-    /// Updates the cursor blink animation.
+    ///     Updates the cursor blink animation.
     /// </summary>
     public void Update(GameTime gameTime)
     {
@@ -54,8 +59,8 @@ public class TextEditorCursor
     }
 
     /// <summary>
-    /// Resets the blink animation (makes cursor visible immediately).
-    /// Call this when cursor moves or text changes.
+    ///     Resets the blink animation (makes cursor visible immediately).
+    ///     Call this when cursor moves or text changes.
     /// </summary>
     public void ResetBlink()
     {
@@ -63,7 +68,7 @@ public class TextEditorCursor
     }
 
     /// <summary>
-    /// Sets the cursor position.
+    ///     Sets the cursor position.
     /// </summary>
     public void SetPosition(int line, int column)
     {
@@ -73,7 +78,7 @@ public class TextEditorCursor
     }
 
     /// <summary>
-    /// Moves cursor to start of line.
+    ///     Moves cursor to start of line.
     /// </summary>
     public void MoveToLineStart()
     {
@@ -82,7 +87,7 @@ public class TextEditorCursor
     }
 
     /// <summary>
-    /// Moves cursor to end of line.
+    ///     Moves cursor to end of line.
     /// </summary>
     public void MoveToLineEnd(int lineLength)
     {
@@ -91,7 +96,7 @@ public class TextEditorCursor
     }
 
     /// <summary>
-    /// Moves cursor one character left, with optional line wrap.
+    ///     Moves cursor one character left, with optional line wrap.
     /// </summary>
     public bool MoveLeft(Func<int, int>? getLineLength = null)
     {
@@ -101,7 +106,8 @@ public class TextEditorCursor
             ResetBlink();
             return true;
         }
-        else if (Line > 0 && getLineLength != null)
+
+        if (Line > 0 && getLineLength != null)
         {
             // Move to end of previous line
             Line--;
@@ -109,11 +115,12 @@ public class TextEditorCursor
             ResetBlink();
             return true;
         }
+
         return false;
     }
 
     /// <summary>
-    /// Moves cursor one character right, with optional line wrap.
+    ///     Moves cursor one character right, with optional line wrap.
     /// </summary>
     public bool MoveRight(int currentLineLength, Func<int>? getTotalLines = null)
     {
@@ -123,7 +130,8 @@ public class TextEditorCursor
             ResetBlink();
             return true;
         }
-        else if (getTotalLines != null && Line < getTotalLines() - 1)
+
+        if (getTotalLines != null && Line < getTotalLines() - 1)
         {
             // Move to start of next line
             Line++;
@@ -131,11 +139,12 @@ public class TextEditorCursor
             ResetBlink();
             return true;
         }
+
         return false;
     }
 
     /// <summary>
-    /// Moves cursor up one line, maintaining column position if possible.
+    ///     Moves cursor up one line, maintaining column position if possible.
     /// </summary>
     public bool MoveUp(Func<int, int> getLineLength)
     {
@@ -146,11 +155,12 @@ public class TextEditorCursor
             ResetBlink();
             return true;
         }
+
         return false;
     }
 
     /// <summary>
-    /// Moves cursor down one line, maintaining column position if possible.
+    ///     Moves cursor down one line, maintaining column position if possible.
     /// </summary>
     public bool MoveDown(int totalLines, Func<int, int> getLineLength)
     {
@@ -161,11 +171,12 @@ public class TextEditorCursor
             ResetBlink();
             return true;
         }
+
         return false;
     }
 
     /// <summary>
-    /// Clamps cursor position to valid range.
+    ///     Clamps cursor position to valid range.
     /// </summary>
     public void ClampToValid(int totalLines, Func<int, int> getLineLength)
     {
@@ -173,4 +184,3 @@ public class TextEditorCursor
         Column = Math.Clamp(Column, 0, getLineLength(Line));
     }
 }
-

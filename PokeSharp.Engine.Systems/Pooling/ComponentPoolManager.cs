@@ -45,8 +45,8 @@ public class ComponentPoolManager
         _positionPool = new ComponentPool<Position>(2000);
         _gridMovementPool = new ComponentPool<GridMovement>(1500);
         _velocityPool = new ComponentPool<Velocity>(1500);
-        _spritePool = new ComponentPool<Sprite>(1000);
-        _animationPool = new ComponentPool<Animation>(1000);
+        _spritePool = new ComponentPool<Sprite>();
+        _animationPool = new ComponentPool<Animation>();
 
         // Register in dictionary for generic access
         _pools[typeof(Position)] = _positionPool;
@@ -70,10 +70,12 @@ public class ComponentPoolManager
     public ComponentPool<T> GetPool<T>(int maxSize = 1000)
         where T : struct
     {
-        var type = typeof(T);
+        Type type = typeof(T);
 
-        if (_pools.TryGetValue(type, out var existingPool))
+        if (_pools.TryGetValue(type, out object? existingPool))
+        {
             return (ComponentPool<T>)existingPool;
+        }
 
         // Create new pool
         var newPool = new ComponentPool<T>(maxSize);
@@ -171,17 +173,29 @@ public class ComponentPoolManager
     {
         var stats = new List<ComponentPoolStatistics>();
 
-        foreach (var (type, poolObj) in _pools)
+        foreach ((Type type, object poolObj) in _pools)
+        {
             if (poolObj is ComponentPool<Position> posPool)
+            {
                 stats.Add(posPool.GetStatistics());
+            }
             else if (poolObj is ComponentPool<GridMovement> gmPool)
+            {
                 stats.Add(gmPool.GetStatistics());
+            }
             else if (poolObj is ComponentPool<Velocity> velPool)
+            {
                 stats.Add(velPool.GetStatistics());
+            }
             else if (poolObj is ComponentPool<Sprite> sprPool)
+            {
                 stats.Add(sprPool.GetStatistics());
+            }
             else if (poolObj is ComponentPool<Animation> aniPool)
+            {
                 stats.Add(aniPool.GetStatistics());
+            }
+        }
 
         return stats;
     }
@@ -195,12 +209,12 @@ public class ComponentPoolManager
         sb.AppendLine("=== Component Pool Statistics ===");
         sb.AppendLine();
 
-        var allStats = GetAllStatistics();
-        var totalRented = 0L;
-        var totalCreated = 0L;
-        var totalAvailable = 0;
+        IReadOnlyList<ComponentPoolStatistics> allStats = GetAllStatistics();
+        long totalRented = 0L;
+        long totalCreated = 0L;
+        int totalAvailable = 0;
 
-        foreach (var stat in allStats.OrderByDescending(s => s.TotalRented))
+        foreach (ComponentPoolStatistics stat in allStats.OrderByDescending(s => s.TotalRented))
         {
             sb.AppendLine($"Component: {stat.ComponentType}");
             sb.AppendLine($"  Available: {stat.AvailableCount}/{stat.MaxSize}");
@@ -221,13 +235,13 @@ public class ComponentPoolManager
         sb.AppendLine($"Total Components Created: {totalCreated:N0}");
         sb.AppendLine($"Total Available: {totalAvailable}");
         sb.AppendLine(
-            $"Overall Reuse Rate: {(totalRented > 0 ? 1.0f - (float)totalCreated / totalRented : 0f):P1}"
+            $"Overall Reuse Rate: {(totalRented > 0 ? 1.0f - ((float)totalCreated / totalRented) : 0f):P1}"
         );
 
         // Memory estimation (rough approximation)
-        var estimatedSavedAllocations = totalRented - totalCreated;
-        var avgComponentSize = 64; // bytes (rough estimate for typical component)
-        var estimatedSavedBytes = estimatedSavedAllocations * avgComponentSize;
+        long estimatedSavedAllocations = totalRented - totalCreated;
+        int avgComponentSize = 64; // bytes (rough estimate for typical component)
+        long estimatedSavedBytes = estimatedSavedAllocations * avgComponentSize;
         sb.AppendLine($"Estimated Memory Saved: ~{estimatedSavedBytes / 1024.0:F2} KB");
 
         return sb.ToString();
@@ -238,17 +252,29 @@ public class ComponentPoolManager
     /// </summary>
     public void ClearAll()
     {
-        foreach (var (type, poolObj) in _pools)
+        foreach ((Type type, object poolObj) in _pools)
+        {
             if (poolObj is ComponentPool<Position> posPool)
+            {
                 posPool.Clear();
+            }
             else if (poolObj is ComponentPool<GridMovement> gmPool)
+            {
                 gmPool.Clear();
+            }
             else if (poolObj is ComponentPool<Velocity> velPool)
+            {
                 velPool.Clear();
+            }
             else if (poolObj is ComponentPool<Sprite> sprPool)
+            {
                 sprPool.Clear();
+            }
             else if (poolObj is ComponentPool<Animation> aniPool)
+            {
                 aniPool.Clear();
+            }
+        }
 
         _logger?.LogInformation("All component pools cleared");
     }
@@ -259,9 +285,11 @@ public class ComponentPoolManager
     public void LogStatistics()
     {
         if (!_enableStatistics || _logger == null)
+        {
             return;
+        }
 
-        var report = GenerateReport();
+        string report = GenerateReport();
         _logger.LogInformation("Component Pool Report:\n{Report}", report);
     }
 }

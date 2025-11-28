@@ -48,12 +48,12 @@ public class MapInitializer(
             logger.LogWorkflowStatus("Loading map from definition", ("mapId", mapId.Value));
 
             // Load map from EF Core definition (NEW: Definition-based)
-            var mapInfoEntity = mapLoader.LoadMap(world, mapId);
+            Entity mapInfoEntity = mapLoader.LoadMap(world, mapId);
             logger.LogWorkflowStatus("Map entities created", ("entity", mapInfoEntity.Id));
 
             // Get MapInfo to extract map ID and name for lifecycle tracking
-            var mapInfo = mapInfoEntity.Get<MapInfo>();
-            var mapName = mapInfo.MapName ?? mapId.Value;
+            MapInfo mapInfo = mapInfoEntity.Get<MapInfo>();
+            string mapName = mapInfo.MapName ?? mapId.Value;
 
             // Complete post-loading steps (shared logic)
             await CompleteMapLoadingAsync(mapInfoEntity, mapInfo, mapName);
@@ -123,12 +123,12 @@ public class MapInitializer(
             logger.LogWorkflowStatus("Loading map from file (LEGACY)", ("path", mapPath));
 
             // Load map as tile entities (file-based approach for backward compatibility)
-            var mapInfoEntity = mapLoader.LoadMapEntities(world, mapPath);
+            Entity mapInfoEntity = mapLoader.LoadMapEntities(world, mapPath);
             logger.LogWorkflowStatus("Map entities created", ("entity", mapInfoEntity.Id));
 
             // Get MapInfo to extract map ID and name for lifecycle tracking
-            var mapInfo = mapInfoEntity.Get<MapInfo>();
-            var mapName = mapInfo.MapName ?? mapPath;
+            MapInfo mapInfo = mapInfoEntity.Get<MapInfo>();
+            string mapName = mapInfo.MapName ?? mapPath;
 
             // Complete post-loading steps (shared logic)
             await CompleteMapLoadingAsync(mapInfoEntity, mapInfo, mapName);
@@ -195,14 +195,14 @@ public class MapInitializer(
         string mapName
     )
     {
-        var tilesetTextureIds = mapLoader.GetLoadedTextureIds(mapInfo.MapId);
+        HashSet<string>? tilesetTextureIds = mapLoader.GetLoadedTextureIds(mapInfo.MapId);
 
         // Load sprites for NPCs in this map
-        var spriteTextureKeys = await LoadMapSpritesAsync(mapInfo.MapId);
+        HashSet<string>? spriteTextureKeys = await LoadMapSpritesAsync(mapInfo.MapId);
 
         // Register map with lifecycle manager BEFORE transitioning
-        var safeTilesetIds = tilesetTextureIds ?? new HashSet<string>();
-        var safeSpriteKeys = spriteTextureKeys ?? new HashSet<string>();
+        HashSet<string> safeTilesetIds = tilesetTextureIds ?? new HashSet<string>();
+        HashSet<string> safeSpriteKeys = spriteTextureKeys ?? new HashSet<string>();
         mapLifecycleManager.RegisterMap(mapInfo.MapId, mapName, safeTilesetIds, safeSpriteKeys);
 
         // Transition to new map (cleans up old maps)
@@ -246,10 +246,10 @@ public class MapInitializer(
             return new HashSet<string>();
         }
 
-        var requiredSpriteIds = mapLoader.GetRequiredSpriteIds();
+        IReadOnlySet<SpriteId> requiredSpriteIds = mapLoader.GetRequiredSpriteIds();
         try
         {
-            var spriteTextureKeys = await _spriteTextureLoader.LoadSpritesForMapAsync(
+            HashSet<string> spriteTextureKeys = await _spriteTextureLoader.LoadSpritesForMapAsync(
                 mapId,
                 requiredSpriteIds
             );

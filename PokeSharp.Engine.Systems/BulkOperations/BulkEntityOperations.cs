@@ -80,8 +80,10 @@ public sealed class BulkEntityOperations
         var sw = Stopwatch.StartNew();
         var entities = new Entity[count];
 
-        for (var i = 0; i < count; i++)
+        for (int i = 0; i < count; i++)
+        {
             entities[i] = _world.Create(componentTypes);
+        }
 
         sw.Stop();
         UpdateCreationStats(count, sw.Elapsed.TotalMilliseconds);
@@ -114,9 +116,9 @@ public sealed class BulkEntityOperations
         var sw = Stopwatch.StartNew();
         var entities = new Entity[count];
 
-        for (var i = 0; i < count; i++)
+        for (int i = 0; i < count; i++)
         {
-            var entity = _world.Create<T>();
+            Entity entity = _world.Create<T>();
             entity.Set(componentFactory(i));
             entities[i] = entity;
         }
@@ -161,9 +163,9 @@ public sealed class BulkEntityOperations
         var sw = Stopwatch.StartNew();
         var entities = new Entity[count];
 
-        for (var i = 0; i < count; i++)
+        for (int i = 0; i < count; i++)
         {
-            var entity = _world.Create<T1, T2>();
+            Entity entity = _world.Create<T1, T2>();
             entity.Set(factory1(i));
             entity.Set(factory2(i));
             entities[i] = entity;
@@ -215,9 +217,9 @@ public sealed class BulkEntityOperations
         var sw = Stopwatch.StartNew();
         var entities = new Entity[count];
 
-        for (var i = 0; i < count; i++)
+        for (int i = 0; i < count; i++)
         {
-            var entity = _world.Create<T1, T2, T3>();
+            Entity entity = _world.Create<T1, T2, T3>();
             entity.Set(factory1(i));
             entity.Set(factory2(i));
             entity.Set(factory3(i));
@@ -247,13 +249,19 @@ public sealed class BulkEntityOperations
         ArgumentNullException.ThrowIfNull(entities);
 
         if (entities.Length == 0)
+        {
             return;
+        }
 
         var sw = Stopwatch.StartNew();
 
-        foreach (var entity in entities)
+        foreach (Entity entity in entities)
+        {
             if (_world.IsAlive(entity))
+            {
                 _world.Destroy(entity);
+            }
+        }
 
         sw.Stop();
         UpdateDestructionStats(entities.Length, sw.Elapsed.TotalMilliseconds);
@@ -277,17 +285,21 @@ public sealed class BulkEntityOperations
 
         var entityList = entities.ToList();
         if (entityList.Count == 0)
+        {
             return;
+        }
 
         var sw = Stopwatch.StartNew();
-        var destroyedCount = 0;
+        int destroyedCount = 0;
 
-        foreach (var entity in entityList)
+        foreach (Entity entity in entityList)
+        {
             if (_world.IsAlive(entity))
             {
                 _world.Destroy(entity);
                 destroyedCount++;
             }
+        }
 
         sw.Stop();
         UpdateDestructionStats(destroyedCount, sw.Elapsed.TotalMilliseconds);
@@ -311,9 +323,13 @@ public sealed class BulkEntityOperations
     {
         ArgumentNullException.ThrowIfNull(entities);
 
-        foreach (var entity in entities)
+        foreach (Entity entity in entities)
+        {
             if (_world.IsAlive(entity))
+            {
                 entity.Add(component);
+            }
+        }
     }
 
     /// <summary>
@@ -336,9 +352,13 @@ public sealed class BulkEntityOperations
         ArgumentNullException.ThrowIfNull(entities);
         ArgumentNullException.ThrowIfNull(componentFactory);
 
-        foreach (var entity in entities)
+        foreach (Entity entity in entities)
+        {
             if (_world.IsAlive(entity))
+            {
                 entity.Add(componentFactory(entity));
+            }
+        }
     }
 
     /// <summary>
@@ -358,9 +378,13 @@ public sealed class BulkEntityOperations
     {
         ArgumentNullException.ThrowIfNull(entities);
 
-        foreach (var entity in entities)
+        foreach (Entity entity in entities)
+        {
             if (_world.IsAlive(entity) && entity.Has<T>())
+            {
                 entity.Remove<T>();
+            }
+        }
     }
 
     /// <summary>

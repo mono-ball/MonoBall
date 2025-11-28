@@ -1,7 +1,7 @@
+using Arch.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Microsoft.Xna.Framework.Graphics;
 using PokeSharp.Engine.Debug.Console.Configuration;
 using PokeSharp.Engine.Debug.Console.Features;
@@ -10,24 +10,29 @@ using PokeSharp.Engine.Debug.Features;
 using PokeSharp.Engine.Debug.Logging;
 using PokeSharp.Engine.Debug.Scripting;
 using PokeSharp.Engine.Debug.Systems;
+using PokeSharp.Engine.Scenes;
+using PokeSharp.Engine.Systems.Management;
 using PokeSharp.Engine.UI.Debug.Core;
 using PokeSharp.Game.Scripting.Api;
 
 namespace PokeSharp.Engine.Debug;
 
 /// <summary>
-/// Extension methods for registering debug console services in the DI container.
+///     Extension methods for registering debug console services in the DI container.
 /// </summary>
 public static class DebugServiceCollectionExtensions
 {
     /// <summary>
-    /// Adds debug console services to the service collection.
-    /// This enables dependency injection for the console system and its components.
+    ///     Adds debug console services to the service collection.
+    ///     This enables dependency injection for the console system and its components.
     /// </summary>
     /// <param name="services">The service collection.</param>
     /// <param name="configuration">Optional configuration to load console settings from appsettings.json.</param>
     /// <returns>The service collection for chaining.</returns>
-    public static IServiceCollection AddDebugConsole(this IServiceCollection services, IConfiguration? configuration = null)
+    public static IServiceCollection AddDebugConsole(
+        this IServiceCollection services,
+        IConfiguration? configuration = null
+    )
     {
         // Console Logger Provider
         services.AddSingleton<ConsoleLoggerProvider>();
@@ -36,8 +41,11 @@ public static class DebugServiceCollectionExtensions
         if (configuration != null)
         {
             // Get configuration from appsettings.json using Get<T>() which supports records
-            var consoleConfigSection = configuration.GetSection(ConsoleConfig.SectionName);
-            var consoleConfig = consoleConfigSection.Get<ConsoleConfig>() ?? new ConsoleConfig();
+            IConfigurationSection consoleConfigSection = configuration.GetSection(
+                ConsoleConfig.SectionName
+            );
+            ConsoleConfig consoleConfig =
+                consoleConfigSection.Get<ConsoleConfig>() ?? new ConsoleConfig();
 
             // Set default theme from config (must be done before ThemeManager is accessed)
             if (!string.IsNullOrEmpty(consoleConfig.Theme))
@@ -61,7 +69,7 @@ public static class DebugServiceCollectionExtensions
                     AutoCompleteEnabled = true,
                     PersistHistory = true,
                     LoggingEnabled = true,
-                    MinimumLogLevel = LogLevel.Debug
+                    MinimumLogLevel = LogLevel.Debug,
                 };
             });
         }
@@ -70,46 +78,54 @@ public static class DebugServiceCollectionExtensions
         services.AddSingleton<ConsoleCommandHistory>();
         services.AddSingleton<ConsoleHistoryPersistence>(sp =>
         {
-            var logger = sp.GetRequiredService<ILogger<ConsoleHistoryPersistence>>();
+            ILogger<ConsoleHistoryPersistence> logger = sp.GetRequiredService<
+                ILogger<ConsoleHistoryPersistence>
+            >();
             return new ConsoleHistoryPersistence(logger);
         });
 
         // Script Manager
         services.AddSingleton<ScriptManager>(sp =>
         {
-            var logger = sp.GetRequiredService<ILogger<ScriptManager>>();
+            ILogger<ScriptManager> logger = sp.GetRequiredService<ILogger<ScriptManager>>();
             return new ScriptManager(logger: logger);
         });
 
         // Alias Manager
         services.AddSingleton<AliasMacroManager>(sp =>
         {
-            var logger = sp.GetRequiredService<ILogger<AliasMacroManager>>();
-            var scriptManager = sp.GetRequiredService<ScriptManager>();
-            var aliasesPath = Path.Combine(scriptManager.ScriptsDirectory, "aliases.txt");
+            ILogger<AliasMacroManager> logger = sp.GetRequiredService<ILogger<AliasMacroManager>>();
+            ScriptManager scriptManager = sp.GetRequiredService<ScriptManager>();
+            string aliasesPath = Path.Combine(scriptManager.ScriptsDirectory, "aliases.txt");
             return new AliasMacroManager(aliasesPath, logger);
         });
 
         // Bookmark Manager
         services.AddSingleton<BookmarkedCommandsManager>(sp =>
         {
-            var logger = sp.GetRequiredService<ILogger<BookmarkedCommandsManager>>();
-            var scriptManager = sp.GetRequiredService<ScriptManager>();
-            var bookmarksPath = Path.Combine(scriptManager.ScriptsDirectory, "bookmarks.txt");
+            ILogger<BookmarkedCommandsManager> logger = sp.GetRequiredService<
+                ILogger<BookmarkedCommandsManager>
+            >();
+            ScriptManager scriptManager = sp.GetRequiredService<ScriptManager>();
+            string bookmarksPath = Path.Combine(scriptManager.ScriptsDirectory, "bookmarks.txt");
             return new BookmarkedCommandsManager(bookmarksPath, logger);
         });
 
         // Console Script Evaluator
         services.AddSingleton<ConsoleScriptEvaluator>(sp =>
         {
-            var logger = sp.GetRequiredService<ILogger<ConsoleScriptEvaluator>>();
+            ILogger<ConsoleScriptEvaluator> logger = sp.GetRequiredService<
+                ILogger<ConsoleScriptEvaluator>
+            >();
             return new ConsoleScriptEvaluator(logger);
         });
 
         // Console Auto-Complete
         services.AddSingleton<ConsoleAutoComplete>(sp =>
         {
-            var logger = sp.GetRequiredService<ILogger<ConsoleAutoComplete>>();
+            ILogger<ConsoleAutoComplete> logger = sp.GetRequiredService<
+                ILogger<ConsoleAutoComplete>
+            >();
             return new ConsoleAutoComplete(logger);
         });
 
@@ -117,10 +133,10 @@ public static class DebugServiceCollectionExtensions
         // Note: GraphicsDevice will be set after it's available
         services.AddSingleton<ConsoleGlobals>(sp =>
         {
-            var apiProvider = sp.GetRequiredService<IScriptingApiProvider>();
-            var world = sp.GetRequiredService<Arch.Core.World>();
-            var systemManager = sp.GetRequiredService<PokeSharp.Engine.Systems.Management.SystemManager>();
-            var logger = sp.GetRequiredService<ILogger<ConsoleGlobals>>();
+            IScriptingApiProvider apiProvider = sp.GetRequiredService<IScriptingApiProvider>();
+            World world = sp.GetRequiredService<World>();
+            SystemManager systemManager = sp.GetRequiredService<SystemManager>();
+            ILogger<ConsoleGlobals> logger = sp.GetRequiredService<ILogger<ConsoleGlobals>>();
             // GraphicsDevice is set later via SetGraphicsDevice
             return new ConsoleGlobals(apiProvider, world, systemManager, null!, logger);
         });
@@ -128,9 +144,11 @@ public static class DebugServiceCollectionExtensions
         // Watch Preset Manager
         services.AddSingleton<WatchPresetManager>(sp =>
         {
-            var logger = sp.GetRequiredService<ILogger<WatchPresetManager>>();
-            var scriptManager = sp.GetRequiredService<ScriptManager>();
-            var presetsPath = Path.Combine(scriptManager.ScriptsDirectory, "watch_presets");
+            ILogger<WatchPresetManager> logger = sp.GetRequiredService<
+                ILogger<WatchPresetManager>
+            >();
+            ScriptManager scriptManager = sp.GetRequiredService<ScriptManager>();
+            string presetsPath = Path.Combine(scriptManager.ScriptsDirectory, "watch_presets");
             return new WatchPresetManager(presetsPath, logger);
         });
 
@@ -144,7 +162,7 @@ public static class DebugServiceCollectionExtensions
 }
 
 /// <summary>
-/// Factory for creating ConsoleSystem after GraphicsDevice and SceneManager are available.
+///     Factory for creating ConsoleSystem after GraphicsDevice and SceneManager are available.
 /// </summary>
 public class ConsoleSystemFactory
 {
@@ -152,22 +170,27 @@ public class ConsoleSystemFactory
 
     public ConsoleSystemFactory(IServiceProvider serviceProvider)
     {
-        _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+        _serviceProvider =
+            serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
     }
 
     /// <summary>
-    /// Creates and initializes the console system with the provided GraphicsDevice and SceneManager.
+    ///     Creates and initializes the console system with the provided GraphicsDevice and SceneManager.
     /// </summary>
     /// <param name="graphicsDevice">The graphics device.</param>
     /// <param name="sceneManager">The scene manager for pushing console scenes.</param>
-    public ConsoleSystem Create(GraphicsDevice graphicsDevice, PokeSharp.Engine.Scenes.SceneManager sceneManager)
+    public ConsoleSystem Create(GraphicsDevice graphicsDevice, SceneManager sceneManager)
     {
         // Get dependencies from DI container
-        var world = _serviceProvider.GetRequiredService<Arch.Core.World>();
-        var apiProvider = _serviceProvider.GetRequiredService<IScriptingApiProvider>();
-        var systemManager = _serviceProvider.GetRequiredService<PokeSharp.Engine.Systems.Management.SystemManager>();
-        var logger = _serviceProvider.GetRequiredService<ILogger<ConsoleSystem>>();
-        var consoleLoggerProvider = _serviceProvider.GetService<ConsoleLoggerProvider>();
+        World world = _serviceProvider.GetRequiredService<World>();
+        IScriptingApiProvider apiProvider =
+            _serviceProvider.GetRequiredService<IScriptingApiProvider>();
+        SystemManager systemManager = _serviceProvider.GetRequiredService<SystemManager>();
+        ILogger<ConsoleSystem> logger = _serviceProvider.GetRequiredService<
+            ILogger<ConsoleSystem>
+        >();
+        ConsoleLoggerProvider? consoleLoggerProvider =
+            _serviceProvider.GetService<ConsoleLoggerProvider>();
 
         // Create ConsoleSystem with scene manager
         var consoleSystem = new ConsoleSystem(

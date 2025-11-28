@@ -80,8 +80,10 @@ public sealed class TemplateBatchSpawner
 
         var entities = new Entity[count];
 
-        for (var i = 0; i < count; i++)
+        for (int i = 0; i < count; i++)
+        {
             if (configure != null)
+            {
                 entities[i] = _factory.SpawnFromTemplate(
                     templateId,
                     _world,
@@ -90,8 +92,12 @@ public sealed class TemplateBatchSpawner
                         configure(builder, i);
                     }
                 );
+            }
             else
+            {
                 entities[i] = _factory.SpawnFromTemplate(templateId, _world);
+            }
+        }
 
         return entities;
     }
@@ -133,16 +139,16 @@ public sealed class TemplateBatchSpawner
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(cols);
         ArgumentOutOfRangeException.ThrowIfNegative(spacing);
 
-        var totalCount = rows * cols;
+        int totalCount = rows * cols;
         var entities = new Entity[totalCount];
 
-        for (var row = 0; row < rows; row++)
-        for (var col = 0; col < cols; col++)
+        for (int row = 0; row < rows; row++)
+        for (int col = 0; col < cols; col++)
         {
-            var index = row * cols + col;
+            int index = (row * cols) + col;
             var position = new Vector2(
-                startPosition.X + col * spacing,
-                startPosition.Y + row * spacing
+                startPosition.X + (col * spacing),
+                startPosition.Y + (row * spacing)
             );
 
             entities[index] = _factory.SpawnFromTemplate(
@@ -195,14 +201,14 @@ public sealed class TemplateBatchSpawner
         ArgumentOutOfRangeException.ThrowIfNegative(radius);
 
         var entities = new Entity[count];
-        var angleStep = MathF.PI * 2f / count;
+        float angleStep = MathF.PI * 2f / count;
 
-        for (var i = 0; i < count; i++)
+        for (int i = 0; i < count; i++)
         {
-            var angle = i * angleStep;
+            float angle = i * angleStep;
             var position = new Vector2(
-                center.X + MathF.Cos(angle) * radius,
-                center.Y + MathF.Sin(angle) * radius
+                center.X + (MathF.Cos(angle) * radius),
+                center.Y + (MathF.Sin(angle) * radius)
             );
 
             entities[i] = _factory.SpawnFromTemplate(
@@ -252,10 +258,10 @@ public sealed class TemplateBatchSpawner
 
         var entities = new Entity[count];
 
-        for (var i = 0; i < count; i++)
+        for (int i = 0; i < count; i++)
         {
-            var spawnDelay = i * config.SpawnInterval;
-            var position = config.PositionFactory?.Invoke(i) ?? config.SpawnPosition;
+            float spawnDelay = i * config.SpawnInterval;
+            Vector2 position = config.PositionFactory?.Invoke(i) ?? config.SpawnPosition;
 
             entities[i] = _factory.SpawnFromTemplate(
                 templateId,
@@ -298,12 +304,12 @@ public sealed class TemplateBatchSpawner
 
         var entities = new Entity[count];
         var direction = Vector2.Normalize(endPos - startPos);
-        var totalDistance = Vector2.Distance(startPos, endPos);
-        var stepSize = totalDistance / (count - 1);
+        float totalDistance = Vector2.Distance(startPos, endPos);
+        float stepSize = totalDistance / (count - 1);
 
-        for (var i = 0; i < count; i++)
+        for (int i = 0; i < count; i++)
         {
-            var position = startPos + direction * (stepSize * i);
+            Vector2 position = startPos + (direction * (stepSize * i));
 
             entities[i] = _factory.SpawnFromTemplate(
                 templateId,
@@ -345,11 +351,11 @@ public sealed class TemplateBatchSpawner
 
         var entities = new Entity[count];
 
-        for (var i = 0; i < count; i++)
+        for (int i = 0; i < count; i++)
         {
             var position = new Vector2(
-                Random.Shared.NextSingle() * (maxBounds.X - minBounds.X) + minBounds.X,
-                Random.Shared.NextSingle() * (maxBounds.Y - minBounds.Y) + minBounds.Y
+                (Random.Shared.NextSingle() * (maxBounds.X - minBounds.X)) + minBounds.X,
+                (Random.Shared.NextSingle() * (maxBounds.Y - minBounds.Y)) + minBounds.Y
             );
 
             entities[i] = _factory.SpawnFromTemplate(

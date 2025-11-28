@@ -17,7 +17,8 @@ namespace PokeSharp.Game.Systems;
 public readonly record struct MapLoadContext(
     MapDefinition Definition,
     MapInfo Info,
-    MapWorldPosition WorldPosition)
+    MapWorldPosition WorldPosition
+)
 {
     /// <summary>Width in pixels.</summary>
     public int WidthPixels => Info.Width * Info.TileSize;
@@ -29,34 +30,80 @@ public readonly record struct MapLoadContext(
     public Vector2 WorldOrigin => WorldPosition.WorldOrigin;
 
     /// <summary>Gets connection info for a direction.</summary>
-    public ConnectionInfo? GetConnection(Direction direction) => direction switch
+    public ConnectionInfo? GetConnection(Direction direction)
     {
-        Direction.North => Definition.NorthMapId.HasValue
-            ? new ConnectionInfo(Definition.NorthMapId.Value, Definition.NorthConnectionOffset, direction)
-            : null,
-        Direction.South => Definition.SouthMapId.HasValue
-            ? new ConnectionInfo(Definition.SouthMapId.Value, Definition.SouthConnectionOffset, direction)
-            : null,
-        Direction.East => Definition.EastMapId.HasValue
-            ? new ConnectionInfo(Definition.EastMapId.Value, Definition.EastConnectionOffset, direction)
-            : null,
-        Direction.West => Definition.WestMapId.HasValue
-            ? new ConnectionInfo(Definition.WestMapId.Value, Definition.WestConnectionOffset, direction)
-            : null,
-        _ => null
-    };
+        return direction switch
+        {
+            Direction.North => Definition.NorthMapId.HasValue
+                ? new ConnectionInfo(
+                    Definition.NorthMapId.Value,
+                    Definition.NorthConnectionOffset,
+                    direction
+                )
+                : null,
+            Direction.South => Definition.SouthMapId.HasValue
+                ? new ConnectionInfo(
+                    Definition.SouthMapId.Value,
+                    Definition.SouthConnectionOffset,
+                    direction
+                )
+                : null,
+            Direction.East => Definition.EastMapId.HasValue
+                ? new ConnectionInfo(
+                    Definition.EastMapId.Value,
+                    Definition.EastConnectionOffset,
+                    direction
+                )
+                : null,
+            Direction.West => Definition.WestMapId.HasValue
+                ? new ConnectionInfo(
+                    Definition.WestMapId.Value,
+                    Definition.WestConnectionOffset,
+                    direction
+                )
+                : null,
+            _ => null,
+        };
+    }
 
     /// <summary>Gets all valid connections.</summary>
     public IEnumerable<ConnectionInfo> GetAllConnections()
     {
         if (Definition.NorthMapId.HasValue)
-            yield return new ConnectionInfo(Definition.NorthMapId.Value, Definition.NorthConnectionOffset, Direction.North);
+        {
+            yield return new ConnectionInfo(
+                Definition.NorthMapId.Value,
+                Definition.NorthConnectionOffset,
+                Direction.North
+            );
+        }
+
         if (Definition.SouthMapId.HasValue)
-            yield return new ConnectionInfo(Definition.SouthMapId.Value, Definition.SouthConnectionOffset, Direction.South);
+        {
+            yield return new ConnectionInfo(
+                Definition.SouthMapId.Value,
+                Definition.SouthConnectionOffset,
+                Direction.South
+            );
+        }
+
         if (Definition.EastMapId.HasValue)
-            yield return new ConnectionInfo(Definition.EastMapId.Value, Definition.EastConnectionOffset, Direction.East);
+        {
+            yield return new ConnectionInfo(
+                Definition.EastMapId.Value,
+                Definition.EastConnectionOffset,
+                Direction.East
+            );
+        }
+
         if (Definition.WestMapId.HasValue)
-            yield return new ConnectionInfo(Definition.WestMapId.Value, Definition.WestConnectionOffset, Direction.West);
+        {
+            yield return new ConnectionInfo(
+                Definition.WestMapId.Value,
+                Definition.WestConnectionOffset,
+                Direction.West
+            );
+        }
     }
 }
 
@@ -66,7 +113,4 @@ public readonly record struct MapLoadContext(
 /// <param name="MapId">The connected map's identifier.</param>
 /// <param name="Offset">Tile offset for alignment.</param>
 /// <param name="Direction">Direction of the connection.</param>
-public readonly record struct ConnectionInfo(
-    MapIdentifier MapId,
-    int Offset,
-    Direction Direction);
+public readonly record struct ConnectionInfo(MapIdentifier MapId, int Offset, Direction Direction);

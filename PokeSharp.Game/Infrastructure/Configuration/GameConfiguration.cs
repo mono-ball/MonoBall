@@ -72,7 +72,7 @@ public class GameInitializationConfig
     /// <summary>
     ///     Initial map ID to load when the game starts.
     /// </summary>
-    public string InitialMap { get; set; }
+    public string InitialMap { get; set; } = string.Empty;
 
     /// <summary>
     ///     Default X coordinate for initial player spawn (in tiles).
@@ -84,4 +84,3 @@ public class GameInitializationConfig
     /// </summary>
     public int PlayerSpawnY { get; set; } = 15;
 }
-

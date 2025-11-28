@@ -26,17 +26,23 @@ public class TilesetLoader
     public List<LoadedTileset> LoadTilesets(TmxDocument tmxDoc, string mapPath)
     {
         if (tmxDoc.Tilesets.Count == 0)
+        {
             return new List<LoadedTileset>();
+        }
 
         var loadedTilesets = new List<LoadedTileset>(tmxDoc.Tilesets.Count);
-        foreach (var tileset in tmxDoc.Tilesets)
+        foreach (TmxTileset tileset in tmxDoc.Tilesets)
         {
-            var tilesetId = ExtractTilesetId(tileset, mapPath);
+            string tilesetId = ExtractTilesetId(tileset, mapPath);
             tileset.Name = tilesetId;
 
             if (tileset.Image != null && !string.IsNullOrEmpty(tileset.Image.Source))
+            {
                 if (!_assetManager.HasTexture(tilesetId))
+                {
                     LoadTilesetTexture(tileset, mapPath, tilesetId);
+                }
+            }
 
             loadedTilesets.Add(new LoadedTileset(tileset, tilesetId));
         }
@@ -58,52 +64,54 @@ public class TilesetLoader
             AllowTrailingCommas = true,
         };
 
-        foreach (var tileset in tmxDoc.Tilesets)
-            // Check if this is an external tileset reference (has "Source" but no tile data)
+        foreach (TmxTileset tileset in tmxDoc.Tilesets)
+        // Check if this is an external tileset reference (has "Source" but no tile data)
+        {
             if (!string.IsNullOrEmpty(tileset.Source) && tileset.TileWidth == 0)
             {
                 // Resolve tileset path relative to map
-                var tilesetPath = Path.Combine(mapBasePath, tileset.Source);
+                string tilesetPath = Path.Combine(mapBasePath, tileset.Source);
 
                 if (File.Exists(tilesetPath))
+                {
                     try
                     {
-                        var tilesetJson = File.ReadAllText(tilesetPath);
+                        string tilesetJson = File.ReadAllText(tilesetPath);
                         // Use dynamic object since tileset JSON format differs from map JSON
                         using var jsonDoc = JsonDocument.Parse(tilesetJson);
-                        var root = jsonDoc.RootElement;
+                        JsonElement root = jsonDoc.RootElement;
 
                         // Extract tileset properties from JSON (flat structure)
-                        var originalFirstGid = tileset.FirstGid;
-                        tileset.Name = root.TryGetProperty("name", out var name)
+                        int originalFirstGid = tileset.FirstGid;
+                        tileset.Name = root.TryGetProperty("name", out JsonElement name)
                             ? name.GetString() ?? ""
                             : "";
-                        tileset.TileWidth = root.TryGetProperty("tilewidth", out var tw)
+                        tileset.TileWidth = root.TryGetProperty("tilewidth", out JsonElement tw)
                             ? tw.GetInt32()
                             : 0;
-                        tileset.TileHeight = root.TryGetProperty("tileheight", out var th)
+                        tileset.TileHeight = root.TryGetProperty("tileheight", out JsonElement th)
                             ? th.GetInt32()
                             : 0;
-                        tileset.TileCount = root.TryGetProperty("tilecount", out var tc)
+                        tileset.TileCount = root.TryGetProperty("tilecount", out JsonElement tc)
                             ? tc.GetInt32()
                             : 0;
-                        tileset.Margin = root.TryGetProperty("margin", out var mg)
+                        tileset.Margin = root.TryGetProperty("margin", out JsonElement mg)
                             ? mg.GetInt32()
                             : 0;
-                        tileset.Spacing = root.TryGetProperty("spacing", out var sp)
+                        tileset.Spacing = root.TryGetProperty("spacing", out JsonElement sp)
                             ? sp.GetInt32()
                             : 0;
 
                         // Image data is at top level in tileset JSON
                         if (
-                            root.TryGetProperty("image", out var img)
-                            && root.TryGetProperty("imagewidth", out var iw)
-                            && root.TryGetProperty("imageheight", out var ih)
+                            root.TryGetProperty("image", out JsonElement img)
+                            && root.TryGetProperty("imagewidth", out JsonElement iw)
+                            && root.TryGetProperty("imageheight", out JsonElement ih)
                         )
                         {
-                            var imageValue = img.GetString() ?? "";
-                            var tilesetDir = Path.GetDirectoryName(tilesetPath) ?? string.Empty;
-                            var imageAbsolute = Path.GetFullPath(
+                            string imageValue = img.GetString() ?? "";
+                            string tilesetDir = Path.GetDirectoryName(tilesetPath) ?? string.Empty;
+                            string imageAbsolute = Path.GetFullPath(
                                 Path.Combine(tilesetDir, imageValue)
                             );
 
@@ -118,8 +126,10 @@ public class TilesetLoader
                         tileset.FirstGid = originalFirstGid; // Preserve from map reference
 
                         // Parse tile animations from "tiles" array
-                        if (root.TryGetProperty("tiles", out var tilesArray))
+                        if (root.TryGetProperty("tiles", out JsonElement tilesArray))
+                        {
                             ParseTilesetAnimations(tilesArray, tileset);
+                        }
 
                         _logger?.LogDebug(
                             "Loaded external tileset: {Name} ({Width}x{Height}) with {AnimCount} animations from {Path}",
@@ -139,9 +149,13 @@ public class TilesetLoader
                         );
                         throw;
                     }
+                }
                 else
+                {
                     throw new FileNotFoundException($"External tileset not found: {tilesetPath}");
+                }
             }
+        }
     }
 
     /// <summary>
@@ -150,57 +164,64 @@ public class TilesetLoader
     /// </summary>
     private void ParseTilesetAnimations(JsonElement tilesArray, TmxTileset tileset)
     {
-        foreach (var tileElement in tilesArray.EnumerateArray())
+        foreach (JsonElement tileElement in tilesArray.EnumerateArray())
         {
-            if (!tileElement.TryGetProperty("id", out var tileIdProp))
+            if (!tileElement.TryGetProperty("id", out JsonElement tileIdProp))
+            {
                 continue;
+            }
 
-            var tileId = tileIdProp.GetInt32();
+            int tileId = tileIdProp.GetInt32();
 
             // Parse animation data
-            if (tileElement.TryGetProperty("animation", out var animArray))
+            if (tileElement.TryGetProperty("animation", out JsonElement animArray))
             {
                 var frameTileIds = new List<int>();
                 var frameDurations = new List<float>();
 
-                foreach (var frameElement in animArray.EnumerateArray())
+                foreach (JsonElement frameElement in animArray.EnumerateArray())
+                {
                     if (
-                        frameElement.TryGetProperty("tileid", out var frameTileId)
-                        && frameElement.TryGetProperty("duration", out var frameDuration)
+                        frameElement.TryGetProperty("tileid", out JsonElement frameTileId)
+                        && frameElement.TryGetProperty("duration", out JsonElement frameDuration)
                     )
                     {
                         frameTileIds.Add(frameTileId.GetInt32());
                         // Convert milliseconds to seconds
                         frameDurations.Add(frameDuration.GetInt32() / 1000f);
                     }
+                }
 
                 if (frameTileIds.Count > 0)
+                {
                     tileset.Animations[tileId] = new TmxTileAnimation
                     {
                         FrameTileIds = frameTileIds.ToArray(),
                         FrameDurations = frameDurations.ToArray(),
                     };
+                }
             }
 
             // Parse tile properties (collision, ledge, etc.)
-            if (tileElement.TryGetProperty("properties", out var propsArray))
+            if (tileElement.TryGetProperty("properties", out JsonElement propsArray))
             {
                 var properties = new Dictionary<string, object>();
 
-                foreach (var propElement in propsArray.EnumerateArray())
+                foreach (JsonElement propElement in propsArray.EnumerateArray())
+                {
                     if (
-                        propElement.TryGetProperty("name", out var propName)
-                        && propElement.TryGetProperty("value", out var propValue)
+                        propElement.TryGetProperty("name", out JsonElement propName)
+                        && propElement.TryGetProperty("value", out JsonElement propValue)
                     )
                     {
-                        var key = propName.GetString();
+                        string? key = propName.GetString();
                         if (!string.IsNullOrEmpty(key))
                         {
                             // Get value based on type
                             object value = propValue.ValueKind switch
                             {
                                 JsonValueKind.String => propValue.GetString() ?? "",
-                                JsonValueKind.Number => propValue.TryGetInt32(out var i)
+                                JsonValueKind.Number => propValue.TryGetInt32(out int i)
                                     ? i
                                     : propValue.GetDouble(),
                                 JsonValueKind.True => true,
@@ -210,9 +231,12 @@ public class TilesetLoader
                             properties[key] = value;
                         }
                     }
+                }
 
                 if (properties.Count > 0)
+                {
                     tileset.TileProperties[tileId] = properties;
+                }
             }
         }
     }
@@ -223,11 +247,13 @@ public class TilesetLoader
     private void LoadTilesetTexture(TmxTileset tileset, string mapPath, string tilesetId)
     {
         if (tileset.Image == null || string.IsNullOrEmpty(tileset.Image.Source))
+        {
             throw new InvalidOperationException("Tileset has no image source");
+        }
 
-        var mapDirectory = Path.GetDirectoryName(mapPath) ?? string.Empty;
+        string mapDirectory = Path.GetDirectoryName(mapPath) ?? string.Empty;
 
-        var tilesetImageAbsolutePath = Path.IsPathRooted(tileset.Image.Source)
+        string tilesetImageAbsolutePath = Path.IsPathRooted(tileset.Image.Source)
             ? tileset.Image.Source
             : Path.GetFullPath(Path.Combine(mapDirectory, tileset.Image.Source));
 
@@ -235,16 +261,20 @@ public class TilesetLoader
         // Otherwise (e.g., in tests with stub), use the path directly
         string pathForLoader;
         if (_assetManager is AssetManager assetManager)
+        {
             pathForLoader = Path.GetRelativePath(assetManager.AssetRoot, tilesetImageAbsolutePath);
+        }
         else
+        {
             pathForLoader = tilesetImageAbsolutePath;
+        }
 
         try
         {
             _assetManager.LoadTexture(tilesetId, pathForLoader);
             _logger?.LogInformation(
-                "[TilesetDebug] Loaded tileset texture: TilesetId='{TilesetId}', Path='{PathForLoader}', " +
-                "ImageSource='{ImageSource}'",
+                "[TilesetDebug] Loaded tileset texture: TilesetId='{TilesetId}', Path='{PathForLoader}', "
+                    + "ImageSource='{ImageSource}'",
                 tilesetId,
                 pathForLoader,
                 tileset.Image?.Source ?? "null"
@@ -270,17 +300,21 @@ public class TilesetLoader
         // If tileset has an image, use the image filename as ID
         if (tileset.Image != null && !string.IsNullOrEmpty(tileset.Image.Source))
         {
-            var id = Path.GetFileNameWithoutExtension(tileset.Image.Source);
+            string id = Path.GetFileNameWithoutExtension(tileset.Image.Source);
             if (!string.IsNullOrEmpty(id))
+            {
                 return id;
+            }
         }
 
         // Fallback to tileset name (handle both null and empty string)
         if (!string.IsNullOrEmpty(tileset.Name))
+        {
             return tileset.Name;
+        }
 
         // Last resort: generate ID from map path
-        var mapName = Path.GetFileNameWithoutExtension(mapPath);
+        string mapName = Path.GetFileNameWithoutExtension(mapPath);
         return !string.IsNullOrEmpty(mapName) ? mapName : "default-tileset";
     }
 }

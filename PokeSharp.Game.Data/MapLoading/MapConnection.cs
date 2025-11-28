@@ -39,7 +39,11 @@ public readonly struct MapConnection
     /// <param name="direction">The direction of the connection.</param>
     /// <param name="targetMapId">The identifier of the connected map.</param>
     /// <param name="offsetInTiles">The alignment offset in tiles (default: 0).</param>
-    public MapConnection(ConnectionDirection direction, MapIdentifier targetMapId, int offsetInTiles = 0)
+    public MapConnection(
+        ConnectionDirection direction,
+        MapIdentifier targetMapId,
+        int offsetInTiles = 0
+    )
     {
         Direction = direction;
         TargetMapId = targetMapId;
@@ -75,7 +79,7 @@ public enum ConnectionDirection : byte
     /// <summary>
     ///     Connection to the west (left).
     /// </summary>
-    West = 3
+    West = 3,
 }
 
 /// <summary>
@@ -96,7 +100,7 @@ public static class ConnectionDirectionExtensions
             ConnectionDirection.South => ConnectionDirection.North,
             ConnectionDirection.East => ConnectionDirection.West,
             ConnectionDirection.West => ConnectionDirection.East,
-            _ => throw new ArgumentOutOfRangeException(nameof(direction))
+            _ => throw new ArgumentOutOfRangeException(nameof(direction)),
         };
     }
 
@@ -128,7 +132,9 @@ public static class ConnectionDirectionExtensions
     public static ConnectionDirection? Parse(string? directionString)
     {
         if (string.IsNullOrWhiteSpace(directionString))
+        {
             return null;
+        }
 
         return directionString.Trim().ToLowerInvariant() switch
         {
@@ -136,7 +142,7 @@ public static class ConnectionDirectionExtensions
             "south" or "down" => ConnectionDirection.South,
             "east" or "right" => ConnectionDirection.East,
             "west" or "left" => ConnectionDirection.West,
-            _ => null
+            _ => null,
         };
     }
 }

@@ -25,16 +25,20 @@ public class CompositeMapValidator : IMapValidator
     {
         var aggregateResult = new ValidationResult();
 
-        foreach (var validator in _validators)
+        foreach (IMapValidator validator in _validators)
         {
-            var result = validator.Validate(map, mapPath);
+            ValidationResult result = validator.Validate(map, mapPath);
 
             // Aggregate errors and warnings
-            foreach (var error in result.Errors)
+            foreach (ValidationError error in result.Errors)
+            {
                 aggregateResult.AddError($"[{validator.GetType().Name}] {error}");
+            }
 
-            foreach (var warning in result.Warnings)
+            foreach (ValidationWarning warning in result.Warnings)
+            {
                 aggregateResult.AddWarning($"[{validator.GetType().Name}] {warning}");
+            }
         }
 
         return aggregateResult;

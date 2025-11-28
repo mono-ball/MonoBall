@@ -1,4 +1,5 @@
 using Arch.Core;
+using Arch.Core.Extensions;
 using Microsoft.Extensions.Logging;
 using PokeSharp.Game.Components.Maps;
 using PokeSharp.Game.Components.Tiles;
@@ -33,25 +34,33 @@ public class MapMetadataFactory
         IReadOnlyList<LoadedTileset> tilesets
     )
     {
-        // Create MapInfo entity for map metadata
+        // Create MapInfo entity for map metadata with MapWarps spatial index
         var mapInfo = new MapInfo(mapId, mapName, tmxDoc.Width, tmxDoc.Height, tmxDoc.TileWidth);
-        var mapInfoEntity = world.Create(mapInfo);
+        Entity mapInfoEntity = world.Create(mapInfo, MapWarps.Create());
 
-        foreach (var loadedTileset in tilesets)
+        foreach (LoadedTileset loadedTileset in tilesets)
         {
-            var tileset = loadedTileset.Tileset;
+            TmxTileset tileset = loadedTileset.Tileset;
             if (tileset.FirstGid <= 0)
+            {
                 throw new InvalidOperationException(
                     $"Tileset '{tileset.Name ?? loadedTileset.TilesetId}' in '{mapPath}' has invalid firstgid {tileset.FirstGid}."
                 );
+            }
+
             if (tileset.TileWidth <= 0 || tileset.TileHeight <= 0)
+            {
                 throw new InvalidOperationException(
                     $"Tileset '{tileset.Name ?? loadedTileset.TilesetId}' in '{mapPath}' has invalid tile size {tileset.TileWidth}x{tileset.TileHeight}."
                 );
+            }
+
             if (tileset.Image == null || tileset.Image.Width <= 0 || tileset.Image.Height <= 0)
+            {
                 throw new InvalidOperationException(
                     $"Tileset '{tileset.Name ?? loadedTileset.TilesetId}' in '{mapPath}' is missing valid image dimensions."
                 );
+            }
 
             var tilesetInfo = new TilesetInfo(
                 loadedTileset.TilesetId,
@@ -79,7 +88,7 @@ public class MapMetadataFactory
         IReadOnlyList<LoadedTileset> tilesets
     )
     {
-        // Create MapInfo entity for map metadata
+        // Create MapInfo entity for map metadata with MapWarps spatial index
         // CRITICAL: Use MapId.Value (identifier like "oldale_town") NOT DisplayName ("Oldale Town")
         // MapStreamingSystem compares MapInfo.MapName against MapIdentifier.Value for lookups
         var mapInfo = new MapInfo(
@@ -89,26 +98,34 @@ public class MapMetadataFactory
             tmxDoc.Height,
             tmxDoc.TileWidth
         );
-        var mapInfoEntity = world.Create(mapInfo);
+        Entity mapInfoEntity = world.Create(mapInfo, MapWarps.Create());
 
         // Create TilesetInfo if map has tilesets
-        foreach (var loadedTileset in tilesets)
+        foreach (LoadedTileset loadedTileset in tilesets)
         {
-            var tileset = loadedTileset.Tileset;
+            TmxTileset tileset = loadedTileset.Tileset;
 
             // Validation
             if (tileset.FirstGid <= 0)
+            {
                 throw new InvalidOperationException(
                     $"Tileset '{tileset.Name ?? loadedTileset.TilesetId}' in map '{mapDef.MapId}' has invalid firstgid {tileset.FirstGid}."
                 );
+            }
+
             if (tileset.TileWidth <= 0 || tileset.TileHeight <= 0)
+            {
                 throw new InvalidOperationException(
                     $"Tileset '{tileset.Name ?? loadedTileset.TilesetId}' in map '{mapDef.MapId}' has invalid tile size {tileset.TileWidth}x{tileset.TileHeight}."
                 );
+            }
+
             if (tileset.Image == null || tileset.Image.Width <= 0 || tileset.Image.Height <= 0)
+            {
                 throw new InvalidOperationException(
                     $"Tileset '{tileset.Name ?? loadedTileset.TilesetId}' in map '{mapDef.MapId}' is missing valid image dimensions."
                 );
+            }
 
             var tilesetInfo = new TilesetInfo(
                 loadedTileset.TilesetId,

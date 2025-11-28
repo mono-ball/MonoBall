@@ -2,14 +2,18 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using PokeSharp.Engine.UI.Debug.Components.Base;
 using PokeSharp.Engine.UI.Debug.Core;
+using PokeSharp.Engine.UI.Debug.Input;
+using PokeSharp.Engine.UI.Debug.Layout;
 
 namespace PokeSharp.Engine.UI.Debug.Components.Controls;
 
 /// <summary>
-/// A text input field component.
+///     A text input field component.
 /// </summary>
 public class InputField : UIComponent
 {
+    private float _cursorBlinkTimer;
+
     /// <summary>Current text value</summary>
     public string Text { get; set; } = string.Empty;
 
@@ -25,24 +29,25 @@ public class InputField : UIComponent
     /// <summary>Callback when Enter is pressed</summary>
     public Action<string>? OnSubmit { get; set; }
 
-    private float _cursorBlinkTimer;
-
-    protected override bool IsInteractive() => Enabled;
+    protected override bool IsInteractive()
+    {
+        return Enabled;
+    }
 
     protected override void OnRender(UIContext context)
     {
-        var isFocused = IsFocused();
+        bool isFocused = IsFocused();
 
         // Draw background
         context.Renderer.DrawRectangle(Rect, Theme.InputBackground);
 
         // Draw border (highlight when focused)
-        var borderColor = isFocused ? Theme.BorderFocus : Theme.BorderPrimary;
+        Color borderColor = isFocused ? Theme.BorderFocus : Theme.BorderPrimary;
         context.Renderer.DrawRectangleOutline(Rect, borderColor, Theme.BorderWidth);
 
         // Draw text or placeholder
         float textX = Rect.X + Theme.PaddingMedium;
-        float textY = Rect.Y + (Rect.Height - context.Renderer.GetLineHeight()) / 2;
+        float textY = Rect.Y + ((Rect.Height - context.Renderer.GetLineHeight()) / 2);
 
         if (string.IsNullOrEmpty(Text) && !string.IsNullOrEmpty(Placeholder) && !isFocused)
         {
@@ -57,14 +62,19 @@ public class InputField : UIComponent
         if (isFocused)
         {
             _cursorBlinkTimer += 0.016f; // Approximate frame time
-            bool showCursor = (_cursorBlinkTimer % 1.0f) < 0.5f;
+            bool showCursor = _cursorBlinkTimer % 1.0f < 0.5f;
 
             if (showCursor)
             {
-                var textBeforeCursor = Text.Substring(0, Math.Min(CursorPosition, Text.Length));
-                var cursorX = textX + context.Renderer.MeasureText(textBeforeCursor).X;
+                string textBeforeCursor = Text.Substring(0, Math.Min(CursorPosition, Text.Length));
+                float cursorX = textX + context.Renderer.MeasureText(textBeforeCursor).X;
 
-                var cursorRect = new PokeSharp.Engine.UI.Debug.Layout.LayoutRect(cursorX, textY, 2, context.Renderer.GetLineHeight());
+                var cursorRect = new LayoutRect(
+                    cursorX,
+                    textY,
+                    2,
+                    context.Renderer.GetLineHeight()
+                );
                 context.Renderer.DrawRectangle(cursorRect, Theme.InputCursor);
             }
         }
@@ -77,7 +87,7 @@ public class InputField : UIComponent
 
         // Handle click to focus
         // Handle focus on mouse RELEASE
-        if (IsHovered() && context.Input.IsMouseButtonReleased(Input.MouseButton.Left))
+        if (IsHovered() && context.Input.IsMouseButtonReleased(MouseButton.Left))
         {
             context.SetFocus(Id);
         }
@@ -85,7 +95,7 @@ public class InputField : UIComponent
 
     private void HandleInput(UIContext context)
     {
-        var input = context.Input;
+        InputState input = context.Input;
 
         // Handle backspace
         if (input.IsKeyPressed(Keys.Back) && CursorPosition > 0 && Text.Length > 0)
@@ -140,4 +150,3 @@ public class InputField : UIComponent
         // For now, this is a simplified implementation
     }
 }
-

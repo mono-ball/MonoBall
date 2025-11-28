@@ -22,7 +22,7 @@ public class WatcherFactory
     /// </summary>
     public IScriptWatcher CreateWatcher(string directory)
     {
-        var analysis = AnalyzePath(directory);
+        PathAnalysis analysis = AnalyzePath(directory);
 
         _logger.LogInformation(
             "Path analysis for {Directory}: Platform={Platform}, IsNetworkPath={IsNetwork}, "
@@ -53,7 +53,7 @@ public class WatcherFactory
 
         try
         {
-            var fullPath = Path.GetFullPath(path);
+            string fullPath = Path.GetFullPath(path);
 
             // Check for network paths
             analysis.IsNetworkPath = IsNetworkPath(fullPath);
@@ -83,8 +83,10 @@ public class WatcherFactory
     private static bool IsNetworkPath(string path)
     {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            // UNC paths (\\server\share) or mapped network drives
+        // UNC paths (\\server\share) or mapped network drives
+        {
             return path.StartsWith(@"\\") || IsNetworkDriveWindows(path);
+        }
 
         // Linux/macOS: check for NFS, SMB, CIFS mounts
         return (
@@ -102,7 +104,9 @@ public class WatcherFactory
         try
         {
             if (path.Length < 2 || path[1] != ':')
+            {
                 return false;
+            }
 
             var drive = new DriveInfo(path.Substring(0, 2));
             return drive.DriveType == DriveType.Network;
@@ -125,19 +129,21 @@ public class WatcherFactory
     private static bool IsWSL2Path(string path)
     {
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
             return false;
+        }
 
         // WSL2 mounts Windows drives under /mnt/c, /mnt/d, etc.
         if (path.StartsWith("/mnt/") && path.Length > 6 && path[6] == '/')
         {
-            var driveLetter = path[5];
+            char driveLetter = path[5];
             return char.IsLetter(driveLetter);
         }
 
         // Check for WSL-specific kernel version
         try
         {
-            var version = File.ReadAllText("/proc/version");
+            string version = File.ReadAllText("/proc/version");
             return version.Contains("microsoft", StringComparison.OrdinalIgnoreCase)
                 || version.Contains("WSL", StringComparison.OrdinalIgnoreCase);
         }
@@ -150,11 +156,20 @@ public class WatcherFactory
     private static string GetPlatformName()
     {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
             return "Windows";
+        }
+
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
             return IsWSL2Path("/proc") ? "WSL2" : "Linux";
+        }
+
         if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
             return "macOS";
+        }
+
         return "Unknown";
     }
 

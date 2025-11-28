@@ -1,7 +1,7 @@
 namespace PokeSharp.Engine.UI.Debug.Layout;
 
 /// <summary>
-/// Defines anchor points for positioning UI elements relative to their parent container.
+///     Defines anchor points for positioning UI elements relative to their parent container.
 /// </summary>
 public enum Anchor
 {
@@ -45,9 +45,5 @@ public enum Anchor
     StretchRight,
 
     /// <summary>Stretch to fill entire parent</summary>
-    Fill
+    Fill,
 }
-
-
-
-

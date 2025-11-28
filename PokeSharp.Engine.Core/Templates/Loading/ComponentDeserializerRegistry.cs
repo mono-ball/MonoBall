@@ -63,24 +63,28 @@ public class ComponentDeserializerRegistry
         ArgumentNullException.ThrowIfNull(dto);
 
         if (string.IsNullOrWhiteSpace(dto.Type))
+        {
             throw new ArgumentException("Component type is required", nameof(dto));
+        }
 
-        if (!_deserializers.TryGetValue(dto.Type, out var info))
+        if (!_deserializers.TryGetValue(dto.Type, out ComponentDeserializerInfo? info))
+        {
             throw new InvalidOperationException(
                 $"No deserializer registered for component type: {dto.Type}. "
                     + $"Available types: {string.Join(", ", _deserializers.Keys)}"
             );
+        }
 
         try
         {
-            var data =
+            JsonElement data =
                 dto.Data
                 ?? throw new ArgumentException(
                     $"Component data is required for type: {dto.Type}",
                     nameof(dto)
                 );
 
-            var componentData = info.Deserializer(data);
+            object componentData = info.Deserializer(data);
 
             // Create ComponentTemplate directly without using generic Create method
             return new ComponentTemplate

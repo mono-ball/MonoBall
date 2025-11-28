@@ -2,14 +2,11 @@ using Microsoft.Xna.Framework;
 using PokeSharp.Engine.UI.Debug.Components.Base;
 using PokeSharp.Engine.UI.Debug.Core;
 using PokeSharp.Engine.UI.Debug.Layout;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace PokeSharp.Engine.UI.Debug.Components.Controls;
 
 /// <summary>
-/// Parameter information for display.
+///     Parameter information for display.
 /// </summary>
 public class ParamInfo
 {
@@ -20,7 +17,7 @@ public class ParamInfo
 }
 
 /// <summary>
-/// Method signature information for display.
+///     Method signature information for display.
 /// </summary>
 public class MethodSig
 {
@@ -30,7 +27,7 @@ public class MethodSig
 }
 
 /// <summary>
-/// Container for parameter hint information.
+///     Container for parameter hint information.
 /// </summary>
 public class ParamHints
 {
@@ -40,39 +37,76 @@ public class ParamHints
 }
 
 /// <summary>
-/// Tooltip that displays method parameter hints with the current parameter highlighted.
+///     Tooltip that displays method parameter hints with the current parameter highlighted.
 /// </summary>
 public class ParameterHintTooltip : UIComponent
 {
-    private ParamHints? _hintInfo = null;
-    private int _currentParameterIndex = 0;
-
     // Visual properties - nullable for theme fallback
     private Color? _backgroundColor;
     private Color? _borderColor;
+    private Color? _counterColor;
+    private Color? _currentParameterColor;
+    private int _currentParameterIndex;
+    private ParamHints? _hintInfo;
     private Color? _methodNameColor;
     private Color? _parameterColor;
-    private Color? _currentParameterColor;
     private Color? _typeColor;
-    private Color? _counterColor;
-
-    public Color BackgroundColor { get => _backgroundColor ?? ThemeManager.Current.BackgroundElevated; set => _backgroundColor = value; }
-    public Color BorderColor { get => _borderColor ?? ThemeManager.Current.BorderPrimary; set => _borderColor = value; }
-    public Color MethodNameColor { get => _methodNameColor ?? ThemeManager.Current.SyntaxMethod; set => _methodNameColor = value; }
-    public Color ParameterColor { get => _parameterColor ?? ThemeManager.Current.TextSecondary; set => _parameterColor = value; }
-    public Color CurrentParameterColor { get => _currentParameterColor ?? ThemeManager.Current.TextPrimary; set => _currentParameterColor = value; }
-    public Color TypeColor { get => _typeColor ?? ThemeManager.Current.SyntaxType; set => _typeColor = value; }
-    public Color CounterColor { get => _counterColor ?? ThemeManager.Current.TextDim; set => _counterColor = value; }
-    public float Padding { get; set; } = 8f;
-    public float BorderThickness { get; set; } = 1f;
 
     public ParameterHintTooltip(string id)
     {
         Id = id;
     }
 
+    public Color BackgroundColor
+    {
+        get => _backgroundColor ?? ThemeManager.Current.BackgroundElevated;
+        set => _backgroundColor = value;
+    }
+
+    public Color BorderColor
+    {
+        get => _borderColor ?? ThemeManager.Current.BorderPrimary;
+        set => _borderColor = value;
+    }
+
+    public Color MethodNameColor
+    {
+        get => _methodNameColor ?? ThemeManager.Current.SyntaxMethod;
+        set => _methodNameColor = value;
+    }
+
+    public Color ParameterColor
+    {
+        get => _parameterColor ?? ThemeManager.Current.TextSecondary;
+        set => _parameterColor = value;
+    }
+
+    public Color CurrentParameterColor
+    {
+        get => _currentParameterColor ?? ThemeManager.Current.TextPrimary;
+        set => _currentParameterColor = value;
+    }
+
+    public Color TypeColor
+    {
+        get => _typeColor ?? ThemeManager.Current.SyntaxType;
+        set => _typeColor = value;
+    }
+    public Color CounterColor
+    {
+        get => _counterColor ?? ThemeManager.Current.TextDim;
+        set => _counterColor = value;
+    }
+    public float Padding { get; set; } = 8f;
+    public float BorderThickness { get; set; } = 1f;
+
     /// <summary>
-    /// Sets the parameter hints to display.
+    ///     Gets whether the tooltip has content to display.
+    /// </summary>
+    public bool HasContent => _hintInfo != null && _hintInfo.Overloads.Count > 0;
+
+    /// <summary>
+    ///     Sets the parameter hints to display.
     /// </summary>
     public void SetHints(ParamHints? hints, int currentParameterIndex = 0)
     {
@@ -84,7 +118,7 @@ public class ParameterHintTooltip : UIComponent
         {
             try
             {
-                var height = GetDesiredHeight(Renderer);
+                float height = GetDesiredHeight(Renderer);
                 Constraint.Height = height;
             }
             catch
@@ -99,7 +133,7 @@ public class ParameterHintTooltip : UIComponent
     }
 
     /// <summary>
-    /// Clears all hints.
+    ///     Clears all hints.
     /// </summary>
     public void Clear()
     {
@@ -108,18 +142,19 @@ public class ParameterHintTooltip : UIComponent
     }
 
     /// <summary>
-    /// Cycles to the next method overload.
+    ///     Cycles to the next method overload.
     /// </summary>
     public void NextOverload()
     {
         if (_hintInfo != null && _hintInfo.Overloads.Count > 1)
         {
-            _hintInfo.CurrentOverloadIndex = (_hintInfo.CurrentOverloadIndex + 1) % _hintInfo.Overloads.Count;
+            _hintInfo.CurrentOverloadIndex =
+                (_hintInfo.CurrentOverloadIndex + 1) % _hintInfo.Overloads.Count;
 
             // Update height for new overload
             try
             {
-                var height = GetDesiredHeight(Renderer);
+                float height = GetDesiredHeight(Renderer);
                 Constraint.Height = height;
             }
             catch
@@ -130,7 +165,7 @@ public class ParameterHintTooltip : UIComponent
     }
 
     /// <summary>
-    /// Cycles to the previous method overload.
+    ///     Cycles to the previous method overload.
     /// </summary>
     public void PreviousOverload()
     {
@@ -138,12 +173,14 @@ public class ParameterHintTooltip : UIComponent
         {
             _hintInfo.CurrentOverloadIndex--;
             if (_hintInfo.CurrentOverloadIndex < 0)
+            {
                 _hintInfo.CurrentOverloadIndex = _hintInfo.Overloads.Count - 1;
+            }
 
             // Update height for new overload
             try
             {
-                var height = GetDesiredHeight(Renderer);
+                float height = GetDesiredHeight(Renderer);
                 Constraint.Height = height;
             }
             catch
@@ -153,21 +190,18 @@ public class ParameterHintTooltip : UIComponent
         }
     }
 
-    /// <summary>
-    /// Gets whether the tooltip has content to display.
-    /// </summary>
-    public bool HasContent => _hintInfo != null && _hintInfo.Overloads.Count > 0;
-
     protected override void OnRender(UIContext context)
     {
         if (!HasContent || Rect.Height <= 0)
+        {
             return;
+        }
 
-        var renderer = Renderer;
+        UIRenderer renderer = Renderer;
 
-        var resolvedRect = Rect;
+        LayoutRect resolvedRect = Rect;
 
-        var currentSignature = _hintInfo!.Overloads[_hintInfo.CurrentOverloadIndex];
+        MethodSig currentSignature = _hintInfo!.Overloads[_hintInfo.CurrentOverloadIndex];
 
         // Draw background
         renderer.DrawRectangle(resolvedRect, BackgroundColor);
@@ -175,28 +209,28 @@ public class ParameterHintTooltip : UIComponent
         // Draw border
         renderer.DrawRectangleOutline(resolvedRect, BorderColor, (int)BorderThickness);
 
-        var lineHeight = renderer.GetLineHeight();
-        var yPos = resolvedRect.Y + Padding;
+        int lineHeight = renderer.GetLineHeight();
+        float yPos = resolvedRect.Y + Padding;
 
         // Draw method signature
-        var xPos = resolvedRect.X + Padding;
+        float xPos = resolvedRect.X + Padding;
 
         // Method name and opening paren
-        var methodText = currentSignature.MethodName + "(";
+        string methodText = currentSignature.MethodName + "(";
         renderer.DrawText(methodText, new Vector2(xPos, yPos), MethodNameColor);
 
         // If no parameters, close on same line
         if (currentSignature.Parameters.Count == 0)
         {
             xPos += renderer.MeasureText(methodText).X;
-            var closingText = ")";
+            string closingText = ")";
             renderer.DrawText(closingText, new Vector2(xPos, yPos), MethodNameColor);
             xPos += renderer.MeasureText(closingText).X;
 
             // Return type
             if (!string.IsNullOrEmpty(currentSignature.ReturnType))
             {
-                var returnText = " : " + currentSignature.ReturnType;
+                string returnText = " : " + currentSignature.ReturnType;
                 renderer.DrawText(returnText, new Vector2(xPos, yPos), TypeColor);
             }
         }
@@ -208,26 +242,28 @@ public class ParameterHintTooltip : UIComponent
             // Parameters - each on its own line for readability
             for (int i = 0; i < currentSignature.Parameters.Count; i++)
             {
-                var param = currentSignature.Parameters[i];
-                var isCurrentParam = i == _currentParameterIndex;
-                var paramColor = isCurrentParam ? CurrentParameterColor : ParameterColor;
+                ParamInfo param = currentSignature.Parameters[i];
+                bool isCurrentParam = i == _currentParameterIndex;
+                Color paramColor = isCurrentParam ? CurrentParameterColor : ParameterColor;
 
                 xPos = resolvedRect.X + Padding + 20; // Indent parameters
 
                 // Type
-                var typeText = param.Type + " ";
+                string typeText = param.Type + " ";
                 renderer.DrawText(typeText, new Vector2(xPos, yPos), TypeColor);
                 xPos += renderer.MeasureText(typeText).X;
 
                 // Parameter name
-                var paramText = param.Name;
+                string paramText = param.Name;
                 if (param.IsOptional)
+                {
                     paramText += " = " + param.DefaultValue;
+                }
 
                 // Highlight background for current parameter
                 if (isCurrentParam)
                 {
-                    var paramSize = renderer.MeasureText(typeText + paramText);
+                    Vector2 paramSize = renderer.MeasureText(typeText + paramText);
                     var highlightRect = new LayoutRect(
                         resolvedRect.X + Padding + 16,
                         yPos - 2,
@@ -243,7 +279,7 @@ public class ParameterHintTooltip : UIComponent
                 // Comma separator (except for last param)
                 if (i < currentSignature.Parameters.Count - 1)
                 {
-                    var commaText = ",";
+                    string commaText = ",";
                     renderer.DrawText(commaText, new Vector2(xPos, yPos), ParameterColor);
                 }
 
@@ -252,14 +288,14 @@ public class ParameterHintTooltip : UIComponent
 
             // Closing parenthesis
             xPos = resolvedRect.X + Padding;
-            var closingText = ")";
+            string closingText = ")";
             renderer.DrawText(closingText, new Vector2(xPos, yPos), MethodNameColor);
             xPos += renderer.MeasureText(closingText).X;
 
             // Return type
             if (!string.IsNullOrEmpty(currentSignature.ReturnType))
             {
-                var returnText = " : " + currentSignature.ReturnType;
+                string returnText = " : " + currentSignature.ReturnType;
                 renderer.DrawText(returnText, new Vector2(xPos, yPos), TypeColor);
             }
         }
@@ -268,20 +304,23 @@ public class ParameterHintTooltip : UIComponent
         if (_hintInfo.Overloads.Count > 1)
         {
             yPos += lineHeight;
-            var counterText = $"[{_hintInfo.CurrentOverloadIndex + 1}/{_hintInfo.Overloads.Count}]";
-            var counterSize = renderer.MeasureText(counterText);
-            var counterX = resolvedRect.Right - Padding - counterSize.X;
+            string counterText =
+                $"[{_hintInfo.CurrentOverloadIndex + 1}/{_hintInfo.Overloads.Count}]";
+            Vector2 counterSize = renderer.MeasureText(counterText);
+            float counterX = resolvedRect.Right - Padding - counterSize.X;
             renderer.DrawText(counterText, new Vector2(counterX, yPos), CounterColor);
         }
     }
 
     /// <summary>
-    /// Calculates the desired height for the tooltip based on content.
+    ///     Calculates the desired height for the tooltip based on content.
     /// </summary>
     public float GetDesiredHeight(UIRenderer? renderer = null)
     {
         if (!HasContent)
+        {
             return 0;
+        }
 
         float lineHeight = 20f; // Default fallback
 
@@ -294,7 +333,9 @@ public class ParameterHintTooltip : UIComponent
             try
             {
                 if (Renderer != null)
+                {
                     lineHeight = Renderer.GetLineHeight();
+                }
             }
             catch
             {
@@ -302,7 +343,7 @@ public class ParameterHintTooltip : UIComponent
             }
         }
 
-        var currentSignature = _hintInfo!.Overloads[_hintInfo.CurrentOverloadIndex];
+        MethodSig currentSignature = _hintInfo!.Overloads[_hintInfo.CurrentOverloadIndex];
 
         // Calculate height based on multi-line layout
         float height = Padding * 2; // Top and bottom padding
@@ -329,63 +370,72 @@ public class ParameterHintTooltip : UIComponent
     }
 
     /// <summary>
-    /// Calculates the desired width for the tooltip based on content.
+    ///     Calculates the desired width for the tooltip based on content.
     /// </summary>
     public float GetDesiredWidth(UIRenderer? renderer = null)
     {
         if (!HasContent)
+        {
             return 0;
+        }
 
         UIRenderer? r = renderer ?? Renderer;
         if (r == null)
+        {
             return 300f; // Default fallback
+        }
 
-        var currentSignature = _hintInfo!.Overloads[_hintInfo.CurrentOverloadIndex];
+        MethodSig currentSignature = _hintInfo!.Overloads[_hintInfo.CurrentOverloadIndex];
         float maxWidth = 0;
 
         // Method name line width
-        var methodNameText = currentSignature.MethodName + "(" + (currentSignature.Parameters.Count == 0 ? ")" : "");
-        var methodNameWidth = r.MeasureText(methodNameText).X;
+        string methodNameText =
+            currentSignature.MethodName + "(" + (currentSignature.Parameters.Count == 0 ? ")" : "");
+        float methodNameWidth = r.MeasureText(methodNameText).X;
         maxWidth = Math.Max(maxWidth, methodNameWidth);
 
         // Check each parameter line width (indented)
-        foreach (var param in currentSignature.Parameters)
+        foreach (ParamInfo param in currentSignature.Parameters)
         {
-            var paramText = param.Type + " " + param.Name;
+            string paramText = param.Type + " " + param.Name;
             if (param.IsOptional)
+            {
                 paramText += " = " + param.DefaultValue;
+            }
 
-            var paramWidth = r.MeasureText(paramText).X + 20; // 20 for indent
+            float paramWidth = r.MeasureText(paramText).X + 20; // 20 for indent
             maxWidth = Math.Max(maxWidth, paramWidth);
         }
 
         // Closing paren and return type line
         if (currentSignature.Parameters.Count > 0)
         {
-            var closingText = ")";
+            string closingText = ")";
             if (!string.IsNullOrEmpty(currentSignature.ReturnType))
+            {
                 closingText += " : " + currentSignature.ReturnType;
+            }
 
-            var closingWidth = r.MeasureText(closingText).X;
+            float closingWidth = r.MeasureText(closingText).X;
             maxWidth = Math.Max(maxWidth, closingWidth);
         }
         else if (!string.IsNullOrEmpty(currentSignature.ReturnType))
         {
             // Return type on same line as method name
-            var returnText = " : " + currentSignature.ReturnType;
-            var totalWidth = r.MeasureText(methodNameText + returnText).X;
+            string returnText = " : " + currentSignature.ReturnType;
+            float totalWidth = r.MeasureText(methodNameText + returnText).X;
             maxWidth = Math.Max(maxWidth, totalWidth);
         }
 
         // Overload counter
         if (_hintInfo.Overloads.Count > 1)
         {
-            var counterText = $"[{_hintInfo.CurrentOverloadIndex + 1}/{_hintInfo.Overloads.Count}]";
-            var counterWidth = r.MeasureText(counterText).X + 40; // Extra space
+            string counterText =
+                $"[{_hintInfo.CurrentOverloadIndex + 1}/{_hintInfo.Overloads.Count}]";
+            float counterWidth = r.MeasureText(counterText).X + 40; // Extra space
             maxWidth = Math.Max(maxWidth, counterWidth);
         }
 
-        return maxWidth + Padding * 2;
+        return maxWidth + (Padding * 2);
     }
 }
-

@@ -17,7 +17,7 @@ public static class ModdingExtensions
         services.AddSingleton<PatchFileLoader>();
         services.AddSingleton<ModLoader>(sp =>
         {
-            var logger = sp.GetRequiredService<ILogger<ModLoader>>();
+            ILogger<ModLoader> logger = sp.GetRequiredService<ILogger<ModLoader>>();
             return new ModLoader(logger, modsDirectory);
         });
 

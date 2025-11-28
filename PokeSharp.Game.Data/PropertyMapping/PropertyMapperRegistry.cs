@@ -1,3 +1,4 @@
+using System.Reflection;
 using Arch.Core;
 using Microsoft.Extensions.Logging;
 
@@ -44,24 +45,25 @@ public class PropertyMapperRegistry
     /// <returns>Number of components successfully mapped and added.</returns>
     public int MapAndAddAll(World world, Entity entity, Dictionary<string, object> properties)
     {
-        var count = 0;
+        int count = 0;
 
-        foreach (var mapper in _mappers)
+        foreach (object mapper in _mappers)
         {
             // Use reflection to call MapAndAdd on IEntityPropertyMapper instances
-            var mapperType = mapper.GetType();
-            var interfaces = mapperType.GetInterfaces();
+            Type mapperType = mapper.GetType();
+            Type[] interfaces = mapperType.GetInterfaces();
 
             // Find IEntityPropertyMapper<T> interface
-            var entityMapperInterface = interfaces.FirstOrDefault(i =>
+            Type? entityMapperInterface = interfaces.FirstOrDefault(i =>
                 i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEntityPropertyMapper<>)
             );
 
             if (entityMapperInterface != null)
             {
                 // Get the MapAndAdd method
-                var mapAndAddMethod = entityMapperInterface.GetMethod("MapAndAdd");
+                MethodInfo? mapAndAddMethod = entityMapperInterface.GetMethod("MapAndAdd");
                 if (mapAndAddMethod != null)
+                {
                     try
                     {
                         mapAndAddMethod.Invoke(mapper, new object[] { world, entity, properties });
@@ -75,6 +77,7 @@ public class PropertyMapperRegistry
                             mapperType.Name
                         );
                     }
+                }
             }
         }
 

@@ -4,7 +4,7 @@ using PokeSharp.Engine.Core.Templates;
 using PokeSharp.Engine.Core.Templates.Loading;
 using PokeSharp.Engine.Core.Types;
 using PokeSharp.Engine.Systems.Factories;
-using PokeSharp.Game.Initialization;
+using PokeSharp.Game.Infrastructure.Services;
 using PokeSharp.Game.Initialization.Initializers;
 using PokeSharp.Game.Templates;
 
@@ -23,7 +23,9 @@ public static class TemplateServicesExtensions
         // Component Deserializer Registry - for JSON template loading
         services.AddSingleton(sp =>
         {
-            var logger = sp.GetRequiredService<ILogger<ComponentDeserializerRegistry>>();
+            ILogger<ComponentDeserializerRegistry> logger = sp.GetRequiredService<
+                ILogger<ComponentDeserializerRegistry>
+            >();
             var registry = new ComponentDeserializerRegistry(logger);
             ComponentDeserializerSetup.RegisterAllDeserializers(registry, sp.GetService<ILogger>());
             return registry;
@@ -42,18 +44,26 @@ public static class TemplateServicesExtensions
         // Entity Factory Service
         services.AddSingleton<IEntityFactoryService, EntityFactoryService>();
 
-        // Behavior Registry
+        // Behavior Registry - uses path resolver for correct path resolution
         services.AddSingleton(sp =>
         {
-            var logger = sp.GetRequiredService<ILogger<TypeRegistry<BehaviorDefinition>>>();
-            return new TypeRegistry<BehaviorDefinition>("Assets/Data/Behaviors", logger);
+            IAssetPathResolver pathResolver = sp.GetRequiredService<IAssetPathResolver>();
+            ILogger<TypeRegistry<BehaviorDefinition>> logger = sp.GetRequiredService<
+                ILogger<TypeRegistry<BehaviorDefinition>>
+            >();
+            string behaviorsPath = pathResolver.ResolveData("Behaviors");
+            return new TypeRegistry<BehaviorDefinition>(behaviorsPath, logger);
         });
 
-        // Tile Behavior Registry
+        // Tile Behavior Registry - uses path resolver for correct path resolution
         services.AddSingleton(sp =>
         {
-            var logger = sp.GetRequiredService<ILogger<TypeRegistry<TileBehaviorDefinition>>>();
-            return new TypeRegistry<TileBehaviorDefinition>("Assets/Data/TileBehaviors", logger);
+            IAssetPathResolver pathResolver = sp.GetRequiredService<IAssetPathResolver>();
+            ILogger<TypeRegistry<TileBehaviorDefinition>> logger = sp.GetRequiredService<
+                ILogger<TypeRegistry<TileBehaviorDefinition>>
+            >();
+            string tileBehaviorsPath = pathResolver.ResolveData("TileBehaviors");
+            return new TypeRegistry<TileBehaviorDefinition>(tileBehaviorsPath, logger);
         });
 
         return services;

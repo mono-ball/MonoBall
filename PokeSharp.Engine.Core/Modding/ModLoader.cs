@@ -38,17 +38,18 @@ public sealed class ModLoader
             return _loadedMods;
         }
 
-        var modDirectories = Directory.GetDirectories(_modsDirectory);
+        string[] modDirectories = Directory.GetDirectories(_modsDirectory);
         _logger.LogInformation(
             "[steelblue1]WF[/] Scanning for mods | path: [cyan]{Path}[/], directories: [yellow]{Count}[/]",
             _modsDirectory,
             modDirectories.Length
         );
 
-        foreach (var modDir in modDirectories)
+        foreach (string modDir in modDirectories)
+        {
             try
             {
-                var manifestPath = Path.Combine(modDir, "mod.json");
+                string manifestPath = Path.Combine(modDir, "mod.json");
                 if (!File.Exists(manifestPath))
                 {
                     _logger.LogWarning(
@@ -58,8 +59,8 @@ public sealed class ModLoader
                     continue;
                 }
 
-                var manifestJson = File.ReadAllText(manifestPath);
-                var manifest = JsonSerializer.Deserialize<ModManifest>(
+                string manifestJson = File.ReadAllText(manifestPath);
+                ModManifest? manifest = JsonSerializer.Deserialize<ModManifest>(
                     manifestJson,
                     new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
                 );
@@ -93,6 +94,7 @@ public sealed class ModLoader
                     modDir
                 );
             }
+        }
 
         return _loadedMods;
     }
@@ -109,32 +111,41 @@ public sealed class ModLoader
         void Visit(LoadedMod mod)
         {
             if (processed.Contains(mod.Manifest.ModId))
+            {
                 return;
+            }
 
             if (processing.Contains(mod.Manifest.ModId))
+            {
                 throw new InvalidOperationException(
                     $"Circular dependency detected involving mod: {mod.Manifest.ModId}"
                 );
+            }
 
             processing.Add(mod.Manifest.ModId);
 
             // Process hard dependencies first
-            foreach (var depId in mod.Manifest.Dependencies)
+            foreach (string depId in mod.Manifest.Dependencies)
             {
-                var dep = mods.FirstOrDefault(m => m.Manifest.ModId == depId);
+                LoadedMod? dep = mods.FirstOrDefault(m => m.Manifest.ModId == depId);
                 if (dep == null)
+                {
                     throw new InvalidOperationException(
                         $"Mod '{mod.Manifest.ModId}' depends on '{depId}' which is not loaded"
                     );
+                }
+
                 Visit(dep);
             }
 
             // Process LoadAfter dependencies
-            foreach (var afterId in mod.Manifest.LoadAfter)
+            foreach (string afterId in mod.Manifest.LoadAfter)
             {
-                var after = mods.FirstOrDefault(m => m.Manifest.ModId == afterId);
+                LoadedMod? after = mods.FirstOrDefault(m => m.Manifest.ModId == afterId);
                 if (after != null) // Soft dependency - don't fail if missing
+                {
                     Visit(after);
+                }
             }
 
             processing.Remove(mod.Manifest.ModId);
@@ -145,8 +156,10 @@ public sealed class ModLoader
         // Sort by priority first (lower = earlier)
         var prioritySorted = mods.OrderBy(m => m.Manifest.LoadPriority).ToList();
 
-        foreach (var mod in prioritySorted)
+        foreach (LoadedMod mod in prioritySorted)
+        {
             Visit(mod);
+        }
 
         _logger.LogInformation(
             "[steelblue1]WF[/] Mod load order | sequence: [cyan]{Order}[/]",

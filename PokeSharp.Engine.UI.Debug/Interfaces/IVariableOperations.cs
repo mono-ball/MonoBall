@@ -1,8 +1,8 @@
 namespace PokeSharp.Engine.UI.Debug.Interfaces;
 
 /// <summary>
-/// Provides operations for the variables panel.
-/// Implemented by VariablesPanel.
+///     Provides operations for the variables panel.
+///     Implemented by VariablesPanel.
 /// </summary>
 public interface IVariableOperations
 {
@@ -45,4 +45,3 @@ public interface IVariableOperations
     /// <summary>Sets a variable with a value getter.</summary>
     void SetVariable(string name, string typeName, Func<object?> valueGetter);
 }
-

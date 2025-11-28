@@ -25,7 +25,8 @@ public class BoundaryAlignmentTests
     public void NorthSouthBoundaries_ShouldAlign_Perfectly(
         string sourceMap,
         string targetMap,
-        string description)
+        string description
+    )
     {
         // Arrange
         var sourceBoundary = GetMapBoundary(sourceMap);
@@ -33,25 +34,25 @@ public class BoundaryAlignmentTests
         var connection = GetMapConnection(sourceMap, targetMap);
 
         // Act
-        var alignment = CalculateBoundaryAlignment(
-            sourceBoundary,
-            targetBoundary,
-            connection
-        );
+        var alignment = CalculateBoundaryAlignment(sourceBoundary, targetBoundary, connection);
 
         // Assert
         alignment.HasGap.Should().BeFalse($"{description}: No gap should exist between maps");
-        alignment.HasOverlap.Should().BeFalse($"{description}: No overlap should exist between maps");
+        alignment
+            .HasOverlap.Should()
+            .BeFalse($"{description}: No overlap should exist between maps");
 
-        alignment.GapSize.Should().Be(0,
-            $"{description}: Gap size should be exactly 0 tiles");
+        alignment.GapSize.Should().Be(0, $"{description}: Gap size should be exactly 0 tiles");
 
-        alignment.PixelGap.Should().Be(0,
-            $"{description}: Pixel-level gap should be exactly 0");
+        alignment.PixelGap.Should().Be(0, $"{description}: Pixel-level gap should be exactly 0");
 
         // Critical assertion: Check for the 2-tile offset bug
-        alignment.TileOffset.Should().Be(EXPECTED_OFFSET,
-            $"{description}: DETECTED 2-TILE OFFSET BUG - boundaries misaligned by {alignment.TileOffset} tiles");
+        alignment
+            .TileOffset.Should()
+            .Be(
+                EXPECTED_OFFSET,
+                $"{description}: DETECTED 2-TILE OFFSET BUG - boundaries misaligned by {alignment.TileOffset} tiles"
+            );
     }
 
     /// <summary>
@@ -66,7 +67,8 @@ public class BoundaryAlignmentTests
     public void EastWestBoundaries_ShouldAlign_Perfectly(
         string sourceMap,
         string targetMap,
-        string direction)
+        string direction
+    )
     {
         // Arrange
         var sourceBoundary = GetMapBoundary(sourceMap);
@@ -74,21 +76,15 @@ public class BoundaryAlignmentTests
         var connection = GetMapConnection(sourceMap, targetMap);
 
         // Act
-        var alignment = CalculateBoundaryAlignment(
-            sourceBoundary,
-            targetBoundary,
-            connection
-        );
+        var alignment = CalculateBoundaryAlignment(sourceBoundary, targetBoundary, connection);
 
         // Assert
         alignment.HasGap.Should().BeFalse($"{direction} connection should have no gap");
         alignment.HasOverlap.Should().BeFalse($"{direction} connection should have no overlap");
 
-        alignment.GapSize.Should().Be(0,
-            $"{direction} connection gap should be 0 tiles");
+        alignment.GapSize.Should().Be(0, $"{direction} connection gap should be 0 tiles");
 
-        alignment.PixelGap.Should().Be(0,
-            $"{direction} connection pixel gap should be 0");
+        alignment.PixelGap.Should().Be(0, $"{direction} connection pixel gap should be 0");
     }
 
     /// <summary>
@@ -111,18 +107,19 @@ public class BoundaryAlignmentTests
             var sourceBoundary = GetMapBoundary(connection.SourceMap);
             var targetBoundary = GetMapBoundary(connection.TargetMap);
 
-            var alignment = CalculateBoundaryAlignment(
-                sourceBoundary,
-                targetBoundary,
-                connection
-            );
+            var alignment = CalculateBoundaryAlignment(sourceBoundary, targetBoundary, connection);
 
-            alignment.TileOffset.Should().Be(0,
-                $"{connection.SourceMap} → {connection.TargetMap} " +
-                $"({connection.Direction}) should have no offset");
+            alignment
+                .TileOffset.Should()
+                .Be(
+                    0,
+                    $"{connection.SourceMap} → {connection.TargetMap} "
+                        + $"({connection.Direction}) should have no offset"
+                );
 
-            alignment.HasGap.Should().BeFalse(
-                $"{connection.SourceMap} → {connection.TargetMap} should have no gap");
+            alignment
+                .HasGap.Should()
+                .BeFalse($"{connection.SourceMap} → {connection.TargetMap} should have no gap");
         }
     }
 
@@ -139,7 +136,8 @@ public class BoundaryAlignmentTests
         string sourceMap,
         string targetMap,
         int expectedWidth,
-        string description)
+        string description
+    )
     {
         // Arrange
         var connection = GetMapConnection(sourceMap, targetMap);
@@ -152,13 +150,24 @@ public class BoundaryAlignmentTests
 
         // Verify that the width is consistent on both sides
         var sourceEdgeWidth = GetMapEdgeWidth(sourceMap, connection.Direction);
-        var targetEdgeWidth = GetMapEdgeWidth(targetMap, GetOppositeDirection(connection.Direction));
+        var targetEdgeWidth = GetMapEdgeWidth(
+            targetMap,
+            GetOppositeDirection(connection.Direction)
+        );
 
-        actualWidth.Should().BeLessOrEqualTo(sourceEdgeWidth,
-            "Connection width cannot exceed source map edge width");
+        actualWidth
+            .Should()
+            .BeLessOrEqualTo(
+                sourceEdgeWidth,
+                "Connection width cannot exceed source map edge width"
+            );
 
-        actualWidth.Should().BeLessOrEqualTo(targetEdgeWidth,
-            "Connection width cannot exceed target map edge width");
+        actualWidth
+            .Should()
+            .BeLessOrEqualTo(
+                targetEdgeWidth,
+                "Connection width cannot exceed target map edge width"
+            );
     }
 
     /// <summary>
@@ -175,7 +184,7 @@ public class BoundaryAlignmentTests
         {
             ("dewford_town", "route107"),
             ("route114", "route115"),
-            ("littleroot_town", "route101")
+            ("littleroot_town", "route101"),
         };
 
         foreach (var (sourceMap, targetMap) in testCases)
@@ -184,21 +193,28 @@ public class BoundaryAlignmentTests
             var transition = SimulateMapTransition(sourceMap, targetMap);
 
             // Assert
-            transition.CameraJump.Should().Be(0,
-                $"{sourceMap} → {targetMap}: Camera should not jump during transition");
+            transition
+                .CameraJump.Should()
+                .Be(0, $"{sourceMap} → {targetMap}: Camera should not jump during transition");
 
-            transition.PlayerJump.Should().Be(0,
-                $"{sourceMap} → {targetMap}: Player position should not jump");
+            transition
+                .PlayerJump.Should()
+                .Be(0, $"{sourceMap} → {targetMap}: Player position should not jump");
 
-            transition.VisualGap.Should().Be(0,
-                $"{sourceMap} → {targetMap}: No visual gap should be visible");
+            transition
+                .VisualGap.Should()
+                .Be(0, $"{sourceMap} → {targetMap}: No visual gap should be visible");
 
             // Critical check for the 2-tile offset bug
             if (transition.PlayerJump != 0)
             {
                 var jumpInTiles = transition.PlayerJump / TILE_SIZE;
-                jumpInTiles.Should().NotBe(2,
-                    $"CONFIRMED BUG: Player jumps exactly 2 tiles during transition from {sourceMap} to {targetMap}");
+                jumpInTiles
+                    .Should()
+                    .NotBe(
+                        2,
+                        $"CONFIRMED BUG: Player jumps exactly 2 tiles during transition from {sourceMap} to {targetMap}"
+                    );
             }
         }
     }
@@ -229,16 +245,16 @@ public class BoundaryAlignmentTests
             GetOppositeDirection(forwardConnection.Direction)
         );
 
-        reversePoint.Should().Be(expectedReversePoint,
-            "Reverse connection should align with forward connection");
+        reversePoint
+            .Should()
+            .Be(expectedReversePoint, "Reverse connection should align with forward connection");
 
         // Verify offset symmetry
         var forwardOffset = CalculateConnectionOffset(forwardConnection);
         var reverseOffset = CalculateConnectionOffset(reverseConnection);
 
         var totalOffset = forwardOffset + reverseOffset;
-        totalOffset.Should().Be(0,
-            "Forward and reverse offsets should cancel out (sum to zero)");
+        totalOffset.Should().Be(0, "Forward and reverse offsets should cancel out (sum to zero)");
     }
 
     #region Test Data Types
@@ -271,11 +287,7 @@ public class BoundaryAlignmentTests
         int Width
     );
 
-    public record MapTransition(
-        int CameraJump,
-        int PlayerJump,
-        int VisualGap
-    );
+    public record MapTransition(int CameraJump, int PlayerJump, int VisualGap);
 
     public record ConnectionPoint(int X, int Y);
 
@@ -308,7 +320,8 @@ public class BoundaryAlignmentTests
     private BoundaryAlignment CalculateBoundaryAlignment(
         MapBoundary source,
         MapBoundary target,
-        MapConnection connection)
+        MapConnection connection
+    )
     {
         // Placeholder - should implement actual alignment logic
         return new BoundaryAlignment(
@@ -373,7 +386,7 @@ public class BoundaryAlignmentTests
             "south" => "north",
             "east" => "west",
             "west" => "east",
-            _ => direction
+            _ => direction,
         };
     }
 
@@ -384,11 +397,7 @@ public class BoundaryAlignmentTests
     private MapTransition SimulateMapTransition(string sourceMap, string targetMap)
     {
         // Placeholder - should simulate actual transition
-        return new MapTransition(
-            CameraJump: 0,
-            PlayerJump: 0,
-            VisualGap: 0
-        );
+        return new MapTransition(CameraJump: 0, PlayerJump: 0, VisualGap: 0);
     }
 
     /// <summary>
@@ -415,7 +424,8 @@ public class BoundaryAlignmentTests
     private ConnectionPoint TransformPointByDirection(
         ConnectionPoint point,
         string fromDirection,
-        string toDirection)
+        string toDirection
+    )
     {
         // Placeholder - should transform point coordinates
         return point;

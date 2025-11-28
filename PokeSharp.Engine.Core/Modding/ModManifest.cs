@@ -66,16 +66,22 @@ public sealed class ModManifest
     public void Validate()
     {
         if (string.IsNullOrWhiteSpace(ModId))
+        {
             throw new InvalidOperationException("ModId is required");
+        }
 
         if (string.IsNullOrWhiteSpace(Name))
+        {
             throw new InvalidOperationException("Name is required");
+        }
 
         // Validate semantic versioning format (basic check)
         if (!Regex.IsMatch(Version, @"^\d+\.\d+\.\d+"))
+        {
             throw new InvalidOperationException(
                 $"Version must follow semantic versioning (e.g. 1.0.0): {Version}"
             );
+        }
     }
 
     public override string ToString()

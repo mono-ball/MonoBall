@@ -28,6 +28,7 @@ public class EventBus(ILogger<EventBus>? logger = null) : IEventBus
 {
     private readonly ConcurrentDictionary<Type, ConcurrentDictionary<int, Delegate>> _handlers =
         new();
+
     private readonly ILogger<EventBus> _logger = logger ?? NullLogger<EventBus>.Instance;
     private int _nextHandlerId;
 
@@ -36,13 +37,20 @@ public class EventBus(ILogger<EventBus>? logger = null) : IEventBus
         where TEvent : TypeEventBase
     {
         if (eventData == null)
+        {
             throw new ArgumentNullException(nameof(eventData));
+        }
 
-        var eventType = typeof(TEvent);
+        Type eventType = typeof(TEvent);
 
-        if (_handlers.TryGetValue(eventType, out var handlers) && !handlers.IsEmpty)
-            // Execute all handlers with error isolation
-            foreach (var handler in handlers.Values)
+        if (
+            _handlers.TryGetValue(eventType, out ConcurrentDictionary<int, Delegate>? handlers)
+            && !handlers.IsEmpty
+        )
+        // Execute all handlers with error isolation
+        {
+            foreach (Delegate handler in handlers.Values)
+            {
                 try
                 {
                     ((Action<TEvent>)handler)(eventData);
@@ -57,6 +65,8 @@ public class EventBus(ILogger<EventBus>? logger = null) : IEventBus
                         ex.Message
                     );
                 }
+            }
+        }
     }
 
     /// <inheritdoc />
@@ -64,16 +74,18 @@ public class EventBus(ILogger<EventBus>? logger = null) : IEventBus
         where TEvent : TypeEventBase
     {
         if (handler == null)
+        {
             throw new ArgumentNullException(nameof(handler));
+        }
 
-        var eventType = typeof(TEvent);
-        var handlers = _handlers.GetOrAdd(
+        Type eventType = typeof(TEvent);
+        ConcurrentDictionary<int, Delegate> handlers = _handlers.GetOrAdd(
             eventType,
             _ => new ConcurrentDictionary<int, Delegate>()
         );
 
         // Generate unique handler ID using atomic increment
-        var handlerId = Interlocked.Increment(ref _nextHandlerId);
+        int handlerId = Interlocked.Increment(ref _nextHandlerId);
         handlers[handlerId] = handler;
 
         // Return a disposable subscription with the handler ID
@@ -84,15 +96,17 @@ public class EventBus(ILogger<EventBus>? logger = null) : IEventBus
     public int GetSubscriberCount<TEvent>()
         where TEvent : TypeEventBase
     {
-        var eventType = typeof(TEvent);
-        return _handlers.TryGetValue(eventType, out var handlers) ? handlers.Count : 0;
+        Type eventType = typeof(TEvent);
+        return _handlers.TryGetValue(eventType, out ConcurrentDictionary<int, Delegate>? handlers)
+            ? handlers.Count
+            : 0;
     }
 
     /// <inheritdoc />
     public void ClearSubscriptions<TEvent>()
         where TEvent : TypeEventBase
     {
-        var eventType = typeof(TEvent);
+        Type eventType = typeof(TEvent);
         _handlers.TryRemove(eventType, out _);
     }
 
@@ -113,9 +127,11 @@ public class EventBus(ILogger<EventBus>? logger = null) : IEventBus
     /// </remarks>
     internal void Unsubscribe(Type eventType, int handlerId)
     {
-        if (_handlers.TryGetValue(eventType, out var handlers))
-            // Atomic removal - always succeeds
+        if (_handlers.TryGetValue(eventType, out ConcurrentDictionary<int, Delegate>? handlers))
+        // Atomic removal - always succeeds
+        {
             handlers.TryRemove(handlerId, out _);
+        }
     }
 }
 
@@ -125,7 +141,7 @@ public class EventBus(ILogger<EventBus>? logger = null) : IEventBus
 /// <remarks>
 ///     FIX #9: Uses handler ID instead of handler reference for atomic unsubscribe.
 /// </remarks>
-file sealed class Subscription(EventBus eventBus, Type eventType, int handlerId) : IDisposable
+sealed file class Subscription(EventBus eventBus, Type eventType, int handlerId) : IDisposable
 {
     private readonly EventBus _eventBus = eventBus;
     private readonly Type _eventType = eventType;

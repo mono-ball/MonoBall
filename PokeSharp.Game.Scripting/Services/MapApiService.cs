@@ -33,14 +33,18 @@ public class MapApiService(
             return true; // Default to walkable if system not ready
         }
 
-        var entities = _spatialQuery.GetEntitiesAt(mapId.Value, x, y);
-        foreach (var entity in entities)
+        IReadOnlyList<Entity> entities = _spatialQuery.GetEntitiesAt(mapId.Value, x, y);
+        foreach (Entity entity in entities)
+        {
             if (_world.Has<Collision>(entity))
             {
-                ref var collision = ref _world.Get<Collision>(entity);
+                ref Collision collision = ref _world.Get<Collision>(entity);
                 if (collision.IsSolid)
+                {
                     return false;
+                }
             }
+        }
 
         return true;
     }
@@ -58,10 +62,10 @@ public class MapApiService(
 
     public MapRuntimeId GetCurrentMapId()
     {
-        var playerEntity = GetPlayerEntity();
+        Entity? playerEntity = GetPlayerEntity();
         if (playerEntity.HasValue && _world.Has<Position>(playerEntity.Value))
         {
-            ref var position = ref _world.Get<Position>(playerEntity.Value);
+            ref Position position = ref _world.Get<Position>(playerEntity.Value);
             return position.MapId;
         }
 
@@ -70,14 +74,14 @@ public class MapApiService(
 
     public void TransitionToMap(MapRuntimeId mapId, int x, int y)
     {
-        var playerEntity = GetPlayerEntity();
+        Entity? playerEntity = GetPlayerEntity();
         if (playerEntity.HasValue && _world.Has<Position>(playerEntity.Value))
         {
-            ref var position = ref _world.Get<Position>(playerEntity.Value);
+            ref Position position = ref _world.Get<Position>(playerEntity.Value);
             position.MapId = mapId;
             position.X = x;
             position.Y = y;
-            var tileSize = GetTileSize(mapId);
+            int tileSize = GetTileSize(mapId);
             position.SyncPixelsToGrid(tileSize);
             _logger.LogInformation("Transitioned to map {MapId} at ({X}, {Y})", mapId.Value, x, y);
         }
@@ -93,7 +97,9 @@ public class MapApiService(
             (ref MapInfo mapInfo) =>
             {
                 if (mapInfo.MapId == mapId)
+                {
                     result = (mapInfo.Width, mapInfo.Height);
+                }
             }
         );
 
@@ -102,12 +108,14 @@ public class MapApiService(
 
     public Direction GetDirectionTo(int fromX, int fromY, int toX, int toY)
     {
-        var dx = toX - fromX;
-        var dy = toY - fromY;
+        int dx = toX - fromX;
+        int dy = toY - fromY;
 
         // Prioritize horizontal movement over vertical
         if (Math.Abs(dx) > Math.Abs(dy))
+        {
             return dx > 0 ? Direction.East : Direction.West;
+        }
 
         return dy > 0 ? Direction.South : Direction.North;
     }
@@ -138,14 +146,16 @@ public class MapApiService(
 
     private int GetTileSize(MapRuntimeId mapId)
     {
-        var tileSize = 16;
+        int tileSize = 16;
 
         _world.Query(
             in EcsQueries.MapInfo,
             (ref MapInfo mapInfo) =>
             {
                 if (mapInfo.MapId == mapId)
+                {
                     tileSize = mapInfo.TileSize;
+                }
             }
         );
 

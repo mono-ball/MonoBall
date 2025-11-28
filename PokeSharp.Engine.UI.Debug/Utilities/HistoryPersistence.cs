@@ -1,13 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Text.Json;
 
 namespace PokeSharp.Engine.UI.Debug.Utilities;
 
 /// <summary>
-/// Handles saving and loading console command history to/from disk.
+///     Handles saving and loading console command history to/from disk.
 /// </summary>
 public static class HistoryPersistence
 {
@@ -16,8 +12,10 @@ public static class HistoryPersistence
     static HistoryPersistence()
     {
         // Save to user's local app data directory
-        var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-        var pokeSharpDataPath = Path.Combine(appDataPath, "PokeSharp");
+        string appDataPath = Environment.GetFolderPath(
+            Environment.SpecialFolder.LocalApplicationData
+        );
+        string pokeSharpDataPath = Path.Combine(appDataPath, "PokeSharp");
 
         // Create directory if it doesn't exist
         Directory.CreateDirectory(pokeSharpDataPath);
@@ -26,7 +24,7 @@ public static class HistoryPersistence
     }
 
     /// <summary>
-    /// Saves command history to disk.
+    ///     Saves command history to disk.
     /// </summary>
     /// <param name="commands">The list of commands to save.</param>
     /// <param name="maxEntries">Maximum number of entries to save (default 1000).</param>
@@ -37,10 +35,10 @@ public static class HistoryPersistence
             // Take only the most recent entries
             var commandList = commands.TakeLast(maxEntries).ToList();
 
-            var json = JsonSerializer.Serialize(commandList, new JsonSerializerOptions
-            {
-                WriteIndented = true
-            });
+            string json = JsonSerializer.Serialize(
+                commandList,
+                new JsonSerializerOptions { WriteIndented = true }
+            );
 
             File.WriteAllText(HistoryFilePath, json);
         }
@@ -51,7 +49,7 @@ public static class HistoryPersistence
     }
 
     /// <summary>
-    /// Loads command history from disk.
+    ///     Loads command history from disk.
     /// </summary>
     /// <returns>List of commands, or empty list if unable to load.</returns>
     public static List<string> LoadHistory()
@@ -59,10 +57,12 @@ public static class HistoryPersistence
         try
         {
             if (!File.Exists(HistoryFilePath))
+            {
                 return new List<string>();
+            }
 
-            var json = File.ReadAllText(HistoryFilePath);
-            var commands = JsonSerializer.Deserialize<List<string>>(json);
+            string json = File.ReadAllText(HistoryFilePath);
+            List<string>? commands = JsonSerializer.Deserialize<List<string>>(json);
 
             return commands ?? new List<string>();
         }
@@ -74,7 +74,7 @@ public static class HistoryPersistence
     }
 
     /// <summary>
-    /// Clears the history file.
+    ///     Clears the history file.
     /// </summary>
     public static void ClearHistory()
     {
@@ -92,11 +92,10 @@ public static class HistoryPersistence
     }
 
     /// <summary>
-    /// Gets the path to the history file for debugging purposes.
+    ///     Gets the path to the history file for debugging purposes.
     /// </summary>
-    public static string GetHistoryFilePath() => HistoryFilePath;
+    public static string GetHistoryFilePath()
+    {
+        return HistoryFilePath;
+    }
 }
-
-
-
-

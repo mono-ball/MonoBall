@@ -22,12 +22,16 @@ public sealed class TemplateCache
     public void Register(EntityTemplate template)
     {
         if (string.IsNullOrWhiteSpace(template.TemplateId))
+        {
             throw new ArgumentException("Template ID cannot be null or empty", nameof(template));
+        }
 
-        if (!template.Validate(out var errors))
+        if (!template.Validate(out List<string> errors))
+        {
             throw new InvalidOperationException(
                 $"Template validation failed for '{template.TemplateId}': {string.Join(", ", errors)}"
             );
+        }
 
         _templates[template.TemplateId] = template;
     }
@@ -38,7 +42,7 @@ public sealed class TemplateCache
     /// </summary>
     public EntityTemplate? Get(string templateId)
     {
-        return _templates.TryGetValue(templateId, out var template) ? template : null;
+        return _templates.TryGetValue(templateId, out EntityTemplate? template) ? template : null;
     }
 
     /// <summary>

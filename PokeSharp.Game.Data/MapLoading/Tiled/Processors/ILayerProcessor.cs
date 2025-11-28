@@ -15,12 +15,14 @@ public interface ILayerProcessor
     /// </summary>
     /// <param name="world">The ECS world.</param>
     /// <param name="tmxDoc">The Tiled map document.</param>
+    /// <param name="mapInfoEntity">The map entity for establishing relationships.</param>
     /// <param name="mapId">The map runtime ID.</param>
     /// <param name="tilesets">Loaded tilesets.</param>
     /// <returns>Total number of tiles created.</returns>
     int ProcessLayers(
         World world,
         TmxDocument tmxDoc,
+        Entity mapInfoEntity,
         int mapId,
         IReadOnlyList<LoadedTileset> tilesets
     );

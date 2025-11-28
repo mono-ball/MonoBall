@@ -28,10 +28,10 @@ public class TemplateCompiler<TEntity> : ITemplateCompiler<TEntity>
     {
         ArgumentNullException.ThrowIfNull(entity);
 
-        var entityType = typeof(TEntity);
+        Type entityType = typeof(TEntity);
 
         // Check if we have a registered compiler for this type
-        if (!_compilers.TryGetValue(entityType, out var compiler))
+        if (!_compilers.TryGetValue(entityType, out Func<TEntity, EntityTemplate>? compiler))
         {
             _logger.LogTemplateCompilerMissing(entityType.Name);
             throw new InvalidOperationException(
@@ -41,10 +41,10 @@ public class TemplateCompiler<TEntity> : ITemplateCompiler<TEntity>
         }
 
         // Compile entity to template
-        var template = compiler(entity);
+        EntityTemplate template = compiler(entity);
 
         // Validate compiled template
-        if (!template.Validate(out var errors))
+        if (!template.Validate(out List<string> errors))
         {
             _logger.LogError(
                 "[steelblue1]WF[/] [red]✗[/] Template compilation validation failed: {Errors}",
@@ -81,13 +81,13 @@ public class TemplateCompiler<TEntity> : ITemplateCompiler<TEntity>
             typeof(TEntity).Name
         );
 
-        foreach (var entity in entityList)
+        foreach (TEntity entity in entityList)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
             try
             {
-                var template = await CompileAsync(entity, cancellationToken);
+                EntityTemplate template = await CompileAsync(entity, cancellationToken);
                 templates.Add(template);
             }
             catch (Exception ex)
@@ -117,7 +117,7 @@ public class TemplateCompiler<TEntity> : ITemplateCompiler<TEntity>
 
         try
         {
-            var template = CompileAsync(entity).GetAwaiter().GetResult();
+            EntityTemplate template = CompileAsync(entity).GetAwaiter().GetResult();
             return template.Validate(out _);
         }
         catch (Exception ex)
@@ -139,7 +139,7 @@ public class TemplateCompiler<TEntity> : ITemplateCompiler<TEntity>
     {
         ArgumentNullException.ThrowIfNull(compilationFunc);
 
-        var entityType = typeof(TEntity);
+        Type entityType = typeof(TEntity);
         _compilers[entityType] = compilationFunc;
 
         _logger.LogInformation("Registered compiler for entity type {EntityType}", entityType.Name);

@@ -33,7 +33,7 @@ public class CoordinateOffsetReproductionTests
         const string targetMap = "route107";
 
         // Expected connection point based on map data
-        const int expectedPlayerX = 64;  // Example X coordinate
+        const int expectedPlayerX = 64; // Example X coordinate
         const int expectedPlayerY = 128; // Example Y coordinate
 
         // Act
@@ -41,16 +41,22 @@ public class CoordinateOffsetReproductionTests
         var actualPosition = SimulateWarp(connection);
 
         // Assert - Player should appear at exact connection point
-        actualPosition.X.Should().Be(expectedPlayerX,
-            "X coordinate should match connection point exactly");
+        actualPosition
+            .X.Should()
+            .Be(expectedPlayerX, "X coordinate should match connection point exactly");
 
-        actualPosition.Y.Should().Be(expectedPlayerY,
-            "Y coordinate should match connection point exactly - NO upward shift");
+        actualPosition
+            .Y.Should()
+            .Be(
+                expectedPlayerY,
+                "Y coordinate should match connection point exactly - NO upward shift"
+            );
 
         // Additional assertion to catch the specific bug
         var yOffset = expectedPlayerY - actualPosition.Y;
-        yOffset.Should().Be(0,
-            "There should be no Y-offset (currently has +32 pixel upward shift bug)");
+        yOffset
+            .Should()
+            .Be(0, "There should be no Y-offset (currently has +32 pixel upward shift bug)");
     }
 
     /// <summary>
@@ -75,24 +81,30 @@ public class CoordinateOffsetReproductionTests
         const string targetMap = "route115";
 
         // Expected connection point based on map data
-        const int expectedPlayerX = 96;  // Example X coordinate
-        const int expectedPlayerY = 64;  // Example Y coordinate
+        const int expectedPlayerX = 96; // Example X coordinate
+        const int expectedPlayerY = 64; // Example Y coordinate
 
         // Act
         var connection = GetMapConnection(sourceMap, targetMap);
         var actualPosition = SimulateWarp(connection);
 
         // Assert - Player should appear at exact connection point
-        actualPosition.X.Should().Be(expectedPlayerX,
-            "X coordinate should match connection point exactly");
+        actualPosition
+            .X.Should()
+            .Be(expectedPlayerX, "X coordinate should match connection point exactly");
 
-        actualPosition.Y.Should().Be(expectedPlayerY,
-            "Y coordinate should match connection point exactly - NO downward shift");
+        actualPosition
+            .Y.Should()
+            .Be(
+                expectedPlayerY,
+                "Y coordinate should match connection point exactly - NO downward shift"
+            );
 
         // Additional assertion to catch the specific bug
         var yOffset = actualPosition.Y - expectedPlayerY;
-        yOffset.Should().Be(0,
-            "There should be no Y-offset (currently has +32 pixel downward shift bug)");
+        yOffset
+            .Should()
+            .Be(0, "There should be no Y-offset (currently has +32 pixel downward shift bug)");
     }
 
     /// <summary>
@@ -104,13 +116,20 @@ public class CoordinateOffsetReproductionTests
     [Theory]
     [InlineData("dewford_town", "route107", 0, 0, "dewford → route107 should have zero offset")]
     [InlineData("route114", "route115", 0, 0, "route114 → route115 should have zero offset")]
-    [InlineData("littleroot_town", "route101", 0, 0, "littleroot → route101 should have zero offset")]
+    [InlineData(
+        "littleroot_town",
+        "route101",
+        0,
+        0,
+        "littleroot → route101 should have zero offset"
+    )]
     public void MapConnections_ShouldHave_CorrectOffsets(
         string sourceMap,
         string targetMap,
         int expectedOffsetX,
         int expectedOffsetY,
-        string reason)
+        string reason
+    )
     {
         // Arrange
         var connection = GetMapConnection(sourceMap, targetMap);
@@ -137,7 +156,7 @@ public class CoordinateOffsetReproductionTests
         {
             ("dewford_town", "route107"),
             ("route114", "route115"),
-            ("route103", "route110")
+            ("route103", "route110"),
         };
 
         foreach (var (sourceMap, targetMap) in testConnections)
@@ -147,14 +166,17 @@ public class CoordinateOffsetReproductionTests
             var alignment = ValidateBoundaryAlignment(connection);
 
             // Assert
-            alignment.IsAligned.Should().BeTrue(
-                $"{sourceMap} → {targetMap} boundaries should align perfectly");
+            alignment
+                .IsAligned.Should()
+                .BeTrue($"{sourceMap} → {targetMap} boundaries should align perfectly");
 
-            alignment.TileOffset.Should().Be(0,
-                $"{sourceMap} → {targetMap} should have no tile offset at boundary");
+            alignment
+                .TileOffset.Should()
+                .Be(0, $"{sourceMap} → {targetMap} should have no tile offset at boundary");
 
-            alignment.PixelOffset.Should().Be(0,
-                $"{sourceMap} → {targetMap} should have no pixel offset at boundary");
+            alignment
+                .PixelOffset.Should()
+                .Be(0, $"{sourceMap} → {targetMap} should have no pixel offset at boundary");
         }
     }
 
@@ -178,15 +200,18 @@ public class CoordinateOffsetReproductionTests
         var warpDestination = warpData.Destination;
 
         // Assert
-        connectionPoint.X.Should().Be(warpDestination.X,
-            "Connection point X should match warp destination X");
+        connectionPoint
+            .X.Should()
+            .Be(warpDestination.X, "Connection point X should match warp destination X");
 
-        connectionPoint.Y.Should().Be(warpDestination.Y,
-            "Connection point Y should match warp destination Y");
+        connectionPoint
+            .Y.Should()
+            .Be(warpDestination.Y, "Connection point Y should match warp destination Y");
 
         var distance = CalculateDistance(connectionPoint, warpDestination);
-        distance.Should().Be(0,
-            "Connection point should be exactly at warp destination (no offset)");
+        distance
+            .Should()
+            .Be(0, "Connection point should be exactly at warp destination (no offset)");
     }
 
     #region Helper Methods and Types
@@ -203,11 +228,7 @@ public class CoordinateOffsetReproductionTests
 
     private record ConnectionOffset(int OffsetX, int OffsetY);
 
-    private record BoundaryAlignment(
-        bool IsAligned,
-        int TileOffset,
-        int PixelOffset
-    );
+    private record BoundaryAlignment(bool IsAligned, int TileOffset, int PixelOffset);
 
     private record WarpData(
         string SourceMap,
@@ -224,13 +245,7 @@ public class CoordinateOffsetReproductionTests
     {
         // TODO: Implement actual map connection data retrieval
         // This is a placeholder that should be replaced with real implementation
-        return new MapConnection(
-            sourceMap,
-            targetMap,
-            0,
-            0,
-            "north"
-        );
+        return new MapConnection(sourceMap, targetMap, 0, 0, "north");
     }
 
     /// <summary>
@@ -268,12 +283,7 @@ public class CoordinateOffsetReproductionTests
     private WarpData GetWarpData(string sourceMap, string targetMap)
     {
         // TODO: Implement actual warp data retrieval
-        return new WarpData(
-            sourceMap,
-            targetMap,
-            new Position(0, 0),
-            new Position(0, 0)
-        );
+        return new WarpData(sourceMap, targetMap, new Position(0, 0), new Position(0, 0));
     }
 
     /// <summary>

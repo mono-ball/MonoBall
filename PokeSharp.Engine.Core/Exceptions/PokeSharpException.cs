@@ -9,7 +9,7 @@ namespace PokeSharp.Engine.Core.Exceptions;
 public abstract class PokeSharpException : Exception
 {
     /// <summary>
-    ///     Initializes a new instance of the <see cref="PokeSharpException"/> class.
+    ///     Initializes a new instance of the <see cref="PokeSharpException" /> class.
     /// </summary>
     /// <param name="errorCode">The error code identifying the exception type.</param>
     /// <param name="message">The error message.</param>
@@ -21,7 +21,7 @@ public abstract class PokeSharpException : Exception
     }
 
     /// <summary>
-    ///     Initializes a new instance of the <see cref="PokeSharpException"/> class with an inner exception.
+    ///     Initializes a new instance of the <see cref="PokeSharpException" /> class with an inner exception.
     /// </summary>
     /// <param name="errorCode">The error code identifying the exception type.</param>
     /// <param name="message">The error message.</param>
@@ -51,6 +51,12 @@ public abstract class PokeSharpException : Exception
     public DateTime Timestamp { get; } = DateTime.UtcNow;
 
     /// <summary>
+    ///     Determines if this exception is recoverable.
+    ///     Override this in derived classes to indicate if the game can continue.
+    /// </summary>
+    public virtual bool IsRecoverable => false;
+
+    /// <summary>
     ///     Adds context information to the exception.
     /// </summary>
     /// <param name="key">The context key.</param>
@@ -69,10 +75,11 @@ public abstract class PokeSharpException : Exception
     /// <returns>This exception instance for method chaining.</returns>
     public PokeSharpException WithContext(IDictionary<string, object> contextData)
     {
-        foreach (var kvp in contextData)
+        foreach (KeyValuePair<string, object> kvp in contextData)
         {
             Context[kvp.Key] = kvp.Value;
         }
+
         return this;
     }
 
@@ -82,12 +89,12 @@ public abstract class PokeSharpException : Exception
     /// <returns>Formatted exception details.</returns>
     public override string ToString()
     {
-        var details = $"[{ErrorCode}] {Message}";
+        string details = $"[{ErrorCode}] {Message}";
 
         if (Context.Count > 0)
         {
             details += "\nContext:";
-            foreach (var kvp in Context)
+            foreach (KeyValuePair<string, object> kvp in Context)
             {
                 details += $"\n  {kvp.Key}: {kvp.Value}";
             }
@@ -112,12 +119,6 @@ public abstract class PokeSharpException : Exception
     }
 
     /// <summary>
-    ///     Determines if this exception is recoverable.
-    ///     Override this in derived classes to indicate if the game can continue.
-    /// </summary>
-    public virtual bool IsRecoverable => false;
-
-    /// <summary>
     ///     Tries to get a context value by key.
     /// </summary>
     /// <typeparam name="T">The expected type of the context value.</typeparam>
@@ -126,7 +127,7 @@ public abstract class PokeSharpException : Exception
     /// <returns>True if value was found and type matches, false otherwise.</returns>
     public bool TryGetContext<T>(string key, [NotNullWhen(true)] out T? value)
     {
-        if (Context.TryGetValue(key, out var obj) && obj is T typedValue)
+        if (Context.TryGetValue(key, out object? obj) && obj is T typedValue)
         {
             value = typedValue;
             return true;

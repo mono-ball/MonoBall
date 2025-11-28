@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace PokeSharp.Game.Scripting.HotReload.Cache;
 
@@ -105,10 +106,11 @@ public class ScriptCacheEntry
         lock (_instanceLock)
         {
             if (_instance == null)
+            {
                 try
                 {
                     // OPTIMIZATION: Use compiled constructor factory with LRU eviction
-                    var factory = GetOrCreateCompiledConstructor(ScriptType);
+                    Func<object> factory = GetOrCreateCompiledConstructor(ScriptType);
                     _instance =
                         factory()
                         ?? throw new InvalidOperationException(
@@ -122,6 +124,7 @@ public class ScriptCacheEntry
                         ex
                     );
                 }
+            }
 
             return _instance;
         }
@@ -136,20 +139,24 @@ public class ScriptCacheEntry
     private static Func<object> GetOrCreateCompiledConstructor(Type type)
     {
         // Fast path: check if already cached
-        if (CompiledConstructors.TryGetValue(type, out var ctor))
+        if (CompiledConstructors.TryGetValue(type, out Func<object>? ctor))
+        {
             return ctor;
+        }
 
         lock (_cacheLock)
         {
             // Double-check after acquiring lock
             if (CompiledConstructors.TryGetValue(type, out ctor))
+            {
                 return ctor;
+            }
 
             // Evict oldest entry if at capacity (simple FIFO eviction)
             // This prevents unbounded growth during hot-reload cycles
             if (CompiledConstructors.Count >= MaxCompiledConstructors)
             {
-                var firstKey = CompiledConstructors.Keys.First();
+                Type firstKey = CompiledConstructors.Keys.First();
                 CompiledConstructors.TryRemove(firstKey, out _);
             }
 
@@ -170,25 +177,27 @@ public class ScriptCacheEntry
     private static Func<object> CreateCompiledConstructor(Type type)
     {
         // Find parameterless constructor
-        var constructor = type.GetConstructor(Type.EmptyTypes);
+        ConstructorInfo? constructor = type.GetConstructor(Type.EmptyTypes);
 
         if (constructor == null)
         {
             // Fallback: Try to find any public constructor with parameters
-            var constructors = type.GetConstructors();
+            ConstructorInfo[] constructors = type.GetConstructors();
             if (constructors.Length == 0)
+            {
                 throw new InvalidOperationException(
                     $"Type {type.Name} has no public constructors available for compiled instantiation"
                 );
+            }
 
             // Use first available constructor (may require parameters)
             constructor = constructors[0];
-            var parameters = constructor.GetParameters();
+            ParameterInfo[] parameters = constructor.GetParameters();
 
             if (parameters.Length > 0)
             {
                 // Create constructor call with default parameter values
-                var paramExpressions = parameters
+                ConstantExpression[] paramExpressions = parameters
                     .Select(p =>
                         Expression.Constant(
                             p.HasDefaultValue ? p.DefaultValue : GetDefaultValue(p.ParameterType),
@@ -197,7 +206,7 @@ public class ScriptCacheEntry
                     )
                     .ToArray();
 
-                var newExpression = Expression.New(constructor, paramExpressions);
+                NewExpression newExpression = Expression.New(constructor, paramExpressions);
                 var lambda = Expression.Lambda<Func<object>>(
                     Expression.Convert(newExpression, typeof(object))
                 );
@@ -206,7 +215,7 @@ public class ScriptCacheEntry
         }
 
         // Standard parameterless constructor compilation
-        var ctorExpression = Expression.New(constructor);
+        NewExpression ctorExpression = Expression.New(constructor);
         var compiledLambda = Expression.Lambda<Func<object>>(
             Expression.Convert(ctorExpression, typeof(object))
         );

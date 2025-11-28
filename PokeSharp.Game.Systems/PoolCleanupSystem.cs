@@ -58,19 +58,24 @@ public class PoolCleanupSystem : SystemBase, IUpdateSystem
         // Throttle checks to avoid overhead
         _timeSinceLastCheck += deltaTime;
         if (_timeSinceLastCheck < _checkInterval)
+        {
             return;
+        }
 
         _timeSinceLastCheck = 0f;
 
         // Get pool statistics
-        var stats = _poolManager.GetStatistics();
+        AggregatePoolStatistics stats = _poolManager.GetStatistics();
 
         // Monitor each pool for health issues
-        foreach (var (poolName, poolStats) in stats.PerPoolStats)
+        foreach ((string poolName, PoolStatistics poolStats) in stats.PerPoolStats)
+        {
             MonitorPoolHealth(poolName, poolStats);
+        }
 
         // Log overall statistics (debug only)
         if (_logger?.IsEnabled(LogLevel.Debug) ?? false)
+        {
             _logger.LogDebug(
                 "Pool Manager Stats: {PoolCount} pools, {ActiveCount} active entities, "
                     + "{AvailableCount} available, {ReuseRate:P2} reuse rate",
@@ -79,6 +84,7 @@ public class PoolCleanupSystem : SystemBase, IUpdateSystem
                 stats.TotalAvailable,
                 stats.OverallReuseRate
             );
+        }
     }
 
     /// <summary>
@@ -94,15 +100,21 @@ public class PoolCleanupSystem : SystemBase, IUpdateSystem
     )
     {
         if (warningThreshold <= 0f || warningThreshold > 1f)
+        {
             throw new ArgumentException("Warning threshold must be between 0 and 1");
+        }
 
         if (criticalThreshold <= warningThreshold || criticalThreshold > 1f)
+        {
             throw new ArgumentException(
                 "Critical threshold must be between warning threshold and 1"
             );
+        }
 
         if (checkInterval <= 0f)
+        {
             throw new ArgumentException("Check interval must be positive");
+        }
 
         _warningThreshold = warningThreshold;
         _criticalThreshold = criticalThreshold;
@@ -112,8 +124,8 @@ public class PoolCleanupSystem : SystemBase, IUpdateSystem
     private void MonitorPoolHealth(string poolName, PoolStatistics stats)
     {
         // Calculate usage percentage
-        var usagePercent = stats.UsagePercent;
-        var autoResizeNote = stats.AutoResizeEnabled
+        float usagePercent = stats.UsagePercent;
+        string autoResizeNote = stats.AutoResizeEnabled
             ? " (auto-resize enabled, will expand if needed)"
             : " Consider increasing pool size or optimizing entity lifecycle.";
 
@@ -150,6 +162,7 @@ public class PoolCleanupSystem : SystemBase, IUpdateSystem
         }
         // Warning: Pool getting full
         else if (usagePercent >= _warningThreshold)
+        {
             _logger?.LogWarning(
                 "Pool '{PoolName}' is {UsagePercent:P0} full "
                     + "({ActiveCount}/{MaxSize} entities active, {AvailableCount} available).{AutoResizeNote}",
@@ -160,9 +173,11 @@ public class PoolCleanupSystem : SystemBase, IUpdateSystem
                 stats.AvailableCount,
                 autoResizeNote
             );
+        }
 
         // Log performance metrics
         if (_logger?.IsEnabled(LogLevel.Trace) ?? false)
+        {
             _logger.LogTrace(
                 "Pool '{PoolName}': {ReuseRate:P2} reuse rate, "
                     + "{AcquireTime:F3}ms avg acquire time",
@@ -170,12 +185,14 @@ public class PoolCleanupSystem : SystemBase, IUpdateSystem
                 stats.ReuseRate,
                 stats.AverageAcquireTimeMs
             );
+        }
 
         // Detect potential memory leaks (entities not being released)
         if (stats.TotalReleases > 0)
         {
-            var releaseRatio = (float)stats.TotalReleases / stats.TotalAcquisitions;
+            float releaseRatio = (float)stats.TotalReleases / stats.TotalAcquisitions;
             if (releaseRatio < 0.8f && stats.TotalAcquisitions > 100)
+            {
                 _logger?.LogWarning(
                     "Pool '{PoolName}' has low release rate ({ReleaseRatio:P0}). "
                         + "Possible memory leak: {Acquisitions} acquisitions but only {Releases} releases.",
@@ -184,6 +201,7 @@ public class PoolCleanupSystem : SystemBase, IUpdateSystem
                     stats.TotalAcquisitions,
                     stats.TotalReleases
                 );
+            }
         }
     }
 

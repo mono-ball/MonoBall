@@ -1,18 +1,18 @@
-using System;
-using System.Linq;
-using System.Threading.Tasks;
+using PokeSharp.Engine.UI.Debug.Core;
 
 namespace PokeSharp.Engine.Debug.Commands.BuiltIn;
 
 /// <summary>
-/// Manages command aliases and macros.
+///     Manages command aliases and macros.
 /// </summary>
 [ConsoleCommand("alias", "Manage command aliases")]
 public class AliasCommand : IConsoleCommand
 {
     public string Name => "alias";
     public string Description => "Manage command aliases";
-    public string Usage => @"alias                      - List all aliases
+
+    public string Usage =>
+        @"alias                      - List all aliases
 alias <name>=<command>     - Create new alias
 alias remove <name>        - Remove an alias
 
@@ -23,7 +23,7 @@ Examples:
 
     public Task ExecuteAsync(IConsoleContext context, string[] args)
     {
-        var theme = context.Theme;
+        UITheme theme = context.Theme;
 
         // No args = list aliases
         if (args.Length == 0)
@@ -42,7 +42,7 @@ Examples:
                 return Task.CompletedTask;
             }
 
-            var name = args[1].Trim();
+            string name = args[1].Trim();
             if (context.RemoveAlias(name))
             {
                 context.WriteLine($"Alias '{name}' removed", theme.Success);
@@ -51,12 +51,13 @@ Examples:
             {
                 context.WriteLine($"Alias '{name}' not found.", theme.Error);
             }
+
             return Task.CompletedTask;
         }
 
         // Otherwise, treat as alias definition
-        var fullAlias = string.Join(" ", args);
-        var parts = fullAlias.Split('=', 2);
+        string fullAlias = string.Join(" ", args);
+        string[] parts = fullAlias.Split('=', 2);
 
         if (parts.Length != 2)
         {
@@ -66,8 +67,8 @@ Examples:
             return Task.CompletedTask;
         }
 
-        var aliasName = parts[0].Trim();
-        var command = parts[1].Trim();
+        string aliasName = parts[0].Trim();
+        string command = parts[1].Trim();
 
         if (context.DefineAlias(aliasName, command))
         {
@@ -75,7 +76,10 @@ Examples:
         }
         else
         {
-            context.WriteLine($"Failed to define alias '{aliasName}'. Invalid name or command.", theme.Error);
+            context.WriteLine(
+                $"Failed to define alias '{aliasName}'. Invalid name or command.",
+                theme.Error
+            );
         }
 
         return Task.CompletedTask;
@@ -83,29 +87,44 @@ Examples:
 
     private void ListAliases(IConsoleContext context)
     {
-        var theme = context.Theme;
-        var aliases = context.GetAllAliases();
+        UITheme theme = context.Theme;
+        IReadOnlyDictionary<string, string> aliases = context.GetAllAliases();
 
-        context.WriteLine("══════════════════════════════════════════════════════════════════", theme.Success);
+        context.WriteLine(
+            "══════════════════════════════════════════════════════════════════",
+            theme.Success
+        );
         context.WriteLine($"  DEFINED ALIASES ({aliases.Count} total)", theme.Success);
-        context.WriteLine("══════════════════════════════════════════════════════════════════", theme.Success);
+        context.WriteLine(
+            "══════════════════════════════════════════════════════════════════",
+            theme.Success
+        );
 
         if (aliases.Count == 0)
         {
-            context.WriteLine("  No aliases defined. Use 'alias <name>=<command>' to create one.", theme.TextSecondary);
+            context.WriteLine(
+                "  No aliases defined. Use 'alias <name>=<command>' to create one.",
+                theme.TextSecondary
+            );
         }
         else
         {
-            foreach (var alias in aliases.OrderBy(a => a.Key))
+            foreach (KeyValuePair<string, string> alias in aliases.OrderBy(a => a.Key))
             {
-                var aliasName = alias.Key.PadRight(15);
-                var isMacro = alias.Value.Contains("$");
-                var macroHint = isMacro ? " (macro)" : "";
-                context.WriteLine($"  {aliasName} = {alias.Value}{macroHint}", isMacro ? theme.SyntaxString : theme.TextPrimary);
+                string aliasName = alias.Key.PadRight(15);
+                bool isMacro = alias.Value.Contains("$");
+                string macroHint = isMacro ? " (macro)" : "";
+                context.WriteLine(
+                    $"  {aliasName} = {alias.Value}{macroHint}",
+                    isMacro ? theme.SyntaxString : theme.TextPrimary
+                );
             }
         }
 
         context.WriteLine("");
-        context.WriteLine("TIP: Use 'alias <name>=<command>' to create, 'alias remove <name>' to delete", theme.Success);
+        context.WriteLine(
+            "TIP: Use 'alias <name>=<command>' to create, 'alias remove <name>' to delete",
+            theme.Success
+        );
     }
 }

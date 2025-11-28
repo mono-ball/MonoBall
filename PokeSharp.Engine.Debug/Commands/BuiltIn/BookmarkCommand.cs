@@ -1,18 +1,18 @@
-using System;
-using System.Linq;
-using System.Threading.Tasks;
+using PokeSharp.Engine.UI.Debug.Core;
 
 namespace PokeSharp.Engine.Debug.Commands.BuiltIn;
 
 /// <summary>
-/// Manages bookmarked commands that can be executed via F1-F12 keys.
+///     Manages bookmarked commands that can be executed via F1-F12 keys.
 /// </summary>
 [ConsoleCommand("bookmark", "Manage bookmarked commands")]
 public class BookmarkCommand : IConsoleCommand
 {
     public string Name => "bookmark";
     public string Description => "Manage bookmarked commands";
-    public string Usage => @"bookmark                   - List all bookmarks
+
+    public string Usage =>
+        @"bookmark                   - List all bookmarks
 bookmark <F1-F12> <cmd>    - Bookmark command to F-key
 bookmark remove <F1-F12>   - Remove bookmark
 bookmark clear             - Clear all bookmarks
@@ -28,7 +28,7 @@ Examples:
 
     public Task ExecuteAsync(IConsoleContext context, string[] args)
     {
-        var theme = context.Theme;
+        UITheme theme = context.Theme;
 
         // No args = list bookmarks
         if (args.Length == 0)
@@ -37,7 +37,7 @@ Examples:
             return Task.CompletedTask;
         }
 
-        var subCommand = args[0].ToLower();
+        string subCommand = args[0].ToLower();
 
         switch (subCommand)
         {
@@ -48,6 +48,7 @@ Examples:
                     context.WriteLine("Example: bookmark remove F5", theme.TextSecondary);
                     return Task.CompletedTask;
                 }
+
                 RemoveBookmark(context, args[1]);
                 break;
 
@@ -68,12 +69,15 @@ Examples:
                 if (args.Length < 2)
                 {
                     context.WriteLine("Usage: bookmark <F1-F12> <command>", theme.Warning);
-                    context.WriteLine("Example: bookmark F5 Player.GetMoney()", theme.TextSecondary);
+                    context.WriteLine(
+                        "Example: bookmark F5 Player.GetMoney()",
+                        theme.TextSecondary
+                    );
                     return Task.CompletedTask;
                 }
 
-                var fkey = args[0];
-                var command = string.Join(" ", args.Skip(1));
+                string fkey = args[0];
+                string command = string.Join(" ", args.Skip(1));
                 AddBookmark(context, fkey, command);
                 break;
         }
@@ -83,35 +87,50 @@ Examples:
 
     private void ListBookmarks(IConsoleContext context)
     {
-        var theme = context.Theme;
-        var bookmarks = context.GetAllBookmarks();
+        UITheme theme = context.Theme;
+        IReadOnlyDictionary<int, string> bookmarks = context.GetAllBookmarks();
 
-        context.WriteLine("══════════════════════════════════════════════════════════════════", theme.Success);
+        context.WriteLine(
+            "══════════════════════════════════════════════════════════════════",
+            theme.Success
+        );
         context.WriteLine($"  BOOKMARKED COMMANDS ({bookmarks.Count} total)", theme.Success);
-        context.WriteLine("══════════════════════════════════════════════════════════════════", theme.Success);
+        context.WriteLine(
+            "══════════════════════════════════════════════════════════════════",
+            theme.Success
+        );
 
         if (bookmarks.Count == 0)
         {
-            context.WriteLine("  No bookmarks defined. Use 'bookmark <F1-F12> <command>' to create one.", theme.TextSecondary);
+            context.WriteLine(
+                "  No bookmarks defined. Use 'bookmark <F1-F12> <command>' to create one.",
+                theme.TextSecondary
+            );
         }
         else
         {
-            foreach (var bookmark in bookmarks.OrderBy(b => b.Key))
+            foreach (KeyValuePair<int, string> bookmark in bookmarks.OrderBy(b => b.Key))
             {
-                var fkey = $"F{bookmark.Key}".PadRight(5);
-                var command = bookmark.Value.Length > 55 ? bookmark.Value.Substring(0, 52) + "..." : bookmark.Value;
+                string fkey = $"F{bookmark.Key}".PadRight(5);
+                string command =
+                    bookmark.Value.Length > 55
+                        ? bookmark.Value.Substring(0, 52) + "..."
+                        : bookmark.Value;
                 context.WriteLine($"  {fkey} -> {command}", theme.Info);
             }
         }
 
         context.WriteLine("");
         context.WriteLine("TIP: Press the F-key to execute the bookmarked command", theme.Success);
-        context.WriteLine("     Use 'bookmark <F-key> <command>' to create or update", theme.Success);
+        context.WriteLine(
+            "     Use 'bookmark <F-key> <command>' to create or update",
+            theme.Success
+        );
     }
 
     private void AddBookmark(IConsoleContext context, string fkeyStr, string command)
     {
-        var theme = context.Theme;
+        UITheme theme = context.Theme;
 
         // Parse F-key (e.g., "F5" -> 5, or "5" -> 5)
         if (!TryParseFKey(fkeyStr, out int fkeyNumber))
@@ -135,7 +154,7 @@ Examples:
 
     private void RemoveBookmark(IConsoleContext context, string fkeyStr)
     {
-        var theme = context.Theme;
+        UITheme theme = context.Theme;
 
         if (!TryParseFKey(fkeyStr, out int fkeyNumber))
         {
@@ -155,7 +174,7 @@ Examples:
 
     private void ClearBookmarks(IConsoleContext context)
     {
-        var theme = context.Theme;
+        UITheme theme = context.Theme;
 
         context.ClearAllBookmarks();
         context.WriteLine("All bookmarks cleared", theme.Success);
@@ -163,11 +182,11 @@ Examples:
 
     private void SaveBookmarks(IConsoleContext context)
     {
-        var theme = context.Theme;
+        UITheme theme = context.Theme;
 
         if (context.SaveBookmarks())
         {
-            var count = context.GetAllBookmarks().Count;
+            int count = context.GetAllBookmarks().Count;
             context.WriteLine($"Saved {count} bookmark(s) to disk", theme.Success);
         }
         else
@@ -178,7 +197,7 @@ Examples:
 
     private void LoadBookmarks(IConsoleContext context)
     {
-        var theme = context.Theme;
+        UITheme theme = context.Theme;
 
         int count = context.LoadBookmarks();
         if (count > 0)
@@ -211,4 +230,3 @@ Examples:
         return false;
     }
 }
-

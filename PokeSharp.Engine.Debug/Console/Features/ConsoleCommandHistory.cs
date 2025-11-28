@@ -1,7 +1,7 @@
 namespace PokeSharp.Engine.Debug.Console.Features;
 
 /// <summary>
-/// Represents a single history entry with metadata.
+///     Represents a single history entry with metadata.
 /// </summary>
 public record HistoryEntry
 {
@@ -17,20 +17,26 @@ public record HistoryEntry
 /// </summary>
 public class ConsoleCommandHistory
 {
+    private const int MaxHistorySize = 100; // Maximum command history entries
     private readonly List<HistoryEntry> _history = new();
     private int _currentIndex = -1;
-    private const int MaxHistorySize = 100; // Maximum command history entries
 
     /// <summary>
-    /// Loads history from a list (used for persistence).
+    ///     Gets total number of history entries.
+    /// </summary>
+    public int Count => _history.Count;
+
+    /// <summary>
+    ///     Loads history from a list (used for persistence).
     /// </summary>
     public void LoadHistory(IEnumerable<string> commands)
     {
         _history.Clear();
-        foreach (var command in commands.Take(MaxHistorySize))
+        foreach (string command in commands.Take(MaxHistorySize))
         {
             _history.Add(new HistoryEntry { Command = command, Timestamp = DateTime.Now });
         }
+
         _currentIndex = _history.Count;
     }
 
@@ -41,10 +47,12 @@ public class ConsoleCommandHistory
     public void Add(string command)
     {
         if (string.IsNullOrWhiteSpace(command))
+        {
             return;
+        }
 
         // Check if command already exists in history (not just consecutive)
-        var existing = _history.FirstOrDefault(e => e.Command == command);
+        HistoryEntry? existing = _history.FirstOrDefault(e => e.Command == command);
         if (existing != null)
         {
             // Update usage count and timestamp
@@ -62,7 +70,9 @@ public class ConsoleCommandHistory
 
             // Limit history size
             if (_history.Count > MaxHistorySize)
+            {
                 _history.RemoveAt(0);
+            }
         }
 
         // Reset navigation index
@@ -76,7 +86,9 @@ public class ConsoleCommandHistory
     public string? NavigateUp()
     {
         if (_history.Count == 0)
+        {
             return null;
+        }
 
         _currentIndex = Math.Max(0, _currentIndex - 1);
         return _history[_currentIndex].Command;
@@ -89,13 +101,17 @@ public class ConsoleCommandHistory
     public string? NavigateDown()
     {
         if (_history.Count == 0)
+        {
             return null;
+        }
 
         _currentIndex = Math.Min(_history.Count, _currentIndex + 1);
 
         // Return empty string if we're past the last command
         if (_currentIndex >= _history.Count)
+        {
             return string.Empty;
+        }
 
         return _history[_currentIndex].Command;
     }
@@ -130,7 +146,9 @@ public class ConsoleCommandHistory
     public IEnumerable<HistoryEntry> Search(string searchText)
     {
         if (string.IsNullOrWhiteSpace(searchText))
+        {
             return _history.AsEnumerable().Reverse();
+        }
 
         return _history
             .Where(e => e.Command.Contains(searchText, StringComparison.OrdinalIgnoreCase))
@@ -153,9 +171,7 @@ public class ConsoleCommandHistory
     /// </summary>
     public IEnumerable<HistoryEntry> GetRecent(int count = 10)
     {
-        return _history
-            .OrderByDescending(e => e.LastUsed)
-            .Take(count);
+        return _history.OrderByDescending(e => e.LastUsed).Take(count);
     }
 
     /// <summary>
@@ -166,10 +182,4 @@ public class ConsoleCommandHistory
         _history.Clear();
         _currentIndex = -1;
     }
-
-    /// <summary>
-    /// Gets total number of history entries.
-    /// </summary>
-    public int Count => _history.Count;
 }
-

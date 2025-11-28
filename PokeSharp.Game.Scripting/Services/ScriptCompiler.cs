@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
@@ -44,14 +45,14 @@ public class ScriptCompiler
         try
         {
             // Create script from source code
-            var script = CSharpScript.Create<object>(scriptCode, _defaultOptions);
+            Script<object>? script = CSharpScript.Create<object>(scriptCode, _defaultOptions);
 
             // Compile the script
-            var diagnostics = script.Compile();
+            ImmutableArray<Diagnostic> diagnostics = script.Compile();
 
             // Check for errors (avoid LINQ allocation by iterating directly)
-            var hasErrors = false;
-            foreach (var diagnostic in diagnostics)
+            bool hasErrors = false;
+            foreach (Diagnostic diagnostic in diagnostics)
             {
                 if (diagnostic.Severity == DiagnosticSeverity.Error)
                 {
@@ -60,12 +61,15 @@ public class ScriptCompiler
                         _logger.LogError("Script compilation failed for {Path}:", scriptPath);
                         hasErrors = true;
                     }
+
                     _logger.LogError("  {Message}", diagnostic.GetMessage());
                 }
             }
 
             if (hasErrors)
+            {
                 return null;
+            }
 
             return script;
         }
@@ -98,8 +102,8 @@ public class ScriptCompiler
         try
         {
             // Execute script to get the instance
-            var result = await script.RunAsync();
-            var instance = result.ReturnValue;
+            ScriptState<object>? result = await script.RunAsync();
+            object? instance = result.ReturnValue;
 
             if (instance == null)
             {
@@ -131,4 +135,3 @@ public class ScriptCompiler
         }
     }
 }
-

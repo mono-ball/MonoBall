@@ -21,35 +21,45 @@ public class InteractionMapper : IEntityPropertyMapper<Interaction>
     public Interaction Map(Dictionary<string, object> properties)
     {
         if (!CanMap(properties))
+        {
             throw new InvalidOperationException("Cannot map properties to Interaction component");
+        }
 
         var interaction = new Interaction();
 
         // Get interaction range
-        if (properties.TryGetValue("interaction_range", out var rangeValue))
+        if (properties.TryGetValue("interaction_range", out object? rangeValue))
+        {
             interaction.InteractionRange = rangeValue switch
             {
                 int i => i,
-                string s when int.TryParse(s, out var result) => result,
+                string s when int.TryParse(s, out int result) => result,
                 _ => 1,
             };
+        }
 
         // Get dialogue script
-        if (properties.TryGetValue("dialogue", out var dialogueValue))
+        if (properties.TryGetValue("dialogue", out object? dialogueValue))
+        {
             interaction.DialogueScript = dialogueValue?.ToString();
+        }
 
         // Get interaction event
-        if (properties.TryGetValue("on_interact", out var eventValue))
+        if (properties.TryGetValue("on_interact", out object? eventValue))
+        {
             interaction.InteractionEvent = eventValue?.ToString();
+        }
 
         // Check if facing is required (default true)
-        if (properties.TryGetValue("requires_facing", out var facingValue))
+        if (properties.TryGetValue("requires_facing", out object? facingValue))
+        {
             interaction.RequiresFacing = facingValue switch
             {
                 bool b => b,
-                string s => !bool.TryParse(s, out var result) || result, // Default true
+                string s => !bool.TryParse(s, out bool result) || result, // Default true
                 _ => true,
             };
+        }
 
         return interaction;
     }
@@ -58,7 +68,7 @@ public class InteractionMapper : IEntityPropertyMapper<Interaction>
     {
         if (CanMap(properties))
         {
-            var interaction = Map(properties);
+            Interaction interaction = Map(properties);
             world.Add(entity, interaction);
         }
     }

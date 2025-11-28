@@ -46,4 +46,3 @@
 // Silence is golden - this script runs silently unless you Print() something
 // Uncomment the line below to confirm startup script is running:
 // Print("✅ Startup script loaded!");
-

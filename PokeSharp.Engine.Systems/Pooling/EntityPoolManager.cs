@@ -64,17 +64,21 @@ public class EntityPoolManager
         lock (_lock)
         {
             if (_pools.ContainsKey(poolName))
+            {
                 throw new ArgumentException($"Pool '{poolName}' already registered");
+            }
 
             var pool = new EntityPool(_world, poolName, initialSize, maxSize)
             {
                 AutoResize = autoResize,
                 GrowthFactor = growthFactor,
-                AbsoluteMaxSize = absoluteMaxSize
+                AbsoluteMaxSize = absoluteMaxSize,
             };
 
             if (warmup)
+            {
                 pool.Warmup(initialSize);
+            }
 
             _pools[poolName] = pool;
         }
@@ -102,8 +106,10 @@ public class EntityPoolManager
 
         lock (_lock)
         {
-            if (!_pools.TryGetValue(poolName, out var pool))
+            if (!_pools.TryGetValue(poolName, out EntityPool? pool))
+            {
                 throw new KeyNotFoundException($"Pool '{poolName}' not found");
+            }
 
             return pool;
         }
@@ -129,7 +135,7 @@ public class EntityPoolManager
     /// <returns>Entity from the pool</returns>
     public Entity Acquire(string poolName = "default")
     {
-        var pool = GetPool(poolName);
+        EntityPool pool = GetPool(poolName);
         return pool.Acquire();
     }
 
@@ -145,12 +151,16 @@ public class EntityPoolManager
         if (string.IsNullOrWhiteSpace(poolName))
         {
             if (entity.Has<Pooled>())
+            {
                 poolName = entity.Get<Pooled>().PoolName;
+            }
             else
+            {
                 poolName = "default";
+            }
         }
 
-        var pool = GetPool(poolName);
+        EntityPool pool = GetPool(poolName);
         pool.Release(entity);
     }
 
@@ -162,13 +172,13 @@ public class EntityPoolManager
         lock (_lock)
         {
             var perPoolStats = new Dictionary<string, PoolStatistics>();
-            var totalAvailable = 0;
-            var totalActive = 0;
-            var totalCreated = 0;
+            int totalAvailable = 0;
+            int totalActive = 0;
+            int totalCreated = 0;
 
-            foreach (var (name, pool) in _pools)
+            foreach ((string name, EntityPool pool) in _pools)
             {
-                var stats = pool.GetStatistics();
+                PoolStatistics stats = pool.GetStatistics();
                 perPoolStats[name] = stats;
                 totalAvailable += stats.AvailableCount;
                 totalActive += stats.ActiveCount;
@@ -193,8 +203,10 @@ public class EntityPoolManager
     {
         lock (_lock)
         {
-            foreach (var pool in _pools.Values)
+            foreach (EntityPool pool in _pools.Values)
+            {
                 pool.Clear();
+            }
         }
     }
 
@@ -257,5 +269,5 @@ public struct AggregatePoolStatistics
     ///     Overall reuse rate across all pools.
     /// </summary>
     public float OverallReuseRate =>
-        TotalCreated > 0 ? 1.0f - (float)TotalCreated / (TotalActive + TotalAvailable) : 0f;
+        TotalCreated > 0 ? 1.0f - ((float)TotalCreated / (TotalActive + TotalAvailable)) : 0f;
 }

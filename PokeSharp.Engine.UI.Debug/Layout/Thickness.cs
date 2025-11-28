@@ -1,8 +1,8 @@
 namespace PokeSharp.Engine.UI.Debug.Layout;
 
 /// <summary>
-/// Represents the thickness of a frame around a rectangle (margin or padding).
-/// Similar to WPF/XAML Thickness but simpler.
+///     Represents the thickness of a frame around a rectangle (margin or padding).
+///     Similar to WPF/XAML Thickness but simpler.
 /// </summary>
 public readonly struct Thickness : IEquatable<Thickness>
 {
@@ -57,7 +57,10 @@ public readonly struct Thickness : IEquatable<Thickness>
 
     public bool Equals(Thickness other)
     {
-        return Left == other.Left && Top == other.Top && Right == other.Right && Bottom == other.Bottom;
+        return Left == other.Left
+            && Top == other.Top
+            && Right == other.Right
+            && Bottom == other.Bottom;
     }
 
     public override bool Equals(object? obj)
@@ -70,17 +73,29 @@ public readonly struct Thickness : IEquatable<Thickness>
         return HashCode.Combine(Left, Top, Right, Bottom);
     }
 
-    public static bool operator ==(Thickness left, Thickness right) => left.Equals(right);
-    public static bool operator !=(Thickness left, Thickness right) => !left.Equals(right);
+    public static bool operator ==(Thickness left, Thickness right)
+    {
+        return left.Equals(right);
+    }
+
+    public static bool operator !=(Thickness left, Thickness right)
+    {
+        return !left.Equals(right);
+    }
 
     /// <summary>Implicit conversion from float (uniform thickness)</summary>
-    public static implicit operator Thickness(float uniform) => new(uniform);
+    public static implicit operator Thickness(float uniform)
+    {
+        return new Thickness(uniform);
+    }
 
     public override string ToString()
     {
         if (IsUniform)
+        {
             return $"Thickness({Left})";
+        }
+
         return $"Thickness({Left}, {Top}, {Right}, {Bottom})";
     }
 }
-

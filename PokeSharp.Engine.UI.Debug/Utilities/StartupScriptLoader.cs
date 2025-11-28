@@ -1,10 +1,7 @@
-using System;
-using System.IO;
-
 namespace PokeSharp.Engine.UI.Debug.Utilities;
 
 /// <summary>
-/// Handles loading and execution of console startup scripts.
+///     Handles loading and execution of console startup scripts.
 /// </summary>
 public static class StartupScriptLoader
 {
@@ -13,8 +10,10 @@ public static class StartupScriptLoader
     static StartupScriptLoader()
     {
         // Save to user's local app data directory (same as history)
-        var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-        var pokeSharpDataPath = Path.Combine(appDataPath, "PokeSharp");
+        string appDataPath = Environment.GetFolderPath(
+            Environment.SpecialFolder.LocalApplicationData
+        );
+        string pokeSharpDataPath = Path.Combine(appDataPath, "PokeSharp");
 
         // Create directory if it doesn't exist
         Directory.CreateDirectory(pokeSharpDataPath);
@@ -23,7 +22,7 @@ public static class StartupScriptLoader
     }
 
     /// <summary>
-    /// Checks if a startup script exists.
+    ///     Checks if a startup script exists.
     /// </summary>
     public static bool StartupScriptExists()
     {
@@ -31,7 +30,7 @@ public static class StartupScriptLoader
     }
 
     /// <summary>
-    /// Loads the startup script content if it exists.
+    ///     Loads the startup script content if it exists.
     /// </summary>
     /// <returns>The script content, or null if the file doesn't exist or can't be read.</returns>
     public static string? LoadStartupScript()
@@ -39,7 +38,9 @@ public static class StartupScriptLoader
         try
         {
             if (!File.Exists(StartupScriptPath))
+            {
                 return null;
+            }
 
             return File.ReadAllText(StartupScriptPath);
         }
@@ -51,7 +52,7 @@ public static class StartupScriptLoader
     }
 
     /// <summary>
-    /// Saves startup script content to disk.
+    ///     Saves startup script content to disk.
     /// </summary>
     /// <param name="content">The script content to save.</param>
     public static bool SaveStartupScript(string content)
@@ -69,11 +70,12 @@ public static class StartupScriptLoader
     }
 
     /// <summary>
-    /// Creates a default startup script with helpful examples.
+    ///     Creates a default startup script with helpful examples.
     /// </summary>
     public static void CreateDefaultStartupScript()
     {
-        var defaultScript = @"// PokeSharp Console Startup Script
+        string defaultScript =
+            @"// PokeSharp Console Startup Script
 // This script runs automatically when the console opens.
 // You can define helper functions, variables, or run initialization code here.
 
@@ -95,7 +97,7 @@ Print(""Type 'Hello(""""World"""")' to test the helper function."");
     }
 
     /// <summary>
-    /// Deletes the startup script if it exists.
+    ///     Deletes the startup script if it exists.
     /// </summary>
     public static bool DeleteStartupScript()
     {
@@ -105,6 +107,7 @@ Print(""Type 'Hello(""""World"""")' to test the helper function."");
             {
                 File.Delete(StartupScriptPath);
             }
+
             return true;
         }
         catch (Exception)
@@ -115,11 +118,10 @@ Print(""Type 'Hello(""""World"""")' to test the helper function."");
     }
 
     /// <summary>
-    /// Gets the path to the startup script file for debugging purposes.
+    ///     Gets the path to the startup script file for debugging purposes.
     /// </summary>
-    public static string GetStartupScriptPath() => StartupScriptPath;
+    public static string GetStartupScriptPath()
+    {
+        return StartupScriptPath;
+    }
 }
-
-
-
-

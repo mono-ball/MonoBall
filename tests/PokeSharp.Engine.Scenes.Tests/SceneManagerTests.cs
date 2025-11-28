@@ -3,7 +3,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Moq;
-using PokeSharp.Engine.Scenes;
 using Xunit;
 
 namespace PokeSharp.Engine.Scenes.Tests;
@@ -43,9 +42,9 @@ public class SceneManagerTests : IDisposable
             // This is a known limitation of XNA/MonoGame in CI/headless environments
             // For now, we'll use a mock/null pattern or skip tests that require graphics
             throw new InvalidOperationException(
-                "GraphicsDevice cannot be created in this environment. " +
-                "GraphicsAdapter is not available (typically in headless CI environments). " +
-                "Consider using mock GraphicsDevice or marking tests as [Fact(Skip = \"Requires graphics adapter\")]"
+                "GraphicsDevice cannot be created in this environment. "
+                    + "GraphicsAdapter is not available (typically in headless CI environments). "
+                    + "Consider using mock GraphicsDevice or marking tests as [Fact(Skip = \"Requires graphics adapter\")]"
             );
         }
     }
@@ -77,8 +76,8 @@ public class SceneManagerTests : IDisposable
     public void ChangeScene_ShouldQueueSceneChange()
     {
         // Arrange
-        var manager = CreateSceneManager();
-        var scene = CreateMockScene("TestScene");
+        SceneManager manager = CreateSceneManager();
+        Mock<IScene> scene = CreateMockScene("TestScene");
 
         // Act
         manager.ChangeScene(scene.Object);
@@ -91,8 +90,8 @@ public class SceneManagerTests : IDisposable
     public void ChangeScene_ShouldTransitionOnNextUpdate()
     {
         // Arrange
-        var manager = CreateSceneManager();
-        var scene = CreateMockScene("TestScene");
+        SceneManager manager = CreateSceneManager();
+        Mock<IScene> scene = CreateMockScene("TestScene");
         var gameTime = new GameTime();
 
         // Act
@@ -109,9 +108,9 @@ public class SceneManagerTests : IDisposable
     public void ChangeScene_ShouldDisposePreviousScene()
     {
         // Arrange
-        var manager = CreateSceneManager();
-        var scene1 = CreateMockScene("Scene1");
-        var scene2 = CreateMockScene("Scene2");
+        SceneManager manager = CreateSceneManager();
+        Mock<IScene> scene1 = CreateMockScene("Scene1");
+        Mock<IScene> scene2 = CreateMockScene("Scene2");
         var gameTime = new GameTime();
 
         // Act
@@ -129,9 +128,9 @@ public class SceneManagerTests : IDisposable
     public void PushScene_ShouldAddToStack()
     {
         // Arrange
-        var manager = CreateSceneManager();
-        var baseScene = CreateMockScene("BaseScene");
-        var overlayScene = CreateMockScene("OverlayScene");
+        SceneManager manager = CreateSceneManager();
+        Mock<IScene> baseScene = CreateMockScene("BaseScene");
+        Mock<IScene> overlayScene = CreateMockScene("OverlayScene");
         var gameTime = new GameTime();
 
         // Act
@@ -150,9 +149,9 @@ public class SceneManagerTests : IDisposable
     public void PopScene_ShouldRemoveFromStack()
     {
         // Arrange
-        var manager = CreateSceneManager();
-        var baseScene = CreateMockScene("BaseScene");
-        var overlayScene = CreateMockScene("OverlayScene");
+        SceneManager manager = CreateSceneManager();
+        Mock<IScene> baseScene = CreateMockScene("BaseScene");
+        Mock<IScene> overlayScene = CreateMockScene("OverlayScene");
         var gameTime = new GameTime();
 
         // Act
@@ -172,8 +171,8 @@ public class SceneManagerTests : IDisposable
     public void Update_ShouldUpdateCurrentScene()
     {
         // Arrange
-        var manager = CreateSceneManager();
-        var scene = CreateMockScene("TestScene");
+        SceneManager manager = CreateSceneManager();
+        Mock<IScene> scene = CreateMockScene("TestScene");
         var gameTime = new GameTime();
 
         // Act
@@ -189,8 +188,8 @@ public class SceneManagerTests : IDisposable
     public void Draw_ShouldDrawCurrentScene()
     {
         // Arrange
-        var manager = CreateSceneManager();
-        var scene = CreateMockScene("TestScene");
+        SceneManager manager = CreateSceneManager();
+        Mock<IScene> scene = CreateMockScene("TestScene");
         var gameTime = new GameTime();
 
         // Act
@@ -202,4 +201,3 @@ public class SceneManagerTests : IDisposable
         scene.Verify(s => s.Draw(gameTime), Times.Once);
     }
 }
-

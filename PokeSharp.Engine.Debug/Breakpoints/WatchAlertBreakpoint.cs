@@ -3,8 +3,8 @@ using Microsoft.Extensions.Logging;
 namespace PokeSharp.Engine.Debug.Breakpoints;
 
 /// <summary>
-/// A breakpoint that triggers when a specific watch's alert condition is met.
-/// Uses polling via the alertChecker callback during evaluation.
+///     A breakpoint that triggers when a specific watch's alert condition is met.
+///     Uses polling via the alertChecker callback during evaluation.
 /// </summary>
 public class WatchAlertBreakpoint : IBreakpoint
 {
@@ -12,14 +12,12 @@ public class WatchAlertBreakpoint : IBreakpoint
     private readonly ILogger? _logger;
     private bool _lastAlertState;
 
-    public int Id { get; }
-    public BreakpointType Type => BreakpointType.WatchAlert;
-    public string WatchName { get; }
-    public string Description => $"on watch alert '{WatchName}'";
-    public bool IsEnabled { get; set; } = true;
-    public int HitCount { get; private set; }
-
-    public WatchAlertBreakpoint(int id, string watchName, Func<bool> alertChecker, ILogger? logger = null)
+    public WatchAlertBreakpoint(
+        int id,
+        string watchName,
+        Func<bool> alertChecker,
+        ILogger? logger = null
+    )
     {
         Id = id;
         WatchName = watchName ?? throw new ArgumentNullException(nameof(watchName));
@@ -27,18 +25,28 @@ public class WatchAlertBreakpoint : IBreakpoint
         _logger = logger;
     }
 
+    public string WatchName { get; }
+
+    public int Id { get; }
+    public BreakpointType Type => BreakpointType.WatchAlert;
+    public string Description => $"on watch alert '{WatchName}'";
+    public bool IsEnabled { get; set; } = true;
+    public int HitCount { get; private set; }
+
     public Task<bool> EvaluateAsync()
     {
         if (!IsEnabled)
+        {
             return Task.FromResult(false);
+        }
 
         // Poll the alert condition via callback
         try
         {
-            var isAlert = _alertChecker();
+            bool isAlert = _alertChecker();
 
             // Trigger on transition from false to true (edge-triggered)
-            var shouldTrigger = isAlert && !_lastAlertState;
+            bool shouldTrigger = isAlert && !_lastAlertState;
             _lastAlertState = isAlert;
 
             return Task.FromResult(shouldTrigger);
@@ -61,4 +69,3 @@ public class WatchAlertBreakpoint : IBreakpoint
         _lastAlertState = false;
     }
 }
-

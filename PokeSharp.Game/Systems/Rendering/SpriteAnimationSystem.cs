@@ -20,6 +20,7 @@ public class SpriteAnimationSystem : SystemBase, IUpdateSystem
     // Cache animation lookups by manifest to avoid repeated LINQ queries
     private readonly Dictionary<string, Dictionary<string, SpriteAnimationInfo>> _animationCache =
         new();
+
     private readonly ILogger<SpriteAnimationSystem>? _logger;
 
     // Cache manifests for performance (avoid repeated async loads)
@@ -47,7 +48,9 @@ public class SpriteAnimationSystem : SystemBase, IUpdateSystem
         EnsureInitialized();
 
         if (!Enabled)
+        {
             return;
+        }
 
         // Query all entities with Position, Sprite + Animation components
         world.Query(
@@ -55,7 +58,7 @@ public class SpriteAnimationSystem : SystemBase, IUpdateSystem
             (Entity entity, ref Position position, ref Sprite sprite, ref Animation anim) =>
             {
                 // Copy animation to avoid ref parameter in lambda
-                var animCopy = anim;
+                Animation animCopy = anim;
                 UpdateSpriteAnimation(ref sprite, ref animCopy, deltaTime);
                 anim = animCopy;
             }
@@ -70,14 +73,16 @@ public class SpriteAnimationSystem : SystemBase, IUpdateSystem
     private void UpdateSpriteAnimation(ref Sprite sprite, ref Animation animation, float deltaTime)
     {
         if (!animation.IsPlaying)
+        {
             return;
+        }
 
         // PERFORMANCE: Use cached ManifestKey instead of string interpolation
         // OLD: var manifestKey = $"{sprite.Category}/{sprite.SpriteName}"; (192-384 KB/sec allocations)
         // NEW: Zero allocations - key was cached during sprite creation
-        var manifestKey = sprite.ManifestKey;
+        string manifestKey = sprite.ManifestKey;
 
-        if (!_manifestCache.TryGetValue(manifestKey, out var manifest))
+        if (!_manifestCache.TryGetValue(manifestKey, out SpriteManifest? manifest))
         {
             // Load manifest from cache synchronously (cache populated during initialization)
             // CRITICAL FIX: Use category + name to avoid loading wrong sprite
@@ -97,18 +102,22 @@ public class SpriteAnimationSystem : SystemBase, IUpdateSystem
         }
 
         // Find the current animation in the manifest
-        var currentAnimName = animation.CurrentAnimation;
-        var animData = GetCachedAnimation(manifest, currentAnimName, manifestKey);
+        string currentAnimName = animation.CurrentAnimation;
+        SpriteAnimationInfo? animData = GetCachedAnimation(manifest, currentAnimName, manifestKey);
 
         if (animData == null)
+        {
             return;
+        }
 
         // Set flip from animation data
         sprite.FlipHorizontal = animData.FlipHorizontal;
 
         // Validate animation has frames
         if (animData.FrameIndices == null || animData.FrameIndices.Length == 0)
+        {
             return;
+        }
 
         // Update frame timer
         animation.FrameTimer += deltaTime;
@@ -145,14 +154,14 @@ public class SpriteAnimationSystem : SystemBase, IUpdateSystem
         }
 
         // Update sprite's current frame index from animation sequence
-        var frameIndexInSequence = animation.CurrentFrame % animData.FrameIndices.Length;
-        var frameIndexInSpriteSheet = animData.FrameIndices[frameIndexInSequence];
+        int frameIndexInSequence = animation.CurrentFrame % animData.FrameIndices.Length;
+        int frameIndexInSpriteSheet = animData.FrameIndices[frameIndexInSequence];
         sprite.CurrentFrame = frameIndexInSpriteSheet;
 
         // Update source rectangle from frame data
         if (frameIndexInSpriteSheet >= 0 && frameIndexInSpriteSheet < manifest.Frames.Count)
         {
-            var frame = manifest.Frames[frameIndexInSpriteSheet];
+            SpriteFrameInfo frame = manifest.Frames[frameIndexInSpriteSheet];
             sprite.SourceRect = new Rectangle(frame.X, frame.Y, frame.Width, frame.Height);
 
             // Set origin to bottom-left for grid alignment
@@ -171,16 +180,24 @@ public class SpriteAnimationSystem : SystemBase, IUpdateSystem
         string manifestKey
     )
     {
-        if (!_animationCache.TryGetValue(manifestKey, out var animDict))
+        if (
+            !_animationCache.TryGetValue(
+                manifestKey,
+                out Dictionary<string, SpriteAnimationInfo>? animDict
+            )
+        )
         {
             // Build lookup dictionary once per manifest
             animDict = new Dictionary<string, SpriteAnimationInfo>();
-            foreach (var anim in manifest.Animations)
+            foreach (SpriteAnimationInfo anim in manifest.Animations)
+            {
                 animDict[anim.Name] = anim;
+            }
+
             _animationCache[manifestKey] = animDict;
         }
 
-        animDict.TryGetValue(animName, out var result);
+        animDict.TryGetValue(animName, out SpriteAnimationInfo? result);
         return result;
     }
 
@@ -191,10 +208,12 @@ public class SpriteAnimationSystem : SystemBase, IUpdateSystem
     private static float GetFrameDuration(SpriteAnimationInfo animData, int frameIndex)
     {
         // Use per-frame durations if available and valid
-        if (animData.FrameDurations != null 
-            && animData.FrameDurations.Length > 0 
-            && frameIndex >= 0 
-            && frameIndex < animData.FrameDurations.Length)
+        if (
+            animData.FrameDurations != null
+            && animData.FrameDurations.Length > 0
+            && frameIndex >= 0
+            && frameIndex < animData.FrameDurations.Length
+        )
         {
             return animData.FrameDurations[frameIndex];
         }

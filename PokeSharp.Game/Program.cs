@@ -1,6 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using System.Text;
 using Arch.Core;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -12,11 +13,11 @@ using PokeSharp.Engine.Systems.Pooling;
 using PokeSharp.Game;
 using PokeSharp.Game.Data.Loading;
 using PokeSharp.Game.Data.Services;
+using PokeSharp.Game.Infrastructure.Configuration;
 using PokeSharp.Game.Infrastructure.Diagnostics;
 using PokeSharp.Game.Infrastructure.Services;
-using PokeSharp.Game.Initialization;
-using PokeSharp.Game.Initialization.Initializers;
 using PokeSharp.Game.Initialization.Factories;
+using PokeSharp.Game.Initialization.Initializers;
 using PokeSharp.Game.Input;
 using PokeSharp.Game.Scripting.Api;
 using PokeSharp.Game.Scripting.Services;
@@ -32,10 +33,10 @@ if (OperatingSystem.IsWindows())
     const int STD_OUTPUT_HANDLE = -11;
     const uint ENABLE_VIRTUAL_TERMINAL_PROCESSING = 0x0004;
 
-    var handle = GetStdHandle(STD_OUTPUT_HANDLE);
+    IntPtr handle = GetStdHandle(STD_OUTPUT_HANDLE);
     if (handle != IntPtr.Zero)
     {
-        GetConsoleMode(handle, out var mode);
+        GetConsoleMode(handle, out uint mode);
         mode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
         SetConsoleMode(handle, mode);
     }
@@ -51,14 +52,14 @@ if (OperatingSystem.IsWindows())
 }
 
 // Determine environment (Development, Production, etc.)
-var environment =
+string environment =
     Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")
     ?? Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT")
     ?? "Production";
 
 // Load configuration from appsettings.json
-var basePath = AppDomain.CurrentDomain.BaseDirectory;
-var configuration = SerilogConfiguration.LoadConfiguration(basePath, environment);
+string basePath = AppDomain.CurrentDomain.BaseDirectory;
+IConfiguration configuration = SerilogConfiguration.LoadConfiguration(basePath, environment);
 
 // Setup DI container
 var services = new ServiceCollection();
@@ -72,8 +73,10 @@ try
     // Add the game itself using options pattern
     services.AddSingleton<PokeSharpGame>(sp =>
     {
-        var loggerFactory = sp.GetRequiredService<ILoggerFactory>();
-        var gameConfig = sp.GetRequiredService<IOptions<PokeSharp.Game.Infrastructure.Configuration.GameConfiguration>>();
+        ILoggerFactory loggerFactory = sp.GetRequiredService<ILoggerFactory>();
+        IOptions<GameConfiguration> gameConfig = sp.GetRequiredService<
+            IOptions<GameConfiguration>
+        >();
         var options = new PokeSharpGameOptions
         {
             World = sp.GetRequiredService<World>(),
@@ -98,10 +101,10 @@ try
     });
 
     // Build service provider
-    var serviceProvider = services.BuildServiceProvider();
+    ServiceProvider serviceProvider = services.BuildServiceProvider();
 
     // Get logger to log startup
-    var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
+    ILogger<Program> logger = serviceProvider.GetRequiredService<ILogger<Program>>();
     logger.LogInformation(
         "PokeSharp starting | environment: {Environment}, config: {BasePath}",
         environment,
@@ -111,7 +114,7 @@ try
     // Create and run the game
     try
     {
-        using var game = serviceProvider.GetRequiredService<PokeSharpGame>();
+        using PokeSharpGame game = serviceProvider.GetRequiredService<PokeSharpGame>();
         game.Run();
     }
     catch (Exception ex)

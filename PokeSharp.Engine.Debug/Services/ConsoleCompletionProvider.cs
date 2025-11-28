@@ -1,14 +1,14 @@
+using Microsoft.CodeAnalysis.Completion;
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
 using PokeSharp.Engine.Debug.Console.Features;
 using PokeSharp.Engine.Debug.Console.Scripting;
 using PokeSharp.Engine.UI.Debug.Components.Controls;
-using PokeSharp.Engine.UI.Debug.Utilities;
 
 namespace PokeSharp.Engine.Debug.Services;
 
 /// <summary>
-/// Provides auto-completion suggestions for console input.
+///     Provides auto-completion suggestions for console input.
 /// </summary>
 public class ConsoleCompletionProvider
 {
@@ -21,7 +21,7 @@ public class ConsoleCompletionProvider
     }
 
     /// <summary>
-    /// Sets the console globals for completion lookup.
+    ///     Sets the console globals for completion lookup.
     /// </summary>
     public void SetGlobals(ConsoleGlobals globals)
     {
@@ -29,9 +29,12 @@ public class ConsoleCompletionProvider
     }
 
     /// <summary>
-    /// Gets auto-completion suggestions for the given partial command.
+    ///     Gets auto-completion suggestions for the given partial command.
     /// </summary>
-    public async Task<List<SuggestionItem>> GetCompletionsAsync(string partialCommand, int cursorPosition)
+    public async Task<List<SuggestionItem>> GetCompletionsAsync(
+        string partialCommand,
+        int cursorPosition
+    )
     {
         try
         {
@@ -49,15 +52,18 @@ public class ConsoleCompletionProvider
                 ConsoleScriptEvaluator.GetDefaultImports()
             );
 
-            var completionItems = await autoComplete.GetCompletionsAsync(partialCommand, cursorPosition);
+            List<CompletionItem> completionItems = await autoComplete.GetCompletionsAsync(
+                partialCommand,
+                cursorPosition
+            );
 
             // Convert CompletionItem objects to SuggestionItem for the UI
             var suggestions = completionItems
                 .Select(item => new SuggestionItem(
-                    Text: item.DisplayText,
-                    Description: item.InlineDescription,
-                    Category: item.Tags.Contains("history") ? "History" : "API",
-                    IconColor: item.Tags.Contains("history") ? Color.LightGreen : Color.LightBlue
+                    item.DisplayText,
+                    item.InlineDescription,
+                    item.Tags.Contains("history") ? "History" : "API",
+                    item.Tags.Contains("history") ? Color.LightGreen : Color.LightBlue
                 ))
                 .ToList();
 
@@ -70,4 +76,3 @@ public class ConsoleCompletionProvider
         }
     }
 }
-

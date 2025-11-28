@@ -30,9 +30,11 @@ public class SpatialHash
     /// </summary>
     public void Clear()
     {
-        foreach (var mapGrid in _grid.Values)
-        foreach (var entityList in mapGrid.Values)
+        foreach (Dictionary<(int x, int y), List<Entity>> mapGrid in _grid.Values)
+        foreach (List<Entity> entityList in mapGrid.Values)
+        {
             entityList.Clear();
+        }
     }
 
     /// <summary>
@@ -45,15 +47,15 @@ public class SpatialHash
     public void Add(Entity entity, int mapId, int x, int y)
     {
         // Ensure map exists
-        if (!_grid.TryGetValue(mapId, out var mapGrid))
+        if (!_grid.TryGetValue(mapId, out Dictionary<(int x, int y), List<Entity>>? mapGrid))
         {
             mapGrid = new Dictionary<(int x, int y), List<Entity>>();
             _grid[mapId] = mapGrid;
         }
 
         // Ensure position list exists
-        var key = (x, y);
-        if (!mapGrid.TryGetValue(key, out var entities))
+        (int x, int y) key = (x, y);
+        if (!mapGrid.TryGetValue(key, out List<Entity>? entities))
         {
             entities = new List<Entity>(4); // Most tiles have 1-2 entities
             mapGrid[key] = entities;
@@ -73,12 +75,16 @@ public class SpatialHash
     /// <returns>True if the entity was removed, false if not found.</returns>
     public bool Remove(Entity entity, int mapId, int x, int y)
     {
-        if (!_grid.TryGetValue(mapId, out var mapGrid))
+        if (!_grid.TryGetValue(mapId, out Dictionary<(int x, int y), List<Entity>>? mapGrid))
+        {
             return false;
+        }
 
-        var key = (x, y);
-        if (!mapGrid.TryGetValue(key, out var entities))
+        (int x, int y) key = (x, y);
+        if (!mapGrid.TryGetValue(key, out List<Entity>? entities))
+        {
             return false;
+        }
 
         return entities.Remove(entity);
     }
@@ -92,12 +98,16 @@ public class SpatialHash
     /// <returns>Collection of entities at this position, or empty if none.</returns>
     public IEnumerable<Entity> GetAt(int mapId, int x, int y)
     {
-        if (!_grid.TryGetValue(mapId, out var mapGrid))
+        if (!_grid.TryGetValue(mapId, out Dictionary<(int x, int y), List<Entity>>? mapGrid))
+        {
             return [];
+        }
 
-        var key = (x, y);
-        if (!mapGrid.TryGetValue(key, out var entities))
+        (int x, int y) key = (x, y);
+        if (!mapGrid.TryGetValue(key, out List<Entity>? entities))
+        {
             return [];
+        }
 
         return entities;
     }
@@ -110,17 +120,23 @@ public class SpatialHash
     /// <returns>Collection of entities within the bounds.</returns>
     public IEnumerable<Entity> GetInBounds(int mapId, Rectangle bounds)
     {
-        if (!_grid.TryGetValue(mapId, out var mapGrid))
+        if (!_grid.TryGetValue(mapId, out Dictionary<(int x, int y), List<Entity>>? mapGrid))
+        {
             yield break;
+        }
 
         // Iterate over all positions within bounds
-        for (var y = bounds.Top; y < bounds.Bottom; y++)
-        for (var x = bounds.Left; x < bounds.Right; x++)
+        for (int y = bounds.Top; y < bounds.Bottom; y++)
+        for (int x = bounds.Left; x < bounds.Right; x++)
         {
-            var key = (x, y);
-            if (mapGrid.TryGetValue(key, out var entities))
-                foreach (var entity in entities)
+            (int x, int y) key = (x, y);
+            if (mapGrid.TryGetValue(key, out List<Entity>? entities))
+            {
+                foreach (Entity entity in entities)
+                {
                     yield return entity;
+                }
+            }
         }
     }
 
@@ -130,10 +146,12 @@ public class SpatialHash
     /// <returns>Total entity count across all maps and positions.</returns>
     public int GetEntityCount()
     {
-        var count = 0;
-        foreach (var mapGrid in _grid.Values)
-        foreach (var entities in mapGrid.Values)
+        int count = 0;
+        foreach (Dictionary<(int x, int y), List<Entity>> mapGrid in _grid.Values)
+        foreach (List<Entity> entities in mapGrid.Values)
+        {
             count += entities.Count;
+        }
 
         return count;
     }
@@ -144,9 +162,12 @@ public class SpatialHash
     /// <returns>Number of (map, x, y) positions with at least one entity.</returns>
     public int GetOccupiedPositionCount()
     {
-        var count = 0;
-        foreach (var mapGrid in _grid.Values)
+        int count = 0;
+        foreach (Dictionary<(int x, int y), List<Entity>> mapGrid in _grid.Values)
+        {
             count += mapGrid.Count;
+        }
+
         return count;
     }
 }

@@ -6,10 +6,12 @@ using PokeSharp.Engine.UI.Debug.Layout;
 namespace PokeSharp.Engine.UI.Debug.Components.Layout;
 
 /// <summary>
-/// A scrollable container with scrollbar.
+///     A scrollable container with scrollbar.
 /// </summary>
 public class ScrollView : UIContainer
 {
+    private float _viewportHeight;
+
     /// <summary>Current scroll offset (0 = top)</summary>
     public float ScrollOffset { get; set; }
 
@@ -18,8 +20,6 @@ public class ScrollView : UIContainer
 
     /// <summary>Whether to show the scrollbar</summary>
     public bool ShowScrollbar { get; set; } = true;
-
-    private float _viewportHeight;
 
     protected override bool IsInteractive()
     {
@@ -32,7 +32,7 @@ public class ScrollView : UIContainer
         context.Renderer.DrawRectangle(Rect, Theme.BackgroundSecondary);
 
         // Store viewport height
-        _viewportHeight = Rect.Height - Theme.PaddingMedium * 2;
+        _viewportHeight = Rect.Height - (Theme.PaddingMedium * 2);
 
         // Calculate content height (sum of children)
         ContentHeight = CalculateContentHeight();
@@ -47,9 +47,9 @@ public class ScrollView : UIContainer
         // Apply scroll offset to children
         float yOffset = -ScrollOffset;
 
-        foreach (var child in Children)
+        foreach (UIComponent child in Children)
         {
-            var originalConstraint = child.Constraint;
+            LayoutConstraint originalConstraint = child.Constraint;
             child.Constraint = new LayoutConstraint
             {
                 Anchor = originalConstraint.Anchor,
@@ -60,7 +60,7 @@ public class ScrollView : UIContainer
                 WidthPercent = originalConstraint.WidthPercent,
                 HeightPercent = originalConstraint.HeightPercent,
                 Margin = originalConstraint.Margin,
-                Padding = originalConstraint.Padding
+                Padding = originalConstraint.Padding,
             };
 
             child.Render(context);
@@ -86,27 +86,32 @@ public class ScrollView : UIContainer
         float scrollbarHeight = _viewportHeight;
 
         // Track
-        var trackRect = new LayoutRect(scrollbarX, scrollbarY, Theme.ScrollbarWidth, scrollbarHeight);
+        var trackRect = new LayoutRect(
+            scrollbarX,
+            scrollbarY,
+            Theme.ScrollbarWidth,
+            scrollbarHeight
+        );
         context.Renderer.DrawRectangle(trackRect, Theme.ScrollbarTrack);
 
         // Thumb
-        float thumbHeight = Math.Max(20, (_viewportHeight / ContentHeight) * scrollbarHeight);
-        float thumbY = scrollbarY + (ScrollOffset / ContentHeight) * scrollbarHeight;
+        float thumbHeight = Math.Max(20, _viewportHeight / ContentHeight * scrollbarHeight);
+        float thumbY = scrollbarY + (ScrollOffset / ContentHeight * scrollbarHeight);
 
         var thumbRect = new LayoutRect(scrollbarX, thumbY, Theme.ScrollbarWidth, thumbHeight);
-        var thumbColor = IsHovered() ? Theme.ScrollbarThumbHover : Theme.ScrollbarThumb;
+        Color thumbColor = IsHovered() ? Theme.ScrollbarThumbHover : Theme.ScrollbarThumb;
         context.Renderer.DrawRectangle(thumbRect, thumbColor);
     }
 
     private float CalculateContentHeight()
     {
         float total = 0;
-        foreach (var child in Children)
+        foreach (UIComponent child in Children)
         {
             float height = child.Constraint.Height ?? 30;
             total += height + Theme.MarginSmall;
         }
+
         return total;
     }
 }
-

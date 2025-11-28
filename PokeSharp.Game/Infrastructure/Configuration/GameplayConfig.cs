@@ -93,12 +93,29 @@ public class PoolConfigs
     /// <summary>
     ///     NPC entity pool configuration.
     /// </summary>
-    public PoolConfig Npc { get; set; } = new() { InitialSize = 100, MaxSize = 200, AutoResize = true };
+    public PoolConfig Npc { get; set; } =
+        new()
+        {
+            InitialSize = 100,
+            MaxSize = 200,
+            AutoResize = true,
+        };
 
     /// <summary>
-    ///     Tile entity pool configuration.
+    ///     Tile entity pool configuration for multi-map streaming.
+    ///     A typical map has ~60x40 tiles × 3 layers = 7200 tiles.
+    ///     With 5 maps loaded simultaneously (current + 4 adjacent), we need ~36000 tiles.
+    ///     AbsoluteMaxSize is set high to accommodate large maps and streaming.
     /// </summary>
-    public PoolConfig Tile { get; set; } = new() { InitialSize = 2000, MaxSize = 5000 };
+    public PoolConfig Tile { get; set; } =
+        new()
+        {
+            InitialSize = 5000,
+            MaxSize = 20000,
+            AutoResize = true,
+            GrowthFactor = 2.0f,
+            AbsoluteMaxSize = 100000,
+        };
 }
 
 /// <summary>
@@ -123,13 +140,13 @@ public class PoolConfig
 
     /// <summary>
     ///     Whether the pool should automatically resize when exhausted.
-    ///     When enabled, pool will grow by <see cref="GrowthFactor"/> when full.
+    ///     When enabled, pool will grow by <see cref="GrowthFactor" /> when full.
     /// </summary>
     public bool AutoResize { get; set; } = true;
 
     /// <summary>
     ///     Growth factor when auto-resizing (e.g., 2.0 = double the size).
-    ///     Only used when <see cref="AutoResize"/> is enabled.
+    ///     Only used when <see cref="AutoResize" /> is enabled.
     /// </summary>
     public float GrowthFactor { get; set; } = 1.5f;
 

@@ -1,91 +1,87 @@
+using System.Text;
+
 namespace PokeSharp.Engine.UI.Debug.Components.Controls;
 
 /// <summary>
-/// Manages text selection state for a text editor.
-/// Handles selection ranges, manipulation, and querying.
+///     Manages text selection state for a text editor.
+///     Handles selection ranges, manipulation, and querying.
 /// </summary>
 public class TextEditorSelection
 {
-    private bool _hasSelection;
-    private int _startLine;
-    private int _startColumn;
-    private int _endLine;
-    private int _endColumn;
-
     /// <summary>
-    /// Gets whether there is an active selection.
+    ///     Gets whether there is an active selection.
     /// </summary>
-    public bool HasSelection => _hasSelection;
+    public bool HasSelection { get; private set; }
 
     /// <summary>
-    /// Gets the selection start line.
+    ///     Gets the selection start line.
     /// </summary>
-    public int StartLine => _startLine;
+    public int StartLine { get; private set; }
 
     /// <summary>
-    /// Gets the selection start column.
+    ///     Gets the selection start column.
     /// </summary>
-    public int StartColumn => _startColumn;
+    public int StartColumn { get; private set; }
 
     /// <summary>
-    /// Gets the selection end line.
+    ///     Gets the selection end line.
     /// </summary>
-    public int EndLine => _endLine;
+    public int EndLine { get; private set; }
 
     /// <summary>
-    /// Gets the selection end column.
+    ///     Gets the selection end column.
     /// </summary>
-    public int EndColumn => _endColumn;
+    public int EndColumn { get; private set; }
 
     /// <summary>
-    /// Starts a new selection at the given position.
+    ///     Starts a new selection at the given position.
     /// </summary>
     public void Start(int line, int column)
     {
-        _hasSelection = true;
-        _startLine = line;
-        _startColumn = column;
-        _endLine = line;
-        _endColumn = column;
+        HasSelection = true;
+        StartLine = line;
+        StartColumn = column;
+        EndLine = line;
+        EndColumn = column;
     }
 
     /// <summary>
-    /// Extends the selection to the given position.
+    ///     Extends the selection to the given position.
     /// </summary>
     public void ExtendTo(int line, int column)
     {
-        if (!_hasSelection)
+        if (!HasSelection)
         {
             Start(line, column);
             return;
         }
 
-        _endLine = line;
-        _endColumn = column;
+        EndLine = line;
+        EndColumn = column;
     }
 
     /// <summary>
-    /// Clears the selection.
+    ///     Clears the selection.
     /// </summary>
     public void Clear()
     {
-        _hasSelection = false;
+        HasSelection = false;
     }
 
     /// <summary>
-    /// Selects all text.
+    ///     Selects all text.
     /// </summary>
     public void SelectAll(int totalLines, Func<int, int> getLineLength)
     {
-        _hasSelection = true;
-        _startLine = 0;
-        _startColumn = 0;
-        _endLine = totalLines - 1;
-        _endColumn = getLineLength(_endLine);
+        HasSelection = true;
+        StartLine = 0;
+        StartColumn = 0;
+        EndLine = totalLines - 1;
+        EndColumn = getLineLength(EndLine);
     }
 
     /// <summary>
-    /// Selects the word at the given position.
+    ///     Selects the word at the given position.
     /// </summary>
     public void SelectWord(int line, int column, string lineText)
     {
@@ -101,82 +97,100 @@ public class TextEditorSelection
 
         // Move start back to word boundary
         while (wordStart > 0 && IsWordChar(lineText[wordStart - 1]))
+        {
             wordStart--;
+        }
 
         // Move end forward to word boundary
         while (wordEnd < lineText.Length && IsWordChar(lineText[wordEnd]))
+        {
             wordEnd++;
+        }
 
-        _hasSelection = true;
-        _startLine = line;
-        _startColumn = wordStart;
-        _endLine = line;
-        _endColumn = wordEnd;
+        HasSelection = true;
+        StartLine = line;
+        StartColumn = wordStart;
+        EndLine = line;
+        EndColumn = wordEnd;
     }
 
     /// <summary>
-    /// Selects the entire line at the given position.
+    ///     Selects the entire line at the given position.
     /// </summary>
     public void SelectLine(int line, int lineLength)
     {
-        _hasSelection = true;
-        _startLine = line;
-        _startColumn = 0;
-        _endLine = line;
-        _endColumn = lineLength;
+        HasSelection = true;
+        StartLine = line;
+        StartColumn = 0;
+        EndLine = line;
+        EndColumn = lineLength;
     }
 
     /// <summary>
-    /// Gets the normalized selection range (start before end).
+    ///     Gets the normalized selection range (start before end).
     /// </summary>
     public (int startLine, int startColumn, int endLine, int endColumn) GetNormalizedRange()
     {
-        if (!_hasSelection)
-            return (0, 0, 0, 0);
-
-        // Normalize so start is always before end
-        if (_startLine > _endLine || (_startLine == _endLine && _startColumn > _endColumn))
+        if (!HasSelection)
         {
-            return (_endLine, _endColumn, _startLine, _startColumn);
+            return (0, 0, 0, 0);
         }
 
-        return (_startLine, _startColumn, _endLine, _endColumn);
+        // Normalize so start is always before end
+        if (StartLine > EndLine || (StartLine == EndLine && StartColumn > EndColumn))
+        {
+            return (EndLine, EndColumn, StartLine, StartColumn);
+        }
+
+        return (StartLine, StartColumn, EndLine, EndColumn);
     }
 
     /// <summary>
-    /// Checks if a given position is within the selection.
+    ///     Checks if a given position is within the selection.
     /// </summary>
     public bool ContainsPosition(int line, int column)
     {
-        if (!_hasSelection)
+        if (!HasSelection)
+        {
             return false;
+        }
 
-        var (startLine, startColumn, endLine, endColumn) = GetNormalizedRange();
+        (int startLine, int startColumn, int endLine, int endColumn) = GetNormalizedRange();
 
         if (line < startLine || line > endLine)
+        {
             return false;
+        }
 
         if (line == startLine && line == endLine)
+        {
             return column >= startColumn && column < endColumn;
+        }
 
         if (line == startLine)
+        {
             return column >= startColumn;
+        }
 
         if (line == endLine)
+        {
             return column < endColumn;
+        }
 
         return true; // Middle line
     }
 
     /// <summary>
-    /// Gets the selected text from the given lines.
+    ///     Gets the selected text from the given lines.
     /// </summary>
     public string GetSelectedText(List<string> lines)
     {
-        if (!_hasSelection || lines.Count == 0)
+        if (!HasSelection || lines.Count == 0)
+        {
             return string.Empty;
+        }
 
-        var (startLine, startColumn, endLine, endColumn) = GetNormalizedRange();
+        (int startLine, int startColumn, int endLine, int endColumn) = GetNormalizedRange();
 
         // Ensure indices are valid
         startLine = Math.Clamp(startLine, 0, lines.Count - 1);
@@ -185,18 +199,18 @@ public class TextEditorSelection
         if (startLine == endLine)
         {
             // Single line selection
-            var line = lines[startLine];
+            string line = lines[startLine];
             startColumn = Math.Clamp(startColumn, 0, line.Length);
             endColumn = Math.Clamp(endColumn, 0, line.Length);
             return line.Substring(startColumn, endColumn - startColumn);
         }
 
         // Multi-line selection
-        var result = new System.Text.StringBuilder();
+        var result = new StringBuilder();
 
         for (int i = startLine; i <= endLine; i++)
         {
-            var line = lines[i];
+            string line = lines[i];
 
             if (i == startLine)
             {
@@ -217,18 +231,19 @@ public class TextEditorSelection
             }
 
             if (i < endLine)
+            {
                 result.Append('\n');
+            }
         }
 
         return result.ToString();
     }
 
     /// <summary>
-    /// Checks if a character is part of a word (for word selection).
+    ///     Checks if a character is part of a word (for word selection).
     /// </summary>
     private static bool IsWordChar(char c)
     {
         return char.IsLetterOrDigit(c) || c == '_';
     }
 }
-

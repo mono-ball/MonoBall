@@ -1,57 +1,60 @@
+using System.Diagnostics;
+using System.Reflection;
+using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis.Completion;
-using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.Extensions.Logging;
 using PokeSharp.Engine.Common.Logging;
 using PokeSharp.Engine.Debug.Console.Configuration;
-using System.Diagnostics;
-using System.Reflection;
-using System.Text.RegularExpressions;
 
 namespace PokeSharp.Engine.Debug.Console.Features;
 
 /// <summary>
-/// Provides reflection-based auto-completion for C# code.
-/// Supports completion for runtime objects using reflection and ScriptState.
-///
-/// Thread Safety:
-/// - This class is NOT thread-safe and should only be accessed from the main game thread.
-/// - The GetCompletionsAsync method returns a Task but executes synchronously on the calling thread.
-/// - Member cache is not protected by locks; concurrent access will result in undefined behavior.
-/// - Script state and globals instance should only be updated from the main thread.
+///     Provides reflection-based auto-completion for C# code.
+///     Supports completion for runtime objects using reflection and ScriptState.
+///     Thread Safety:
+///     - This class is NOT thread-safe and should only be accessed from the main game thread.
+///     - The GetCompletionsAsync method returns a Task but executes synchronously on the calling thread.
+///     - Member cache is not protected by locks; concurrent access will result in undefined behavior.
+///     - Script state and globals instance should only be updated from the main thread.
 /// </summary>
 public class ConsoleAutoComplete
 {
+    private const int MaxCacheSize = 100; // Limit cache to prevent unbounded growth
+
+    // Compiled regex patterns for better performance
+    private static readonly Regex MemberAccessRegex = new(@"(\w+)\.$", RegexOptions.Compiled);
+    private static readonly Regex PartialMemberAccessRegex = new(
+        @"(\w+)\.(\w*)$",
+        RegexOptions.Compiled
+    );
     private readonly ILogger? _logger;
-    private object? _globalsInstance;
-    private ScriptState<object>? _scriptState;
-    private List<Assembly>? _referencedAssemblies;
-    private List<string>? _importedNamespaces;
 
     // Cache for reflection results to avoid repeated lookups
     private readonly Dictionary<Type, List<CompletionItem>> _memberCache = new();
-    private const int MaxCacheSize = 100; // Limit cache to prevent unbounded growth
+
+    // Performance tracking
+    private readonly Stopwatch _performanceTimer = new();
+    private object? _globalsInstance;
+    private List<string>? _importedNamespaces;
+    private List<Assembly>? _referencedAssemblies;
+    private ScriptState<object>? _scriptState;
+    private long _totalCompletionRequests;
+    private double _totalCompletionTimeMs;
 
     // Cache for type completions from assemblies
     private List<CompletionItem>? _typeCompletionsCache;
 
-    // Compiled regex patterns for better performance
-    private static readonly Regex MemberAccessRegex = new(@"(\w+)\.$", RegexOptions.Compiled);
-    private static readonly Regex PartialMemberAccessRegex = new(@"(\w+)\.(\w*)$", RegexOptions.Compiled);
-
-    // Performance tracking
-    private readonly Stopwatch _performanceTimer = new();
-    private long _totalCompletionRequests = 0;
-    private double _totalCompletionTimeMs = 0;
-
     public ConsoleAutoComplete(ILogger? logger = null)
     {
         _logger = logger;
-        _logger?.LogDebug("Auto-complete initialized with reflection-based completion and ScriptState tracking");
+        _logger?.LogDebug(
+            "Auto-complete initialized with reflection-based completion and ScriptState tracking"
+        );
     }
 
     /// <summary>
-    /// Set the globals instance to enable member completion
+    ///     Set the globals instance to enable member completion
     /// </summary>
     public void SetGlobals(object globals)
     {
@@ -60,49 +63,56 @@ public class ConsoleAutoComplete
     }
 
     /// <summary>
-    /// Update the script state after execution to track variables
+    ///     Update the script state after execution to track variables
     /// </summary>
     public void UpdateScriptState(ScriptState<object>? state)
     {
         _scriptState = state;
         if (state != null)
         {
-            var varCount = state.Variables.Count();
+            int varCount = state.Variables.Count();
             _logger?.LogAutoCompleteScriptStateUpdated(varCount);
         }
     }
 
     /// <summary>
-    /// Set the referenced assemblies and imported namespaces for type completion
+    ///     Set the referenced assemblies and imported namespaces for type completion
     /// </summary>
     public void SetReferences(IEnumerable<Assembly> assemblies, IEnumerable<string> namespaces)
     {
         _referencedAssemblies = assemblies.ToList();
         _importedNamespaces = namespaces.ToList();
         _typeCompletionsCache = null; // Clear cache when references change
-        _logger?.LogDebug("AutoComplete references updated: {AssemblyCount} assemblies, {NamespaceCount} namespaces",
-            _referencedAssemblies.Count, _importedNamespaces.Count);
+        _logger?.LogDebug(
+            "AutoComplete references updated: {AssemblyCount} assemblies, {NamespaceCount} namespaces",
+            _referencedAssemblies.Count,
+            _importedNamespaces.Count
+        );
     }
 
     /// <summary>
-    /// Clears the reflection member cache.
-    /// Useful for reducing memory usage or refreshing after dynamic assembly loads.
+    ///     Clears the reflection member cache.
+    ///     Useful for reducing memory usage or refreshing after dynamic assembly loads.
     /// </summary>
     public void ClearCache()
     {
-        var count = _memberCache.Count;
+        int count = _memberCache.Count;
         _memberCache.Clear();
         _logger?.LogInformation("Cleared autocomplete member cache ({Count} types removed)", count);
     }
 
     /// <summary>
-    /// Gets auto-completion suggestions for the given code at the cursor position using reflection.
-    /// Synchronous operation wrapped in Task for interface compatibility.
+    ///     Gets auto-completion suggestions for the given code at the cursor position using reflection.
+    ///     Synchronous operation wrapped in Task for interface compatibility.
     /// </summary>
-    public Task<List<CompletionItem>> GetCompletionsAsync(string code, int cursorPosition, string? globals = null)
+    public Task<List<CompletionItem>> GetCompletionsAsync(
+        string code,
+        int cursorPosition,
+        string? globals = null
+    )
     {
         _performanceTimer.Restart();
-        var result = GetCompletions(code, cursorPosition, globals);
+        List<CompletionItem> result = GetCompletions(code, cursorPosition, globals);
         _performanceTimer.Stop();
 
         // Track performance metrics
@@ -112,18 +122,26 @@ public class ConsoleAutoComplete
         // Log performance occasionally (every 50 requests)
         if (_totalCompletionRequests % 50 == 0)
         {
-            var avgTime = _totalCompletionTimeMs / _totalCompletionRequests;
-            _logger?.LogDebug("Autocomplete performance: {Requests} requests, avg {AvgMs:F2}ms, last {LastMs:F2}ms",
-                _totalCompletionRequests, avgTime, _performanceTimer.Elapsed.TotalMilliseconds);
+            double avgTime = _totalCompletionTimeMs / _totalCompletionRequests;
+            _logger?.LogDebug(
+                "Autocomplete performance: {Requests} requests, avg {AvgMs:F2}ms, last {LastMs:F2}ms",
+                _totalCompletionRequests,
+                avgTime,
+                _performanceTimer.Elapsed.TotalMilliseconds
+            );
         }
 
         return Task.FromResult(result);
     }
 
     /// <summary>
-    /// Gets auto-completion suggestions synchronously.
+    ///     Gets auto-completion suggestions synchronously.
     /// </summary>
-    private List<CompletionItem> GetCompletions(string code, int cursorPosition, string? globals = null)
+    private List<CompletionItem> GetCompletions(
+        string code,
+        int cursorPosition,
+        string? globals = null
+    )
     {
         try
         {
@@ -132,46 +150,60 @@ public class ConsoleAutoComplete
             // Validate and clamp cursor position
             if (cursorPosition < 0)
             {
-                _logger?.LogWarning("Cursor position {Pos} is negative, clamping to 0", cursorPosition);
+                _logger?.LogWarning(
+                    "Cursor position {Pos} is negative, clamping to 0",
+                    cursorPosition
+                );
                 cursorPosition = 0;
             }
+
             if (cursorPosition > code.Length)
             {
-                _logger?.LogWarning("Cursor position {Pos} exceeds code length {Len}, clamping to length", cursorPosition, code.Length);
+                _logger?.LogWarning(
+                    "Cursor position {Pos} exceeds code length {Len}, clamping to length",
+                    cursorPosition,
+                    code.Length
+                );
                 cursorPosition = code.Length;
             }
 
             // Get text up to cursor for pattern matching
-            var textUpToCursor = code.Substring(0, cursorPosition);
+            string textUpToCursor = code.Substring(0, cursorPosition);
 
             // Check for member access using compiled regex (e.g., "player." or "World.")
-            var memberAccessMatch = MemberAccessRegex.Match(textUpToCursor);
+            Match memberAccessMatch = MemberAccessRegex.Match(textUpToCursor);
             if (memberAccessMatch.Success)
             {
-                var memberName = memberAccessMatch.Groups[1].Value;
+                string memberName = memberAccessMatch.Groups[1].Value;
                 _logger?.LogAutoCompleteMemberAccess(memberName);
 
-                var members = GetMembersForObject(memberName);
+                List<CompletionItem> members = GetMembersForObject(memberName);
                 _logger?.LogAutoCompleteMembersFound(members.Count, memberName);
                 return members;
             }
 
             // Check for partial member access using compiled regex (e.g., "player.Na" - user typing after the dot)
-            var partialMemberMatch = PartialMemberAccessRegex.Match(textUpToCursor);
+            Match partialMemberMatch = PartialMemberAccessRegex.Match(textUpToCursor);
             if (partialMemberMatch.Success)
             {
-                var objectName = partialMemberMatch.Groups[1].Value;
-                var partial = partialMemberMatch.Groups[2].Value.ToLower();
-                _logger?.LogDebug("Partial member access detected: '{ObjectName}.{Partial}'", objectName, partial);
+                string objectName = partialMemberMatch.Groups[1].Value;
+                string partial = partialMemberMatch.Groups[2].Value.ToLower();
+                _logger?.LogDebug(
+                    "Partial member access detected: '{ObjectName}.{Partial}'",
+                    objectName,
+                    partial
+                );
 
-                var members = GetMembersForObject(objectName);
-                var filtered = members.Where(m => m.DisplayText.ToLower().StartsWith(partial)).ToList();
+                List<CompletionItem> members = GetMembersForObject(objectName);
+                var filtered = members
+                    .Where(m => m.DisplayText.ToLower().StartsWith(partial))
+                    .ToList();
                 _logger?.LogAutoCompleteMembersFound(filtered.Count, objectName);
                 return filtered;
             }
 
             // Provide global variable completions
-            var globalCompletions = GetGlobalCompletions();
+            List<CompletionItem> globalCompletions = GetGlobalCompletions();
             _logger?.LogAutoCompleteGlobalsProvided(globalCompletions.Count);
             return globalCompletions;
         }
@@ -185,46 +217,47 @@ public class ConsoleAutoComplete
     }
 
     /// <summary>
-    /// Get fallback completions when an error occurs
-    /// Provides basic C# keywords and a helpful error message
+    ///     Get fallback completions when an error occurs
+    ///     Provides basic C# keywords and a helpful error message
     /// </summary>
     private List<CompletionItem> GetFallbackCompletions(string errorMessage)
     {
         var fallbacks = new List<CompletionItem>();
 
         // Add a helpful error indicator
-        fallbacks.Add(CompletionItem.Create(
-            displayText: "⚠️ Error",
-            inlineDescription: $"Autocomplete error: {TruncateMessage(errorMessage, 50)}"
-        ));
+        fallbacks.Add(
+            CompletionItem.Create(
+                "⚠️ Error",
+                inlineDescription: $"Autocomplete error: {TruncateMessage(errorMessage, 50)}"
+            )
+        );
 
         // Add basic C# keywords as fallback
-        var keywords = ConsoleConstants.AutoComplete.Keywords;
-        foreach (var keyword in keywords.Take(5)) // Just show a few to keep list short
+        string[] keywords = ConsoleConstants.AutoComplete.Keywords;
+        foreach (string keyword in keywords.Take(5)) // Just show a few to keep list short
         {
-            fallbacks.Add(CompletionItem.Create(
-                displayText: keyword,
-                inlineDescription: "keyword"
-            ));
+            fallbacks.Add(CompletionItem.Create(keyword, inlineDescription: "keyword"));
         }
 
         return fallbacks;
     }
 
     /// <summary>
-    /// Truncate an error message to a maximum length
+    ///     Truncate an error message to a maximum length
     /// </summary>
     private static string TruncateMessage(string message, int maxLength)
     {
         if (string.IsNullOrEmpty(message) || message.Length <= maxLength)
+        {
             return message;
+        }
 
         return message.Substring(0, maxLength - 3) + "...";
     }
 
     /// <summary>
-    /// Get members (properties, fields, methods) for an object by name
-    /// Uses caching to avoid repeated reflection lookups
+    ///     Get members (properties, fields, methods) for an object by name
+    ///     Uses caching to avoid repeated reflection lookups
     /// </summary>
     private List<CompletionItem> GetMembersForObject(string objectName)
     {
@@ -236,19 +269,27 @@ public class ConsoleAutoComplete
             // First, try to find in script state variables (case-insensitive for user convenience)
             if (_scriptState != null)
             {
-                var variable = _scriptState.Variables.FirstOrDefault(v =>
-                    string.Equals(v.Name, objectName, StringComparison.OrdinalIgnoreCase));
+                ScriptVariable? variable = _scriptState.Variables.FirstOrDefault(v =>
+                    string.Equals(v.Name, objectName, StringComparison.OrdinalIgnoreCase)
+                );
                 if (variable != null)
                 {
                     targetObject = variable.Value;
                     targetType = variable.Type;
-                    _logger?.LogInformation("Auto-complete object found: '{ObjectName}' of type {TypeName} in {Source}",
-                        objectName, targetType.Name, "ScriptState");
+                    _logger?.LogInformation(
+                        "Auto-complete object found: '{ObjectName}' of type {TypeName} in {Source}",
+                        objectName,
+                        targetType.Name,
+                        "ScriptState"
+                    );
                 }
                 else
                 {
-                    _logger?.LogInformation("Object '{ObjectName}' not found in ScriptState ({VarCount} variables available)",
-                        objectName, _scriptState.Variables.Count());
+                    _logger?.LogInformation(
+                        "Object '{ObjectName}' not found in ScriptState ({VarCount} variables available)",
+                        objectName,
+                        _scriptState.Variables.Count()
+                    );
                 }
             }
             else
@@ -260,11 +301,15 @@ public class ConsoleAutoComplete
             if (targetType == null && _globalsInstance != null)
             {
                 _logger?.LogInformation("Searching for '{ObjectName}' in globals...", objectName);
-                var globalsType = _globalsInstance.GetType();
-                var property = globalsType.GetProperty(objectName,
-                    BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
-                var field = globalsType.GetField(objectName,
-                    BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+                Type globalsType = _globalsInstance.GetType();
+                PropertyInfo? property = globalsType.GetProperty(
+                    objectName,
+                    BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase
+                );
+                FieldInfo? field = globalsType.GetField(
+                    objectName,
+                    BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase
+                );
 
                 if (property != null)
                 {
@@ -274,13 +319,20 @@ public class ConsoleAutoComplete
                     // Null check: if the property value is null, we can still show its type members
                     if (targetObject == null)
                     {
-                        _logger?.LogInformation("Auto-complete property '{ObjectName}' is null, showing type {TypeName} members",
-                            objectName, targetType.Name);
+                        _logger?.LogInformation(
+                            "Auto-complete property '{ObjectName}' is null, showing type {TypeName} members",
+                            objectName,
+                            targetType.Name
+                        );
                     }
                     else
                     {
-                        _logger?.LogInformation("Auto-complete object found: '{ObjectName}' of type {TypeName} in {Source}",
-                            objectName, targetType.Name, "globals property");
+                        _logger?.LogInformation(
+                            "Auto-complete object found: '{ObjectName}' of type {TypeName} in {Source}",
+                            objectName,
+                            targetType.Name,
+                            "globals property"
+                        );
                     }
                 }
                 else if (field != null)
@@ -291,13 +343,20 @@ public class ConsoleAutoComplete
                     // Null check: if the field value is null, we can still show its type members
                     if (targetObject == null)
                     {
-                        _logger?.LogInformation("Auto-complete field '{ObjectName}' is null, showing type {TypeName} members",
-                            objectName, targetType.Name);
+                        _logger?.LogInformation(
+                            "Auto-complete field '{ObjectName}' is null, showing type {TypeName} members",
+                            objectName,
+                            targetType.Name
+                        );
                     }
                     else
                     {
-                        _logger?.LogInformation("Auto-complete object found: '{ObjectName}' of type {TypeName} in {Source}",
-                            objectName, targetType.Name, "globals field");
+                        _logger?.LogInformation(
+                            "Auto-complete object found: '{ObjectName}' of type {TypeName} in {Source}",
+                            objectName,
+                            targetType.Name,
+                            "globals field"
+                        );
                     }
                 }
             }
@@ -308,7 +367,11 @@ public class ConsoleAutoComplete
                 targetType = FindTypeByName(objectName);
                 if (targetType != null)
                 {
-                    _logger?.LogInformation("Found '{ObjectName}' as type {TypeName}", objectName, targetType.FullName);
+                    _logger?.LogInformation(
+                        "Found '{ObjectName}' as type {TypeName}",
+                        objectName,
+                        targetType.FullName
+                    );
 
                     // For enums, show enum values
                     if (targetType.IsEnum)
@@ -323,67 +386,109 @@ public class ConsoleAutoComplete
 
             if (targetType == null)
             {
-                _logger?.LogWarning("Auto-complete object not found: '{ObjectName}' (searched ScriptState: {HasState}, Globals: {HasGlobals}, Types: {HasTypes})",
-                    objectName, _scriptState != null, _globalsInstance != null, _referencedAssemblies != null);
+                _logger?.LogWarning(
+                    "Auto-complete object not found: '{ObjectName}' (searched ScriptState: {HasState}, Globals: {HasGlobals}, Types: {HasTypes})",
+                    objectName,
+                    _scriptState != null,
+                    _globalsInstance != null,
+                    _referencedAssemblies != null
+                );
                 return new List<CompletionItem>();
             }
 
             // Check cache first to avoid repeated reflection
-            if (_memberCache.TryGetValue(targetType, out var cachedMembers))
+            if (_memberCache.TryGetValue(targetType, out List<CompletionItem>? cachedMembers))
             {
-                _logger?.LogInformation("Using cached members for type {TypeName} ({Count} items) | TypeHash: {Hash} | CacheEntry.Count: {CacheCount}",
-                    targetType.Name, cachedMembers.Count, targetType.GetHashCode(), _memberCache[targetType].Count);
-                _logger?.LogInformation("First 5 cached members: {Members}",
-                    string.Join(", ", cachedMembers.Take(5).Select(m => m.DisplayText)));
-                _logger?.LogInformation("CachedMembers same reference as dictionary entry: {IsSame}",
-                    ReferenceEquals(cachedMembers, _memberCache[targetType]));
+                _logger?.LogInformation(
+                    "Using cached members for type {TypeName} ({Count} items) | TypeHash: {Hash} | CacheEntry.Count: {CacheCount}",
+                    targetType.Name,
+                    cachedMembers.Count,
+                    targetType.GetHashCode(),
+                    _memberCache[targetType].Count
+                );
+                _logger?.LogInformation(
+                    "First 5 cached members: {Members}",
+                    string.Join(", ", cachedMembers.Take(5).Select(m => m.DisplayText))
+                );
+                _logger?.LogInformation(
+                    "CachedMembers same reference as dictionary entry: {IsSame}",
+                    ReferenceEquals(cachedMembers, _memberCache[targetType])
+                );
                 // Return a NEW list to prevent external modifications from affecting the cache
                 return new List<CompletionItem>(cachedMembers);
             }
 
             // Get all public members via reflection
-            _logger?.LogInformation("Cache miss for type {TypeName}, performing reflection...", targetType.Name);
-            var completions = GetMembersForType(targetType);
+            _logger?.LogInformation(
+                "Cache miss for type {TypeName}, performing reflection...",
+                targetType.Name
+            );
+            List<CompletionItem> completions = GetMembersForType(targetType);
 
             // Cache the results for this type (with size limit)
-            _logger?.LogInformation("Reflection found {Count} members for type {TypeName}", completions.Count, targetType.Name);
-            _logger?.LogInformation("First 5 reflected members: {Members}",
-                string.Join(", ", completions.Take(5).Select(m => m.DisplayText)));
+            _logger?.LogInformation(
+                "Reflection found {Count} members for type {TypeName}",
+                completions.Count,
+                targetType.Name
+            );
+            _logger?.LogInformation(
+                "First 5 reflected members: {Members}",
+                string.Join(", ", completions.Take(5).Select(m => m.DisplayText))
+            );
 
             if (_memberCache.Count < MaxCacheSize)
             {
                 _memberCache[targetType] = completions;
-                _logger?.LogInformation("Cached members for type {TypeName} ({Count} items, cache size: {CacheSize})",
-                    targetType.Name, completions.Count, _memberCache.Count);
+                _logger?.LogInformation(
+                    "Cached members for type {TypeName} ({Count} items, cache size: {CacheSize})",
+                    targetType.Name,
+                    completions.Count,
+                    _memberCache.Count
+                );
             }
             else
             {
-                _logger?.LogWarning("Member cache limit reached ({MaxSize}), not caching type {TypeName}",
-                    MaxCacheSize, targetType.Name);
+                _logger?.LogWarning(
+                    "Member cache limit reached ({MaxSize}), not caching type {TypeName}",
+                    MaxCacheSize,
+                    targetType.Name
+                );
             }
 
             return completions;
         }
         catch (TargetInvocationException ex)
         {
-            _logger?.LogError(ex, "Error invoking reflection target for object '{ObjectName}'", objectName);
+            _logger?.LogError(
+                ex,
+                "Error invoking reflection target for object '{ObjectName}'",
+                objectName
+            );
             return new List<CompletionItem>();
         }
         catch (ArgumentException ex)
         {
-            _logger?.LogError(ex, "Invalid argument when reflecting on object '{ObjectName}'", objectName);
+            _logger?.LogError(
+                ex,
+                "Invalid argument when reflecting on object '{ObjectName}'",
+                objectName
+            );
             return new List<CompletionItem>();
         }
         catch (Exception ex)
         {
-            _logger?.LogError(ex, "Unexpected error getting members for object '{ObjectName}'", objectName);
+            _logger?.LogError(
+                ex,
+                "Unexpected error getting members for object '{ObjectName}'",
+                objectName
+            );
             return new List<CompletionItem>();
         }
     }
 
     /// <summary>
-    /// Gets completion items for all members of a type using reflection
-    /// Returns items sorted by category (properties, fields, then methods) and alphabetically within each category
+    ///     Gets completion items for all members of a type using reflection
+    ///     Returns items sorted by category (properties, fields, then methods) and alphabetically within each category
     /// </summary>
     private List<CompletionItem> GetMembersForType(Type targetType)
     {
@@ -392,59 +497,60 @@ public class ConsoleAutoComplete
         var methods = new List<CompletionItem>();
 
         // Properties - highest priority (most commonly accessed)
-        var propMembers = targetType.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+        IOrderedEnumerable<PropertyInfo> propMembers = targetType
+            .GetProperties(BindingFlags.Public | BindingFlags.Instance)
             .Where(p => !p.GetIndexParameters().Any()) // Exclude indexers
             .OrderBy(p => p.Name);
-        foreach (var prop in propMembers)
+        foreach (PropertyInfo prop in propMembers)
         {
-            properties.Add(CompletionItem.Create(
-                displayText: prop.Name,
-                inlineDescription: $"property: {GetFriendlyTypeName(prop.PropertyType)}"
-            ));
+            properties.Add(
+                CompletionItem.Create(
+                    prop.Name,
+                    inlineDescription: $"property: {GetFriendlyTypeName(prop.PropertyType)}"
+                )
+            );
         }
 
         // Fields - medium priority
-        var fieldMembers = targetType.GetFields(BindingFlags.Public | BindingFlags.Instance)
+        IOrderedEnumerable<FieldInfo> fieldMembers = targetType
+            .GetFields(BindingFlags.Public | BindingFlags.Instance)
             .OrderBy(f => f.Name);
-        foreach (var fld in fieldMembers)
+        foreach (FieldInfo fld in fieldMembers)
         {
-            fields.Add(CompletionItem.Create(
-                displayText: fld.Name,
-                inlineDescription: $"field: {GetFriendlyTypeName(fld.FieldType)}"
-            ));
+            fields.Add(
+                CompletionItem.Create(
+                    fld.Name,
+                    inlineDescription: $"field: {GetFriendlyTypeName(fld.FieldType)}"
+                )
+            );
         }
 
         // Methods - lower priority (come after data members)
-        var methodGroups = targetType.GetMethods(BindingFlags.Public | BindingFlags.Instance)
+        IOrderedEnumerable<IGrouping<string, MethodInfo>> methodGroups = targetType
+            .GetMethods(BindingFlags.Public | BindingFlags.Instance)
             .Where(m => !m.IsSpecialName) // Exclude property getters/setters
             .GroupBy(m => m.Name)
             .OrderBy(g => g.Key);
 
-        foreach (var group in methodGroups)
+        foreach (IGrouping<string, MethodInfo> group in methodGroups)
         {
-            var method = group.First(); // Take first overload for display
-            var overloadCount = group.Count();
-            var paramCount = method.GetParameters().Length;
+            MethodInfo method = group.First(); // Take first overload for display
+            int overloadCount = group.Count();
+            int paramCount = method.GetParameters().Length;
 
             // Create compact description
             string description;
             if (paramCount == 0)
             {
-                description = overloadCount > 1
-                    ? $"method() +{overloadCount - 1}"
-                    : "method()";
+                description = overloadCount > 1 ? $"method() +{overloadCount - 1}" : "method()";
             }
             else
             {
-                description = overloadCount > 1
-                    ? $"method(...) +{overloadCount - 1}"
-                    : "method(...)";
+                description =
+                    overloadCount > 1 ? $"method(...) +{overloadCount - 1}" : "method(...)";
             }
 
-            methods.Add(CompletionItem.Create(
-                displayText: method.Name,
-                inlineDescription: description
-            ));
+            methods.Add(CompletionItem.Create(method.Name, inlineDescription: description));
         }
 
         // Combine in priority order: properties, fields, methods
@@ -457,7 +563,7 @@ public class ConsoleAutoComplete
     }
 
     /// <summary>
-    /// Get completions for global variables, script variables, types, and common keywords
+    ///     Get completions for global variables, script variables, types, and common keywords
     /// </summary>
     private List<CompletionItem> GetGlobalCompletions()
     {
@@ -466,36 +572,50 @@ public class ConsoleAutoComplete
         // Add script state variables
         if (_scriptState != null)
         {
-            foreach (var variable in _scriptState.Variables)
+            foreach (ScriptVariable? variable in _scriptState.Variables)
             {
-                completions.Add(CompletionItem.Create(
-                    displayText: variable.Name,
-                    inlineDescription: $"var: {GetFriendlyTypeName(variable.Type)}"
-                ));
+                completions.Add(
+                    CompletionItem.Create(
+                        variable.Name,
+                        inlineDescription: $"var: {GetFriendlyTypeName(variable.Type)}"
+                    )
+                );
             }
         }
 
         // Add globals
         if (_globalsInstance != null)
         {
-            var globalsType = _globalsInstance.GetType();
+            Type globalsType = _globalsInstance.GetType();
 
             // Add all public properties from globals
-            foreach (var prop in globalsType.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+            foreach (
+                PropertyInfo prop in globalsType.GetProperties(
+                    BindingFlags.Public | BindingFlags.Instance
+                )
+            )
             {
-                completions.Add(CompletionItem.Create(
-                    displayText: prop.Name,
-                    inlineDescription: $"{GetFriendlyTypeName(prop.PropertyType)}"
-                ));
+                completions.Add(
+                    CompletionItem.Create(
+                        prop.Name,
+                        inlineDescription: $"{GetFriendlyTypeName(prop.PropertyType)}"
+                    )
+                );
             }
 
             // Add all public fields from globals
-            foreach (var field in globalsType.GetFields(BindingFlags.Public | BindingFlags.Instance))
+            foreach (
+                FieldInfo field in globalsType.GetFields(
+                    BindingFlags.Public | BindingFlags.Instance
+                )
+            )
             {
-                completions.Add(CompletionItem.Create(
-                    displayText: field.Name,
-                    inlineDescription: $"{GetFriendlyTypeName(field.FieldType)}"
-                ));
+                completions.Add(
+                    CompletionItem.Create(
+                        field.Name,
+                        inlineDescription: $"{GetFriendlyTypeName(field.FieldType)}"
+                    )
+                );
             }
         }
 
@@ -503,20 +623,35 @@ public class ConsoleAutoComplete
         completions.AddRange(GetTypeCompletions());
 
         // Add common C# keywords
-        var keywords = new[] { "var", "int", "string", "bool", "float", "double", "if", "else", "for", "foreach", "while", "return", "true", "false", "null", "new" };
-        foreach (var keyword in keywords)
+        string[] keywords = new[]
         {
-            completions.Add(CompletionItem.Create(
-                displayText: keyword,
-                inlineDescription: "keyword"
-            ));
+            "var",
+            "int",
+            "string",
+            "bool",
+            "float",
+            "double",
+            "if",
+            "else",
+            "for",
+            "foreach",
+            "while",
+            "return",
+            "true",
+            "false",
+            "null",
+            "new",
+        };
+        foreach (string keyword in keywords)
+        {
+            completions.Add(CompletionItem.Create(keyword, inlineDescription: "keyword"));
         }
 
         return completions.OrderBy(c => c.DisplayText).ToList();
     }
 
     /// <summary>
-    /// Get type completions from referenced assemblies (cached for performance)
+    ///     Get type completions from referenced assemblies (cached for performance)
     /// </summary>
     private List<CompletionItem> GetTypeCompletions()
     {
@@ -530,7 +665,9 @@ public class ConsoleAutoComplete
 
         if (_referencedAssemblies == null || _importedNamespaces == null)
         {
-            _logger?.LogDebug("No referenced assemblies or namespaces set, skipping type completions");
+            _logger?.LogDebug(
+                "No referenced assemblies or namespaces set, skipping type completions"
+            );
             return typeCompletions;
         }
 
@@ -539,14 +676,15 @@ public class ConsoleAutoComplete
             // Get all public types from imported namespaces
             var typesToInclude = new HashSet<Type>();
 
-            foreach (var assembly in _referencedAssemblies)
+            foreach (Assembly assembly in _referencedAssemblies)
             {
                 try
                 {
-                    var assemblyTypes = assembly.GetExportedTypes()
+                    IEnumerable<Type> assemblyTypes = assembly
+                        .GetExportedTypes()
                         .Where(t => t.IsPublic && !t.IsNested); // Only top-level public types
 
-                    foreach (var type in assemblyTypes)
+                    foreach (Type type in assemblyTypes)
                     {
                         // Check if type is in an imported namespace (exact match only)
                         // In C#, importing "System" does NOT import "System.Globalization"
@@ -558,27 +696,32 @@ public class ConsoleAutoComplete
                 }
                 catch (Exception ex)
                 {
-                    _logger?.LogWarning(ex, "Error loading types from assembly {Assembly}", assembly.FullName);
+                    _logger?.LogWarning(
+                        ex,
+                        "Error loading types from assembly {Assembly}",
+                        assembly.FullName
+                    );
                 }
             }
 
             // Create completion items for types
-            foreach (var type in typesToInclude.OrderBy(t => t.Name))
+            foreach (Type type in typesToInclude.OrderBy(t => t.Name))
             {
-                var kind = type.IsEnum ? "enum" :
-                          type.IsInterface ? "interface" :
-                          type.IsValueType ? "struct" :
-                          type.IsAbstract && type.IsSealed ? "static class" :
-                          "class";
+                string kind =
+                    type.IsEnum ? "enum"
+                    : type.IsInterface ? "interface"
+                    : type.IsValueType ? "struct"
+                    : type.IsAbstract && type.IsSealed ? "static class"
+                    : "class";
 
-                typeCompletions.Add(CompletionItem.Create(
-                    displayText: type.Name,
-                    inlineDescription: $"{kind}"
-                ));
+                typeCompletions.Add(CompletionItem.Create(type.Name, inlineDescription: $"{kind}"));
             }
 
-            _logger?.LogInformation("Loaded {Count} type completions from {AssemblyCount} assemblies",
-                typeCompletions.Count, _referencedAssemblies.Count);
+            _logger?.LogInformation(
+                "Loaded {Count} type completions from {AssemblyCount} assemblies",
+                typeCompletions.Count,
+                _referencedAssemblies.Count
+            );
 
             // Cache the results
             _typeCompletionsCache = typeCompletions;
@@ -592,7 +735,7 @@ public class ConsoleAutoComplete
     }
 
     /// <summary>
-    /// Find a type by name from referenced assemblies
+    ///     Find a type by name from referenced assemblies
     /// </summary>
     private Type? FindTypeByName(string typeName)
     {
@@ -604,18 +747,21 @@ public class ConsoleAutoComplete
         try
         {
             // Search through all referenced assemblies for a matching type name
-            foreach (var assembly in _referencedAssemblies)
+            foreach (Assembly assembly in _referencedAssemblies)
             {
                 try
                 {
-                    var types = assembly.GetExportedTypes();
+                    Type[] types = assembly.GetExportedTypes();
 
                     // Try exact match first
-                    var exactMatch = types.FirstOrDefault(t =>
-                        t.Name.Equals(typeName, StringComparison.Ordinal) &&
-                        t.IsPublic &&
-                        _importedNamespaces.Any(ns => t.Namespace != null &&
-                            (t.Namespace == ns || t.Namespace.StartsWith(ns + "."))));
+                    Type? exactMatch = types.FirstOrDefault(t =>
+                        t.Name.Equals(typeName, StringComparison.Ordinal)
+                        && t.IsPublic
+                        && _importedNamespaces.Any(ns =>
+                            t.Namespace != null
+                            && (t.Namespace == ns || t.Namespace.StartsWith(ns + "."))
+                        )
+                    );
 
                     if (exactMatch != null)
                     {
@@ -623,11 +769,14 @@ public class ConsoleAutoComplete
                     }
 
                     // Try case-insensitive match
-                    var caseInsensitiveMatch = types.FirstOrDefault(t =>
-                        t.Name.Equals(typeName, StringComparison.OrdinalIgnoreCase) &&
-                        t.IsPublic &&
-                        _importedNamespaces.Any(ns => t.Namespace != null &&
-                            (t.Namespace == ns || t.Namespace.StartsWith(ns + "."))));
+                    Type? caseInsensitiveMatch = types.FirstOrDefault(t =>
+                        t.Name.Equals(typeName, StringComparison.OrdinalIgnoreCase)
+                        && t.IsPublic
+                        && _importedNamespaces.Any(ns =>
+                            t.Namespace != null
+                            && (t.Namespace == ns || t.Namespace.StartsWith(ns + "."))
+                        )
+                    );
 
                     if (caseInsensitiveMatch != null)
                     {
@@ -636,8 +785,12 @@ public class ConsoleAutoComplete
                 }
                 catch (Exception ex)
                 {
-                    _logger?.LogWarning(ex, "Error searching for type '{TypeName}' in assembly {Assembly}",
-                        typeName, assembly.FullName);
+                    _logger?.LogWarning(
+                        ex,
+                        "Error searching for type '{TypeName}' in assembly {Assembly}",
+                        typeName,
+                        assembly.FullName
+                    );
                 }
             }
         }
@@ -650,7 +803,7 @@ public class ConsoleAutoComplete
     }
 
     /// <summary>
-    /// Get enum values for an enum type
+    ///     Get enum values for an enum type
     /// </summary>
     private List<CompletionItem> GetEnumValues(Type enumType)
     {
@@ -658,17 +811,20 @@ public class ConsoleAutoComplete
 
         try
         {
-            var names = Enum.GetNames(enumType);
-            foreach (var name in names)
+            string[] names = Enum.GetNames(enumType);
+            foreach (string name in names)
             {
-                var value = Enum.Parse(enumType, name);
-                completions.Add(CompletionItem.Create(
-                    displayText: name,
-                    inlineDescription: $"{value} (enum value)"
-                ));
+                object value = Enum.Parse(enumType, name);
+                completions.Add(
+                    CompletionItem.Create(name, inlineDescription: $"{value} (enum value)")
+                );
             }
 
-            _logger?.LogInformation("Found {Count} enum values for {EnumType}", completions.Count, enumType.Name);
+            _logger?.LogInformation(
+                "Found {Count} enum values for {EnumType}",
+                completions.Count,
+                enumType.Name
+            );
         }
         catch (Exception ex)
         {
@@ -679,7 +835,7 @@ public class ConsoleAutoComplete
     }
 
     /// <summary>
-    /// Get static members for a type (for types like Console, Math, etc.)
+    ///     Get static members for a type (for types like Console, Math, etc.)
     /// </summary>
     private List<CompletionItem> GetStaticMembersForType(Type type)
     {
@@ -690,66 +846,80 @@ public class ConsoleAutoComplete
         try
         {
             // Static properties
-            var staticProps = type.GetProperties(BindingFlags.Public | BindingFlags.Static)
+            IOrderedEnumerable<PropertyInfo> staticProps = type.GetProperties(
+                    BindingFlags.Public | BindingFlags.Static
+                )
                 .Where(p => !p.GetIndexParameters().Any())
                 .OrderBy(p => p.Name);
 
-            foreach (var prop in staticProps)
+            foreach (PropertyInfo prop in staticProps)
             {
-                properties.Add(CompletionItem.Create(
-                    displayText: prop.Name,
-                    inlineDescription: $"static property: {GetFriendlyTypeName(prop.PropertyType)}"
-                ));
+                properties.Add(
+                    CompletionItem.Create(
+                        prop.Name,
+                        inlineDescription: $"static property: {GetFriendlyTypeName(prop.PropertyType)}"
+                    )
+                );
             }
 
             // Static fields (including const)
-            var staticFields = type.GetFields(BindingFlags.Public | BindingFlags.Static)
+            IOrderedEnumerable<FieldInfo> staticFields = type.GetFields(
+                    BindingFlags.Public | BindingFlags.Static
+                )
                 .OrderBy(f => f.Name);
 
-            foreach (var field in staticFields)
+            foreach (FieldInfo field in staticFields)
             {
-                var kind = field.IsLiteral ? "const" : "static field";
-                fields.Add(CompletionItem.Create(
-                    displayText: field.Name,
-                    inlineDescription: $"{kind}: {GetFriendlyTypeName(field.FieldType)}"
-                ));
+                string kind = field.IsLiteral ? "const" : "static field";
+                fields.Add(
+                    CompletionItem.Create(
+                        field.Name,
+                        inlineDescription: $"{kind}: {GetFriendlyTypeName(field.FieldType)}"
+                    )
+                );
             }
 
             // Static methods
-            var staticMethods = type.GetMethods(BindingFlags.Public | BindingFlags.Static)
+            IOrderedEnumerable<IGrouping<string, MethodInfo>> staticMethods = type.GetMethods(
+                    BindingFlags.Public | BindingFlags.Static
+                )
                 .Where(m => !m.IsSpecialName)
                 .GroupBy(m => m.Name)
                 .OrderBy(g => g.Key);
 
-            foreach (var group in staticMethods)
+            foreach (IGrouping<string, MethodInfo> group in staticMethods)
             {
-                var method = group.First();
-                var overloadCount = group.Count();
-                var paramCount = method.GetParameters().Length;
+                MethodInfo method = group.First();
+                int overloadCount = group.Count();
+                int paramCount = method.GetParameters().Length;
 
                 // Create compact description
                 string description;
                 if (paramCount == 0)
                 {
-                    description = overloadCount > 1
-                        ? $"static method() +{overloadCount - 1}"
-                        : "static method()";
+                    description =
+                        overloadCount > 1
+                            ? $"static method() +{overloadCount - 1}"
+                            : "static method()";
                 }
                 else
                 {
-                    description = overloadCount > 1
-                        ? $"static method(...) +{overloadCount - 1}"
-                        : "static method(...)";
+                    description =
+                        overloadCount > 1
+                            ? $"static method(...) +{overloadCount - 1}"
+                            : "static method(...)";
                 }
 
-                methods.Add(CompletionItem.Create(
-                    displayText: method.Name,
-                    inlineDescription: description
-                ));
+                methods.Add(CompletionItem.Create(method.Name, inlineDescription: description));
             }
 
-            _logger?.LogInformation("Found {PropCount} static properties, {FieldCount} static fields, {MethodCount} static methods for {TypeName}",
-                properties.Count, fields.Count, methods.Count, type.Name);
+            _logger?.LogInformation(
+                "Found {PropCount} static properties, {FieldCount} static fields, {MethodCount} static methods for {TypeName}",
+                properties.Count,
+                fields.Count,
+                methods.Count,
+                type.Name
+            );
         }
         catch (Exception ex)
         {
@@ -766,45 +936,53 @@ public class ConsoleAutoComplete
     }
 
     /// <summary>
-    /// Converts a .NET Type to a friendly C# display name.
-    /// Handles nullables, arrays, pointers, generics, tuples, and primitives.
-    /// Includes protection against excessive nesting depth.
+    ///     Converts a .NET Type to a friendly C# display name.
+    ///     Handles nullables, arrays, pointers, generics, tuples, and primitives.
+    ///     Includes protection against excessive nesting depth.
     /// </summary>
     /// <param name="type">The type to convert.</param>
     /// <returns>A C#-style type name string (e.g., "int?", "List&lt;string&gt;").</returns>
-    private string GetFriendlyTypeName(Type type) => GetFriendlyTypeName(type, 0);
+    private string GetFriendlyTypeName(Type type)
+    {
+        return GetFriendlyTypeName(type, 0);
+    }
 
     private string GetFriendlyTypeName(Type type, int depth)
     {
         // Safety: prevent stack overflow on pathologically deep generic nesting
         if (depth > 10)
+        {
             return type.Name;
+        }
 
         // Handle ByRef types (ref parameters, e.g., ref int)
         if (type.IsByRef)
         {
-            var elementType = type.GetElementType();
+            Type? elementType = type.GetElementType();
             return $"ref {GetFriendlyTypeName(elementType!, depth + 1)}";
         }
+
         // Handle nullable types (e.g., int?)
         if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
         {
-            var underlyingType = Nullable.GetUnderlyingType(type);
-            return underlyingType != null ? $"{GetFriendlyTypeName(underlyingType, depth + 1)}?" : type.Name;
+            Type? underlyingType = Nullable.GetUnderlyingType(type);
+            return underlyingType != null
+                ? $"{GetFriendlyTypeName(underlyingType, depth + 1)}?"
+                : type.Name;
         }
 
         // Handle arrays (e.g., int[], string[][])
         if (type.IsArray)
         {
-            var elementType = type.GetElementType();
-            var rankSpecifier = new string(',', type.GetArrayRank() - 1);
+            Type? elementType = type.GetElementType();
+            string rankSpecifier = new(',', type.GetArrayRank() - 1);
             return $"{GetFriendlyTypeName(elementType!, depth + 1)}[{rankSpecifier}]";
         }
 
         // Handle pointers (e.g., int*)
         if (type.IsPointer)
         {
-            var elementType = type.GetElementType();
+            Type? elementType = type.GetElementType();
             return $"{GetFriendlyTypeName(elementType!, depth + 1)}*";
         }
 
@@ -812,10 +990,13 @@ public class ConsoleAutoComplete
         // Supports nested generics like Dictionary<string, List<int>>
         if (type.IsGenericType)
         {
-            var genericType = type.GetGenericTypeDefinition();
-            var genericArgs = type.GetGenericArguments();
-            var genericTypeName = genericType.Name.Substring(0, genericType.Name.IndexOf('`'));
-            var genericArgsNames = string.Join(", ", genericArgs.Select(arg => GetFriendlyTypeName(arg, depth + 1)));
+            Type genericType = type.GetGenericTypeDefinition();
+            Type[] genericArgs = type.GetGenericArguments();
+            string genericTypeName = genericType.Name.Substring(0, genericType.Name.IndexOf('`'));
+            string genericArgsNames = string.Join(
+                ", ",
+                genericArgs.Select(arg => GetFriendlyTypeName(arg, depth + 1))
+            );
 
             // Handle ValueTuple specially (show as (int, string) instead of ValueTuple<int, string>)
             if (genericType.FullName?.StartsWith("System.ValueTuple") == true)
@@ -845,7 +1026,7 @@ public class ConsoleAutoComplete
             "Char" => "char",
             "Object" => "object",
             "Void" => "void",
-            _ => type.Name
+            _ => type.Name,
         };
     }
 }

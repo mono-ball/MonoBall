@@ -63,10 +63,10 @@ public class LruCache<TKey, TValue>
     {
         lock (_lock)
         {
-            var size = _sizeCalculator(value);
+            long size = _sizeCalculator(value);
 
             // If item already exists, remove it first
-            if (_cache.TryRemove(key, out var oldEntry))
+            if (_cache.TryRemove(key, out CacheEntry oldEntry))
             {
                 oldEntry.Node?.List?.Remove(oldEntry.Node);
                 Interlocked.Add(ref _currentSizeBytes, -oldEntry.Size);
@@ -81,10 +81,12 @@ public class LruCache<TKey, TValue>
 
             // Evict LRU items if adding this would exceed budget
             while (_currentSizeBytes + size > _maxSizeBytes && _lruList.Count > 0)
+            {
                 EvictLru();
+            }
 
             // Add new entry
-            var node = _lruList.AddFirst(key);
+            LinkedListNode<TKey> node = _lruList.AddFirst(key);
             _cache[key] = new CacheEntry(value, size, node);
             Interlocked.Add(ref _currentSizeBytes, size);
 
@@ -105,7 +107,7 @@ public class LruCache<TKey, TValue>
     {
         lock (_lock)
         {
-            if (_cache.TryGetValue(key, out var entry))
+            if (_cache.TryGetValue(key, out CacheEntry entry))
             {
                 // Move to front (most recently used)
                 if (entry.Node != null && entry.Node.List != null)
@@ -131,7 +133,7 @@ public class LruCache<TKey, TValue>
     {
         lock (_lock)
         {
-            if (_cache.TryRemove(key, out var entry))
+            if (_cache.TryRemove(key, out CacheEntry entry))
             {
                 entry.Node?.List?.Remove(entry.Node);
                 Interlocked.Add(ref _currentSizeBytes, -entry.Size);
@@ -156,8 +158,10 @@ public class LruCache<TKey, TValue>
     {
         lock (_lock)
         {
-            foreach (var entry in _cache.Values)
+            foreach (CacheEntry entry in _cache.Values)
+            {
                 entry.Value.Dispose();
+            }
 
             _cache.Clear();
             _lruList.Clear();
@@ -174,10 +178,12 @@ public class LruCache<TKey, TValue>
     {
         // Must be called within lock
         if (_lruList.Last == null)
+        {
             return;
+        }
 
-        var lruKey = _lruList.Last.Value;
-        if (_cache.TryRemove(lruKey, out var entry))
+        TKey lruKey = _lruList.Last.Value;
+        if (_cache.TryRemove(lruKey, out CacheEntry entry))
         {
             _lruList.RemoveLast();
             Interlocked.Add(ref _currentSizeBytes, -entry.Size);

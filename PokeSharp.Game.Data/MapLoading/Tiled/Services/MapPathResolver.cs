@@ -23,7 +23,10 @@ public class MapPathResolver
     public string ResolveMapDirectoryBase()
     {
         if (_assetProvider is AssetManager assetManager)
+        {
             return Path.Combine(assetManager.AssetRoot, "Data", "Maps");
+        }
+
         return Path.Combine(Directory.GetCurrentDirectory(), "Assets", "Data", "Maps");
     }
 
@@ -35,7 +38,10 @@ public class MapPathResolver
     public string ResolveAssetRoot()
     {
         if (_assetProvider is AssetManager assetManager)
+        {
             return assetManager.AssetRoot;
+        }
+
         return Path.Combine(Directory.GetCurrentDirectory(), "Assets");
     }
 }

@@ -6,7 +6,6 @@ using PokeSharp.Engine.Core.Services;
 using PokeSharp.Engine.Input.Systems;
 using PokeSharp.Engine.Rendering.Assets;
 using PokeSharp.Engine.Rendering.Systems;
-using PokeSharp.Engine.Systems.Factories;
 using PokeSharp.Engine.Systems.Management;
 using PokeSharp.Engine.Systems.Pooling;
 using PokeSharp.Game.Data.MapLoading.Tiled.Core;
@@ -14,6 +13,7 @@ using PokeSharp.Game.Data.Services;
 using PokeSharp.Game.Infrastructure.Configuration;
 using PokeSharp.Game.Infrastructure.Services;
 using PokeSharp.Game.Systems;
+using PokeSharp.Game.Systems.Warps;
 
 namespace PokeSharp.Game.Initialization.Initializers;
 
@@ -32,6 +32,9 @@ public class GameInitializer(
     MapDefinitionService mapDefinitionService
 ) : IGameInitializer
 {
+    // Store reference to MapStreamingSystem so we can wire up lifecycle manager later
+    private MapStreamingSystem? _mapStreamingSystem;
+
     /// <summary>
     ///     Gets the spatial hash system.
     /// </summary>
@@ -58,6 +61,16 @@ public class GameInitializer(
     public CollisionService CollisionService { get; private set; } = null!;
 
     /// <summary>
+    ///     Gets the warp system (detects warp tiles and creates warp requests).
+    /// </summary>
+    public WarpSystem WarpSystem { get; private set; } = null!;
+
+    /// <summary>
+    ///     Gets the warp execution system (processes warp requests and handles map loading).
+    /// </summary>
+    public WarpExecutionSystem WarpExecutionSystem { get; private set; } = null!;
+
+    /// <summary>
     ///     Gets the sprite texture loader (set after Initialize is called).
     /// </summary>
     public SpriteTextureLoader SpriteTextureLoader { get; private set; } = null!;
@@ -69,48 +82,17 @@ public class GameInitializer(
     /// <param name="inputBlocker">Optional input blocker (e.g., SceneManager) that systems can check to skip input processing.</param>
     public void Initialize(GraphicsDevice graphicsDevice, IInputBlocker? inputBlocker = null)
     {
-        // NOTE: GameDataLoader is called earlier in PokeSharpGame.Initialize
+        // NOTE: Pools are now registered in CoreServicesExtensions.AddCoreEcsServices()
+        // when EntityPoolManager is created. This eliminates temporal coupling where
+        // LayerProcessor was created with the pool manager before pools were registered.
+        //
+        // GameDataLoader is also called earlier in PokeSharpGame.Initialize
         // before GameInitializer.Initialize is invoked.
 
-        // Register and warmup pools for common entity types
-        var gameplayConfig = GameplayConfig.CreateDefault();
-        var playerPool = gameplayConfig.Pools.Player;
-        var npcPool = gameplayConfig.Pools.Npc;
-        var tilePool = gameplayConfig.Pools.Tile;
-
-        poolManager.RegisterPool(
-            "player",
-            playerPool.InitialSize,
-            playerPool.MaxSize,
-            playerPool.Warmup,
-            playerPool.AutoResize,
-            playerPool.GrowthFactor,
-            playerPool.AbsoluteMaxSize
-        );
-        poolManager.RegisterPool(
-            "npc",
-            npcPool.InitialSize,
-            npcPool.MaxSize,
-            npcPool.Warmup,
-            npcPool.AutoResize,
-            npcPool.GrowthFactor,
-            npcPool.AbsoluteMaxSize
-        );
-        poolManager.RegisterPool(
-            "tile",
-            tilePool.InitialSize,
-            tilePool.MaxSize,
-            tilePool.Warmup,
-            tilePool.AutoResize,
-            tilePool.GrowthFactor,
-            tilePool.AbsoluteMaxSize
-        );
-
         logger.LogInformation(
-            "Entity pool manager initialized with {NPCPoolSize} NPC, {PlayerPoolSize} player, and {TilePoolSize} tile pool capacity",
-            npcPool.InitialSize,
-            playerPool.InitialSize,
-            tilePool.InitialSize
+            "Entity pool manager ready with {PoolCount} pools: {Pools}",
+            poolManager.GetPoolNames().Count(),
+            string.Join(", ", poolManager.GetPoolNames())
         );
 
         // Create and register systems in priority order
@@ -118,33 +100,36 @@ public class GameInitializer(
         // === Update Systems (Logic Only) ===
 
         // SpatialHashSystem (Priority: 25) - must run early to build spatial index
-        var spatialHashLogger = loggerFactory.CreateLogger<SpatialHashSystem>();
+        ILogger<SpatialHashSystem> spatialHashLogger =
+            loggerFactory.CreateLogger<SpatialHashSystem>();
         SpatialHashSystem = new SpatialHashSystem(spatialHashLogger);
         systemManager.RegisterUpdateSystem(SpatialHashSystem);
 
         // Register pool management systems
-        var poolCleanupLogger = loggerFactory.CreateLogger<PoolCleanupSystem>();
+        ILogger<PoolCleanupSystem> poolCleanupLogger =
+            loggerFactory.CreateLogger<PoolCleanupSystem>();
         systemManager.RegisterUpdateSystem(new PoolCleanupSystem(poolManager, poolCleanupLogger));
 
         // InputSystem with Pokemon-style input buffering
         // Pass inputBlocker so InputSystem can skip processing when console/menus have exclusive input
-        var inputBuffer = gameplayConfig.InputBuffer;
-        var inputLogger = loggerFactory.CreateLogger<InputSystem>();
+        var inputConfig = GameplayConfig.CreateDefault().InputBuffer;
+        ILogger<InputSystem> inputLogger = loggerFactory.CreateLogger<InputSystem>();
         var inputSystem = new InputSystem(
-            inputBuffer.MaxBufferedInputs,
-            inputBuffer.TimeoutSeconds,
+            inputConfig.MaxBufferedInputs,
+            inputConfig.TimeoutSeconds,
             inputLogger,
             inputBlocker
         );
         systemManager.RegisterUpdateSystem(inputSystem);
 
         // Register CollisionService (not a system, but a service used by MovementSystem)
-        var collisionServiceLogger = loggerFactory.CreateLogger<CollisionService>();
+        ILogger<CollisionService> collisionServiceLogger =
+            loggerFactory.CreateLogger<CollisionService>();
         CollisionService = new CollisionService(SpatialHashSystem, collisionServiceLogger);
         CollisionService.SetWorld(world);
 
         // Register MovementSystem (Priority: 100, handles movement and collision checking)
-        var movementLogger = loggerFactory.CreateLogger<MovementSystem>();
+        ILogger<MovementSystem> movementLogger = loggerFactory.CreateLogger<MovementSystem>();
         var movementSystem = new MovementSystem(
             CollisionService,
             SpatialHashSystem,
@@ -152,30 +137,45 @@ public class GameInitializer(
         );
         systemManager.RegisterUpdateSystem(movementSystem);
 
+        // Register WarpSystem (Priority: 110, detects when player steps on warp tiles)
+        ILogger<WarpSystem> warpLogger = loggerFactory.CreateLogger<WarpSystem>();
+        WarpSystem = new WarpSystem(warpLogger);
+        systemManager.RegisterUpdateSystem(WarpSystem);
+
+        // Register WarpExecutionSystem (Priority: 115, processes pending warp requests)
+        ILogger<WarpExecutionSystem> warpExecLogger = loggerFactory.CreateLogger<WarpExecutionSystem>();
+        WarpExecutionSystem = new WarpExecutionSystem(warpExecLogger);
+        systemManager.RegisterUpdateSystem(WarpExecutionSystem);
+
         // Register PathfindingSystem (Priority: 300, processes MovementRoute waypoints with A* pathfinding)
-        var pathfindingLogger = loggerFactory.CreateLogger<PathfindingSystem>();
+        ILogger<PathfindingSystem> pathfindingLogger =
+            loggerFactory.CreateLogger<PathfindingSystem>();
         var pathfindingSystem = new PathfindingSystem(SpatialHashSystem, pathfindingLogger);
         systemManager.RegisterUpdateSystem(pathfindingSystem);
 
         // Register MapStreamingSystem (Priority: 100, same as movement for seamless streaming)
-        var mapStreamingLogger = loggerFactory.CreateLogger<MapStreamingSystem>();
-        var mapStreamingSystem = new MapStreamingSystem(
+        ILogger<MapStreamingSystem> mapStreamingLogger =
+            loggerFactory.CreateLogger<MapStreamingSystem>();
+        _mapStreamingSystem = new MapStreamingSystem(
             mapLoader,
             mapDefinitionService,
             mapStreamingLogger
         );
-        systemManager.RegisterUpdateSystem(mapStreamingSystem);
+        systemManager.RegisterUpdateSystem(_mapStreamingSystem);
 
         // Register CameraFollowSystem (Priority: 825, after PathfindingSystem, before TileAnimation)
-        var cameraFollowLogger = loggerFactory.CreateLogger<CameraFollowSystem>();
+        ILogger<CameraFollowSystem> cameraFollowLogger =
+            loggerFactory.CreateLogger<CameraFollowSystem>();
         systemManager.RegisterUpdateSystem(new CameraFollowSystem(cameraFollowLogger));
 
         // Register TileAnimationSystem (Priority: 850, animates water/grass tiles between Animation and Render)
-        var tileAnimLogger = loggerFactory.CreateLogger<TileAnimationSystem>();
+        ILogger<TileAnimationSystem> tileAnimLogger =
+            loggerFactory.CreateLogger<TileAnimationSystem>();
         systemManager.RegisterUpdateSystem(new TileAnimationSystem(tileAnimLogger));
 
         // Register SpriteAnimationSystem (Priority: 875, updates NPC/player sprite frames from manifests)
-        var spriteAnimLogger = loggerFactory.CreateLogger<SpriteAnimationSystem>();
+        ILogger<SpriteAnimationSystem> spriteAnimLogger =
+            loggerFactory.CreateLogger<SpriteAnimationSystem>();
         systemManager.RegisterUpdateSystem(
             new SpriteAnimationSystem(spriteLoader, spriteAnimLogger)
         );
@@ -184,14 +184,16 @@ public class GameInitializer(
         // It requires ScriptService and behavior registry to be set up first
 
         // Register RelationshipSystem (Priority: 950, validates entity relationships and cleans up broken references)
-        var relationshipLogger = loggerFactory.CreateLogger<RelationshipSystem>();
+        ILogger<RelationshipSystem> relationshipLogger =
+            loggerFactory.CreateLogger<RelationshipSystem>();
         var relationshipSystem = new RelationshipSystem(relationshipLogger);
         systemManager.RegisterUpdateSystem(relationshipSystem);
 
         // === Render Systems (Rendering Only) ===
 
         // Register ElevationRenderSystem (Priority: 1000) - unified rendering with Z-order sorting
-        var renderLogger = loggerFactory.CreateLogger<ElevationRenderSystem>();
+        ILogger<ElevationRenderSystem> renderLogger =
+            loggerFactory.CreateLogger<ElevationRenderSystem>();
         RenderSystem = new ElevationRenderSystem(graphicsDevice, assetManager, renderLogger);
         systemManager.RegisterRenderSystem(RenderSystem);
 
@@ -211,14 +213,32 @@ public class GameInitializer(
         SpriteTextureLoader =
             spriteTextureLoader ?? throw new ArgumentNullException(nameof(spriteTextureLoader));
 
-        // Initialize MapLifecycleManager with SpriteTextureLoader dependency
-        var mapLifecycleLogger = loggerFactory.CreateLogger<MapLifecycleManager>();
+        // Initialize MapLifecycleManager with SpriteTextureLoader, SpatialHashSystem, and EntityPoolManager dependencies
+        ILogger<MapLifecycleManager> mapLifecycleLogger =
+            loggerFactory.CreateLogger<MapLifecycleManager>();
         MapLifecycleManager = new MapLifecycleManager(
             world,
             assetManager,
             spriteTextureLoader,
+            SpatialHashSystem,
+            poolManager,
             mapLifecycleLogger
         );
-        logger.LogInformation("MapLifecycleManager initialized with sprite texture support");
+        logger.LogInformation("MapLifecycleManager initialized with sprite texture, spatial hash, and pooling support");
+
+        // Wire up MapLifecycleManager to MapStreamingSystem for proper entity cleanup during unloading
+        if (_mapStreamingSystem != null)
+        {
+            _mapStreamingSystem.SetLifecycleManager(MapLifecycleManager);
+            logger.LogInformation(
+                "MapStreamingSystem wired to MapLifecycleManager for entity cleanup"
+            );
+        }
+        else
+        {
+            logger.LogWarning(
+                "MapStreamingSystem not available - entity cleanup on map unload may not work"
+            );
+        }
     }
 }

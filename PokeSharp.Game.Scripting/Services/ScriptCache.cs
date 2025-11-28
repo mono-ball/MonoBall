@@ -30,13 +30,14 @@ public class ScriptCache
     /// <param name="compiled">The compiled script if found.</param>
     /// <param name="scriptType">The script type if found.</param>
     /// <returns>True if the script is cached, false otherwise.</returns>
-    public bool TryGetCompiled(
-        string scriptPath,
-        out Script<object> compiled,
-        out Type? scriptType
-    )
+    public bool TryGetCompiled(string scriptPath, out Script<object> compiled, out Type? scriptType)
     {
-        if (_compiledScripts.TryGetValue(scriptPath, out var cached))
+        if (
+            _compiledScripts.TryGetValue(
+                scriptPath,
+                out (Script<object> compiled, Type? scriptType) cached
+            )
+        )
         {
             compiled = cached.compiled;
             scriptType = cached.scriptType;
@@ -118,4 +119,3 @@ public class ScriptCache
         return _scriptInstances.Values;
     }
 }
-

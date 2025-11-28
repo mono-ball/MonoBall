@@ -1,4 +1,3 @@
-using Microsoft.Xna.Framework;
 using PokeSharp.Engine.UI.Debug.Components.Controls;
 using PokeSharp.Engine.UI.Debug.Core;
 using PokeSharp.Engine.UI.Debug.Layout;
@@ -6,31 +5,34 @@ using PokeSharp.Engine.UI.Debug.Layout;
 namespace PokeSharp.Engine.UI.Debug.Components.Debug;
 
 /// <summary>
-/// Builder for creating ConsolePanel with customizable components.
-/// Allows dependency injection for testing and custom configurations.
+///     Builder for creating ConsolePanel with customizable components.
+///     Allows dependency injection for testing and custom configurations.
 /// </summary>
 public class ConsolePanelBuilder
 {
-    private TextBuffer? _outputBuffer;
     private TextEditor? _commandEditor;
-    private SuggestionsDropdown? _suggestionsDropdown;
-    private HintBar? _hintBar;
-    private SearchBar? _searchBar;
-    private HintBar? _searchHintBar;
-    private ParameterHintTooltip? _parameterHints;
     private DocumentationPopup? _documentationPopup;
+    private HintBar? _hintBar;
+    private bool _loadHistoryFromDisk = true;
 
     private int _maxOutputLines = 5000;
     private int _maxVisibleSuggestions = 8;
-    private bool _loadHistoryFromDisk = true;
+    private TextBuffer? _outputBuffer;
+    private ParameterHintTooltip? _parameterHints;
+    private SearchBar? _searchBar;
+    private HintBar? _searchHintBar;
+    private SuggestionsDropdown? _suggestionsDropdown;
 
     /// <summary>
-    /// Creates a new ConsolePanelBuilder with default settings.
+    ///     Creates a new ConsolePanelBuilder with default settings.
     /// </summary>
-    public static ConsolePanelBuilder Create() => new();
+    public static ConsolePanelBuilder Create()
+    {
+        return new ConsolePanelBuilder();
+    }
 
     /// <summary>
-    /// Sets a custom output buffer component.
+    ///     Sets a custom output buffer component.
     /// </summary>
     public ConsolePanelBuilder WithOutputBuffer(TextBuffer outputBuffer)
     {
@@ -39,7 +41,7 @@ public class ConsolePanelBuilder
     }
 
     /// <summary>
-    /// Sets a custom command editor component.
+    ///     Sets a custom command editor component.
     /// </summary>
     public ConsolePanelBuilder WithCommandEditor(TextEditor commandEditor)
     {
@@ -48,7 +50,7 @@ public class ConsolePanelBuilder
     }
 
     /// <summary>
-    /// Sets a custom suggestions dropdown component.
+    ///     Sets a custom suggestions dropdown component.
     /// </summary>
     public ConsolePanelBuilder WithSuggestionsDropdown(SuggestionsDropdown dropdown)
     {
@@ -57,7 +59,7 @@ public class ConsolePanelBuilder
     }
 
     /// <summary>
-    /// Sets a custom hint bar component.
+    ///     Sets a custom hint bar component.
     /// </summary>
     public ConsolePanelBuilder WithHintBar(HintBar hintBar)
     {
@@ -66,7 +68,7 @@ public class ConsolePanelBuilder
     }
 
     /// <summary>
-    /// Sets a custom search bar component.
+    ///     Sets a custom search bar component.
     /// </summary>
     public ConsolePanelBuilder WithSearchBar(SearchBar searchBar)
     {
@@ -75,7 +77,7 @@ public class ConsolePanelBuilder
     }
 
     /// <summary>
-    /// Sets a custom search hint bar component.
+    ///     Sets a custom search hint bar component.
     /// </summary>
     public ConsolePanelBuilder WithSearchHintBar(HintBar searchHintBar)
     {
@@ -84,7 +86,7 @@ public class ConsolePanelBuilder
     }
 
     /// <summary>
-    /// Sets a custom parameter hints component.
+    ///     Sets a custom parameter hints component.
     /// </summary>
     public ConsolePanelBuilder WithParameterHints(ParameterHintTooltip parameterHints)
     {
@@ -93,7 +95,7 @@ public class ConsolePanelBuilder
     }
 
     /// <summary>
-    /// Sets a custom documentation popup component.
+    ///     Sets a custom documentation popup component.
     /// </summary>
     public ConsolePanelBuilder WithDocumentationPopup(DocumentationPopup popup)
     {
@@ -102,7 +104,7 @@ public class ConsolePanelBuilder
     }
 
     /// <summary>
-    /// Sets the maximum number of output lines to retain.
+    ///     Sets the maximum number of output lines to retain.
     /// </summary>
     public ConsolePanelBuilder WithMaxOutputLines(int maxLines)
     {
@@ -111,7 +113,7 @@ public class ConsolePanelBuilder
     }
 
     /// <summary>
-    /// Sets the maximum number of visible suggestions in the dropdown.
+    ///     Sets the maximum number of visible suggestions in the dropdown.
     /// </summary>
     public ConsolePanelBuilder WithMaxVisibleSuggestions(int maxVisible)
     {
@@ -120,7 +122,7 @@ public class ConsolePanelBuilder
     }
 
     /// <summary>
-    /// Sets whether to load command history from disk on startup.
+    ///     Sets whether to load command history from disk on startup.
     /// </summary>
     public ConsolePanelBuilder WithHistoryPersistence(bool enabled)
     {
@@ -129,7 +131,7 @@ public class ConsolePanelBuilder
     }
 
     /// <summary>
-    /// Builds the ConsolePanel with the configured components.
+    ///     Builds the ConsolePanel with the configured components.
     /// </summary>
     public ConsolePanel Build()
     {
@@ -157,11 +159,7 @@ public class ConsolePanelBuilder
             // BackgroundColor uses theme fallback - don't set explicitly
             AutoScroll = true,
             MaxLines = _maxOutputLines,
-            Constraint = new LayoutConstraint
-            {
-                Anchor = Anchor.StretchTop,
-                Height = 400
-            }
+            Constraint = new LayoutConstraint { Anchor = Anchor.StretchTop, Height = 400 },
         };
     }
 
@@ -169,7 +167,7 @@ public class ConsolePanelBuilder
     {
         return new TextEditor("console_input")
         {
-            Prompt = Core.NerdFontIcons.Prompt,
+            Prompt = NerdFontIcons.Prompt,
             // BackgroundColor uses theme fallback - don't set explicitly
             MinVisibleLines = 1,
             MaxVisibleLines = 10,
@@ -177,8 +175,8 @@ public class ConsolePanelBuilder
             {
                 Anchor = Anchor.StretchBottom,
                 OffsetY = 0,
-                Height = 30 // Fixed height
-            }
+                Height = 30, // Fixed height
+            },
         };
     }
 
@@ -191,12 +189,14 @@ public class ConsolePanelBuilder
             {
                 Anchor = Anchor.BottomLeft,
                 OffsetX = ThemeManager.Current.ComponentGap,
-                OffsetY = -(ThemeManager.Current.MinInputHeight + ThemeManager.Current.ComponentGap),
+                OffsetY = -(
+                    ThemeManager.Current.MinInputHeight + ThemeManager.Current.ComponentGap
+                ),
                 WidthPercent = 0.5f,
                 MinWidth = 400f,
                 MaxWidth = 800f,
-                Height = 0
-            }
+                Height = 0,
+            },
         };
     }
 
@@ -209,8 +209,8 @@ public class ConsolePanelBuilder
             {
                 Anchor = Anchor.StretchBottom,
                 OffsetY = 0,
-                Height = 0
-            }
+                Height = 0,
+            },
         };
     }
 
@@ -224,8 +224,8 @@ public class ConsolePanelBuilder
             {
                 Anchor = Anchor.StretchBottom,
                 OffsetY = 0,
-                Height = 30 // Fixed height
-            }
+                Height = 30, // Fixed height
+            },
         };
     }
 
@@ -238,8 +238,8 @@ public class ConsolePanelBuilder
             {
                 Anchor = Anchor.StretchBottom,
                 OffsetY = 0,
-                Height = 0
-            }
+                Height = 0,
+            },
         };
     }
 
@@ -254,8 +254,8 @@ public class ConsolePanelBuilder
                 Height = 0,
                 Width = 0,
                 MaxWidth = 800f,
-                MaxHeight = 300f
-            }
+                MaxHeight = 300f,
+            },
         };
     }
 
@@ -272,9 +272,8 @@ public class ConsolePanelBuilder
                 MinWidth = 400f,
                 MaxWidth = 600f,
                 HeightPercent = 0.7f,
-                Height = 0
-            }
+                Height = 0,
+            },
         };
     }
 }
-

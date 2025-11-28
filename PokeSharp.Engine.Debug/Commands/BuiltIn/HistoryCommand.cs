@@ -1,16 +1,18 @@
-using System.Text;
+using PokeSharp.Engine.UI.Debug.Core;
 
 namespace PokeSharp.Engine.Debug.Commands.BuiltIn;
 
 /// <summary>
-/// Manages command history (view, clear, save, load).
+///     Manages command history (view, clear, save, load).
 /// </summary>
 [ConsoleCommand("history", "Manage command history")]
 public class HistoryCommand : IConsoleCommand
 {
     public string Name => "history";
     public string Description => "Manage command history";
-    public string Usage => @"history [subcommand]
+
+    public string Usage =>
+        @"history [subcommand]
   history        - Show command history
   history clear  - Clear history
   history save   - Save history to disk
@@ -25,7 +27,7 @@ public class HistoryCommand : IConsoleCommand
             return Task.CompletedTask;
         }
 
-        var subcommand = args[0].ToLower();
+        string subcommand = args[0].ToLower();
 
         switch (subcommand)
         {
@@ -43,7 +45,10 @@ public class HistoryCommand : IConsoleCommand
 
             default:
                 context.WriteLine($"Unknown subcommand: '{subcommand}'", context.Theme.Error);
-                context.WriteLine("Use 'help history' for usage information", context.Theme.TextSecondary);
+                context.WriteLine(
+                    "Use 'help history' for usage information",
+                    context.Theme.TextSecondary
+                );
                 break;
         }
 
@@ -52,8 +57,8 @@ public class HistoryCommand : IConsoleCommand
 
     private void ShowHistory(IConsoleContext context)
     {
-        var theme = context.Theme;
-        var history = context.GetCommandHistory();
+        UITheme theme = context.Theme;
+        IReadOnlyList<string> history = context.GetCommandHistory();
 
         if (history.Count == 0)
         {
@@ -61,32 +66,40 @@ public class HistoryCommand : IConsoleCommand
             return;
         }
 
-        context.WriteLine("══════════════════════════════════════════════════════════════════", theme.Success);
+        context.WriteLine(
+            "══════════════════════════════════════════════════════════════════",
+            theme.Success
+        );
         context.WriteLine($"  COMMAND HISTORY ({history.Count} commands)", theme.Success);
-        context.WriteLine("══════════════════════════════════════════════════════════════════", theme.Success);
+        context.WriteLine(
+            "══════════════════════════════════════════════════════════════════",
+            theme.Success
+        );
 
         // Show most recent first (reverse order)
         for (int i = history.Count - 1; i >= 0; i--)
         {
-            var index = i + 1;
-            var command = history[i];
+            int index = i + 1;
+            string command = history[i];
 
             // Truncate long commands
-            var displayCommand = command.Length > 80
-                ? command.Substring(0, 77) + "..."
-                : command;
+            string displayCommand =
+                command.Length > 80 ? command.Substring(0, 77) + "..." : command;
 
-            context.WriteLine($"  {index,3}. {displayCommand}", theme.TextPrimary);
+            context.WriteLine($"  {index, 3}. {displayCommand}", theme.TextPrimary);
         }
 
         context.WriteLine("");
-        context.WriteLine($"TIP: Use Up/Down arrows to navigate history or Ctrl+R to search", theme.Success);
+        context.WriteLine(
+            "TIP: Use Up/Down arrows to navigate history or Ctrl+R to search",
+            theme.Success
+        );
     }
 
     private void ClearHistory(IConsoleContext context)
     {
-        var theme = context.Theme;
-        var countBefore = context.GetCommandHistory().Count;
+        UITheme theme = context.Theme;
+        int countBefore = context.GetCommandHistory().Count;
 
         context.ClearCommandHistory();
 
@@ -95,8 +108,8 @@ public class HistoryCommand : IConsoleCommand
 
     private void SaveHistory(IConsoleContext context)
     {
-        var theme = context.Theme;
-        var count = context.GetCommandHistory().Count;
+        UITheme theme = context.Theme;
+        int count = context.GetCommandHistory().Count;
 
         context.SaveCommandHistory();
 
@@ -105,12 +118,11 @@ public class HistoryCommand : IConsoleCommand
 
     private void LoadHistory(IConsoleContext context)
     {
-        var theme = context.Theme;
+        UITheme theme = context.Theme;
 
         context.LoadCommandHistory();
 
-        var count = context.GetCommandHistory().Count;
+        int count = context.GetCommandHistory().Count;
         context.WriteLine($"Loaded {count} command(s) from disk", theme.Success);
     }
 }
-

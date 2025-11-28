@@ -3,7 +3,7 @@ using PokeSharp.Engine.Core.Services;
 using PokeSharp.Engine.Rendering.Systems;
 using PokeSharp.Engine.Systems.Pooling;
 using PokeSharp.Game.Systems;
-using PokeSharp.Game.Systems.Services;
+using PokeSharp.Game.Systems.Warps;
 
 namespace PokeSharp.Game.Initialization.Initializers;
 
@@ -38,6 +38,16 @@ public interface IGameInitializer
     CollisionService CollisionService { get; }
 
     /// <summary>
+    ///     Gets the warp system (detects warp tiles and creates warp requests).
+    /// </summary>
+    WarpSystem WarpSystem { get; }
+
+    /// <summary>
+    ///     Gets the warp execution system (processes warp requests and handles map loading).
+    /// </summary>
+    WarpExecutionSystem WarpExecutionSystem { get; }
+
+    /// <summary>
     ///     Gets the sprite texture loader (set after Initialize is called).
     /// </summary>
     SpriteTextureLoader SpriteTextureLoader { get; }
@@ -56,4 +66,3 @@ public interface IGameInitializer
     /// <param name="spriteTextureLoader">The sprite texture loader instance.</param>
     void SetSpriteTextureLoader(SpriteTextureLoader spriteTextureLoader);
 }
-

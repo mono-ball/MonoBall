@@ -1,6 +1,5 @@
-using Microsoft.Extensions.Logging;
-using System;
 using System.Text.RegularExpressions;
+using Microsoft.Extensions.Logging;
 
 namespace PokeSharp.Engine.Debug.Logging;
 
@@ -9,21 +8,23 @@ namespace PokeSharp.Engine.Debug.Logging;
 /// </summary>
 public class ConsoleLogger : ILogger
 {
-    private readonly string _categoryName;
     private readonly Action<LogLevel, string, string> _addLogEntry;
+    private readonly string _categoryName;
     private readonly Func<LogLevel, bool> _isEnabled;
 
     public ConsoleLogger(
         string categoryName,
         Action<LogLevel, string, string> addLogEntry,
-        Func<LogLevel, bool> isEnabled)
+        Func<LogLevel, bool> isEnabled
+    )
     {
         _categoryName = categoryName;
         _addLogEntry = addLogEntry;
         _isEnabled = isEnabled;
     }
 
-    public IDisposable? BeginScope<TState>(TState state) where TState : notnull
+    public IDisposable? BeginScope<TState>(TState state)
+        where TState : notnull
     {
         return null; // Scopes not supported for now
     }
@@ -33,34 +34,45 @@ public class ConsoleLogger : ILogger
         return _isEnabled(logLevel);
     }
 
-    public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
+    public void Log<TState>(
+        LogLevel logLevel,
+        EventId eventId,
+        TState state,
+        Exception? exception,
+        Func<TState, Exception?, string> formatter
+    )
     {
         if (!IsEnabled(logLevel))
+        {
             return;
+        }
 
-        var message = formatter(state, exception);
+        string message = formatter(state, exception);
         if (string.IsNullOrEmpty(message) && exception == null)
+        {
             return;
+        }
 
         // Strip Serilog/Spectre.Console markup tags (e.g., [cyan], [red], etc.)
         message = StripMarkupTags(message);
 
         // Get short category name for display
-        var category = GetShortCategoryName(_categoryName);
+        string category = GetShortCategoryName(_categoryName);
 
         // Add to Logs panel only (not console output)
-        var logMessage = exception != null ? $"{message}\n{exception}" : message;
+        string logMessage = exception != null ? $"{message}\n{exception}" : message;
         _addLogEntry(logLevel, logMessage, category);
     }
 
     private static string GetShortCategoryName(string category)
     {
         // Shorten category name if it's too long
-        var lastDot = category.LastIndexOf('.');
+        int lastDot = category.LastIndexOf('.');
         if (lastDot >= 0 && lastDot < category.Length - 1)
         {
             return category.Substring(lastDot + 1);
         }
+
         return category;
     }
 
@@ -71,7 +83,9 @@ public class ConsoleLogger : ILogger
     private static string StripMarkupTags(string message)
     {
         if (string.IsNullOrEmpty(message))
+        {
             return message;
+        }
 
         // Remove markup tags like [cyan], [red], [/], [skyblue1], [cyan bold], etc.
         // Pattern matches:

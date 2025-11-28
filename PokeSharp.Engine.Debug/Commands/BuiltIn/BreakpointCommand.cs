@@ -1,17 +1,21 @@
 using Microsoft.Extensions.Logging;
+using Microsoft.Xna.Framework;
 using PokeSharp.Engine.Debug.Breakpoints;
+using PokeSharp.Engine.UI.Debug.Core;
 
 namespace PokeSharp.Engine.Debug.Commands.BuiltIn;
 
 /// <summary>
-/// Command to manage breakpoints that pause the game when conditions are met.
+///     Command to manage breakpoints that pause the game when conditions are met.
 /// </summary>
 [ConsoleCommand("break", "Manage breakpoints that pause the game")]
 public class BreakpointCommand : IConsoleCommand
 {
     public string Name => "break";
     public string Description => "Manage breakpoints that pause the game when conditions are met";
-    public string Usage => @"break                           - List all breakpoints
+
+    public string Usage =>
+        @"break                           - List all breakpoints
 break when <expression>         - Pause when C# expression becomes true
 break log <level>               - Pause on log level (error, warning, info)
 break watch <name>              - Pause when watch alert triggers
@@ -33,8 +37,8 @@ Use 'Help()' in console for full API reference.";
 
     public Task ExecuteAsync(IConsoleContext context, string[] args)
     {
-        var theme = context.Theme;
-        var breakpoints = context.Breakpoints;
+        UITheme theme = context.Theme;
+        IBreakpointOperations? breakpoints = context.Breakpoints;
 
         if (breakpoints == null)
         {
@@ -49,7 +53,7 @@ Use 'Help()' in console for full API reference.";
             return Task.CompletedTask;
         }
 
-        var subCommand = args[0].ToLower();
+        string subCommand = args[0].ToLower();
 
         switch (subCommand)
         {
@@ -100,9 +104,13 @@ Use 'Help()' in console for full API reference.";
         return Task.CompletedTask;
     }
 
-    private static void HandleWhen(IConsoleContext context, string[] args, IBreakpointOperations breakpoints)
+    private static void HandleWhen(
+        IConsoleContext context,
+        string[] args,
+        IBreakpointOperations breakpoints
+    )
     {
-        var theme = context.Theme;
+        UITheme theme = context.Theme;
 
         if (args.Length < 2)
         {
@@ -115,25 +123,35 @@ Use 'Help()' in console for full API reference.";
         }
 
         // Join all args after "when" as the expression
-        var expression = string.Join(" ", args.Skip(1));
+        string expression = string.Join(" ", args.Skip(1));
 
-        var id = breakpoints.AddExpressionBreakpoint(expression);
+        int id = breakpoints.AddExpressionBreakpoint(expression);
         context.WriteLine($"Breakpoint #{id} added: when {expression}", theme.Success);
-        context.WriteLine("Game will pause when this expression becomes true.", theme.TextSecondary);
+        context.WriteLine(
+            "Game will pause when this expression becomes true.",
+            theme.TextSecondary
+        );
     }
 
-    private static void HandleLog(IConsoleContext context, string[] args, IBreakpointOperations breakpoints)
+    private static void HandleLog(
+        IConsoleContext context,
+        string[] args,
+        IBreakpointOperations breakpoints
+    )
     {
-        var theme = context.Theme;
+        UITheme theme = context.Theme;
 
         if (args.Length < 2)
         {
             context.WriteLine("Usage: break log <level>", theme.Warning);
-            context.WriteLine("Levels: trace, debug, info, warning, error, critical", theme.TextSecondary);
+            context.WriteLine(
+                "Levels: trace, debug, info, warning, error, critical",
+                theme.TextSecondary
+            );
             return;
         }
 
-        var levelStr = args[1].ToLower();
+        string levelStr = args[1].ToLower();
         LogLevel? level = levelStr switch
         {
             "trace" => LogLevel.Trace,
@@ -142,24 +160,34 @@ Use 'Help()' in console for full API reference.";
             "warn" or "warning" => LogLevel.Warning,
             "error" => LogLevel.Error,
             "critical" or "fatal" => LogLevel.Critical,
-            _ => null
+            _ => null,
         };
 
         if (level == null)
         {
             context.WriteLine($"Unknown log level: {levelStr}", theme.Error);
-            context.WriteLine("Valid levels: trace, debug, info, warning, error, critical", theme.TextSecondary);
+            context.WriteLine(
+                "Valid levels: trace, debug, info, warning, error, critical",
+                theme.TextSecondary
+            );
             return;
         }
 
-        var id = breakpoints.AddLogLevelBreakpoint(level.Value);
+        int id = breakpoints.AddLogLevelBreakpoint(level.Value);
         context.WriteLine($"Breakpoint #{id} added: on log {level.Value}+", theme.Success);
-        context.WriteLine($"Game will pause when a {level.Value} or higher log is written.", theme.TextSecondary);
+        context.WriteLine(
+            $"Game will pause when a {level.Value} or higher log is written.",
+            theme.TextSecondary
+        );
     }
 
-    private static void HandleWatch(IConsoleContext context, string[] args, IBreakpointOperations breakpoints)
+    private static void HandleWatch(
+        IConsoleContext context,
+        string[] args,
+        IBreakpointOperations breakpoints
+    )
     {
-        var theme = context.Theme;
+        UITheme theme = context.Theme;
 
         if (args.Length < 2)
         {
@@ -168,7 +196,7 @@ Use 'Help()' in console for full API reference.";
             return;
         }
 
-        var watchName = args[1];
+        string watchName = args[1];
 
         // Create a callback that checks if the watch has an alert
         Func<bool> alertChecker = () =>
@@ -183,16 +211,23 @@ Use 'Help()' in console for full API reference.";
             }
         };
 
-        var id = breakpoints.AddWatchAlertBreakpoint(watchName, alertChecker);
+        int id = breakpoints.AddWatchAlertBreakpoint(watchName, alertChecker);
         context.WriteLine($"Breakpoint #{id} added: on watch alert '{watchName}'", theme.Success);
-        context.WriteLine("Game will pause when this watch's alert condition triggers.", theme.TextSecondary);
+        context.WriteLine(
+            "Game will pause when this watch's alert condition triggers.",
+            theme.TextSecondary
+        );
     }
 
-    private static void HandleEnable(IConsoleContext context, string[] args, IBreakpointOperations breakpoints)
+    private static void HandleEnable(
+        IConsoleContext context,
+        string[] args,
+        IBreakpointOperations breakpoints
+    )
     {
-        var theme = context.Theme;
+        UITheme theme = context.Theme;
 
-        if (args.Length < 2 || !int.TryParse(args[1], out var id))
+        if (args.Length < 2 || !int.TryParse(args[1], out int id))
         {
             context.WriteLine("Usage: break enable <id>", theme.Warning);
             return;
@@ -208,11 +243,15 @@ Use 'Help()' in console for full API reference.";
         }
     }
 
-    private static void HandleDisable(IConsoleContext context, string[] args, IBreakpointOperations breakpoints)
+    private static void HandleDisable(
+        IConsoleContext context,
+        string[] args,
+        IBreakpointOperations breakpoints
+    )
     {
-        var theme = context.Theme;
+        UITheme theme = context.Theme;
 
-        if (args.Length < 2 || !int.TryParse(args[1], out var id))
+        if (args.Length < 2 || !int.TryParse(args[1], out int id))
         {
             context.WriteLine("Usage: break disable <id>", theme.Warning);
             return;
@@ -228,11 +267,15 @@ Use 'Help()' in console for full API reference.";
         }
     }
 
-    private static void HandleDelete(IConsoleContext context, string[] args, IBreakpointOperations breakpoints)
+    private static void HandleDelete(
+        IConsoleContext context,
+        string[] args,
+        IBreakpointOperations breakpoints
+    )
     {
-        var theme = context.Theme;
+        UITheme theme = context.Theme;
 
-        if (args.Length < 2 || !int.TryParse(args[1], out var id))
+        if (args.Length < 2 || !int.TryParse(args[1], out int id))
         {
             context.WriteLine("Usage: break delete <id>", theme.Warning);
             return;
@@ -250,8 +293,8 @@ Use 'Help()' in console for full API reference.";
 
     private static void HandleClear(IConsoleContext context, IBreakpointOperations breakpoints)
     {
-        var theme = context.Theme;
-        var count = breakpoints.Breakpoints.Count;
+        UITheme theme = context.Theme;
+        int count = breakpoints.Breakpoints.Count;
 
         if (count == 0)
         {
@@ -265,7 +308,7 @@ Use 'Help()' in console for full API reference.";
 
     private static void HandleToggle(IConsoleContext context, IBreakpointOperations breakpoints)
     {
-        var theme = context.Theme;
+        UITheme theme = context.Theme;
         breakpoints.IsEnabled = !breakpoints.IsEnabled;
 
         if (breakpoints.IsEnabled)
@@ -275,14 +318,20 @@ Use 'Help()' in console for full API reference.";
         else
         {
             context.WriteLine("Breakpoint evaluation DISABLED", theme.Warning);
-            context.WriteLine("Breakpoints will not trigger until re-enabled.", theme.TextSecondary);
+            context.WriteLine(
+                "Breakpoints will not trigger until re-enabled.",
+                theme.TextSecondary
+            );
         }
     }
 
-    private static void ShowBreakpointList(IConsoleContext context, IBreakpointOperations breakpoints)
+    private static void ShowBreakpointList(
+        IConsoleContext context,
+        IBreakpointOperations breakpoints
+    )
     {
-        var theme = context.Theme;
-        var allBreakpoints = breakpoints.Breakpoints;
+        UITheme theme = context.Theme;
+        IReadOnlyCollection<IBreakpoint> allBreakpoints = breakpoints.Breakpoints;
 
         context.WriteLine("═══ Breakpoints ═══", theme.Info);
 
@@ -290,24 +339,33 @@ Use 'Help()' in console for full API reference.";
         {
             context.WriteLine("  No breakpoints set.", theme.TextSecondary);
             context.WriteLine("", theme.TextPrimary);
-            context.WriteLine("Use 'break when <expr>' to add an expression breakpoint", theme.TextDim);
+            context.WriteLine(
+                "Use 'break when <expr>' to add an expression breakpoint",
+                theme.TextDim
+            );
             context.WriteLine("Use 'break log error' to pause on errors", theme.TextDim);
             return;
         }
 
-        var (total, enabled, disabled, totalHits) = breakpoints.GetStatistics();
+        (int total, int enabled, int disabled, int totalHits) = breakpoints.GetStatistics();
 
-        foreach (var bp in allBreakpoints)
+        foreach (IBreakpoint bp in allBreakpoints)
         {
-            var status = bp.IsEnabled ? "●" : "○";
-            var statusColor = bp.IsEnabled ? theme.Success : theme.TextSecondary;
-            var hitInfo = bp.HitCount > 0 ? $" (hits: {bp.HitCount})" : "";
+            string status = bp.IsEnabled ? "●" : "○";
+            Color statusColor = bp.IsEnabled ? theme.Success : theme.TextSecondary;
+            string hitInfo = bp.HitCount > 0 ? $" (hits: {bp.HitCount})" : "";
 
-            context.WriteLine($"  {status} #{bp.Id} [{bp.Type}] {bp.Description}{hitInfo}", statusColor);
+            context.WriteLine(
+                $"  {status} #{bp.Id} [{bp.Type}] {bp.Description}{hitInfo}",
+                statusColor
+            );
         }
 
         context.WriteLine("", theme.TextPrimary);
-        context.WriteLine($"Total: {total} ({enabled} enabled, {disabled} disabled)", theme.TextSecondary);
+        context.WriteLine(
+            $"Total: {total} ({enabled} enabled, {disabled} disabled)",
+            theme.TextSecondary
+        );
 
         if (!breakpoints.IsEnabled)
         {
@@ -318,4 +376,3 @@ Use 'Help()' in console for full API reference.";
         context.WriteLine("Commands: enable/disable/delete <id>, clear, toggle", theme.TextDim);
     }
 }
-

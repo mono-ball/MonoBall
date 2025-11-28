@@ -66,27 +66,39 @@ public class TileBehaviorSystem : SystemBase, IUpdateSystem, ITileBehaviorSystem
     )
     {
         if (!tileEntity.Has<TileBehavior>())
+        {
             return false;
+        }
 
-        ref var behavior = ref tileEntity.Get<TileBehavior>();
+        ref TileBehavior behavior = ref tileEntity.Get<TileBehavior>();
         if (!behavior.IsActive)
+        {
             return false;
+        }
 
         if (_behaviorRegistry == null)
+        {
             return false;
+        }
 
-        var scriptObj = _behaviorRegistry.GetScript(behavior.BehaviorTypeId);
+        object? scriptObj = _behaviorRegistry.GetScript(behavior.BehaviorTypeId);
         if (scriptObj is not TileBehaviorScriptBase script)
+        {
             return false;
+        }
 
         var context = new ScriptContext(world, tileEntity, _logger, _apis);
 
         // Check both directions (like Pokemon Emerald's two-way check)
         if (script.IsBlockedFrom(context, fromDirection, toDirection))
+        {
             return true;
+        }
 
         if (script.IsBlockedTo(context, toDirection))
+        {
             return true;
+        }
 
         return false;
     }
@@ -98,18 +110,26 @@ public class TileBehaviorSystem : SystemBase, IUpdateSystem, ITileBehaviorSystem
     public Direction GetForcedMovement(World world, Entity tileEntity, Direction currentDirection)
     {
         if (!tileEntity.Has<TileBehavior>())
+        {
             return Direction.None;
+        }
 
-        ref var behavior = ref tileEntity.Get<TileBehavior>();
+        ref TileBehavior behavior = ref tileEntity.Get<TileBehavior>();
         if (!behavior.IsActive)
+        {
             return Direction.None;
+        }
 
         if (_behaviorRegistry == null)
+        {
             return Direction.None;
+        }
 
-        var scriptObj = _behaviorRegistry.GetScript(behavior.BehaviorTypeId);
+        object? scriptObj = _behaviorRegistry.GetScript(behavior.BehaviorTypeId);
         if (scriptObj is not TileBehaviorScriptBase script)
+        {
             return Direction.None;
+        }
 
         var context = new ScriptContext(world, tileEntity, _logger, _apis);
         return script.GetForcedMovement(context, currentDirection);
@@ -122,18 +142,26 @@ public class TileBehaviorSystem : SystemBase, IUpdateSystem, ITileBehaviorSystem
     public Direction GetJumpDirection(World world, Entity tileEntity, Direction fromDirection)
     {
         if (!tileEntity.Has<TileBehavior>())
+        {
             return Direction.None;
+        }
 
-        ref var behavior = ref tileEntity.Get<TileBehavior>();
+        ref TileBehavior behavior = ref tileEntity.Get<TileBehavior>();
         if (!behavior.IsActive)
+        {
             return Direction.None;
+        }
 
         if (_behaviorRegistry == null)
+        {
             return Direction.None;
+        }
 
-        var scriptObj = _behaviorRegistry.GetScript(behavior.BehaviorTypeId);
+        object? scriptObj = _behaviorRegistry.GetScript(behavior.BehaviorTypeId);
         if (scriptObj is not TileBehaviorScriptBase script)
+        {
             return Direction.None;
+        }
 
         var context = new ScriptContext(world, tileEntity, _logger, _apis);
         return script.GetJumpDirection(context, fromDirection);
@@ -146,18 +174,26 @@ public class TileBehaviorSystem : SystemBase, IUpdateSystem, ITileBehaviorSystem
     public string? GetRequiredMovementMode(World world, Entity tileEntity)
     {
         if (!tileEntity.Has<TileBehavior>())
+        {
             return null;
+        }
 
-        ref var behavior = ref tileEntity.Get<TileBehavior>();
+        ref TileBehavior behavior = ref tileEntity.Get<TileBehavior>();
         if (!behavior.IsActive)
+        {
             return null;
+        }
 
         if (_behaviorRegistry == null)
+        {
             return null;
+        }
 
-        var scriptObj = _behaviorRegistry.GetScript(behavior.BehaviorTypeId);
+        object? scriptObj = _behaviorRegistry.GetScript(behavior.BehaviorTypeId);
         if (scriptObj is not TileBehaviorScriptBase script)
+        {
             return null;
+        }
 
         var context = new ScriptContext(world, tileEntity, _logger, _apis);
         return script.GetRequiredMovementMode(context);
@@ -170,18 +206,26 @@ public class TileBehaviorSystem : SystemBase, IUpdateSystem, ITileBehaviorSystem
     public bool AllowsRunning(World world, Entity tileEntity)
     {
         if (!tileEntity.Has<TileBehavior>())
+        {
             return true; // Default: allow running
+        }
 
-        ref var behavior = ref tileEntity.Get<TileBehavior>();
+        ref TileBehavior behavior = ref tileEntity.Get<TileBehavior>();
         if (!behavior.IsActive)
+        {
             return true;
+        }
 
         if (_behaviorRegistry == null)
+        {
             return true;
+        }
 
-        var scriptObj = _behaviorRegistry.GetScript(behavior.BehaviorTypeId);
+        object? scriptObj = _behaviorRegistry.GetScript(behavior.BehaviorTypeId);
         if (scriptObj is not TileBehaviorScriptBase script)
+        {
             return true;
+        }
 
         var context = new ScriptContext(world, tileEntity, _logger, _apis);
         return script.AllowsRunning(context);
@@ -209,8 +253,8 @@ public class TileBehaviorSystem : SystemBase, IUpdateSystem, ITileBehaviorSystem
             return;
         }
 
-        var behaviorCount = 0;
-        var errorCount = 0;
+        int behaviorCount = 0;
+        int errorCount = 0;
 
         // Query all tiles with behavior components
         world.Query(
@@ -221,10 +265,12 @@ public class TileBehaviorSystem : SystemBase, IUpdateSystem, ITileBehaviorSystem
                 {
                     // Skip if behavior is not active
                     if (!behavior.IsActive)
+                    {
                         return;
+                    }
 
                     // Get script from registry
-                    var scriptObj = _behaviorRegistry.GetScript(behavior.BehaviorTypeId);
+                    object? scriptObj = _behaviorRegistry.GetScript(behavior.BehaviorTypeId);
                     if (scriptObj == null)
                     {
                         _logger.LogEntityOperationInvalid(
@@ -249,8 +295,8 @@ public class TileBehaviorSystem : SystemBase, IUpdateSystem, ITileBehaviorSystem
                     }
 
                     // Create ScriptContext for this entity
-                    var loggerKey = $"{behavior.BehaviorTypeId}.{entity.Id}";
-                    var scriptLogger = GetOrCreateLogger(loggerKey);
+                    string loggerKey = $"{behavior.BehaviorTypeId}.{entity.Id}";
+                    ILogger scriptLogger = GetOrCreateLogger(loggerKey);
                     var context = new ScriptContext(world, entity, scriptLogger, _apis);
 
                     // Initialize on first tick
@@ -282,20 +328,24 @@ public class TileBehaviorSystem : SystemBase, IUpdateSystem, ITileBehaviorSystem
         // Log performance metrics periodically
         _tickCounter++;
 
-        var shouldLogSummary =
+        bool shouldLogSummary =
             errorCount > 0
             || (_tickCounter % 60 == 0 && behaviorCount > 0)
             || (behaviorCount > 0 && behaviorCount != _lastBehaviorSummaryCount);
 
         if (shouldLogSummary)
+        {
             _logger.LogWorkflowStatus(
                 "Tile behavior tick summary",
                 ("executed", behaviorCount),
                 ("errors", errorCount)
             );
+        }
 
         if (behaviorCount > 0)
+        {
             _lastBehaviorSummaryCount = behaviorCount;
+        }
     }
 
     /// <summary>
@@ -321,10 +371,12 @@ public class TileBehaviorSystem : SystemBase, IUpdateSystem, ITileBehaviorSystem
             {
                 // Check if we've hit the cache limit
                 if (_scriptLoggerCache.Count >= _config.MaxCachedLoggers)
+                {
                     _logger.LogWarning(
                         "Script logger cache limit reached ({Limit}). Consider increasing limit or checking for leaks.",
                         _config.MaxCachedLoggers
                     );
+                }
 
                 return _loggerFactory.CreateLogger($"TileBehavior.{k}");
             }

@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 using PokeSharp.Engine.Scenes;
-using PokeSharp.Game.Initialization;
 
 namespace PokeSharp.Game.Initialization.Pipeline;
 
@@ -31,7 +30,9 @@ public class InitializationPipeline
     public InitializationPipeline AddStep(IInitializationStep step)
     {
         if (step == null)
+        {
             throw new ArgumentNullException(nameof(step));
+        }
 
         _steps.Add(step);
         _logger.LogDebug("Added initialization step: {StepName}", step.Name);
@@ -52,15 +53,23 @@ public class InitializationPipeline
     )
     {
         if (context == null)
-            throw new ArgumentNullException(nameof(context));
-        if (progress == null)
-            throw new ArgumentNullException(nameof(progress));
-
-        _logger.LogInformation("Starting initialization pipeline with {StepCount} steps", _steps.Count);
-
-        for (var i = 0; i < _steps.Count; i++)
         {
-            var step = _steps[i];
+            throw new ArgumentNullException(nameof(context));
+        }
+
+        if (progress == null)
+        {
+            throw new ArgumentNullException(nameof(progress));
+        }
+
+        _logger.LogInformation(
+            "Starting initialization pipeline with {StepCount} steps",
+            _steps.Count
+        );
+
+        for (int i = 0; i < _steps.Count; i++)
+        {
+            IInitializationStep step = _steps[i];
             cancellationToken.ThrowIfCancellationRequested();
 
             _logger.LogDebug(
@@ -98,4 +107,3 @@ public class InitializationPipeline
         _logger.LogInformation("Initialization pipeline completed successfully");
     }
 }
-

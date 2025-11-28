@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using PokeSharp.Engine.Core.Modding;
 using PokeSharp.Engine.Core.Templates;
 using PokeSharp.Engine.Core.Templates.Loading;
+using PokeSharp.Game.Infrastructure.Services;
 
 namespace PokeSharp.Game.Initialization.Initializers;
 
@@ -12,6 +13,7 @@ namespace PokeSharp.Game.Initialization.Initializers;
 /// </summary>
 public class TemplateCacheInitializer
 {
+    private readonly IAssetPathResolver _pathResolver;
     private readonly JsonTemplateLoader _jsonLoader;
     private readonly ILogger<TemplateCacheInitializer>? _logger;
     private readonly ModLoader _modLoader;
@@ -25,6 +27,7 @@ public class TemplateCacheInitializer
         ModLoader modLoader,
         PatchFileLoader patchFileLoader,
         PatchApplicator patchApplicator,
+        IAssetPathResolver pathResolver,
         ILogger<TemplateCacheInitializer>? logger = null
     )
     {
@@ -35,16 +38,24 @@ public class TemplateCacheInitializer
             patchFileLoader ?? throw new ArgumentNullException(nameof(patchFileLoader));
         _patchApplicator =
             patchApplicator ?? throw new ArgumentNullException(nameof(patchApplicator));
+        _pathResolver = pathResolver ?? throw new ArgumentNullException(nameof(pathResolver));
         _logger = logger;
     }
 
     /// <summary>
     ///     Initializes the template cache by loading base templates, mods, and applying patches.
     /// </summary>
-    public async Task InitializeAsync(string templatesBasePath = "Assets/Templates")
+    public async Task InitializeAsync()
     {
+        // Resolve the templates path using the centralized path resolver
+        string templatesBasePath = _pathResolver.Resolve("Templates");
+
+        _logger?.LogDebug("Loading templates from: {Path}", templatesBasePath);
+
         // Load base game JSON templates as JSON (before deserialization)
-        var templateJsonCache = await _jsonLoader.LoadTemplateJsonAsync(templatesBasePath, true);
+        TemplateJsonCache templateJsonCache = await _jsonLoader.LoadTemplateJsonAsync(
+            templatesBasePath
+        );
 
         _logger?.LogInformation(
             "[steelblue1]WF[/] Template JSON loaded | count: [yellow]{Count}[/], source: [cyan]base[/]",
@@ -52,15 +63,15 @@ public class TemplateCacheInitializer
         );
 
         // Load and apply mods
-        var mods = _modLoader.DiscoverMods();
-        var sortedMods = _modLoader.SortByLoadOrder(mods);
+        List<LoadedMod> mods = _modLoader.DiscoverMods();
+        List<LoadedMod> sortedMods = _modLoader.SortByLoadOrder(mods);
 
         _logger?.LogInformation(
             "[steelblue1]WF[/] Mod system initializing | discovered: [yellow]{Count}[/]",
             sortedMods.Count
         );
 
-        foreach (var mod in sortedMods)
+        foreach (LoadedMod mod in sortedMods)
         {
             _logger?.LogInformation(
                 "[steelblue1]WF[/] Loading mod | id: [cyan]{ModId}[/], version: [cyan]{Version}[/]",
@@ -69,28 +80,27 @@ public class TemplateCacheInitializer
             );
 
             // Load mod templates as JSON (new content)
-            if (mod.Manifest.ContentFolders.TryGetValue("Templates", out var templatesPath))
+            if (mod.Manifest.ContentFolders.TryGetValue("Templates", out string? templatesPath))
             {
-                var modTemplatesDir = mod.ResolvePath(templatesPath);
+                string modTemplatesDir = mod.ResolvePath(templatesPath);
                 if (Directory.Exists(modTemplatesDir))
                 {
-                    var modJsonCache = await _jsonLoader.LoadTemplateJsonAsync(
-                        modTemplatesDir,
-                        true
+                    TemplateJsonCache modJsonCache = await _jsonLoader.LoadTemplateJsonAsync(
+                        modTemplatesDir
                     );
 
                     // Add mod templates to the main cache
-                    foreach (var (path, json) in modJsonCache.GetAll())
+                    foreach ((string path, JsonNode json) in modJsonCache.GetAll())
                     {
                         templateJsonCache.Add(path, json);
 
                         // Extract templateId for logging
                         if (
                             json is JsonObject obj
-                            && obj.TryGetPropertyValue("templateId", out var idNode)
+                            && obj.TryGetPropertyValue("templateId", out JsonNode? idNode)
                         )
                         {
-                            var templateId = idNode?.ToString().Trim('"');
+                            string? templateId = idNode?.ToString().Trim('"');
                             _logger?.LogInformation(
                                 "    [green]+[/] [cyan]{TemplateId}[/]",
                                 templateId
@@ -101,12 +111,13 @@ public class TemplateCacheInitializer
             }
 
             // Apply patches from mod (patch the JSON before deserialization)
-            var patches = _patchFileLoader.LoadModPatches(mod);
-            foreach (var patch in patches)
+            List<ModPatch> patches = _patchFileLoader.LoadModPatches(mod);
+            foreach (ModPatch patch in patches)
+            {
                 try
                 {
                     // Get the target template JSON
-                    var targetJson = templateJsonCache.GetByTemplateId(patch.Target);
+                    JsonNode? targetJson = templateJsonCache.GetByTemplateId(patch.Target);
                     if (targetJson == null)
                     {
                         _logger?.LogWarning(
@@ -117,7 +128,7 @@ public class TemplateCacheInitializer
                     }
 
                     // Apply patch to JSON
-                    var patchedJson = _patchApplicator.ApplyPatch(targetJson, patch);
+                    JsonNode? patchedJson = _patchApplicator.ApplyPatch(targetJson, patch);
                     if (patchedJson == null)
                     {
                         _logger?.LogWarning(
@@ -143,13 +154,15 @@ public class TemplateCacheInitializer
                         patch.Target
                     );
                 }
+            }
         }
 
         // Now deserialize all templates (base game + mods + patches applied)
-        foreach (var (path, json) in templateJsonCache.GetAll())
+        foreach ((string path, JsonNode json) in templateJsonCache.GetAll())
+        {
             try
             {
-                var template = _jsonLoader.DeserializeTemplate(json, path);
+                EntityTemplate template = _jsonLoader.DeserializeTemplate(json, path);
                 _templateCache.Register(template);
             }
             catch (Exception ex)
@@ -160,6 +173,7 @@ public class TemplateCacheInitializer
                     path
                 );
             }
+        }
 
         _logger?.LogInformation(
             "[skyblue1]▶[/] Template cache ready | count: [yellow]{Count}[/]",

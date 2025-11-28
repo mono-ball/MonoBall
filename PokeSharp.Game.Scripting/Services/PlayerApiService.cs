@@ -27,12 +27,12 @@ public class PlayerApiService(World world, ILogger<PlayerApiService> logger) : I
     /// <returns>Player name (e.g., "ASH", "RED"), or "PLAYER" if not found.</returns>
     public string GetPlayerName()
     {
-        var playerEntity = GetPlayerEntity();
+        Entity? playerEntity = GetPlayerEntity();
         if (playerEntity.HasValue)
         {
             if (_world.Has<Name>(playerEntity.Value))
             {
-                ref var name = ref _world.Get<Name>(playerEntity.Value);
+                ref Name name = ref _world.Get<Name>(playerEntity.Value);
                 return string.IsNullOrWhiteSpace(name.DisplayName)
                     ? DefaultPlayerName
                     : name.DisplayName;
@@ -54,12 +54,12 @@ public class PlayerApiService(World world, ILogger<PlayerApiService> logger) : I
     /// <returns>Money in Pokédollars, or 0 if player not found.</returns>
     public int GetMoney()
     {
-        var playerEntity = GetPlayerEntity();
+        Entity? playerEntity = GetPlayerEntity();
         if (playerEntity.HasValue)
         {
             if (_world.Has<Wallet>(playerEntity.Value))
             {
-                ref var wallet = ref _world.Get<Wallet>(playerEntity.Value);
+                ref Wallet wallet = ref _world.Get<Wallet>(playerEntity.Value);
                 return wallet.Balance;
             }
 
@@ -76,14 +76,16 @@ public class PlayerApiService(World world, ILogger<PlayerApiService> logger) : I
     public void GiveMoney(int amount)
     {
         if (amount < 0)
+        {
             throw new ArgumentException("Amount must be positive", nameof(amount));
+        }
 
-        var playerEntity = GetPlayerEntity();
+        Entity? playerEntity = GetPlayerEntity();
         if (playerEntity.HasValue)
         {
             if (_world.Has<Wallet>(playerEntity.Value))
             {
-                ref var wallet = ref _world.Get<Wallet>(playerEntity.Value);
+                ref Wallet wallet = ref _world.Get<Wallet>(playerEntity.Value);
                 wallet.Balance += amount;
                 _logger.LogInformation(
                     "Gave {Amount} money to player. New balance: {Balance}",
@@ -105,14 +107,16 @@ public class PlayerApiService(World world, ILogger<PlayerApiService> logger) : I
     public bool TakeMoney(int amount)
     {
         if (amount < 0)
+        {
             throw new ArgumentException("Amount must be positive", nameof(amount));
+        }
 
-        var playerEntity = GetPlayerEntity();
+        Entity? playerEntity = GetPlayerEntity();
         if (playerEntity.HasValue)
         {
             if (_world.Has<Wallet>(playerEntity.Value))
             {
-                ref var wallet = ref _world.Get<Wallet>(playerEntity.Value);
+                ref Wallet wallet = ref _world.Get<Wallet>(playerEntity.Value);
                 if (wallet.Balance >= amount)
                 {
                     wallet.Balance -= amount;
@@ -144,10 +148,10 @@ public class PlayerApiService(World world, ILogger<PlayerApiService> logger) : I
 
     public Point GetPlayerPosition()
     {
-        var playerEntity = GetPlayerEntity();
+        Entity? playerEntity = GetPlayerEntity();
         if (playerEntity.HasValue && _world.Has<Position>(playerEntity.Value))
         {
-            ref var position = ref _world.Get<Position>(playerEntity.Value);
+            ref Position position = ref _world.Get<Position>(playerEntity.Value);
             return new Point(position.X, position.Y);
         }
 
@@ -156,10 +160,10 @@ public class PlayerApiService(World world, ILogger<PlayerApiService> logger) : I
 
     public Direction GetPlayerFacing()
     {
-        var playerEntity = GetPlayerEntity();
+        Entity? playerEntity = GetPlayerEntity();
         if (playerEntity.HasValue && _world.Has<GridMovement>(playerEntity.Value))
         {
-            ref var movement = ref _world.Get<GridMovement>(playerEntity.Value);
+            ref GridMovement movement = ref _world.Get<GridMovement>(playerEntity.Value);
             return movement.FacingDirection;
         }
 
@@ -168,10 +172,10 @@ public class PlayerApiService(World world, ILogger<PlayerApiService> logger) : I
 
     public void SetPlayerFacing(Direction direction)
     {
-        var playerEntity = GetPlayerEntity();
+        Entity? playerEntity = GetPlayerEntity();
         if (playerEntity.HasValue && _world.Has<GridMovement>(playerEntity.Value))
         {
-            ref var movement = ref _world.Get<GridMovement>(playerEntity.Value);
+            ref GridMovement movement = ref _world.Get<GridMovement>(playerEntity.Value);
             movement.FacingDirection = direction;
             _logger.LogDebug("Player facing set to: {Direction}", direction);
         }
@@ -183,10 +187,10 @@ public class PlayerApiService(World world, ILogger<PlayerApiService> logger) : I
     /// <param name="locked">True to lock movement, false to unlock.</param>
     public void SetPlayerMovementLocked(bool locked)
     {
-        var playerEntity = GetPlayerEntity();
+        Entity? playerEntity = GetPlayerEntity();
         if (playerEntity.HasValue && _world.Has<GridMovement>(playerEntity.Value))
         {
-            ref var movement = ref _world.Get<GridMovement>(playerEntity.Value);
+            ref GridMovement movement = ref _world.Get<GridMovement>(playerEntity.Value);
             movement.MovementLocked = locked;
             _logger.LogInformation("Player movement {Status}", locked ? "locked" : "unlocked");
         }
@@ -202,10 +206,10 @@ public class PlayerApiService(World world, ILogger<PlayerApiService> logger) : I
     /// <returns>True if player cannot move, false otherwise.</returns>
     public bool IsPlayerMovementLocked()
     {
-        var playerEntity = GetPlayerEntity();
+        Entity? playerEntity = GetPlayerEntity();
         if (playerEntity.HasValue && _world.Has<GridMovement>(playerEntity.Value))
         {
-            ref var movement = ref _world.Get<GridMovement>(playerEntity.Value);
+            ref GridMovement movement = ref _world.Get<GridMovement>(playerEntity.Value);
             return movement.MovementLocked;
         }
 

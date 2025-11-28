@@ -1,33 +1,31 @@
-using System;
+using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
-using Microsoft.Extensions.DependencyInjection;
 using PokeSharp.Engine.Core.Services;
 using PokeSharp.Engine.Debug.Breakpoints;
+using PokeSharp.Engine.Debug.Common;
+using PokeSharp.Engine.Debug.Console.Scripting;
+using PokeSharp.Engine.Debug.Features;
 using PokeSharp.Engine.UI.Debug.Components.Debug;
 using PokeSharp.Engine.UI.Debug.Core;
 using PokeSharp.Engine.UI.Debug.Interfaces;
+using PokeSharp.Engine.UI.Debug.Models;
 using PokeSharp.Engine.UI.Debug.Scenes;
-using PokeSharp.Engine.Debug.Console.Features;
-using PokeSharp.Engine.Debug.Console.Scripting;
-using PokeSharp.Engine.Debug.Scripting;
-using PokeSharp.Engine.Debug.Features;
 
 namespace PokeSharp.Engine.Debug.Commands;
 
 /// <summary>
-/// Implementation of IConsoleContext that provides services to command execution.
+///     Implementation of IConsoleContext that provides services to command execution.
 /// </summary>
 public class ConsoleContext : IConsoleContext
 {
-    private readonly ConsoleScene _consoleScene;
     private readonly Action _closeAction;
+    private readonly ConsoleScene _consoleScene;
     private readonly ConsoleLoggingCallbacks _loggingCallbacks;
-    private readonly ITimeControl? _timeControl;
     private readonly ConsoleServices _services;
 
     /// <summary>
-    /// Creates a new ConsoleContext with aggregated services.
-    /// This is the preferred constructor for new code.
+    ///     Creates a new ConsoleContext with aggregated services.
+    ///     This is the preferred constructor for new code.
     /// </summary>
     /// <param name="consoleScene">The console scene for output and UI operations.</param>
     /// <param name="closeAction">Action to close the console.</param>
@@ -39,39 +37,67 @@ public class ConsoleContext : IConsoleContext
         Action closeAction,
         ConsoleLoggingCallbacks loggingCallbacks,
         ITimeControl? timeControl,
-        ConsoleServices services)
+        ConsoleServices services
+    )
     {
         _consoleScene = consoleScene ?? throw new ArgumentNullException(nameof(consoleScene));
         _closeAction = closeAction ?? throw new ArgumentNullException(nameof(closeAction));
-        _loggingCallbacks = loggingCallbacks ?? throw new ArgumentNullException(nameof(loggingCallbacks));
-        _timeControl = timeControl; // Can be null - time control is optional
+        _loggingCallbacks =
+            loggingCallbacks ?? throw new ArgumentNullException(nameof(loggingCallbacks));
+        TimeControl = timeControl; // Can be null - time control is optional
         _services = services ?? throw new ArgumentNullException(nameof(services));
     }
 
     /// <summary>
-    /// Creates a new ConsoleContext without time control.
+    ///     Creates a new ConsoleContext without time control.
     /// </summary>
     public ConsoleContext(
         ConsoleScene consoleScene,
         Action closeAction,
         ConsoleLoggingCallbacks loggingCallbacks,
-        ConsoleServices services)
-        : this(consoleScene, closeAction, loggingCallbacks, null, services)
+        ConsoleServices services
+    )
+        : this(consoleScene, closeAction, loggingCallbacks, null, services) { }
+
+    public bool EntityAutoRefresh
     {
+        get => Entities.AutoRefresh;
+        set => Entities.AutoRefresh = value;
     }
+
+    public float EntityRefreshInterval
+    {
+        get => Entities.RefreshInterval;
+        set => Entities.RefreshInterval = value;
+    }
+
+    public float EntityHighlightDuration
+    {
+        get => Entities.HighlightDuration;
+        set => Entities.HighlightDuration = value;
+    }
+
+    public int? SelectedEntityId => Entities.SelectedId;
 
     public UITheme Theme => UITheme.Dark;
 
     // Panel operation interfaces - expose panels directly for commands
     // These are non-nullable because panels are always created with the console (in LoadContent)
     // Commands can only run after the console is visible, so panels are guaranteed to exist
-    public IEntityOperations Entities => _consoleScene.EntityOperations
+    public IEntityOperations Entities =>
+        _consoleScene.EntityOperations
         ?? throw new InvalidOperationException("Entities panel not initialized");
-    public IWatchOperations Watches => _consoleScene.WatchOperations
+
+    public IWatchOperations Watches =>
+        _consoleScene.WatchOperations
         ?? throw new InvalidOperationException("Watches panel not initialized");
-    public IVariableOperations Variables => _consoleScene.VariableOperations
+
+    public IVariableOperations Variables =>
+        _consoleScene.VariableOperations
         ?? throw new InvalidOperationException("Variables panel not initialized");
-    public ILogOperations Logs => _consoleScene.LogOperations
+
+    public ILogOperations Logs =>
+        _consoleScene.LogOperations
         ?? throw new InvalidOperationException("Logs panel not initialized");
 
     // External dependencies - nullable because they may not be available
@@ -104,9 +130,9 @@ public class ConsoleContext : IConsoleContext
         _loggingCallbacks.SetLoggingEnabled(enabled);
     }
 
-    public Microsoft.Extensions.Logging.LogLevel MinimumLogLevel => _loggingCallbacks.GetLogLevel();
+    public LogLevel MinimumLogLevel => _loggingCallbacks.GetLogLevel();
 
-    public void SetMinimumLogLevel(Microsoft.Extensions.Logging.LogLevel level)
+    public void SetMinimumLogLevel(LogLevel level)
     {
         _loggingCallbacks.SetLogLevel(level);
     }
@@ -148,21 +174,23 @@ public class ConsoleContext : IConsoleContext
 
     public bool DefineAlias(string name, string command)
     {
-        var result = _services.AliasManager.DefineAlias(name, command);
+        bool result = _services.AliasManager.DefineAlias(name, command);
         if (result)
         {
             _services.AliasManager.SaveAliases();
         }
+
         return result;
     }
 
     public bool RemoveAlias(string name)
     {
-        var result = _services.AliasManager.RemoveAlias(name);
+        bool result = _services.AliasManager.RemoveAlias(name);
         if (result)
         {
             _services.AliasManager.SaveAliases();
         }
+
         return result;
     }
 
@@ -183,39 +211,47 @@ public class ConsoleContext : IConsoleContext
 
     public string? LoadScript(string filename)
     {
-        var result = _services.ScriptManager.LoadScript(filename);
+        Result<string> result = _services.ScriptManager.LoadScript(filename);
         return result.IsSuccess ? result.Value : null;
     }
 
     public bool SaveScript(string filename, string content)
     {
-        var result = _services.ScriptManager.SaveScript(filename, content);
+        Result result = _services.ScriptManager.SaveScript(filename, content);
         return result.IsSuccess;
     }
 
     public async Task ExecuteScriptAsync(string scriptContent)
     {
-        var result = await _services.ScriptEvaluator.EvaluateAsync(scriptContent, _services.ScriptGlobals);
+        EvaluationResult result = await _services.ScriptEvaluator.EvaluateAsync(
+            scriptContent,
+            _services.ScriptGlobals
+        );
 
         // Handle compilation errors
         if (result.IsCompilationError && result.Errors != null)
         {
             WriteLine("Compilation Error:", Theme.Error);
-            foreach (var error in result.Errors)
+            foreach (FormattedError error in result.Errors)
             {
                 WriteLine($"  {error.Message}", Theme.Error);
             }
+
             return;
         }
 
         // Handle runtime errors
         if (result.IsRuntimeError)
         {
-            WriteLine($"Runtime Error: {result.RuntimeException?.Message ?? "Unknown error"}", Theme.Error);
+            WriteLine(
+                $"Runtime Error: {result.RuntimeException?.Message ?? "Unknown error"}",
+                Theme.Error
+            );
             if (result.RuntimeException != null)
             {
                 WriteLine($"  {result.RuntimeException.GetType().Name}", Theme.TextSecondary);
             }
+
             return;
         }
 
@@ -243,15 +279,23 @@ public class ConsoleContext : IConsoleContext
 
     public bool SetBookmark(int fkeyNumber, string command)
     {
-        var result = _services.BookmarkManager.BookmarkCommand(fkeyNumber, command);
-        if (result) _services.BookmarkManager.SaveBookmarks(); // Auto-save on change
+        bool result = _services.BookmarkManager.BookmarkCommand(fkeyNumber, command);
+        if (result)
+        {
+            _services.BookmarkManager.SaveBookmarks(); // Auto-save on change
+        }
+
         return result;
     }
 
     public bool RemoveBookmark(int fkeyNumber)
     {
-        var result = _services.BookmarkManager.RemoveBookmark(fkeyNumber);
-        if (result) _services.BookmarkManager.SaveBookmarks(); // Auto-save on change
+        bool result = _services.BookmarkManager.RemoveBookmark(fkeyNumber);
+        if (result)
+        {
+            _services.BookmarkManager.SaveBookmarks(); // Auto-save on change
+        }
+
         return result;
     }
 
@@ -283,22 +327,24 @@ public class ConsoleContext : IConsoleContext
         {
             try
             {
-                var task = _services.ScriptEvaluator.EvaluateAsync(expression, _services.ScriptGlobals);
+                Task<EvaluationResult> task = _services.ScriptEvaluator.EvaluateAsync(
+                    expression,
+                    _services.ScriptGlobals
+                );
                 task.Wait();
-                var result = task.Result;
+                EvaluationResult result = task.Result;
 
                 if (result.IsSuccess)
                 {
                     return string.IsNullOrWhiteSpace(result.Output) ? "<null>" : result.Output;
                 }
-                else
+
+                if (result.Errors != null && result.Errors.Count > 0)
                 {
-                    if (result.Errors != null && result.Errors.Count > 0)
-                    {
-                        return $"<error: {result.Errors[0].Message}>";
-                    }
-                    return "<error: evaluation failed>";
+                    return $"<error: {result.Errors[0].Message}>";
                 }
+
+                return "<error: evaluation failed>";
             }
             catch (Exception ex)
             {
@@ -314,20 +360,25 @@ public class ConsoleContext : IConsoleContext
             {
                 try
                 {
-                    var task = _services.ScriptEvaluator.EvaluateAsync(condition, _services.ScriptGlobals);
+                    Task<EvaluationResult> task = _services.ScriptEvaluator.EvaluateAsync(
+                        condition,
+                        _services.ScriptGlobals
+                    );
                     task.Wait();
-                    var result = task.Result;
+                    EvaluationResult result = task.Result;
 
                     if (result.IsSuccess && !string.IsNullOrWhiteSpace(result.Output))
                     {
                         // Try to parse as boolean
-                        if (bool.TryParse(result.Output.Trim(), out var boolResult))
+                        if (bool.TryParse(result.Output.Trim(), out bool boolResult))
                         {
                             return boolResult;
                         }
+
                         // Non-empty result treated as true
                         return true;
                     }
+
                     return false;
                 }
                 catch
@@ -340,95 +391,45 @@ public class ConsoleContext : IConsoleContext
         return Watches.Add(name, expression, valueGetter, group, condition, conditionEvaluator);
     }
 
-    public bool RemoveWatch(string name) => Watches.Remove(name);
-
-    public void ClearWatches() => Watches.Clear();
-
-    public bool ToggleWatchAutoUpdate()
-    {
-        Watches.AutoUpdate = !Watches.AutoUpdate;
-        return Watches.AutoUpdate;
-    }
-
-    public int GetWatchCount() => Watches.Count;
-
-    public bool PinWatch(string name) => Watches.Pin(name);
-
-    public bool UnpinWatch(string name) => Watches.Unpin(name);
-
-    public bool IsWatchPinned(string name) => Watches.IsPinned(name);
-
-    public bool SetWatchInterval(double intervalSeconds)
-    {
-        if (intervalSeconds < WatchPanel.MinUpdateInterval || intervalSeconds > WatchPanel.MaxUpdateInterval)
-            return false;
-        Watches.UpdateInterval = intervalSeconds;
-        return true;
-    }
-
-    public bool CollapseWatchGroup(string groupName) => Watches.CollapseGroup(groupName);
-
-    public bool ExpandWatchGroup(string groupName) => Watches.ExpandGroup(groupName);
-
-    public bool ToggleWatchGroup(string groupName) => Watches.ToggleGroup(groupName);
-
-    public IEnumerable<string> GetWatchGroups() => Watches.GetGroups();
-
-    public bool SetWatchAlert(string name, string alertType, object? threshold) => Watches.SetAlert(name, alertType, threshold);
-
-    public bool RemoveWatchAlert(string name) => Watches.RemoveAlert(name);
-
-    public IEnumerable<(string Name, string AlertType, bool Triggered)> GetWatchesWithAlerts() => Watches.GetWatchesWithAlerts();
-
-    public bool ClearWatchAlertStatus(string name) => Watches.ClearAlertStatus(name);
-
-    public bool SetWatchComparison(string watchName, string compareWithName, string comparisonLabel = "Expected")
-        => Watches.SetComparison(watchName, compareWithName, comparisonLabel);
-
-    public bool RemoveWatchComparison(string name) => Watches.RemoveComparison(name);
-
-    public IEnumerable<(string Name, string ComparedWith)> GetWatchesWithComparisons() => Watches.GetWatchesWithComparisons();
-
-    public void SetLogFilter(Microsoft.Extensions.Logging.LogLevel level) => Logs.SetFilterLevel(level);
-
-    public void SetLogSearch(string? searchText) => Logs.SetSearch(searchText);
-
-    public void AddLog(Microsoft.Extensions.Logging.LogLevel level, string message, string category = "General")
-        => Logs.Add(level, message, category);
-
-    public void ClearLogs() => Logs.Clear();
-
-    public int GetLogCount() => Logs.Count;
-
-    public void SetLogCategoryFilter(IEnumerable<string>? categories) => Logs.SetCategoryFilter(categories);
-
-    public void ClearLogCategoryFilter() => Logs.ClearCategoryFilter();
-
-    public IEnumerable<string> GetLogCategories() => Logs.GetCategories();
-
-    public Dictionary<string, int> GetLogCategoryCounts() => Logs.GetCategoryCounts();
-
-    public string ExportLogs(bool includeTimestamp = true, bool includeLevel = true, bool includeCategory = false)
-        => Logs.Export(includeTimestamp, includeLevel, includeCategory);
-
-    public string ExportLogsToCsv() => Logs.ExportToCsv();
-
-    public void CopyLogsToClipboard() => Logs.CopyToClipboard();
-
-    public (int Total, int Filtered, int Errors, int Warnings, int LastMinute, int Categories) GetLogStatistics()
-        => Logs.GetStatistics();
-
-    public Dictionary<Microsoft.Extensions.Logging.LogLevel, int> GetLogLevelCounts() => Logs.GetLevelCounts();
-
     public bool SaveWatchPreset(string name, string description)
     {
         try
         {
-            var config = Watches.ExportConfiguration();
+            (
+                List<(
+                    string Name,
+                    string Expression,
+                    string? Group,
+                    string? Condition,
+                    bool IsPinned,
+                    string? AlertType,
+                    object? AlertThreshold,
+                    string? ComparisonWith,
+                    string? ComparisonLabel
+                )> Watches,
+                double UpdateInterval,
+                bool AutoUpdateEnabled
+            )? config = Watches.ExportConfiguration();
             if (config == null)
+            {
                 return false;
+            }
 
-            var (watches, updateInterval, autoUpdateEnabled) = config.Value;
+            (
+                List<(
+                    string Name,
+                    string Expression,
+                    string? Group,
+                    string? Condition,
+                    bool IsPinned,
+                    string? AlertType,
+                    object? AlertThreshold,
+                    string? ComparisonWith,
+                    string? ComparisonLabel
+                )> watches,
+                double updateInterval,
+                bool autoUpdateEnabled
+            ) = config.Value;
 
             var preset = new WatchPreset
             {
@@ -437,24 +438,32 @@ public class ConsoleContext : IConsoleContext
                 CreatedAt = DateTime.Now,
                 UpdateInterval = updateInterval,
                 AutoUpdateEnabled = autoUpdateEnabled,
-                Watches = watches.Select(w => new WatchPresetEntry
-                {
-                    Name = w.Name,
-                    Expression = w.Expression,
-                    Group = w.Group,
-                    Condition = w.Condition,
-                    IsPinned = w.IsPinned,
-                    Alert = w.AlertType != null ? new WatchAlertConfig
+                Watches = watches
+                    .Select(w => new WatchPresetEntry
                     {
-                        Type = w.AlertType,
-                        Threshold = w.AlertThreshold?.ToString()
-                    } : null,
-                    Comparison = w.ComparisonWith != null ? new WatchComparisonConfig
-                    {
-                        CompareWith = w.ComparisonWith,
-                        Label = w.ComparisonLabel ?? "Expected"
-                    } : null
-                }).ToList()
+                        Name = w.Name,
+                        Expression = w.Expression,
+                        Group = w.Group,
+                        Condition = w.Condition,
+                        IsPinned = w.IsPinned,
+                        Alert =
+                            w.AlertType != null
+                                ? new WatchAlertConfig
+                                {
+                                    Type = w.AlertType,
+                                    Threshold = w.AlertThreshold?.ToString(),
+                                }
+                                : null,
+                        Comparison =
+                            w.ComparisonWith != null
+                                ? new WatchComparisonConfig
+                                {
+                                    CompareWith = w.ComparisonWith,
+                                    Label = w.ComparisonLabel ?? "Expected",
+                                }
+                                : null,
+                    })
+                    .ToList(),
             };
 
             return _services.WatchPresetManager.SavePreset(preset);
@@ -469,9 +478,11 @@ public class ConsoleContext : IConsoleContext
     {
         try
         {
-            var preset = _services.WatchPresetManager.LoadPreset(name);
+            WatchPreset? preset = _services.WatchPresetManager.LoadPreset(name);
             if (preset == null)
+            {
                 return false;
+            }
 
             // Import configuration (clears watches and sets update settings)
             Watches.Clear();
@@ -479,15 +490,22 @@ public class ConsoleContext : IConsoleContext
             Watches.AutoUpdate = preset.AutoUpdateEnabled;
 
             // Add watches from preset
-            foreach (var watch in preset.Watches)
+            foreach (WatchPresetEntry watch in preset.Watches)
             {
                 // Create value getter for the expression
-                System.Func<object?> valueGetter = () =>
+                Func<object?> valueGetter = () =>
                 {
                     try
                     {
-                        var result = _services.ScriptEvaluator.EvaluateAsync(watch.Expression, _services.ScriptGlobals).Result;
-                        return result.IsSuccess ? result.Output : $"<error: {result.Errors?[0].Message ?? "evaluation failed"}>";
+                        EvaluationResult result = _services
+                            .ScriptEvaluator.EvaluateAsync(
+                                watch.Expression,
+                                _services.ScriptGlobals
+                            )
+                            .Result;
+                        return result.IsSuccess
+                            ? result.Output
+                            : $"<error: {result.Errors?[0].Message ?? "evaluation failed"}>";
                     }
                     catch (Exception ex)
                     {
@@ -496,18 +514,35 @@ public class ConsoleContext : IConsoleContext
                 };
 
                 // Create condition evaluator if condition exists
-                System.Func<bool>? conditionEvaluator = null;
+                Func<bool>? conditionEvaluator = null;
                 if (!string.IsNullOrEmpty(watch.Condition))
                 {
                     conditionEvaluator = () =>
                     {
                         try
                         {
-                            var result = _services.ScriptEvaluator.EvaluateAsync(watch.Condition, _services.ScriptGlobals).Result;
-                            if (!result.IsSuccess) return false;
+                            EvaluationResult result = _services
+                                .ScriptEvaluator.EvaluateAsync(
+                                    watch.Condition,
+                                    _services.ScriptGlobals
+                                )
+                                .Result;
+                            if (!result.IsSuccess)
+                            {
+                                return false;
+                            }
+
                             // Output is a string representation, parse it as boolean
-                            if (string.IsNullOrEmpty(result.Output)) return false;
-                            if (bool.TryParse(result.Output, out var boolValue)) return boolValue;
+                            if (string.IsNullOrEmpty(result.Output))
+                            {
+                                return false;
+                            }
+
+                            if (bool.TryParse(result.Output, out bool boolValue))
+                            {
+                                return boolValue;
+                            }
+
                             // Consider "true" (case-insensitive) or non-empty strings as true
                             return result.Output.Equals("true", StringComparison.OrdinalIgnoreCase);
                         }
@@ -533,7 +568,7 @@ public class ConsoleContext : IConsoleContext
                     object? alertThreshold = null;
                     if (watch.Alert.Threshold != null)
                     {
-                        if (double.TryParse(watch.Alert.Threshold, out var numThreshold))
+                        if (double.TryParse(watch.Alert.Threshold, out double numThreshold))
                         {
                             alertThreshold = numThreshold;
                         }
@@ -549,7 +584,11 @@ public class ConsoleContext : IConsoleContext
                 // Set up comparison if configured
                 if (watch.Comparison != null)
                 {
-                    SetWatchComparison(watch.Name, watch.Comparison.CompareWith, watch.Comparison.Label);
+                    SetWatchComparison(
+                        watch.Name,
+                        watch.Comparison.CompareWith,
+                        watch.Comparison.Label
+                    );
                 }
             }
 
@@ -563,7 +602,12 @@ public class ConsoleContext : IConsoleContext
         }
     }
 
-    public IEnumerable<(string Name, string Description, int WatchCount, DateTime CreatedAt)> ListWatchPresets()
+    public IEnumerable<(
+        string Name,
+        string Description,
+        int WatchCount,
+        DateTime CreatedAt
+    )> ListWatchPresets()
     {
         return _services.WatchPresetManager.ListPresets();
     }
@@ -613,25 +657,248 @@ public class ConsoleContext : IConsoleContext
         return _consoleScene.GetConsoleOutputStats();
     }
 
-    public string ExportWatchesToCsv() => Watches.ExportToCsv();
+    // ═══════════════════════════════════════════════════════════════════════════
+    // Time Control
+    // ═══════════════════════════════════════════════════════════════════════════
 
-    public void CopyWatchesToClipboard(bool asCsv = false) => Watches.CopyToClipboard(asCsv);
+    /// <summary>
+    ///     Gets the time control interface, or null if time control is not available.
+    /// </summary>
+    public ITimeControl? TimeControl { get; }
 
-    public (int Total, int Pinned, int WithErrors, int WithAlerts, int Groups) GetWatchStatistics() => Watches.GetStatistics();
+    public bool RemoveWatch(string name)
+    {
+        return Watches.Remove(name);
+    }
+
+    public void ClearWatches()
+    {
+        Watches.Clear();
+    }
+
+    public bool ToggleWatchAutoUpdate()
+    {
+        Watches.AutoUpdate = !Watches.AutoUpdate;
+        return Watches.AutoUpdate;
+    }
+
+    public int GetWatchCount()
+    {
+        return Watches.Count;
+    }
+
+    public bool PinWatch(string name)
+    {
+        return Watches.Pin(name);
+    }
+
+    public bool UnpinWatch(string name)
+    {
+        return Watches.Unpin(name);
+    }
+
+    public bool IsWatchPinned(string name)
+    {
+        return Watches.IsPinned(name);
+    }
+
+    public bool SetWatchInterval(double intervalSeconds)
+    {
+        if (
+            intervalSeconds < WatchPanel.MinUpdateInterval
+            || intervalSeconds > WatchPanel.MaxUpdateInterval
+        )
+        {
+            return false;
+        }
+
+        Watches.UpdateInterval = intervalSeconds;
+        return true;
+    }
+
+    public bool CollapseWatchGroup(string groupName)
+    {
+        return Watches.CollapseGroup(groupName);
+    }
+
+    public bool ExpandWatchGroup(string groupName)
+    {
+        return Watches.ExpandGroup(groupName);
+    }
+
+    public bool ToggleWatchGroup(string groupName)
+    {
+        return Watches.ToggleGroup(groupName);
+    }
+
+    public IEnumerable<string> GetWatchGroups()
+    {
+        return Watches.GetGroups();
+    }
+
+    public bool SetWatchAlert(string name, string alertType, object? threshold)
+    {
+        return Watches.SetAlert(name, alertType, threshold);
+    }
+
+    public bool RemoveWatchAlert(string name)
+    {
+        return Watches.RemoveAlert(name);
+    }
+
+    public IEnumerable<(string Name, string AlertType, bool Triggered)> GetWatchesWithAlerts()
+    {
+        return Watches.GetWatchesWithAlerts();
+    }
+
+    public bool ClearWatchAlertStatus(string name)
+    {
+        return Watches.ClearAlertStatus(name);
+    }
+
+    public bool SetWatchComparison(
+        string watchName,
+        string compareWithName,
+        string comparisonLabel = "Expected"
+    )
+    {
+        return Watches.SetComparison(watchName, compareWithName, comparisonLabel);
+    }
+
+    public bool RemoveWatchComparison(string name)
+    {
+        return Watches.RemoveComparison(name);
+    }
+
+    public IEnumerable<(string Name, string ComparedWith)> GetWatchesWithComparisons()
+    {
+        return Watches.GetWatchesWithComparisons();
+    }
+
+    public void SetLogFilter(LogLevel level)
+    {
+        Logs.SetFilterLevel(level);
+    }
+
+    public void SetLogSearch(string? searchText)
+    {
+        Logs.SetSearch(searchText);
+    }
+
+    public void AddLog(LogLevel level, string message, string category = "General")
+    {
+        Logs.Add(level, message, category);
+    }
+
+    public void ClearLogs()
+    {
+        Logs.Clear();
+    }
+
+    public int GetLogCount()
+    {
+        return Logs.Count;
+    }
+
+    public void SetLogCategoryFilter(IEnumerable<string>? categories)
+    {
+        Logs.SetCategoryFilter(categories);
+    }
+
+    public void ClearLogCategoryFilter()
+    {
+        Logs.ClearCategoryFilter();
+    }
+
+    public IEnumerable<string> GetLogCategories()
+    {
+        return Logs.GetCategories();
+    }
+
+    public Dictionary<string, int> GetLogCategoryCounts()
+    {
+        return Logs.GetCategoryCounts();
+    }
+
+    public string ExportLogs(
+        bool includeTimestamp = true,
+        bool includeLevel = true,
+        bool includeCategory = false
+    )
+    {
+        return Logs.Export(includeTimestamp, includeLevel, includeCategory);
+    }
+
+    public string ExportLogsToCsv()
+    {
+        return Logs.ExportToCsv();
+    }
+
+    public void CopyLogsToClipboard()
+    {
+        Logs.CopyToClipboard();
+    }
+
+    public (
+        int Total,
+        int Filtered,
+        int Errors,
+        int Warnings,
+        int LastMinute,
+        int Categories
+    ) GetLogStatistics()
+    {
+        return Logs.GetStatistics();
+    }
+
+    public Dictionary<LogLevel, int> GetLogLevelCounts()
+    {
+        return Logs.GetLevelCounts();
+    }
+
+    public string ExportWatchesToCsv()
+    {
+        return Watches.ExportToCsv();
+    }
+
+    public void CopyWatchesToClipboard(bool asCsv = false)
+    {
+        Watches.CopyToClipboard(asCsv);
+    }
+
+    public (int Total, int Pinned, int WithErrors, int WithAlerts, int Groups) GetWatchStatistics()
+    {
+        return Watches.GetStatistics();
+    }
 
     // ═══════════════════════════════════════════════════════════════════════════
     // Variables Tab
     // ═══════════════════════════════════════════════════════════════════════════
 
-    public (int Variables, int Globals, int Pinned, int Expanded) GetVariableStatistics() => Variables.GetStatistics();
+    public (int Variables, int Globals, int Pinned, int Expanded) GetVariableStatistics()
+    {
+        return Variables.GetStatistics();
+    }
 
-    public IEnumerable<string> GetVariableNames() => Variables.GetNames();
+    public IEnumerable<string> GetVariableNames()
+    {
+        return Variables.GetNames();
+    }
 
-    public object? GetVariableValue(string name) => Variables.GetValue(name);
+    public object? GetVariableValue(string name)
+    {
+        return Variables.GetValue(name);
+    }
 
-    public void SetVariableSearchFilter(string filter) => Variables.SetSearchFilter(filter);
+    public void SetVariableSearchFilter(string filter)
+    {
+        Variables.SetSearchFilter(filter);
+    }
 
-    public void ClearVariableSearchFilter() => Variables.ClearSearchFilter();
+    public void ClearVariableSearchFilter()
+    {
+        Variables.ClearSearchFilter();
+    }
 
     public bool ExpandVariable(string path)
     {
@@ -639,104 +906,172 @@ public class ConsoleContext : IConsoleContext
         return true;
     }
 
-    public void CollapseVariable(string path) => Variables.Collapse(path);
+    public void CollapseVariable(string path)
+    {
+        Variables.Collapse(path);
+    }
 
-    public void ExpandAllVariables() => Variables.ExpandAll();
+    public void ExpandAllVariables()
+    {
+        Variables.ExpandAll();
+    }
 
-    public void CollapseAllVariables() => Variables.CollapseAll();
+    public void CollapseAllVariables()
+    {
+        Variables.CollapseAll();
+    }
 
-    public void PinVariable(string name) => Variables.Pin(name);
+    public void PinVariable(string name)
+    {
+        Variables.Pin(name);
+    }
 
-    public void UnpinVariable(string name) => Variables.Unpin(name);
+    public void UnpinVariable(string name)
+    {
+        Variables.Unpin(name);
+    }
 
-    public void ClearVariables() => Variables.Clear();
+    public void ClearVariables()
+    {
+        Variables.Clear();
+    }
 
     // ═══════════════════════════════════════════════════════════════════════════
     // Entities Tab
     // ═══════════════════════════════════════════════════════════════════════════
 
-    public void RefreshEntities() => Entities.Refresh();
-
-    public void SetEntityTagFilter(string tag) => Entities.SetTagFilter(tag);
-
-    public void SetEntitySearchFilter(string search) => Entities.SetSearchFilter(search);
-
-    public void SetEntityComponentFilter(string componentName) => Entities.SetComponentFilter(componentName);
-
-    public void ClearEntityFilters() => Entities.ClearFilters();
-
-    public (string Tag, string Search, string Component) GetEntityFilters() => Entities.GetFilters();
-
-    public void SelectEntity(int entityId) => Entities.Select(entityId);
-
-    public void ExpandEntity(int entityId) => Entities.Expand(entityId);
-
-    public void CollapseEntity(int entityId) => Entities.Collapse(entityId);
-
-    public bool ToggleEntity(int entityId) => Entities.Toggle(entityId);
-
-    public void ExpandAllEntities() => Entities.ExpandAll();
-
-    public void CollapseAllEntities() => Entities.CollapseAll();
-
-    public void PinEntity(int entityId) => Entities.Pin(entityId);
-
-    public void UnpinEntity(int entityId) => Entities.Unpin(entityId);
-
-    public (int Total, int Filtered, int Pinned, int Expanded) GetEntityStatistics() => Entities.GetStatistics();
-
-    public Dictionary<string, int> GetEntityTagCounts() => Entities.GetTagCounts();
-
-    public IEnumerable<string> GetEntityComponentNames() => Entities.GetComponentNames();
-
-    public IEnumerable<string> GetEntityTags() => Entities.GetTags();
-
-    public PokeSharp.Engine.UI.Debug.Models.EntityInfo? FindEntity(int entityId) => Entities.Find(entityId);
-
-    public IEnumerable<PokeSharp.Engine.UI.Debug.Models.EntityInfo> FindEntitiesByName(string name) => Entities.FindByName(name);
-
-    public (int Spawned, int Removed, int CurrentlyHighlighted) GetEntitySessionStats() => Entities.GetSessionStats();
-
-    public void ClearEntitySessionStats() => Entities.ClearSessionStats();
-
-    public bool EntityAutoRefresh
+    public void RefreshEntities()
     {
-        get => Entities.AutoRefresh;
-        set => Entities.AutoRefresh = value;
+        Entities.Refresh();
     }
 
-    public float EntityRefreshInterval
+    public void SetEntityTagFilter(string tag)
     {
-        get => Entities.RefreshInterval;
-        set => Entities.RefreshInterval = value;
+        Entities.SetTagFilter(tag);
     }
 
-    public float EntityHighlightDuration
+    public void SetEntitySearchFilter(string search)
     {
-        get => Entities.HighlightDuration;
-        set => Entities.HighlightDuration = value;
+        Entities.SetSearchFilter(search);
     }
 
-    public IEnumerable<int> GetNewEntityIds() => Entities.GetNewEntityIds();
+    public void SetEntityComponentFilter(string componentName)
+    {
+        Entities.SetComponentFilter(componentName);
+    }
+
+    public void ClearEntityFilters()
+    {
+        Entities.ClearFilters();
+    }
+
+    public (string Tag, string Search, string Component) GetEntityFilters()
+    {
+        return Entities.GetFilters();
+    }
+
+    public void SelectEntity(int entityId)
+    {
+        Entities.Select(entityId);
+    }
+
+    public void ExpandEntity(int entityId)
+    {
+        Entities.Expand(entityId);
+    }
+
+    public void CollapseEntity(int entityId)
+    {
+        Entities.Collapse(entityId);
+    }
+
+    public bool ToggleEntity(int entityId)
+    {
+        return Entities.Toggle(entityId);
+    }
+
+    public void ExpandAllEntities()
+    {
+        Entities.ExpandAll();
+    }
+
+    public void CollapseAllEntities()
+    {
+        Entities.CollapseAll();
+    }
+
+    public void PinEntity(int entityId)
+    {
+        Entities.Pin(entityId);
+    }
+
+    public void UnpinEntity(int entityId)
+    {
+        Entities.Unpin(entityId);
+    }
+
+    public (int Total, int Filtered, int Pinned, int Expanded) GetEntityStatistics()
+    {
+        return Entities.GetStatistics();
+    }
+
+    public Dictionary<string, int> GetEntityTagCounts()
+    {
+        return Entities.GetTagCounts();
+    }
+
+    public IEnumerable<string> GetEntityComponentNames()
+    {
+        return Entities.GetComponentNames();
+    }
+
+    public IEnumerable<string> GetEntityTags()
+    {
+        return Entities.GetTags();
+    }
+
+    public EntityInfo? FindEntity(int entityId)
+    {
+        return Entities.Find(entityId);
+    }
+
+    public IEnumerable<EntityInfo> FindEntitiesByName(string name)
+    {
+        return Entities.FindByName(name);
+    }
+
+    public (int Spawned, int Removed, int CurrentlyHighlighted) GetEntitySessionStats()
+    {
+        return Entities.GetSessionStats();
+    }
+
+    public void ClearEntitySessionStats()
+    {
+        Entities.ClearSessionStats();
+    }
+
+    public IEnumerable<int> GetNewEntityIds()
+    {
+        return Entities.GetNewEntityIds();
+    }
 
     public string ExportEntitiesToText(bool includeComponents = true, bool includeProperties = true)
-        => Entities.ExportToText(includeComponents, includeProperties);
+    {
+        return Entities.ExportToText(includeComponents, includeProperties);
+    }
 
-    public string ExportEntitiesToCsv() => Entities.ExportToCsv();
+    public string ExportEntitiesToCsv()
+    {
+        return Entities.ExportToCsv();
+    }
 
-    public string? ExportSelectedEntity() => Entities.ExportSelected();
+    public string? ExportSelectedEntity()
+    {
+        return Entities.ExportSelected();
+    }
 
-    public void CopyEntitiesToClipboard(bool asCsv = false) => Entities.CopyToClipboard(asCsv);
-
-    public int? SelectedEntityId => Entities.SelectedId;
-
-    // ═══════════════════════════════════════════════════════════════════════════
-    // Time Control
-    // ═══════════════════════════════════════════════════════════════════════════
-
-    /// <summary>
-    /// Gets the time control interface, or null if time control is not available.
-    /// </summary>
-    public ITimeControl? TimeControl => _timeControl;
+    public void CopyEntitiesToClipboard(bool asCsv = false)
+    {
+        Entities.CopyToClipboard(asCsv);
+    }
 }
-

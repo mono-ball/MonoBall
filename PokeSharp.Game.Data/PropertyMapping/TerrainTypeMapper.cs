@@ -17,17 +17,23 @@ public class TerrainTypeMapper : IEntityPropertyMapper<TerrainType>
     public TerrainType Map(Dictionary<string, object> properties)
     {
         if (!CanMap(properties))
+        {
             throw new InvalidOperationException("Cannot map properties to TerrainType component");
+        }
 
-        if (!properties.TryGetValue("terrain_type", out var terrainValue))
+        if (!properties.TryGetValue("terrain_type", out object? terrainValue))
+        {
             throw new InvalidOperationException("terrain_type property is required");
+        }
 
-        var terrainType = terrainValue?.ToString();
+        string? terrainType = terrainValue?.ToString();
         if (string.IsNullOrWhiteSpace(terrainType))
+        {
             throw new InvalidOperationException("terrain_type property is empty or whitespace");
+        }
 
         // Get footstep sound (optional, defaults to empty string)
-        var footstepSound = properties.TryGetValue("footstep_sound", out var soundValue)
+        string footstepSound = properties.TryGetValue("footstep_sound", out object? soundValue)
             ? soundValue?.ToString() ?? ""
             : "";
 
@@ -38,7 +44,7 @@ public class TerrainTypeMapper : IEntityPropertyMapper<TerrainType>
     {
         if (CanMap(properties))
         {
-            var terrainType = Map(properties);
+            TerrainType terrainType = Map(properties);
             world.Add(entity, terrainType);
         }
     }

@@ -31,7 +31,10 @@ public class BorderProcessor : IBorderProcessor
     /// <returns>A MapBorder if border data exists; otherwise, null.</returns>
     public MapBorder? ParseBorder(TmxDocument tmxDoc, IReadOnlyList<LoadedTileset> tilesets)
     {
-        if (tmxDoc.Properties == null || !tmxDoc.Properties.TryGetValue("border", out var borderValue))
+        if (
+            tmxDoc.Properties == null
+            || !tmxDoc.Properties.TryGetValue("border", out object? borderValue)
+        )
         {
             _logger?.LogDebug("No border property found in map");
             return null;
@@ -43,10 +46,13 @@ public class BorderProcessor : IBorderProcessor
             // New format includes both bottom and top layer GIDs:
             // { "top_left": 1, "top_right": 3, "bottom_left": 5, "bottom_right": 7,
             //   "top_left_top": 2, "top_right_top": 4, "bottom_left_top": 6, "bottom_right_top": 8 }
-            var borderData = ParseBorderData(borderValue);
+            BorderData? borderData = ParseBorderData(borderValue);
             if (borderData == null)
             {
-                _logger?.LogWarning("Failed to parse border data from property: {Value}", borderValue);
+                _logger?.LogWarning(
+                    "Failed to parse border data from property: {Value}",
+                    borderValue
+                );
                 return null;
             }
 
@@ -57,51 +63,65 @@ public class BorderProcessor : IBorderProcessor
                 return null;
             }
 
-            var primaryTileset = tilesets[0];
-            var tilesetId = primaryTileset.TilesetId;
+            LoadedTileset primaryTileset = tilesets[0];
+            string tilesetId = primaryTileset.TilesetId;
 
             // Create MapBorder with both bottom and top layer GIDs
-            var bottomLayer = new[]
+            int[] bottomLayer = new[]
             {
                 borderData.Value.TopLeft,
                 borderData.Value.TopRight,
                 borderData.Value.BottomLeft,
-                borderData.Value.BottomRight
+                borderData.Value.BottomRight,
             };
 
-            var topLayer = new[]
+            int[] topLayer = new[]
             {
                 borderData.Value.TopLeftTop,
                 borderData.Value.TopRightTop,
                 borderData.Value.BottomLeftTop,
-                borderData.Value.BottomRightTop
+                borderData.Value.BottomRightTop,
             };
 
             var mapBorder = new MapBorder(bottomLayer, topLayer, tilesetId);
 
             // Pre-calculate source rectangles for BOTTOM layer border tiles
             mapBorder.BottomSourceRects = new Rectangle[4];
-            for (var i = 0; i < 4; i++)
+            for (int i = 0; i < 4; i++)
             {
-                var tileGid = mapBorder.BottomLayerGids[i];
-                mapBorder.BottomSourceRects[i] = TilesetUtilities.CalculateSourceRect(tileGid, primaryTileset.Tileset);
+                int tileGid = mapBorder.BottomLayerGids[i];
+                mapBorder.BottomSourceRects[i] = TilesetUtilities.CalculateSourceRect(
+                    tileGid,
+                    primaryTileset.Tileset
+                );
             }
 
             // Pre-calculate source rectangles for TOP layer border tiles
             mapBorder.TopSourceRects = new Rectangle[4];
-            for (var i = 0; i < 4; i++)
+            for (int i = 0; i < 4; i++)
             {
-                var tileGid = mapBorder.TopLayerGids[i];
+                int tileGid = mapBorder.TopLayerGids[i];
                 if (tileGid > 0)
-                    mapBorder.TopSourceRects[i] = TilesetUtilities.CalculateSourceRect(tileGid, primaryTileset.Tileset);
+                {
+                    mapBorder.TopSourceRects[i] = TilesetUtilities.CalculateSourceRect(
+                        tileGid,
+                        primaryTileset.Tileset
+                    );
+                }
             }
 
             _logger?.LogInformation(
-                "Loaded dual-layer border tiles from tileset {TilesetId}: " +
-                "Bottom=[{B0},{B1},{B2},{B3}], Top=[{T0},{T1},{T2},{T3}]",
+                "Loaded dual-layer border tiles from tileset {TilesetId}: "
+                    + "Bottom=[{B0},{B1},{B2},{B3}], Top=[{T0},{T1},{T2},{T3}]",
                 tilesetId,
-                bottomLayer[0], bottomLayer[1], bottomLayer[2], bottomLayer[3],
-                topLayer[0], topLayer[1], topLayer[2], topLayer[3]
+                bottomLayer[0],
+                bottomLayer[1],
+                bottomLayer[2],
+                bottomLayer[3],
+                topLayer[0],
+                topLayer[1],
+                topLayer[2],
+                topLayer[3]
             );
 
             return mapBorder;
@@ -125,11 +145,14 @@ public class BorderProcessor : IBorderProcessor
         World world,
         Entity mapInfoEntity,
         TmxDocument tmxDoc,
-        IReadOnlyList<LoadedTileset> tilesets)
+        IReadOnlyList<LoadedTileset> tilesets
+    )
     {
-        var border = ParseBorder(tmxDoc, tilesets);
+        MapBorder? border = ParseBorder(tmxDoc, tilesets);
         if (border == null)
+        {
             return false;
+        }
 
         world.Add(mapInfoEntity, border.Value);
         _logger?.LogDebug("Added MapBorder component to map entity {EntityId}", mapInfoEntity.Id);
@@ -195,27 +218,42 @@ public class BorderProcessor : IBorderProcessor
 
     private static int GetIntProperty(JsonElement element, string propertyName)
     {
-        if (element.TryGetProperty(propertyName, out var prop))
+        if (element.TryGetProperty(propertyName, out JsonElement prop))
         {
             if (prop.ValueKind == JsonValueKind.Number)
+            {
                 return prop.GetInt32();
+            }
         }
+
         return 0;
     }
 
     private static int GetIntFromDict(Dictionary<string, object> dict, string key)
     {
-        if (dict.TryGetValue(key, out var value))
+        if (dict.TryGetValue(key, out object? value))
         {
             if (value is int intValue)
+            {
                 return intValue;
+            }
+
             if (value is long longValue)
+            {
                 return (int)longValue;
+            }
+
             if (value is JsonElement jsonElement && jsonElement.ValueKind == JsonValueKind.Number)
+            {
                 return jsonElement.GetInt32();
-            if (int.TryParse(value?.ToString(), out var parsed))
+            }
+
+            if (int.TryParse(value?.ToString(), out int parsed))
+            {
                 return parsed;
+            }
         }
+
         return 0;
     }
 

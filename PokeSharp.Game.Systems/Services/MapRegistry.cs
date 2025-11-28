@@ -41,7 +41,7 @@ public class MapRegistry
     /// <returns>Map runtime ID if found, null if not registered.</returns>
     public MapRuntimeId? GetMapId(string mapName)
     {
-        return _mapNameToId.TryGetValue(mapName, out var id) ? id : null;
+        return _mapNameToId.TryGetValue(mapName, out MapRuntimeId id) ? id : null;
     }
 
     /// <summary>
@@ -51,7 +51,7 @@ public class MapRegistry
     /// <returns>Map name if found, null if not registered.</returns>
     public string? GetMapName(MapRuntimeId mapId)
     {
-        return _mapIdToName.TryGetValue(mapId, out var name) ? name : null;
+        return _mapIdToName.TryGetValue(mapId, out string? name) ? name : null;
     }
 
     /// <summary>

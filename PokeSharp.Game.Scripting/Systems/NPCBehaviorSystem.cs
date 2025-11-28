@@ -74,12 +74,14 @@ public class NPCBehaviorSystem : SystemBase, IUpdateSystem
             return;
         }
 
-        var behaviorCount = 0;
-        var errorCount = 0;
+        int behaviorCount = 0;
+        int errorCount = 0;
 
         // Debug: Log first tick to confirm system is running
         if (_tickCounter == 0)
+        {
             _logger.LogInformation("NPCBehaviorSystem: First update tick");
+        }
 
         // Use centralized query for NPCs with behavior
         world.Query(
@@ -88,21 +90,25 @@ public class NPCBehaviorSystem : SystemBase, IUpdateSystem
             {
                 // Debug: Log first entity found
                 if (_tickCounter == 0)
+                {
                     _logger.LogInformation(
                         "Found NPC with behavior: npcId={NpcId}, behaviorTypeId={BehaviorTypeId}, isActive={IsActive}",
                         npc.NpcId,
                         behavior.BehaviorTypeId,
                         behavior.IsActive
                     );
+                }
 
                 try
                 {
                     // Skip if behavior is not active
                     if (!behavior.IsActive)
+                    {
                         return;
+                    }
 
                     // Get script from registry
-                    var scriptObj = _behaviorRegistry.GetScript(behavior.BehaviorTypeId);
+                    object? scriptObj = _behaviorRegistry.GetScript(behavior.BehaviorTypeId);
                     if (scriptObj == null)
                     {
                         _logger.LogEntityOperationInvalid(
@@ -135,8 +141,8 @@ public class NPCBehaviorSystem : SystemBase, IUpdateSystem
                     }
 
                     // Create ScriptContext for this entity (with cached logger and API services)
-                    var loggerKey = $"{behavior.BehaviorTypeId}.{npc.NpcId}";
-                    var scriptLogger = GetOrCreateLogger(loggerKey);
+                    string loggerKey = $"{behavior.BehaviorTypeId}.{npc.NpcId}";
+                    ILogger scriptLogger = GetOrCreateLogger(loggerKey);
                     var context = new ScriptContext(world, entity, scriptLogger, _apis);
 
                     // Initialize on first tick
@@ -167,11 +173,11 @@ public class NPCBehaviorSystem : SystemBase, IUpdateSystem
                     errorCount++;
 
                     // Deactivate behavior with cleanup
-                    var scriptObj = _behaviorRegistry.GetScript(behavior.BehaviorTypeId);
+                    object? scriptObj = _behaviorRegistry.GetScript(behavior.BehaviorTypeId);
                     if (scriptObj is TypeScriptBase script)
                     {
-                        var loggerKey = $"{behavior.BehaviorTypeId}.{npc.NpcId}";
-                        var scriptLogger = GetOrCreateLogger(loggerKey);
+                        string loggerKey = $"{behavior.BehaviorTypeId}.{npc.NpcId}";
+                        ILogger scriptLogger = GetOrCreateLogger(loggerKey);
                         var context = new ScriptContext(world, entity, scriptLogger, _apis);
                         DeactivateBehavior(
                             script,
@@ -194,20 +200,24 @@ public class NPCBehaviorSystem : SystemBase, IUpdateSystem
         // Log performance metrics periodically
         _tickCounter++;
 
-        var shouldLogSummary =
+        bool shouldLogSummary =
             errorCount > 0
             || (_tickCounter % 60 == 0 && behaviorCount > 0)
             || (behaviorCount > 0 && behaviorCount != _lastBehaviorSummaryCount);
 
         if (shouldLogSummary)
+        {
             _logger.LogWorkflowStatus(
                 "Behavior tick summary",
                 ("executed", behaviorCount),
                 ("errors", errorCount)
             );
+        }
 
         if (behaviorCount > 0)
+        {
             _lastBehaviorSummaryCount = behaviorCount;
+        }
     }
 
     /// <summary>
@@ -233,10 +243,12 @@ public class NPCBehaviorSystem : SystemBase, IUpdateSystem
             {
                 // Check if we've hit the cache limit
                 if (_scriptLoggerCache.Count >= _config.MaxCachedLoggers)
+                {
                     _logger.LogWarning(
                         "Script logger cache limit reached ({Limit}). Consider increasing limit or checking for leaks.",
                         _config.MaxCachedLoggers
                     );
+                }
 
                 return _loggerFactory.CreateLogger($"Script.{k}");
             }
@@ -250,7 +262,7 @@ public class NPCBehaviorSystem : SystemBase, IUpdateSystem
     /// <param name="npcId">NPC ID</param>
     private void RemoveLogger(string behaviorTypeId, string npcId)
     {
-        var key = $"{behaviorTypeId}.{npcId}";
+        string key = $"{behaviorTypeId}.{npcId}";
         _scriptLoggerCache.TryRemove(key, out _);
     }
 

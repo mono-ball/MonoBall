@@ -46,19 +46,23 @@ public class JsonTemplateLoader
     )
     {
         if (!File.Exists(filePath))
+        {
             throw new FileNotFoundException($"Template file not found: {filePath}");
+        }
 
         try
         {
-            var json = await File.ReadAllTextAsync(filePath, ct);
-            var dto = JsonSerializer.Deserialize<TemplateDto>(json, _jsonOptions);
+            string json = await File.ReadAllTextAsync(filePath, ct);
+            TemplateDto? dto = JsonSerializer.Deserialize<TemplateDto>(json, _jsonOptions);
 
             if (dto == null)
+            {
                 throw new InvalidOperationException(
                     $"Failed to deserialize template from {filePath}"
                 );
+            }
 
-            var template = ConvertDtoToTemplate(dto, filePath);
+            EntityTemplate template = ConvertDtoToTemplate(dto, filePath);
 
             _logger.LogDebug(
                 "[steelblue1]WF[/] Loaded template [cyan]{TemplateId}[/] from [cyan]{FilePath}[/] with [yellow]{ComponentCount}[/] components",
@@ -102,17 +106,19 @@ public class JsonTemplateLoader
             return new List<EntityTemplate>();
         }
 
-        var searchOption = recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
-        var files = Directory.GetFiles(directoryPath, "*.json", searchOption);
+        SearchOption searchOption = recursive
+            ? SearchOption.AllDirectories
+            : SearchOption.TopDirectoryOnly;
+        string[] files = Directory.GetFiles(directoryPath, "*.json", searchOption);
         var templates = new List<EntityTemplate>();
 
-        foreach (var file in files)
+        foreach (string file in files)
         {
             ct.ThrowIfCancellationRequested();
 
             try
             {
-                var template = await LoadTemplateAsync(file, ct);
+                EntityTemplate template = await LoadTemplateAsync(file, ct);
                 templates.Add(template);
             }
             catch (Exception ex)
@@ -154,20 +160,24 @@ public class JsonTemplateLoader
             return cache;
         }
 
-        var searchOption = recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
-        var files = Directory.GetFiles(directoryPath, "*.json", searchOption);
+        SearchOption searchOption = recursive
+            ? SearchOption.AllDirectories
+            : SearchOption.TopDirectoryOnly;
+        string[] files = Directory.GetFiles(directoryPath, "*.json", searchOption);
 
-        foreach (var file in files)
+        foreach (string file in files)
         {
             ct.ThrowIfCancellationRequested();
 
             try
             {
-                var json = await File.ReadAllTextAsync(file, ct);
+                string json = await File.ReadAllTextAsync(file, ct);
                 var jsonNode = JsonNode.Parse(json);
 
                 if (jsonNode != null)
+                {
                     cache.Add(file, jsonNode);
+                }
             }
             catch (Exception ex)
             {
@@ -192,15 +202,17 @@ public class JsonTemplateLoader
     /// </summary>
     public EntityTemplate DeserializeTemplate(JsonNode templateJson, string sourcePath)
     {
-        var dto = JsonSerializer.Deserialize<TemplateDto>(
+        TemplateDto? dto = JsonSerializer.Deserialize<TemplateDto>(
             templateJson.ToJsonString(),
             _jsonOptions
         );
 
         if (dto == null)
+        {
             throw new InvalidOperationException(
                 $"Failed to deserialize template from {sourcePath}"
             );
+        }
 
         return ConvertDtoToTemplate(dto, sourcePath);
     }
@@ -228,10 +240,14 @@ public class JsonTemplateLoader
 
         // Deserialize components
         if (dto.Components != null)
-            foreach (var componentDto in dto.Components)
+        {
+            foreach (ComponentDto componentDto in dto.Components)
+            {
                 try
                 {
-                    var componentTemplate = _componentRegistry.DeserializeComponent(componentDto);
+                    ComponentTemplate componentTemplate = _componentRegistry.DeserializeComponent(
+                        componentDto
+                    );
                     template.AddComponent(componentTemplate);
                 }
                 catch (Exception ex)
@@ -244,6 +260,8 @@ public class JsonTemplateLoader
                     );
                     throw;
                 }
+            }
+        }
 
         return template;
     }

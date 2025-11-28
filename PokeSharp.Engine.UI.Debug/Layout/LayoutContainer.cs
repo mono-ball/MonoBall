@@ -1,13 +1,19 @@
-using System.Collections.Generic;
-
 namespace PokeSharp.Engine.UI.Debug.Layout;
 
 /// <summary>
-/// Manages layout resolution for a container and its children.
-/// Handles coordinate space transformations and child layout.
+///     Manages layout resolution for a container and its children.
+///     Handles coordinate space transformations and child layout.
 /// </summary>
 public class LayoutContainer
 {
+    /// <summary>Child containers</summary>
+    private readonly List<LayoutContainer> _children = new();
+
+    public LayoutContainer(LayoutConstraint constraint)
+    {
+        Constraint = constraint;
+    }
+
     /// <summary>The resolved rectangle for this container</summary>
     public LayoutRect Rect { get; private set; }
 
@@ -17,20 +23,15 @@ public class LayoutContainer
     /// <summary>The constraint that produced this layout</summary>
     public LayoutConstraint Constraint { get; }
 
-    /// <summary>Child containers</summary>
-    private readonly List<LayoutContainer> _children = new();
-
     public IReadOnlyList<LayoutContainer> Children => _children;
 
-    public LayoutContainer(LayoutConstraint constraint)
-    {
-        Constraint = constraint;
-    }
-
     /// <summary>
-    /// Resolves this container's layout relative to a parent rectangle.
+    ///     Resolves this container's layout relative to a parent rectangle.
     /// </summary>
-    public void ResolveLayout(LayoutRect parentRect, (float width, float height)? contentSize = null)
+    public void ResolveLayout(
+        LayoutRect parentRect,
+        (float width, float height)? contentSize = null
+    )
     {
         Rect = LayoutResolver.Resolve(Constraint, parentRect, contentSize);
 
@@ -44,7 +45,7 @@ public class LayoutContainer
     }
 
     /// <summary>
-    /// Adds a child container.
+    ///     Adds a child container.
     /// </summary>
     public LayoutContainer AddChild(LayoutConstraint constraint)
     {
@@ -54,7 +55,7 @@ public class LayoutContainer
     }
 
     /// <summary>
-    /// Removes a child container.
+    ///     Removes a child container.
     /// </summary>
     public void RemoveChild(LayoutContainer child)
     {
@@ -62,7 +63,7 @@ public class LayoutContainer
     }
 
     /// <summary>
-    /// Clears all children.
+    ///     Clears all children.
     /// </summary>
     public void ClearChildren()
     {
@@ -70,11 +71,11 @@ public class LayoutContainer
     }
 
     /// <summary>
-    /// Resolves layout for all children using this container's content area as parent.
+    ///     Resolves layout for all children using this container's content area as parent.
     /// </summary>
     public void ResolveChildLayouts()
     {
-        foreach (var child in _children)
+        foreach (LayoutContainer child in _children)
         {
             child.ResolveLayout(ContentRect);
             child.ResolveChildLayouts(); // Recursive
@@ -82,7 +83,7 @@ public class LayoutContainer
     }
 
     /// <summary>
-    /// Converts a point from screen space to this container's local space.
+    ///     Converts a point from screen space to this container's local space.
     /// </summary>
     public (float x, float y) ScreenToLocal(float screenX, float screenY)
     {
@@ -90,7 +91,7 @@ public class LayoutContainer
     }
 
     /// <summary>
-    /// Converts a point from this container's local space to screen space.
+    ///     Converts a point from this container's local space to screen space.
     /// </summary>
     public (float x, float y) LocalToScreen(float localX, float localY)
     {
@@ -98,14 +99,10 @@ public class LayoutContainer
     }
 
     /// <summary>
-    /// Checks if a screen point is inside this container.
+    ///     Checks if a screen point is inside this container.
     /// </summary>
     public bool ContainsScreenPoint(float x, float y)
     {
         return Rect.Contains(x, y);
     }
 }
-
-
-
-

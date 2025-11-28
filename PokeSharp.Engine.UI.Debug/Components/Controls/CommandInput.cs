@@ -9,75 +9,115 @@ using PokeSharp.Engine.UI.Debug.Utilities;
 namespace PokeSharp.Engine.UI.Debug.Components.Controls;
 
 /// <summary>
-/// Enhanced input field specifically for command-line interfaces.
-/// Supports command history, auto-completion, and multi-line input.
+///     Enhanced input field specifically for command-line interfaces.
+///     Supports command history, auto-completion, and multi-line input.
 /// </summary>
 public class CommandInput : UIComponent, ITextInput
 {
-    private string _text = string.Empty;
-    private int _cursorPosition = 0;
-    private float _cursorBlinkTimer = 0;
-    private static float CursorBlinkRate => 0.5f; // Fixed value, doesn't need theme
-
-    // Selection
-    private int _selectionStart = 0;
-    private int _selectionEnd = 0;
-    private bool _hasSelection = false;
-
     // Command history
     private readonly List<string> _history = new();
-    private int _historyIndex = -1; // -1 = not navigating history
-    private string _temporaryInput = string.Empty; // Stores current input when navigating history
-    private int _maxHistory = 100;
-
-    // Multi-line support
-    private bool _multiLineMode = false;
+    private readonly int _maxHistory = 100;
 
     // Visual properties - nullable for theme fallback
     private Color? _backgroundColor;
-    private Color? _textColor;
-    private Color? _cursorColor;
-    private Color? _selectionColor;
     private Color? _borderColor;
+    private float _cursorBlinkTimer;
+    private Color? _cursorColor;
     private Color? _focusBorderColor;
-    private Color? _promptColor;
+    private int _historyIndex = -1; // -1 = not navigating history
 
-    public Color BackgroundColor { get => _backgroundColor ?? ThemeManager.Current.InputBackground; set => _backgroundColor = value; }
-    public Color TextColor { get => _textColor ?? ThemeManager.Current.InputText; set => _textColor = value; }
-    public Color CursorColor { get => _cursorColor ?? ThemeManager.Current.InputCursor; set => _cursorColor = value; }
-    public Color SelectionColor { get => _selectionColor ?? ThemeManager.Current.InputSelection; set => _selectionColor = value; }
-    public Color BorderColor { get => _borderColor ?? ThemeManager.Current.BorderPrimary; set => _borderColor = value; }
-    public Color FocusBorderColor { get => _focusBorderColor ?? ThemeManager.Current.BorderFocus; set => _focusBorderColor = value; }
+    // Mouse drag state for selection
+    private bool _isMouseDragging;
+    private bool _isSelectingWithMouse;
+
+    // Multi-line support
+    private Color? _promptColor;
+    private Color? _selectionColor;
+    private int _selectionEnd;
+
+    // Selection
+    private int _selectionStart;
+    private string _temporaryInput = string.Empty; // Stores current input when navigating history
+    private Color? _textColor;
+
+    public CommandInput(string id)
+    {
+        Id = id;
+    }
+
+    private static float CursorBlinkRate => 0.5f; // Fixed value, doesn't need theme
+
+    public Color BackgroundColor
+    {
+        get => _backgroundColor ?? ThemeManager.Current.InputBackground;
+        set => _backgroundColor = value;
+    }
+
+    public Color TextColor
+    {
+        get => _textColor ?? ThemeManager.Current.InputText;
+        set => _textColor = value;
+    }
+    public Color CursorColor
+    {
+        get => _cursorColor ?? ThemeManager.Current.InputCursor;
+        set => _cursorColor = value;
+    }
+
+    public Color SelectionColor
+    {
+        get => _selectionColor ?? ThemeManager.Current.InputSelection;
+        set => _selectionColor = value;
+    }
+
+    public Color BorderColor
+    {
+        get => _borderColor ?? ThemeManager.Current.BorderPrimary;
+        set => _borderColor = value;
+    }
+
+    public Color FocusBorderColor
+    {
+        get => _focusBorderColor ?? ThemeManager.Current.BorderFocus;
+        set => _focusBorderColor = value;
+    }
+
     public float BorderThickness { get; set; } = 1;
     public float Padding { get; set; } = 8f;
 
     // Prompt string (e.g., " ")
-    public string Prompt { get; set; } = Core.NerdFontIcons.Prompt;
-    public Color PromptColor { get => _promptColor ?? ThemeManager.Current.Prompt; set => _promptColor = value; }
-
-    // Properties
-    public string Text => _text;
-    public int CursorPosition => _cursorPosition;
-    public bool HasSelection => _hasSelection;
-    public string SelectedText => _hasSelection ? _text.Substring(SelectionStart, SelectionLength) : string.Empty;
-    public bool IsMultiLine { get => _multiLineMode; set => _multiLineMode = value; }
+    public string Prompt { get; set; } = NerdFontIcons.Prompt;
+    public Color PromptColor
+    {
+        get => _promptColor ?? ThemeManager.Current.Prompt;
+        set => _promptColor = value;
+    }
+    public bool IsMultiLine { get; set; }
 
     private int SelectionStart => Math.Min(_selectionStart, _selectionEnd);
     private int SelectionEnd => Math.Max(_selectionStart, _selectionEnd);
     private int SelectionLength => SelectionEnd - SelectionStart;
 
-    // Events (ITextInput interface)
-    public event Action<string>? OnSubmit;
-    public event Action<string>? OnTextChanged;
-
     // Additional events (not in ITextInput)
     public Action<string>? OnRequestCompletions { get; set; }
     public Action? OnEscape { get; set; }
 
-    public CommandInput(string id) { Id = id; }
+    // Properties
+    public string Text { get; private set; } = string.Empty;
+
+    public int CursorPosition { get; private set; }
+
+    public bool HasSelection { get; private set; }
+
+    public string SelectedText =>
+        HasSelection ? Text.Substring(SelectionStart, SelectionLength) : string.Empty;
+
+    // Events (ITextInput interface)
+    public event Action<string>? OnSubmit;
+    public event Action<string>? OnTextChanged;
 
     /// <summary>
-    /// Requests focus for this input component (ITextInput interface).
+    ///     Requests focus for this input component (ITextInput interface).
     /// </summary>
     public void Focus()
     {
@@ -85,76 +125,90 @@ public class CommandInput : UIComponent, ITextInput
     }
 
     /// <summary>
-    /// Sets the input text programmatically.
+    ///     Sets the input text programmatically.
     /// </summary>
     public void SetText(string text)
     {
-        _text = text;
-        _cursorPosition = Math.Clamp(_cursorPosition, 0, _text.Length);
-        OnTextChanged?.Invoke(_text);
+        Text = text;
+        CursorPosition = Math.Clamp(CursorPosition, 0, Text.Length);
+        OnTextChanged?.Invoke(Text);
     }
 
     /// <summary>
-    /// Completes the current word at the cursor position with the given completion text.
-    /// Finds the word boundary before the cursor and replaces it.
+    ///     Clears the input field.
+    /// </summary>
+    public void Clear()
+    {
+        Text = string.Empty;
+        CursorPosition = 0;
+        ClearSelection();
+        _historyIndex = -1;
+        _temporaryInput = string.Empty;
+        OnTextChanged?.Invoke(Text);
+    }
+
+    /// <summary>
+    ///     Completes the current word at the cursor position with the given completion text.
+    ///     Finds the word boundary before the cursor and replaces it.
     /// </summary>
     public void CompleteText(string completionText)
     {
         // Find the start of the current word (go back until we hit a word boundary)
-        int wordStart = _cursorPosition;
+        int wordStart = CursorPosition;
         while (wordStart > 0)
         {
-            char c = _text[wordStart - 1];
+            char c = Text[wordStart - 1];
             // Word boundary: whitespace, operators, or dot (for member access like Console.WriteLine)
-            if (char.IsWhiteSpace(c) || c == '(' || c == ')' || c == '[' || c == ']' ||
-                c == '{' || c == '}' || c == ',' || c == ';' || c == '=' || c == '.')
+            if (
+                char.IsWhiteSpace(c)
+                || c == '('
+                || c == ')'
+                || c == '['
+                || c == ']'
+                || c == '{'
+                || c == '}'
+                || c == ','
+                || c == ';'
+                || c == '='
+                || c == '.'
+            )
             {
                 break;
             }
+
             wordStart--;
         }
 
         // Remove the partial word
-        if (wordStart < _cursorPosition)
+        if (wordStart < CursorPosition)
         {
-            _text = _text.Remove(wordStart, _cursorPosition - wordStart);
-            _cursorPosition = wordStart;
+            Text = Text.Remove(wordStart, CursorPosition - wordStart);
+            CursorPosition = wordStart;
         }
 
         // Insert the completion
-        _text = _text.Insert(_cursorPosition, completionText);
-        _cursorPosition += completionText.Length;
+        Text = Text.Insert(CursorPosition, completionText);
+        CursorPosition += completionText.Length;
 
         _historyIndex = -1; // Reset history navigation
 
-        OnTextChanged?.Invoke(_text);
+        OnTextChanged?.Invoke(Text);
     }
 
     /// <summary>
-    /// Clears the input field.
-    /// </summary>
-    public void Clear()
-    {
-        _text = string.Empty;
-        _cursorPosition = 0;
-        ClearSelection();
-        _historyIndex = -1;
-        _temporaryInput = string.Empty;
-        OnTextChanged?.Invoke(_text);
-    }
-
-    /// <summary>
-    /// Submits the current input.
+    ///     Submits the current input.
     /// </summary>
     public void Submit()
     {
-        if (string.IsNullOrWhiteSpace(_text))
+        if (string.IsNullOrWhiteSpace(Text))
+        {
             return;
+        }
 
         // Add to history
-        if (_history.Count == 0 || _history[^1] != _text)
+        if (_history.Count == 0 || _history[^1] != Text)
         {
-            _history.Add(_text);
+            _history.Add(Text);
 
             // Limit history size
             while (_history.Count > _maxHistory)
@@ -164,39 +218,43 @@ public class CommandInput : UIComponent, ITextInput
         }
 
         // Fire submit event
-        OnSubmit?.Invoke(_text);
+        OnSubmit?.Invoke(Text);
 
         // Clear input
         Clear();
     }
 
     /// <summary>
-    /// Navigates to the previous command in history.
+    ///     Navigates to the previous command in history.
     /// </summary>
     public void HistoryPrevious()
     {
         if (_history.Count == 0)
+        {
             return;
+        }
 
         // Save current input if we're starting history navigation
         if (_historyIndex == -1)
         {
-            _temporaryInput = _text;
+            _temporaryInput = Text;
             _historyIndex = _history.Count;
         }
 
         _historyIndex = Math.Max(0, _historyIndex - 1);
         SetText(_history[_historyIndex]);
-        _cursorPosition = _text.Length;
+        CursorPosition = Text.Length;
     }
 
     /// <summary>
-    /// Navigates to the next command in history.
+    ///     Navigates to the next command in history.
     /// </summary>
     public void HistoryNext()
     {
         if (_historyIndex == -1)
+        {
             return;
+        }
 
         _historyIndex++;
 
@@ -212,11 +270,11 @@ public class CommandInput : UIComponent, ITextInput
             SetText(_history[_historyIndex]);
         }
 
-        _cursorPosition = _text.Length;
+        CursorPosition = Text.Length;
     }
 
     /// <summary>
-    /// Loads command history from a list.
+    ///     Loads command history from a list.
     /// </summary>
     public void LoadHistory(List<string> history)
     {
@@ -225,76 +283,75 @@ public class CommandInput : UIComponent, ITextInput
     }
 
     /// <summary>
-    /// Gets the current command history.
+    ///     Gets the current command history.
     /// </summary>
-    public List<string> GetHistory() => new List<string>(_history);
+    public List<string> GetHistory()
+    {
+        return new List<string>(_history);
+    }
 
     private void ClearSelection()
     {
-        _hasSelection = false;
+        HasSelection = false;
         _selectionStart = 0;
         _selectionEnd = 0;
     }
 
     private void InsertText(string text)
     {
-        if (_hasSelection)
+        if (HasSelection)
         {
             // Replace selection
-            _text = _text.Remove(SelectionStart, SelectionLength);
-            _cursorPosition = SelectionStart;
+            Text = Text.Remove(SelectionStart, SelectionLength);
+            CursorPosition = SelectionStart;
             ClearSelection();
         }
 
-        _text = _text.Insert(_cursorPosition, text);
-        _cursorPosition += text.Length;
+        Text = Text.Insert(CursorPosition, text);
+        CursorPosition += text.Length;
         _historyIndex = -1; // Reset history navigation
-        OnTextChanged?.Invoke(_text);
+        OnTextChanged?.Invoke(Text);
     }
 
     private void DeleteBackward()
     {
-        if (_hasSelection)
+        if (HasSelection)
         {
-            _text = _text.Remove(SelectionStart, SelectionLength);
-            _cursorPosition = SelectionStart;
+            Text = Text.Remove(SelectionStart, SelectionLength);
+            CursorPosition = SelectionStart;
             ClearSelection();
         }
-        else if (_cursorPosition > 0)
+        else if (CursorPosition > 0)
         {
-            _text = _text.Remove(_cursorPosition - 1, 1);
-            _cursorPosition--;
+            Text = Text.Remove(CursorPosition - 1, 1);
+            CursorPosition--;
         }
 
         _historyIndex = -1;
-        OnTextChanged?.Invoke(_text);
+        OnTextChanged?.Invoke(Text);
     }
 
     private void DeleteForward()
     {
-        if (_hasSelection)
+        if (HasSelection)
         {
-            _text = _text.Remove(SelectionStart, SelectionLength);
-            _cursorPosition = SelectionStart;
+            Text = Text.Remove(SelectionStart, SelectionLength);
+            CursorPosition = SelectionStart;
             ClearSelection();
         }
-        else if (_cursorPosition < _text.Length)
+        else if (CursorPosition < Text.Length)
         {
-            _text = _text.Remove(_cursorPosition, 1);
+            Text = Text.Remove(CursorPosition, 1);
         }
 
         _historyIndex = -1;
-        OnTextChanged?.Invoke(_text);
+        OnTextChanged?.Invoke(Text);
     }
-
-    // Mouse drag state for selection
-    private bool _isMouseDragging = false;
-    private bool _isSelectingWithMouse = false;
 
     protected override void OnRender(UIContext context)
     {
-        var input = context.Input;
-        var mousePos = input.MousePosition;
+        InputState input = context.Input;
+        Point mousePos = input.MousePosition;
 
         // Handle mouse input for focus, cursor positioning, and selection
         HandleMouseInput(context, input, mousePos);
@@ -305,14 +362,14 @@ public class CommandInput : UIComponent, ITextInput
             HandleKeyboardInput(context.Input);
         }
 
-        var renderer = Renderer;
-        var resolvedRect = Rect;
+        UIRenderer renderer = Renderer;
+        LayoutRect resolvedRect = Rect;
 
         // Draw background
         renderer.DrawRectangle(resolvedRect, BackgroundColor);
 
         // Draw border
-        var borderColor = IsFocused() ? FocusBorderColor : BorderColor;
+        Color borderColor = IsFocused() ? FocusBorderColor : BorderColor;
         renderer.DrawRectangleOutline(resolvedRect, borderColor, (int)BorderThickness);
 
         // Calculate text position
@@ -320,17 +377,17 @@ public class CommandInput : UIComponent, ITextInput
 
         // Draw prompt
         renderer.DrawText(Prompt, textPos, PromptColor);
-        var promptWidth = renderer.MeasureText(Prompt).X;
+        float promptWidth = renderer.MeasureText(Prompt).X;
         textPos.X += promptWidth;
 
         // Draw selection background
-        if (_hasSelection)
+        if (HasSelection)
         {
-            var beforeSelection = _text.Substring(0, SelectionStart);
-            var selectedText = _text.Substring(SelectionStart, SelectionLength);
+            string beforeSelection = Text.Substring(0, SelectionStart);
+            string selectedText = Text.Substring(SelectionStart, SelectionLength);
 
-            var beforeWidth = renderer.MeasureText(beforeSelection).X;
-            var selectionWidth = renderer.MeasureText(selectedText).X;
+            float beforeWidth = renderer.MeasureText(beforeSelection).X;
+            float selectionWidth = renderer.MeasureText(selectedText).X;
 
             var selectionRect = new LayoutRect(
                 textPos.X + beforeWidth,
@@ -342,12 +399,12 @@ public class CommandInput : UIComponent, ITextInput
         }
 
         // Draw text with syntax highlighting
-        if (!string.IsNullOrEmpty(_text))
+        if (!string.IsNullOrEmpty(Text))
         {
-            var segments = SyntaxHighlighter.Highlight(_text);
+            List<ColoredSegment> segments = SyntaxHighlighter.Highlight(Text);
             float currentX = textPos.X;
 
-            foreach (var segment in segments)
+            foreach (ColoredSegment segment in segments)
             {
                 renderer.DrawText(segment.Text, new Vector2(currentX, textPos.Y), segment.Color);
                 currentX += renderer.MeasureText(segment.Text).X;
@@ -359,12 +416,14 @@ public class CommandInput : UIComponent, ITextInput
         {
             _cursorBlinkTimer += (float)context.Input.GameTime.ElapsedGameTime.TotalSeconds;
             if (_cursorBlinkTimer > CursorBlinkRate)
+            {
                 _cursorBlinkTimer = 0;
+            }
 
             if (_cursorBlinkTimer < CursorBlinkRate / 2)
             {
-                var textBeforeCursor = _text.Substring(0, _cursorPosition);
-                var cursorX = textPos.X + renderer.MeasureText(textBeforeCursor).X;
+                string textBeforeCursor = Text.Substring(0, CursorPosition);
+                float cursorX = textPos.X + renderer.MeasureText(textBeforeCursor).X;
 
                 var cursorRect = new LayoutRect(
                     cursorX,
@@ -378,8 +437,8 @@ public class CommandInput : UIComponent, ITextInput
     }
 
     /// <summary>
-    /// Handles mouse click to position cursor at the clicked character.
-    /// Uses binary search for efficiency with long text.
+    ///     Handles mouse click to position cursor at the clicked character.
+    ///     Uses binary search for efficiency with long text.
     /// </summary>
     /// <param name="mousePos">Mouse position</param>
     /// <param name="renderer">UI renderer for text measurement</param>
@@ -388,14 +447,14 @@ public class CommandInput : UIComponent, ITextInput
     {
         int newPosition;
 
-        if (string.IsNullOrEmpty(_text))
+        if (string.IsNullOrEmpty(Text))
         {
             newPosition = 0;
         }
         else
         {
             // Calculate text start position (after padding and prompt)
-            var promptWidth = renderer.MeasureText(Prompt).X;
+            float promptWidth = renderer.MeasureText(Prompt).X;
             float textStartX = Rect.X + Padding + promptWidth;
             float relativeX = mousePos.X - textStartX;
 
@@ -407,10 +466,10 @@ public class CommandInput : UIComponent, ITextInput
             // Click after text end
             else
             {
-                float totalWidth = renderer.MeasureText(_text).X;
+                float totalWidth = renderer.MeasureText(Text).X;
                 if (relativeX >= totalWidth)
                 {
-                    newPosition = _text.Length;
+                    newPosition = Text.Length;
                 }
                 else
                 {
@@ -424,11 +483,12 @@ public class CommandInput : UIComponent, ITextInput
         if (extendSelection)
         {
             // Shift+Click: extend selection from current position (or start new selection)
-            if (!_hasSelection)
+            if (!HasSelection)
             {
-                _hasSelection = true;
-                _selectionStart = _cursorPosition;
+                HasSelection = true;
+                _selectionStart = CursorPosition;
             }
+
             _selectionEnd = newPosition;
         }
         else
@@ -439,13 +499,16 @@ public class CommandInput : UIComponent, ITextInput
             _selectionEnd = newPosition;
         }
 
-        _cursorPosition = newPosition;
+        CursorPosition = newPosition;
     }
 
-    protected override bool IsInteractive() => true;
+    protected override bool IsInteractive()
+    {
+        return true;
+    }
 
     /// <summary>
-    /// Handles all mouse input for focus, cursor positioning, and selection.
+    ///     Handles all mouse input for focus, cursor positioning, and selection.
     /// </summary>
     private void HandleMouseInput(UIContext context, InputState input, Point mousePos)
     {
@@ -499,15 +562,17 @@ public class CommandInput : UIComponent, ITextInput
     }
 
     /// <summary>
-    /// Handles mouse drag to extend selection.
+    ///     Handles mouse drag to extend selection.
     /// </summary>
     private void HandleMouseDrag(Point mousePos, UIRenderer renderer)
     {
-        if (string.IsNullOrEmpty(_text))
+        if (string.IsNullOrEmpty(Text))
+        {
             return;
+        }
 
         // Calculate new cursor position from mouse
-        var promptWidth = renderer.MeasureText(Prompt).X;
+        float promptWidth = renderer.MeasureText(Prompt).X;
         float textStartX = Rect.X + Padding + promptWidth;
         float relativeX = mousePos.X - textStartX;
 
@@ -518,10 +583,10 @@ public class CommandInput : UIComponent, ITextInput
         }
         else
         {
-            float totalWidth = renderer.MeasureText(_text).X;
+            float totalWidth = renderer.MeasureText(Text).X;
             if (relativeX >= totalWidth)
             {
-                newPosition = _text.Length;
+                newPosition = Text.Length;
             }
             else
             {
@@ -531,36 +596,36 @@ public class CommandInput : UIComponent, ITextInput
         }
 
         // If this is the first drag movement, start selection
-        if (!_isSelectingWithMouse && newPosition != _cursorPosition)
+        if (!_isSelectingWithMouse && newPosition != CursorPosition)
         {
             _isSelectingWithMouse = true;
-            if (!_hasSelection)
+            if (!HasSelection)
             {
-                _hasSelection = true;
-                _selectionStart = _cursorPosition;
+                HasSelection = true;
+                _selectionStart = CursorPosition;
             }
         }
 
         // Update cursor and selection end
         if (_isSelectingWithMouse)
         {
-            _cursorPosition = newPosition;
+            CursorPosition = newPosition;
             _selectionEnd = newPosition;
         }
     }
 
     /// <summary>
-    /// Binary search to find character position from X coordinate.
+    ///     Binary search to find character position from X coordinate.
     /// </summary>
     private int FindCharacterPosition(float relativeX, UIRenderer renderer)
     {
         int left = 0;
-        int right = _text.Length;
+        int right = Text.Length;
 
         while (left < right)
         {
             int mid = (left + right) / 2;
-            string substring = _text.Substring(0, mid);
+            string substring = Text.Substring(0, mid);
             float widthAtMid = renderer.MeasureText(substring).X;
 
             if (widthAtMid < relativeX)
@@ -576,8 +641,8 @@ public class CommandInput : UIComponent, ITextInput
         // Check if we should round to previous character
         if (left > 0)
         {
-            string substringAtLeft = _text.Substring(0, left);
-            string substringAtPrev = _text.Substring(0, left - 1);
+            string substringAtLeft = Text.Substring(0, left);
+            string substringAtPrev = Text.Substring(0, left - 1);
             float widthAtLeft = renderer.MeasureText(substringAtLeft).X;
             float widthAtPrev = renderer.MeasureText(substringAtPrev).X;
             float midPoint = (widthAtPrev + widthAtLeft) / 2;
@@ -598,7 +663,7 @@ public class CommandInput : UIComponent, ITextInput
         {
             // In the new architecture, parent (ConsolePanel) handles suggestion acceptance
             // We just handle command submission
-            if (!_multiLineMode || !input.IsShiftDown())
+            if (!IsMultiLine || !input.IsShiftDown())
             {
                 Submit();
             }
@@ -606,6 +671,7 @@ public class CommandInput : UIComponent, ITextInput
             {
                 InsertText("\n");
             }
+
             return;
         }
 
@@ -632,7 +698,7 @@ public class CommandInput : UIComponent, ITextInput
         // Tab - Auto-complete
         if (input.IsKeyPressed(Keys.Tab))
         {
-            OnRequestCompletions?.Invoke(_text);
+            OnRequestCompletions?.Invoke(Text);
             return;
         }
 
@@ -653,14 +719,14 @@ public class CommandInput : UIComponent, ITextInput
         // Left/Right arrows - with repeat
         if (input.IsKeyPressedWithRepeat(Keys.Left))
         {
-            _cursorPosition = Math.Max(0, _cursorPosition - 1);
+            CursorPosition = Math.Max(0, CursorPosition - 1);
             ClearSelection();
             return;
         }
 
         if (input.IsKeyPressedWithRepeat(Keys.Right))
         {
-            _cursorPosition = Math.Min(_text.Length, _cursorPosition + 1);
+            CursorPosition = Math.Min(Text.Length, CursorPosition + 1);
             ClearSelection();
             return;
         }
@@ -668,14 +734,14 @@ public class CommandInput : UIComponent, ITextInput
         // Home/End - with repeat
         if (input.IsKeyPressedWithRepeat(Keys.Home))
         {
-            _cursorPosition = 0;
+            CursorPosition = 0;
             ClearSelection();
             return;
         }
 
         if (input.IsKeyPressedWithRepeat(Keys.End))
         {
-            _cursorPosition = _text.Length;
+            CursorPosition = Text.Length;
             ClearSelection();
             return;
         }
@@ -683,20 +749,21 @@ public class CommandInput : UIComponent, ITextInput
         // Ctrl+A - Select all
         if (input.IsCtrlDown() && input.IsKeyPressed(Keys.A))
         {
-            _hasSelection = true;
+            HasSelection = true;
             _selectionStart = 0;
-            _selectionEnd = _text.Length;
+            _selectionEnd = Text.Length;
             return;
         }
 
         // Ctrl+C - Copy
         if (input.IsCtrlDown() && input.IsKeyPressed(Keys.C))
         {
-            if (_hasSelection)
+            if (HasSelection)
             {
                 // Would need clipboard access
                 // SDL2.SDL.SDL_SetClipboardText(SelectedText);
             }
+
             return;
         }
 
@@ -710,11 +777,11 @@ public class CommandInput : UIComponent, ITextInput
         }
 
         // Regular character input - with repeat for smooth typing when held
-        foreach (var key in Enum.GetValues<Keys>())
+        foreach (Keys key in Enum.GetValues<Keys>())
         {
             if (input.IsKeyPressedWithRepeat(key))
             {
-                var ch = Utilities.KeyboardHelper.KeyToChar(key, input.IsShiftDown());
+                char? ch = KeyboardHelper.KeyToChar(key, input.IsShiftDown());
                 if (ch.HasValue)
                 {
                     InsertText(ch.Value.ToString());
@@ -722,6 +789,4 @@ public class CommandInput : UIComponent, ITextInput
             }
         }
     }
-
 }
-

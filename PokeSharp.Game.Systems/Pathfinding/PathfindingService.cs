@@ -1,3 +1,4 @@
+using Arch.Core;
 using Arch.Core.Extensions;
 using Microsoft.Xna.Framework;
 using PokeSharp.Engine.Core.Systems;
@@ -49,39 +50,47 @@ public class PathfindingService
         _allNodes[start] = startNode;
         _openSet.Enqueue(startNode, startNode.F);
 
-        var nodesSearched = 0;
+        int nodesSearched = 0;
 
         while (_openSet.Count > 0 && nodesSearched < maxSearchNodes)
         {
             nodesSearched++;
 
             // Get node with lowest F score
-            var current = _openSet.Dequeue();
+            PathNode current = _openSet.Dequeue();
 
             // Goal reached
             if (current.Position == goal)
+            {
                 return ReconstructPath(current);
+            }
 
             _closedSet.Add(current.Position);
 
             // Explore neighbors
-            foreach (var neighborPos in GetNeighbors(current.Position))
+            foreach (Point neighborPos in GetNeighbors(current.Position))
             {
                 // Skip if already evaluated
                 if (_closedSet.Contains(neighborPos))
+                {
                     continue;
+                }
 
                 // Skip if not walkable (check collision)
                 if (!IsWalkable(neighborPos, mapId, spatialQuery))
+                {
                     continue;
+                }
 
-                var tentativeG = current.G + 1f; // Each step costs 1
+                float tentativeG = current.G + 1f; // Each step costs 1
 
                 // Check if we found a better path to this neighbor
-                if (_allNodes.TryGetValue(neighborPos, out var existingNeighbor))
+                if (_allNodes.TryGetValue(neighborPos, out PathNode? existingNeighbor))
                 {
                     if (tentativeG >= existingNeighbor.G)
+                    {
                         continue; // Not a better path
+                    }
 
                     // Update existing node with better path
                     existingNeighbor.Parent = current;
@@ -91,7 +100,7 @@ public class PathfindingService
                 else
                 {
                     // Create new node
-                    var h = Heuristic(neighborPos, goal);
+                    float h = Heuristic(neighborPos, goal);
                     var neighbor = new PathNode(neighborPos, current, tentativeG, h);
                     _allNodes[neighborPos] = neighbor;
                     _openSet.Enqueue(neighbor, neighbor.F);
@@ -111,9 +120,13 @@ public class PathfindingService
     /// <returns>True if path is clear, false if blocked</returns>
     public bool IsPathValid(Queue<Point> path, int mapId, ISpatialQuery spatialQuery)
     {
-        foreach (var point in path)
+        foreach (Point point in path)
+        {
             if (!IsWalkable(point, mapId, spatialQuery))
+            {
                 return false;
+            }
+        }
 
         return true;
     }
@@ -129,24 +142,32 @@ public class PathfindingService
     public Queue<Point> SmoothPath(Queue<Point> path, int mapId, ISpatialQuery spatialQuery)
     {
         if (path.Count <= 2)
+        {
             return path; // Can't smooth a path with 2 or fewer points
+        }
 
         var smoothed = new Queue<Point>();
-        var pathArray = path.ToArray();
+        Point[] pathArray = path.ToArray();
 
         smoothed.Enqueue(pathArray[0]); // Always keep start
 
-        var currentIndex = 0;
+        int currentIndex = 0;
         while (currentIndex < pathArray.Length - 1)
         {
-            var farthestVisible = currentIndex + 1;
+            int farthestVisible = currentIndex + 1;
 
             // Find the farthest point we can see from current
-            for (var i = currentIndex + 2; i < pathArray.Length; i++)
+            for (int i = currentIndex + 2; i < pathArray.Length; i++)
+            {
                 if (HasLineOfSight(pathArray[currentIndex], pathArray[i], mapId, spatialQuery))
+                {
                     farthestVisible = i;
+                }
                 else
+                {
                     break; // Can't see beyond this point
+                }
+            }
 
             currentIndex = farthestVisible;
             smoothed.Enqueue(pathArray[currentIndex]);
@@ -161,11 +182,15 @@ public class PathfindingService
     private bool HasLineOfSight(Point from, Point to, int mapId, ISpatialQuery spatialQuery)
     {
         // Use Bresenham's line algorithm to check all tiles in the line
-        var points = GetLinePoints(from, to);
+        IEnumerable<Point> points = GetLinePoints(from, to);
 
-        foreach (var point in points)
+        foreach (Point point in points)
+        {
             if (!IsWalkable(point, mapId, spatialQuery))
+            {
                 return false;
+            }
+        }
 
         return true;
     }
@@ -182,20 +207,22 @@ public class PathfindingService
         int x1 = to.X,
             y1 = to.Y;
 
-        var dx = Math.Abs(x1 - x0);
-        var dy = Math.Abs(y1 - y0);
-        var sx = x0 < x1 ? 1 : -1;
-        var sy = y0 < y1 ? 1 : -1;
-        var err = dx - dy;
+        int dx = Math.Abs(x1 - x0);
+        int dy = Math.Abs(y1 - y0);
+        int sx = x0 < x1 ? 1 : -1;
+        int sy = y0 < y1 ? 1 : -1;
+        int err = dx - dy;
 
         while (true)
         {
             points.Add(new Point(x0, y0));
 
             if (x0 == x1 && y0 == y1)
+            {
                 break;
+            }
 
-            var e2 = 2 * err;
+            int e2 = 2 * err;
             if (e2 > -dy)
             {
                 err -= dy;
@@ -218,7 +245,7 @@ public class PathfindingService
     private Queue<Point> ReconstructPath(PathNode goalNode)
     {
         var path = new Stack<Point>();
-        var current = goalNode;
+        PathNode? current = goalNode;
 
         while (current != null)
         {
@@ -248,15 +275,19 @@ public class PathfindingService
     {
         // Use the same collision detection as CollisionService
         // Check if position is walkable by querying spatial hash for collision components
-        var entities = spatialQuery.GetEntitiesAt(mapId, position.X, position.Y);
+        IReadOnlyList<Entity> entities = spatialQuery.GetEntitiesAt(mapId, position.X, position.Y);
 
-        foreach (var entity in entities)
+        foreach (Entity entity in entities)
+        {
             if (entity.Has<Collision>())
             {
-                ref var collision = ref entity.Get<Collision>();
+                ref Collision collision = ref entity.Get<Collision>();
                 if (collision.IsSolid)
+                {
                     return false; // Blocked by solid collision
+                }
             }
+        }
 
         return true; // Walkable
     }

@@ -72,18 +72,24 @@ public class ValidationResult
     public string GetErrorMessage()
     {
         if (IsValid)
+        {
             return string.Empty;
+        }
 
         var lines = new List<string>();
 
         if (!string.IsNullOrEmpty(Context))
-            lines.Add($"Validation failed for {Context}:");
-        else
-            lines.Add("Validation failed:");
-
-        foreach (var error in Errors)
         {
-            var location = error.Location != null ? $" (at {error.Location})" : "";
+            lines.Add($"Validation failed for {Context}:");
+        }
+        else
+        {
+            lines.Add("Validation failed:");
+        }
+
+        foreach (ValidationError error in Errors)
+        {
+            string location = error.Location != null ? $" (at {error.Location})" : "";
             lines.Add($"  - {error.Message}{location}");
         }
 
@@ -97,18 +103,24 @@ public class ValidationResult
     public string GetWarningMessage()
     {
         if (Warnings.Count == 0)
+        {
             return string.Empty;
+        }
 
         var lines = new List<string>();
 
         if (!string.IsNullOrEmpty(Context))
-            lines.Add($"Validation warnings for {Context}:");
-        else
-            lines.Add("Validation warnings:");
-
-        foreach (var warning in Warnings)
         {
-            var location = warning.Location != null ? $" (at {warning.Location})" : "";
+            lines.Add($"Validation warnings for {Context}:");
+        }
+        else
+        {
+            lines.Add("Validation warnings:");
+        }
+
+        foreach (ValidationWarning warning in Warnings)
+        {
+            string location = warning.Location != null ? $" (at {warning.Location})" : "";
             lines.Add($"  - {warning.Message}{location}");
         }
 
@@ -134,8 +146,11 @@ public class ValidationResult
     public static ValidationResult Failure(string? context, params string[] errors)
     {
         var result = new ValidationResult { Context = context };
-        foreach (var error in errors)
+        foreach (string error in errors)
+        {
             result.AddError(error);
+        }
+
         return result;
     }
 
@@ -148,8 +163,11 @@ public class ValidationResult
     public static ValidationResult WithWarnings(string? context, params string[] warnings)
     {
         var result = new ValidationResult { Context = context };
-        foreach (var warning in warnings)
+        foreach (string warning in warnings)
+        {
             result.AddWarning(warning);
+        }
+
         return result;
     }
 
@@ -170,15 +188,23 @@ public class ValidationResult
     /// </summary>
     public override string ToString()
     {
-        var result = $"Valid: {IsValid}";
+        string result = $"Valid: {IsValid}";
         if (!string.IsNullOrEmpty(Context))
+        {
             result += $" (Context: {Context})";
+        }
+
         result += "\n";
 
         if (Errors.Count > 0)
+        {
             result += $"Errors ({Errors.Count}):\n{GetErrorMessage()}\n";
+        }
+
         if (Warnings.Count > 0)
+        {
             result += $"Warnings ({Warnings.Count}):\n{GetWarningMessage()}\n";
+        }
 
         return result;
     }

@@ -1,20 +1,11 @@
 namespace PokeSharp.Engine.UI.Debug.Interfaces;
 
 /// <summary>
-/// Provides operations for the watch panel.
-/// Implemented by WatchPanel.
+///     Provides operations for the watch panel.
+///     Implemented by WatchPanel.
 /// </summary>
 public interface IWatchOperations
 {
-    /// <summary>Adds a watch with a value getter function.</summary>
-    bool Add(string name, string expression, Func<object?> valueGetter, string? group = null, string? condition = null, Func<bool>? conditionEvaluator = null);
-
-    /// <summary>Removes a watch by name.</summary>
-    bool Remove(string name);
-
-    /// <summary>Clears all watches.</summary>
-    void Clear();
-
     /// <summary>Gets the watch count.</summary>
     int Count { get; }
 
@@ -23,6 +14,22 @@ public interface IWatchOperations
 
     /// <summary>Gets or sets the update interval in seconds.</summary>
     double UpdateInterval { get; set; }
+
+    /// <summary>Adds a watch with a value getter function.</summary>
+    bool Add(
+        string name,
+        string expression,
+        Func<object?> valueGetter,
+        string? group = null,
+        string? condition = null,
+        Func<bool>? conditionEvaluator = null
+    );
+
+    /// <summary>Removes a watch by name.</summary>
+    bool Remove(string name);
+
+    /// <summary>Clears all watches.</summary>
+    void Clear();
 
     /// <summary>Pins a watch to the top.</summary>
     bool Pin(string name);
@@ -61,7 +68,11 @@ public interface IWatchOperations
     bool IsAlertActive(string name);
 
     /// <summary>Sets up a comparison between two watches.</summary>
-    bool SetComparison(string watchName, string compareWithName, string comparisonLabel = "Expected");
+    bool SetComparison(
+        string watchName,
+        string compareWithName,
+        string comparisonLabel = "Expected"
+    );
 
     /// <summary>Removes comparison from a watch.</summary>
     bool RemoveComparison(string name);
@@ -79,9 +90,19 @@ public interface IWatchOperations
     (int Total, int Pinned, int WithErrors, int WithAlerts, int Groups) GetStatistics();
 
     /// <summary>Exports the current configuration.</summary>
-    (List<(string Name, string Expression, string? Group, string? Condition, bool IsPinned,
-           string? AlertType, object? AlertThreshold, string? ComparisonWith, string? ComparisonLabel)> Watches,
-     double UpdateInterval,
-     bool AutoUpdateEnabled)? ExportConfiguration();
+    (
+        List<(
+            string Name,
+            string Expression,
+            string? Group,
+            string? Condition,
+            bool IsPinned,
+            string? AlertType,
+            object? AlertThreshold,
+            string? ComparisonWith,
+            string? ComparisonLabel
+        )> Watches,
+        double UpdateInterval,
+        bool AutoUpdateEnabled
+    )? ExportConfiguration();
 }
-

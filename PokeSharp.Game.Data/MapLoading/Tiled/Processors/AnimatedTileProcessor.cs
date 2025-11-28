@@ -1,7 +1,6 @@
 using Arch.Core;
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
-using PokeSharp.Engine.Core.Types;
 using PokeSharp.Engine.Systems.Management;
 using PokeSharp.Game.Components.Tiles;
 using PokeSharp.Game.Data.MapLoading.Tiled.Services;
@@ -28,21 +27,27 @@ public class AnimatedTileProcessor : IAnimatedTileProcessor
     /// </summary>
     /// <param name="world">The ECS world.</param>
     /// <param name="tmxDoc">The TMX document.</param>
+    /// <param name="mapInfoEntity">The map entity (unused - tiles already have BelongsToMap).</param>
     /// <param name="tilesets">Loaded tilesets.</param>
     /// <param name="mapId">The map ID to filter tiles by (prevents cross-map corruption).</param>
     public int CreateAnimatedTileEntities(
         World world,
         TmxDocument tmxDoc,
+        Entity mapInfoEntity,
         IReadOnlyList<LoadedTileset> tilesets,
         int mapId
     )
     {
         if (tilesets.Count == 0)
+        {
             return 0;
+        }
 
-        var created = 0;
-        foreach (var loadedTileset in tilesets)
+        int created = 0;
+        foreach (LoadedTileset loadedTileset in tilesets)
+        {
             created += CreateAnimatedTileEntitiesForTileset(world, loadedTileset.Tileset, mapId);
+        }
 
         return created;
     }
@@ -57,53 +62,61 @@ public class AnimatedTileProcessor : IAnimatedTileProcessor
     private int CreateAnimatedTileEntitiesForTileset(World world, TmxTileset tileset, int mapId)
     {
         if (tileset.Animations.Count == 0)
+        {
             return 0;
+        }
 
-        var created = 0;
+        int created = 0;
 
-        var tilesPerRow = TilesetUtilities.CalculateTilesPerRow(tileset);
-        var tileWidth = tileset.TileWidth;
-        var tileHeight = tileset.TileHeight;
-        var tileSpacing = tileset.Spacing;
-        var tileMargin = tileset.Margin;
-        var firstGid = tileset.FirstGid;
+        int tilesPerRow = TilesetUtilities.CalculateTilesPerRow(tileset);
+        int tileWidth = tileset.TileWidth;
+        int tileHeight = tileset.TileHeight;
+        int tileSpacing = tileset.Spacing;
+        int tileMargin = tileset.Margin;
+        int firstGid = tileset.FirstGid;
 
         if (tileSpacing < 0)
+        {
             throw new InvalidOperationException(
                 $"Tileset '{tileset.Name ?? "unnamed"}' has negative spacing value {tileSpacing}."
             );
+        }
 
         if (tileMargin < 0)
+        {
             throw new InvalidOperationException(
                 $"Tileset '{tileset.Name ?? "unnamed"}' has negative margin value {tileMargin}."
             );
+        }
 
         if (firstGid <= 0)
+        {
             throw new InvalidOperationException(
                 $"Tileset '{tileset.Name ?? "unnamed"}' has invalid firstgid {firstGid}."
             );
+        }
 
         // PERFORMANCE OPTIMIZATION: Build animation components dictionary BEFORE querying
         // This allows us to execute a SINGLE query instead of N queries (one per animation)
         // Reduces complexity from O(animations × tiles) to O(tiles + animations)
         var animationsByTileId = new Dictionary<int, AnimatedTile>(tileset.Animations.Count);
 
-        foreach (var kvp in tileset.Animations)
+        foreach (KeyValuePair<int, TmxTileAnimation> kvp in tileset.Animations)
         {
-            var localTileId = kvp.Key;
-            var animation = kvp.Value;
+            int localTileId = kvp.Key;
+            TmxTileAnimation animation = kvp.Value;
 
             // Convert local tile ID to global tile ID
-            var globalTileId = tileset.FirstGid + localTileId;
+            int globalTileId = tileset.FirstGid + localTileId;
 
             // Convert frame local IDs to global IDs
-            var globalFrameIds = animation
+            int[] globalFrameIds = animation
                 .FrameTileIds.Select(id => tileset.FirstGid + id)
                 .ToArray();
 
             // PERFORMANCE OPTIMIZATION: Precalculate ALL source rectangles at load time
             // This eliminates expensive runtime calculations, dictionary lookups, and lock contention
-            var frameSourceRects = globalFrameIds
+            Rectangle[] frameSourceRects = globalFrameIds
                 .Select(frameGid => TilesetUtilities.CalculateSourceRect(frameGid, tileset))
                 .ToArray();
 
@@ -134,17 +147,24 @@ public class AnimatedTileProcessor : IAnimatedTileProcessor
         // incorrect AnimatedTile components, causing visual corruption.
         if (animationsByTileId.Count > 0)
         {
-            var tileQuery = QueryCache.Get<TilePosition, TileSprite>();
+            QueryDescription tileQuery = QueryCache.Get<TilePosition, TileSprite>();
             world.Query(
                 in tileQuery,
                 (Entity entity, ref TilePosition pos, ref TileSprite sprite) =>
                 {
                     // CRITICAL: Only process tiles belonging to THIS map
                     if (pos.MapId.Value != mapId)
+                    {
                         return;
+                    }
 
                     // Check if this tile has an animation component
-                    if (animationsByTileId.TryGetValue(sprite.TileGid, out var animatedTile))
+                    if (
+                        animationsByTileId.TryGetValue(
+                            sprite.TileGid,
+                            out AnimatedTile animatedTile
+                        )
+                    )
                     {
                         world.Add(entity, animatedTile);
                         created++;

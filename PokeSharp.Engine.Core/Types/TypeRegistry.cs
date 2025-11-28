@@ -40,19 +40,29 @@ public class TypeRegistry<T>(string dataPath, ILogger logger) : IAsyncDisposable
     public async ValueTask DisposeAsync()
     {
         // Dispose any script instances that implement IAsyncDisposable
-        foreach (var script in _scripts.Values)
+        foreach (object script in _scripts.Values)
+        {
             try
             {
-            if (script is IAsyncDisposable asyncDisposable)
-                await asyncDisposable.DisposeAsync();
-            else if (script is IDisposable disposable)
-                disposable.Dispose();
+                if (script is IAsyncDisposable asyncDisposable)
+                {
+                    await asyncDisposable.DisposeAsync();
+                }
+                else if (script is IDisposable disposable)
+                {
+                    disposable.Dispose();
+                }
             }
             catch (Exception ex)
             {
                 // Log disposal errors but continue disposing other resources
-                _logger.LogError(ex, "Error disposing script instance of type {Type}", script.GetType().Name);
+                _logger.LogError(
+                    ex,
+                    "Error disposing script instance of type {Type}",
+                    script.GetType().Name
+                );
             }
+        }
 
         Clear();
         GC.SuppressFinalize(this);
@@ -67,10 +77,14 @@ public class TypeRegistry<T>(string dataPath, ILogger logger) : IAsyncDisposable
     public void RegisterScript(string typeId, object scriptInstance)
     {
         if (string.IsNullOrWhiteSpace(typeId))
+        {
             throw new ArgumentException("TypeId cannot be null or empty", nameof(typeId));
+        }
 
         if (scriptInstance == null)
+        {
             throw new ArgumentNullException(nameof(scriptInstance));
+        }
 
         _scripts[typeId] = scriptInstance;
         _logger.LogDebug("Registered script for {TypeId}", typeId);
@@ -89,10 +103,11 @@ public class TypeRegistry<T>(string dataPath, ILogger logger) : IAsyncDisposable
             return 0;
         }
 
-        var jsonFiles = Directory.GetFiles(_dataPath, "*.json", SearchOption.AllDirectories);
-        var successCount = 0;
+        string[] jsonFiles = Directory.GetFiles(_dataPath, "*.json", SearchOption.AllDirectories);
+        int successCount = 0;
 
-        foreach (var jsonPath in jsonFiles)
+        foreach (string jsonPath in jsonFiles)
+        {
             try
             {
                 await RegisterFromJsonAsync(jsonPath);
@@ -102,6 +117,7 @@ public class TypeRegistry<T>(string dataPath, ILogger logger) : IAsyncDisposable
             {
                 _logger.LogError(ex, "Error loading type from {JsonPath}", jsonPath);
             }
+        }
 
         _logger.LogWorkflowStatus(
             "Type definitions loaded",
@@ -119,7 +135,7 @@ public class TypeRegistry<T>(string dataPath, ILogger logger) : IAsyncDisposable
     /// <param name="jsonPath">Path to JSON file containing type definition.</param>
     public async Task RegisterFromJsonAsync(string jsonPath)
     {
-        var json = await File.ReadAllTextAsync(jsonPath);
+        string json = await File.ReadAllTextAsync(jsonPath);
         var options = new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true,
@@ -127,17 +143,21 @@ public class TypeRegistry<T>(string dataPath, ILogger logger) : IAsyncDisposable
             AllowTrailingCommas = true,
         };
 
-        var definition = JsonSerializer.Deserialize<T>(json, options);
+        T? definition = JsonSerializer.Deserialize<T>(json, options);
         if (definition == null)
+        {
             throw new InvalidOperationException(
                 $"Failed to deserialize type definition from {jsonPath}"
             );
+        }
 
         // Validate required properties
         if (string.IsNullOrWhiteSpace(definition.TypeId))
+        {
             throw new InvalidOperationException(
                 $"Type definition in {jsonPath} has null or empty TypeId"
             );
+        }
 
         // Register the data definition
         _definitions[definition.TypeId] = definition;
@@ -154,10 +174,14 @@ public class TypeRegistry<T>(string dataPath, ILogger logger) : IAsyncDisposable
     public void Register(T definition)
     {
         if (definition == null)
+        {
             throw new ArgumentNullException(nameof(definition));
+        }
 
         if (string.IsNullOrWhiteSpace(definition.TypeId))
+        {
             throw new ArgumentException("TypeId cannot be null or empty", nameof(definition));
+        }
 
         _definitions[definition.TypeId] = definition;
         _logger.LogDebug("Registered type: {TypeId}", definition.TypeId);
@@ -172,9 +196,11 @@ public class TypeRegistry<T>(string dataPath, ILogger logger) : IAsyncDisposable
     public T? Get(string typeId)
     {
         if (string.IsNullOrWhiteSpace(typeId))
+        {
             return default;
+        }
 
-        return _definitions.TryGetValue(typeId, out var def) ? def : default;
+        return _definitions.TryGetValue(typeId, out T? def) ? def : default;
     }
 
     /// <summary>
@@ -186,9 +212,11 @@ public class TypeRegistry<T>(string dataPath, ILogger logger) : IAsyncDisposable
     public object? GetScript(string typeId)
     {
         if (string.IsNullOrWhiteSpace(typeId))
+        {
             return null;
+        }
 
-        return _scripts.TryGetValue(typeId, out var script) ? script : null;
+        return _scripts.TryGetValue(typeId, out object? script) ? script : null;
     }
 
     /// <summary>
@@ -200,10 +228,14 @@ public class TypeRegistry<T>(string dataPath, ILogger logger) : IAsyncDisposable
     public void UpdateScript(string typeId, object scriptInstance)
     {
         if (string.IsNullOrWhiteSpace(typeId))
+        {
             throw new ArgumentException("TypeId cannot be null or empty", nameof(typeId));
+        }
 
         if (scriptInstance == null)
+        {
             throw new ArgumentNullException(nameof(scriptInstance));
+        }
 
         _scripts[typeId] = scriptInstance;
         _logger.LogInformation("Updated script for {TypeId}", typeId);
@@ -235,7 +267,9 @@ public class TypeRegistry<T>(string dataPath, ILogger logger) : IAsyncDisposable
     public bool Contains(string typeId)
     {
         if (string.IsNullOrWhiteSpace(typeId))
+        {
             return false;
+        }
 
         return _definitions.ContainsKey(typeId);
     }
@@ -248,9 +282,11 @@ public class TypeRegistry<T>(string dataPath, ILogger logger) : IAsyncDisposable
     public bool Remove(string typeId)
     {
         if (string.IsNullOrWhiteSpace(typeId))
+        {
             return false;
+        }
 
-        var removed = _definitions.TryRemove(typeId, out _);
+        bool removed = _definitions.TryRemove(typeId, out _);
         if (removed)
         {
             _scripts.TryRemove(typeId, out _);
@@ -278,7 +314,9 @@ public class TypeRegistry<T>(string dataPath, ILogger logger) : IAsyncDisposable
     public bool HasScript(string typeId)
     {
         if (string.IsNullOrWhiteSpace(typeId))
+        {
             return false;
+        }
 
         return _scripts.ContainsKey(typeId);
     }

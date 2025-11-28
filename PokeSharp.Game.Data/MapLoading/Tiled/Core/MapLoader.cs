@@ -75,6 +75,11 @@ public class MapLoader(
     // Initialize MapIdService
     private readonly MapIdService _mapIdService = new();
 
+    /// <summary>
+    ///     Gets the MapIdService for resolving map names to runtime IDs.
+    /// </summary>
+    public MapIdService MapIdService => _mapIdService;
+
     // Initialize MapLoadLogger
     private readonly MapLoadLogger _mapLoadLogger = new(logger);
 
@@ -121,15 +126,19 @@ public class MapLoader(
     public Entity LoadMap(World world, MapIdentifier mapId)
     {
         if (_mapDefinitionService == null)
+        {
             throw new InvalidOperationException(
                 "MapDefinitionService is required for definition-based map loading. "
                     + "Use LoadMapEntities(world, mapPath) for file-based loading."
             );
+        }
 
         // Get map definition from EF Core
-        var mapDef = _mapDefinitionService.GetMap(mapId);
+        MapDefinition? mapDef = _mapDefinitionService.GetMap(mapId);
         if (mapDef == null)
+        {
             throw new FileNotFoundException($"Map definition not found: {mapId.Value}");
+        }
 
         _logger?.LogWorkflowStatus(
             "Loading map from definition",
@@ -138,15 +147,17 @@ public class MapLoader(
         );
 
         // Read Tiled JSON from file using stored path
-        var assetRoot = _mapPathResolver.ResolveAssetRoot();
-        var fullPath = Path.Combine(assetRoot, mapDef.TiledDataPath);
+        string assetRoot = _mapPathResolver.ResolveAssetRoot();
+        string fullPath = Path.Combine(assetRoot, mapDef.TiledDataPath);
 
         if (!File.Exists(fullPath))
+        {
             throw new FileNotFoundException(
                 $"Map file not found: {fullPath} (relative: {mapDef.TiledDataPath})"
             );
+        }
 
-        var tiledJson = File.ReadAllText(fullPath);
+        string tiledJson = File.ReadAllText(fullPath);
 
         // Parse Tiled JSON
         var jsonOptions = new JsonSerializerOptions
@@ -156,10 +167,10 @@ public class MapLoader(
             AllowTrailingCommas = true,
         };
 
-        var tmxDoc = TiledMapLoader.LoadFromJson(tiledJson, fullPath);
+        TmxDocument tmxDoc = TiledMapLoader.LoadFromJson(tiledJson, fullPath);
 
         // Load external tileset files (Tiled JSON format supports external tilesets)
-        var mapDirectoryBase =
+        string mapDirectoryBase =
             Path.GetDirectoryName(fullPath) ?? _mapPathResolver.ResolveMapDirectoryBase();
         _tilesetLoader.LoadExternalTilesets(tmxDoc, mapDirectoryBase);
 
@@ -187,15 +198,19 @@ public class MapLoader(
     public Entity LoadMapAtOffset(World world, MapIdentifier mapId, Vector2 worldOffset)
     {
         if (_mapDefinitionService == null)
+        {
             throw new InvalidOperationException(
                 "MapDefinitionService is required for definition-based map loading. "
                     + "Use LoadMapEntities(world, mapPath) for file-based loading."
             );
+        }
 
         // Get map definition from EF Core
-        var mapDef = _mapDefinitionService.GetMap(mapId);
+        MapDefinition? mapDef = _mapDefinitionService.GetMap(mapId);
         if (mapDef == null)
+        {
             throw new FileNotFoundException($"Map definition not found: {mapId.Value}");
+        }
 
         _logger?.LogWorkflowStatus(
             "Loading map at world offset",
@@ -206,15 +221,17 @@ public class MapLoader(
         );
 
         // Read Tiled JSON from file using stored path
-        var assetRoot = _mapPathResolver.ResolveAssetRoot();
-        var fullPath = Path.Combine(assetRoot, mapDef.TiledDataPath);
+        string assetRoot = _mapPathResolver.ResolveAssetRoot();
+        string fullPath = Path.Combine(assetRoot, mapDef.TiledDataPath);
 
         if (!File.Exists(fullPath))
+        {
             throw new FileNotFoundException(
                 $"Map file not found: {fullPath} (relative: {mapDef.TiledDataPath})"
             );
+        }
 
-        var tiledJson = File.ReadAllText(fullPath);
+        string tiledJson = File.ReadAllText(fullPath);
 
         // Parse Tiled JSON
         var jsonOptions = new JsonSerializerOptions
@@ -224,10 +241,10 @@ public class MapLoader(
             AllowTrailingCommas = true,
         };
 
-        var tmxDoc = TiledMapLoader.LoadFromJson(tiledJson, fullPath);
+        TmxDocument tmxDoc = TiledMapLoader.LoadFromJson(tiledJson, fullPath);
 
         // Load external tileset files (Tiled JSON format supports external tilesets)
-        var mapDirectoryBase =
+        string mapDirectoryBase =
             Path.GetDirectoryName(fullPath) ?? _mapPathResolver.ResolveMapDirectoryBase();
         _tilesetLoader.LoadExternalTilesets(tmxDoc, mapDirectoryBase);
 
@@ -252,28 +269,34 @@ public class MapLoader(
     public (int Width, int Height, int TileSize) GetMapDimensions(MapIdentifier mapId)
     {
         if (_mapDefinitionService == null)
+        {
             throw new InvalidOperationException(
                 "MapDefinitionService is required for GetMapDimensions."
             );
+        }
 
         // Get map definition from EF Core
-        var mapDef = _mapDefinitionService.GetMap(mapId);
+        MapDefinition? mapDef = _mapDefinitionService.GetMap(mapId);
         if (mapDef == null)
+        {
             throw new FileNotFoundException($"Map definition not found: {mapId.Value}");
+        }
 
         // Read Tiled JSON from file using stored path
-        var assetRoot = _mapPathResolver.ResolveAssetRoot();
-        var fullPath = Path.Combine(assetRoot, mapDef.TiledDataPath);
+        string assetRoot = _mapPathResolver.ResolveAssetRoot();
+        string fullPath = Path.Combine(assetRoot, mapDef.TiledDataPath);
 
         if (!File.Exists(fullPath))
+        {
             throw new FileNotFoundException(
                 $"Map file not found: {fullPath} (relative: {mapDef.TiledDataPath})"
             );
+        }
 
-        var tiledJson = File.ReadAllText(fullPath);
+        string tiledJson = File.ReadAllText(fullPath);
 
         // Parse only the header info from Tiled JSON
-        var tmxDoc = TiledMapLoader.LoadFromJson(tiledJson, fullPath);
+        TmxDocument tmxDoc = TiledMapLoader.LoadFromJson(tiledJson, fullPath);
 
         return (tmxDoc.Width, tmxDoc.Height, tmxDoc.TileWidth);
     }
@@ -311,10 +334,10 @@ public class MapLoader(
         Vector2? worldOffset = null
     )
     {
-        var mapId = _mapIdService.GetMapIdFromIdentifier(mapDef.MapId);
+        MapRuntimeId mapId = _mapIdService.GetMapIdFromIdentifier(mapDef.MapId);
         // Use MapId.Value (identifier like "oldale_town") NOT DisplayName ("Oldale Town")
         // MapStreamingSystem compares MapInfo.MapName against MapIdentifier.Value
-        var mapName = mapDef.MapId.Value;
+        string mapName = mapDef.MapId.Value;
 
         var context = new MapLoadContext
         {
@@ -345,9 +368,9 @@ public class MapLoader(
     /// </summary>
     private Entity LoadMapEntitiesInternal(World world, string mapPath)
     {
-        var tmxDoc = TiledMapLoader.Load(mapPath);
-        var mapId = _mapIdService.GetMapId(mapPath);
-        var mapName = Path.GetFileNameWithoutExtension(mapPath);
+        TmxDocument tmxDoc = TiledMapLoader.Load(mapPath);
+        MapRuntimeId mapId = _mapIdService.GetMapId(mapPath);
+        string mapName = Path.GetFileNameWithoutExtension(mapPath);
 
         var context = new MapLoadContext
         {
@@ -383,19 +406,14 @@ public class MapLoader(
         _requiredSpriteIds.Clear();
 
         // Load tilesets
-        var loadedTilesets = tmxDoc.Tilesets.Count > 0 ? loadTilesets() : new List<LoadedTileset>();
+        List<LoadedTileset> loadedTilesets =
+            tmxDoc.Tilesets.Count > 0 ? loadTilesets() : new List<LoadedTileset>();
 
         // Track texture IDs for lifecycle management
         _mapTextureTracker.TrackMapTextures(context.MapId, loadedTilesets);
 
-        // Process all layers and create tile entities (only if tilesets exist)
-        var tilesCreated =
-            loadedTilesets.Count > 0
-                ? _layerProcessor.ProcessLayers(world, tmxDoc, context.MapId, loadedTilesets)
-                : 0;
-
-        // Create metadata entities
-        var mapInfoEntity = createMetadata(
+        // Create map entity FIRST so we can establish relationships with all child entities
+        Entity mapInfoEntity = createMetadata(
             world,
             tmxDoc,
             context.MapId,
@@ -403,26 +421,43 @@ public class MapLoader(
             loadedTilesets
         );
 
-        // Setup animations (only if tilesets exist)
-        // CRITICAL: Pass mapId to prevent cross-map animation corruption
-        var animatedTilesCreated =
+        // Process all layers and create tile entities (only if tilesets exist)
+        // Pass mapInfoEntity so tiles can have BelongsToMap relationship
+        int tilesCreated =
             loadedTilesets.Count > 0
-                ? _animatedTileProcessor.CreateAnimatedTileEntities(world, tmxDoc, loadedTilesets, context.MapId)
+                ? _layerProcessor.ProcessLayers(world, tmxDoc, mapInfoEntity, context.MapId, loadedTilesets)
                 : 0;
 
-        // Create image layers
-        var totalLayerCount = tmxDoc.Layers.Count + tmxDoc.ImageLayers.Count;
-        var imageLayersCreated = _imageLayerProcessor.CreateImageLayerEntities(
+        // Setup animations (only if tilesets exist)
+        // Pass mapInfoEntity so animated tiles can have BelongsToMap relationship
+        int animatedTilesCreated =
+            loadedTilesets.Count > 0
+                ? _animatedTileProcessor.CreateAnimatedTileEntities(
+                    world,
+                    tmxDoc,
+                    mapInfoEntity,
+                    loadedTilesets,
+                    context.MapId
+                )
+                : 0;
+
+        // Create image layers with BelongsToMap relationship
+        int totalLayerCount = tmxDoc.Layers.Count + tmxDoc.ImageLayers.Count;
+        int imageLayersCreated = _imageLayerProcessor.CreateImageLayerEntities(
             world,
             tmxDoc,
+            mapInfoEntity,
+            context.MapId,
             context.ImageLayerPath,
             totalLayerCount
         );
 
         // Spawn map objects (NPCs, items, etc.)
-        var objectsCreated = _mapObjectSpawner.SpawnMapObjects(
+        // Pass mapInfoEntity for relationship tracking and MapWarps spatial index
+        int objectsCreated = _mapObjectSpawner.SpawnMapObjects(
             world,
             tmxDoc,
+            mapInfoEntity,
             context.MapId,
             tmxDoc.TileWidth,
             tmxDoc.TileHeight,
@@ -449,8 +484,12 @@ public class MapLoader(
         );
 
         if (_logger != null && _logger.IsEnabled(LogLevel.Debug))
-            foreach (var spriteId in _requiredSpriteIds.OrderBy(x => x))
+        {
+            foreach (SpriteId spriteId in _requiredSpriteIds.OrderBy(x => x))
+            {
                 _logger.LogDebug("  - {SpriteId}", spriteId);
+            }
+        }
 
         // Apply world offset to all entities if specified
         if (context.WorldOffset != Vector2.Zero)
@@ -479,9 +518,16 @@ public class MapLoader(
         // Adds MapBorder component to map entity if border property exists
         if (loadedTilesets.Count > 0)
         {
-            var hasBorder = _borderProcessor.AddBorderToEntity(world, mapInfoEntity, tmxDoc, loadedTilesets);
+            bool hasBorder = _borderProcessor.AddBorderToEntity(
+                world,
+                mapInfoEntity,
+                tmxDoc,
+                loadedTilesets
+            );
             if (hasBorder)
+            {
                 _logger?.LogInformation("Border data loaded for map '{MapName}'", context.MapName);
+            }
         }
 
         _logger?.LogWorkflowStatus(
@@ -494,7 +540,7 @@ public class MapLoader(
         );
 
         // Invalidate spatial hash to rebuild with new tiles
-        var spatialHashSystem = _systemManager.GetSystem<SpatialHashSystem>();
+        SpatialHashSystem? spatialHashSystem = _systemManager.GetSystem<SpatialHashSystem>();
         if (spatialHashSystem != null)
         {
             spatialHashSystem.InvalidateStaticTiles();
@@ -538,17 +584,19 @@ public class MapLoader(
         TmxDocument tmxDoc
     )
     {
-        var entitiesUpdated = 0;
+        int entitiesUpdated = 0;
 
         // Query all entities with Position component belonging to this map
-        var query = new QueryDescription().WithAll<Position>();
+        QueryDescription query = new QueryDescription().WithAll<Position>();
         world.Query(
             in query,
             (Entity entity, ref Position pos) =>
             {
                 // Only update entities from this map
                 if (pos.MapId.Value != mapId)
+                {
                     return;
+                }
 
                 // Apply world offset to pixel positions
                 pos.PixelX += worldOffset.X;

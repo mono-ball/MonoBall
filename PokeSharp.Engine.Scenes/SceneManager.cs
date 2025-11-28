@@ -1,7 +1,6 @@
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using PokeSharp.Engine.Core.Services;
 
 namespace PokeSharp.Engine.Scenes;
@@ -14,11 +13,11 @@ namespace PokeSharp.Engine.Scenes;
 public class SceneManager : IInputBlocker
 {
     private readonly ILogger<SceneManager> _logger;
-    private IScene? _currentScene;
-    private IScene? _nextScene;
-    private bool _isPushOperation;
-    private bool _popRequested;
     private readonly Stack<IScene> _sceneStack = new();
+    private IScene? _currentScene;
+    private bool _isPushOperation;
+    private IScene? _nextScene;
+    private bool _popRequested;
 
     /// <summary>
     ///     Initializes a new instance of the SceneManager class.
@@ -27,7 +26,7 @@ public class SceneManager : IInputBlocker
     /// <param name="services">The service provider for dependency injection.</param>
     /// <param name="logger">The logger for scene transitions.</param>
     public SceneManager(
-        Microsoft.Xna.Framework.Graphics.GraphicsDevice graphicsDevice,
+        GraphicsDevice graphicsDevice,
         IServiceProvider services,
         ILogger<SceneManager> logger
     )
@@ -44,7 +43,7 @@ public class SceneManager : IInputBlocker
     /// <summary>
     ///     Gets the graphics device.
     /// </summary>
-    public Microsoft.Xna.Framework.Graphics.GraphicsDevice GraphicsDevice { get; }
+    public GraphicsDevice GraphicsDevice { get; }
 
     /// <summary>
     ///     Gets the service provider.
@@ -61,7 +60,9 @@ public class SceneManager : IInputBlocker
         get
         {
             if (_sceneStack.Count > 0)
+            {
                 return _sceneStack.Peek();
+            }
 
             return _currentScene;
         }
@@ -73,14 +74,10 @@ public class SceneManager : IInputBlocker
     ///     Scenes should check this property before processing input if they are updated
     ///     while a scene above them has exclusive input.
     /// </summary>
-    public bool IsInputBlocked
-    {
-        get
-        {
-            // If there's at least one stacked scene with ExclusiveInput, input is blocked for scenes below
-            return _sceneStack.Count > 0 && _sceneStack.Any(s => s.ExclusiveInput);
-        }
-    }
+    public bool IsInputBlocked =>
+        // If there's at least one stacked scene with ExclusiveInput, input is blocked for scenes below
+        _sceneStack.Count > 0
+        && _sceneStack.Any(s => s.ExclusiveInput);
 
     /// <summary>
     ///     Changes to a new scene. The transition will occur at the start of the next Update cycle.
@@ -136,7 +133,7 @@ public class SceneManager : IInputBlocker
         }
 
         _logger.LogInformation("Popping scene from stack");
-        var previousScene = _sceneStack.Pop();
+        IScene previousScene = _sceneStack.Pop();
         previousScene.Dispose();
 
         // If stack is now empty, we need to handle this
@@ -166,8 +163,8 @@ public class SceneManager : IInputBlocker
         {
             try
             {
-                var sceneToTransition = _nextScene;
-                var isPush = _isPushOperation;
+                IScene? sceneToTransition = _nextScene;
+                bool isPush = _isPushOperation;
                 _nextScene = null; // Clear before processing to prevent re-entry
                 _isPushOperation = false;
 
@@ -178,14 +175,17 @@ public class SceneManager : IInputBlocker
                     sceneToTransition.Initialize();
                     // Manually call LoadContent() since MonoGame only does this for the main Game class
                     sceneToTransition.LoadContent();
-                    _logger.LogInformation("Scene {SceneType} pushed onto stack", sceneToTransition.GetType().Name);
+                    _logger.LogInformation(
+                        "Scene {SceneType} pushed onto stack",
+                        sceneToTransition.GetType().Name
+                    );
                 }
                 else
                 {
                     // Clear stack when changing base scene
                     while (_sceneStack.Count > 0)
                     {
-                        var stackedScene = _sceneStack.Pop();
+                        IScene stackedScene = _sceneStack.Pop();
                         stackedScene.Dispose();
                     }
 
@@ -202,7 +202,10 @@ public class SceneManager : IInputBlocker
                     // Manually call LoadContent() since MonoGame only does this for the main Game class
                     _currentScene.LoadContent();
 
-                    _logger.LogInformation("Scene transitioned to {SceneType}", _currentScene.GetType().Name);
+                    _logger.LogInformation(
+                        "Scene transitioned to {SceneType}",
+                        _currentScene.GetType().Name
+                    );
                 }
             }
             catch (Exception ex)
@@ -222,7 +225,7 @@ public class SceneManager : IInputBlocker
         if (_sceneStack.Count > 0)
         {
             // Get the top scene (most recently pushed)
-            var topScene = _sceneStack.Peek();
+            IScene topScene = _sceneStack.Peek();
 
             // If top scene allows scenes below to update, update from bottom to top
             if (topScene.UpdateScenesBelow)
@@ -234,7 +237,7 @@ public class SceneManager : IInputBlocker
                 }
 
                 // Update all stacked scenes in order
-                foreach (var scene in _sceneStack)
+                foreach (IScene scene in _sceneStack)
                 {
                     scene.Update(gameTime);
                 }
@@ -263,13 +266,13 @@ public class SceneManager : IInputBlocker
     {
         // Take a snapshot of the stack to avoid "collection was modified" errors
         // This is important because scene rendering might trigger state changes
-        var stackSnapshot = _sceneStack.ToArray();
+        IScene[] stackSnapshot = _sceneStack.ToArray();
 
         // If we have stacked scenes, determine what to render based on the top scene
         if (stackSnapshot.Length > 0)
         {
             // Get the top scene (most recently pushed - first in array since Stack iterates LIFO)
-            var topScene = stackSnapshot[0];
+            IScene topScene = stackSnapshot[0];
 
             // If top scene wants to render scenes below, render from bottom to top
             if (topScene.RenderScenesBelow)
@@ -281,7 +284,7 @@ public class SceneManager : IInputBlocker
                 }
 
                 // Render all stacked scenes in order (bottom to top = reverse of snapshot)
-                for (var i = stackSnapshot.Length - 1; i >= 0; i--)
+                for (int i = stackSnapshot.Length - 1; i >= 0; i--)
                 {
                     stackSnapshot[i].Draw(gameTime);
                 }
@@ -290,17 +293,18 @@ public class SceneManager : IInputBlocker
             {
                 // Top scene is full-screen, only render it (and any above it that are also full-screen)
                 // Find the first full-screen scene from the bottom
-                var foundFullScreen = false;
-                for (var i = stackSnapshot.Length - 1; i >= 0; i--)
+                bool foundFullScreen = false;
+                for (int i = stackSnapshot.Length - 1; i >= 0; i--)
                 {
-                    var scene = stackSnapshot[i];
+                    IScene scene = stackSnapshot[i];
                     if (!scene.RenderScenesBelow)
                     {
                         // Found first full-screen scene, render from here up (to index 0)
-                        for (var j = i; j >= 0; j--)
+                        for (int j = i; j >= 0; j--)
                         {
                             stackSnapshot[j].Draw(gameTime);
                         }
+
                         foundFullScreen = true;
                         break;
                     }
@@ -320,4 +324,3 @@ public class SceneManager : IInputBlocker
         }
     }
 }
-

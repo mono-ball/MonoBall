@@ -17,8 +17,8 @@ namespace PokeSharp.Engine.Systems.Tests.Rendering;
 /// </summary>
 public class SpriteAnimationSystemTests : IDisposable
 {
-    private readonly Mock<SpriteLoader> _mockSpriteLoader;
     private readonly Mock<ILogger<SpriteAnimationSystem>> _mockLogger;
+    private readonly Mock<SpriteLoader> _mockSpriteLoader;
     private readonly SpriteAnimationSystem _system;
     private readonly SpriteManifest _testManifest;
     private readonly World _world;
@@ -43,14 +43,42 @@ public class SpriteAnimationSystemTests : IDisposable
                     FrameIndices = new[] { 0, 1, 2, 3 },
                     FrameDuration = 0.125f,
                     FlipHorizontal = false,
-                }
+                },
             },
             Frames = new List<SpriteFrameInfo>
             {
-                new() { Index = 0, X = 0, Y = 0, Width = 32, Height = 32 },
-                new() { Index = 1, X = 32, Y = 0, Width = 32, Height = 32 },
-                new() { Index = 2, X = 64, Y = 0, Width = 32, Height = 32 },
-                new() { Index = 3, X = 96, Y = 0, Width = 32, Height = 32 },
+                new()
+                {
+                    Index = 0,
+                    X = 0,
+                    Y = 0,
+                    Width = 32,
+                    Height = 32,
+                },
+                new()
+                {
+                    Index = 1,
+                    X = 32,
+                    Y = 0,
+                    Width = 32,
+                    Height = 32,
+                },
+                new()
+                {
+                    Index = 2,
+                    X = 64,
+                    Y = 0,
+                    Width = 32,
+                    Height = 32,
+                },
+                new()
+                {
+                    Index = 3,
+                    X = 96,
+                    Y = 0,
+                    Width = 32,
+                    Height = 32,
+                },
             },
         };
 
@@ -86,11 +114,9 @@ public class SpriteAnimationSystemTests : IDisposable
             FrameTimer = 0f,
         };
 
-        _mockSpriteLoader
-            .Setup(x => x.GetSprite("player", "player_sprite"))
-            .Returns(_testManifest);
+        _mockSpriteLoader.Setup(x => x.GetSprite("player", "player_sprite")).Returns(_testManifest);
 
-        var entity = _world.Create(sprite, animation);
+        Entity entity = _world.Create(sprite, animation);
 
         // Act - Update the system
         _system.Initialize(_world);
@@ -113,26 +139,23 @@ public class SpriteAnimationSystemTests : IDisposable
             FrameTimer = 0f,
         };
 
-        _mockSpriteLoader
-            .Setup(x => x.GetSprite("player", "player_sprite"))
-            .Returns(_testManifest);
+        _mockSpriteLoader.Setup(x => x.GetSprite("player", "player_sprite")).Returns(_testManifest);
 
-        var entity = _world.Create(sprite, animation);
+        Entity entity = _world.Create(sprite, animation);
         _system.Initialize(_world);
 
         // Act - Update multiple times (simulate 60 frames)
-        for (var i = 0; i < 60; i++)
+        for (int i = 0; i < 60; i++)
+        {
             _system.Update(_world, 0.016f);
+        }
 
         // Assert - ManifestKey should still be the same instance
-        var currentSprite = _world.Get<Sprite>(entity);
+        Sprite currentSprite = _world.Get<Sprite>(entity);
         currentSprite.ManifestKey.Should().Be("player/player_sprite");
 
         // Verify sprite loader is called consistently with same key (only once due to caching)
-        _mockSpriteLoader.Verify(
-            x => x.GetSprite("player", "player_sprite"),
-            Times.Once
-        );
+        _mockSpriteLoader.Verify(x => x.GetSprite("player", "player_sprite"), Times.Once);
     }
 
     [Fact]
@@ -147,22 +170,28 @@ public class SpriteAnimationSystemTests : IDisposable
         var animation2 = new Animation { CurrentAnimation = "walk_down", IsPlaying = true };
         var animation3 = new Animation { CurrentAnimation = "walk_down", IsPlaying = true };
 
-        var testManifest2 = new SpriteManifest { Name = "npc_sprite", Category = "npc", Animations = _testManifest.Animations, Frames = _testManifest.Frames };
-        var testManifest3 = new SpriteManifest { Name = "enemy_sprite", Category = "enemy", Animations = _testManifest.Animations, Frames = _testManifest.Frames };
+        var testManifest2 = new SpriteManifest
+        {
+            Name = "npc_sprite",
+            Category = "npc",
+            Animations = _testManifest.Animations,
+            Frames = _testManifest.Frames,
+        };
+        var testManifest3 = new SpriteManifest
+        {
+            Name = "enemy_sprite",
+            Category = "enemy",
+            Animations = _testManifest.Animations,
+            Frames = _testManifest.Frames,
+        };
 
-        _mockSpriteLoader
-            .Setup(x => x.GetSprite("player", "player_sprite"))
-            .Returns(_testManifest);
-        _mockSpriteLoader
-            .Setup(x => x.GetSprite("npc", "npc_sprite"))
-            .Returns(testManifest2);
-        _mockSpriteLoader
-            .Setup(x => x.GetSprite("enemy", "enemy_sprite"))
-            .Returns(testManifest3);
+        _mockSpriteLoader.Setup(x => x.GetSprite("player", "player_sprite")).Returns(_testManifest);
+        _mockSpriteLoader.Setup(x => x.GetSprite("npc", "npc_sprite")).Returns(testManifest2);
+        _mockSpriteLoader.Setup(x => x.GetSprite("enemy", "enemy_sprite")).Returns(testManifest3);
 
-        var entity1 = _world.Create(sprite1, animation1);
-        var entity2 = _world.Create(sprite2, animation2);
-        var entity3 = _world.Create(sprite3, animation3);
+        Entity entity1 = _world.Create(sprite1, animation1);
+        Entity entity2 = _world.Create(sprite2, animation2);
+        Entity entity3 = _world.Create(sprite3, animation3);
 
         _system.Initialize(_world);
 
@@ -180,7 +209,7 @@ public class SpriteAnimationSystemTests : IDisposable
     {
         // Arrange
         var sprite = new Sprite("player", "player_sprite");
-        var originalKey = sprite.ManifestKey;
+        string originalKey = sprite.ManifestKey;
 
         // Act - Modify sprite properties (but not category/spriteName)
         sprite.CurrentFrame = 1; // Just modify something that won't affect ManifestKey
@@ -201,7 +230,7 @@ public class SpriteAnimationSystemTests : IDisposable
             .Setup(x => x.GetSprite("player", "invalid_sprite"))
             .Returns((SpriteManifest?)null);
 
-        var entity = _world.Create(sprite, animation);
+        Entity entity = _world.Create(sprite, animation);
         _system.Initialize(_world);
 
         // Act & Assert - Should not throw
@@ -222,18 +251,16 @@ public class SpriteAnimationSystemTests : IDisposable
             FrameTimer = 0f,
         };
 
-        _mockSpriteLoader
-            .Setup(x => x.GetSprite("player", "player_sprite"))
-            .Returns(_testManifest);
+        _mockSpriteLoader.Setup(x => x.GetSprite("player", "player_sprite")).Returns(_testManifest);
 
-        var entity = _world.Create(sprite, animation);
+        Entity entity = _world.Create(sprite, animation);
         _system.Initialize(_world);
 
         // Act
         _system.Update(_world, 0.5f); // Large delta time
 
         // Assert - Animation should not have advanced
-        var currentAnimation = _world.Get<Animation>(entity);
+        Animation currentAnimation = _world.Get<Animation>(entity);
         currentAnimation.CurrentFrame.Should().Be(2);
     }
 
@@ -249,18 +276,18 @@ public class SpriteAnimationSystemTests : IDisposable
 
         // Act - Measure ManifestKey access (optimized)
         var sw1 = Stopwatch.StartNew();
-        for (var i = 0; i < iterations; i++)
+        for (int i = 0; i < iterations; i++)
         {
-            var key = sprite.ManifestKey; // Direct property access
+            string key = sprite.ManifestKey; // Direct property access
         }
 
         sw1.Stop();
 
         // Act - Measure string concatenation (old way)
         var sw2 = Stopwatch.StartNew();
-        for (var i = 0; i < iterations; i++)
+        for (int i = 0; i < iterations; i++)
         {
-            var key = $"{sprite.Category}/{sprite.SpriteName}"; // Allocation per iteration
+            string key = $"{sprite.Category}/{sprite.SpriteName}"; // Allocation per iteration
         }
 
         sw2.Stop();
@@ -269,7 +296,7 @@ public class SpriteAnimationSystemTests : IDisposable
         sw1.ElapsedMilliseconds.Should().BeLessThan(sw2.ElapsedMilliseconds);
 
         // Output performance comparison
-        var improvement =
+        double improvement =
             (sw2.ElapsedMilliseconds - sw1.ElapsedMilliseconds)
             / (double)sw2.ElapsedMilliseconds
             * 100;
@@ -291,18 +318,16 @@ public class SpriteAnimationSystemTests : IDisposable
             FrameTimer = 0.1f,
         };
 
-        _mockSpriteLoader
-            .Setup(x => x.GetSprite("player", "player_sprite"))
-            .Returns(_testManifest);
+        _mockSpriteLoader.Setup(x => x.GetSprite("player", "player_sprite")).Returns(_testManifest);
 
-        var entity = _world.Create(sprite, animation);
+        Entity entity = _world.Create(sprite, animation);
         _system.Initialize(_world);
 
         // Act - Update with delta time that exceeds frame duration
         _system.Update(_world, 0.05f); // Total timer: 0.15f > 0.125f frame duration
 
         // Assert - Should advance to next frame
-        var currentAnimation = _world.Get<Animation>(entity);
+        Animation currentAnimation = _world.Get<Animation>(entity);
         currentAnimation.CurrentFrame.Should().Be(1);
     }
 }

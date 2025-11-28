@@ -7,10 +7,10 @@ namespace PokeSharp.Engine.Scenes;
 public class LoadingProgress
 {
     private readonly object _lock = new();
-    private float _progress;
     private string _currentStep = string.Empty;
-    private bool _isComplete;
     private Exception? _error;
+    private bool _isComplete;
+    private float _progress;
 
     /// <summary>
     ///     Gets or sets the progress value (0.0 to 1.0).
@@ -97,4 +97,3 @@ public class LoadingProgress
         }
     }
 }
-

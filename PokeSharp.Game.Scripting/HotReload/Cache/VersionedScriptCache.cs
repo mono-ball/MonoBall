@@ -50,14 +50,19 @@ public class VersionedScriptCache
     public int UpdateVersion(string typeId, Type newType)
     {
         if (string.IsNullOrEmpty(typeId))
+        {
             throw new ArgumentNullException(nameof(typeId));
+        }
+
         if (newType == null)
+        {
             throw new ArgumentNullException(nameof(newType));
+        }
 
         lock (_versionLock)
         {
             _currentVersion++;
-            var newVersion = _currentVersion;
+            int newVersion = _currentVersion;
 
             _cache.AddOrUpdate(
                 typeId,
@@ -91,9 +96,14 @@ public class VersionedScriptCache
     public void UpdateVersion(string typeId, Type type, int version)
     {
         if (string.IsNullOrEmpty(typeId))
+        {
             throw new ArgumentNullException(nameof(typeId));
+        }
+
         if (type == null)
+        {
             throw new ArgumentNullException(nameof(type));
+        }
 
         _cache.AddOrUpdate(
             typeId,
@@ -116,10 +126,14 @@ public class VersionedScriptCache
     public object GetOrCreateInstance(string typeId)
     {
         if (string.IsNullOrEmpty(typeId))
+        {
             throw new ArgumentNullException(nameof(typeId));
+        }
 
-        if (!_cache.TryGetValue(typeId, out var entry))
+        if (!_cache.TryGetValue(typeId, out ScriptCacheEntry? entry))
+        {
             throw new KeyNotFoundException($"Script type '{typeId}' not found in cache");
+        }
 
         return entry.GetOrCreateInstance();
     }
@@ -132,10 +146,14 @@ public class VersionedScriptCache
     public (int version, object? instance) GetInstance(string typeId)
     {
         if (string.IsNullOrEmpty(typeId))
+        {
             throw new ArgumentNullException(nameof(typeId));
+        }
 
-        if (!_cache.TryGetValue(typeId, out var entry))
+        if (!_cache.TryGetValue(typeId, out ScriptCacheEntry? entry))
+        {
             return (-1, null);
+        }
 
         return (entry.Version, entry.Instance);
     }
@@ -148,10 +166,14 @@ public class VersionedScriptCache
     public int GetVersion(string typeId)
     {
         if (string.IsNullOrEmpty(typeId))
+        {
             throw new ArgumentNullException(nameof(typeId));
+        }
 
-        if (!_cache.TryGetValue(typeId, out var entry))
+        if (!_cache.TryGetValue(typeId, out ScriptCacheEntry? entry))
+        {
             return -1;
+        }
 
         return entry.Version;
     }
@@ -164,10 +186,14 @@ public class VersionedScriptCache
     public Type? GetScriptType(string typeId)
     {
         if (string.IsNullOrEmpty(typeId))
+        {
             throw new ArgumentNullException(nameof(typeId));
+        }
 
-        if (!_cache.TryGetValue(typeId, out var entry))
+        if (!_cache.TryGetValue(typeId, out ScriptCacheEntry? entry))
+        {
             return null;
+        }
 
         return entry.ScriptType;
     }
@@ -181,13 +207,19 @@ public class VersionedScriptCache
     public bool Rollback(string typeId)
     {
         if (string.IsNullOrEmpty(typeId))
+        {
             throw new ArgumentNullException(nameof(typeId));
+        }
 
-        if (!_cache.TryGetValue(typeId, out var currentEntry))
+        if (!_cache.TryGetValue(typeId, out ScriptCacheEntry? currentEntry))
+        {
             return false;
+        }
 
         if (currentEntry.PreviousVersion == null)
+        {
             return false;
+        }
 
         // Restore previous version
         _cache.TryUpdate(typeId, currentEntry.PreviousVersion, currentEntry);
@@ -203,7 +235,9 @@ public class VersionedScriptCache
     public bool Contains(string typeId)
     {
         if (string.IsNullOrEmpty(typeId))
+        {
             return false;
+        }
 
         return _cache.ContainsKey(typeId);
     }
@@ -217,10 +251,14 @@ public class VersionedScriptCache
     public bool ClearInstance(string typeId)
     {
         if (string.IsNullOrEmpty(typeId))
+        {
             throw new ArgumentNullException(nameof(typeId));
+        }
 
-        if (!_cache.TryGetValue(typeId, out var entry))
+        if (!_cache.TryGetValue(typeId, out ScriptCacheEntry? entry))
+        {
             return false;
+        }
 
         entry.ClearInstance();
         return true;
@@ -234,7 +272,9 @@ public class VersionedScriptCache
     public bool Remove(string typeId)
     {
         if (string.IsNullOrEmpty(typeId))
+        {
             throw new ArgumentNullException(nameof(typeId));
+        }
 
         return _cache.TryRemove(typeId, out _);
     }
@@ -286,13 +326,17 @@ public class VersionedScriptCache
     public int GetVersionHistoryDepth(string typeId)
     {
         if (string.IsNullOrEmpty(typeId))
+        {
             throw new ArgumentNullException(nameof(typeId));
+        }
 
-        if (!_cache.TryGetValue(typeId, out var entry))
+        if (!_cache.TryGetValue(typeId, out ScriptCacheEntry? entry))
+        {
             return 0;
+        }
 
-        var depth = 0;
-        var current = entry.PreviousVersion;
+        int depth = 0;
+        ScriptCacheEntry? current = entry.PreviousVersion;
         while (current != null)
         {
             depth++;
@@ -312,10 +356,12 @@ public class VersionedScriptCache
     private static void PruneVersionHistory(ScriptCacheEntry entry, int maxDepth)
     {
         if (maxDepth <= 0)
+        {
             return;
+        }
 
-        var current = entry;
-        var depth = 0;
+        ScriptCacheEntry? current = entry;
+        int depth = 0;
 
         // Traverse to the depth limit
         while (current.PreviousVersion != null && depth < maxDepth - 1)
@@ -326,7 +372,9 @@ public class VersionedScriptCache
 
         // Sever the chain at max depth to allow GC of older versions
         if (current.PreviousVersion != null)
+        {
             current.PreviousVersion = null;
+        }
     }
 
     /// <summary>
@@ -336,11 +384,11 @@ public class VersionedScriptCache
     /// <returns>Total version entries across all script types</returns>
     public int GetTotalVersionEntries()
     {
-        var total = 0;
-        foreach (var kvp in _cache)
+        int total = 0;
+        foreach (KeyValuePair<string, ScriptCacheEntry> kvp in _cache)
         {
             total++; // Current version
-            var current = kvp.Value.PreviousVersion;
+            ScriptCacheEntry? current = kvp.Value.PreviousVersion;
             while (current != null)
             {
                 total++;

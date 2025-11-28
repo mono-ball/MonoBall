@@ -15,7 +15,9 @@ public static class PropertyMapperServiceExtensions
     {
         services.AddSingleton(provider =>
         {
-            var logger = provider.GetService<ILogger<PropertyMapperRegistry>>();
+            ILogger<PropertyMapperRegistry>? logger = provider.GetService<
+                ILogger<PropertyMapperRegistry>
+            >();
             return CreatePropertyMapperRegistry(logger);
         });
 

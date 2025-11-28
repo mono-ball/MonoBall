@@ -31,7 +31,7 @@ public sealed class PatchApplicator
             return null;
         }
 
-        var current = document.Deserialize<JsonNode>();
+        JsonNode? current = document.Deserialize<JsonNode>();
         if (current == null)
         {
             _logger.LogWarning(
@@ -41,7 +41,8 @@ public sealed class PatchApplicator
             return document;
         }
 
-        foreach (var operation in patch.Operations)
+        foreach (PatchOperation operation in patch.Operations)
+        {
             try
             {
                 operation.Validate();
@@ -67,6 +68,7 @@ public sealed class PatchApplicator
                 );
                 throw;
             }
+        }
 
         return current;
     }
@@ -101,7 +103,7 @@ public sealed class PatchApplicator
 
     private JsonNode? ApplyAdd(JsonNode document, string path, JsonElement value)
     {
-        var (parent, key) = NavigateToParent(document, path);
+        (var parent, string key) = NavigateToParent(document, path);
         var jsonValue = JsonNode.Parse(value.GetRawText());
 
         if (parent is JsonObject obj)
@@ -111,12 +113,18 @@ public sealed class PatchApplicator
         else if (parent is JsonArray arr)
         {
             if (key == "-")
-                // Append to end of array
+            // Append to end of array
+            {
                 arr.Add(jsonValue);
-            else if (int.TryParse(key, out var index))
+            }
+            else if (int.TryParse(key, out int index))
+            {
                 arr.Insert(index, jsonValue);
+            }
             else
+            {
                 throw new InvalidOperationException($"Invalid array index: {key}");
+            }
         }
         else
         {
@@ -130,16 +138,22 @@ public sealed class PatchApplicator
 
     private JsonNode? ApplyRemove(JsonNode document, string path)
     {
-        var (parent, key) = NavigateToParent(document, path);
+        (var parent, string key) = NavigateToParent(document, path);
 
         if (parent is JsonObject obj)
+        {
             obj.Remove(key);
-        else if (parent is JsonArray arr && int.TryParse(key, out var index))
+        }
+        else if (parent is JsonArray arr && int.TryParse(key, out int index))
+        {
             arr.RemoveAt(index);
+        }
         else
+        {
             throw new InvalidOperationException(
                 $"Cannot remove from {parent?.GetType().Name ?? "null"}"
             );
+        }
 
         return document;
     }
@@ -147,19 +161,25 @@ public sealed class PatchApplicator
     private JsonNode? ApplyReplace(JsonNode document, string path, JsonElement value)
     {
         // Replace is equivalent to remove + add (but target must exist)
-        var (parent, key) = NavigateToParent(document, path);
+        (var parent, string key) = NavigateToParent(document, path);
         var jsonValue = JsonNode.Parse(value.GetRawText());
 
         if (parent is JsonObject obj)
         {
             if (!obj.ContainsKey(key))
+            {
                 throw new InvalidOperationException($"Path does not exist: {path}");
+            }
+
             obj[key] = jsonValue;
         }
-        else if (parent is JsonArray arr && int.TryParse(key, out var index))
+        else if (parent is JsonArray arr && int.TryParse(key, out int index))
         {
             if (index < 0 || index >= arr.Count)
+            {
                 throw new InvalidOperationException($"Array index out of range: {index}");
+            }
+
             arr[index] = jsonValue;
         }
         else
@@ -175,18 +195,22 @@ public sealed class PatchApplicator
     private JsonNode? ApplyMove(JsonNode document, string from, string to)
     {
         // Get value from source
-        var value = NavigateToValue(document, from);
+        JsonNode? value = NavigateToValue(document, from);
         if (value == null)
+        {
             throw new InvalidOperationException($"Cannot move from null value at: {from}");
+        }
 
         // Remove from source
-        var afterRemove = ApplyRemove(document, from);
+        JsonNode? afterRemove = ApplyRemove(document, from);
         if (afterRemove == null)
+        {
             throw new InvalidOperationException($"Document became null after removing: {from}");
+        }
 
         // Add to destination
-        var jsonElement = JsonSerializer.SerializeToElement(value);
-        var afterAdd = ApplyAdd(afterRemove, to, jsonElement);
+        JsonElement jsonElement = JsonSerializer.SerializeToElement(value);
+        JsonNode? afterAdd = ApplyAdd(afterRemove, to, jsonElement);
 
         return afterAdd;
     }
@@ -194,30 +218,34 @@ public sealed class PatchApplicator
     private JsonNode? ApplyCopy(JsonNode document, string from, string to)
     {
         // Get value from source (don't remove)
-        var value = NavigateToValue(document, from);
+        JsonNode? value = NavigateToValue(document, from);
         if (value == null)
+        {
             throw new InvalidOperationException($"Cannot copy from null value at: {from}");
+        }
 
         // Add to destination
-        var jsonElement = JsonSerializer.SerializeToElement(value);
-        var afterAdd = ApplyAdd(document, to, jsonElement);
+        JsonElement jsonElement = JsonSerializer.SerializeToElement(value);
+        JsonNode? afterAdd = ApplyAdd(document, to, jsonElement);
 
         return afterAdd;
     }
 
     private void ApplyTest(JsonNode document, string path, JsonElement expectedValue)
     {
-        var actualValue = NavigateToValue(document, path);
-        var actualElement = JsonSerializer.SerializeToElement(actualValue);
+        JsonNode? actualValue = NavigateToValue(document, path);
+        JsonElement actualElement = JsonSerializer.SerializeToElement(actualValue);
 
         // Compare JSON representations
-        var actualJson = actualElement.GetRawText();
-        var expectedJson = expectedValue.GetRawText();
+        string actualJson = actualElement.GetRawText();
+        string expectedJson = expectedValue.GetRawText();
 
         if (actualJson != expectedJson)
+        {
             throw new InvalidOperationException(
                 $"Test failed at {path}: expected {expectedJson} but got {actualJson}"
             );
+        }
     }
 
     /// <summary>
@@ -225,27 +253,37 @@ public sealed class PatchApplicator
     /// </summary>
     private (JsonNode parent, string key) NavigateToParent(JsonNode document, string path)
     {
-        var segments = ParsePath(path);
+        List<string> segments = ParsePath(path);
 
         if (segments.Count == 0)
+        {
             throw new InvalidOperationException("Cannot navigate to parent of root");
+        }
 
-        var current = document;
+        JsonNode? current = document;
 
         // Navigate to parent (all segments except last)
-        for (var i = 0; i < segments.Count - 1; i++)
+        for (int i = 0; i < segments.Count - 1; i++)
         {
-            var segment = segments[i];
+            string segment = segments[i];
 
             if (current is JsonObject obj)
+            {
                 current = obj[segment];
-            else if (current is JsonArray arr && int.TryParse(segment, out var index))
+            }
+            else if (current is JsonArray arr && int.TryParse(segment, out int index))
+            {
                 current = arr[index];
+            }
             else
+            {
                 throw new InvalidOperationException($"Cannot navigate path: {path}");
+            }
 
             if (current == null)
+            {
                 throw new InvalidOperationException($"Path not found: {path}");
+            }
         }
 
         return (current, segments[^1]);
@@ -256,20 +294,28 @@ public sealed class PatchApplicator
     /// </summary>
     private JsonNode? NavigateToValue(JsonNode document, string path)
     {
-        var segments = ParsePath(path);
-        var current = document;
+        List<string> segments = ParsePath(path);
+        JsonNode? current = document;
 
-        foreach (var segment in segments)
+        foreach (string segment in segments)
         {
             if (current is JsonObject obj)
+            {
                 current = obj[segment];
-            else if (current is JsonArray arr && int.TryParse(segment, out var index))
+            }
+            else if (current is JsonArray arr && int.TryParse(segment, out int index))
+            {
                 current = arr[index];
+            }
             else
+            {
                 throw new InvalidOperationException($"Cannot navigate path: {path}");
+            }
 
             if (current == null)
+            {
                 throw new InvalidOperationException($"Path not found: {path}");
+            }
         }
 
         return current;
@@ -281,10 +327,12 @@ public sealed class PatchApplicator
     private List<string> ParsePath(string path)
     {
         if (path == "/")
+        {
             return new List<string>();
+        }
 
         // Remove leading slash and split
-        var segments = path.TrimStart('/').Split('/');
+        string[] segments = path.TrimStart('/').Split('/');
 
         // Unescape special characters (~0 = ~, ~1 = /)
         return segments.Select(s => s.Replace("~1", "/").Replace("~0", "~")).ToList();

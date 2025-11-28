@@ -44,12 +44,16 @@ public class SpatialHashSystem(ILogger<SpatialHashSystem>? logger = null)
         _queryResultBuffer.Clear();
 
         // Add static entities
-        foreach (var entity in _staticHash.GetAt(mapId, x, y))
+        foreach (Entity entity in _staticHash.GetAt(mapId, x, y))
+        {
             _queryResultBuffer.Add(entity);
+        }
 
         // Add dynamic entities
-        foreach (var entity in _dynamicHash.GetAt(mapId, x, y))
+        foreach (Entity entity in _dynamicHash.GetAt(mapId, x, y))
+        {
             _queryResultBuffer.Add(entity);
+        }
 
         return _queryResultBuffer;
     }
@@ -65,12 +69,16 @@ public class SpatialHashSystem(ILogger<SpatialHashSystem>? logger = null)
         _queryResultBuffer.Clear();
 
         // Add static entities
-        foreach (var entity in _staticHash.GetInBounds(mapId, bounds))
+        foreach (Entity entity in _staticHash.GetInBounds(mapId, bounds))
+        {
             _queryResultBuffer.Add(entity);
+        }
 
         // Add dynamic entities
-        foreach (var entity in _dynamicHash.GetInBounds(mapId, bounds))
+        foreach (Entity entity in _dynamicHash.GetInBounds(mapId, bounds))
+        {
             _queryResultBuffer.Add(entity);
+        }
 
         return _queryResultBuffer;
     }
@@ -87,7 +95,7 @@ public class SpatialHashSystem(ILogger<SpatialHashSystem>? logger = null)
         if (!_staticTilesIndexed)
         {
             _staticHash.Clear();
-            var staticTileCount = 0;
+            int staticTileCount = 0;
 
             // Use centralized query for all tile-positioned entities
             world.Query(
@@ -132,10 +140,10 @@ public class SpatialHashSystem(ILogger<SpatialHashSystem>? logger = null)
     /// <returns>A tuple with (entity count, occupied position count).</returns>
     public (int entityCount, int occupiedPositions) GetDiagnostics()
     {
-        var staticCount = _staticHash.GetEntityCount();
-        var dynamicCount = _dynamicHash.GetEntityCount();
-        var staticPositions = _staticHash.GetOccupiedPositionCount();
-        var dynamicPositions = _dynamicHash.GetOccupiedPositionCount();
+        int staticCount = _staticHash.GetEntityCount();
+        int dynamicCount = _dynamicHash.GetEntityCount();
+        int staticPositions = _staticHash.GetOccupiedPositionCount();
+        int dynamicPositions = _dynamicHash.GetOccupiedPositionCount();
         return (staticCount + dynamicCount, staticPositions + dynamicPositions);
     }
 }

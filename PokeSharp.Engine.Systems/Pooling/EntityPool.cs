@@ -20,7 +20,6 @@ public class EntityPool
     private readonly Queue<Entity> _availableEntities;
     private readonly int _initialSize;
     private readonly object _lock = new();
-    private int _maxSize;
     private readonly string _poolName;
     private readonly bool _trackStatistics;
     private readonly World _world;
@@ -28,32 +27,6 @@ public class EntityPool
     private int _totalAcquisitions;
 
     private int _totalReleases;
-    private int _resizeCount;
-
-    /// <summary>
-    ///     Whether the pool should automatically resize when exhausted.
-    /// </summary>
-    public bool AutoResize { get; set; } = true;
-
-    /// <summary>
-    ///     Growth factor when auto-resizing (e.g., 1.5 = 50% increase).
-    /// </summary>
-    public float GrowthFactor { get; set; } = 1.5f;
-
-    /// <summary>
-    ///     Absolute maximum size the pool can grow to, even with auto-resize.
-    /// </summary>
-    public int AbsoluteMaxSize { get; set; } = 10000;
-
-    /// <summary>
-    ///     Number of times this pool has been auto-resized.
-    /// </summary>
-    public int ResizeCount => _resizeCount;
-
-    /// <summary>
-    ///     Current maximum size of the pool.
-    /// </summary>
-    public int MaxSize => _maxSize;
 
     /// <summary>
     ///     Creates a new entity pool with specified configuration.
@@ -75,18 +48,45 @@ public class EntityPool
         ArgumentException.ThrowIfNullOrWhiteSpace(poolName);
 
         if (initialSize < 0 || initialSize > maxSize)
+        {
             throw new ArgumentException(
                 $"Initial size ({initialSize}) must be >= 0 and <= max size ({maxSize})"
             );
+        }
 
         _world = world;
         _poolName = poolName;
         _initialSize = initialSize;
-        _maxSize = maxSize;
+        MaxSize = maxSize;
         _trackStatistics = trackStatistics;
         _availableEntities = new Queue<Entity>(initialSize);
         _activeEntities = new HashSet<Entity>();
     }
+
+    /// <summary>
+    ///     Whether the pool should automatically resize when exhausted.
+    /// </summary>
+    public bool AutoResize { get; set; } = true;
+
+    /// <summary>
+    ///     Growth factor when auto-resizing (e.g., 1.5 = 50% increase).
+    /// </summary>
+    public float GrowthFactor { get; set; } = 1.5f;
+
+    /// <summary>
+    ///     Absolute maximum size the pool can grow to, even with auto-resize.
+    /// </summary>
+    public int AbsoluteMaxSize { get; set; } = 10000;
+
+    /// <summary>
+    ///     Number of times this pool has been auto-resized.
+    /// </summary>
+    public int ResizeCount { get; private set; }
+
+    /// <summary>
+    ///     Current maximum size of the pool.
+    /// </summary>
+    public int MaxSize { get; private set; }
 
     /// <summary>
     ///     Number of entities available in pool (not currently in use).
@@ -125,7 +125,7 @@ public class EntityPool
     ///     Reuse rate (0.0 to 1.0). Higher is better (more reuse, fewer allocations).
     /// </summary>
     public float ReuseRate =>
-        _totalAcquisitions > 0 ? 1.0f - (float)TotalCreated / _totalAcquisitions : 0f;
+        _totalAcquisitions > 0 ? 1.0f - ((float)TotalCreated / _totalAcquisitions) : 0f;
 
     /// <summary>
     ///     Average time to acquire entity from pool in milliseconds (for monitoring).
@@ -140,15 +140,17 @@ public class EntityPool
     /// <param name="count">Number of entities to pre-create</param>
     public void Warmup(int count)
     {
-        if (count <= 0 || count > _maxSize)
-            throw new ArgumentException($"Warmup count must be > 0 and <= max size ({_maxSize})");
+        if (count <= 0 || count > MaxSize)
+        {
+            throw new ArgumentException($"Warmup count must be > 0 and <= max size ({MaxSize})");
+        }
 
         lock (_lock)
         {
-            var toCreate = Math.Min(count, _maxSize - TotalCreated);
-            for (var i = 0; i < toCreate; i++)
+            int toCreate = Math.Min(count, MaxSize - TotalCreated);
+            for (int i = 0; i < toCreate; i++)
             {
-                var entity = CreateNewEntity();
+                Entity entity = CreateNewEntity();
                 _availableEntities.Enqueue(entity);
             }
         }
@@ -163,7 +165,7 @@ public class EntityPool
     /// <exception cref="InvalidOperationException">Thrown if pool exhausted and cannot resize</exception>
     public Entity Acquire()
     {
-        var sw = _trackStatistics ? Stopwatch.StartNew() : null;
+        Stopwatch? sw = _trackStatistics ? Stopwatch.StartNew() : null;
 
         lock (_lock)
         {
@@ -175,23 +177,22 @@ public class EntityPool
                 entity = _availableEntities.Dequeue();
             }
             // Create new if below max size
-            else if (TotalCreated < _maxSize)
+            else if (TotalCreated < MaxSize)
             {
                 entity = CreateNewEntity();
             }
             // Pool exhausted - try auto-resize
-            else if (AutoResize && _maxSize < AbsoluteMaxSize)
+            else if (AutoResize && MaxSize < AbsoluteMaxSize)
             {
-                var newMaxSize = Math.Min(
-                    (int)(_maxSize * GrowthFactor),
-                    AbsoluteMaxSize
-                );
+                int newMaxSize = Math.Min((int)(MaxSize * GrowthFactor), AbsoluteMaxSize);
                 // Ensure we grow by at least 1
-                if (newMaxSize <= _maxSize)
-                    newMaxSize = Math.Min(_maxSize + 10, AbsoluteMaxSize);
+                if (newMaxSize <= MaxSize)
+                {
+                    newMaxSize = Math.Min(MaxSize + 10, AbsoluteMaxSize);
+                }
 
-                _maxSize = newMaxSize;
-                _resizeCount++;
+                MaxSize = newMaxSize;
+                ResizeCount++;
 
                 // Now we can create a new entity
                 entity = CreateNewEntity();
@@ -200,7 +201,7 @@ public class EntityPool
             else
             {
                 throw new InvalidOperationException(
-                    $"Entity pool '{_poolName}' exhausted (max size: {_maxSize}, active: {_activeEntities.Count}, auto-resize: {AutoResize})"
+                    $"Entity pool '{_poolName}' exhausted (max size: {MaxSize}, active: {_activeEntities.Count}, auto-resize: {AutoResize})"
                 );
             }
 
@@ -210,7 +211,7 @@ public class EntityPool
             // Update pooled component
             if (entity.Has<Pooled>())
             {
-                var pooled = entity.Get<Pooled>();
+                Pooled pooled = entity.Get<Pooled>();
                 pooled.AcquiredAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
                 pooled.ReuseCount++;
                 entity.Set(pooled);
@@ -238,17 +239,21 @@ public class EntityPool
         lock (_lock)
         {
             if (newMaxSize < _activeEntities.Count)
+            {
                 throw new ArgumentException(
                     $"Cannot resize pool '{_poolName}' to {newMaxSize}: {_activeEntities.Count} entities are active"
                 );
+            }
 
             if (newMaxSize > AbsoluteMaxSize)
+            {
                 throw new ArgumentException(
                     $"Cannot resize pool '{_poolName}' to {newMaxSize}: exceeds absolute max of {AbsoluteMaxSize}"
                 );
+            }
 
-            _maxSize = newMaxSize;
-            _resizeCount++;
+            MaxSize = newMaxSize;
+            ResizeCount++;
         }
     }
 
@@ -264,9 +269,11 @@ public class EntityPool
         {
             // Validate entity is active
             if (!_activeEntities.Remove(entity))
+            {
                 throw new ArgumentException(
                     $"Entity {entity.Id} is not active in pool '{_poolName}' (already released or wrong pool)"
                 );
+            }
 
             // Strip all components except Pooled
             ResetEntityToPoolState(entity);
@@ -290,7 +297,7 @@ public class EntityPool
             // Destroy all available entities
             while (_availableEntities.Count > 0)
             {
-                var entity = _availableEntities.Dequeue();
+                Entity entity = _availableEntities.Dequeue();
                 _world.Destroy(entity);
             }
 
@@ -320,9 +327,9 @@ public class EntityPool
                 TotalReleases = _totalReleases,
                 ReuseRate = ReuseRate,
                 AverageAcquireTimeMs = AverageAcquireTimeMs,
-                MaxSize = _maxSize,
-                UsagePercent = TotalCreated > 0 ? (float)_activeEntities.Count / _maxSize : 0f,
-                ResizeCount = _resizeCount,
+                MaxSize = MaxSize,
+                UsagePercent = TotalCreated > 0 ? (float)_activeEntities.Count / MaxSize : 0f,
+                ResizeCount = ResizeCount,
                 AutoResizeEnabled = AutoResize,
             };
         }
@@ -332,7 +339,7 @@ public class EntityPool
 
     private Entity CreateNewEntity()
     {
-        var entity = _world.Create();
+        Entity entity = _world.Create();
 
         // Add pooled marker component
         entity.Add(
@@ -355,7 +362,7 @@ public class EntityPool
 
         // Get all component types (Arch API for this varies by version)
         // For now, we'll use a heuristic: store the Pooled component, destroy and recreate
-        var pooled = entity.Has<Pooled>() ? entity.Get<Pooled>() : new Pooled();
+        Pooled pooled = entity.Has<Pooled>() ? entity.Get<Pooled>() : new Pooled();
 
         // Arch's approach: Remove all components one by one
         // This is version-specific - adjust based on your Arch version
@@ -367,7 +374,9 @@ public class EntityPool
 
         // Re-add the pooled marker
         if (!entity.Has<Pooled>())
+        {
             entity.Add(pooled);
+        }
     }
 }
 

@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 using PokeSharp.Engine.Scenes;
-using PokeSharp.Game.Initialization.Pipeline;
 
 namespace PokeSharp.Game.Initialization.Pipeline.Steps;
 
@@ -27,15 +26,17 @@ public class SetupApiProvidersStep : InitializationStepBase
     )
     {
         if (context.GameInitializer == null)
+        {
             throw new InvalidOperationException(
                 "GameInitializer must be initialized before setting up API providers"
             );
+        }
 
-        var logger = context.LoggerFactory.CreateLogger<SetupApiProvidersStep>();
+        ILogger<SetupApiProvidersStep> logger =
+            context.LoggerFactory.CreateLogger<SetupApiProvidersStep>();
         // Set SpatialQuery on the MapApiService (used by ScriptService)
         context.ApiProvider.Map.SetSpatialQuery(context.GameInitializer.SpatialHashSystem);
         logger.LogInformation("API providers configured successfully");
         return Task.CompletedTask;
     }
 }
-

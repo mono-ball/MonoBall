@@ -44,40 +44,54 @@ public class ExpectedVsActualTests
             SourceMapWidth = 15,
             SourceMapHeight = 10,
             TargetMapWidth = 15,
-            TargetMapHeight = 15
+            TargetMapHeight = 15,
         };
 
         // Act - Simulate the warp
         var actual = SimulateMapWarp(expected);
 
         // Assert - Tile coordinates
-        actual.ActualTargetTileX.Should().Be(expected.ExpectedTargetTileX,
-            "Target X tile coordinate should match expected");
+        actual
+            .ActualTargetTileX.Should()
+            .Be(expected.ExpectedTargetTileX, "Target X tile coordinate should match expected");
 
-        actual.ActualTargetTileY.Should().Be(expected.ExpectedTargetTileY,
-            "Target Y tile coordinate should match expected");
+        actual
+            .ActualTargetTileY.Should()
+            .Be(expected.ExpectedTargetTileY, "Target Y tile coordinate should match expected");
 
         // Assert - Pixel coordinates
-        actual.ActualTargetPixelX.Should().Be(expected.ExpectedTargetPixelX,
-            "Target X pixel coordinate should match expected");
+        actual
+            .ActualTargetPixelX.Should()
+            .Be(expected.ExpectedTargetPixelX, "Target X pixel coordinate should match expected");
 
-        actual.ActualTargetPixelY.Should().Be(expected.ExpectedTargetPixelY,
-            "Target Y pixel coordinate should match expected");
+        actual
+            .ActualTargetPixelY.Should()
+            .Be(expected.ExpectedTargetPixelY, "Target Y pixel coordinate should match expected");
 
         // Critical assertion - Detect the 2-tile upward shift bug
         var tileOffsetY = expected.ExpectedTargetTileY - actual.ActualTargetTileY;
         var pixelOffsetY = expected.ExpectedTargetPixelY - actual.ActualTargetPixelY;
 
-        tileOffsetY.Should().Be(0,
-            $"DETECTED BUG: Y-coordinate shifted by {tileOffsetY} tiles (expected 0, bug shows +2)");
+        tileOffsetY
+            .Should()
+            .Be(
+                0,
+                $"DETECTED BUG: Y-coordinate shifted by {tileOffsetY} tiles (expected 0, bug shows +2)"
+            );
 
-        pixelOffsetY.Should().Be(0,
-            $"DETECTED BUG: Y-coordinate shifted by {pixelOffsetY} pixels (expected 0, bug shows +32)");
+        pixelOffsetY
+            .Should()
+            .Be(
+                0,
+                $"DETECTED BUG: Y-coordinate shifted by {pixelOffsetY} pixels (expected 0, bug shows +32)"
+            );
 
         // Explicit bug detection
         if (tileOffsetY == BUGGY_OFFSET_TILES)
         {
-            Assert.Fail($"CONFIRMED: 2-tile upward offset bug in dewford_town → route107 connection");
+            Assert.Fail(
+                $"CONFIRMED: 2-tile upward offset bug in dewford_town → route107 connection"
+            );
         }
     }
 
@@ -112,35 +126,47 @@ public class ExpectedVsActualTests
             SourceMapWidth = 20,
             SourceMapHeight = 20,
             TargetMapWidth = 20,
-            TargetMapHeight = 15
+            TargetMapHeight = 15,
         };
 
         // Act
         var actual = SimulateMapWarp(expected);
 
         // Assert - Tile coordinates
-        actual.ActualTargetTileX.Should().Be(expected.ExpectedTargetTileX,
-            "Target X tile coordinate should match expected");
+        actual
+            .ActualTargetTileX.Should()
+            .Be(expected.ExpectedTargetTileX, "Target X tile coordinate should match expected");
 
-        actual.ActualTargetTileY.Should().Be(expected.ExpectedTargetTileY,
-            "Target Y tile coordinate should match expected");
+        actual
+            .ActualTargetTileY.Should()
+            .Be(expected.ExpectedTargetTileY, "Target Y tile coordinate should match expected");
 
         // Assert - Pixel coordinates
-        actual.ActualTargetPixelX.Should().Be(expected.ExpectedTargetPixelX,
-            "Target X pixel coordinate should match expected");
+        actual
+            .ActualTargetPixelX.Should()
+            .Be(expected.ExpectedTargetPixelX, "Target X pixel coordinate should match expected");
 
-        actual.ActualTargetPixelY.Should().Be(expected.ExpectedTargetPixelY,
-            "Target Y pixel coordinate should match expected");
+        actual
+            .ActualTargetPixelY.Should()
+            .Be(expected.ExpectedTargetPixelY, "Target Y pixel coordinate should match expected");
 
         // Critical assertion - Detect the 2-tile downward shift bug
         var tileOffsetY = actual.ActualTargetTileY - expected.ExpectedTargetTileY;
         var pixelOffsetY = actual.ActualTargetPixelY - expected.ExpectedTargetPixelY;
 
-        tileOffsetY.Should().Be(0,
-            $"DETECTED BUG: Y-coordinate shifted by {tileOffsetY} tiles (expected 0, bug shows -2)");
+        tileOffsetY
+            .Should()
+            .Be(
+                0,
+                $"DETECTED BUG: Y-coordinate shifted by {tileOffsetY} tiles (expected 0, bug shows -2)"
+            );
 
-        pixelOffsetY.Should().Be(0,
-            $"DETECTED BUG: Y-coordinate shifted by {pixelOffsetY} pixels (expected 0, bug shows -32)");
+        pixelOffsetY
+            .Should()
+            .Be(
+                0,
+                $"DETECTED BUG: Y-coordinate shifted by {pixelOffsetY} pixels (expected 0, bug shows -32)"
+            );
 
         // Explicit bug detection
         if (Math.Abs(tileOffsetY) == BUGGY_OFFSET_TILES)
@@ -166,24 +192,23 @@ public class ExpectedVsActualTests
         int sourceTileY,
         int expectedTargetX,
         int expectedTargetY,
-        string description)
+        string description
+    )
     {
         // Arrange
         var sourcePosition = new TileCoordinate(sourceTileX, sourceTileY);
 
         // Act
-        var actualTarget = CalculateTargetCoordinate(
-            sourceMap,
-            targetMap,
-            sourcePosition
-        );
+        var actualTarget = CalculateTargetCoordinate(sourceMap, targetMap, sourcePosition);
 
         // Assert
-        actualTarget.TileX.Should().Be(expectedTargetX,
-            $"{description}: Target X should be {expectedTargetX}");
+        actualTarget
+            .TileX.Should()
+            .Be(expectedTargetX, $"{description}: Target X should be {expectedTargetX}");
 
-        actualTarget.TileY.Should().Be(expectedTargetY,
-            $"{description}: Target Y should be {expectedTargetY}");
+        actualTarget
+            .TileY.Should()
+            .Be(expectedTargetY, $"{description}: Target Y should be {expectedTargetY}");
 
         // Calculate and verify offset
         var offsetX = actualTarget.TileX - expectedTargetX;
@@ -196,9 +221,10 @@ public class ExpectedVsActualTests
         if (Math.Abs(offsetY) == BUGGY_OFFSET_TILES)
         {
             Assert.Fail(
-                $"{description}: DETECTED 2-tile offset bug! " +
-                $"Expected ({expectedTargetX}, {expectedTargetY}) " +
-                $"but got ({actualTarget.TileX}, {actualTarget.TileY})");
+                $"{description}: DETECTED 2-tile offset bug! "
+                    + $"Expected ({expectedTargetX}, {expectedTargetY}) "
+                    + $"but got ({actualTarget.TileX}, {actualTarget.TileY})"
+            );
         }
     }
 
@@ -221,7 +247,7 @@ public class ExpectedVsActualTests
                 SourcePixelY = 0,
                 ExpectedTargetPixelX = 112,
                 ExpectedTargetPixelY = 224, // 14 * 16
-                Description = "Dewford to Route107"
+                Description = "Dewford to Route107",
             },
             new PixelTestCase
             {
@@ -231,8 +257,8 @@ public class ExpectedVsActualTests
                 SourcePixelY = 304, // 19 * 16
                 ExpectedTargetPixelX = 160,
                 ExpectedTargetPixelY = 0,
-                Description = "Route114 to Route115"
-            }
+                Description = "Route114 to Route115",
+            },
         };
 
         foreach (var testCase in testCases)
@@ -246,19 +272,28 @@ public class ExpectedVsActualTests
             );
 
             // Assert
-            actualPixels.X.Should().Be(testCase.ExpectedTargetPixelX,
-                $"{testCase.Description}: Pixel X coordinate mismatch");
+            actualPixels
+                .X.Should()
+                .Be(
+                    testCase.ExpectedTargetPixelX,
+                    $"{testCase.Description}: Pixel X coordinate mismatch"
+                );
 
-            actualPixels.Y.Should().Be(testCase.ExpectedTargetPixelY,
-                $"{testCase.Description}: Pixel Y coordinate mismatch");
+            actualPixels
+                .Y.Should()
+                .Be(
+                    testCase.ExpectedTargetPixelY,
+                    $"{testCase.Description}: Pixel Y coordinate mismatch"
+                );
 
             // Check for 32-pixel offset bug
             var pixelOffsetY = Math.Abs(actualPixels.Y - testCase.ExpectedTargetPixelY);
             if (pixelOffsetY == BUGGY_OFFSET_PIXELS)
             {
                 Assert.Fail(
-                    $"{testCase.Description}: DETECTED 32-pixel offset bug! " +
-                    $"Expected Y={testCase.ExpectedTargetPixelY} but got Y={actualPixels.Y}");
+                    $"{testCase.Description}: DETECTED 32-pixel offset bug! "
+                        + $"Expected Y={testCase.ExpectedTargetPixelY} but got Y={actualPixels.Y}"
+                );
             }
         }
     }
@@ -277,17 +312,10 @@ public class ExpectedVsActualTests
         var intermediateMap = "route107";
 
         var startTile = new TileCoordinate(7, 5);
-        var startPixel = new PixelCoordinate(
-            7 * TILE_SIZE_PIXELS,
-            5 * TILE_SIZE_PIXELS
-        );
+        var startPixel = new PixelCoordinate(7 * TILE_SIZE_PIXELS, 5 * TILE_SIZE_PIXELS);
 
         // Act - Go from dewford_town → route107 → dewford_town
-        var afterFirstWarp = CalculateTargetCoordinate(
-            originalMap,
-            intermediateMap,
-            startTile
-        );
+        var afterFirstWarp = CalculateTargetCoordinate(originalMap, intermediateMap, startTile);
 
         var afterRoundTrip = CalculateTargetCoordinate(
             intermediateMap,
@@ -296,27 +324,28 @@ public class ExpectedVsActualTests
         );
 
         // Assert
-        afterRoundTrip.TileX.Should().Be(startTile.TileX,
-            "Round trip should return to original X coordinate");
+        afterRoundTrip
+            .TileX.Should()
+            .Be(startTile.TileX, "Round trip should return to original X coordinate");
 
-        afterRoundTrip.TileY.Should().Be(startTile.TileY,
-            "Round trip should return to original Y coordinate");
+        afterRoundTrip
+            .TileY.Should()
+            .Be(startTile.TileY, "Round trip should return to original Y coordinate");
 
         // If there's an offset bug, it might accumulate on round trip
         var accumulatedOffsetX = afterRoundTrip.TileX - startTile.TileX;
         var accumulatedOffsetY = afterRoundTrip.TileY - startTile.TileY;
 
-        accumulatedOffsetX.Should().Be(0,
-            "No X offset should accumulate on round trip");
+        accumulatedOffsetX.Should().Be(0, "No X offset should accumulate on round trip");
 
-        accumulatedOffsetY.Should().Be(0,
-            "No Y offset should accumulate on round trip");
+        accumulatedOffsetY.Should().Be(0, "No Y offset should accumulate on round trip");
 
         if (Math.Abs(accumulatedOffsetY) > 0)
         {
             Assert.Fail(
-                $"OFFSET ACCUMULATION DETECTED: Round trip has {accumulatedOffsetY} tile offset " +
-                $"(original: {startTile}, after round trip: {afterRoundTrip})");
+                $"OFFSET ACCUMULATION DETECTED: Round trip has {accumulatedOffsetY} tile offset "
+                    + $"(original: {startTile}, after round trip: {afterRoundTrip})"
+            );
         }
     }
 
@@ -384,7 +413,7 @@ public class ExpectedVsActualTests
             ActualTargetTileX = expected.ExpectedTargetTileX,
             ActualTargetTileY = expected.ExpectedTargetTileY,
             ActualTargetPixelX = expected.ExpectedTargetPixelX,
-            ActualTargetPixelY = expected.ExpectedTargetPixelY
+            ActualTargetPixelY = expected.ExpectedTargetPixelY,
         };
     }
 
@@ -395,7 +424,8 @@ public class ExpectedVsActualTests
     private TileCoordinate CalculateTargetCoordinate(
         string sourceMap,
         string targetMap,
-        TileCoordinate sourcePosition)
+        TileCoordinate sourcePosition
+    )
     {
         // Placeholder implementation
         return new TileCoordinate(sourcePosition.TileX, sourcePosition.TileY);
@@ -409,7 +439,8 @@ public class ExpectedVsActualTests
         string sourceMap,
         string targetMap,
         int sourcePixelX,
-        int sourcePixelY)
+        int sourcePixelY
+    )
     {
         // Placeholder implementation
         return new PixelCoordinate(sourcePixelX, sourcePixelY);

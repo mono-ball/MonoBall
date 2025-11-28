@@ -51,18 +51,24 @@ public sealed class PatchOperation
 
     public void Validate()
     {
-        var validOps = new[] { "add", "remove", "replace", "move", "copy", "test" };
+        string[] validOps = new[] { "add", "remove", "replace", "move", "copy", "test" };
         if (!validOps.Contains(Op.ToLowerInvariant()))
+        {
             throw new InvalidOperationException(
                 $"Invalid patch operation: {Op}. Must be one of: {string.Join(", ", validOps)}"
             );
+        }
 
         if (string.IsNullOrWhiteSpace(Path))
+        {
             throw new InvalidOperationException("Path is required for all operations");
+        }
 
         // Validate path format (must start with /)
         if (!Path.StartsWith('/'))
+        {
             throw new InvalidOperationException($"Path must start with '/': {Path}");
+        }
 
         // Validate operation-specific requirements
         switch (Op.ToLowerInvariant())
@@ -71,13 +77,19 @@ public sealed class PatchOperation
             case "replace":
             case "test":
                 if (Value == null)
+                {
                     throw new InvalidOperationException($"{Op} operation requires 'value'");
+                }
+
                 break;
 
             case "move":
             case "copy":
                 if (string.IsNullOrWhiteSpace(From))
+                {
                     throw new InvalidOperationException($"{Op} operation requires 'from'");
+                }
+
                 break;
 
             case "remove":

@@ -1,7 +1,5 @@
-using Microsoft.Extensions.Logging;
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 
 namespace PokeSharp.Engine.Debug.Logging;
 
@@ -11,15 +9,29 @@ namespace PokeSharp.Engine.Debug.Logging;
 [ProviderAlias("DebugConsole")]
 public class ConsoleLoggerProvider : ILoggerProvider
 {
+    private const int MaxPendingLogs = 1000;
     private readonly ConcurrentDictionary<string, ConsoleLogger> _loggers = new();
-    private Action<LogLevel, string, string>? _addLogEntry; // level, message, category
-    private Func<LogLevel, bool> _isEnabled = _ => true;
 
     // Buffer for logs that arrive before handlers are set
     private readonly List<(LogLevel Level, string Message, string Category)> _pendingLogs = new();
     private readonly object _pendingLogsLock = new();
-    private const int MaxPendingLogs = 1000;
-    private bool _handlersConfigured = false;
+    private Action<LogLevel, string, string>? _addLogEntry; // level, message, category
+    private bool _handlersConfigured;
+    private Func<LogLevel, bool> _isEnabled = _ => true;
+
+    public ILogger CreateLogger(string categoryName)
+    {
+        // Pass a wrapper that always calls the current _isEnabled, not a captured copy
+        return _loggers.GetOrAdd(
+            categoryName,
+            name => new ConsoleLogger(name, AddLogEntry, IsLogLevelEnabled)
+        );
+    }
+
+    public void Dispose()
+    {
+        _loggers.Clear();
+    }
 
     /// <summary>
     ///     Sets the function to add structured log entries to the Logs panel.
@@ -50,7 +62,9 @@ public class ConsoleLoggerProvider : ILoggerProvider
         lock (_pendingLogsLock)
         {
             if (_pendingLogs.Count == 0 || _addLogEntry == null)
+            {
                 return;
+            }
 
             logsToFlush = new List<(LogLevel, string, string)>(_pendingLogs);
             _pendingLogs.Clear();
@@ -58,17 +72,10 @@ public class ConsoleLoggerProvider : ILoggerProvider
         }
 
         // Flush outside of lock
-        foreach (var (level, message, category) in logsToFlush)
+        foreach ((LogLevel level, string message, string category) in logsToFlush)
         {
             _addLogEntry(level, message, category);
         }
-    }
-
-    public ILogger CreateLogger(string categoryName)
-    {
-        // Pass a wrapper that always calls the current _isEnabled, not a captured copy
-        return _loggers.GetOrAdd(categoryName, name =>
-            new ConsoleLogger(name, AddLogEntry, IsLogLevelEnabled));
     }
 
     /// <summary>
@@ -98,7 +105,9 @@ public class ConsoleLoggerProvider : ILoggerProvider
                     // Debug: show pending log count periodically
                     if (_pendingLogs.Count % 50 == 0)
                     {
-                        System.Diagnostics.Debug.WriteLine($"[ConsoleLoggerProvider] Pending logs: {_pendingLogs.Count}");
+                        System.Diagnostics.Debug.WriteLine(
+                            $"[ConsoleLoggerProvider] Pending logs: {_pendingLogs.Count}"
+                        );
                     }
 
                     // Prevent unbounded growth
@@ -109,10 +118,5 @@ public class ConsoleLoggerProvider : ILoggerProvider
                 }
             }
         }
-    }
-
-    public void Dispose()
-    {
-        _loggers.Clear();
     }
 }

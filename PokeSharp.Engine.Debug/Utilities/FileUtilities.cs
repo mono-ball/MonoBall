@@ -1,16 +1,16 @@
-using Microsoft.Extensions.Logging;
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
 
 namespace PokeSharp.Engine.Debug.Utilities;
 
 /// <summary>
-/// Utility class for common file operations with consistent error handling.
-/// Eliminates code duplication across file handling classes.
+///     Utility class for common file operations with consistent error handling.
+///     Eliminates code duplication across file handling classes.
 /// </summary>
 public static class FileUtilities
 {
     /// <summary>
-    /// Safely reads a text file with error handling and logging.
+    ///     Safely reads a text file with error handling and logging.
     /// </summary>
     /// <param name="filePath">Path to the file to read.</param>
     /// <param name="logger">Optional logger for error reporting.</param>
@@ -34,7 +34,7 @@ public static class FileUtilities
     }
 
     /// <summary>
-    /// Safely writes text to a file with error handling and logging.
+    ///     Safely writes text to a file with error handling and logging.
     /// </summary>
     /// <param name="filePath">Path to the file to write.</param>
     /// <param name="content">Content to write.</param>
@@ -45,7 +45,7 @@ public static class FileUtilities
         try
         {
             // Ensure directory exists
-            var directory = Path.GetDirectoryName(filePath);
+            string? directory = Path.GetDirectoryName(filePath);
             if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
             {
                 Directory.CreateDirectory(directory);
@@ -62,13 +62,14 @@ public static class FileUtilities
     }
 
     /// <summary>
-    /// Safely reads and deserializes a JSON file with error handling and logging.
+    ///     Safely reads and deserializes a JSON file with error handling and logging.
     /// </summary>
     /// <typeparam name="T">The type to deserialize to.</typeparam>
     /// <param name="filePath">Path to the JSON file.</param>
     /// <param name="logger">Optional logger for error reporting.</param>
     /// <returns>Deserialized object, or default(T) if file doesn't exist or an error occurs.</returns>
-    public static T? ReadJsonFile<T>(string filePath, ILogger? logger = null) where T : class
+    public static T? ReadJsonFile<T>(string filePath, ILogger? logger = null)
+        where T : class
     {
         try
         {
@@ -77,7 +78,7 @@ public static class FileUtilities
                 return null;
             }
 
-            var json = File.ReadAllText(filePath);
+            string json = File.ReadAllText(filePath);
             return JsonSerializer.Deserialize<T>(json);
         }
         catch (Exception ex)
@@ -88,29 +89,27 @@ public static class FileUtilities
     }
 
     /// <summary>
-    /// Safely serializes and writes an object to a JSON file with error handling and logging.
+    ///     Safely serializes and writes an object to a JSON file with error handling and logging.
     /// </summary>
     /// <typeparam name="T">The type to serialize.</typeparam>
     /// <param name="filePath">Path to the JSON file.</param>
     /// <param name="data">Object to serialize.</param>
     /// <param name="logger">Optional logger for error reporting.</param>
     /// <returns>True if successful, false otherwise.</returns>
-    public static bool WriteJsonFile<T>(string filePath, T data, ILogger? logger = null) where T : class
+    public static bool WriteJsonFile<T>(string filePath, T data, ILogger? logger = null)
+        where T : class
     {
         try
         {
             // Ensure directory exists
-            var directory = Path.GetDirectoryName(filePath);
+            string? directory = Path.GetDirectoryName(filePath);
             if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
             {
                 Directory.CreateDirectory(directory);
             }
 
-            var options = new JsonSerializerOptions
-            {
-                WriteIndented = true
-            };
-            var json = JsonSerializer.Serialize(data, options);
+            var options = new JsonSerializerOptions { WriteIndented = true };
+            string json = JsonSerializer.Serialize(data, options);
             File.WriteAllText(filePath, json);
             return true;
         }
@@ -122,7 +121,7 @@ public static class FileUtilities
     }
 
     /// <summary>
-    /// Safely deletes a file with error handling and logging.
+    ///     Safely deletes a file with error handling and logging.
     /// </summary>
     /// <param name="filePath">Path to the file to delete.</param>
     /// <param name="logger">Optional logger for error reporting.</param>
@@ -147,7 +146,7 @@ public static class FileUtilities
     }
 
     /// <summary>
-    /// Ensures a directory exists, creating it if necessary.
+    ///     Ensures a directory exists, creating it if necessary.
     /// </summary>
     /// <param name="directoryPath">Path to the directory.</param>
     /// <param name="logger">Optional logger for error reporting.</param>
@@ -160,6 +159,7 @@ public static class FileUtilities
             {
                 Directory.CreateDirectory(directoryPath);
             }
+
             return true;
         }
         catch (Exception ex)
@@ -169,4 +169,3 @@ public static class FileUtilities
         }
     }
 }
-

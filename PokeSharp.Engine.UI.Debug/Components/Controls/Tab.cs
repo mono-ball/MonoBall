@@ -1,12 +1,13 @@
 using Microsoft.Xna.Framework;
 using PokeSharp.Engine.UI.Debug.Components.Base;
 using PokeSharp.Engine.UI.Debug.Core;
+using PokeSharp.Engine.UI.Debug.Input;
 using PokeSharp.Engine.UI.Debug.Layout;
 
 namespace PokeSharp.Engine.UI.Debug.Components.Controls;
 
 /// <summary>
-/// Individual tab button component.
+///     Individual tab button component.
 /// </summary>
 public class Tab : UIComponent
 {
@@ -25,12 +26,15 @@ public class Tab : UIComponent
     /// <summary>Event triggered when tab is clicked</summary>
     public Action? OnClick { get; set; }
 
-    protected override bool IsInteractive() => true;
+    protected override bool IsInteractive()
+    {
+        return true;
+    }
 
     protected override void OnRender(UIContext context)
     {
-        var isHovered = IsHovered();
-        var isPressed = IsPressed();
+        bool isHovered = IsHovered();
+        bool isPressed = IsPressed();
 
         // Determine colors based on state
         Color backgroundColor;
@@ -65,12 +69,7 @@ public class Tab : UIComponent
         // Draw active indicator at bottom
         if (IsActive)
         {
-            var indicatorRect = new LayoutRect(
-                Rect.X,
-                Rect.Y + Rect.Height - 2,
-                Rect.Width,
-                2
-            );
+            var indicatorRect = new LayoutRect(Rect.X, Rect.Y + Rect.Height - 2, Rect.Width, 2);
             Renderer.DrawRectangle(indicatorRect, Theme.TabActiveIndicator);
         }
 
@@ -96,15 +95,15 @@ public class Tab : UIComponent
         }
 
         // Draw text centered
-        var textSize = Renderer.MeasureText(Text);
-        var textX = Rect.X + (Rect.Width - textSize.X) / 2;
-        var textY = Rect.Y + (Rect.Height - textSize.Y) / 2;
+        Vector2 textSize = Renderer.MeasureText(Text);
+        float textX = Rect.X + ((Rect.Width - textSize.X) / 2);
+        float textY = Rect.Y + ((Rect.Height - textSize.Y) / 2);
         Renderer.DrawText(Text, new Vector2(textX, textY), textColor);
 
         // Handle click on mouse RELEASE (standard click behavior)
         // This allows user to press, move away, and cancel by releasing outside
         // Note: No consumption - only one tab can be hovered at a time, so no conflict
-        var isReleased = context.Input.IsMouseButtonReleased(Input.MouseButton.Left);
+        bool isReleased = context.Input.IsMouseButtonReleased(MouseButton.Left);
         if (isHovered && isReleased)
         {
             OnClick?.Invoke();
@@ -114,10 +113,9 @@ public class Tab : UIComponent
     protected override (float width, float height)? GetContentSize()
     {
         // Auto-size based on text
-        var textSize = Context?.Renderer.MeasureText(Text) ?? Vector2.Zero;
-        var width = Math.Max(MinWidth, textSize.X + Padding * 2);
-        var height = Theme.ButtonHeight;
+        Vector2 textSize = Context?.Renderer.MeasureText(Text) ?? Vector2.Zero;
+        float width = Math.Max(MinWidth, textSize.X + (Padding * 2));
+        int height = Theme.ButtonHeight;
         return (width, height);
     }
 }
-

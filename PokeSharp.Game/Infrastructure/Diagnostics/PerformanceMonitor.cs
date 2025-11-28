@@ -15,7 +15,6 @@ public class PerformanceMonitor(ILogger<PerformanceMonitor> logger)
     private const int PerformanceLogIntervalFrames = 300; // Log every 5 seconds at 60fps
     private readonly RollingAverage _frameTimeTracker = new(60); // Track last 60 frames (1 second)
 
-    private ulong _frameCounter;
     private int _lastGen0Count;
     private int _lastGen1Count;
     private int _lastGen2Count;
@@ -46,7 +45,7 @@ public class PerformanceMonitor(ILogger<PerformanceMonitor> logger)
     public int Gen2Collections => GC.CollectionCount(2);
 
     /// <summary>Total frame count since start.</summary>
-    public ulong FrameCount => _frameCounter;
+    public ulong FrameCount { get; private set; }
 
     /// <summary>
     ///     Updates performance metrics for the current frame.
@@ -54,18 +53,20 @@ public class PerformanceMonitor(ILogger<PerformanceMonitor> logger)
     /// <param name="frameTimeMs">Frame time in milliseconds.</param>
     public void Update(float frameTimeMs)
     {
-        _frameCounter++;
+        FrameCount++;
         _frameTimeTracker.Add(frameTimeMs);
 
         // Warn about slow frames (>50% over budget)
         if (frameTimeMs > TargetFrameTime * 1.5f)
+        {
             logger.LogSlowFrame(frameTimeMs, TargetFrameTime);
+        }
 
         // Log frame time statistics every 5 seconds (300 frames at 60fps)
-        if (_frameCounter % PerformanceLogIntervalFrames == 0)
+        if (FrameCount % PerformanceLogIntervalFrames == 0)
         {
-            var avgMs = _frameTimeTracker.Average;
-            var fps = 1000.0f / avgMs;
+            float avgMs = _frameTimeTracker.Average;
+            float fps = 1000.0f / avgMs;
             logger.LogFramePerformance(avgMs, fps, _frameTimeTracker.Min, _frameTimeTracker.Max);
 
             // Log memory stats every 5 seconds
@@ -78,37 +79,43 @@ public class PerformanceMonitor(ILogger<PerformanceMonitor> logger)
     /// </summary>
     private void LogMemoryStats()
     {
-        var totalMemoryBytes = GC.GetTotalMemory(false);
-        var totalMemoryMb = totalMemoryBytes / 1024.0 / 1024.0;
+        long totalMemoryBytes = GC.GetTotalMemory(false);
+        double totalMemoryMb = totalMemoryBytes / 1024.0 / 1024.0;
 
-        var gen0 = GC.CollectionCount(0);
-        var gen1 = GC.CollectionCount(1);
-        var gen2 = GC.CollectionCount(2);
+        int gen0 = GC.CollectionCount(0);
+        int gen1 = GC.CollectionCount(1);
+        int gen2 = GC.CollectionCount(2);
 
         // Log memory stats using template
         logger.LogMemoryStatistics(totalMemoryMb, gen0, gen1, gen2);
 
         // Warn about high memory usage
         if (totalMemoryMb > HighMemoryThresholdMb)
+        {
             logger.LogHighMemoryUsage(totalMemoryMb, HighMemoryThresholdMb);
+        }
 
         // Warn about excessive GC activity (more than 10 collections per second)
-        var gen0Delta = gen0 - _lastGen0Count;
-        var gen1Delta = gen1 - _lastGen1Count;
-        var gen2Delta = gen2 - _lastGen2Count;
+        int gen0Delta = gen0 - _lastGen0Count;
+        int gen1Delta = gen1 - _lastGen1Count;
+        int gen2Delta = gen2 - _lastGen2Count;
 
         if (gen0Delta > MaxGen0CollectionsPerInterval) // >50 Gen0 collections in 5 seconds = >10/sec
+        {
             logger.LogWarning(
                 "High Gen0 GC activity: {Count} collections in last 5 seconds ({PerSec:F1}/sec)",
                 gen0Delta,
                 gen0Delta / 5.0
             );
+        }
 
         if (gen2Delta > 0) // Any Gen2 collection is notable
+        {
             logger.LogWarning(
                 "Gen2 GC occurred: {Count} collections (indicates memory pressure)",
                 gen2Delta
             );
+        }
 
         // Update last counts
         _lastGen0Count = gen0;

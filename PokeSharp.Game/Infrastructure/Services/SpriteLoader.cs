@@ -12,13 +12,11 @@ namespace PokeSharp.Game.Infrastructure.Services;
 ///     - NPCs: generic/, elite_four/, gym_leaders/, team_aqua/, team_magma/, frontier_brains/
 ///     Implements caching for performance - use ClearCache() to free memory when needed.
 /// </summary>
-public class SpriteLoader(ILogger<SpriteLoader> logger)
+public class SpriteLoader
 {
-    private readonly List<string> _spritesBasePaths = new()
-    {
-        "Assets/Sprites/Players",
-        "Assets/Sprites/NPCs",
-    };
+    private readonly IAssetPathResolver _pathResolver;
+    private readonly ILogger<SpriteLoader> _logger;
+    private readonly List<string> _spritesBasePaths;
 
     private List<SpriteManifest>? _allSprites;
 
@@ -28,39 +26,60 @@ public class SpriteLoader(ILogger<SpriteLoader> logger)
     private Dictionary<string, string>? _spritePathLookup; // Maps "category/spriteId" -> full directory path
 
     /// <summary>
+    ///     Initializes a new instance of the <see cref="SpriteLoader"/> class.
+    /// </summary>
+    /// <param name="pathResolver">Path resolver for locating sprite directories.</param>
+    /// <param name="logger">Logger instance.</param>
+    public SpriteLoader(IAssetPathResolver pathResolver, ILogger<SpriteLoader> logger)
+    {
+        _pathResolver = pathResolver ?? throw new ArgumentNullException(nameof(pathResolver));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+
+        // Use path resolver to get the actual paths to sprite directories
+        _spritesBasePaths = new List<string>
+        {
+            _pathResolver.Resolve("Sprites/Players"),
+            _pathResolver.Resolve("Sprites/NPCs"),
+        };
+    }
+
+    /// <summary>
     ///     Load all available sprites by scanning directories for individual manifests.
     ///     Scans both Assets/Sprites/Players and Assets/Sprites/NPCs.
     /// </summary>
     public async Task<List<SpriteManifest>> LoadAllSpritesAsync()
     {
         if (_allSprites != null)
+        {
             return _allSprites;
+        }
 
         _allSprites = new List<SpriteManifest>();
         _spritePathLookup = new Dictionary<string, string>();
 
-        foreach (var spritesBasePath in _spritesBasePaths)
+        foreach (string spritesBasePath in _spritesBasePaths)
         {
             if (!Directory.Exists(spritesBasePath))
             {
-                logger.LogDirectoryNotFound("Sprites", spritesBasePath);
+                _logger.LogDirectoryNotFound("Sprites", spritesBasePath);
                 continue;
             }
 
-            logger.LogSpriteScanningStarted(spritesBasePath);
+            _logger.LogSpriteScanningStarted(spritesBasePath);
 
             // Find all manifest.json files in subdirectories
-            var manifestFiles = Directory.GetFiles(
+            string[] manifestFiles = Directory.GetFiles(
                 spritesBasePath,
                 "manifest.json",
                 SearchOption.AllDirectories
             );
 
-            foreach (var manifestFile in manifestFiles)
+            foreach (string manifestFile in manifestFiles)
+            {
                 try
                 {
-                    var json = await File.ReadAllTextAsync(manifestFile);
-                    var manifest = JsonSerializer.Deserialize<SpriteManifest>(
+                    string json = await File.ReadAllTextAsync(manifestFile);
+                    SpriteManifest? manifest = JsonSerializer.Deserialize<SpriteManifest>(
                         json,
                         new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
                     );
@@ -70,29 +89,30 @@ public class SpriteLoader(ILogger<SpriteLoader> logger)
                         _allSprites.Add(manifest);
 
                         // Build lookup: "category/spriteId" -> full directory path
-                        var manifestDir = Path.GetDirectoryName(manifestFile);
+                        string? manifestDir = Path.GetDirectoryName(manifestFile);
                         if (!string.IsNullOrEmpty(manifestDir))
                         {
-                            var lookupKey = $"{manifest.Category}/{manifest.Name}";
+                            string lookupKey = $"{manifest.Category}/{manifest.Name}";
                             _spritePathLookup[lookupKey] = manifestDir;
-                            logger.LogSpriteRegistered(lookupKey, manifestDir);
+                            _logger.LogSpriteRegistered(lookupKey, manifestDir);
                         }
                     }
                 }
                 catch (Exception ex)
                 {
-                    logger.LogSpriteManifestLoadFailed(manifestFile, ex);
+                    _logger.LogSpriteManifestLoadFailed(manifestFile, ex);
                 }
+            }
         }
 
-        logger.LogSpritesLoaded(_allSprites.Count);
+        _logger.LogSpritesLoaded(_allSprites.Count);
 
         // Populate sprite cache for synchronous GetSprite() calls
         // Use capacity hint to avoid reallocations
         _spriteCache = new Dictionary<string, SpriteManifest>(_allSprites.Count);
-        foreach (var sprite in _allSprites)
+        foreach (SpriteManifest sprite in _allSprites)
         {
-            var cacheKey = $"{sprite.Category}/{sprite.Name}";
+            string cacheKey = $"{sprite.Category}/{sprite.Name}";
             _spriteCache[cacheKey] = sprite;
         }
 
@@ -108,21 +128,23 @@ public class SpriteLoader(ILogger<SpriteLoader> logger)
         if (_spriteCache == null)
         {
             _spriteCache = new Dictionary<string, SpriteManifest>();
-            var allSprites = await LoadAllSpritesAsync();
-            foreach (var sprite in allSprites)
+            List<SpriteManifest> allSprites = await LoadAllSpritesAsync();
+            foreach (SpriteManifest sprite in allSprites)
             {
                 // FIXED: Use "category/name" as cache key to handle duplicate names
-                var cacheKey = $"{sprite.Category}/{sprite.Name}";
+                string cacheKey = $"{sprite.Category}/{sprite.Name}";
                 _spriteCache[cacheKey] = sprite;
             }
         }
 
         // Try to find sprite by name (search all categories)
-        var found = _spriteCache.Values.FirstOrDefault(s => s.Name == spriteName);
+        SpriteManifest? found = _spriteCache.Values.FirstOrDefault(s => s.Name == spriteName);
         if (found != null)
+        {
             return found;
+        }
 
-        logger.LogSpriteNotFound(spriteName);
+        _logger.LogSpriteNotFound(spriteName);
         return null;
     }
 
@@ -134,20 +156,22 @@ public class SpriteLoader(ILogger<SpriteLoader> logger)
         if (_spriteCache == null)
         {
             _spriteCache = new Dictionary<string, SpriteManifest>();
-            var allSprites = await LoadAllSpritesAsync();
-            foreach (var sprite in allSprites)
+            List<SpriteManifest> allSprites = await LoadAllSpritesAsync();
+            foreach (SpriteManifest sprite in allSprites)
             {
                 // Use "category/name" as cache key to handle duplicate names
-                var cacheKey = $"{sprite.Category}/{sprite.Name}";
+                string cacheKey = $"{sprite.Category}/{sprite.Name}";
                 _spriteCache[cacheKey] = sprite;
             }
         }
 
-        var lookupKey = $"{category}/{spriteName}";
-        if (_spriteCache.TryGetValue(lookupKey, out var manifest))
+        string lookupKey = $"{category}/{spriteName}";
+        if (_spriteCache.TryGetValue(lookupKey, out SpriteManifest? manifest))
+        {
             return manifest;
+        }
 
-        logger.LogSpriteNotFound(lookupKey);
+        _logger.LogSpriteNotFound(lookupKey);
         return null;
     }
 
@@ -162,17 +186,19 @@ public class SpriteLoader(ILogger<SpriteLoader> logger)
     {
         if (_spriteCache == null)
         {
-            logger.LogWarning(
+            _logger.LogWarning(
                 "Sprite cache not initialized. Call LoadAllSpritesAsync() during initialization."
             );
             return null;
         }
 
-        var lookupKey = $"{category}/{spriteName}";
-        if (_spriteCache.TryGetValue(lookupKey, out var manifest))
+        string lookupKey = $"{category}/{spriteName}";
+        if (_spriteCache.TryGetValue(lookupKey, out SpriteManifest? manifest))
+        {
             return manifest;
+        }
 
-        logger.LogSpriteNotFound(lookupKey);
+        _logger.LogSpriteNotFound(lookupKey);
         return null;
     }
 
@@ -181,7 +207,7 @@ public class SpriteLoader(ILogger<SpriteLoader> logger)
     /// </summary>
     public async Task<List<SpriteManifest>> GetSpritesByCategoryAsync(string category)
     {
-        var allSprites = await LoadAllSpritesAsync();
+        List<SpriteManifest> allSprites = await LoadAllSpritesAsync();
         return allSprites.Where(s => s.Category == category).ToList();
     }
 
@@ -190,7 +216,7 @@ public class SpriteLoader(ILogger<SpriteLoader> logger)
     /// </summary>
     public async Task<List<string>> GetCategoriesAsync()
     {
-        var allSprites = await LoadAllSpritesAsync();
+        List<SpriteManifest> allSprites = await LoadAllSpritesAsync();
         return allSprites.Select(s => s.Category).Distinct().OrderBy(c => c).ToList();
     }
 
@@ -202,15 +228,19 @@ public class SpriteLoader(ILogger<SpriteLoader> logger)
     {
         // Ensure sprites are loaded (defensive check)
         if (_spritePathLookup == null)
+        {
             throw new InvalidOperationException(
                 "Sprite manifests have not been loaded. Call LoadAllSpritesAsync() during initialization."
             );
+        }
 
-        var lookupKey = $"{category}/{spriteName}";
-        if (_spritePathLookup.TryGetValue(lookupKey, out var path))
+        string lookupKey = $"{category}/{spriteName}";
+        if (_spritePathLookup.TryGetValue(lookupKey, out string? path))
+        {
             return path;
+        }
 
-        logger.LogSpritePathNotFound(lookupKey);
+        _logger.LogSpritePathNotFound(lookupKey);
         return null;
     }
 
@@ -227,7 +257,7 @@ public class SpriteLoader(ILogger<SpriteLoader> logger)
     /// </summary>
     public string? GetSpriteSheetPath(string category, string spriteName)
     {
-        var spritePath = GetSpritePath(category, spriteName);
+        string? spritePath = GetSpritePath(category, spriteName);
         return spritePath != null ? Path.Combine(spritePath, "spritesheet.png") : null;
     }
 
@@ -254,7 +284,7 @@ public class SpriteLoader(ILogger<SpriteLoader> logger)
         _spritePathLookup?.Clear();
         _spritePathLookup = null;
 
-        logger.LogSpriteCacheCleared();
+        _logger.LogSpriteCacheCleared();
     }
 
     /// <summary>
@@ -263,10 +293,12 @@ public class SpriteLoader(ILogger<SpriteLoader> logger)
     /// </summary>
     public void ClearSprite(string category, string spriteName)
     {
-        var key = $"{category}/{spriteName}";
+        string key = $"{category}/{spriteName}";
 
         if (_spriteCache?.Remove(key) == true)
-            logger.LogSpriteClearedFromCache(key);
+        {
+            _logger.LogSpriteClearedFromCache(key);
+        }
 
         // Note: We don't remove from _allSprites or _spritePathLookup as those are
         // rebuilt from disk on next LoadAllSpritesAsync() call

@@ -1,6 +1,3 @@
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Input;
-using PokeSharp.Engine.UI.Debug.Components.Base;
 using PokeSharp.Engine.UI.Debug.Components.Controls;
 using PokeSharp.Engine.UI.Debug.Components.Layout;
 using PokeSharp.Engine.UI.Debug.Core;
@@ -10,35 +7,16 @@ using PokeSharp.Engine.UI.Debug.Models;
 namespace PokeSharp.Engine.UI.Debug.Components.Debug;
 
 /// <summary>
-/// Live entity inspector with entity selection and refresh.
-/// Enhanced version that supports real-time updates.
+///     Live entity inspector with entity selection and refresh.
+///     Enhanced version that supports real-time updates.
 /// </summary>
 public class LiveEntityInspector : Panel
 {
-    /// <summary>
-    /// Currently selected entity
-    /// </summary>
-    public EntityInfo? SelectedEntity { get; set; }
-
-    /// <summary>
-    /// List of available entities to inspect
-    /// </summary>
-    public List<EntityInfo> AvailableEntities { get; set; } = new();
-
-    /// <summary>
-    /// Auto-refresh interval in seconds (0 = manual only)
-    /// </summary>
-    public float AutoRefreshInterval { get; set; } = 1.0f;
-
-    /// <summary>
-    /// Callback to get fresh entity data
-    /// </summary>
-    public Func<EntityInfo, EntityInfo>? OnRefreshEntity { get; set; }
+    private Dropdown? _entityDropdown;
+    private ScrollView? _propertiesScrollView;
+    private Label? _refreshLabel;
 
     private float _timeSinceLastRefresh;
-    private ScrollView? _propertiesScrollView;
-    private Dropdown? _entityDropdown;
-    private Label? _refreshLabel;
 
     public LiveEntityInspector()
     {
@@ -48,9 +26,29 @@ public class LiveEntityInspector : Panel
         InitializeComponents();
     }
 
+    /// <summary>
+    ///     Currently selected entity
+    /// </summary>
+    public EntityInfo? SelectedEntity { get; set; }
+
+    /// <summary>
+    ///     List of available entities to inspect
+    /// </summary>
+    public List<EntityInfo> AvailableEntities { get; set; } = new();
+
+    /// <summary>
+    ///     Auto-refresh interval in seconds (0 = manual only)
+    /// </summary>
+    public float AutoRefreshInterval { get; set; } = 1.0f;
+
+    /// <summary>
+    ///     Callback to get fresh entity data
+    /// </summary>
+    public Func<EntityInfo, EntityInfo>? OnRefreshEntity { get; set; }
+
     private void InitializeComponents()
     {
-        var theme = UITheme.Dark;
+        UITheme theme = UITheme.Dark;
 
         // Title
         var titleLabel = new Label
@@ -61,8 +59,8 @@ public class LiveEntityInspector : Panel
             Constraint = new LayoutConstraint
             {
                 Anchor = Anchor.TopLeft,
-                Margin = theme.PaddingMedium
-            }
+                Margin = theme.PaddingMedium,
+            },
         };
         AddChild(titleLabel);
 
@@ -78,15 +76,15 @@ public class LiveEntityInspector : Panel
                 OffsetY = 28,
                 WidthPercent = 0.9f,
                 Height = 30,
-                MarginLeft = theme.PaddingMedium
+                MarginLeft = theme.PaddingMedium,
             },
-            OnSelectionChanged = (index) =>
+            OnSelectionChanged = index =>
             {
                 if (index >= 0 && index < AvailableEntities.Count)
                 {
                     SelectEntity(AvailableEntities[index]);
                 }
-            }
+            },
         };
         AddChild(_entityDropdown);
 
@@ -101,9 +99,9 @@ public class LiveEntityInspector : Panel
                 OffsetY = 68,
                 Width = 100,
                 Height = 25,
-                MarginLeft = theme.PaddingMedium
+                MarginLeft = theme.PaddingMedium,
             },
-            OnClick = () => RefreshEntityData()
+            OnClick = () => RefreshEntityData(),
         };
         AddChild(refreshButton);
 
@@ -117,8 +115,8 @@ public class LiveEntityInspector : Panel
                 Anchor = Anchor.TopLeft,
                 OffsetY = 73,
                 OffsetX = 110,
-                MarginLeft = theme.PaddingMedium
-            }
+                MarginLeft = theme.PaddingMedium,
+            },
         };
         AddChild(_refreshLabel);
 
@@ -132,8 +130,8 @@ public class LiveEntityInspector : Panel
                 OffsetY = 105,
                 WidthPercent = 0.9f,
                 HeightPercent = 0.65f,
-                Margin = theme.PaddingMedium
-            }
+                Margin = theme.PaddingMedium,
+            },
         };
         AddChild(_propertiesScrollView);
     }
@@ -149,9 +147,10 @@ public class LiveEntityInspector : Panel
         // Update dropdown options
         if (_entityDropdown != null)
         {
-            _entityDropdown.Options = AvailableEntities.Count > 0
-                ? AvailableEntities.Select(e => $"[{e.Id}] {e.Name}").ToList()
-                : new List<string> { "No entities" };
+            _entityDropdown.Options =
+                AvailableEntities.Count > 0
+                    ? AvailableEntities.Select(e => $"[{e.Id}] {e.Name}").ToList()
+                    : new List<string> { "No entities" };
         }
 
         // Update refresh label
@@ -160,7 +159,8 @@ public class LiveEntityInspector : Panel
             if (AutoRefreshInterval > 0)
             {
                 _timeSinceLastRefresh += 0.016f; // Approximate frame time
-                _refreshLabel.Text = $"Auto: {AutoRefreshInterval:F1}s (next in {Math.Max(0, AutoRefreshInterval - _timeSinceLastRefresh):F1}s)";
+                _refreshLabel.Text =
+                    $"Auto: {AutoRefreshInterval:F1}s (next in {Math.Max(0, AutoRefreshInterval - _timeSinceLastRefresh):F1}s)";
 
                 // Auto-refresh if interval elapsed
                 if (_timeSinceLastRefresh >= AutoRefreshInterval)
@@ -182,7 +182,9 @@ public class LiveEntityInspector : Panel
     private void UpdatePropertiesDisplay(UIContext context)
     {
         if (_propertiesScrollView == null)
+        {
             return;
+        }
 
         _propertiesScrollView.ClearChildren();
 
@@ -193,7 +195,7 @@ public class LiveEntityInspector : Panel
                 Id = Id + "_no_selection",
                 Text = "No entity selected",
                 Color = context.Theme.TextDim,
-                Constraint = new LayoutConstraint { Anchor = Anchor.TopLeft }
+                Constraint = new LayoutConstraint { Anchor = Anchor.TopLeft },
             };
             _propertiesScrollView.AddChild(noSelectionLabel);
             return;
@@ -212,8 +214,8 @@ public class LiveEntityInspector : Panel
             {
                 Anchor = Anchor.TopLeft,
                 OffsetY = yOffset,
-                Height = lineHeight
-            }
+                Height = lineHeight,
+            },
         };
         _propertiesScrollView.AddChild(headerLabel);
         yOffset += lineHeight + 5;
@@ -230,13 +232,13 @@ public class LiveEntityInspector : Panel
                 {
                     Anchor = Anchor.TopLeft,
                     OffsetY = yOffset,
-                    Height = lineHeight
-                }
+                    Height = lineHeight,
+                },
             };
             _propertiesScrollView.AddChild(propsHeaderLabel);
             yOffset += lineHeight;
 
-            foreach (var property in SelectedEntity.Properties)
+            foreach (KeyValuePair<string, string> property in SelectedEntity.Properties)
             {
                 var propLabel = new Label
                 {
@@ -247,8 +249,8 @@ public class LiveEntityInspector : Panel
                     {
                         Anchor = Anchor.TopLeft,
                         OffsetY = yOffset,
-                        Height = lineHeight
-                    }
+                        Height = lineHeight,
+                    },
                 };
                 _propertiesScrollView.AddChild(propLabel);
                 yOffset += lineHeight;
@@ -269,13 +271,13 @@ public class LiveEntityInspector : Panel
                 {
                     Anchor = Anchor.TopLeft,
                     OffsetY = yOffset,
-                    Height = lineHeight
-                }
+                    Height = lineHeight,
+                },
             };
             _propertiesScrollView.AddChild(compsHeaderLabel);
             yOffset += lineHeight;
 
-            foreach (var component in SelectedEntity.Components)
+            foreach (string component in SelectedEntity.Components)
             {
                 var compLabel = new Label
                 {
@@ -287,8 +289,8 @@ public class LiveEntityInspector : Panel
                         Anchor = Anchor.TopLeft,
                         OffsetY = yOffset,
                         OffsetX = 10,
-                        Height = lineHeight
-                    }
+                        Height = lineHeight,
+                    },
                 };
                 _propertiesScrollView.AddChild(compLabel);
                 yOffset += lineHeight;
@@ -311,4 +313,3 @@ public class LiveEntityInspector : Panel
         }
     }
 }
-

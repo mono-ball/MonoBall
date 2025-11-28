@@ -30,13 +30,13 @@ public class NPCBehaviorInitializer(
         try
         {
             // Load all behavior definitions from JSON
-            var loadedCount = await behaviorRegistry.LoadAllAsync();
+            int loadedCount = await behaviorRegistry.LoadAllAsync();
             logger.LogWorkflowStatus("Behavior definitions loaded", ("count", loadedCount));
 
             // Load and compile behavior scripts for each type
-            foreach (var typeId in behaviorRegistry.GetAllTypeIds())
+            foreach (string typeId in behaviorRegistry.GetAllTypeIds())
             {
-                var definition = behaviorRegistry.Get(typeId);
+                BehaviorDefinition? definition = behaviorRegistry.Get(typeId);
                 if (
                     definition is IScriptedType scripted
                     && !string.IsNullOrEmpty(scripted.BehaviorScript)
@@ -48,7 +48,7 @@ public class NPCBehaviorInitializer(
                         ("script", scripted.BehaviorScript)
                     );
 
-                    var scriptInstance = await scriptService.LoadScriptAsync(
+                    object? scriptInstance = await scriptService.LoadScriptAsync(
                         scripted.BehaviorScript
                     );
 
@@ -78,7 +78,8 @@ public class NPCBehaviorInitializer(
             }
 
             // Register NPCBehaviorSystem with API services
-            var npcBehaviorLogger = loggerFactory.CreateLogger<NPCBehaviorSystem>();
+            ILogger<NPCBehaviorSystem> npcBehaviorLogger =
+                loggerFactory.CreateLogger<NPCBehaviorSystem>();
             var npcBehaviorSystem = new NPCBehaviorSystem(
                 npcBehaviorLogger,
                 loggerFactory,

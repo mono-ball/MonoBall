@@ -17,28 +17,34 @@ public class EncounterZoneMapper : IEntityPropertyMapper<EncounterZone>
     public EncounterZone Map(Dictionary<string, object> properties)
     {
         if (!CanMap(properties))
+        {
             throw new InvalidOperationException("Cannot map properties to EncounterZone component");
+        }
 
         // Get encounter rate (required)
-        if (!properties.TryGetValue("encounter_rate", out var encounterRateValue))
+        if (!properties.TryGetValue("encounter_rate", out object? encounterRateValue))
+        {
             throw new InvalidOperationException("encounter_rate property is required");
+        }
 
-        var encounterRate = encounterRateValue switch
+        int encounterRate = encounterRateValue switch
         {
             int i => i,
-            string s when int.TryParse(s, out var result) => result,
+            string s when int.TryParse(s, out int result) => result,
             _ => throw new InvalidOperationException(
                 $"Invalid encounter_rate value: '{encounterRateValue}'. Must be an integer."
             ),
         };
 
         if (encounterRate < 0 || encounterRate > 255)
+        {
             throw new InvalidOperationException(
                 $"encounter_rate must be between 0 and 255. Got: {encounterRate}"
             );
+        }
 
         // Get encounter table ID (optional, defaults to empty string)
-        var encounterTableId = properties.TryGetValue("encounter_table", out var tableValue)
+        string encounterTableId = properties.TryGetValue("encounter_table", out object? tableValue)
             ? tableValue?.ToString() ?? ""
             : "";
 
@@ -49,10 +55,12 @@ public class EncounterZoneMapper : IEntityPropertyMapper<EncounterZone>
     {
         if (CanMap(properties))
         {
-            var encounterZone = Map(properties);
+            EncounterZone encounterZone = Map(properties);
             // Only add if encounter rate is greater than 0
             if (encounterZone.EncounterRate > 0)
+            {
                 world.Add(entity, encounterZone);
+            }
         }
     }
 }

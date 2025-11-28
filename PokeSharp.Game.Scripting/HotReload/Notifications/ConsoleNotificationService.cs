@@ -7,7 +7,7 @@ public class ConsoleNotificationService : IHotReloadNotificationService
 {
     public void ShowNotification(HotReloadNotification notification)
     {
-        var icon = notification.Type switch
+        string icon = notification.Type switch
         {
             NotificationType.Success => "✓",
             NotificationType.Warning => "⚠",
@@ -16,7 +16,7 @@ public class ConsoleNotificationService : IHotReloadNotificationService
             _ => "•",
         };
 
-        var color = notification.Type switch
+        ConsoleColor color = notification.Type switch
         {
             NotificationType.Success => ConsoleColor.Green,
             NotificationType.Warning => ConsoleColor.Yellow,
@@ -25,20 +25,22 @@ public class ConsoleNotificationService : IHotReloadNotificationService
             _ => ConsoleColor.White,
         };
 
-        var originalColor = Console.ForegroundColor;
+        ConsoleColor originalColor = Console.ForegroundColor;
         Console.ForegroundColor = color;
 
-        var durationStr = notification.Duration.HasValue
+        string durationStr = notification.Duration.HasValue
             ? $" ({notification.Duration.Value.TotalMilliseconds:F0}ms)"
             : "";
 
-        var affectedStr =
+        string affectedStr =
             notification.AffectedScripts > 0 ? $" [{notification.AffectedScripts} scripts]" : "";
 
         Console.WriteLine($"[HOT-RELOAD] {icon} {notification.Message}{durationStr}{affectedStr}");
 
         if (!string.IsNullOrEmpty(notification.Details))
+        {
             Console.WriteLine($"            {notification.Details}");
+        }
 
         Console.ForegroundColor = originalColor;
     }

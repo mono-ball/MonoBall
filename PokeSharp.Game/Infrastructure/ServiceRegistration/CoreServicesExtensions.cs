@@ -8,6 +8,7 @@ using PokeSharp.Engine.Systems.Pooling;
 using PokeSharp.Game.Data;
 using PokeSharp.Game.Data.Loading;
 using PokeSharp.Game.Data.Services;
+using PokeSharp.Game.Infrastructure.Configuration;
 using PokeSharp.Game.Infrastructure.Services;
 
 namespace PokeSharp.Game.Infrastructure.ServiceRegistration;
@@ -17,6 +18,18 @@ namespace PokeSharp.Game.Infrastructure.ServiceRegistration;
 /// </summary>
 public static class CoreServicesExtensions
 {
+    /// <summary>
+    ///     Registers infrastructure services (path resolution, etc.).
+    /// </summary>
+    public static IServiceCollection AddInfrastructureServices(this IServiceCollection services)
+    {
+        // Asset Path Resolver - centralizes all asset path resolution
+        // Uses AppContext.BaseDirectory to work correctly regardless of working directory
+        services.AddSingleton<IAssetPathResolver, AssetPathResolver>();
+
+        return services;
+    }
+
     /// <summary>
     ///     Registers core ECS services (World, SystemManager, EntityPoolManager).
     /// </summary>
@@ -33,15 +46,55 @@ public static class CoreServicesExtensions
         // Parallel overhead (1-2ms) exceeds work time (0.09ms) for Pokemon-style games
         services.AddSingleton<SystemManager>(sp =>
         {
-            var logger = sp.GetService<ILogger<SystemManager>>();
+            ILogger<SystemManager>? logger = sp.GetService<ILogger<SystemManager>>();
             return new SystemManager(logger);
         });
 
         // Entity Pool Manager - For entity recycling and pooling
+        // Register pools immediately to ensure they're available before any service that needs them
         services.AddSingleton(sp =>
         {
-            var world = sp.GetRequiredService<World>();
-            return new EntityPoolManager(world);
+            World world = sp.GetRequiredService<World>();
+            var poolManager = new EntityPoolManager(world);
+
+            // Register pools at creation time to eliminate temporal coupling
+            // Previously, pools were registered in GameInitializer.Initialize() which
+            // ran after services like LayerProcessor were created with the pool manager.
+            // Now pools are available immediately after EntityPoolManager is created.
+            var gameplayConfig = GameplayConfig.CreateDefault();
+            PoolConfig playerPool = gameplayConfig.Pools.Player;
+            PoolConfig npcPool = gameplayConfig.Pools.Npc;
+            PoolConfig tilePool = gameplayConfig.Pools.Tile;
+
+            poolManager.RegisterPool(
+                "player",
+                playerPool.InitialSize,
+                playerPool.MaxSize,
+                playerPool.Warmup,
+                playerPool.AutoResize,
+                playerPool.GrowthFactor,
+                playerPool.AbsoluteMaxSize
+            );
+            poolManager.RegisterPool(
+                "npc",
+                npcPool.InitialSize,
+                npcPool.MaxSize,
+                npcPool.Warmup,
+                npcPool.AutoResize,
+                npcPool.GrowthFactor,
+                npcPool.AbsoluteMaxSize
+            );
+            poolManager.RegisterPool(
+                "tile",
+                tilePool.InitialSize,
+                tilePool.MaxSize,
+                tilePool.Warmup,
+                tilePool.AutoResize,
+                tilePool.GrowthFactor,
+                tilePool.AbsoluteMaxSize
+            );
+
+            return poolManager;
         });
 
         return services;

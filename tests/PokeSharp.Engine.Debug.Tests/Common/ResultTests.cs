@@ -116,4 +116,3 @@ public class ResultTests
         Assert.Equal(-1, failureValue);
     }
 }
-

@@ -44,4 +44,3 @@ catch (Exception ex)
 {
     Print($"❌ Failed to give money: {ex.Message}");
 }
-

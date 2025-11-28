@@ -1,7 +1,6 @@
 using Microsoft.Extensions.Logging;
 using PokeSharp.Engine.Scenes;
 using PokeSharp.Game.Scenes;
-using PokeSharp.Game.Initialization.Pipeline;
 
 namespace PokeSharp.Game.Initialization.Pipeline.Steps;
 
@@ -28,16 +27,23 @@ public class CreateGameplaySceneStep : InitializationStepBase
     )
     {
         if (context.GameInitializer == null)
+        {
             throw new InvalidOperationException(
                 "GameInitializer must be initialized before creating gameplay scene"
             );
+        }
+
         if (context.MapInitializer == null)
+        {
             throw new InvalidOperationException(
                 "MapInitializer must be created before creating gameplay scene"
             );
+        }
 
-        var logger = context.LoggerFactory.CreateLogger<CreateGameplaySceneStep>();
-        var gameplaySceneLogger = context.LoggerFactory.CreateLogger<GameplayScene>();
+        ILogger<CreateGameplaySceneStep> logger =
+            context.LoggerFactory.CreateLogger<CreateGameplaySceneStep>();
+        ILogger<GameplayScene> gameplaySceneLogger =
+            context.LoggerFactory.CreateLogger<GameplayScene>();
 
         var gameplayScene = new GameplayScene(
             context.GraphicsDevice,
@@ -58,4 +64,3 @@ public class CreateGameplaySceneStep : InitializationStepBase
         return Task.CompletedTask;
     }
 }
-

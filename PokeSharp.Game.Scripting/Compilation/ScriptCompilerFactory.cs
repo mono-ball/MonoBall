@@ -25,7 +25,7 @@ public static class ScriptCompilerFactory
     /// <returns>Configured IScriptCompiler instance.</returns>
     public static IScriptCompiler CreateRoslynCompiler(ILoggerFactory loggerFactory)
     {
-        var logger = loggerFactory.CreateLogger<RoslynScriptCompiler>();
+        ILogger<RoslynScriptCompiler> logger = loggerFactory.CreateLogger<RoslynScriptCompiler>();
         return new RoslynScriptCompiler(logger);
     }
 }

@@ -1,25 +1,21 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 
 namespace PokeSharp.Engine.Debug.Features;
 
 /// <summary>
-/// Manages saving and loading watch presets.
+///     Manages saving and loading watch presets.
 /// </summary>
 public class WatchPresetManager
 {
-    private readonly string _presetsDirectory;
-    private readonly ILogger<WatchPresetManager>? _logger;
-
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         WriteIndented = true,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
     };
+
+    private readonly ILogger<WatchPresetManager>? _logger;
+    private readonly string _presetsDirectory;
 
     public WatchPresetManager(string presetsDirectory, ILogger<WatchPresetManager>? logger = null)
     {
@@ -30,24 +26,31 @@ public class WatchPresetManager
         if (!Directory.Exists(_presetsDirectory))
         {
             Directory.CreateDirectory(_presetsDirectory);
-            _logger?.LogInformation("Created watch presets directory: {Directory}", _presetsDirectory);
+            _logger?.LogInformation(
+                "Created watch presets directory: {Directory}",
+                _presetsDirectory
+            );
         }
     }
 
     /// <summary>
-    /// Saves a watch preset to disk.
+    ///     Saves a watch preset to disk.
     /// </summary>
     public bool SavePreset(WatchPreset preset)
     {
         try
         {
-            var filename = GetPresetFilename(preset.Name);
-            var filePath = Path.Combine(_presetsDirectory, filename);
+            string filename = GetPresetFilename(preset.Name);
+            string filePath = Path.Combine(_presetsDirectory, filename);
 
-            var json = JsonSerializer.Serialize(preset, JsonOptions);
+            string json = JsonSerializer.Serialize(preset, JsonOptions);
             File.WriteAllText(filePath, json);
 
-            _logger?.LogInformation("Saved watch preset: {Name} ({Count} watches)", preset.Name, preset.Watches.Count);
+            _logger?.LogInformation(
+                "Saved watch preset: {Name} ({Count} watches)",
+                preset.Name,
+                preset.Watches.Count
+            );
             return true;
         }
         catch (Exception ex)
@@ -58,14 +61,14 @@ public class WatchPresetManager
     }
 
     /// <summary>
-    /// Loads a watch preset from disk.
+    ///     Loads a watch preset from disk.
     /// </summary>
     public WatchPreset? LoadPreset(string name)
     {
         try
         {
-            var filename = GetPresetFilename(name);
-            var filePath = Path.Combine(_presetsDirectory, filename);
+            string filename = GetPresetFilename(name);
+            string filePath = Path.Combine(_presetsDirectory, filename);
 
             if (!File.Exists(filePath))
             {
@@ -73,12 +76,16 @@ public class WatchPresetManager
                 return null;
             }
 
-            var json = File.ReadAllText(filePath);
-            var preset = JsonSerializer.Deserialize<WatchPreset>(json, JsonOptions);
+            string json = File.ReadAllText(filePath);
+            WatchPreset? preset = JsonSerializer.Deserialize<WatchPreset>(json, JsonOptions);
 
             if (preset != null)
             {
-                _logger?.LogInformation("Loaded watch preset: {Name} ({Count} watches)", preset.Name, preset.Watches.Count);
+                _logger?.LogInformation(
+                    "Loaded watch preset: {Name} ({Count} watches)",
+                    preset.Name,
+                    preset.Watches.Count
+                );
             }
 
             return preset;
@@ -91,7 +98,7 @@ public class WatchPresetManager
     }
 
     /// <summary>
-    /// Lists all available presets.
+    ///     Lists all available presets.
     /// </summary>
     public List<(string Name, string Description, int WatchCount, DateTime CreatedAt)> ListPresets()
     {
@@ -99,18 +106,28 @@ public class WatchPresetManager
 
         try
         {
-            var files = Directory.GetFiles(_presetsDirectory, "*.json");
+            string[] files = Directory.GetFiles(_presetsDirectory, "*.json");
 
-            foreach (var file in files)
+            foreach (string file in files)
             {
                 try
                 {
-                    var json = File.ReadAllText(file);
-                    var preset = JsonSerializer.Deserialize<WatchPreset>(json, JsonOptions);
+                    string json = File.ReadAllText(file);
+                    WatchPreset? preset = JsonSerializer.Deserialize<WatchPreset>(
+                        json,
+                        JsonOptions
+                    );
 
                     if (preset != null)
                     {
-                        presets.Add((preset.Name, preset.Description, preset.Watches.Count, preset.CreatedAt));
+                        presets.Add(
+                            (
+                                preset.Name,
+                                preset.Description,
+                                preset.Watches.Count,
+                                preset.CreatedAt
+                            )
+                        );
                     }
                 }
                 catch (Exception ex)
@@ -128,14 +145,14 @@ public class WatchPresetManager
     }
 
     /// <summary>
-    /// Deletes a watch preset.
+    ///     Deletes a watch preset.
     /// </summary>
     public bool DeletePreset(string name)
     {
         try
         {
-            var filename = GetPresetFilename(name);
-            var filePath = Path.Combine(_presetsDirectory, filename);
+            string filename = GetPresetFilename(name);
+            string filePath = Path.Combine(_presetsDirectory, filename);
 
             if (!File.Exists(filePath))
             {
@@ -155,28 +172,31 @@ public class WatchPresetManager
     }
 
     /// <summary>
-    /// Checks if a preset exists.
+    ///     Checks if a preset exists.
     /// </summary>
     public bool PresetExists(string name)
     {
-        var filename = GetPresetFilename(name);
-        var filePath = Path.Combine(_presetsDirectory, filename);
+        string filename = GetPresetFilename(name);
+        string filePath = Path.Combine(_presetsDirectory, filename);
         return File.Exists(filePath);
     }
 
     /// <summary>
-    /// Gets the filename for a preset.
+    ///     Gets the filename for a preset.
     /// </summary>
     private static string GetPresetFilename(string name)
     {
         // Sanitize the name for use as a filename
-        var invalidChars = Path.GetInvalidFileNameChars();
-        var sanitized = string.Join("_", name.Split(invalidChars, StringSplitOptions.RemoveEmptyEntries));
+        char[] invalidChars = Path.GetInvalidFileNameChars();
+        string sanitized = string.Join(
+            "_",
+            name.Split(invalidChars, StringSplitOptions.RemoveEmptyEntries)
+        );
         return $"{sanitized}.json";
     }
 
     /// <summary>
-    /// Creates built-in presets in the presets directory.
+    ///     Creates built-in presets in the presets directory.
     /// </summary>
     public void CreateBuiltInPresets()
     {
@@ -185,10 +205,10 @@ public class WatchPresetManager
             CreatePerformancePreset(),
             CreateCombatPreset(),
             CreatePlayerStatsPreset(),
-            CreateMemoryPreset()
+            CreateMemoryPreset(),
         };
 
-        foreach (var preset in presets)
+        foreach (WatchPreset preset in presets)
         {
             if (!PresetExists(preset.Name))
             {
@@ -214,22 +234,22 @@ public class WatchPresetManager
                     Expression = "Game.GetFPS()",
                     Group = "performance",
                     IsPinned = true,
-                    Alert = new WatchAlertConfig { Type = "below", Threshold = "55" }
+                    Alert = new WatchAlertConfig { Type = "below", Threshold = "55" },
                 },
                 new()
                 {
                     Name = "frame_time",
                     Expression = "Game.GetFrameTime()",
                     Group = "performance",
-                    Alert = new WatchAlertConfig { Type = "above", Threshold = "16.67" }
+                    Alert = new WatchAlertConfig { Type = "above", Threshold = "16.67" },
                 },
                 new()
                 {
                     Name = "memory_mb",
                     Expression = "GC.GetTotalMemory(false) / (1024.0 * 1024.0)",
-                    Group = "performance"
-                }
-            }
+                    Group = "performance",
+                },
+            },
         };
     }
 
@@ -249,7 +269,7 @@ public class WatchPresetManager
                     Name = "in_battle",
                     Expression = "Game.InBattle()",
                     Group = "combat",
-                    IsPinned = true
+                    IsPinned = true,
                 },
                 new()
                 {
@@ -257,23 +277,23 @@ public class WatchPresetManager
                     Expression = "Player.GetHP()",
                     Group = "combat",
                     Condition = "Game.InBattle()",
-                    Alert = new WatchAlertConfig { Type = "below", Threshold = "30" }
+                    Alert = new WatchAlertConfig { Type = "below", Threshold = "30" },
                 },
                 new()
                 {
                     Name = "enemy_hp",
                     Expression = "Battle.GetEnemyHP()",
                     Group = "combat",
-                    Condition = "Game.InBattle()"
+                    Condition = "Game.InBattle()",
                 },
                 new()
                 {
                     Name = "last_damage",
                     Expression = "Battle.GetLastDamage()",
                     Group = "combat",
-                    Condition = "Game.InBattle()"
-                }
-            }
+                    Condition = "Game.InBattle()",
+                },
+            },
         };
     }
 
@@ -292,22 +312,22 @@ public class WatchPresetManager
                 {
                     Name = "position",
                     Expression = "Player.GetPosition()",
-                    Group = "player"
+                    Group = "player",
                 },
                 new()
                 {
                     Name = "money",
                     Expression = "Player.GetMoney()",
                     Group = "player",
-                    Alert = new WatchAlertConfig { Type = "changes" }
+                    Alert = new WatchAlertConfig { Type = "changes" },
                 },
                 new()
                 {
                     Name = "map",
                     Expression = "Game.GetCurrentMap()",
-                    Group = "player"
-                }
-            }
+                    Group = "player",
+                },
+            },
         };
     }
 
@@ -327,29 +347,28 @@ public class WatchPresetManager
                     Name = "total_memory",
                     Expression = "GC.GetTotalMemory(false) / (1024.0 * 1024.0)",
                     Group = "memory",
-                    IsPinned = true
+                    IsPinned = true,
                 },
                 new()
                 {
                     Name = "gen0_collections",
                     Expression = "GC.CollectionCount(0)",
                     Group = "memory",
-                    Alert = new WatchAlertConfig { Type = "changes" }
+                    Alert = new WatchAlertConfig { Type = "changes" },
                 },
                 new()
                 {
                     Name = "gen1_collections",
                     Expression = "GC.CollectionCount(1)",
-                    Group = "memory"
+                    Group = "memory",
                 },
                 new()
                 {
                     Name = "gen2_collections",
                     Expression = "GC.CollectionCount(2)",
-                    Group = "memory"
-                }
-            }
+                    Group = "memory",
+                },
+            },
         };
     }
 }
-

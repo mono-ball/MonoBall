@@ -82,7 +82,9 @@ public sealed class EntityBuilder
     internal T? GetComponentOverride<T>()
         where T : struct
     {
-        return _componentOverrides.TryGetValue(typeof(T), out var component) ? (T)component : null;
+        return _componentOverrides.TryGetValue(typeof(T), out object? component)
+            ? (T)component
+            : null;
     }
 
     /// <summary>
@@ -102,7 +104,9 @@ public sealed class EntityBuilder
     /// <returns>Component data or null if not overridden</returns>
     internal object? GetComponentOverride(Type componentType)
     {
-        return _componentOverrides.TryGetValue(componentType, out var component) ? component : null;
+        return _componentOverrides.TryGetValue(componentType, out object? component)
+            ? component
+            : null;
     }
 
     /// <summary>

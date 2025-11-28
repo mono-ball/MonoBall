@@ -1,27 +1,27 @@
 using PokeSharp.Engine.UI.Debug.Components.Controls;
-using PokeSharp.Engine.UI.Debug.Core;
 using PokeSharp.Engine.UI.Debug.Layout;
 using PokeSharp.Engine.UI.Debug.Models;
-using System;
-using System.Collections.Generic;
 
 namespace PokeSharp.Engine.UI.Debug.Components.Debug;
 
 /// <summary>
-/// Builder for creating EntitiesPanel with customizable components.
+///     Builder for creating EntitiesPanel with customizable components.
 /// </summary>
 public class EntitiesPanelBuilder
 {
+    private bool _autoRefresh = true;
     private TextBuffer? _entityListBuffer;
     private Func<IEnumerable<EntityInfo>>? _entityProvider;
     private int _maxLines = 50000;
-    private bool _autoRefresh = true;
     private float _refreshInterval = 1.0f;
 
-    public static EntitiesPanelBuilder Create() => new();
+    public static EntitiesPanelBuilder Create()
+    {
+        return new EntitiesPanelBuilder();
+    }
 
     /// <summary>
-    /// Sets a custom entity list buffer.
+    ///     Sets a custom entity list buffer.
     /// </summary>
     public EntitiesPanelBuilder WithEntityListBuffer(TextBuffer buffer)
     {
@@ -30,7 +30,7 @@ public class EntitiesPanelBuilder
     }
 
     /// <summary>
-    /// Sets the entity provider function.
+    ///     Sets the entity provider function.
     /// </summary>
     public EntitiesPanelBuilder WithEntityProvider(Func<IEnumerable<EntityInfo>>? provider)
     {
@@ -39,7 +39,7 @@ public class EntitiesPanelBuilder
     }
 
     /// <summary>
-    /// Sets the maximum number of lines in the buffer.
+    ///     Sets the maximum number of lines in the buffer.
     /// </summary>
     public EntitiesPanelBuilder WithMaxLines(int maxLines)
     {
@@ -48,7 +48,7 @@ public class EntitiesPanelBuilder
     }
 
     /// <summary>
-    /// Enables or disables auto-refresh.
+    ///     Enables or disables auto-refresh.
     /// </summary>
     public EntitiesPanelBuilder WithAutoRefresh(bool enabled)
     {
@@ -57,7 +57,7 @@ public class EntitiesPanelBuilder
     }
 
     /// <summary>
-    /// Sets the auto-refresh interval in seconds.
+    ///     Sets the auto-refresh interval in seconds.
     /// </summary>
     public EntitiesPanelBuilder WithRefreshInterval(float intervalSeconds)
     {
@@ -66,7 +66,7 @@ public class EntitiesPanelBuilder
     }
 
     /// <summary>
-    /// Builds the EntitiesPanel.
+    ///     Builds the EntitiesPanel.
     /// </summary>
     public EntitiesPanel Build()
     {
@@ -93,10 +93,7 @@ public class EntitiesPanelBuilder
             // BackgroundColor uses theme fallback - don't set explicitly
             AutoScroll = false,
             MaxLines = _maxLines,
-            Constraint = new LayoutConstraint
-            {
-                Anchor = Anchor.StretchTop
-            }
+            Constraint = new LayoutConstraint { Anchor = Anchor.StretchTop },
         };
     }
 
@@ -104,10 +101,7 @@ public class EntitiesPanelBuilder
     {
         return new StatusBar("entities_status")
         {
-            Constraint = new LayoutConstraint
-            {
-                Anchor = Anchor.StretchBottom
-            }
+            Constraint = new LayoutConstraint { Anchor = Anchor.StretchBottom },
         };
     }
 }

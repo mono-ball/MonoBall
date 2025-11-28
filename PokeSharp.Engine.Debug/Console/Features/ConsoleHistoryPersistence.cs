@@ -1,11 +1,10 @@
-using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using PokeSharp.Engine.Debug.Utilities;
 
 namespace PokeSharp.Engine.Debug.Console.Features;
 
 /// <summary>
-/// Handles saving and loading console command history to/from disk.
+///     Handles saving and loading console command history to/from disk.
 /// </summary>
 public class ConsoleHistoryPersistence
 {
@@ -13,13 +12,15 @@ public class ConsoleHistoryPersistence
     private readonly ILogger? _logger;
 
     /// <summary>
-    /// Initializes a new instance of the ConsoleHistoryPersistence class.
+    ///     Initializes a new instance of the ConsoleHistoryPersistence class.
     /// </summary>
     public ConsoleHistoryPersistence(ILogger? logger = null)
     {
         // Save to user's local app data directory
-        var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-        var pokeSharpDataPath = Path.Combine(appDataPath, "PokeSharp");
+        string appDataPath = Environment.GetFolderPath(
+            Environment.SpecialFolder.LocalApplicationData
+        );
+        string pokeSharpDataPath = Path.Combine(appDataPath, "PokeSharp");
 
         // Create directory if it doesn't exist
         Directory.CreateDirectory(pokeSharpDataPath);
@@ -29,7 +30,7 @@ public class ConsoleHistoryPersistence
     }
 
     /// <summary>
-    /// Saves command history to disk.
+    ///     Saves command history to disk.
     /// </summary>
     public void SaveHistory(IEnumerable<string> commands)
     {
@@ -41,11 +42,14 @@ public class ConsoleHistoryPersistence
     }
 
     /// <summary>
-    /// Loads command history from disk.
+    ///     Loads command history from disk.
     /// </summary>
     public List<string> LoadHistory()
     {
-        var commands = FileUtilities.ReadJsonFile<List<string>>(_historyFilePath, _logger);
+        List<string>? commands = FileUtilities.ReadJsonFile<List<string>>(
+            _historyFilePath,
+            _logger
+        );
         if (commands == null)
         {
             _logger?.LogDebug("No history file found or unable to load");
@@ -57,7 +61,7 @@ public class ConsoleHistoryPersistence
     }
 
     /// <summary>
-    /// Clears the history file.
+    ///     Clears the history file.
     /// </summary>
     public void ClearHistory()
     {
@@ -67,4 +71,3 @@ public class ConsoleHistoryPersistence
         }
     }
 }
-

@@ -1,5 +1,4 @@
 using FluentAssertions;
-using PokeSharp.Engine.Scenes;
 using Xunit;
 
 namespace PokeSharp.Engine.Scenes.Tests;
@@ -39,14 +38,18 @@ public class LoadingProgressTests
         for (int i = 0; i < threadCount; i++)
         {
             int threadId = i;
-            tasks.Add(Task.Run(() =>
-            {
-                for (int j = 0; j < updatesPerThread; j++)
+            tasks.Add(
+                Task.Run(() =>
                 {
-                    progress.Progress = (threadId * updatesPerThread + j) / (float)(threadCount * updatesPerThread);
-                    progress.CurrentStep = $"Thread {threadId} step {j}";
-                }
-            }));
+                    for (int j = 0; j < updatesPerThread; j++)
+                    {
+                        progress.Progress =
+                            ((threadId * updatesPerThread) + j)
+                            / (float)(threadCount * updatesPerThread);
+                        progress.CurrentStep = $"Thread {threadId} step {j}";
+                    }
+                })
+            );
         }
 
         await Task.WhenAll(tasks);
@@ -103,4 +106,3 @@ public class LoadingProgressTests
         progress.Error.Should().Be(exception);
     }
 }
-

@@ -78,10 +78,12 @@ public static class PoolingExtensions
     public static void ResetToPoolState(this Entity entity)
     {
         if (!entity.IsPooled())
+        {
             return;
+        }
 
         // Store pooled component data
-        var pooled = entity.Get<Pooled>();
+        Pooled pooled = entity.Get<Pooled>();
 
         // Arch doesn't have a built-in RemoveAll method that preserves specific components
         // So we need to manually handle component removal based on your Arch version
@@ -98,7 +100,9 @@ public static class PoolingExtensions
 
         // Re-add pooled marker if it was somehow removed
         if (!entity.Has<Pooled>())
+        {
             entity.Add(pooled);
+        }
     }
 
     /// <summary>
@@ -117,10 +121,12 @@ public static class PoolingExtensions
         if (entity.IsPooled())
         {
             if (poolManager == null)
+            {
                 throw new InvalidOperationException(
                     "Cannot release pooled entity without EntityPoolManager. "
                         + "Either provide poolManager parameter or use poolManager.Release() directly."
                 );
+            }
 
             poolManager.Release(entity);
         }
@@ -137,9 +143,11 @@ public static class PoolingExtensions
     internal static void UpdatePooledStats(this Entity entity)
     {
         if (!entity.Has<Pooled>())
+        {
             return;
+        }
 
-        var pooled = entity.Get<Pooled>();
+        Pooled pooled = entity.Get<Pooled>();
         pooled.AcquiredAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         pooled.ReuseCount++;
         entity.Set(pooled);

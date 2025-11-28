@@ -29,7 +29,9 @@ public class ComponentPool<T>
     public ComponentPool(int maxSize = 1000)
     {
         if (maxSize <= 0)
+        {
             throw new ArgumentException("Max size must be > 0", nameof(maxSize));
+        }
 
         _maxSize = maxSize;
     }
@@ -57,7 +59,7 @@ public class ComponentPool<T>
     /// <summary>
     ///     Component reuse rate (0.0 to 1.0). Higher is better.
     /// </summary>
-    public float ReuseRate => _totalRented > 0 ? 1.0f - (float)_totalCreated / _totalRented : 0f;
+    public float ReuseRate => _totalRented > 0 ? 1.0f - ((float)_totalCreated / _totalRented) : 0f;
 
     /// <summary>
     ///     Rent a component instance from the pool.
@@ -68,8 +70,10 @@ public class ComponentPool<T>
     {
         Interlocked.Increment(ref _totalRented);
 
-        if (_pool.TryTake(out var component))
+        if (_pool.TryTake(out T component))
+        {
             return component;
+        }
 
         Interlocked.Increment(ref _totalCreated);
         return new T();
@@ -85,7 +89,9 @@ public class ComponentPool<T>
         Interlocked.Increment(ref _totalReturned);
 
         if (_pool.Count >= _maxSize)
+        {
             return; // Pool full, discard
+        }
 
         // Reset to default state
         component = default;

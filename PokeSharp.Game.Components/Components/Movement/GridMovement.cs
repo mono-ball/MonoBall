@@ -113,7 +113,7 @@ public struct GridMovement
     /// <param name="target">The target pixel position.</param>
     public void StartMovement(Vector2 start, Vector2 target)
     {
-        var direction = CalculateDirection(start, target);
+        Direction direction = CalculateDirection(start, target);
         StartMovement(start, target, direction);
     }
 
@@ -147,11 +147,13 @@ public struct GridMovement
     /// </summary>
     private static Direction CalculateDirection(Vector2 start, Vector2 target)
     {
-        var delta = target - start;
+        Vector2 delta = target - start;
 
         // Determine primary axis (larger delta)
         if (Math.Abs(delta.X) > Math.Abs(delta.Y))
+        {
             return delta.X > 0 ? Direction.East : Direction.West;
+        }
 
         return delta.Y > 0 ? Direction.South : Direction.North;
     }

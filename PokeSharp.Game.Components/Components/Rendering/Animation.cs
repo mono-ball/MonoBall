@@ -68,7 +68,11 @@ public struct Animation
     /// <param name="animationName">The new animation name.</param>
     /// <param name="forceRestart">Whether to restart even if already playing this animation.</param>
     /// <param name="playOnce">Whether to play the animation once (ignoring manifest Loop setting).</param>
-    public void ChangeAnimation(string animationName, bool forceRestart = false, bool playOnce = false)
+    public void ChangeAnimation(
+        string animationName,
+        bool forceRestart = false,
+        bool playOnce = false
+    )
     {
         if (CurrentAnimation != animationName || forceRestart)
         {

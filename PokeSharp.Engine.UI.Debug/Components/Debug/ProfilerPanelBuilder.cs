@@ -2,36 +2,39 @@ using PokeSharp.Engine.Systems.Management;
 using PokeSharp.Engine.UI.Debug.Components.Controls;
 using PokeSharp.Engine.UI.Debug.Interfaces;
 using PokeSharp.Engine.UI.Debug.Layout;
-using System;
-using System.Collections.Generic;
 
 namespace PokeSharp.Engine.UI.Debug.Components.Debug;
 
 /// <summary>
-/// Builder for creating ProfilerPanel with customizable configuration.
+///     Builder for creating ProfilerPanel with customizable configuration.
 /// </summary>
 public class ProfilerPanelBuilder
 {
     private Func<IReadOnlyDictionary<string, SystemMetrics>?>? _metricsProvider;
-    private float _targetFrameTimeMs = 16.67f; // 60 FPS
-    private float _warningThresholdMs = 2.0f;  // Warn if system takes >2ms
-    private ProfilerSortMode _sortMode = ProfilerSortMode.ByExecutionTime;
-    private bool _showOnlyActive = true;
     private float _refreshInterval = 0.1f;
+    private bool _showOnlyActive = true;
+    private ProfilerSortMode _sortMode = ProfilerSortMode.ByExecutionTime;
+    private float _targetFrameTimeMs = 16.67f; // 60 FPS
+    private float _warningThresholdMs = 2.0f; // Warn if system takes >2ms
 
-    public static ProfilerPanelBuilder Create() => new();
+    public static ProfilerPanelBuilder Create()
+    {
+        return new ProfilerPanelBuilder();
+    }
 
     /// <summary>
-    /// Sets the metrics provider function.
+    ///     Sets the metrics provider function.
     /// </summary>
-    public ProfilerPanelBuilder WithMetricsProvider(Func<IReadOnlyDictionary<string, SystemMetrics>?>? provider)
+    public ProfilerPanelBuilder WithMetricsProvider(
+        Func<IReadOnlyDictionary<string, SystemMetrics>?>? provider
+    )
     {
         _metricsProvider = provider;
         return this;
     }
 
     /// <summary>
-    /// Sets the target frame time in milliseconds (default: 16.67ms for 60fps).
+    ///     Sets the target frame time in milliseconds (default: 16.67ms for 60fps).
     /// </summary>
     public ProfilerPanelBuilder WithTargetFrameTime(float ms)
     {
@@ -40,7 +43,7 @@ public class ProfilerPanelBuilder
     }
 
     /// <summary>
-    /// Sets the warning threshold in milliseconds (default: 2.0ms).
+    ///     Sets the warning threshold in milliseconds (default: 2.0ms).
     /// </summary>
     public ProfilerPanelBuilder WithWarningThreshold(float ms)
     {
@@ -49,7 +52,7 @@ public class ProfilerPanelBuilder
     }
 
     /// <summary>
-    /// Sets the initial sort mode.
+    ///     Sets the initial sort mode.
     /// </summary>
     public ProfilerPanelBuilder WithSortMode(ProfilerSortMode mode)
     {
@@ -58,7 +61,7 @@ public class ProfilerPanelBuilder
     }
 
     /// <summary>
-    /// Sets whether to show only active systems initially.
+    ///     Sets whether to show only active systems initially.
     /// </summary>
     public ProfilerPanelBuilder WithShowOnlyActive(bool showOnlyActive)
     {
@@ -67,7 +70,7 @@ public class ProfilerPanelBuilder
     }
 
     /// <summary>
-    /// Sets the refresh interval in seconds.
+    ///     Sets the refresh interval in seconds.
     /// </summary>
     public ProfilerPanelBuilder WithRefreshInterval(float intervalSeconds)
     {
@@ -76,12 +79,12 @@ public class ProfilerPanelBuilder
     }
 
     /// <summary>
-    /// Builds the ProfilerPanel.
+    ///     Builds the ProfilerPanel.
     /// </summary>
     public ProfilerPanel Build()
     {
-        var content = CreateDefaultContent();
-        var statusBar = CreateDefaultStatusBar();
+        ProfilerContent content = CreateDefaultContent();
+        StatusBar statusBar = CreateDefaultStatusBar();
 
         var panel = new ProfilerPanel(content, statusBar);
         panel.SetSortMode(_sortMode);
@@ -100,10 +103,7 @@ public class ProfilerPanelBuilder
     {
         return new ProfilerContent("profiler_content", _targetFrameTimeMs, _warningThresholdMs)
         {
-            Constraint = new LayoutConstraint
-            {
-                Anchor = Anchor.StretchTop
-            }
+            Constraint = new LayoutConstraint { Anchor = Anchor.StretchTop },
         };
     }
 
@@ -111,10 +111,7 @@ public class ProfilerPanelBuilder
     {
         return new StatusBar("profiler_status")
         {
-            Constraint = new LayoutConstraint
-            {
-                Anchor = Anchor.StretchBottom
-            }
+            Constraint = new LayoutConstraint { Anchor = Anchor.StretchBottom },
         };
     }
 }

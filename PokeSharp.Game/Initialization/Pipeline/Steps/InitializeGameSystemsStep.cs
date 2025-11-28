@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 using PokeSharp.Engine.Scenes;
-using PokeSharp.Game.Initialization.Pipeline;
 
 namespace PokeSharp.Game.Initialization.Pipeline.Steps;
 
@@ -27,15 +26,17 @@ public class InitializeGameSystemsStep : InitializationStepBase
     )
     {
         if (context.GameInitializer == null)
+        {
             throw new InvalidOperationException(
                 "GameInitializer must be created before initializing systems"
             );
+        }
 
-        var logger = context.LoggerFactory.CreateLogger<InitializeGameSystemsStep>();
+        ILogger<InitializeGameSystemsStep> logger =
+            context.LoggerFactory.CreateLogger<InitializeGameSystemsStep>();
         // Pass SceneManager as IInputBlocker so InputSystem can check for exclusive input scenes
         context.GameInitializer.Initialize(context.GraphicsDevice, context.SceneManager);
         logger.LogInformation("Game systems initialized successfully");
         return Task.CompletedTask;
     }
 }
-

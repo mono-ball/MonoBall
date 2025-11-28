@@ -41,15 +41,15 @@ public class GameDataLoader
         var loadedCounts = new Dictionary<string, int>();
 
         // Load NPCs
-        var npcsPath = Path.Combine(dataPath, "NPCs");
+        string npcsPath = Path.Combine(dataPath, "NPCs");
         loadedCounts["NPCs"] = await LoadNpcsAsync(npcsPath, ct);
 
         // Load Trainers
-        var trainersPath = Path.Combine(dataPath, "Trainers");
+        string trainersPath = Path.Combine(dataPath, "Trainers");
         loadedCounts["Trainers"] = await LoadTrainersAsync(trainersPath, ct);
 
         // Load Maps
-        var mapsPath = Path.Combine(dataPath, "Maps");
+        string mapsPath = Path.Combine(dataPath, "Maps");
         loadedCounts["Maps"] = await LoadMapsAsync(mapsPath, ct);
 
         // Log summary
@@ -67,17 +67,20 @@ public class GameDataLoader
             return 0;
         }
 
-        var files = Directory.GetFiles(path, "*.json", SearchOption.AllDirectories);
-        var count = 0;
+        string[] files = Directory.GetFiles(path, "*.json", SearchOption.AllDirectories);
+        int count = 0;
 
-        foreach (var file in files)
+        foreach (string file in files)
         {
             ct.ThrowIfCancellationRequested();
 
             try
             {
-                var json = await File.ReadAllTextAsync(file, ct);
-                var dto = JsonSerializer.Deserialize<NpcDefinitionDto>(json, _jsonOptions);
+                string json = await File.ReadAllTextAsync(file, ct);
+                NpcDefinitionDto? dto = JsonSerializer.Deserialize<NpcDefinitionDto>(
+                    json,
+                    _jsonOptions
+                );
 
                 if (dto == null)
                 {
@@ -139,17 +142,20 @@ public class GameDataLoader
             return 0;
         }
 
-        var files = Directory.GetFiles(path, "*.json", SearchOption.AllDirectories);
-        var count = 0;
+        string[] files = Directory.GetFiles(path, "*.json", SearchOption.AllDirectories);
+        int count = 0;
 
-        foreach (var file in files)
+        foreach (string file in files)
         {
             ct.ThrowIfCancellationRequested();
 
             try
             {
-                var json = await File.ReadAllTextAsync(file, ct);
-                var dto = JsonSerializer.Deserialize<TrainerDefinitionDto>(json, _jsonOptions);
+                string json = await File.ReadAllTextAsync(file, ct);
+                TrainerDefinitionDto? dto = JsonSerializer.Deserialize<TrainerDefinitionDto>(
+                    json,
+                    _jsonOptions
+                );
 
                 if (dto == null)
                 {
@@ -221,29 +227,31 @@ public class GameDataLoader
         }
 
         // Determine Assets root for relative path calculation
-        var assetsRoot = ResolveAssetsRoot(path);
+        string assetsRoot = ResolveAssetsRoot(path);
 
-        var files = Directory
+        string[] files = Directory
             .GetFiles(path, "*.json", SearchOption.AllDirectories)
             .Where(f => !IsHiddenOrSystemDirectory(f)) // Skip hidden directories like .claude-flow
             .ToArray();
-        var count = 0;
+        int count = 0;
 
         // OPTIMIZATION: Load all existing maps once to avoid N+1 queries
         // Using AsNoTracking since we'll manually track changes
-        var existingMaps = await _context.Maps.AsNoTracking().ToDictionaryAsync(m => m.MapId, ct);
+        Dictionary<MapIdentifier, MapDefinition> existingMaps = await _context
+            .Maps.AsNoTracking()
+            .ToDictionaryAsync(m => m.MapId, ct);
 
-        foreach (var file in files)
+        foreach (string file in files)
         {
             ct.ThrowIfCancellationRequested();
 
             try
             {
                 // Read Tiled JSON to extract metadata only
-                var tiledJson = await File.ReadAllTextAsync(file, ct);
+                string tiledJson = await File.ReadAllTextAsync(file, ct);
 
                 // Parse to extract metadata (use a lightweight DTO)
-                var tiledDoc = JsonSerializer.Deserialize<TiledMapMetadataDto>(
+                TiledMapMetadataDto? tiledDoc = JsonSerializer.Deserialize<TiledMapMetadataDto>(
                     tiledJson,
                     _jsonOptions
                 );
@@ -255,17 +263,27 @@ public class GameDataLoader
                 }
 
                 // Generate map ID from filename
-                var mapId = Path.GetFileNameWithoutExtension(file);
+                string mapId = Path.GetFileNameWithoutExtension(file);
 
                 // Extract metadata from Tiled custom properties (convert array to dictionary)
-                var properties = ConvertTiledPropertiesToDictionary(tiledDoc.Properties);
+                Dictionary<string, object> properties = ConvertTiledPropertiesToDictionary(
+                    tiledDoc.Properties
+                );
 
                 // Calculate relative path from Assets root
-                var relativePath = Path.GetRelativePath(assetsRoot, file);
+                string relativePath = Path.GetRelativePath(assetsRoot, file);
 
                 // Parse map connections from structured Connection properties (includes offsets)
-                var (northMapId, northOffset, southMapId, southOffset,
-                     eastMapId, eastOffset, westMapId, westOffset) = ParseMapConnections(properties);
+                (
+                    MapIdentifier? northMapId,
+                    int northOffset,
+                    MapIdentifier? southMapId,
+                    int southOffset,
+                    MapIdentifier? eastMapId,
+                    int eastOffset,
+                    MapIdentifier? westMapId,
+                    int westOffset
+                ) = ParseMapConnections(properties);
 
                 var mapDef = new MapDefinition
                 {
@@ -293,7 +311,7 @@ public class GameDataLoader
                 };
 
                 // Support mod overrides: Check in-memory dictionary instead of querying DB
-                if (existingMaps.TryGetValue(mapId, out var existing))
+                if (existingMaps.TryGetValue(mapId, out MapDefinition? existing))
                 {
                     // Mod is overriding base game map - attach and update
                     _context.Maps.Attach(existing);
@@ -332,7 +350,10 @@ public class GameDataLoader
         while (current != null)
         {
             if (current.Name.Equals("Assets", StringComparison.OrdinalIgnoreCase))
+            {
                 return current.FullName;
+            }
+
             current = current.Parent;
         }
 
@@ -353,34 +374,54 @@ public class GameDataLoader
         var dict = new Dictionary<string, object>();
 
         if (properties == null)
+        {
             return dict;
+        }
 
-        foreach (var prop in properties)
+        foreach (TiledPropertyDto prop in properties)
+        {
             if (!string.IsNullOrEmpty(prop.Name) && prop.Value != null)
+            {
                 dict[prop.Name] = prop.Value;
+            }
+        }
 
         return dict;
     }
 
     private static string? GetPropertyString(Dictionary<string, object> props, string key)
     {
-        if (props.TryGetValue(key, out var value))
+        if (props.TryGetValue(key, out object? value))
+        {
             return value?.ToString();
+        }
+
         return null;
     }
 
     private static bool? GetPropertyBool(Dictionary<string, object> props, string key)
     {
-        if (props.TryGetValue(key, out var value))
+        if (props.TryGetValue(key, out object? value))
         {
             if (value is bool b)
+            {
                 return b;
+            }
+
             if (value is JsonElement je && je.ValueKind == JsonValueKind.True)
+            {
                 return true;
+            }
+
             if (value is JsonElement je2 && je2.ValueKind == JsonValueKind.False)
+            {
                 return false;
-            if (bool.TryParse(value?.ToString(), out var result))
+            }
+
+            if (bool.TryParse(value?.ToString(), out bool result))
+            {
                 return result;
+            }
         }
 
         return null;
@@ -391,41 +432,54 @@ public class GameDataLoader
     ///     Looks for properties named connection_north, connection_south, etc.
     ///     and extracts both the "map" field and "offset" field from the value object.
     /// </summary>
-    private static (MapIdentifier? North, int NorthOffset, MapIdentifier? South, int SouthOffset,
-        MapIdentifier? East, int EastOffset, MapIdentifier? West, int WestOffset)
-        ParseMapConnections(Dictionary<string, object> properties)
+    private static (
+        MapIdentifier? North,
+        int NorthOffset,
+        MapIdentifier? South,
+        int SouthOffset,
+        MapIdentifier? East,
+        int EastOffset,
+        MapIdentifier? West,
+        int WestOffset
+    ) ParseMapConnections(Dictionary<string, object> properties)
     {
-        MapIdentifier? north = null, south = null, east = null, west = null;
-        int northOffset = 0, southOffset = 0, eastOffset = 0, westOffset = 0;
+        MapIdentifier? north = null,
+            south = null,
+            east = null,
+            west = null;
+        int northOffset = 0,
+            southOffset = 0,
+            eastOffset = 0,
+            westOffset = 0;
 
         // Check for connection_north
-        if (properties.TryGetValue("connection_north", out var northValue))
+        if (properties.TryGetValue("connection_north", out object? northValue))
         {
-            var (mapId, offset) = ExtractConnectionData(northValue);
+            (string? mapId, int offset) = ExtractConnectionData(northValue);
             north = MapIdentifier.TryCreate(mapId);
             northOffset = offset;
         }
 
         // Check for connection_south
-        if (properties.TryGetValue("connection_south", out var southValue))
+        if (properties.TryGetValue("connection_south", out object? southValue))
         {
-            var (mapId, offset) = ExtractConnectionData(southValue);
+            (string? mapId, int offset) = ExtractConnectionData(southValue);
             south = MapIdentifier.TryCreate(mapId);
             southOffset = offset;
         }
 
         // Check for connection_east
-        if (properties.TryGetValue("connection_east", out var eastValue))
+        if (properties.TryGetValue("connection_east", out object? eastValue))
         {
-            var (mapId, offset) = ExtractConnectionData(eastValue);
+            (string? mapId, int offset) = ExtractConnectionData(eastValue);
             east = MapIdentifier.TryCreate(mapId);
             eastOffset = offset;
         }
 
         // Check for connection_west
-        if (properties.TryGetValue("connection_west", out var westValue))
+        if (properties.TryGetValue("connection_west", out object? westValue))
         {
-            var (mapId, offset) = ExtractConnectionData(westValue);
+            (string? mapId, int offset) = ExtractConnectionData(westValue);
             west = MapIdentifier.TryCreate(mapId);
             westOffset = offset;
         }
@@ -441,22 +495,27 @@ public class GameDataLoader
     private static (string? MapId, int Offset) ExtractConnectionData(object? connectionValue)
     {
         if (connectionValue == null)
+        {
             return (null, 0);
+        }
 
         try
         {
             // Handle JsonElement case
-            if (connectionValue is JsonElement jsonElement && jsonElement.ValueKind == JsonValueKind.Object)
+            if (
+                connectionValue is JsonElement jsonElement
+                && jsonElement.ValueKind == JsonValueKind.Object
+            )
             {
                 string? mapId = null;
                 int offset = 0;
 
-                if (jsonElement.TryGetProperty("map", out var mapProp))
+                if (jsonElement.TryGetProperty("map", out JsonElement mapProp))
                 {
                     mapId = mapProp.GetString();
                 }
 
-                if (jsonElement.TryGetProperty("offset", out var offsetProp))
+                if (jsonElement.TryGetProperty("offset", out JsonElement offsetProp))
                 {
                     if (offsetProp.ValueKind == JsonValueKind.Number)
                     {
@@ -467,17 +526,18 @@ public class GameDataLoader
                 return (mapId, offset);
             }
             // Handle Dictionary case
-            else if (connectionValue is Dictionary<string, object> dict)
+
+            if (connectionValue is Dictionary<string, object> dict)
             {
                 string? mapId = null;
                 int offset = 0;
 
-                if (dict.TryGetValue("map", out var mapValue))
+                if (dict.TryGetValue("map", out object? mapValue))
                 {
                     mapId = mapValue?.ToString();
                 }
 
-                if (dict.TryGetValue("offset", out var offsetValue))
+                if (dict.TryGetValue("offset", out object? offsetValue))
                 {
                     if (offsetValue is int intOffset)
                     {
@@ -487,7 +547,7 @@ public class GameDataLoader
                     {
                         offset = je.GetInt32();
                     }
-                    else if (int.TryParse(offsetValue?.ToString(), out var parsedOffset))
+                    else if (int.TryParse(offsetValue?.ToString(), out int parsedOffset))
                     {
                         offset = parsedOffset;
                     }
@@ -509,7 +569,10 @@ public class GameDataLoader
     /// </summary>
     private static bool IsHiddenOrSystemDirectory(string filePath)
     {
-        var pathParts = filePath.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        string[] pathParts = filePath.Split(
+            Path.DirectorySeparatorChar,
+            Path.AltDirectorySeparatorChar
+        );
         return pathParts.Any(part => part.StartsWith("."));
     }
 }

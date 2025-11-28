@@ -23,7 +23,7 @@ public class SystemPerformanceTrackerTests
         tracker.TrackSystemPerformance("TestSystem", 7.5);
 
         // Assert
-        var metrics = tracker.GetMetrics("TestSystem");
+        SystemMetrics? metrics = tracker.GetMetrics("TestSystem");
         Assert.NotNull(metrics);
         Assert.Equal(3, metrics.UpdateCount);
         Assert.Equal(22.5, metrics.TotalTimeMs);
@@ -44,7 +44,7 @@ public class SystemPerformanceTrackerTests
         tracker.TrackSystemPerformance("TestSystem", 7.0);
 
         // Assert
-        var metrics = tracker.GetMetrics("TestSystem");
+        SystemMetrics? metrics = tracker.GetMetrics("TestSystem");
         Assert.NotNull(metrics);
         Assert.Equal(15.0, metrics.MaxUpdateMs);
     }
@@ -71,7 +71,7 @@ public class SystemPerformanceTrackerTests
         var tracker = new SystemPerformanceTracker();
 
         // Act
-        var metrics = tracker.GetMetrics("NonExistentSystem");
+        SystemMetrics? metrics = tracker.GetMetrics("NonExistentSystem");
 
         // Assert
         Assert.Null(metrics);
@@ -88,7 +88,7 @@ public class SystemPerformanceTrackerTests
         tracker.TrackSystemPerformance("System2", 10.0);
         tracker.TrackSystemPerformance("System3", 15.0);
 
-        var allMetrics = tracker.GetAllMetrics();
+        IReadOnlyDictionary<string, SystemMetrics> allMetrics = tracker.GetAllMetrics();
 
         // Assert
         Assert.Equal(3, allMetrics.Count);
@@ -111,7 +111,7 @@ public class SystemPerformanceTrackerTests
         tracker.ResetMetrics();
 
         // Assert
-        var allMetrics = tracker.GetAllMetrics();
+        IReadOnlyDictionary<string, SystemMetrics> allMetrics = tracker.GetAllMetrics();
         Assert.Empty(allMetrics);
         // Note: Frame counter is not reset by ResetMetrics
         Assert.Equal(2UL, tracker.FrameCount);
@@ -134,8 +134,10 @@ public class SystemPerformanceTrackerTests
         var tracker = new SystemPerformanceTracker(mockLogger.Object, config);
 
         // Act - Advance frame counter to pass cooldown check (needs >= 10 frames)
-        for (var i = 0; i < 10; i++)
+        for (int i = 0; i < 10; i++)
+        {
             tracker.IncrementFrame();
+        }
 
         // Execute a slow system (3ms > 1.667ms threshold)
         tracker.TrackSystemPerformance("SlowSystem", 3.0);
@@ -168,7 +170,7 @@ public class SystemPerformanceTrackerTests
         var tracker = new SystemPerformanceTracker(mockLogger.Object, config);
 
         // Act - Execute slow system 10 times with frame increments
-        for (var i = 0; i < 10; i++)
+        for (int i = 0; i < 10; i++)
         {
             tracker.IncrementFrame();
             tracker.TrackSystemPerformance("SlowSystem", 3.0);
@@ -214,7 +216,7 @@ public class SystemPerformanceTrackerTests
         tracker.TrackSystemPerformance("TestSystem", 5.0);
 
         // Assert - Should use default configuration without errors
-        var metrics = tracker.GetMetrics("TestSystem");
+        SystemMetrics? metrics = tracker.GetMetrics("TestSystem");
         Assert.NotNull(metrics);
     }
 }

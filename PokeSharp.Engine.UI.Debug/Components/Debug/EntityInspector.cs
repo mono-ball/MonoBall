@@ -1,5 +1,3 @@
-using Microsoft.Xna.Framework;
-using PokeSharp.Engine.UI.Debug.Components.Base;
 using PokeSharp.Engine.UI.Debug.Components.Controls;
 using PokeSharp.Engine.UI.Debug.Components.Layout;
 using PokeSharp.Engine.UI.Debug.Core;
@@ -9,16 +7,11 @@ using PokeSharp.Engine.UI.Debug.Models;
 namespace PokeSharp.Engine.UI.Debug.Components.Debug;
 
 /// <summary>
-/// A panel that displays entity properties and components.
-/// Example debug component for inspecting game entities.
+///     A panel that displays entity properties and components.
+///     Example debug component for inspecting game entities.
 /// </summary>
 public class EntityInspector : Panel
 {
-    /// <summary>
-    /// Entity to inspect (would be an actual entity in the game)
-    /// </summary>
-    public EntityInfo? SelectedEntity { get; set; }
-
     private ScrollView? _propertiesScrollView;
 
     public EntityInspector()
@@ -29,9 +22,14 @@ public class EntityInspector : Panel
         InitializeComponents();
     }
 
+    /// <summary>
+    ///     Entity to inspect (would be an actual entity in the game)
+    /// </summary>
+    public EntityInfo? SelectedEntity { get; set; }
+
     private void InitializeComponents()
     {
-        var theme = UITheme.Dark;
+        UITheme theme = UITheme.Dark;
 
         // Title
         var titleLabel = new Label
@@ -42,8 +40,8 @@ public class EntityInspector : Panel
             Constraint = new LayoutConstraint
             {
                 Anchor = Anchor.TopLeft,
-                Margin = theme.PaddingMedium
-            }
+                Margin = theme.PaddingMedium,
+            },
         };
         AddChild(titleLabel);
 
@@ -57,8 +55,8 @@ public class EntityInspector : Panel
             {
                 Anchor = Anchor.TopLeft,
                 OffsetY = 25,
-                MarginLeft = theme.PaddingMedium
-            }
+                MarginLeft = theme.PaddingMedium,
+            },
         };
         AddChild(entityIdLabel);
 
@@ -72,8 +70,8 @@ public class EntityInspector : Panel
                 OffsetY = 55,
                 WidthPercent = 0.9f,
                 HeightPercent = 0.7f,
-                Margin = theme.PaddingMedium
-            }
+                Margin = theme.PaddingMedium,
+            },
         };
         AddChild(_propertiesScrollView);
     }
@@ -87,7 +85,9 @@ public class EntityInspector : Panel
         base.OnRenderContainer(context);
 
         if (_propertiesScrollView == null)
+        {
             return;
+        }
 
         // Clear previous properties
         _propertiesScrollView.ClearChildren();
@@ -98,7 +98,7 @@ public class EntityInspector : Panel
             float yOffset = 0;
             float lineHeight = ThemeManager.Current.PanelRowHeight;
 
-            foreach (var property in SelectedEntity.Properties)
+            foreach (KeyValuePair<string, string> property in SelectedEntity.Properties)
             {
                 var propertyLabel = new Label
                 {
@@ -109,8 +109,8 @@ public class EntityInspector : Panel
                     {
                         Anchor = Anchor.TopLeft,
                         OffsetY = yOffset,
-                        Height = lineHeight
-                    }
+                        Height = lineHeight,
+                    },
                 };
 
                 _propertiesScrollView.AddChild(propertyLabel);
@@ -128,13 +128,13 @@ public class EntityInspector : Panel
                 {
                     Anchor = Anchor.TopLeft,
                     OffsetY = yOffset,
-                    Height = lineHeight
-                }
+                    Height = lineHeight,
+                },
             };
             _propertiesScrollView.AddChild(componentsLabel);
             yOffset += lineHeight;
 
-            foreach (var component in SelectedEntity.Components)
+            foreach (string component in SelectedEntity.Components)
             {
                 var componentLabel = new Label
                 {
@@ -146,8 +146,8 @@ public class EntityInspector : Panel
                         Anchor = Anchor.TopLeft,
                         OffsetY = yOffset,
                         OffsetX = 10,
-                        Height = lineHeight
-                    }
+                        Height = lineHeight,
+                    },
                 };
 
                 _propertiesScrollView.AddChild(componentLabel);
@@ -162,10 +162,7 @@ public class EntityInspector : Panel
                 Id = Id + "_no_selection",
                 Text = "No entity selected",
                 Color = context.Theme.TextDim,
-                Constraint = new LayoutConstraint
-                {
-                    Anchor = Anchor.TopLeft
-                }
+                Constraint = new LayoutConstraint { Anchor = Anchor.TopLeft },
             };
             _propertiesScrollView.AddChild(noSelectionLabel);
         }

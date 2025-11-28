@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using PokeSharp.Engine.Rendering.Assets;
 using PokeSharp.Engine.Systems.Factories;
 using PokeSharp.Engine.Systems.Management;
+using PokeSharp.Engine.Systems.Pooling;
 using PokeSharp.Game.Data.MapLoading.Tiled.Core;
 using PokeSharp.Game.Data.MapLoading.Tiled.Processors;
 using PokeSharp.Game.Data.PropertyMapping;
@@ -13,7 +14,7 @@ namespace PokeSharp.Game.Data.Factories;
 /// <summary>
 ///     Concrete implementation of IGraphicsServiceFactory using Dependency Injection.
 ///     Resolves loggers, PropertyMapperRegistry, SystemManager, NpcDefinitionService,
-///     and MapDefinitionService from the service provider.
+///     EntityPoolManager, and MapDefinitionService from the service provider.
 /// </summary>
 public class GraphicsServiceFactory : IGraphicsServiceFactory
 {
@@ -21,6 +22,7 @@ public class GraphicsServiceFactory : IGraphicsServiceFactory
     private readonly MapDefinitionService? _mapDefinitionService;
     private readonly NpcDefinitionService? _npcDefinitionService;
     private readonly PropertyMapperRegistry? _propertyMapperRegistry;
+    private readonly EntityPoolManager? _poolManager;
     private readonly SystemManager _systemManager;
 
     /// <summary>
@@ -28,12 +30,14 @@ public class GraphicsServiceFactory : IGraphicsServiceFactory
     /// </summary>
     /// <param name="loggerFactory">Factory for creating loggers for graphics services.</param>
     /// <param name="systemManager">System manager for accessing SpatialHashSystem.</param>
+    /// <param name="poolManager">Entity pool manager for tile pooling.</param>
     /// <param name="propertyMapperRegistry">Optional property mapper registry for map loading.</param>
     /// <param name="npcDefinitionService">Optional NPC definition service for data-driven NPC loading.</param>
     /// <param name="mapDefinitionService">Optional map definition service for definition-based map loading.</param>
     public GraphicsServiceFactory(
         ILoggerFactory loggerFactory,
         SystemManager systemManager,
+        EntityPoolManager poolManager,
         PropertyMapperRegistry? propertyMapperRegistry = null,
         NpcDefinitionService? npcDefinitionService = null,
         MapDefinitionService? mapDefinitionService = null
@@ -41,6 +45,7 @@ public class GraphicsServiceFactory : IGraphicsServiceFactory
     {
         _loggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
         _systemManager = systemManager ?? throw new ArgumentNullException(nameof(systemManager));
+        _poolManager = poolManager ?? throw new ArgumentNullException(nameof(poolManager));
         _propertyMapperRegistry = propertyMapperRegistry;
         _npcDefinitionService = npcDefinitionService;
         _mapDefinitionService = mapDefinitionService;
@@ -53,9 +58,11 @@ public class GraphicsServiceFactory : IGraphicsServiceFactory
     )
     {
         if (graphicsDevice == null)
+        {
             throw new ArgumentNullException(nameof(graphicsDevice));
+        }
 
-        var logger = _loggerFactory.CreateLogger<AssetManager>();
+        ILogger<AssetManager> logger = _loggerFactory.CreateLogger<AssetManager>();
         return new AssetManager(graphicsDevice, assetRoot, logger);
     }
 
@@ -66,11 +73,15 @@ public class GraphicsServiceFactory : IGraphicsServiceFactory
     )
     {
         if (assetManager == null)
+        {
             throw new ArgumentNullException(nameof(assetManager));
+        }
 
         // Create processors with proper loggers
+        // Pass EntityPoolManager to LayerProcessor for tile entity pooling
         var layerProcessor = new LayerProcessor(
             _propertyMapperRegistry,
+            _poolManager,
             _loggerFactory.CreateLogger<LayerProcessor>()
         );
 
@@ -78,9 +89,7 @@ public class GraphicsServiceFactory : IGraphicsServiceFactory
             _loggerFactory.CreateLogger<AnimatedTileProcessor>()
         );
 
-        var borderProcessor = new BorderProcessor(
-            _loggerFactory.CreateLogger<BorderProcessor>()
-        );
+        var borderProcessor = new BorderProcessor(_loggerFactory.CreateLogger<BorderProcessor>());
 
         return new MapLoader(
             assetManager,

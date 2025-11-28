@@ -26,7 +26,7 @@ public static class QueryCache
     public static QueryDescription Get<T1>()
         where T1 : struct
     {
-        var key = typeof(T1).FullName!;
+        string key = typeof(T1).FullName!;
         return _cache.GetOrAdd(key, _ => new QueryDescription().WithAll<T1>());
     }
 
@@ -37,7 +37,7 @@ public static class QueryCache
         where T1 : struct
         where T2 : struct
     {
-        var key = $"{typeof(T1).FullName},{typeof(T2).FullName}";
+        string key = $"{typeof(T1).FullName},{typeof(T2).FullName}";
         return _cache.GetOrAdd(key, _ => new QueryDescription().WithAll<T1, T2>());
     }
 
@@ -49,7 +49,7 @@ public static class QueryCache
         where T2 : struct
         where T3 : struct
     {
-        var key = $"{typeof(T1).FullName},{typeof(T2).FullName},{typeof(T3).FullName}";
+        string key = $"{typeof(T1).FullName},{typeof(T2).FullName},{typeof(T3).FullName}";
         return _cache.GetOrAdd(key, _ => new QueryDescription().WithAll<T1, T2, T3>());
     }
 
@@ -60,7 +60,7 @@ public static class QueryCache
         where TWith : struct
         where TNone : struct
     {
-        var key = $"{typeof(TWith).FullName}!{typeof(TNone).FullName}";
+        string key = $"{typeof(TWith).FullName}!{typeof(TNone).FullName}";
         return _cache.GetOrAdd(key, _ => new QueryDescription().WithAll<TWith>().WithNone<TNone>());
     }
 
@@ -72,7 +72,7 @@ public static class QueryCache
         where T2 : struct
         where TNone : struct
     {
-        var key = $"{typeof(T1).FullName},{typeof(T2).FullName}!{typeof(TNone).FullName}";
+        string key = $"{typeof(T1).FullName},{typeof(T2).FullName}!{typeof(TNone).FullName}";
         return _cache.GetOrAdd(
             key,
             _ => new QueryDescription().WithAll<T1, T2>().WithNone<TNone>()
@@ -88,7 +88,7 @@ public static class QueryCache
         where T3 : struct
         where T4 : struct
     {
-        var key =
+        string key =
             $"{typeof(T1).FullName},{typeof(T2).FullName},{typeof(T3).FullName},{typeof(T4).FullName}";
         return _cache.GetOrAdd(key, _ => new QueryDescription().WithAll<T1, T2, T3, T4>());
     }
@@ -103,7 +103,7 @@ public static class QueryCache
         where T4 : struct
         where T5 : struct
     {
-        var key =
+        string key =
             $"{typeof(T1).FullName},{typeof(T2).FullName},{typeof(T3).FullName},{typeof(T4).FullName},{typeof(T5).FullName}";
         return _cache.GetOrAdd(key, _ => new QueryDescription().WithAll<T1, T2, T3, T4, T5>());
     }
@@ -117,7 +117,7 @@ public static class QueryCache
         where T3 : struct
         where TNone : struct
     {
-        var key =
+        string key =
             $"{typeof(T1).FullName},{typeof(T2).FullName},{typeof(T3).FullName}!{typeof(TNone).FullName}";
         return _cache.GetOrAdd(
             key,

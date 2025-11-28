@@ -5,6 +5,7 @@ This folder contains the bundled font for the PokeSharp debug console.
 ## Bundled Font: 0xProto Nerd Font
 
 We use **0xProto Nerd Font Mono** for the debug console because:
+
 - **Excellent readability** - designed specifically for terminals and source code
 - **Clear character differentiation** - easy to distinguish similar characters
 - **Nerd Font glyphs** - includes 10,000+ icons for file types, git status, etc.
@@ -51,6 +52,7 @@ Remove-Item "$env:TEMP\0xProto.zip", "$env:TEMP\0xProto" -Recurse -Force
 ## Expected File
 
 After setup, this folder should contain:
+
 - `0xProtoNerdFontMono-Regular.ttf` - The main font file
 - `OFL.txt` - SIL Open Font License
 - `README.md` - This file
@@ -58,6 +60,7 @@ After setup, this folder should contain:
 ## Fallback Behavior
 
 If the bundled font is not found, `FontLoader` will fall back to system fonts:
+
 - **macOS**: Monaco, Menlo, Courier New
 - **Windows**: Consolas, Courier
 - **Linux**: Liberation Mono, DejaVu Sans Mono

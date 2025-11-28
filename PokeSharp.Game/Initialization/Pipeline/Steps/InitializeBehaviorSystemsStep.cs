@@ -1,8 +1,6 @@
 using Microsoft.Extensions.Logging;
 using PokeSharp.Engine.Scenes;
-using PokeSharp.Game.Initialization;
 using PokeSharp.Game.Initialization.Behaviors;
-using PokeSharp.Game.Initialization.Pipeline;
 
 namespace PokeSharp.Game.Initialization.Pipeline.Steps;
 
@@ -29,14 +27,17 @@ public class InitializeBehaviorSystemsStep : InitializationStepBase
     )
     {
         if (context.GameInitializer == null)
+        {
             throw new InvalidOperationException(
                 "GameInitializer must be initialized before behavior systems"
             );
+        }
 
-        var logger = context.LoggerFactory.CreateLogger<InitializeBehaviorSystemsStep>();
+        ILogger<InitializeBehaviorSystemsStep> logger =
+            context.LoggerFactory.CreateLogger<InitializeBehaviorSystemsStep>();
 
         // Initialize NPC behavior system
-        var npcBehaviorInitializerLogger =
+        ILogger<NPCBehaviorInitializer> npcBehaviorInitializerLogger =
             context.LoggerFactory.CreateLogger<NPCBehaviorInitializer>();
         var npcBehaviorInitializer = new NPCBehaviorInitializer(
             npcBehaviorInitializerLogger,
@@ -50,7 +51,7 @@ public class InitializeBehaviorSystemsStep : InitializationStepBase
         await npcBehaviorInitializer.InitializeAsync();
 
         // Initialize tile behavior system
-        var tileBehaviorInitializerLogger =
+        ILogger<TileBehaviorInitializer> tileBehaviorInitializerLogger =
             context.LoggerFactory.CreateLogger<TileBehaviorInitializer>();
         var tileBehaviorInitializer = new TileBehaviorInitializer(
             tileBehaviorInitializerLogger,
@@ -66,9 +67,24 @@ public class InitializeBehaviorSystemsStep : InitializationStepBase
 
         // Set sprite texture loader in MapInitializer (must be called after MapInitializer is created)
         if (context.SpriteTextureLoader != null && context.MapInitializer != null)
+        {
             context.MapInitializer.SetSpriteTextureLoader(context.SpriteTextureLoader);
+        }
+
+        // Wire up WarpExecutionSystem with its required services
+        if (context.MapInitializer != null && context.GameInitializer.MapLifecycleManager != null)
+        {
+            context.GameInitializer.WarpExecutionSystem.SetServices(
+                context.MapInitializer,
+                context.GameInitializer.MapLifecycleManager
+            );
+            logger.LogInformation("WarpExecutionSystem wired to MapInitializer and MapLifecycleManager");
+        }
+        else
+        {
+            logger.LogWarning("MapInitializer or MapLifecycleManager not available - WarpExecutionSystem will not function");
+        }
 
         logger.LogInformation("Behavior systems initialized successfully");
     }
 }
-

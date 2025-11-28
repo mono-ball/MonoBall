@@ -4,27 +4,27 @@ using Microsoft.CodeAnalysis;
 namespace PokeSharp.Engine.Debug.Console.Scripting;
 
 /// <summary>
-/// Formats compilation errors with context, line numbers, and helpful messages.
+///     Formats compilation errors with context, line numbers, and helpful messages.
 /// </summary>
 public static class ErrorFormatter
 {
     /// <summary>
-    /// Formats a compilation error with context lines and caret position.
+    ///     Formats a compilation error with context lines and caret position.
     /// </summary>
     /// <param name="diagnostic">The diagnostic error from Roslyn.</param>
     /// <param name="sourceCode">The source code that was being compiled.</param>
     /// <returns>A formatted error message with context.</returns>
     public static FormattedError FormatError(Diagnostic diagnostic, string sourceCode)
     {
-        var lineSpan = diagnostic.Location.GetLineSpan();
-        var startLine = lineSpan.StartLinePosition.Line;
-        var startColumn = lineSpan.StartLinePosition.Character;
-        var endLine = lineSpan.EndLinePosition.Line;
-        var endColumn = lineSpan.EndLinePosition.Character;
+        FileLinePositionSpan lineSpan = diagnostic.Location.GetLineSpan();
+        int startLine = lineSpan.StartLinePosition.Line;
+        int startColumn = lineSpan.StartLinePosition.Character;
+        int endLine = lineSpan.EndLinePosition.Line;
+        int endColumn = lineSpan.EndLinePosition.Character;
 
-        var lines = sourceCode.Split('\n');
-        var errorMessage = diagnostic.GetMessage();
-        var errorCode = diagnostic.Id;
+        string[] lines = sourceCode.Split('\n');
+        string errorMessage = diagnostic.GetMessage();
+        string errorCode = diagnostic.Id;
 
         // Build context with lines around the error
         var context = new List<ContextLine>();
@@ -62,14 +62,17 @@ public static class ErrorFormatter
             EndLine = endLine + 1,
             EndColumn = endColumn + 1,
             Context = context,
-            Severity = diagnostic.Severity
+            Severity = diagnostic.Severity,
         };
     }
 
     /// <summary>
-    /// Formats multiple errors.
+    ///     Formats multiple errors.
     /// </summary>
-    public static List<FormattedError> FormatErrors(IEnumerable<Diagnostic> diagnostics, string sourceCode)
+    public static List<FormattedError> FormatErrors(
+        IEnumerable<Diagnostic> diagnostics,
+        string sourceCode
+    )
     {
         return diagnostics
             .Where(d => d.Severity == DiagnosticSeverity.Error)
@@ -78,7 +81,7 @@ public static class ErrorFormatter
     }
 
     /// <summary>
-    /// Generates a caret line pointing to the error position.
+    ///     Generates a caret line pointing to the error position.
     /// </summary>
     public static string GenerateCaretLine(int column, int length = 1)
     {
@@ -89,12 +92,13 @@ public static class ErrorFormatter
         {
             sb.Append(new string('~', length - 1));
         }
+
         return sb.ToString();
     }
 }
 
 /// <summary>
-/// Represents a formatted compilation error with context.
+///     Represents a formatted compilation error with context.
 /// </summary>
 public class FormattedError
 {
@@ -109,19 +113,18 @@ public class FormattedError
 }
 
 /// <summary>
-/// Represents a line of context around an error.
+///     Represents a line of context around an error.
 /// </summary>
 public class ContextLine
 {
-    public int LineNumber { get; set; }
-    public string Text { get; set; }
-    public bool IsErrorLine { get; set; }
-
     public ContextLine(int lineNumber, string text, bool isErrorLine)
     {
         LineNumber = lineNumber;
         Text = text;
         IsErrorLine = isErrorLine;
     }
-}
 
+    public int LineNumber { get; set; }
+    public string Text { get; set; }
+    public bool IsErrorLine { get; set; }
+}

@@ -43,17 +43,22 @@ public static class RelationshipExtensions
     public static void SetParent(this Entity child, Entity parent, World world)
     {
         if (!world.IsAlive(child))
+        {
             throw new ArgumentException("Child entity is not alive", nameof(child));
+        }
+
         if (!world.IsAlive(parent))
+        {
             throw new ArgumentException("Parent entity is not alive", nameof(parent));
+        }
 
         // Remove existing parent if present
         if (child.Has<Parent>())
         {
-            var oldParent = child.Get<Parent>().Value;
+            Entity oldParent = child.Get<Parent>().Value;
             if (world.IsAlive(oldParent) && oldParent.Has<Children>())
             {
-                ref var oldChildren = ref oldParent.Get<Children>();
+                ref Children oldChildren = ref oldParent.Get<Children>();
                 oldChildren.Values?.Remove(child);
             }
 
@@ -65,14 +70,20 @@ public static class RelationshipExtensions
 
         // Add to parent's children list
         if (!parent.Has<Children>())
+        {
             parent.Add(new Children { Values = new List<Entity>() });
+        }
 
-        ref var children = ref parent.Get<Children>();
+        ref Children children = ref parent.Get<Children>();
         if (children.Values == null)
+        {
             children.Values = new List<Entity>();
+        }
 
         if (!children.Values.Contains(child))
+        {
             children.Values.Add(child);
+        }
     }
 
     /// <summary>
@@ -87,14 +98,16 @@ public static class RelationshipExtensions
     public static void RemoveParent(this Entity child, World world)
     {
         if (!world.IsAlive(child) || !child.Has<Parent>())
+        {
             return;
+        }
 
-        var parent = child.Get<Parent>().Value;
+        Entity parent = child.Get<Parent>().Value;
 
         // Remove from parent's children list
         if (world.IsAlive(parent) && parent.Has<Children>())
         {
-            ref var children = ref parent.Get<Children>();
+            ref Children children = ref parent.Get<Children>();
             children.Values?.Remove(child);
         }
 
@@ -120,9 +133,11 @@ public static class RelationshipExtensions
     public static Entity? GetParent(this Entity child, World world)
     {
         if (!world.IsAlive(child) || !child.Has<Parent>())
+        {
             return null;
+        }
 
-        var parent = child.Get<Parent>().Value;
+        Entity parent = child.Get<Parent>().Value;
         return world.IsAlive(parent) ? parent : null;
     }
 
@@ -147,11 +162,15 @@ public static class RelationshipExtensions
     public static IEnumerable<Entity> GetChildren(this Entity parent, World world)
     {
         if (!world.IsAlive(parent) || !parent.Has<Children>())
+        {
             return Enumerable.Empty<Entity>();
+        }
 
-        var children = parent.Get<Children>();
+        Children children = parent.Get<Children>();
         if (children.Values == null)
+        {
             return Enumerable.Empty<Entity>();
+        }
 
         return children.Values.Where(child => world.IsAlive(child));
     }
@@ -202,20 +221,29 @@ public static class RelationshipExtensions
     )
     {
         if (!world.IsAlive(owned))
+        {
             throw new ArgumentException("Owned entity is not alive", nameof(owned));
+        }
+
         if (!world.IsAlive(owner))
+        {
             throw new ArgumentException("Owner entity is not alive", nameof(owner));
+        }
 
         // Remove existing ownership if present
         if (owned.Has<Owned>())
+        {
             owned.Remove<Owned>();
+        }
 
         // Set new owner
         owned.Add(new Owned { OwnerEntity = owner, AcquiredAt = DateTime.UtcNow });
 
         // Set owner relationship
         if (!owner.Has<Owner>() || owner.Get<Owner>().Value != owned)
+        {
             owner.Set(new Owner { Value = owned, Type = ownershipType });
+        }
     }
 
     /// <summary>
@@ -230,16 +258,20 @@ public static class RelationshipExtensions
     public static void RemoveOwner(this Entity owned, World world)
     {
         if (!world.IsAlive(owned) || !owned.Has<Owned>())
+        {
             return;
+        }
 
-        var owner = owned.Get<Owned>().OwnerEntity;
+        Entity owner = owned.Get<Owned>().OwnerEntity;
 
         // Remove owner component from owner entity
         if (world.IsAlive(owner) && owner.Has<Owner>())
         {
-            var ownerComp = owner.Get<Owner>();
+            Owner ownerComp = owner.Get<Owner>();
             if (ownerComp.Value == owned)
+            {
                 owner.Remove<Owner>();
+            }
         }
 
         // Remove owned component
@@ -264,9 +296,11 @@ public static class RelationshipExtensions
     public static Entity? GetOwner(this Entity owned, World world)
     {
         if (!world.IsAlive(owned) || !owned.Has<Owned>())
+        {
             return null;
+        }
 
-        var owner = owned.Get<Owned>().OwnerEntity;
+        Entity owner = owned.Get<Owned>().OwnerEntity;
         return world.IsAlive(owner) ? owner : null;
     }
 
@@ -284,18 +318,22 @@ public static class RelationshipExtensions
     public static IEnumerable<Entity> GetOwnedEntities(this Entity owner, World world)
     {
         if (!world.IsAlive(owner))
+        {
             return Enumerable.Empty<Entity>();
+        }
 
         var ownedEntities = new List<Entity>();
         // Use centralized relationship query
-        var query = RelationshipQueries.AllOwned;
+        QueryDescription query = RelationshipQueries.AllOwned;
 
         world.Query(
             in query,
             (Entity entity, ref Owned owned) =>
             {
                 if (owned.OwnerEntity == owner && world.IsAlive(entity))
+                {
                     ownedEntities.Add(entity);
+                }
             }
         );
 
@@ -310,9 +348,11 @@ public static class RelationshipExtensions
     /// <returns>The ownership type if the entity has a valid owner, otherwise null.</returns>
     public static OwnershipType? GetOwnershipType(this Entity owned, World world)
     {
-        var owner = owned.GetOwner(world);
+        Entity? owner = owned.GetOwner(world);
         if (!owner.HasValue || !owner.Value.Has<Owner>())
+        {
             return null;
+        }
 
         return owner.Value.Get<Owner>().Type;
     }

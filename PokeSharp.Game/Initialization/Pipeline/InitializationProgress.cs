@@ -46,4 +46,3 @@ public static class InitializationProgress
     /// </summary>
     public const float Complete = 1.0f;
 }
-

@@ -9,6 +9,7 @@ using PokeSharp.Engine.Systems.Management;
 using PokeSharp.Game.Components;
 using PokeSharp.Game.Components.Maps;
 using PokeSharp.Game.Components.Movement;
+using PokeSharp.Game.Components.Warps;
 using PokeSharp.Game.Infrastructure.Configuration;
 
 namespace PokeSharp.Game.Initialization.Factories;
@@ -34,9 +35,9 @@ public class PlayerFactory(
     {
         // Capture tile size and current map info from MapInfo
         var gameplayConfig = GameplayConfig.CreateDefault();
-        var tileSize = gameplayConfig.DefaultTileSize;
+        int tileSize = gameplayConfig.DefaultTileSize;
         string? currentMapName = null;
-        var mapInfoQuery = QueryCache.Get<MapInfo>();
+        QueryDescription mapInfoQuery = QueryCache.Get<MapInfo>();
         world.Query(
             in mapInfoQuery,
             (ref MapInfo mapInfo) =>
@@ -60,7 +61,7 @@ public class PlayerFactory(
         // camera.MapBounds remains Rectangle.Empty (default) to allow free camera movement
 
         // Spawn player entity from template with position override
-        var playerEntity = entityFactory.SpawnFromTemplate(
+        Entity playerEntity = entityFactory.SpawnFromTemplate(
             "player",
             world,
             builder =>
@@ -75,9 +76,7 @@ public class PlayerFactory(
         // Add MapStreaming component for seamless map transitions
         if (currentMapName != null)
         {
-            var mapStreaming = new MapStreaming(
-                new MapIdentifier(currentMapName)
-            );
+            var mapStreaming = new MapStreaming(new MapIdentifier(currentMapName));
             world.Add(playerEntity, mapStreaming);
             logger.LogInformation("MapStreaming component added to player");
         }
@@ -85,6 +84,10 @@ public class PlayerFactory(
         {
             logger.LogWarning("No map found - MapStreaming component not added");
         }
+
+        // Add WarpState component for warp transitions
+        world.Add(playerEntity, WarpState.Default);
+        logger.LogDebug("WarpState component added to player");
 
         logger.LogEntityCreated(
             "Player",

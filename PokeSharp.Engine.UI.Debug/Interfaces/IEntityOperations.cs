@@ -3,11 +3,23 @@ using PokeSharp.Engine.UI.Debug.Models;
 namespace PokeSharp.Engine.UI.Debug.Interfaces;
 
 /// <summary>
-/// Provides operations for browsing and managing ECS entities.
-/// Implemented by EntitiesPanel.
+///     Provides operations for browsing and managing ECS entities.
+///     Implemented by EntitiesPanel.
 /// </summary>
 public interface IEntityOperations
 {
+    /// <summary>Gets or sets whether auto-refresh is enabled.</summary>
+    bool AutoRefresh { get; set; }
+
+    /// <summary>Gets or sets the refresh interval in seconds.</summary>
+    float RefreshInterval { get; set; }
+
+    /// <summary>Gets or sets the highlight duration in seconds.</summary>
+    float HighlightDuration { get; set; }
+
+    /// <summary>Gets the currently selected entity ID.</summary>
+    int? SelectedId { get; }
+
     /// <summary>Refreshes the entity list from the provider.</summary>
     void Refresh();
 
@@ -74,15 +86,6 @@ public interface IEntityOperations
     /// <summary>Clears session statistics.</summary>
     void ClearSessionStats();
 
-    /// <summary>Gets or sets whether auto-refresh is enabled.</summary>
-    bool AutoRefresh { get; set; }
-
-    /// <summary>Gets or sets the refresh interval in seconds.</summary>
-    float RefreshInterval { get; set; }
-
-    /// <summary>Gets or sets the highlight duration in seconds.</summary>
-    float HighlightDuration { get; set; }
-
     /// <summary>Gets the IDs of newly spawned entities.</summary>
     IEnumerable<int> GetNewEntityIds();
 
@@ -97,8 +100,4 @@ public interface IEntityOperations
 
     /// <summary>Copies entities to clipboard.</summary>
     void CopyToClipboard(bool asCsv = false);
-
-    /// <summary>Gets the currently selected entity ID.</summary>
-    int? SelectedId { get; }
 }
-

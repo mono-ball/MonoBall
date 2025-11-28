@@ -50,9 +50,11 @@ public abstract class SystemBase : ISystem
     protected void EnsureInitialized()
     {
         if (World == null)
+        {
             throw new InvalidOperationException(
                 $"System {SystemName} has not been initialized. Call Initialize() first."
             );
+        }
     }
 
     /// <summary>
@@ -64,7 +66,9 @@ public abstract class SystemBase : ISystem
         ArgumentNullException.ThrowIfNull(action);
 
         if (World != null)
+        {
             action();
+        }
     }
 
     /// <summary>

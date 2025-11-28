@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using Microsoft.Extensions.Logging;
 using PokeSharp.Engine.Debug.Common;
 
@@ -12,7 +8,6 @@ namespace PokeSharp.Engine.Debug.Scripting;
 /// </summary>
 public class ScriptManager
 {
-    private readonly string _scriptsDirectory;
     private readonly ILogger? _logger;
 
     /// <summary>
@@ -22,7 +17,8 @@ public class ScriptManager
     /// <param name="logger">Optional logger for diagnostics</param>
     public ScriptManager(string? scriptsDirectory = null, ILogger? logger = null)
     {
-        _scriptsDirectory = scriptsDirectory ?? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Scripts");
+        ScriptsDirectory =
+            scriptsDirectory ?? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Scripts");
         _logger = logger;
 
         // Ensure scripts directory exists
@@ -32,7 +28,7 @@ public class ScriptManager
     /// <summary>
     ///     Gets the scripts directory path.
     /// </summary>
-    public string ScriptsDirectory => _scriptsDirectory;
+    public string ScriptsDirectory { get; }
 
     /// <summary>
     ///     Loads a script file and returns its contents.
@@ -43,7 +39,7 @@ public class ScriptManager
     {
         try
         {
-            var pathResult = SanitizeAndValidatePath(filename);
+            Result<string> pathResult = SanitizeAndValidatePath(filename);
             if (!pathResult.IsSuccess)
             {
                 return pathResult.Exception != null
@@ -51,7 +47,7 @@ public class ScriptManager
                     : Result<string>.Failure(pathResult.Error!);
             }
 
-            var fullPath = pathResult.Value!;
+            string fullPath = pathResult.Value!;
 
             if (!File.Exists(fullPath))
             {
@@ -59,8 +55,12 @@ public class ScriptManager
                 return Result<string>.Failure($"Script not found: {filename}");
             }
 
-            var content = File.ReadAllText(fullPath);
-            _logger?.LogInformation("Loaded script: {Filename} ({Length} chars)", filename, content.Length);
+            string content = File.ReadAllText(fullPath);
+            _logger?.LogInformation(
+                "Loaded script: {Filename} ({Length} chars)",
+                filename,
+                content.Length
+            );
             return Result<string>.Success(content);
         }
         catch (Exception ex)
@@ -80,7 +80,7 @@ public class ScriptManager
     {
         try
         {
-            var pathResult = SanitizeAndValidatePath(filename);
+            Result<string> pathResult = SanitizeAndValidatePath(filename);
             if (!pathResult.IsSuccess)
             {
                 return pathResult.Exception != null
@@ -88,10 +88,14 @@ public class ScriptManager
                     : Result.Failure(pathResult.Error!);
             }
 
-            var fullPath = pathResult.Value!;
+            string fullPath = pathResult.Value!;
 
             File.WriteAllText(fullPath, content);
-            _logger?.LogInformation("Saved script: {Filename} ({Length} chars)", filename, content.Length);
+            _logger?.LogInformation(
+                "Saved script: {Filename} ({Length} chars)",
+                filename,
+                content.Length
+            );
             return Result.Success();
         }
         catch (Exception ex)
@@ -109,24 +113,29 @@ public class ScriptManager
     {
         try
         {
-            if (!Directory.Exists(_scriptsDirectory))
+            if (!Directory.Exists(ScriptsDirectory))
             {
                 return new List<string>();
             }
 
-            var files = Directory.GetFiles(_scriptsDirectory, "*.csx", SearchOption.TopDirectoryOnly)
+            var files = Directory
+                .GetFiles(ScriptsDirectory, "*.csx", SearchOption.TopDirectoryOnly)
                 .Select(Path.GetFileName)
                 .Where(name => name != null)
                 .Select(name => name!)
                 .OrderBy(name => name)
                 .ToList();
 
-            _logger?.LogDebug("Found {Count} scripts in {Directory}", files.Count, _scriptsDirectory);
+            _logger?.LogDebug(
+                "Found {Count} scripts in {Directory}",
+                files.Count,
+                ScriptsDirectory
+            );
             return files;
         }
         catch (Exception ex)
         {
-            _logger?.LogError(ex, "Failed to list scripts in: {Directory}", _scriptsDirectory);
+            _logger?.LogError(ex, "Failed to list scripts in: {Directory}", ScriptsDirectory);
             return new List<string>();
         }
     }
@@ -140,7 +149,7 @@ public class ScriptManager
     {
         try
         {
-            var pathResult = SanitizeAndValidatePath(filename);
+            Result<string> pathResult = SanitizeAndValidatePath(filename);
             if (!pathResult.IsSuccess)
             {
                 return pathResult.Exception != null
@@ -148,7 +157,7 @@ public class ScriptManager
                     : Result.Failure(pathResult.Error!);
             }
 
-            var fullPath = pathResult.Value!;
+            string fullPath = pathResult.Value!;
 
             if (!File.Exists(fullPath))
             {
@@ -176,7 +185,7 @@ public class ScriptManager
     {
         try
         {
-            var pathResult = SanitizeAndValidatePath(filename);
+            Result<string> pathResult = SanitizeAndValidatePath(filename);
             if (!pathResult.IsSuccess)
             {
                 return false;
@@ -215,10 +224,10 @@ public class ScriptManager
                 filename += ".csx";
             }
 
-            var fullPath = Path.GetFullPath(Path.Combine(_scriptsDirectory, filename));
+            string fullPath = Path.GetFullPath(Path.Combine(ScriptsDirectory, filename));
 
             // Ensure the resolved path is within the scripts directory (prevent traversal)
-            var scriptsDir = Path.GetFullPath(_scriptsDirectory);
+            string scriptsDir = Path.GetFullPath(ScriptsDirectory);
             if (!fullPath.StartsWith(scriptsDir, StringComparison.OrdinalIgnoreCase))
             {
                 _logger?.LogError("Path traversal attempt detected: {Filename}", filename);
@@ -241,10 +250,10 @@ public class ScriptManager
     {
         try
         {
-            if (!Directory.Exists(_scriptsDirectory))
+            if (!Directory.Exists(ScriptsDirectory))
             {
-                Directory.CreateDirectory(_scriptsDirectory);
-                _logger?.LogInformation("Created scripts directory: {Directory}", _scriptsDirectory);
+                Directory.CreateDirectory(ScriptsDirectory);
+                _logger?.LogInformation("Created scripts directory: {Directory}", ScriptsDirectory);
 
                 // Create a default example script
                 CreateDefaultExampleScript();
@@ -252,7 +261,11 @@ public class ScriptManager
         }
         catch (Exception ex)
         {
-            _logger?.LogError(ex, "Failed to create scripts directory: {Directory}", _scriptsDirectory);
+            _logger?.LogError(
+                ex,
+                "Failed to create scripts directory: {Directory}",
+                ScriptsDirectory
+            );
         }
     }
 
@@ -263,7 +276,8 @@ public class ScriptManager
     {
         try
         {
-            var exampleScript = @"// Example Debug Script
+            string exampleScript =
+                @"// Example Debug Script
 // This script demonstrates common debugging tasks using the Scripting API
 // Uses ScriptContext pattern (same as NPC behaviors)
 
@@ -321,7 +335,7 @@ Print(""     Type 'load debug-info' for detailed system info"");
 Print(""     Type 'Help()' to see all available methods"");
 ";
 
-            var examplePath = Path.Combine(_scriptsDirectory, "example.csx");
+            string examplePath = Path.Combine(ScriptsDirectory, "example.csx");
             File.WriteAllText(examplePath, exampleScript);
             _logger?.LogInformation("Created example script: example.csx");
         }

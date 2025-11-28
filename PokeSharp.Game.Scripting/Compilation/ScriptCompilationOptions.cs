@@ -21,7 +21,7 @@ public static class ScriptCompilationOptions
     /// </summary>
     public static ScriptOptions GetDefaultOptions()
     {
-        var options = ScriptOptions
+        ScriptOptions options = ScriptOptions
             .Default
             // Add assembly references
             .AddReferences(
@@ -74,13 +74,17 @@ public static class ScriptCompilationOptions
         IEnumerable<string>? additionalImports = null
     )
     {
-        var options = GetDefaultOptions();
+        ScriptOptions options = GetDefaultOptions();
 
         if (additionalAssemblies != null)
+        {
             options = options.AddReferences(additionalAssemblies.Select(t => t.Assembly));
+        }
 
         if (additionalImports != null)
+        {
             options = options.AddImports(additionalImports);
+        }
 
         return options;
     }

@@ -37,8 +37,9 @@ public static partial class LogTemplates
         params (string key, object value)[] details
     )
     {
-        var detailsFormatted = FormatDetails(details);
-        var body = $"[green]✓[/] [cyan]{EscapeMarkup(systemName)}[/] initialized{detailsFormatted}";
+        string detailsFormatted = FormatDetails(details);
+        string body =
+            $"[green]✓[/] [cyan]{EscapeMarkup(systemName)}[/] initialized{detailsFormatted}";
         logger.LogInformation(
             LogFormatting.FormatTemplate(WithAccent(LogAccent.Initialization, body))
         );
@@ -49,7 +50,7 @@ public static partial class LogTemplates
     /// </summary>
     public static void LogComponentInitialized(this ILogger logger, string componentName, int count)
     {
-        var body =
+        string body =
             $"[green]✓[/] [cyan]{EscapeMarkup(componentName)}[/] ready [grey]|[/] [yellow]{count}[/] items";
         logger.LogInformation(
             LogFormatting.FormatTemplate(WithAccent(LogAccent.Initialization, body))
@@ -66,8 +67,8 @@ public static partial class LogTemplates
         params (string key, object value)[] details
     )
     {
-        var detailsFormatted = FormatDetails(details);
-        var body =
+        string detailsFormatted = FormatDetails(details);
+        string body =
             $"[green]✓[/] Loaded [cyan]{EscapeMarkup(resourceType)}[/] [yellow]'{EscapeMarkup(resourceId)}'[/]{detailsFormatted}";
         logger.LogInformation(LogFormatting.FormatTemplate(WithAccent(LogAccent.Asset, body)));
     }
@@ -88,7 +89,7 @@ public static partial class LogTemplates
         int y
     )
     {
-        var body =
+        string body =
             $"[green]✓[/] [yellow]{EscapeMarkup(entityType)}[/] [grey]#{entityId}[/] from [cyan]'{EscapeMarkup(templateId)}'[/] at [magenta]({x}, {y})[/]";
         logger.LogInformation(LogFormatting.FormatTemplate(WithAccent(LogAccent.Entity, body)));
     }
@@ -103,8 +104,8 @@ public static partial class LogTemplates
         params (string key, object value)[] components
     )
     {
-        var componentList = FormatComponents(components);
-        var body =
+        string componentList = FormatComponents(components);
+        string body =
             $"[green]✓[/] [yellow]{EscapeMarkup(entityType)}[/] [grey]#{entityId}[/]{componentList}";
         logger.LogInformation(LogFormatting.FormatTemplate(WithAccent(LogAccent.Entity, body)));
     }
@@ -118,7 +119,7 @@ public static partial class LogTemplates
     /// </summary>
     public static void LogAssetLoadingStarted(this ILogger logger, string assetType, int count)
     {
-        var body = $"Loading [yellow]{count}[/] [cyan]{EscapeMarkup(assetType)}[/]";
+        string body = $"Loading [yellow]{count}[/] [cyan]{EscapeMarkup(assetType)}[/]";
         logger.LogInformation(LogFormatting.FormatTemplate(WithAccent(LogAccent.Asset, body)));
     }
 
@@ -133,8 +134,8 @@ public static partial class LogTemplates
         int height
     )
     {
-        var timeColor = timeMs > 100 ? "yellow" : "green";
-        var body =
+        string timeColor = timeMs > 100 ? "yellow" : "green";
+        string body =
             $"[green]✓[/] [cyan]{EscapeMarkup(assetId)}[/] [{timeColor}]{timeMs:F1}ms[/] [grey]({width}x{height}px)[/]";
         logger.LogDebug(LogFormatting.FormatTemplate(WithAccent(LogAccent.Asset, body)));
     }
@@ -148,8 +149,8 @@ public static partial class LogTemplates
         params (string key, object value)[] details
     )
     {
-        var detailsFormatted = FormatDetails(details);
-        var body = $"[cyan]{EscapeMarkup(message)}[/]{detailsFormatted}";
+        string detailsFormatted = FormatDetails(details);
+        string body = $"[cyan]{EscapeMarkup(message)}[/]{detailsFormatted}";
         logger.LogInformation(LogFormatting.FormatTemplate(WithAccent(LogAccent.Asset, body)));
     }
 
@@ -162,8 +163,8 @@ public static partial class LogTemplates
         params (string key, object value)[] details
     )
     {
-        var detailsFormatted = FormatDetails(details);
-        var body = $"[cyan]{EscapeMarkup(message)}[/]{detailsFormatted}";
+        string detailsFormatted = FormatDetails(details);
+        string body = $"[cyan]{EscapeMarkup(message)}[/]{detailsFormatted}";
         logger.LogInformation(LogFormatting.FormatTemplate(WithAccent(LogAccent.Workflow, body)));
     }
 
@@ -179,7 +180,7 @@ public static partial class LogTemplates
         int objects
     )
     {
-        var body =
+        string body =
             $"[green]✓[/] [cyan]{EscapeMarkup(mapName)}[/] [grey]{width}x{height}[/] [grey]|[/] [yellow]{tiles}[/] tiles [grey]|[/] [magenta]{objects}[/] objects";
         logger.LogInformation(LogFormatting.FormatTemplate(WithAccent(LogAccent.Map, body)));
     }
@@ -199,11 +200,11 @@ public static partial class LogTemplates
         float maxMs
     )
     {
-        var fpsColor =
+        string fpsColor =
             fps >= 60 ? "green"
             : fps >= 30 ? "yellow"
             : "red";
-        var body =
+        string body =
             $"[cyan]{avgMs:F1}ms[/] avg [{fpsColor}]{fps:F1} FPS[/] [grey]|[/] [aqua]{minMs:F1}ms[/] min [orange1]{maxMs:F1}ms[/] peak";
         logger.LogDebug(LogFormatting.FormatTemplate(WithAccent(LogAccent.Performance, body)));
     }
@@ -219,19 +220,19 @@ public static partial class LogTemplates
         long calls
     )
     {
-        var avgColor =
+        string avgColor =
             avgMs > 1.67 ? "red"
             : avgMs > 0.84 ? "yellow"
             : "green";
-        var peakColor =
+        string peakColor =
             maxMs > 2.0 ? "red1"
             : maxMs > 1.0 ? "orange1"
             : "aqua";
-        var systemDisplay = PadRightInvariant(EscapeMarkup(systemName), 22);
-        var avgText = avgMs.ToString("0.00", CultureInfo.InvariantCulture).PadLeft(6);
-        var maxText = maxMs.ToString("0.00", CultureInfo.InvariantCulture).PadLeft(6);
-        var callsText = calls.ToString("N0", CultureInfo.InvariantCulture);
-        var body =
+        string systemDisplay = PadRightInvariant(EscapeMarkup(systemName), 22);
+        string avgText = avgMs.ToString("0.00", CultureInfo.InvariantCulture).PadLeft(6);
+        string maxText = maxMs.ToString("0.00", CultureInfo.InvariantCulture).PadLeft(6);
+        string callsText = calls.ToString("N0", CultureInfo.InvariantCulture);
+        string body =
             $"[cyan]{systemDisplay}[/] [{avgColor}]{avgText}ms[/] avg [{peakColor}]{maxText}ms[/] peak [grey]|[/] [grey]{callsText} calls[/]";
         logger.LogDebug(LogFormatting.FormatTemplate(WithAccent(LogAccent.Performance, body)));
     }
@@ -247,11 +248,11 @@ public static partial class LogTemplates
         int gen2
     )
     {
-        var memColor =
+        string memColor =
             memoryMb > 500 ? "red"
             : memoryMb > 250 ? "yellow"
             : "green";
-        var body =
+        string body =
             $"[{memColor}]{memoryMb:F1}MB[/] in use [grey]|[/] [grey]G0:[/] [yellow]{gen0}[/] [grey]G1:[/] [yellow]{gen1}[/] [grey]G2:[/] [yellow]{gen2}[/]";
         logger.LogDebug(LogFormatting.FormatTemplate(WithAccent(LogAccent.Memory, body)));
     }
@@ -270,7 +271,7 @@ public static partial class LogTemplates
         double thresholdMs
     )
     {
-        var body =
+        string body =
             $"[orange3]⚠[/] Slow operation [grey]|[/] [cyan]{EscapeMarkup(operation)}[/] took [red]{timeMs:F1}ms[/] [grey](>{thresholdMs:F1}ms)[/]";
         logger.LogWarning(LogFormatting.FormatTemplate(WithAccent(LogAccent.Performance, body)));
     }
@@ -316,7 +317,7 @@ public static partial class LogTemplates
             label = "[yellow]Slow:[/]";
         }
 
-        var message =
+        string message =
             $"{icon} {label} [cyan bold]{EscapeMarkup(systemName)}[/] [{timeColor}]{timeMs:F2}ms[/] "
             + $"[grey]│[/] [{percentColor}]{percent:F1}%[/] of frame";
         logger.LogWarning(LogFormatting.FormatTemplate(message));
@@ -331,7 +332,7 @@ public static partial class LogTemplates
         string resourceId
     )
     {
-        var body =
+        string body =
             $"[orange3]⚠[/] [cyan]{EscapeMarkup(resourceType)}[/] [red]'{EscapeMarkup(resourceId)}'[/] not found";
         logger.LogWarning(LogFormatting.FormatTemplate(WithAccent(LogAccent.Asset, body)));
     }
@@ -341,7 +342,7 @@ public static partial class LogTemplates
     /// </summary>
     public static void LogOperationSkipped(this ILogger logger, string operation, string reason)
     {
-        var body =
+        string body =
             $"[orange3]⚠[/] Skipped [grey]|[/] [cyan]{EscapeMarkup(operation)}[/] [grey]({EscapeMarkup(reason)})[/]";
         logger.LogWarning(LogFormatting.FormatTemplate(WithAccent(LogAccent.Workflow, body)));
     }
@@ -359,7 +360,7 @@ public static partial class LogTemplates
         string recovery
     )
     {
-        var body =
+        string body =
             $"[red]✗[/] Failed [grey]|[/] [cyan]{EscapeMarkup(operation)}[/] [grey]→[/] [yellow]{EscapeMarkup(recovery)}[/]";
         logger.LogWarning(LogFormatting.FormatTemplate(WithAccent(LogAccent.Workflow, body)));
     }
@@ -369,7 +370,7 @@ public static partial class LogTemplates
     /// </summary>
     public static void LogCriticalError(this ILogger logger, Exception ex, string operation)
     {
-        var body =
+        string body =
             $"[red bold]✗ CRITICAL[/] [grey]|[/] [cyan]{EscapeMarkup(operation)}[/] [grey]→[/] [red]{EscapeMarkup(ex.GetType().Name)}[/]: {EscapeMarkup(ex.Message)}";
         logger.LogError(LogFormatting.FormatTemplate(WithAccent(LogAccent.System, body)));
     }
@@ -388,14 +389,20 @@ public static partial class LogTemplates
         bool isCritical = false
     )
     {
-        var label = isCritical ? "[red bold]✗ SYSTEM OFFLINE[/]" : "[orange3]⚠[/] System not ready";
-        var body =
+        string label = isCritical
+            ? "[red bold]✗ SYSTEM OFFLINE[/]"
+            : "[orange3]⚠[/] System not ready";
+        string body =
             $"{label} [grey]|[/] [cyan]{EscapeMarkup(systemName)}[/] [grey]→[/] [orange1]{EscapeMarkup(reason)}[/]";
-        var formatted = LogFormatting.FormatTemplate(WithAccent(LogAccent.System, body));
+        string formatted = LogFormatting.FormatTemplate(WithAccent(LogAccent.System, body));
         if (isCritical)
+        {
             logger.LogError(formatted);
+        }
         else
+        {
             logger.LogWarning(formatted);
+        }
     }
 
     /// <summary>
@@ -408,15 +415,19 @@ public static partial class LogTemplates
         bool isCritical = false
     )
     {
-        var severity = isCritical ? "red bold" : "yellow";
-        var icon = isCritical ? "[red]✗[/]" : "[orange3]⚠[/]";
-        var body =
+        string severity = isCritical ? "red bold" : "yellow";
+        string icon = isCritical ? "[red]✗[/]" : "[orange3]⚠[/]";
+        string body =
             $"{icon} [{severity}]Dependency missing[/] [grey]|[/] [cyan]{EscapeMarkup(systemName)}[/] needs [yellow]{EscapeMarkup(dependencyName)}[/]";
-        var formatted = LogFormatting.FormatTemplate(WithAccent(LogAccent.System, body));
+        string formatted = LogFormatting.FormatTemplate(WithAccent(LogAccent.System, body));
         if (isCritical)
+        {
             logger.LogError(formatted);
+        }
         else
+        {
             logger.LogWarning(formatted);
+        }
     }
 
     /// <summary>
@@ -429,7 +440,7 @@ public static partial class LogTemplates
         string context
     )
     {
-        var body =
+        string body =
             $"[orange3]⚠[/] [yellow]{EscapeMarkup(entityLabel)}[/] missing [red]{EscapeMarkup(componentName)}[/] [grey]→[/] [orange1]{EscapeMarkup(context)}[/]";
         logger.LogWarning(LogFormatting.FormatTemplate(WithAccent(LogAccent.Entity, body)));
     }
@@ -439,7 +450,7 @@ public static partial class LogTemplates
     /// </summary>
     public static void LogEntityNotFound(this ILogger logger, string entityLabel, string context)
     {
-        var body =
+        string body =
             $"[orange3]⚠[/] [yellow]{EscapeMarkup(entityLabel)}[/] not found [grey]→[/] [orange1]{EscapeMarkup(context)}[/]";
         logger.LogWarning(LogFormatting.FormatTemplate(WithAccent(LogAccent.Entity, body)));
     }
@@ -454,7 +465,7 @@ public static partial class LogTemplates
         string reason
     )
     {
-        var body =
+        string body =
             $"[orange3]⚠[/] [yellow]{EscapeMarkup(entityLabel)}[/] [grey]→[/] [cyan]{EscapeMarkup(operation)}[/] [orange1]skipped[/] [grey]({EscapeMarkup(reason)})[/]";
         logger.LogWarning(LogFormatting.FormatTemplate(WithAccent(LogAccent.Entity, body)));
     }
@@ -464,7 +475,7 @@ public static partial class LogTemplates
     /// </summary>
     public static void LogTemplateMissing(this ILogger logger, string templateId)
     {
-        var body =
+        string body =
             $"[red bold]✗ Template missing[/] [grey]|[/] [yellow]'{EscapeMarkup(templateId)}'[/]";
         logger.LogError(LogFormatting.FormatTemplate(WithAccent(LogAccent.Workflow, body)));
     }
@@ -474,7 +485,7 @@ public static partial class LogTemplates
     /// </summary>
     public static void LogTemplateCompilerMissing(this ILogger logger, string entityTypeName)
     {
-        var body =
+        string body =
             $"[red bold]✗ Compiler missing[/] [grey]|[/] [yellow]{EscapeMarkup(entityTypeName)}[/]";
         logger.LogError(LogFormatting.FormatTemplate(WithAccent(LogAccent.Workflow, body)));
     }
@@ -493,7 +504,7 @@ public static partial class LogTemplates
     /// </summary>
     public static void LogBatchStarted(this ILogger logger, string operation, int total)
     {
-        var body =
+        string body =
             $"[cyan]{EscapeMarkup(operation)}[/] started [grey]|[/] [yellow]{total}[/] items";
         logger.LogInformation(LogFormatting.FormatTemplate(WithAccent(LogAccent.Workflow, body)));
     }
@@ -509,9 +520,9 @@ public static partial class LogTemplates
         double timeMs
     )
     {
-        var successColor = failed == 0 ? "green" : "yellow";
-        var timeColor = failed == 0 ? "aqua" : "yellow";
-        var body =
+        string successColor = failed == 0 ? "green" : "yellow";
+        string timeColor = failed == 0 ? "aqua" : "yellow";
+        string body =
             $"[green]✓ Completed[/] [grey]|[/] [cyan]{EscapeMarkup(operation)}[/] [{successColor}]{successful} OK[/] [grey]{failed} failed[/] [grey]|[/] [{timeColor}]{timeMs:F1}ms[/]";
         logger.LogInformation(LogFormatting.FormatTemplate(WithAccent(LogAccent.Workflow, body)));
     }
@@ -525,7 +536,7 @@ public static partial class LogTemplates
     /// </summary>
     public static void LogControlsHint(this ILogger logger, string hint)
     {
-        var body = $"Controls [grey]|[/] [cyan]{EscapeMarkup(hint)}[/]";
+        string body = $"Controls [grey]|[/] [cyan]{EscapeMarkup(hint)}[/]";
         logger.LogInformation(LogFormatting.FormatTemplate(WithAccent(LogAccent.Input, body)));
     }
 
@@ -534,7 +545,7 @@ public static partial class LogTemplates
     /// </summary>
     public static void LogZoomChanged(this ILogger logger, string preset, float zoom)
     {
-        var body = $"[cyan]{EscapeMarkup(preset)}[/] zoom [yellow]{zoom:F1}x[/]";
+        string body = $"[cyan]{EscapeMarkup(preset)}[/] zoom [yellow]{zoom:F1}x[/]";
         logger.LogDebug(LogFormatting.FormatTemplate(WithAccent(LogAccent.Input, body)));
     }
 
@@ -549,8 +560,8 @@ public static partial class LogTemplates
         ulong calls
     )
     {
-        var callsText = calls.ToString("N0", CultureInfo.InvariantCulture);
-        var body =
+        string callsText = calls.ToString("N0", CultureInfo.InvariantCulture);
+        string body =
             $"[cyan bold]{totalEntities}[/] entities [grey]|[/] [yellow]{tiles}[/] tiles [grey]|[/] [magenta]{sprites}[/] sprites [grey]|[/] [grey]{callsText} calls[/]";
         logger.LogDebug(LogFormatting.FormatTemplate(WithAccent(LogAccent.Render, body)));
     }
@@ -569,7 +580,7 @@ public static partial class LogTemplates
                 "[blue bold]╔══════════════════════════════════════════╗[/]"
             )
         );
-        var headerLine = LogFormatting.FormatTemplate(
+        string headerLine = LogFormatting.FormatTemplate(
             $"[blue bold]║[/]  [cyan bold]{title, -38}[/]  [blue bold]║[/]"
         );
         logger.LogInformation(headerLine);
@@ -609,7 +620,7 @@ public static partial class LogTemplates
     /// </summary>
     public static void LogRenderTileSizeSet(this ILogger logger, int tileSize)
     {
-        var body = $"[green]✓[/] Tile size set to [yellow]{tileSize}px[/]";
+        string body = $"[green]✓[/] Tile size set to [yellow]{tileSize}px[/]";
         logger.LogInformation(LogFormatting.FormatTemplate(WithAccent(LogAccent.Render, body)));
     }
 
@@ -618,7 +629,7 @@ public static partial class LogTemplates
     /// </summary>
     public static void LogSpriteLoaderRegistered(this ILogger logger)
     {
-        var body = "[green]✓ Sprite texture loader[/] registered for lazy loading";
+        string body = "[green]✓ Sprite texture loader[/] registered for lazy loading";
         logger.LogInformation(LogFormatting.FormatTemplate(WithAccent(LogAccent.Render, body)));
     }
 
@@ -627,8 +638,8 @@ public static partial class LogTemplates
     /// </summary>
     public static void LogDetailedProfilingChanged(this ILogger logger, bool enabled)
     {
-        var state = enabled ? "[green]enabled[/]" : "[grey]disabled[/]";
-        var body = $"[cyan]Detailed profiling[/] {state}";
+        string state = enabled ? "[green]enabled[/]" : "[grey]disabled[/]";
+        string body = $"[cyan]Detailed profiling[/] {state}";
         logger.LogInformation(
             LogFormatting.FormatTemplate(WithAccent(LogAccent.Performance, body))
         );
@@ -639,7 +650,7 @@ public static partial class LogTemplates
     /// </summary>
     public static void LogSpriteTextureLoaded(this ILogger logger, string textureKey, object format)
     {
-        var body =
+        string body =
             $"[green]✓[/] [cyan]{EscapeMarkup(textureKey)}[/] loaded [grey]|[/] [yellow]{format}[/]";
         logger.LogInformation(LogFormatting.FormatTemplate(WithAccent(LogAccent.Asset, body)));
     }
@@ -653,7 +664,7 @@ public static partial class LogTemplates
         object format
     )
     {
-        var body =
+        string body =
             $"[green]✓ Lazy-loaded[/] [cyan]{EscapeMarkup(textureKey)}[/] [grey]|[/] [yellow]{format}[/]";
         logger.LogInformation(LogFormatting.FormatTemplate(WithAccent(LogAccent.Asset, body)));
     }
@@ -663,7 +674,7 @@ public static partial class LogTemplates
     /// </summary>
     public static void LogSpriteTextureRegisteredDebug(this ILogger logger, string textureKey)
     {
-        var body = $"[green]✓ Registered[/] [cyan]{EscapeMarkup(textureKey)}[/]";
+        string body = $"[green]✓ Registered[/] [cyan]{EscapeMarkup(textureKey)}[/]";
         logger.LogDebug(LogFormatting.FormatTemplate(WithAccent(LogAccent.Asset, body)));
     }
 
@@ -672,7 +683,7 @@ public static partial class LogTemplates
     /// </summary>
     public static void LogSpriteTextureUnregistered(this ILogger logger, string textureKey)
     {
-        var body = $"[yellow]Unregistered[/] [cyan]{EscapeMarkup(textureKey)}[/]";
+        string body = $"[yellow]Unregistered[/] [cyan]{EscapeMarkup(textureKey)}[/]";
         logger.LogDebug(LogFormatting.FormatTemplate(WithAccent(LogAccent.Asset, body)));
     }
 
@@ -681,7 +692,7 @@ public static partial class LogTemplates
     /// </summary>
     public static void LogSpriteManifestsFound(this ILogger logger, int count)
     {
-        var body = $"Found [yellow]{count}[/] sprite manifests to load";
+        string body = $"Found [yellow]{count}[/] sprite manifests to load";
         logger.LogInformation(LogFormatting.FormatTemplate(WithAccent(LogAccent.Asset, body)));
     }
 
@@ -696,7 +707,7 @@ public static partial class LogTemplates
         string name
     )
     {
-        var body =
+        string body =
             $"Loading sprite [yellow]{current}[/][grey]/[/][yellow]{total}[/] [grey]|[/] [cyan]{EscapeMarkup(category)}[/][grey]/[/][cyan]{EscapeMarkup(name)}[/]";
         logger.LogInformation(LogFormatting.FormatTemplate(WithAccent(LogAccent.Asset, body)));
     }
@@ -713,7 +724,7 @@ public static partial class LogTemplates
         int height
     )
     {
-        var body =
+        string body =
             $"[green]✓[/] [cyan]{EscapeMarkup(category)}[/][grey]/[/][cyan]{EscapeMarkup(name)}[/] [yellow]{format}[/] [grey]({width}x{height}px)[/]";
         logger.LogInformation(LogFormatting.FormatTemplate(WithAccent(LogAccent.Asset, body)));
     }
@@ -723,8 +734,8 @@ public static partial class LogTemplates
     /// </summary>
     public static void LogSpriteLoadingComplete(this ILogger logger, int loaded, int failed)
     {
-        var successColor = failed == 0 ? "green" : "yellow";
-        var body =
+        string successColor = failed == 0 ? "green" : "yellow";
+        string body =
             $"[green]✓ Sprite loading complete[/] [grey]|[/] [{successColor}]{loaded} loaded[/] [grey]{failed} failed[/]";
         logger.LogInformation(LogFormatting.FormatTemplate(WithAccent(LogAccent.Asset, body)));
     }
@@ -739,7 +750,7 @@ public static partial class LogTemplates
         int skippedCount
     )
     {
-        var body =
+        string body =
             $"[green]✓ Loaded[/] [yellow]{loadedCount}[/] new sprites for map [cyan]{mapId}[/] [grey]|[/] [grey]{skippedCount} already loaded[/]";
         logger.LogInformation(LogFormatting.FormatTemplate(WithAccent(LogAccent.Map, body)));
     }
@@ -749,7 +760,7 @@ public static partial class LogTemplates
     /// </summary>
     public static void LogSpritesUnloadedForMap(this ILogger logger, int count, int mapId)
     {
-        var body = $"Unloaded [yellow]{count}[/] sprites for map [cyan]{mapId}[/]";
+        string body = $"Unloaded [yellow]{count}[/] sprites for map [cyan]{mapId}[/]";
         logger.LogInformation(LogFormatting.FormatTemplate(WithAccent(LogAccent.Map, body)));
     }
 
@@ -764,8 +775,8 @@ public static partial class LogTemplates
         int height
     )
     {
-        var timeColor = timeMs > 100 ? "yellow" : "green";
-        var body =
+        string timeColor = timeMs > 100 ? "yellow" : "green";
+        string body =
             $"[green]✓[/] [cyan]{EscapeMarkup(textureId)}[/] [{timeColor}]{timeMs:F1}ms[/] [grey]({width}x{height}px)[/]";
         logger.LogDebug(LogFormatting.FormatTemplate(WithAccent(LogAccent.Asset, body)));
     }
@@ -775,7 +786,7 @@ public static partial class LogTemplates
     /// </summary>
     public static void LogSlowTextureLoad(this ILogger logger, string textureId, double timeMs)
     {
-        var body =
+        string body =
             $"[orange3]⚠[/] Slow load [cyan]{EscapeMarkup(textureId)}[/] [red]{timeMs:F1}ms[/]";
         logger.LogWarning(LogFormatting.FormatTemplate(WithAccent(LogAccent.Performance, body)));
     }
@@ -785,7 +796,7 @@ public static partial class LogTemplates
     /// </summary>
     public static void LogSpriteSheetNotFound(this ILogger logger, string category, string name)
     {
-        var body =
+        string body =
             $"[orange3]⚠[/] Sprite sheet not found for [cyan]{EscapeMarkup(category)}[/][grey]/[/][cyan]{EscapeMarkup(name)}[/]";
         logger.LogWarning(LogFormatting.FormatTemplate(WithAccent(LogAccent.Asset, body)));
     }
@@ -795,7 +806,7 @@ public static partial class LogTemplates
     /// </summary>
     public static void LogSpriteLoadedOnDemand(this ILogger logger, string textureKey)
     {
-        var body = $"Loaded sprite sheet on-demand: [cyan]{EscapeMarkup(textureKey)}[/]";
+        string body = $"Loaded sprite sheet on-demand: [cyan]{EscapeMarkup(textureKey)}[/]";
         logger.LogDebug(LogFormatting.FormatTemplate(WithAccent(LogAccent.Asset, body)));
     }
 
@@ -804,7 +815,7 @@ public static partial class LogTemplates
     /// </summary>
     public static void LogSpritesRequiredForMap(this ILogger logger, int mapId, int count)
     {
-        var body =
+        string body =
             $"Loading sprites for map [yellow]{mapId}[/] [grey]|[/] [grey]{count} sprites required[/]";
         logger.LogDebug(LogFormatting.FormatTemplate(WithAccent(LogAccent.Map, body)));
     }
@@ -814,7 +825,7 @@ public static partial class LogTemplates
     /// </summary>
     public static void LogInvalidSpriteIdFormat(this ILogger logger, string spriteId)
     {
-        var body = $"[orange3]⚠[/] Invalid sprite ID format: [red]{EscapeMarkup(spriteId)}[/]";
+        string body = $"[orange3]⚠[/] Invalid sprite ID format: [red]{EscapeMarkup(spriteId)}[/]";
         logger.LogWarning(LogFormatting.FormatTemplate(WithAccent(LogAccent.Asset, body)));
     }
 
@@ -827,7 +838,7 @@ public static partial class LogTemplates
         string spriteName
     )
     {
-        var body =
+        string body =
             $"[orange3]⚠[/] Sprite texture file not found for [cyan]{EscapeMarkup(category)}[/][grey]/[/][cyan]{EscapeMarkup(spriteName)}[/]";
         logger.LogWarning(LogFormatting.FormatTemplate(WithAccent(LogAccent.Asset, body)));
     }
@@ -837,7 +848,7 @@ public static partial class LogTemplates
     /// </summary>
     public static void LogSpriteTextureLoadedDebug(this ILogger logger, string textureKey)
     {
-        var body = $"Loaded sprite texture: [cyan]{EscapeMarkup(textureKey)}[/]";
+        string body = $"Loaded sprite texture: [cyan]{EscapeMarkup(textureKey)}[/]";
         logger.LogDebug(LogFormatting.FormatTemplate(WithAccent(LogAccent.Asset, body)));
     }
 
@@ -846,7 +857,7 @@ public static partial class LogTemplates
     /// </summary>
     public static void LogNoSpritesForMap(this ILogger logger, int mapId)
     {
-        var body = $"No sprites tracked for map [yellow]{mapId}[/]";
+        string body = $"No sprites tracked for map [yellow]{mapId}[/]";
         logger.LogDebug(LogFormatting.FormatTemplate(WithAccent(LogAccent.Map, body)));
     }
 
@@ -862,7 +873,7 @@ public static partial class LogTemplates
         double endMs
     )
     {
-        var body =
+        string body =
             $"[cyan]Setup[/]=[yellow]{setupMs:F2}ms[/] [cyan]Begin[/]=[yellow]{beginMs:F2}ms[/] [cyan]Tiles[/]=[yellow]{tilesMs:F2}ms[/] [cyan]Sprites[/]=[yellow]{spritesMs:F2}ms[/] [cyan]End[/]=[yellow]{endMs:F2}ms[/]";
         logger.LogDebug(LogFormatting.FormatTemplate(WithAccent(LogAccent.Performance, body)));
     }
@@ -872,7 +883,7 @@ public static partial class LogTemplates
     /// </summary>
     public static void LogImageLayersRendered(this ILogger logger, int count)
     {
-        var body = $"[cyan]Image Layers Rendered:[/] [yellow]{count}[/]";
+        string body = $"[cyan]Image Layers Rendered:[/] [yellow]{count}[/]";
         logger.LogDebug(LogFormatting.FormatTemplate(WithAccent(LogAccent.Render, body)));
     }
 
@@ -881,7 +892,7 @@ public static partial class LogTemplates
     /// </summary>
     public static void LogSpriteManifestNotFound(this ILogger logger, string spriteName)
     {
-        var body =
+        string body =
             $"[orange3]⚠[/] Sprite manifest not found for [red]{EscapeMarkup(spriteName)}[/]";
         logger.LogWarning(LogFormatting.FormatTemplate(WithAccent(LogAccent.Asset, body)));
     }
@@ -896,7 +907,7 @@ public static partial class LogTemplates
         string spriteName
     )
     {
-        var body =
+        string body =
             $"[orange3]⚠[/] Failed to load sprite manifest for [cyan]{EscapeMarkup(category)}[/][grey]/[/][cyan]{EscapeMarkup(spriteName)}[/]";
         logger.LogWarning(ex, LogFormatting.FormatTemplate(WithAccent(LogAccent.Asset, body)));
     }
@@ -911,7 +922,7 @@ public static partial class LogTemplates
         string spriteName
     )
     {
-        var body =
+        string body =
             $"[orange3]⚠[/] Animation [red]'{EscapeMarkup(animationName)}'[/] not found in sprite [cyan]{EscapeMarkup(category)}[/][grey]/[/][cyan]{EscapeMarkup(spriteName)}[/]";
         logger.LogWarning(LogFormatting.FormatTemplate(WithAccent(LogAccent.Render, body)));
     }
@@ -922,26 +933,39 @@ public static partial class LogTemplates
 
     private static string WithAccent(LogAccent accent, string message)
     {
-        var style = AccentStyles.TryGetValue(accent, out var value) ? value : ("•", "grey");
-        var prefix = $"[{style.Item2}]{style.Item1.PadRight(3)}[/]";
+        (string, string) style = AccentStyles.TryGetValue(
+            accent,
+            out (string Glyph, string Color) value
+        )
+            ? value
+            : ("•", "grey");
+        string prefix = $"[{style.Item2}]{style.Item1.PadRight(3)}[/]";
         return $"{prefix} {message}";
     }
 
     private static string PadRightInvariant(string value, int width)
     {
         if (string.IsNullOrEmpty(value))
+        {
             return new string(' ', width);
+        }
+
         if (value.Length >= width)
+        {
             return value.Length == width ? value : value[..width];
+        }
+
         return value + new string(' ', width - value.Length);
     }
 
     private static string FormatDetails(params (string key, object value)[] details)
     {
         if (details == null || details.Length == 0)
+        {
             return "";
+        }
 
-        var formatted = string.Join(
+        string formatted = string.Join(
             ", ",
             details.Select(d =>
                 $"[grey]{EscapeMarkup(d.key)}:[/] [cyan]{EscapeMarkup(d.value?.ToString() ?? "")}[/]"
@@ -953,9 +977,11 @@ public static partial class LogTemplates
     private static string FormatComponents(params (string key, object value)[] components)
     {
         if (components == null || components.Length == 0)
+        {
             return "";
+        }
 
-        var formatted = string.Join(
+        string formatted = string.Join(
             "[grey],[/] ",
             components.Select(c => $"[cyan]{EscapeMarkup(c.key)}[/]")
         );
@@ -971,7 +997,7 @@ public static partial class LogTemplates
     /// </summary>
     public static void LogGameDataLoadingStarted(this ILogger logger, string path)
     {
-        var body = $"Loading game data from [cyan]{EscapeMarkup(path)}[/]";
+        string body = $"Loading game data from [cyan]{EscapeMarkup(path)}[/]";
         logger.LogInformation(LogFormatting.FormatTemplate(WithAccent(LogAccent.Asset, body)));
     }
 
@@ -980,11 +1006,11 @@ public static partial class LogTemplates
     /// </summary>
     public static void LogGameDataLoaded(this ILogger logger, Dictionary<string, int> loadedCounts)
     {
-        var parts = loadedCounts.Select(kvp =>
+        IEnumerable<string> parts = loadedCounts.Select(kvp =>
             $"[cyan]{EscapeMarkup(kvp.Key)}:[/] [yellow]{kvp.Value}[/]"
         );
-        var summary = string.Join("[grey], [/]", parts);
-        var body = $"[green]✓ Game data loaded:[/] {summary}";
+        string summary = string.Join("[grey], [/]", parts);
+        string body = $"[green]✓ Game data loaded:[/] {summary}";
         logger.LogInformation(LogFormatting.FormatTemplate(WithAccent(LogAccent.Asset, body)));
     }
 
@@ -993,7 +1019,7 @@ public static partial class LogTemplates
     /// </summary>
     public static void LogDirectoryNotFound(this ILogger logger, string directoryType, string path)
     {
-        var body =
+        string body =
             $"[orange3]⚠[/] [cyan]{EscapeMarkup(directoryType)}[/] directory not found: [yellow]{EscapeMarkup(path)}[/]";
         logger.LogWarning(LogFormatting.FormatTemplate(WithAccent(LogAccent.Asset, body)));
     }
@@ -1003,7 +1029,7 @@ public static partial class LogTemplates
     /// </summary>
     public static void LogNpcsLoaded(this ILogger logger, int count)
     {
-        var body = $"[green]✓ Loaded[/] [yellow]{count}[/] [cyan]NPCs[/]";
+        string body = $"[green]✓ Loaded[/] [yellow]{count}[/] [cyan]NPCs[/]";
         logger.LogInformation(LogFormatting.FormatTemplate(WithAccent(LogAccent.Asset, body)));
     }
 
@@ -1012,7 +1038,7 @@ public static partial class LogTemplates
     /// </summary>
     public static void LogNpcLoaded(this ILogger logger, string npcId)
     {
-        var body = $"Loaded NPC: [yellow]{EscapeMarkup(npcId)}[/]";
+        string body = $"Loaded NPC: [yellow]{EscapeMarkup(npcId)}[/]";
         logger.LogDebug(LogFormatting.FormatTemplate(WithAccent(LogAccent.Asset, body)));
     }
 
@@ -1021,11 +1047,15 @@ public static partial class LogTemplates
     /// </summary>
     public static void LogNpcLoadFailed(this ILogger logger, string file, Exception? ex = null)
     {
-        var body = $"[red]✗ Error loading NPC from[/] [cyan]{EscapeMarkup(file)}[/]";
+        string body = $"[red]✗ Error loading NPC from[/] [cyan]{EscapeMarkup(file)}[/]";
         if (ex != null)
+        {
             logger.LogError(ex, LogFormatting.FormatTemplate(WithAccent(LogAccent.Asset, body)));
+        }
         else
+        {
             logger.LogError(LogFormatting.FormatTemplate(WithAccent(LogAccent.Asset, body)));
+        }
     }
 
     /// <summary>
@@ -1033,7 +1063,7 @@ public static partial class LogTemplates
     /// </summary>
     public static void LogNpcDeserializeFailed(this ILogger logger, string file)
     {
-        var body = $"[orange3]⚠[/] Failed to deserialize NPC from [cyan]{EscapeMarkup(file)}[/]";
+        string body = $"[orange3]⚠[/] Failed to deserialize NPC from [cyan]{EscapeMarkup(file)}[/]";
         logger.LogWarning(LogFormatting.FormatTemplate(WithAccent(LogAccent.Asset, body)));
     }
 
@@ -1042,7 +1072,7 @@ public static partial class LogTemplates
     /// </summary>
     public static void LogNpcMissingField(this ILogger logger, string file, string fieldName)
     {
-        var body =
+        string body =
             $"[orange3]⚠[/] NPC in [cyan]{EscapeMarkup(file)}[/] missing [red]{fieldName}[/]";
         logger.LogWarning(LogFormatting.FormatTemplate(WithAccent(LogAccent.Asset, body)));
     }
@@ -1052,7 +1082,7 @@ public static partial class LogTemplates
     /// </summary>
     public static void LogTrainersLoaded(this ILogger logger, int count)
     {
-        var body = $"[green]✓ Loaded[/] [yellow]{count}[/] [cyan]trainers[/]";
+        string body = $"[green]✓ Loaded[/] [yellow]{count}[/] [cyan]trainers[/]";
         logger.LogInformation(LogFormatting.FormatTemplate(WithAccent(LogAccent.Asset, body)));
     }
 
@@ -1061,7 +1091,7 @@ public static partial class LogTemplates
     /// </summary>
     public static void LogTrainerLoaded(this ILogger logger, string trainerId)
     {
-        var body = $"Loaded Trainer: [yellow]{EscapeMarkup(trainerId)}[/]";
+        string body = $"Loaded Trainer: [yellow]{EscapeMarkup(trainerId)}[/]";
         logger.LogDebug(LogFormatting.FormatTemplate(WithAccent(LogAccent.Asset, body)));
     }
 
@@ -1070,11 +1100,15 @@ public static partial class LogTemplates
     /// </summary>
     public static void LogTrainerLoadFailed(this ILogger logger, string file, Exception? ex = null)
     {
-        var body = $"[red]✗ Error loading Trainer from[/] [cyan]{EscapeMarkup(file)}[/]";
+        string body = $"[red]✗ Error loading Trainer from[/] [cyan]{EscapeMarkup(file)}[/]";
         if (ex != null)
+        {
             logger.LogError(ex, LogFormatting.FormatTemplate(WithAccent(LogAccent.Asset, body)));
+        }
         else
+        {
             logger.LogError(LogFormatting.FormatTemplate(WithAccent(LogAccent.Asset, body)));
+        }
     }
 
     /// <summary>
@@ -1082,7 +1116,7 @@ public static partial class LogTemplates
     /// </summary>
     public static void LogTrainerDeserializeFailed(this ILogger logger, string file)
     {
-        var body =
+        string body =
             $"[orange3]⚠[/] Failed to deserialize Trainer from [cyan]{EscapeMarkup(file)}[/]";
         logger.LogWarning(LogFormatting.FormatTemplate(WithAccent(LogAccent.Asset, body)));
     }
@@ -1092,7 +1126,7 @@ public static partial class LogTemplates
     /// </summary>
     public static void LogTrainerMissingField(this ILogger logger, string file, string fieldName)
     {
-        var body =
+        string body =
             $"[orange3]⚠[/] Trainer in [cyan]{EscapeMarkup(file)}[/] missing [red]{fieldName}[/]";
         logger.LogWarning(LogFormatting.FormatTemplate(WithAccent(LogAccent.Asset, body)));
     }
@@ -1102,7 +1136,7 @@ public static partial class LogTemplates
     /// </summary>
     public static void LogMapsLoaded(this ILogger logger, int count)
     {
-        var body = $"[green]✓ Loaded[/] [yellow]{count}[/] [cyan]maps[/]";
+        string body = $"[green]✓ Loaded[/] [yellow]{count}[/] [cyan]maps[/]";
         logger.LogInformation(LogFormatting.FormatTemplate(WithAccent(LogAccent.Map, body)));
     }
 
@@ -1116,7 +1150,7 @@ public static partial class LogTemplates
         string relativePath
     )
     {
-        var body =
+        string body =
             $"Loaded Map: [yellow]{EscapeMarkup(mapId)}[/] [grey]([/][cyan]{EscapeMarkup(displayName)}[/][grey]) from[/] [cyan]{EscapeMarkup(relativePath)}[/]";
         logger.LogDebug(LogFormatting.FormatTemplate(WithAccent(LogAccent.Map, body)));
     }
@@ -1126,7 +1160,7 @@ public static partial class LogTemplates
     /// </summary>
     public static void LogMapOverridden(this ILogger logger, string mapId, string displayName)
     {
-        var body =
+        string body =
             $"[orange3]⚠[/] Overriding Map: [cyan]{EscapeMarkup(mapId)}[/] [grey]([/][yellow]{EscapeMarkup(displayName)}[/][grey]) with mod data[/]";
         logger.LogDebug(LogFormatting.FormatTemplate(WithAccent(LogAccent.Map, body)));
     }
@@ -1136,11 +1170,15 @@ public static partial class LogTemplates
     /// </summary>
     public static void LogMapLoadFailed(this ILogger logger, string file, Exception? ex = null)
     {
-        var body = $"[red]✗ Error loading Map from[/] [cyan]{EscapeMarkup(file)}[/]";
+        string body = $"[red]✗ Error loading Map from[/] [cyan]{EscapeMarkup(file)}[/]";
         if (ex != null)
+        {
             logger.LogError(ex, LogFormatting.FormatTemplate(WithAccent(LogAccent.Map, body)));
+        }
         else
+        {
             logger.LogError(LogFormatting.FormatTemplate(WithAccent(LogAccent.Map, body)));
+        }
     }
 
     /// <summary>
@@ -1148,7 +1186,8 @@ public static partial class LogTemplates
     /// </summary>
     public static void LogTiledParseFailed(this ILogger logger, string file)
     {
-        var body = $"[orange3]⚠[/] Failed to parse Tiled JSON from [cyan]{EscapeMarkup(file)}[/]";
+        string body =
+            $"[orange3]⚠[/] Failed to parse Tiled JSON from [cyan]{EscapeMarkup(file)}[/]";
         logger.LogWarning(LogFormatting.FormatTemplate(WithAccent(LogAccent.Map, body)));
     }
 
@@ -1157,7 +1196,7 @@ public static partial class LogTemplates
     /// </summary>
     public static void LogSpriteScanningStarted(this ILogger logger, string path)
     {
-        var body = $"Scanning for sprite manifests in [cyan]{EscapeMarkup(path)}[/]";
+        string body = $"Scanning for sprite manifests in [cyan]{EscapeMarkup(path)}[/]";
         logger.LogInformation(LogFormatting.FormatTemplate(WithAccent(LogAccent.Asset, body)));
     }
 
@@ -1166,7 +1205,7 @@ public static partial class LogTemplates
     /// </summary>
     public static void LogSpritesLoaded(this ILogger logger, int count)
     {
-        var body =
+        string body =
             $"[green]✓ Loaded[/] [yellow]{count}[/] [cyan]total sprites[/] from all categories";
         logger.LogInformation(LogFormatting.FormatTemplate(WithAccent(LogAccent.Asset, body)));
     }
@@ -1176,7 +1215,7 @@ public static partial class LogTemplates
     /// </summary>
     public static void LogSpriteRegistered(this ILogger logger, string lookupKey, string path)
     {
-        var body =
+        string body =
             $"Registered sprite: [yellow]{EscapeMarkup(lookupKey)}[/] [grey]→[/] [cyan]{EscapeMarkup(path)}[/]";
         logger.LogDebug(LogFormatting.FormatTemplate(WithAccent(LogAccent.Asset, body)));
     }
@@ -1190,11 +1229,15 @@ public static partial class LogTemplates
         Exception? ex = null
     )
     {
-        var body = $"[orange3]⚠[/] Failed to load manifest from [cyan]{EscapeMarkup(path)}[/]";
+        string body = $"[orange3]⚠[/] Failed to load manifest from [cyan]{EscapeMarkup(path)}[/]";
         if (ex != null)
+        {
             logger.LogWarning(ex, LogFormatting.FormatTemplate(WithAccent(LogAccent.Asset, body)));
+        }
         else
+        {
             logger.LogWarning(LogFormatting.FormatTemplate(WithAccent(LogAccent.Asset, body)));
+        }
     }
 
     /// <summary>
@@ -1202,7 +1245,8 @@ public static partial class LogTemplates
     /// </summary>
     public static void LogSpriteNotFound(this ILogger logger, string spriteName)
     {
-        var body = $"[orange3]⚠[/] Sprite [red]{EscapeMarkup(spriteName)}[/] not found in manifest";
+        string body =
+            $"[orange3]⚠[/] Sprite [red]{EscapeMarkup(spriteName)}[/] not found in manifest";
         logger.LogWarning(LogFormatting.FormatTemplate(WithAccent(LogAccent.Asset, body)));
     }
 
@@ -1211,7 +1255,7 @@ public static partial class LogTemplates
     /// </summary>
     public static void LogSpritePathNotFound(this ILogger logger, string lookupKey)
     {
-        var body = $"[orange3]⚠[/] Sprite path not found for [red]{EscapeMarkup(lookupKey)}[/]";
+        string body = $"[orange3]⚠[/] Sprite path not found for [red]{EscapeMarkup(lookupKey)}[/]";
         logger.LogWarning(LogFormatting.FormatTemplate(WithAccent(LogAccent.Asset, body)));
     }
 
@@ -1220,7 +1264,7 @@ public static partial class LogTemplates
     /// </summary>
     public static void LogSpriteCacheCleared(this ILogger logger)
     {
-        var body = "Sprite manifest cache cleared";
+        string body = "Sprite manifest cache cleared";
         logger.LogDebug(LogFormatting.FormatTemplate(WithAccent(LogAccent.Asset, body)));
     }
 
@@ -1229,7 +1273,7 @@ public static partial class LogTemplates
     /// </summary>
     public static void LogSpriteClearedFromCache(this ILogger logger, string spriteKey)
     {
-        var body = $"Cleared sprite manifest from cache: [yellow]{EscapeMarkup(spriteKey)}[/]";
+        string body = $"Cleared sprite manifest from cache: [yellow]{EscapeMarkup(spriteKey)}[/]";
         logger.LogDebug(LogFormatting.FormatTemplate(WithAccent(LogAccent.Asset, body)));
     }
 
@@ -1238,7 +1282,7 @@ public static partial class LogTemplates
     /// </summary>
     public static void LogNpcCached(this ILogger logger, string npcId)
     {
-        var body = $"Cached NPC definition: [yellow]{EscapeMarkup(npcId)}[/]";
+        string body = $"Cached NPC definition: [yellow]{EscapeMarkup(npcId)}[/]";
         logger.LogDebug(LogFormatting.FormatTemplate(WithAccent(LogAccent.Asset, body)));
     }
 
@@ -1247,7 +1291,7 @@ public static partial class LogTemplates
     /// </summary>
     public static void LogTrainerCached(this ILogger logger, string trainerId)
     {
-        var body = $"Cached Trainer definition: [yellow]{EscapeMarkup(trainerId)}[/]";
+        string body = $"Cached Trainer definition: [yellow]{EscapeMarkup(trainerId)}[/]";
         logger.LogDebug(LogFormatting.FormatTemplate(WithAccent(LogAccent.Asset, body)));
     }
 
@@ -1256,7 +1300,7 @@ public static partial class LogTemplates
     /// </summary>
     public static void LogMapCached(this ILogger logger, string mapId)
     {
-        var body = $"Cached map definition: [yellow]{EscapeMarkup(mapId)}[/]";
+        string body = $"Cached map definition: [yellow]{EscapeMarkup(mapId)}[/]";
         logger.LogDebug(LogFormatting.FormatTemplate(WithAccent(LogAccent.Map, body)));
     }
 

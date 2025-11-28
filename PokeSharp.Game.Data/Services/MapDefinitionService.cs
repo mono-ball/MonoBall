@@ -64,11 +64,13 @@ public class MapDefinitionService
     public MapDefinition? GetMap(MapIdentifier mapId)
     {
         // Check cache first
-        if (_mapCache.TryGetValue(mapId.Value, out var cached))
+        if (_mapCache.TryGetValue(mapId.Value, out MapDefinition? cached))
+        {
             return cached;
+        }
 
         // Query database with AsNoTracking (read-only, no change tracking overhead)
-        var map = _context.Maps.AsNoTracking().FirstOrDefault(m => m.MapId == mapId);
+        MapDefinition? map = _context.Maps.AsNoTracking().FirstOrDefault(m => m.MapId == mapId);
 
         // Cache for next time
         if (map != null)
@@ -120,11 +122,13 @@ public class MapDefinitionService
     /// </summary>
     public MapDefinition? GetConnectedMap(MapIdentifier mapId, MapDirection direction)
     {
-        var map = GetMap(mapId);
+        MapDefinition? map = GetMap(mapId);
         if (map == null)
+        {
             return null;
+        }
 
-        var connectedMapId = direction switch
+        MapIdentifier? connectedMapId = direction switch
         {
             MapDirection.North => map.NorthMapId,
             MapDirection.South => map.SouthMapId,

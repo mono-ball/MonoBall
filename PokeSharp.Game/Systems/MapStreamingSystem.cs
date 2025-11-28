@@ -2,13 +2,14 @@ using Arch.Core;
 using Arch.Core.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
-using PokeSharp.Engine.Common.Logging;
 using PokeSharp.Engine.Core.Systems;
 using PokeSharp.Engine.Core.Types;
 using PokeSharp.Game.Components;
 using PokeSharp.Game.Components.Maps;
 using PokeSharp.Game.Components.Movement;
 using PokeSharp.Game.Components.Player;
+using PokeSharp.Game.Components.Relationships;
+using PokeSharp.Game.Components.Tiles;
 using PokeSharp.Game.Data.Entities;
 using PokeSharp.Game.Data.MapLoading.Tiled.Core;
 using PokeSharp.Game.Data.Services;
@@ -37,15 +38,22 @@ namespace PokeSharp.Game.Systems;
 public class MapStreamingSystem : SystemBase, IUpdateSystem
 {
     private readonly ILogger<MapStreamingSystem>? _logger;
-    private readonly MapLoader _mapLoader;
     private readonly MapDefinitionService _mapDefinitionService;
+
+    // Map info cache to avoid nested queries (O(N×M) -> O(N))
+    private readonly Dictionary<
+        string,
+        (MapInfo Info, MapWorldPosition WorldPos, MapDefinition? Definition)
+    > _mapInfoCache = new(10);
+
+    private readonly MapLoader _mapLoader;
+
+    // Optional lifecycle manager for proper entity cleanup (set after initialization)
+    private MapLifecycleManager? _lifecycleManager;
+    private QueryDescription _mapInfoQuery;
 
     // Cached queries for performance
     private QueryDescription _playerQuery;
-    private QueryDescription _mapInfoQuery;
-
-    // Map info cache to avoid nested queries (O(N×M) -> O(N))
-    private readonly Dictionary<string, (MapInfo Info, MapWorldPosition WorldPos, MapDefinition? Definition)> _mapInfoCache = new(10);
 
     /// <summary>
     ///     Creates a new MapStreamingSystem with required services.
@@ -56,10 +64,12 @@ public class MapStreamingSystem : SystemBase, IUpdateSystem
     public MapStreamingSystem(
         MapLoader mapLoader,
         MapDefinitionService mapDefinitionService,
-        ILogger<MapStreamingSystem>? logger = null)
+        ILogger<MapStreamingSystem>? logger = null
+    )
     {
         _mapLoader = mapLoader ?? throw new ArgumentNullException(nameof(mapLoader));
-        _mapDefinitionService = mapDefinitionService ?? throw new ArgumentNullException(nameof(mapDefinitionService));
+        _mapDefinitionService =
+            mapDefinitionService ?? throw new ArgumentNullException(nameof(mapDefinitionService));
         _logger = logger;
     }
 
@@ -75,19 +85,19 @@ public class MapStreamingSystem : SystemBase, IUpdateSystem
         base.Initialize(world);
 
         // Query for player with streaming component
-        _playerQuery = new QueryDescription()
-            .WithAll<Player, Position, MapStreaming>();
+        _playerQuery = new QueryDescription().WithAll<Player, Position, MapStreaming>();
 
         // Query for map info entities with world position
-        _mapInfoQuery = new QueryDescription()
-            .WithAll<MapInfo, MapWorldPosition>();
+        _mapInfoQuery = new QueryDescription().WithAll<MapInfo, MapWorldPosition>();
     }
 
     /// <inheritdoc />
     public override void Update(World world, float deltaTime)
     {
         if (!Enabled)
+        {
             return;
+        }
 
         EnsureInitialized();
 
@@ -105,16 +115,31 @@ public class MapStreamingSystem : SystemBase, IUpdateSystem
     }
 
     /// <summary>
+    ///     Sets the MapLifecycleManager for proper entity cleanup during map unloading.
+    ///     Must be called after MapLifecycleManager is created (delayed initialization).
+    /// </summary>
+    /// <param name="lifecycleManager">The lifecycle manager instance.</param>
+    public void SetLifecycleManager(MapLifecycleManager lifecycleManager)
+    {
+        _lifecycleManager =
+            lifecycleManager ?? throw new ArgumentNullException(nameof(lifecycleManager));
+        _logger?.LogDebug("MapStreamingSystem: MapLifecycleManager set for entity cleanup");
+    }
+
+    /// <summary>
     ///     Updates the map info cache with current map data.
     ///     Called once per frame to avoid nested queries during streaming checks.
     /// </summary>
     private void UpdateMapInfoCache(World world)
     {
         _mapInfoCache.Clear();
-        world.Query(in _mapInfoQuery, (ref MapInfo info, ref MapWorldPosition pos) =>
-        {
-            _mapInfoCache[info.MapName] = (info, pos, null);
-        });
+        world.Query(
+            in _mapInfoQuery,
+            (ref MapInfo info, ref MapWorldPosition pos) =>
+            {
+                _mapInfoCache[info.MapName] = (info, pos, null);
+            }
+        );
     }
 
     /// <summary>
@@ -125,16 +150,29 @@ public class MapStreamingSystem : SystemBase, IUpdateSystem
         World world,
         Entity playerEntity,
         ref Position position,
-        ref MapStreaming streaming)
+        ref MapStreaming streaming
+    )
     {
+        // Skip streaming if no maps are loaded (we're in a warp transition)
+        if (_mapInfoCache.Count == 0)
+        {
+            _logger?.LogDebug("Skipping map streaming - no maps loaded (likely mid-warp transition)");
+            return;
+        }
+
         // Create local copy to avoid ref struct capture in lambda
-        var streamingCopy = streaming;
+        MapStreaming streamingCopy = streaming;
 
         // Try to build the map context from cached data
-        var context = TryGetMapContext(streamingCopy.CurrentMapId);
+        MapLoadContext? context = TryGetMapContext(streamingCopy.CurrentMapId);
         if (!context.HasValue)
         {
-            _logger?.LogError("Current map not found for streaming: {MapId}", streamingCopy.CurrentMapId.Value);
+            // This can happen during warp transitions when the player's MapStreaming.CurrentMapId
+            // hasn't been updated yet but the old map is already unloaded
+            _logger?.LogDebug(
+                "Current map not found for streaming (may be transitioning): {MapId}",
+                streamingCopy.CurrentMapId.Value
+            );
             return;
         }
 
@@ -142,7 +180,13 @@ public class MapStreamingSystem : SystemBase, IUpdateSystem
         LoadAllConnections(world, ref streamingCopy, context.Value);
 
         // Update current map if player has crossed boundary
-        UpdateCurrentMap(world, ref position, ref streamingCopy, context.Value.WorldPosition, context.Value.Info);
+        UpdateCurrentMap(
+            world,
+            ref position,
+            ref streamingCopy,
+            context.Value.WorldPosition,
+            context.Value.Info
+        );
 
         // Unload distant maps
         UnloadDistantMaps(world, ref position, ref streamingCopy);
@@ -156,12 +200,21 @@ public class MapStreamingSystem : SystemBase, IUpdateSystem
     /// </summary>
     private MapLoadContext? TryGetMapContext(MapIdentifier mapId)
     {
-        if (!_mapInfoCache.TryGetValue(mapId.Value, out var mapData))
+        if (
+            !_mapInfoCache.TryGetValue(
+                mapId.Value,
+                out (MapInfo Info, MapWorldPosition WorldPos, MapDefinition? Definition) mapData
+            )
+        )
+        {
             return null;
+        }
 
-        var mapDef = _mapDefinitionService.GetMap(mapId);
+        MapDefinition? mapDef = _mapDefinitionService.GetMap(mapId);
         if (mapDef == null)
+        {
             return null;
+        }
 
         return new MapLoadContext(mapDef, mapData.Info, mapData.WorldPos);
     }
@@ -169,12 +222,9 @@ public class MapStreamingSystem : SystemBase, IUpdateSystem
     /// <summary>
     ///     Loads all connected maps for the given context.
     /// </summary>
-    private void LoadAllConnections(
-        World world,
-        ref MapStreaming streaming,
-        MapLoadContext context)
+    private void LoadAllConnections(World world, ref MapStreaming streaming, MapLoadContext context)
     {
-        foreach (var connection in context.GetAllConnections())
+        foreach (ConnectionInfo connection in context.GetAllConnections())
         {
             LoadAdjacentMapIfNeeded(world, ref streaming, context, connection);
         }
@@ -190,11 +240,14 @@ public class MapStreamingSystem : SystemBase, IUpdateSystem
         World world,
         ref MapStreaming streaming,
         MapLoadContext sourceContext,
-        ConnectionInfo connection)
+        ConnectionInfo connection
+    )
     {
         // Already loaded
         if (streaming.IsMapLoaded(connection.MapId))
+        {
             return;
+        }
 
         _logger?.LogDebug(
             "Loading connected map in {Direction} direction: {MapId} (offset: {Offset} tiles)",
@@ -204,14 +257,19 @@ public class MapStreamingSystem : SystemBase, IUpdateSystem
         );
 
         // Get adjacent map dimensions (needed for correct offset calculation)
-        var adjacentDimensions = GetAdjacentMapDimensions(connection.MapId, sourceContext.Info);
+        (int Width, int Height)? adjacentDimensions = GetAdjacentMapDimensions(
+            connection.MapId,
+            sourceContext.Info
+        );
         if (!adjacentDimensions.HasValue)
+        {
             return;
+        }
 
-        var (adjacentWidth, adjacentHeight) = adjacentDimensions.Value;
+        (int adjacentWidth, int adjacentHeight) = adjacentDimensions.Value;
 
         // Calculate world offset for the adjacent map
-        var adjacentOffset = CalculateMapOffset(
+        Vector2 adjacentOffset = CalculateMapOffset(
             sourceContext.WorldPosition,
             sourceContext.Info.Width,
             sourceContext.Info.Height,
@@ -232,10 +290,38 @@ public class MapStreamingSystem : SystemBase, IUpdateSystem
         try
         {
             // Load the map at the calculated world offset
-            _mapLoader.LoadMapAtOffset(world, connection.MapId, adjacentOffset);
+            Entity mapInfoEntity = _mapLoader.LoadMapAtOffset(
+                world,
+                connection.MapId,
+                adjacentOffset
+            );
             streaming.AddLoadedMap(connection.MapId, adjacentOffset);
 
-            _logger?.LogInformation("Successfully loaded adjacent map: {MapId}", connection.MapId.Value);
+            // Register with MapLifecycleManager for proper entity cleanup during unloading
+            if (_lifecycleManager != null && mapInfoEntity.Has<MapInfo>())
+            {
+                MapInfo mapInfo = mapInfoEntity.Get<MapInfo>();
+                HashSet<string> tilesetTextureIds = _mapLoader.GetLoadedTextureIds(
+                    mapInfo.MapId.Value
+                );
+                // Note: Sprites are loaded lazily, so pass empty set for streaming-loaded maps
+                _lifecycleManager.RegisterMap(
+                    mapInfo.MapId,
+                    connection.MapId.Value,
+                    tilesetTextureIds,
+                    new HashSet<string>()
+                );
+                _logger?.LogDebug(
+                    "Registered streaming map with lifecycle manager: {MapId} (RuntimeId: {RuntimeId})",
+                    connection.MapId.Value,
+                    mapInfo.MapId.Value
+                );
+            }
+
+            _logger?.LogInformation(
+                "Successfully loaded adjacent map: {MapId}",
+                connection.MapId.Value
+            );
         }
         catch (Exception ex)
         {
@@ -246,10 +332,13 @@ public class MapStreamingSystem : SystemBase, IUpdateSystem
     /// <summary>
     ///     Gets dimensions for an adjacent map, with fallback to source dimensions.
     /// </summary>
-    private (int Width, int Height)? GetAdjacentMapDimensions(MapIdentifier mapId, MapInfo sourceInfo)
+    private (int Width, int Height)? GetAdjacentMapDimensions(
+        MapIdentifier mapId,
+        MapInfo sourceInfo
+    )
     {
         // Get adjacent map definition
-        var adjacentMapDef = _mapDefinitionService.GetMap(mapId);
+        MapDefinition? adjacentMapDef = _mapDefinitionService.GetMap(mapId);
         if (adjacentMapDef == null)
         {
             _logger?.LogWarning("Adjacent map definition not found: {MapId}", mapId.Value);
@@ -258,17 +347,22 @@ public class MapStreamingSystem : SystemBase, IUpdateSystem
 
         try
         {
-            var dimensions = _mapLoader.GetMapDimensions(mapId);
+            (int Width, int Height, int TileSize) dimensions = _mapLoader.GetMapDimensions(mapId);
             _logger?.LogDebug(
                 "Adjacent map {MapId} dimensions: {Width}x{Height} tiles",
-                mapId.Value, dimensions.Width, dimensions.Height);
+                mapId.Value,
+                dimensions.Width,
+                dimensions.Height
+            );
             return (dimensions.Width, dimensions.Height);
         }
         catch (Exception ex)
         {
-            _logger?.LogWarning(ex,
+            _logger?.LogWarning(
+                ex,
                 "Failed to get dimensions for adjacent map: {MapId}, using source dimensions as fallback",
-                mapId.Value);
+                mapId.Value
+            );
             return (sourceInfo.Width, sourceInfo.Height);
         }
     }
@@ -277,7 +371,9 @@ public class MapStreamingSystem : SystemBase, IUpdateSystem
     ///     Calculates the world offset for an adjacent map based on direction and connection offset.
     /// </summary>
     /// <remarks>
-    ///     <para><strong>Offset Calculations:</strong></para>
+    ///     <para>
+    ///         <strong>Offset Calculations:</strong>
+    ///     </para>
     ///     <list type="bullet">
     ///         <item>North: Y = sourceOrigin.Y - adjacentHeight, X shifted by connectionOffset</item>
     ///         <item>South: Y = sourceOrigin.Y + sourceHeight, X shifted by connectionOffset</item>
@@ -302,30 +398,43 @@ public class MapStreamingSystem : SystemBase, IUpdateSystem
         int adjacentHeightInTiles,
         int tileSize,
         Direction direction,
-        int connectionOffset)
+        int connectionOffset
+    )
     {
-        var sourceOrigin = sourceMapWorldPos.WorldOrigin;
-        var sourceWidth = sourceWidthInTiles * tileSize;
-        var sourceHeight = sourceHeightInTiles * tileSize;
-        var adjacentWidth = adjacentWidthInTiles * tileSize;
-        var adjacentHeight = adjacentHeightInTiles * tileSize;
-        var offsetPixels = connectionOffset * tileSize;
+        Vector2 sourceOrigin = sourceMapWorldPos.WorldOrigin;
+        int sourceWidth = sourceWidthInTiles * tileSize;
+        int sourceHeight = sourceHeightInTiles * tileSize;
+        int adjacentWidth = adjacentWidthInTiles * tileSize;
+        int adjacentHeight = adjacentHeightInTiles * tileSize;
+        int offsetPixels = connectionOffset * tileSize;
 
         return direction switch
         {
             // North: Place adjacent map ABOVE source. Adjacent's BOTTOM edge touches source's TOP edge.
             // Y = sourceOrigin.Y - adjacentHeight (use adjacent height!)
-            Direction.North => new Vector2(sourceOrigin.X + offsetPixels, sourceOrigin.Y - adjacentHeight),
+            Direction.North => new Vector2(
+                sourceOrigin.X + offsetPixels,
+                sourceOrigin.Y - adjacentHeight
+            ),
             // South: Place adjacent map BELOW source. Adjacent's TOP edge touches source's BOTTOM edge.
             // Y = sourceOrigin.Y + sourceHeight (use source height)
-            Direction.South => new Vector2(sourceOrigin.X + offsetPixels, sourceOrigin.Y + sourceHeight),
+            Direction.South => new Vector2(
+                sourceOrigin.X + offsetPixels,
+                sourceOrigin.Y + sourceHeight
+            ),
             // East: Place adjacent map RIGHT of source. Adjacent's LEFT edge touches source's RIGHT edge.
             // X = sourceOrigin.X + sourceWidth (use source width)
-            Direction.East => new Vector2(sourceOrigin.X + sourceWidth, sourceOrigin.Y + offsetPixels),
+            Direction.East => new Vector2(
+                sourceOrigin.X + sourceWidth,
+                sourceOrigin.Y + offsetPixels
+            ),
             // West: Place adjacent map LEFT of source. Adjacent's RIGHT edge touches source's LEFT edge.
             // X = sourceOrigin.X - adjacentWidth (use adjacent width!)
-            Direction.West => new Vector2(sourceOrigin.X - adjacentWidth, sourceOrigin.Y + offsetPixels),
-            _ => sourceOrigin
+            Direction.West => new Vector2(
+                sourceOrigin.X - adjacentWidth,
+                sourceOrigin.Y + offsetPixels
+            ),
+            _ => sourceOrigin,
         };
     }
 
@@ -342,11 +451,12 @@ public class MapStreamingSystem : SystemBase, IUpdateSystem
         Vector2 point,
         Vector2 rectOrigin,
         int rectWidth,
-        int rectHeight)
+        int rectHeight
+    )
     {
         // Find the closest point on the rectangle to the given point
-        var closestX = MathHelper.Clamp(point.X, rectOrigin.X, rectOrigin.X + rectWidth);
-        var closestY = MathHelper.Clamp(point.Y, rectOrigin.Y, rectOrigin.Y + rectHeight);
+        float closestX = MathHelper.Clamp(point.X, rectOrigin.X, rectOrigin.X + rectWidth);
+        float closestY = MathHelper.Clamp(point.Y, rectOrigin.Y, rectOrigin.Y + rectHeight);
         var closestPoint = new Vector2(closestX, closestY);
 
         // Return distance to that closest point
@@ -361,24 +471,41 @@ public class MapStreamingSystem : SystemBase, IUpdateSystem
         ref Position position,
         ref MapStreaming streaming,
         MapWorldPosition currentMapWorldPos,
-        MapInfo currentMapInfo)
+        MapInfo currentMapInfo
+    )
     {
         var playerPos = new Vector2(position.PixelX, position.PixelY);
 
         // Still in current map
         if (currentMapWorldPos.Contains(playerPos))
+        {
             return;
+        }
 
         // Find new map
-        var newMapId = TryFindContainingMap(playerPos, streaming, streaming.CurrentMapId);
+        MapIdentifier? newMapId = TryFindContainingMap(
+            playerPos,
+            streaming,
+            streaming.CurrentMapId
+        );
         if (!newMapId.HasValue)
+        {
             return;
+        }
 
-        var offset = streaming.GetMapOffset(newMapId.Value);
+        Vector2? offset = streaming.GetMapOffset(newMapId.Value);
         if (!offset.HasValue)
+        {
             return;
+        }
 
-        UpdatePlayerMapPosition(ref position, ref streaming, newMapId.Value, offset.Value, currentMapInfo.TileSize);
+        UpdatePlayerMapPosition(
+            ref position,
+            ref streaming,
+            newMapId.Value,
+            offset.Value,
+            currentMapInfo.TileSize
+        );
     }
 
     /// <summary>
@@ -387,26 +514,41 @@ public class MapStreamingSystem : SystemBase, IUpdateSystem
     private MapIdentifier? TryFindContainingMap(
         Vector2 playerPos,
         MapStreaming streaming,
-        MapIdentifier currentMapId)
+        MapIdentifier currentMapId
+    )
     {
-        foreach (var loadedMapId in streaming.LoadedMaps)
+        foreach (MapIdentifier loadedMapId in streaming.LoadedMaps)
         {
             if (loadedMapId.Value == currentMapId.Value)
+            {
                 continue;
+            }
 
-            var offset = streaming.GetMapOffset(loadedMapId);
-            if (!offset.HasValue || !_mapInfoCache.TryGetValue(loadedMapId.Value, out var mapData))
+            Vector2? offset = streaming.GetMapOffset(loadedMapId);
+            if (
+                !offset.HasValue
+                || !_mapInfoCache.TryGetValue(
+                    loadedMapId.Value,
+                    out (MapInfo Info, MapWorldPosition WorldPos, MapDefinition? Definition) mapData
+                )
+            )
+            {
                 continue;
+            }
 
             var bounds = new Rectangle(
                 (int)offset.Value.X,
                 (int)offset.Value.Y,
                 mapData.Info.Width * mapData.Info.TileSize,
-                mapData.Info.Height * mapData.Info.TileSize);
+                mapData.Info.Height * mapData.Info.TileSize
+            );
 
             if (bounds.Contains(playerPos))
+            {
                 return loadedMapId;
+            }
         }
+
         return null;
     }
 
@@ -418,17 +560,24 @@ public class MapStreamingSystem : SystemBase, IUpdateSystem
         ref MapStreaming streaming,
         MapIdentifier newMapId,
         Vector2 newMapOffset,
-        int tileSize)
+        int tileSize
+    )
     {
-        var oldMapId = position.MapId;
-        var oldGridX = position.X;
-        var oldGridY = position.Y;
+        MapRuntimeId oldMapId = position.MapId;
+        int oldGridX = position.X;
+        int oldGridY = position.Y;
 
         // Update map reference
-        if (_mapInfoCache.TryGetValue(newMapId.Value, out var newMapData))
+        if (
+            _mapInfoCache.TryGetValue(
+                newMapId.Value,
+                out (MapInfo Info, MapWorldPosition WorldPos, MapDefinition? Definition) newMapData
+            )
+        )
         {
             position.MapId = newMapData.Info.MapId;
         }
+
         streaming.CurrentMapId = newMapId;
 
         // Recalculate grid coordinates
@@ -437,25 +586,30 @@ public class MapStreamingSystem : SystemBase, IUpdateSystem
 
         _logger?.LogInformation(
             "Player crossed map boundary: {OldMapId} -> {NewMapId} | Grid: ({OldX},{OldY}) -> ({NewX},{NewY})",
-            oldMapId, position.MapId, oldGridX, oldGridY, position.X, position.Y);
+            oldMapId,
+            position.MapId,
+            oldGridX,
+            oldGridY,
+            position.X,
+            position.Y
+        );
     }
 
     /// <summary>
     ///     Unloads maps that are not connected to the current map.
     ///     Pokemon-style: only keep current map and its direct connections.
     /// </summary>
-    private void UnloadDistantMaps(
-        World world,
-        ref Position position,
-        ref MapStreaming streaming)
+    private void UnloadDistantMaps(World world, ref Position position, ref MapStreaming streaming)
     {
         // Create local copy to avoid ref struct capture
-        var currentMapId = streaming.CurrentMapId;
+        MapIdentifier currentMapId = streaming.CurrentMapId;
 
         // Get current map definition to check connections
-        var currentMapDef = _mapDefinitionService.GetMap(currentMapId);
+        MapDefinition? currentMapDef = _mapDefinitionService.GetMap(currentMapId);
         if (currentMapDef == null)
+        {
             return;
+        }
 
         // Build set of maps that should stay loaded:
         // 1. Current map
@@ -463,18 +617,29 @@ public class MapStreamingSystem : SystemBase, IUpdateSystem
         var mapsToKeep = new HashSet<string> { currentMapId.Value };
 
         if (currentMapDef.NorthMapId != null)
+        {
             mapsToKeep.Add(currentMapDef.NorthMapId.Value.Value);
+        }
+
         if (currentMapDef.SouthMapId != null)
+        {
             mapsToKeep.Add(currentMapDef.SouthMapId.Value.Value);
+        }
+
         if (currentMapDef.EastMapId != null)
+        {
             mapsToKeep.Add(currentMapDef.EastMapId.Value.Value);
+        }
+
         if (currentMapDef.WestMapId != null)
+        {
             mapsToKeep.Add(currentMapDef.WestMapId.Value.Value);
+        }
 
         var mapsToUnload = new List<MapIdentifier>();
         var loadedMaps = new HashSet<MapIdentifier>(streaming.LoadedMaps);
 
-        foreach (var loadedMapId in loadedMaps)
+        foreach (MapIdentifier loadedMapId in loadedMaps)
         {
             // Unload if not in the "keep" set
             if (!mapsToKeep.Contains(loadedMapId.Value))
@@ -484,7 +649,7 @@ public class MapStreamingSystem : SystemBase, IUpdateSystem
         }
 
         // Unload maps not connected to current map
-        foreach (var mapId in mapsToUnload)
+        foreach (MapIdentifier mapId in mapsToUnload)
         {
             _logger?.LogInformation(
                 "Unloading map (not connected to current map): {MapId}",
@@ -493,9 +658,55 @@ public class MapStreamingSystem : SystemBase, IUpdateSystem
 
             try
             {
-                // TODO: Implement map unloading in MapLoader
-                // For now, just remove from tracking
+                // Get the MapRuntimeId from our cache to cleanup entities
+                if (
+                    _mapInfoCache.TryGetValue(
+                        mapId.Value,
+                        out (
+                            MapInfo Info,
+                            MapWorldPosition WorldPos,
+                            MapDefinition? Definition
+                        ) mapData
+                    )
+                )
+                {
+                    MapRuntimeId runtimeId = mapData.Info.MapId;
+
+                    // Try to use MapLifecycleManager for proper cleanup (registered maps)
+                    if (_lifecycleManager != null)
+                    {
+                        _lifecycleManager.UnloadMap(runtimeId);
+                        _logger?.LogInformation(
+                            "Unloaded map via lifecycle manager: {MapId} (RuntimeId: {RuntimeId})",
+                            mapId.Value,
+                            runtimeId.Value
+                        );
+                    }
+                    else
+                    {
+                        // Fallback: destroy entities directly if no lifecycle manager
+                        int destroyedCount = DestroyMapEntities(world, runtimeId);
+                        _logger?.LogInformation(
+                            "Destroyed {Count} entities directly for map: {MapId} (RuntimeId: {RuntimeId})",
+                            destroyedCount,
+                            mapId.Value,
+                            runtimeId.Value
+                        );
+                    }
+                }
+                else
+                {
+                    _logger?.LogWarning(
+                        "Map not found in cache - cannot cleanup entities: {MapId}",
+                        mapId.Value
+                    );
+                }
+
+                // Remove from streaming tracking
                 streaming.RemoveLoadedMap(mapId);
+
+                // Remove from our local cache
+                _mapInfoCache.Remove(mapId.Value);
 
                 _logger?.LogDebug("Successfully unloaded map: {MapId}", mapId.Value);
             }
@@ -504,5 +715,57 @@ public class MapStreamingSystem : SystemBase, IUpdateSystem
                 _logger?.LogError(ex, "Failed to unload map: {MapId}", mapId.Value);
             }
         }
+    }
+
+    /// <summary>
+    ///     Destroys all entities belonging to a specific map using BelongsToMap relationship.
+    ///     Used for cleaning up streaming-loaded maps which aren't registered with MapLifecycleManager.
+    /// </summary>
+    private int DestroyMapEntities(World world, MapRuntimeId mapId)
+    {
+        var entitiesToDestroy = new List<Entity>();
+
+        // Query all entities with BelongsToMap relationship to this map
+        QueryDescription belongsToMapQuery = new QueryDescription().WithAll<BelongsToMap>();
+        world.Query(
+            in belongsToMapQuery,
+            (Entity entity, ref BelongsToMap belongsTo) =>
+            {
+                if (belongsTo.MapId == mapId)
+                {
+                    entitiesToDestroy.Add(entity);
+                }
+            }
+        );
+
+        // Also query MapInfo entities for this map (they ARE the parent, not children)
+        QueryDescription mapInfoQuery = new QueryDescription().WithAll<MapInfo>();
+        world.Query(
+            in mapInfoQuery,
+            (Entity entity, ref MapInfo info) =>
+            {
+                if (info.MapId == mapId)
+                {
+                    entitiesToDestroy.Add(entity);
+                }
+            }
+        );
+
+        // Destroy all collected entities (outside the query to avoid modification during iteration)
+        foreach (Entity entity in entitiesToDestroy)
+        {
+            if (world.IsAlive(entity))
+            {
+                world.Destroy(entity);
+            }
+        }
+
+        _logger?.LogDebug(
+            "Destroyed {Count} entities for map {MapId}",
+            entitiesToDestroy.Count,
+            mapId.Value
+        );
+
+        return entitiesToDestroy.Count;
     }
 }

@@ -36,11 +36,13 @@ public static class TiledMapLoader
         _logger = logger;
 
         if (options.ValidateMaps && logger != null)
+        {
             _validator = new TmxDocumentValidator(
                 logger as ILogger<TmxDocumentValidator>
                     ?? NullLogger<TmxDocumentValidator>.Instance,
                 options.ValidateFileReferences
             );
+        }
     }
 
     /// <summary>
@@ -54,9 +56,11 @@ public static class TiledMapLoader
     public static TmxDocument Load(string mapPath)
     {
         if (!File.Exists(mapPath))
+        {
             throw new FileNotFoundException($"Tiled map file not found: {mapPath}");
+        }
 
-        var json = File.ReadAllText(mapPath);
+        string json = File.ReadAllText(mapPath);
         return LoadFromJson(json, mapPath);
     }
 
@@ -71,35 +75,41 @@ public static class TiledMapLoader
     public static TmxDocument LoadFromJson(string json, string? mapPath = null)
     {
         if (string.IsNullOrWhiteSpace(json))
+        {
             throw new JsonException("Tiled map JSON cannot be empty.");
+        }
 
-        var resolvedPath =
+        string resolvedPath =
             mapPath ?? Path.Combine(Directory.GetCurrentDirectory(), "inline_map.json");
         return DeserializeAndValidate(json, resolvedPath);
     }
 
     private static TmxDocument DeserializeAndValidate(string json, string mapPath)
     {
-        var tiledMap =
+        TiledJsonMap tiledMap =
             JsonSerializer.Deserialize<TiledJsonMap>(json, JsonOptions)
             ?? throw new JsonException($"Failed to deserialize Tiled map: {mapPath}");
 
-        var tmxDoc = ConvertToTmxDocument(tiledMap, mapPath);
+        TmxDocument tmxDoc = ConvertToTmxDocument(tiledMap, mapPath);
 
         // Validate map if validator is configured
         if (_validator != null)
         {
-            var validationResult = _validator.Validate(tmxDoc, mapPath);
+            ValidationResult validationResult = _validator.Validate(tmxDoc, mapPath);
 
             // Log warnings
             if (validationResult.Warnings.Count > 0 && _options?.LogValidationWarnings == true)
+            {
                 _logger?.LogWarning(validationResult.GetWarningMessage());
+            }
 
             // Handle validation errors
             if (!validationResult.IsValid)
             {
                 if (_options?.ThrowOnValidationError == true)
+                {
                     throw new MapValidationException(validationResult);
+                }
 
                 _logger?.LogError(validationResult.GetErrorMessage());
             }
@@ -141,12 +151,14 @@ public static class TiledMapLoader
     )
     {
         if (tilesets == null)
+        {
             return new List<TmxTileset>();
+        }
 
         var result = new List<TmxTileset>();
-        var mapDirectory = Path.GetDirectoryName(mapPath) ?? string.Empty;
+        string mapDirectory = Path.GetDirectoryName(mapPath) ?? string.Empty;
 
-        foreach (var tiledTileset in tilesets)
+        foreach (TiledJsonTileset tiledTileset in tilesets)
         {
             var tileset = new TmxTileset
             {
@@ -163,9 +175,11 @@ public static class TiledMapLoader
             if (!string.IsNullOrEmpty(tiledTileset.Source))
             {
                 tileset.Source = tiledTileset.Source;
-                var tilesetPath = Path.Combine(mapDirectory, tiledTileset.Source);
+                string tilesetPath = Path.Combine(mapDirectory, tiledTileset.Source);
                 if (File.Exists(tilesetPath))
+                {
                     LoadExternalTileset(tileset, tilesetPath);
+                }
             }
             // Handle embedded tileset
             else if (!string.IsNullOrEmpty(tiledTileset.Image))
@@ -180,7 +194,9 @@ public static class TiledMapLoader
 
             // Parse tile animations
             if (tiledTileset.Tiles != null)
+            {
                 ParseTileAnimations(tileset, tiledTileset.Tiles);
+            }
 
             result.Add(tileset);
         }
@@ -192,8 +208,11 @@ public static class TiledMapLoader
     {
         try
         {
-            var json = File.ReadAllText(tilesetPath);
-            var tiledTileset = JsonSerializer.Deserialize<TiledJsonTileset>(json, JsonOptions);
+            string json = File.ReadAllText(tilesetPath);
+            TiledJsonTileset? tiledTileset = JsonSerializer.Deserialize<TiledJsonTileset>(
+                json,
+                JsonOptions
+            );
 
             if (tiledTileset != null)
             {
@@ -206,9 +225,9 @@ public static class TiledMapLoader
 
                 if (!string.IsNullOrEmpty(tiledTileset.Image))
                 {
-                    var imagePath = tiledTileset.Image;
-                    var tilesetDirectory = Path.GetDirectoryName(tilesetPath) ?? string.Empty;
-                    var resolvedImagePath = Path.IsPathRooted(imagePath)
+                    string? imagePath = tiledTileset.Image;
+                    string tilesetDirectory = Path.GetDirectoryName(tilesetPath) ?? string.Empty;
+                    string resolvedImagePath = Path.IsPathRooted(imagePath)
                         ? imagePath
                         : Path.GetFullPath(Path.Combine(tilesetDirectory, imagePath));
 
@@ -222,7 +241,9 @@ public static class TiledMapLoader
 
                 // Parse tile animations and properties from external tileset
                 if (tiledTileset.Tiles != null)
+                {
                     ParseTileAnimations(tileset, tiledTileset.Tiles);
+                }
             }
         }
         catch (Exception ex)
@@ -236,17 +257,17 @@ public static class TiledMapLoader
 
     private static void ParseTileAnimations(TmxTileset tileset, List<TiledJsonTileDefinition> tiles)
     {
-        foreach (var tile in tiles)
+        foreach (TiledJsonTileDefinition tile in tiles)
         {
             // Parse animation frames
             if (tile.Animation != null && tile.Animation.Count > 0)
             {
-                var frameTileIds = new int[tile.Animation.Count];
-                var frameDurations = new float[tile.Animation.Count];
+                int[] frameTileIds = new int[tile.Animation.Count];
+                float[] frameDurations = new float[tile.Animation.Count];
 
-                for (var i = 0; i < tile.Animation.Count; i++)
+                for (int i = 0; i < tile.Animation.Count; i++)
                 {
-                    var frame = tile.Animation[i];
+                    TiledJsonAnimationFrame frame = tile.Animation[i];
                     frameTileIds[i] = frame.TileId;
                     frameDurations[i] = frame.Duration / 1000f; // Convert milliseconds to seconds
                 }
@@ -261,11 +282,13 @@ public static class TiledMapLoader
             // Parse custom properties (data-driven!)
             if (tile.Properties != null && tile.Properties.Count > 0)
             {
-                var props = ConvertProperties(tile.Properties);
+                Dictionary<string, object> props = ConvertProperties(tile.Properties);
 
                 // Add tile type if specified (optional, from Tiled object types)
                 if (!string.IsNullOrEmpty(tile.Type))
+                {
                     props["tile_type"] = tile.Type;
+                }
 
                 tileset.TileProperties[tile.Id] = props;
             }
@@ -279,17 +302,21 @@ public static class TiledMapLoader
     )
     {
         if (layers == null)
+        {
             return new List<TmxLayer>();
+        }
 
         var result = new List<TmxLayer>();
 
-        foreach (var tiledLayer in layers)
+        foreach (TiledJsonLayer tiledLayer in layers)
         {
             // Only process tile layers (not object groups)
             if (tiledLayer.Type != "tilelayer")
+            {
                 continue;
+            }
 
-            var layer = ConvertTileLayer(tiledLayer, mapWidth, mapHeight);
+            TmxLayer layer = ConvertTileLayer(tiledLayer, mapWidth, mapHeight);
             result.Add(layer);
         }
 
@@ -314,9 +341,11 @@ public static class TiledMapLoader
             OffsetY = tiledLayer.OffsetY,
         };
 
-        var flatData = DecodeLayerData(tiledLayer);
+        uint[] flatData = DecodeLayerData(tiledLayer);
         if (flatData.Length > 0)
+        {
             layer.Data = flatData;
+        }
 
         return layer;
     }
@@ -327,31 +356,40 @@ public static class TiledMapLoader
     private static uint[] DecodeLayerData(TiledJsonLayer layer)
     {
         if (layer.Data == null)
+        {
             return Array.Empty<uint>();
+        }
 
-        var dataElement = layer.Data.Value;
+        JsonElement dataElement = layer.Data.Value;
 
         // Check if data is an array (uncompressed)
         if (dataElement.ValueKind == JsonValueKind.Array)
         {
             var dataList = new List<uint>();
-            foreach (var element in dataElement.EnumerateArray())
+            foreach (JsonElement element in dataElement.EnumerateArray())
+            {
                 dataList.Add(element.GetUInt32());
+            }
+
             return dataList.ToArray();
         }
 
         // Data is a string (compressed or base64)
         if (dataElement.ValueKind == JsonValueKind.String)
         {
-            var base64Data = dataElement.GetString();
+            string? base64Data = dataElement.GetString();
             if (string.IsNullOrEmpty(base64Data))
+            {
                 return Array.Empty<uint>();
+            }
 
-            var bytes = Convert.FromBase64String(base64Data);
+            byte[] bytes = Convert.FromBase64String(base64Data);
 
             // Handle compression
             if (!string.IsNullOrEmpty(layer.Compression))
+            {
                 bytes = DecompressBytes(bytes, layer.Compression);
+            }
 
             return ConvertBytesToUInts(bytes);
         }
@@ -411,25 +449,29 @@ public static class TiledMapLoader
     private static uint[] ConvertBytesToUInts(byte[] bytes)
     {
         if (bytes.Length % 4 != 0)
+        {
             throw new InvalidDataException(
                 $"Byte array length must be multiple of 4, got {bytes.Length}"
             );
+        }
 
-        var ints = new uint[bytes.Length / 4];
-        for (var i = 0; i < ints.Length; i++)
+        uint[] ints = new uint[bytes.Length / 4];
+        for (int i = 0; i < ints.Length; i++)
+        {
             ints[i] = BitConverter.ToUInt32(bytes, i * 4);
+        }
 
         return ints;
     }
 
     private static uint[,] ConvertFlatArrayTo2D(uint[] flatData, int width, int height)
     {
-        var data = new uint[height, width];
+        uint[,] data = new uint[height, width];
 
-        for (var i = 0; i < flatData.Length && i < width * height; i++)
+        for (int i = 0; i < flatData.Length && i < width * height; i++)
         {
-            var y = i / width;
-            var x = i % width;
+            int y = i / width;
+            int x = i % width;
             data[y, x] = flatData[i];
         }
 
@@ -439,15 +481,19 @@ public static class TiledMapLoader
     private static List<TmxObjectGroup> ConvertObjectGroups(List<TiledJsonLayer>? layers)
     {
         if (layers == null)
+        {
             return new List<TmxObjectGroup>();
+        }
 
         var result = new List<TmxObjectGroup>();
 
-        foreach (var tiledLayer in layers)
+        foreach (TiledJsonLayer tiledLayer in layers)
         {
             // Only process object groups
             if (tiledLayer.Type != "objectgroup" || tiledLayer.Objects == null)
+            {
                 continue;
+            }
 
             var group = new TmxObjectGroup
             {
@@ -466,7 +512,7 @@ public static class TiledMapLoader
     {
         var result = new List<TmxObject>();
 
-        foreach (var tiledObj in tiledObjects)
+        foreach (TiledJsonObject tiledObj in tiledObjects)
         {
             var obj = new TmxObject
             {
@@ -491,11 +537,17 @@ public static class TiledMapLoader
         var result = new Dictionary<string, object>();
 
         if (properties == null)
+        {
             return result;
+        }
 
-        foreach (var prop in properties)
+        foreach (TiledJsonProperty prop in properties)
+        {
             if (prop.Value != null)
+            {
                 result[prop.Name] = prop.Value;
+            }
+        }
 
         return result;
     }
@@ -506,15 +558,19 @@ public static class TiledMapLoader
     private static List<TmxImageLayer> ConvertImageLayers(List<TiledJsonLayer>? layers)
     {
         if (layers == null)
+        {
             return new List<TmxImageLayer>();
+        }
 
         var result = new List<TmxImageLayer>();
 
-        foreach (var tiledLayer in layers)
+        foreach (TiledJsonLayer tiledLayer in layers)
         {
             // Only process image layers
             if (tiledLayer.Type != "imagelayer")
+            {
                 continue;
+            }
 
             var imageLayer = new TmxImageLayer
             {
@@ -530,12 +586,14 @@ public static class TiledMapLoader
 
             // Parse image source if present
             if (!string.IsNullOrEmpty(tiledLayer.Image))
+            {
                 imageLayer.Image = new TmxImage
                 {
                     Source = tiledLayer.Image,
                     Width = 0, // Image dimensions will be determined when texture is loaded
                     Height = 0,
                 };
+            }
 
             result.Add(imageLayer);
         }

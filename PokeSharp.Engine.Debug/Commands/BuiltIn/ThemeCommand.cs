@@ -1,33 +1,36 @@
+using Microsoft.Xna.Framework;
 using PokeSharp.Engine.UI.Debug.Core;
 
 namespace PokeSharp.Engine.Debug.Commands.BuiltIn;
 
 /// <summary>
-/// Command to list and switch UI themes.
-/// Usage: theme [name]
+///     Command to list and switch UI themes.
+///     Usage: theme [name]
 /// </summary>
 [ConsoleCommand("theme", "List or switch UI themes")]
 public class ThemeCommand : IConsoleCommand
 {
     public string Name => "theme";
     public string Description => "List or switch UI themes";
-    public string Usage => "theme [onedark|monokai|dracula|gruvbox|nord|solarized|solarized-light|pokeball]";
+    public string Usage =>
+        "theme [onedark|monokai|dracula|gruvbox|nord|solarized|solarized-light|pokeball]";
 
     public Task ExecuteAsync(IConsoleContext context, string[] args)
     {
         if (args.Length == 0)
         {
             // List available themes
-            var currentTheme = ThemeManager.GetCurrentThemeName();
+            string currentTheme = ThemeManager.GetCurrentThemeName();
 
             context.WriteLine("Available Themes:", context.Theme.Info);
             context.WriteLine("", context.Theme.TextPrimary);
 
-            foreach (var themeName in ThemeManager.AvailableThemes)
+            foreach (string themeName in ThemeManager.AvailableThemes)
             {
-                var marker = themeName.Equals(currentTheme, StringComparison.OrdinalIgnoreCase)
-                    ? "► " : "  ";
-                var color = themeName.Equals(currentTheme, StringComparison.OrdinalIgnoreCase)
+                string marker = themeName.Equals(currentTheme, StringComparison.OrdinalIgnoreCase)
+                    ? "► "
+                    : "  ";
+                Color color = themeName.Equals(currentTheme, StringComparison.OrdinalIgnoreCase)
                     ? context.Theme.Success
                     : context.Theme.TextSecondary;
 
@@ -40,7 +43,7 @@ public class ThemeCommand : IConsoleCommand
             return Task.CompletedTask;
         }
 
-        var requestedTheme = args[0].ToLowerInvariant();
+        string requestedTheme = args[0].ToLowerInvariant();
 
         if (ThemeManager.SetTheme(requestedTheme))
         {
@@ -49,10 +52,12 @@ public class ThemeCommand : IConsoleCommand
         else
         {
             context.WriteLine($"Unknown theme: {requestedTheme}", context.Theme.Error);
-            context.WriteLine("Available: " + string.Join(", ", ThemeManager.AvailableThemes), context.Theme.TextDim);
+            context.WriteLine(
+                "Available: " + string.Join(", ", ThemeManager.AvailableThemes),
+                context.Theme.TextDim
+            );
         }
 
         return Task.CompletedTask;
     }
 }
-

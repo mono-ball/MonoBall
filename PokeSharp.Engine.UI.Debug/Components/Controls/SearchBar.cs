@@ -4,40 +4,72 @@ using PokeSharp.Engine.UI.Debug.Components.Base;
 using PokeSharp.Engine.UI.Debug.Core;
 using PokeSharp.Engine.UI.Debug.Input;
 using PokeSharp.Engine.UI.Debug.Layout;
+using PokeSharp.Engine.UI.Debug.Utilities;
 
 namespace PokeSharp.Engine.UI.Debug.Components.Controls;
 
 /// <summary>
-/// Search bar component for finding text in output.
-/// Shows search input, match count, and navigation buttons.
+///     Search bar component for finding text in output.
+///     Shows search input, match count, and navigation buttons.
 /// </summary>
 public class SearchBar : UIComponent
 {
-    private string _searchText = string.Empty;
-    private int _cursorPosition = 0;
-    private float _cursorBlinkTimer = 0;
-    private static float CursorBlinkRate => ThemeManager.Current.CursorBlinkRate;
-
     // Visual properties - nullable for theme fallback
     private Color? _backgroundColor;
-    private Color? _textColor;
-    private Color? _cursorColor;
     private Color? _borderColor;
+    private float _cursorBlinkTimer;
+    private Color? _cursorColor;
+    private int _cursorPosition;
     private Color? _focusBorderColor;
     private Color? _infoColor;
+    private Color? _textColor;
 
-    public Color BackgroundColor { get => _backgroundColor ?? ThemeManager.Current.ConsoleSearchBackground; set => _backgroundColor = value; }
-    public Color TextColor { get => _textColor ?? ThemeManager.Current.InputText; set => _textColor = value; }
-    public Color CursorColor { get => _cursorColor ?? ThemeManager.Current.InputCursor; set => _cursorColor = value; }
-    public Color BorderColor { get => _borderColor ?? ThemeManager.Current.BorderPrimary; set => _borderColor = value; }
-    public Color FocusBorderColor { get => _focusBorderColor ?? ThemeManager.Current.BorderFocus; set => _focusBorderColor = value; }
-    public Color InfoColor { get => _infoColor ?? ThemeManager.Current.TextSecondary; set => _infoColor = value; }
+    public SearchBar(string id)
+    {
+        Id = id;
+    }
+
+    private static float CursorBlinkRate => ThemeManager.Current.CursorBlinkRate;
+
+    public Color BackgroundColor
+    {
+        get => _backgroundColor ?? ThemeManager.Current.ConsoleSearchBackground;
+        set => _backgroundColor = value;
+    }
+
+    public Color TextColor
+    {
+        get => _textColor ?? ThemeManager.Current.InputText;
+        set => _textColor = value;
+    }
+    public Color CursorColor
+    {
+        get => _cursorColor ?? ThemeManager.Current.InputCursor;
+        set => _cursorColor = value;
+    }
+    public Color BorderColor
+    {
+        get => _borderColor ?? ThemeManager.Current.BorderPrimary;
+        set => _borderColor = value;
+    }
+
+    public Color FocusBorderColor
+    {
+        get => _focusBorderColor ?? ThemeManager.Current.BorderFocus;
+        set => _focusBorderColor = value;
+    }
+
+    public Color InfoColor
+    {
+        get => _infoColor ?? ThemeManager.Current.TextSecondary;
+        set => _infoColor = value;
+    }
     public float Padding { get; set; } = 8f;
     public float BorderThickness { get; set; } = 1f;
 
     // Search state
-    public int TotalMatches { get; set; } = 0;
-    public int CurrentMatchIndex { get; set; } = 0;
+    public int TotalMatches { get; set; }
+    public int CurrentMatchIndex { get; set; }
 
     // Events
     public Action<string>? OnSearchTextChanged { get; set; }
@@ -45,22 +77,17 @@ public class SearchBar : UIComponent
     public Action? OnPreviousMatch { get; set; }
     public Action? OnClose { get; set; }
 
-    public SearchBar(string id)
-    {
-        Id = id;
-    }
-
-    public string SearchText => _searchText;
+    public string SearchText { get; private set; } = string.Empty;
 
     public void SetSearchText(string text)
     {
-        _searchText = text ?? string.Empty;
-        _cursorPosition = Math.Clamp(_cursorPosition, 0, _searchText.Length);
+        SearchText = text ?? string.Empty;
+        _cursorPosition = Math.Clamp(_cursorPosition, 0, SearchText.Length);
     }
 
     public void Clear()
     {
-        _searchText = string.Empty;
+        SearchText = string.Empty;
         _cursorPosition = 0;
         TotalMatches = 0;
         CurrentMatchIndex = 0;
@@ -70,16 +97,18 @@ public class SearchBar : UIComponent
     {
         // Don't render if height is 0 (hidden)
         if (Rect.Height <= 0)
+        {
             return;
+        }
 
-        var renderer = Renderer;
-        var resolvedRect = Rect;
+        UIRenderer renderer = Renderer;
+        LayoutRect resolvedRect = Rect;
 
         // Draw background
         renderer.DrawRectangle(resolvedRect, BackgroundColor);
 
         // Draw border (use focus color when focused)
-        var borderColor = IsFocused() ? FocusBorderColor : BorderColor;
+        Color borderColor = IsFocused() ? FocusBorderColor : BorderColor;
         renderer.DrawRectangleOutline(resolvedRect, borderColor, (int)BorderThickness);
 
         // Handle input if focused
@@ -89,20 +118,20 @@ public class SearchBar : UIComponent
         }
 
         // Calculate layout
-        var contentX = resolvedRect.X + Padding;
-        var contentY = resolvedRect.Y + Padding;
-        var contentHeight = resolvedRect.Height - Padding * 2;
+        float contentX = resolvedRect.X + Padding;
+        float contentY = resolvedRect.Y + Padding;
+        float contentHeight = resolvedRect.Height - (Padding * 2);
 
         // Draw label
-        var labelText = "Find: ";
+        string labelText = "Find: ";
         renderer.DrawText(labelText, new Vector2(contentX, contentY), InfoColor);
-        var labelWidth = renderer.MeasureText(labelText).X;
+        float labelWidth = renderer.MeasureText(labelText).X;
 
         // Draw search text
-        var textX = contentX + labelWidth;
-        if (!string.IsNullOrEmpty(_searchText))
+        float textX = contentX + labelWidth;
+        if (!string.IsNullOrEmpty(SearchText))
         {
-            renderer.DrawText(_searchText, new Vector2(textX, contentY), TextColor);
+            renderer.DrawText(SearchText, new Vector2(textX, contentY), TextColor);
         }
 
         // Draw cursor if focused
@@ -110,12 +139,14 @@ public class SearchBar : UIComponent
         {
             _cursorBlinkTimer += (float)context.Input.GameTime.ElapsedGameTime.TotalSeconds;
             if (_cursorBlinkTimer > CursorBlinkRate)
+            {
                 _cursorBlinkTimer = 0;
+            }
 
             if (_cursorBlinkTimer < CursorBlinkRate / 2)
             {
-                var textBeforeCursor = _searchText.Substring(0, _cursorPosition);
-                var cursorX = textX + renderer.MeasureText(textBeforeCursor).X;
+                string textBeforeCursor = SearchText.Substring(0, _cursorPosition);
+                float cursorX = textX + renderer.MeasureText(textBeforeCursor).X;
                 var cursorRect = new LayoutRect(cursorX, contentY, 2, contentHeight);
                 renderer.DrawRectangle(cursorRect, CursorColor);
             }
@@ -124,16 +155,16 @@ public class SearchBar : UIComponent
         // Draw match count on the right
         if (TotalMatches > 0)
         {
-            var matchText = $"{CurrentMatchIndex + 1}/{TotalMatches}";
-            var matchWidth = renderer.MeasureText(matchText).X;
-            var matchX = resolvedRect.Right - Padding - matchWidth;
+            string matchText = $"{CurrentMatchIndex + 1}/{TotalMatches}";
+            float matchWidth = renderer.MeasureText(matchText).X;
+            float matchX = resolvedRect.Right - Padding - matchWidth;
             renderer.DrawText(matchText, new Vector2(matchX, contentY), InfoColor);
         }
-        else if (!string.IsNullOrEmpty(_searchText))
+        else if (!string.IsNullOrEmpty(SearchText))
         {
-            var noMatchText = "No matches";
-            var noMatchWidth = renderer.MeasureText(noMatchText).X;
-            var noMatchX = resolvedRect.Right - Padding - noMatchWidth;
+            string noMatchText = "No matches";
+            float noMatchWidth = renderer.MeasureText(noMatchText).X;
+            float noMatchX = resolvedRect.Right - Padding - noMatchWidth;
             renderer.DrawText(noMatchText, new Vector2(noMatchX, contentY), InfoColor);
         }
     }
@@ -161,6 +192,7 @@ public class SearchBar : UIComponent
                 // Regular Enter or F3 - Next match
                 OnNextMatch?.Invoke();
             }
+
             return;
         }
 
@@ -169,21 +201,23 @@ public class SearchBar : UIComponent
         {
             if (_cursorPosition > 0)
             {
-                _searchText = _searchText.Remove(_cursorPosition - 1, 1);
+                SearchText = SearchText.Remove(_cursorPosition - 1, 1);
                 _cursorPosition--;
-                OnSearchTextChanged?.Invoke(_searchText);
+                OnSearchTextChanged?.Invoke(SearchText);
             }
+
             return;
         }
 
         // Delete
         if (input.IsKeyPressedWithRepeat(Keys.Delete))
         {
-            if (_cursorPosition < _searchText.Length)
+            if (_cursorPosition < SearchText.Length)
             {
-                _searchText = _searchText.Remove(_cursorPosition, 1);
-                OnSearchTextChanged?.Invoke(_searchText);
+                SearchText = SearchText.Remove(_cursorPosition, 1);
+                OnSearchTextChanged?.Invoke(SearchText);
             }
+
             return;
         }
 
@@ -191,14 +225,20 @@ public class SearchBar : UIComponent
         if (input.IsKeyPressedWithRepeat(Keys.Left))
         {
             if (_cursorPosition > 0)
+            {
                 _cursorPosition--;
+            }
+
             return;
         }
 
         if (input.IsKeyPressedWithRepeat(Keys.Right))
         {
-            if (_cursorPosition < _searchText.Length)
+            if (_cursorPosition < SearchText.Length)
+            {
                 _cursorPosition++;
+            }
+
             return;
         }
 
@@ -211,26 +251,28 @@ public class SearchBar : UIComponent
 
         if (input.IsKeyPressed(Keys.End))
         {
-            _cursorPosition = _searchText.Length;
+            _cursorPosition = SearchText.Length;
             return;
         }
 
         // Character input
-        foreach (var key in Enum.GetValues<Keys>())
+        foreach (Keys key in Enum.GetValues<Keys>())
         {
             if (input.IsKeyPressedWithRepeat(key))
             {
-                var ch = Utilities.KeyboardHelper.KeyToChar(key, input.IsShiftDown());
+                char? ch = KeyboardHelper.KeyToChar(key, input.IsShiftDown());
                 if (ch.HasValue)
                 {
-                    _searchText = _searchText.Insert(_cursorPosition, ch.Value.ToString());
+                    SearchText = SearchText.Insert(_cursorPosition, ch.Value.ToString());
                     _cursorPosition++;
-                    OnSearchTextChanged?.Invoke(_searchText);
+                    OnSearchTextChanged?.Invoke(SearchText);
                 }
             }
         }
     }
 
-    protected override bool IsInteractive() => true;
+    protected override bool IsInteractive()
+    {
+        return true;
+    }
 }
-

@@ -1,6 +1,5 @@
 using Arch.Core;
 using Microsoft.Xna.Framework;
-using System.Linq;
 
 namespace PokeSharp.Engine.Rendering.Animation;
 
@@ -85,6 +84,7 @@ public class AnimationDefinition
             {
                 return FrameDurations.Sum();
             }
+
             return FrameCount * FrameDuration;
         }
     }
@@ -97,10 +97,12 @@ public class AnimationDefinition
     public Rectangle GetFrame(int frameIndex)
     {
         if (frameIndex < 0 || frameIndex >= FrameCount)
+        {
             throw new ArgumentOutOfRangeException(
                 nameof(frameIndex),
                 $"Frame index {frameIndex} is out of range. Valid range: 0-{FrameCount - 1}"
             );
+        }
 
         return Frames[frameIndex];
     }
@@ -125,13 +127,17 @@ public class AnimationDefinition
     public AnimationDefinition AddEvent(int frameIndex, AnimationEvent animationEvent)
     {
         if (frameIndex < 0 || frameIndex >= FrameCount)
+        {
             throw new ArgumentOutOfRangeException(
                 nameof(frameIndex),
                 $"Frame index {frameIndex} is out of range. Valid range: 0-{FrameCount - 1}"
             );
+        }
 
         if (!Events.ContainsKey(frameIndex))
+        {
             Events[frameIndex] = new List<AnimationEvent>();
+        }
 
         Events[frameIndex].Add(animationEvent);
         return this;
@@ -156,7 +162,9 @@ public class AnimationDefinition
     /// <returns>List of events for that frame, or empty list if none.</returns>
     public List<AnimationEvent> GetEventsForFrame(int frameIndex)
     {
-        return Events.TryGetValue(frameIndex, out var events) ? events : new List<AnimationEvent>();
+        return Events.TryGetValue(frameIndex, out List<AnimationEvent>? events)
+            ? events
+            : new List<AnimationEvent>();
     }
 
     /// <summary>
@@ -203,8 +211,10 @@ public class AnimationDefinition
     )
     {
         var frames = new Rectangle[frameCount];
-        for (var i = 0; i < frameCount; i++)
-            frames[i] = new Rectangle(startX + i * frameWidth, startY, frameWidth, frameHeight);
+        for (int i = 0; i < frameCount; i++)
+        {
+            frames[i] = new Rectangle(startX + (i * frameWidth), startY, frameWidth, frameHeight);
+        }
 
         return new AnimationDefinition(name, frames, frameDuration, loop);
     }

@@ -18,18 +18,26 @@ public class ScriptMapper : IEntityPropertyMapper<TileScript>
     public TileScript Map(Dictionary<string, object> properties)
     {
         if (!CanMap(properties))
+        {
             throw new InvalidOperationException("Cannot map properties to TileScript component");
+        }
 
         // Get script path
         string? scriptPath = null;
 
-        if (properties.TryGetValue("script", out var scriptValue))
+        if (properties.TryGetValue("script", out object? scriptValue))
+        {
             scriptPath = scriptValue?.ToString();
-        else if (properties.TryGetValue("on_step", out var stepValue))
+        }
+        else if (properties.TryGetValue("on_step", out object? stepValue))
+        {
             scriptPath = stepValue?.ToString();
+        }
 
         if (string.IsNullOrWhiteSpace(scriptPath))
+        {
             throw new InvalidOperationException("Script property is empty or whitespace");
+        }
 
         return new TileScript(scriptPath);
     }
@@ -38,7 +46,7 @@ public class ScriptMapper : IEntityPropertyMapper<TileScript>
     {
         if (CanMap(properties))
         {
-            var script = Map(properties);
+            TileScript script = Map(properties);
             world.Add(entity, script);
         }
     }

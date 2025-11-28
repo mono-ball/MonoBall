@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Text;
 using Microsoft.Extensions.Logging;
 using PokeSharp.Engine.Common.Configuration;
 using PokeSharp.Engine.Common.Logging;
@@ -98,7 +99,7 @@ public class SystemPerformanceTracker
         // CRITICAL OPTIMIZATION: Use GetOrAdd to atomically get or create metrics
         // OLD: lock + TryGetValue + Add = 3 operations under lock
         // NEW: GetOrAdd = 1 atomic operation, lock-free for reads
-        var metrics = _metrics.GetOrAdd(systemName, _ => new SystemMetrics());
+        SystemMetrics metrics = _metrics.GetOrAdd(systemName, _ => new SystemMetrics());
 
         // Update metrics (SystemMetrics is a class, so this is thread-safe reference update)
         metrics.UpdateCount++;
@@ -106,24 +107,27 @@ public class SystemPerformanceTracker
         metrics.LastUpdateMs = elapsedMs;
 
         if (elapsedMs > metrics.MaxUpdateMs)
+        {
             metrics.MaxUpdateMs = elapsedMs;
+        }
 
         // Check for slow systems and log warnings (throttled to avoid spam)
         // OPTIMIZATION: Short-circuit evaluation - only check dictionary if threshold exceeded
         if (elapsedMs > _config.TargetFrameTimeMs * _config.SlowSystemThresholdPercent)
         {
             // Use GetOrAdd for lock-free access
-            var lastWarning = _lastSlowWarningFrame.GetOrAdd(systemName, 0);
+            ulong lastWarning = _lastSlowWarningFrame.GetOrAdd(systemName, 0);
 
             // Only warn if cooldown period has passed since last warning for this system
             // If lastWarning is 0, it means we've never warned for this system, so allow the first warning
-            var framesSinceLastWarning = lastWarning == 0 ? ulong.MaxValue : FrameCount - lastWarning;
+            ulong framesSinceLastWarning =
+                lastWarning == 0 ? ulong.MaxValue : FrameCount - lastWarning;
             if (framesSinceLastWarning >= _config.SlowSystemWarningCooldownFrames)
             {
                 // Update warning frame (TryUpdate ensures we don't overwrite a newer value from another thread)
                 _lastSlowWarningFrame.TryUpdate(systemName, FrameCount, lastWarning);
 
-                var percentOfFrame = elapsedMs / _config.TargetFrameTimeMs * 100;
+                double percentOfFrame = elapsedMs / _config.TargetFrameTimeMs * 100;
                 _logger?.LogSlowSystem(systemName, elapsedMs, percentOfFrame);
             }
         }
@@ -148,7 +152,7 @@ public class SystemPerformanceTracker
         ArgumentNullException.ThrowIfNull(systemName);
 
         // ConcurrentDictionary.TryGetValue is lock-free for reads
-        return _metrics.TryGetValue(systemName, out var metrics) ? metrics : null;
+        return _metrics.TryGetValue(systemName, out SystemMetrics? metrics) ? metrics : null;
     }
 
     /// <summary>
@@ -171,10 +175,14 @@ public class SystemPerformanceTracker
     public void LogPerformanceStats()
     {
         if (_logger == null)
+        {
             return;
+        }
 
         if (_metrics.Count == 0)
+        {
             return;
+        }
 
         // CRITICAL OPTIMIZATION: Eliminate LINQ allocations
         // OLD: OrderByDescending().ToList() = 5-10 KB/sec allocation overhead
@@ -187,10 +195,10 @@ public class SystemPerformanceTracker
         );
 
         // Log all systems using the custom template
-        foreach (var kvp in _cachedSortedMetrics)
+        foreach (KeyValuePair<string, SystemMetrics> kvp in _cachedSortedMetrics)
         {
-            var systemName = kvp.Key;
-            var metrics = kvp.Value;
+            string systemName = kvp.Key;
+            SystemMetrics metrics = kvp.Value;
             _logger.LogSystemPerformance(
                 systemName,
                 metrics.AverageUpdateMs,
@@ -219,7 +227,9 @@ public class SystemPerformanceTracker
     public string GenerateReport()
     {
         if (_metrics.Count == 0)
+        {
             return "No system performance data available.";
+        }
 
         // OPTIMIZATION: Reuse cached list instead of LINQ allocation
         _cachedSortedMetrics.Clear();
@@ -229,7 +239,7 @@ public class SystemPerformanceTracker
         );
 
         // Build report using StringBuilder for efficient string construction
-        var report = new System.Text.StringBuilder();
+        var report = new StringBuilder();
         report.AppendLine("=== System Performance Report ===");
         report.AppendLine($"Frame Count: {FrameCount}");
         report.AppendLine();
@@ -239,27 +249,30 @@ public class SystemPerformanceTracker
         double maxTime = 0;
         long totalUpdates = 0;
 
-        foreach (var kvp in _cachedSortedMetrics)
+        foreach (KeyValuePair<string, SystemMetrics> kvp in _cachedSortedMetrics)
         {
-            var metrics = kvp.Value;
+            SystemMetrics metrics = kvp.Value;
             totalTime += metrics.TotalTimeMs;
             if (metrics.MaxUpdateMs > maxTime)
+            {
                 maxTime = metrics.MaxUpdateMs;
+            }
+
             totalUpdates += metrics.UpdateCount;
         }
 
         report.AppendLine("=== Summary ===");
         report.AppendLine($"Total Time: {totalTime:F2} ms");
-        report.AppendLine($"Average Time: {(totalTime / _cachedSortedMetrics.Count):F2} ms");
+        report.AppendLine($"Average Time: {totalTime / _cachedSortedMetrics.Count:F2} ms");
         report.AppendLine($"Max Time: {maxTime:F2} ms");
         report.AppendLine($"Total Updates: {totalUpdates}");
         report.AppendLine();
 
         report.AppendLine("=== System Details ===");
-        foreach (var kvp in _cachedSortedMetrics)
+        foreach (KeyValuePair<string, SystemMetrics> kvp in _cachedSortedMetrics)
         {
-            var systemName = kvp.Key;
-            var metrics = kvp.Value;
+            string systemName = kvp.Key;
+            SystemMetrics metrics = kvp.Value;
             report.AppendLine($"{systemName}:");
             report.AppendLine($"  Total: {metrics.TotalTimeMs:F2} ms");
             report.AppendLine($"  Average: {metrics.AverageUpdateMs:F2} ms");

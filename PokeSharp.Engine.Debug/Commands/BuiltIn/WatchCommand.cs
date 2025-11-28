@@ -1,6 +1,5 @@
-using System;
-using System.Linq;
-using System.Threading.Tasks;
+using Microsoft.Xna.Framework;
+using PokeSharp.Engine.UI.Debug.Core;
 
 namespace PokeSharp.Engine.Debug.Commands.BuiltIn;
 
@@ -9,7 +8,9 @@ public class WatchCommand : IConsoleCommand
 {
     public string Name => "watch";
     public string Description => "Manage watch expressions for real-time monitoring";
-    public string Usage => @"watch [list | add | remove | clear | toggle | pin | unpin | interval | group | alert | compare | preset]
+
+    public string Usage =>
+        @"watch [list | add | remove | clear | toggle | pin | unpin | interval | group | alert | compare | preset]
   list: List all watches
   add <name> <expression> [--group <name>] [--when <condition>]: Add watch
   remove <name>: Remove a watch
@@ -50,24 +51,37 @@ Examples:
 
     public Task ExecuteAsync(IConsoleContext context, string[] args)
     {
-        var theme = context.Theme;
+        UITheme theme = context.Theme;
 
         if (args.Length == 0 || args[0].Equals("list", StringComparison.OrdinalIgnoreCase))
         {
             // Show watch count and summary
-            var watchCount = context.Watches.Count;
+            int watchCount = context.Watches.Count;
             var groups = context.Watches.GetGroups().ToList();
-            var (total, pinned, errors, alertsTriggered, groupCount) = context.Watches.GetStatistics();
+            (int total, int pinned, int errors, int alertsTriggered, int groupCount) =
+                context.Watches.GetStatistics();
 
             context.WriteLine($"Watches: {watchCount} total", theme.Info);
             if (pinned > 0)
+            {
                 context.WriteLine($"  Pinned: {pinned}", theme.Success);
+            }
+
             if (errors > 0)
+            {
                 context.WriteLine($"  Errors: {errors}", theme.Error);
+            }
+
             if (alertsTriggered > 0)
+            {
                 context.WriteLine($"  Alerts triggered: {alertsTriggered}", theme.Warning);
+            }
+
             if (groupCount > 0)
+            {
                 context.WriteLine($"  Groups: {groupCount}", theme.TextSecondary);
+            }
+
             context.WriteLine("", theme.TextPrimary);
             context.WriteLine("Use 'tab watch' to view the Watch panel", theme.TextDim);
         }
@@ -76,54 +90,82 @@ Examples:
             // Parse watch add command
             if (args.Length < 3)
             {
-                context.WriteLine("Usage: watch add <name> <expression> [--group <name>] [--when <condition>]", theme.Warning);
-                context.WriteLine("Example: watch add hp Player.GetHP() --group player --when \"Game.InBattle()\"", theme.TextSecondary);
+                context.WriteLine(
+                    "Usage: watch add <name> <expression> [--group <name>] [--when <condition>]",
+                    theme.Warning
+                );
+                context.WriteLine(
+                    "Example: watch add hp Player.GetHP() --group player --when \"Game.InBattle()\"",
+                    theme.TextSecondary
+                );
                 return Task.CompletedTask;
             }
 
-            var name = args[1];
+            string name = args[1];
 
             // Find flags
-            var groupIndex = Array.IndexOf(args, "--group");
-            var whenIndex = Array.IndexOf(args, "--when");
+            int groupIndex = Array.IndexOf(args, "--group");
+            int whenIndex = Array.IndexOf(args, "--when");
 
             // Determine expression end index
-            var expressionEndIndex = args.Length;
-            if (groupIndex > 0) expressionEndIndex = Math.Min(expressionEndIndex, groupIndex);
-            if (whenIndex > 0) expressionEndIndex = Math.Min(expressionEndIndex, whenIndex);
+            int expressionEndIndex = args.Length;
+            if (groupIndex > 0)
+            {
+                expressionEndIndex = Math.Min(expressionEndIndex, groupIndex);
+            }
+
+            if (whenIndex > 0)
+            {
+                expressionEndIndex = Math.Min(expressionEndIndex, whenIndex);
+            }
 
             // Extract expression
-            var expression = string.Join(" ", args.Skip(2).Take(expressionEndIndex - 2));
+            string expression = string.Join(" ", args.Skip(2).Take(expressionEndIndex - 2));
 
             // Extract group
             string? group = null;
             if (groupIndex > 0 && groupIndex + 1 < args.Length)
             {
-                var groupEndIndex = whenIndex > groupIndex ? whenIndex : args.Length;
-                group = string.Join(" ", args.Skip(groupIndex + 1).Take(groupEndIndex - (groupIndex + 1)));
+                int groupEndIndex = whenIndex > groupIndex ? whenIndex : args.Length;
+                group = string.Join(
+                    " ",
+                    args.Skip(groupIndex + 1).Take(groupEndIndex - (groupIndex + 1))
+                );
             }
 
             // Extract condition
             string? condition = null;
             if (whenIndex > 0 && whenIndex + 1 < args.Length)
             {
-                var condEndIndex = groupIndex > whenIndex ? groupIndex : args.Length;
-                condition = string.Join(" ", args.Skip(whenIndex + 1).Take(condEndIndex - (whenIndex + 1)));
+                int condEndIndex = groupIndex > whenIndex ? groupIndex : args.Length;
+                condition = string.Join(
+                    " ",
+                    args.Skip(whenIndex + 1).Take(condEndIndex - (whenIndex + 1))
+                );
                 // Remove quotes if present
                 condition = condition.Trim('"', '\'');
             }
 
             if (context.AddWatch(name, expression, group, condition))
             {
-                var groupInfo = !string.IsNullOrEmpty(group) ? $" [group: {group}]" : "";
-                var condInfo = !string.IsNullOrEmpty(condition) ? $" [conditional]" : "";
-                context.WriteLine($"Watch '{name}' added: {expression}{groupInfo}{condInfo}", theme.Success);
-                context.WriteLine("Switch to Watch tab (Ctrl+2) to view results", theme.TextSecondary);
+                string groupInfo = !string.IsNullOrEmpty(group) ? $" [group: {group}]" : "";
+                string condInfo = !string.IsNullOrEmpty(condition) ? " [conditional]" : "";
+                context.WriteLine(
+                    $"Watch '{name}' added: {expression}{groupInfo}{condInfo}",
+                    theme.Success
+                );
+                context.WriteLine(
+                    "Switch to Watch tab (Ctrl+2) to view results",
+                    theme.TextSecondary
+                );
             }
             else
             {
                 context.WriteLine($"Failed to add watch '{name}'", theme.Error);
-                context.WriteLine("Watch limit reached (50 max) or invalid expression", theme.Error);
+                context.WriteLine(
+                    "Watch limit reached (50 max) or invalid expression",
+                    theme.Error
+                );
             }
         }
         else if (args[0].Equals("remove", StringComparison.OrdinalIgnoreCase))
@@ -135,7 +177,7 @@ Examples:
                 return Task.CompletedTask;
             }
 
-            var name = args[1];
+            string name = args[1];
             if (context.Watches.Remove(name))
             {
                 context.WriteLine($"Watch '{name}' removed", theme.Success);
@@ -152,8 +194,8 @@ Examples:
         }
         else if (args[0].Equals("toggle", StringComparison.OrdinalIgnoreCase))
         {
-            var autoUpdate = context.Watches.AutoUpdate = !context.Watches.AutoUpdate;
-            var status = autoUpdate ? "enabled" : "disabled";
+            bool autoUpdate = context.Watches.AutoUpdate = !context.Watches.AutoUpdate;
+            string status = autoUpdate ? "enabled" : "disabled";
             context.WriteLine($"Watch auto-update {status}", theme.Success);
         }
         else if (args[0].Equals("pin", StringComparison.OrdinalIgnoreCase))
@@ -165,7 +207,7 @@ Examples:
                 return Task.CompletedTask;
             }
 
-            var name = args[1];
+            string name = args[1];
             if (context.Watches.Pin(name))
             {
                 context.WriteLine($"Watch '{name}' pinned to top", theme.Success);
@@ -184,7 +226,7 @@ Examples:
                 return Task.CompletedTask;
             }
 
-            var name = args[1];
+            string name = args[1];
             if (context.Watches.Unpin(name))
             {
                 context.WriteLine($"Watch '{name}' unpinned", theme.Success);
@@ -204,18 +246,21 @@ Examples:
                 return Task.CompletedTask;
             }
 
-            if (double.TryParse(args[1], out var milliseconds))
+            if (double.TryParse(args[1], out double milliseconds))
             {
-                var seconds = milliseconds / 1000.0;
+                double seconds = milliseconds / 1000.0;
                 if (seconds >= 0.1 && seconds <= 60.0)
                 {
                     context.Watches.UpdateInterval = seconds;
-                    var display = seconds < 1.0 ? $"{milliseconds:F0}ms" : $"{seconds:F1}s";
+                    string display = seconds < 1.0 ? $"{milliseconds:F0}ms" : $"{seconds:F1}s";
                     context.WriteLine($"Watch update interval set to {display}", theme.Success);
                 }
                 else
                 {
-                    context.WriteLine($"Invalid interval. Must be between 100ms and 60000ms", theme.Error);
+                    context.WriteLine(
+                        "Invalid interval. Must be between 100ms and 60000ms",
+                        theme.Error
+                    );
                 }
             }
             else
@@ -228,17 +273,26 @@ Examples:
             // Group management
             if (args.Length < 2)
             {
-                context.WriteLine("Usage: watch group [list | collapse <name> | expand <name> | toggle <name>]", theme.Warning);
+                context.WriteLine(
+                    "Usage: watch group [list | collapse <name> | expand <name> | toggle <name>]",
+                    theme.Warning
+                );
                 return Task.CompletedTask;
             }
 
-            var subCommand = args[1].ToLower();
+            string subCommand = args[1].ToLower();
             if (subCommand == "list")
             {
                 var groups = context.Watches.GetGroups().ToList();
-                context.WriteLine("══════════════════════════════════════════════════════════════════", theme.Success);
+                context.WriteLine(
+                    "══════════════════════════════════════════════════════════════════",
+                    theme.Success
+                );
                 context.WriteLine($"  WATCH GROUPS ({groups.Count} total)", theme.Success);
-                context.WriteLine("══════════════════════════════════════════════════════════════════", theme.Success);
+                context.WriteLine(
+                    "══════════════════════════════════════════════════════════════════",
+                    theme.Success
+                );
 
                 if (groups.Count == 0)
                 {
@@ -246,17 +300,21 @@ Examples:
                 }
                 else
                 {
-                    foreach (var group in groups)
+                    foreach (string group in groups)
                     {
                         context.WriteLine($"  - {group}", theme.TextPrimary);
                     }
                 }
+
                 context.WriteLine("", theme.TextSecondary);
-                context.WriteLine("TIP: Use 'watch group collapse <name>' to collapse a group", theme.Success);
+                context.WriteLine(
+                    "TIP: Use 'watch group collapse <name>' to collapse a group",
+                    theme.Success
+                );
             }
             else if (subCommand == "collapse" && args.Length > 2)
             {
-                var groupName = args[2];
+                string groupName = args[2];
                 if (context.Watches.CollapseGroup(groupName))
                 {
                     context.WriteLine($"Group '{groupName}' collapsed", theme.Success);
@@ -268,7 +326,7 @@ Examples:
             }
             else if (subCommand == "expand" && args.Length > 2)
             {
-                var groupName = args[2];
+                string groupName = args[2];
                 if (context.Watches.ExpandGroup(groupName))
                 {
                     context.WriteLine($"Group '{groupName}' expanded", theme.Success);
@@ -280,7 +338,7 @@ Examples:
             }
             else if (subCommand == "toggle" && args.Length > 2)
             {
-                var groupName = args[2];
+                string groupName = args[2];
                 if (context.Watches.ToggleGroup(groupName))
                 {
                     context.WriteLine($"Group '{groupName}' toggled", theme.Success);
@@ -292,7 +350,10 @@ Examples:
             }
             else
             {
-                context.WriteLine("Usage: watch group [list | collapse <name> | expand <name> | toggle <name>]", theme.Warning);
+                context.WriteLine(
+                    "Usage: watch group [list | collapse <name> | expand <name> | toggle <name>]",
+                    theme.Warning
+                );
             }
         }
         else if (args[0].Equals("alert", StringComparison.OrdinalIgnoreCase))
@@ -300,17 +361,26 @@ Examples:
             // Alert management
             if (args.Length < 2)
             {
-                context.WriteLine("Usage: watch alert [list | set <name> <type> <threshold> | remove <name> | clear <name>]", theme.Warning);
+                context.WriteLine(
+                    "Usage: watch alert [list | set <name> <type> <threshold> | remove <name> | clear <name>]",
+                    theme.Warning
+                );
                 return Task.CompletedTask;
             }
 
-            var subCommand = args[1].ToLower();
+            string subCommand = args[1].ToLower();
             if (subCommand == "list")
             {
                 var alertWatches = context.Watches.GetWatchesWithAlerts().ToList();
-                context.WriteLine("══════════════════════════════════════════════════════════════════", theme.Success);
+                context.WriteLine(
+                    "══════════════════════════════════════════════════════════════════",
+                    theme.Success
+                );
                 context.WriteLine($"  WATCH ALERTS ({alertWatches.Count} total)", theme.Success);
-                context.WriteLine("══════════════════════════════════════════════════════════════════", theme.Success);
+                context.WriteLine(
+                    "══════════════════════════════════════════════════════════════════",
+                    theme.Success
+                );
 
                 if (alertWatches.Count == 0)
                 {
@@ -318,26 +388,38 @@ Examples:
                 }
                 else
                 {
-                    foreach (var (name, alertType, triggered) in alertWatches)
+                    foreach ((string name, string alertType, bool triggered) in alertWatches)
                     {
-                        var status = triggered ? "[TRIGGERED]" : "[watching]";
-                        var statusColor = triggered ? theme.Error : theme.TextDim;
+                        string status = triggered ? "[TRIGGERED]" : "[watching]";
+                        Color statusColor = triggered ? theme.Error : theme.TextDim;
                         context.WriteLine($"  - {name}: {alertType} {status}", statusColor);
                     }
                 }
+
                 context.WriteLine("", theme.TextSecondary);
-                context.WriteLine("TIP: Use 'watch alert clear <name>' to clear triggered status", theme.Success);
+                context.WriteLine(
+                    "TIP: Use 'watch alert clear <name>' to clear triggered status",
+                    theme.Success
+                );
             }
             else if (subCommand == "set" && args.Length >= 4)
             {
-                var name = args[2];
-                var alertType = args[3].ToLower();
+                string name = args[2];
+                string alertType = args[3].ToLower();
 
                 // Validate alert type
-                if (alertType != "above" && alertType != "below" && alertType != "equals" && alertType != "changes")
+                if (
+                    alertType != "above"
+                    && alertType != "below"
+                    && alertType != "equals"
+                    && alertType != "changes"
+                )
                 {
                     context.WriteLine($"Invalid alert type: '{alertType}'", theme.Error);
-                    context.WriteLine("Valid types: above, below, equals, changes", theme.TextSecondary);
+                    context.WriteLine(
+                        "Valid types: above, below, equals, changes",
+                        theme.TextSecondary
+                    );
                     return Task.CompletedTask;
                 }
 
@@ -348,14 +430,20 @@ Examples:
                 {
                     if (args.Length < 5)
                     {
-                        context.WriteLine($"Alert type '{alertType}' requires a threshold value", theme.Warning);
-                        context.WriteLine("Usage: watch alert set <name> <type> <threshold>", theme.TextSecondary);
+                        context.WriteLine(
+                            $"Alert type '{alertType}' requires a threshold value",
+                            theme.Warning
+                        );
+                        context.WriteLine(
+                            "Usage: watch alert set <name> <type> <threshold>",
+                            theme.TextSecondary
+                        );
                         return Task.CompletedTask;
                     }
 
                     // Try to parse threshold as number, otherwise use as string
-                    var thresholdStr = args[4];
-                    if (double.TryParse(thresholdStr, out var numThreshold))
+                    string thresholdStr = args[4];
+                    if (double.TryParse(thresholdStr, out double numThreshold))
                     {
                         threshold = numThreshold;
                     }
@@ -367,8 +455,11 @@ Examples:
 
                 if (context.Watches.SetAlert(name, alertType, threshold))
                 {
-                    var thresholdInfo = threshold != null ? $" (threshold: {threshold})" : "";
-                    context.WriteLine($"Alert set on '{name}': {alertType}{thresholdInfo}", theme.Success);
+                    string thresholdInfo = threshold != null ? $" (threshold: {threshold})" : "";
+                    context.WriteLine(
+                        $"Alert set on '{name}': {alertType}{thresholdInfo}",
+                        theme.Success
+                    );
                 }
                 else
                 {
@@ -377,7 +468,7 @@ Examples:
             }
             else if (subCommand == "remove" && args.Length > 2)
             {
-                var name = args[2];
+                string name = args[2];
                 if (context.Watches.RemoveAlert(name))
                 {
                     context.WriteLine($"Alert removed from '{name}'", theme.Success);
@@ -389,7 +480,7 @@ Examples:
             }
             else if (subCommand == "clear" && args.Length > 2)
             {
-                var name = args[2];
+                string name = args[2];
                 if (context.Watches.ClearAlertStatus(name))
                 {
                     context.WriteLine($"Alert status cleared for '{name}'", theme.Success);
@@ -401,7 +492,10 @@ Examples:
             }
             else
             {
-                context.WriteLine("Usage: watch alert [list | set <name> <type> <threshold> | remove <name> | clear <name>]", theme.Warning);
+                context.WriteLine(
+                    "Usage: watch alert [list | set <name> <type> <threshold> | remove <name> | clear <name>]",
+                    theme.Warning
+                );
             }
         }
         else if (args[0].Equals("compare", StringComparison.OrdinalIgnoreCase))
@@ -409,17 +503,29 @@ Examples:
             // Comparison management
             if (args.Length < 2)
             {
-                context.WriteLine("Usage: watch compare [list | set <watch1> <watch2> [label] | remove <name>]", theme.Warning);
+                context.WriteLine(
+                    "Usage: watch compare [list | set <watch1> <watch2> [label] | remove <name>]",
+                    theme.Warning
+                );
                 return Task.CompletedTask;
             }
 
-            var subCommand = args[1].ToLower();
+            string subCommand = args[1].ToLower();
             if (subCommand == "list")
             {
                 var comparisons = context.Watches.GetWatchesWithComparisons().ToList();
-                context.WriteLine("══════════════════════════════════════════════════════════════════", theme.Success);
-                context.WriteLine($"  WATCH COMPARISONS ({comparisons.Count} total)", theme.Success);
-                context.WriteLine("══════════════════════════════════════════════════════════════════", theme.Success);
+                context.WriteLine(
+                    "══════════════════════════════════════════════════════════════════",
+                    theme.Success
+                );
+                context.WriteLine(
+                    $"  WATCH COMPARISONS ({comparisons.Count} total)",
+                    theme.Success
+                );
+                context.WriteLine(
+                    "══════════════════════════════════════════════════════════════════",
+                    theme.Success
+                );
 
                 if (comparisons.Count == 0)
                 {
@@ -427,33 +533,49 @@ Examples:
                 }
                 else
                 {
-                    foreach (var (name, comparedWith) in comparisons)
+                    foreach ((string name, string comparedWith) in comparisons)
                     {
-                        context.WriteLine($"  - {name} compared to {comparedWith}", theme.TextPrimary);
+                        context.WriteLine(
+                            $"  - {name} compared to {comparedWith}",
+                            theme.TextPrimary
+                        );
                     }
                 }
+
                 context.WriteLine("", theme.TextSecondary);
-                context.WriteLine("TIP: Switch to Watch tab to see comparison details", theme.Success);
+                context.WriteLine(
+                    "TIP: Switch to Watch tab to see comparison details",
+                    theme.Success
+                );
             }
             else if (subCommand == "set" && args.Length >= 4)
             {
-                var watch1 = args[2];
-                var watch2 = args[3];
-                var label = args.Length > 4 ? args[4] : "Expected";
+                string watch1 = args[2];
+                string watch2 = args[3];
+                string label = args.Length > 4 ? args[4] : "Expected";
 
                 if (context.Watches.SetComparison(watch1, watch2, label))
                 {
-                    context.WriteLine($"Comparison set: '{watch1}' compared to '{watch2}' ({label})", theme.Success);
-                    context.WriteLine("Switch to Watch tab to see the difference calculation", theme.TextSecondary);
+                    context.WriteLine(
+                        $"Comparison set: '{watch1}' compared to '{watch2}' ({label})",
+                        theme.Success
+                    );
+                    context.WriteLine(
+                        "Switch to Watch tab to see the difference calculation",
+                        theme.TextSecondary
+                    );
                 }
                 else
                 {
-                    context.WriteLine($"Failed to set comparison. Make sure both watches exist.", theme.Error);
+                    context.WriteLine(
+                        "Failed to set comparison. Make sure both watches exist.",
+                        theme.Error
+                    );
                 }
             }
             else if (subCommand == "remove" && args.Length > 2)
             {
-                var name = args[2];
+                string name = args[2];
                 if (context.Watches.RemoveComparison(name))
                 {
                     context.WriteLine($"Comparison removed from '{name}'", theme.Success);
@@ -465,7 +587,10 @@ Examples:
             }
             else
             {
-                context.WriteLine("Usage: watch compare [list | set <watch1> <watch2> [label] | remove <name>]", theme.Warning);
+                context.WriteLine(
+                    "Usage: watch compare [list | set <watch1> <watch2> [label] | remove <name>]",
+                    theme.Warning
+                );
             }
         }
         else if (args[0].Equals("preset", StringComparison.OrdinalIgnoreCase))
@@ -473,46 +598,82 @@ Examples:
             // Preset management
             if (args.Length < 2)
             {
-                context.WriteLine("Usage: watch preset [list | save <name> <description> | load <name> | delete <name> | builtin]", theme.Warning);
+                context.WriteLine(
+                    "Usage: watch preset [list | save <name> <description> | load <name> | delete <name> | builtin]",
+                    theme.Warning
+                );
                 return Task.CompletedTask;
             }
 
-            var subCommand = args[1].ToLower();
+            string subCommand = args[1].ToLower();
             if (subCommand == "list")
             {
                 var presets = context.ListWatchPresets().ToList();
-                context.WriteLine("══════════════════════════════════════════════════════════════════", theme.Success);
+                context.WriteLine(
+                    "══════════════════════════════════════════════════════════════════",
+                    theme.Success
+                );
                 context.WriteLine($"  WATCH PRESETS ({presets.Count} total)", theme.Success);
-                context.WriteLine("══════════════════════════════════════════════════════════════════", theme.Success);
+                context.WriteLine(
+                    "══════════════════════════════════════════════════════════════════",
+                    theme.Success
+                );
 
                 if (presets.Count == 0)
                 {
                     context.WriteLine("  No presets available.", theme.TextSecondary);
-                    context.WriteLine("  Use 'watch preset save <name> <description>' to save current configuration", theme.TextSecondary);
-                    context.WriteLine("  Use 'watch preset builtin' to create built-in presets", theme.TextSecondary);
+                    context.WriteLine(
+                        "  Use 'watch preset save <name> <description>' to save current configuration",
+                        theme.TextSecondary
+                    );
+                    context.WriteLine(
+                        "  Use 'watch preset builtin' to create built-in presets",
+                        theme.TextSecondary
+                    );
                 }
                 else
                 {
-                    foreach (var (name, description, watchCount, createdAt) in presets)
+                    foreach (
+                        (
+                            string name,
+                            string description,
+                            int watchCount,
+                            DateTime createdAt
+                        ) in presets
+                    )
                     {
-                        var date = createdAt.ToString("yyyy-MM-dd HH:mm");
-                        context.WriteLine($"  - {name.PadRight(20)} ({watchCount} watches) - {description}", theme.TextPrimary);
+                        string date = createdAt.ToString("yyyy-MM-dd HH:mm");
+                        context.WriteLine(
+                            $"  - {name.PadRight(20)} ({watchCount} watches) - {description}",
+                            theme.TextPrimary
+                        );
                         context.WriteLine($"    Created: {date}", theme.TextDim);
                     }
                 }
+
                 context.WriteLine("", theme.TextSecondary);
-                context.WriteLine("TIP: Use 'watch preset load <name>' to load a preset", theme.Success);
+                context.WriteLine(
+                    "TIP: Use 'watch preset load <name>' to load a preset",
+                    theme.Success
+                );
             }
             else if (subCommand == "save" && args.Length >= 3)
             {
-                var name = args[2];
-                var description = args.Length > 3 ? string.Join(" ", args.Skip(3)) : "Custom watch configuration";
+                string name = args[2];
+                string description =
+                    args.Length > 3 ? string.Join(" ", args.Skip(3)) : "Custom watch configuration";
 
                 if (context.SaveWatchPreset(name, description))
                 {
-                    var watchCount = context.Watches.Count;
-                    context.WriteLine($"Preset '{name}' saved ({watchCount} watches)", theme.Success);
-                    context.WriteLine($"Load it later with: watch preset load {name}", theme.TextSecondary);
+                    int watchCount = context.Watches.Count;
+                    context.WriteLine(
+                        $"Preset '{name}' saved ({watchCount} watches)",
+                        theme.Success
+                    );
+                    context.WriteLine(
+                        $"Load it later with: watch preset load {name}",
+                        theme.TextSecondary
+                    );
                 }
                 else
                 {
@@ -521,7 +682,7 @@ Examples:
             }
             else if (subCommand == "load" && args.Length > 2)
             {
-                var name = args[2];
+                string name = args[2];
 
                 if (context.LoadWatchPreset(name))
                 {
@@ -535,7 +696,7 @@ Examples:
             }
             else if (subCommand == "delete" && args.Length > 2)
             {
-                var name = args[2];
+                string name = args[2];
 
                 if (context.DeleteWatchPreset(name))
                 {
@@ -550,16 +711,25 @@ Examples:
             {
                 context.CreateBuiltInWatchPresets();
                 context.WriteLine("Built-in presets created:", theme.Success);
-                context.WriteLine("  - performance: Monitor FPS, frame time, memory", theme.TextPrimary);
+                context.WriteLine(
+                    "  - performance: Monitor FPS, frame time, memory",
+                    theme.TextPrimary
+                );
                 context.WriteLine("  - combat: Monitor battle system values", theme.TextPrimary);
-                context.WriteLine("  - player_stats: Monitor player position, money, map", theme.TextPrimary);
+                context.WriteLine(
+                    "  - player_stats: Monitor player position, money, map",
+                    theme.TextPrimary
+                );
                 context.WriteLine("  - memory: Monitor GC and memory metrics", theme.TextPrimary);
                 context.WriteLine("", theme.TextSecondary);
                 context.WriteLine("Use 'watch preset load <name>' to load a preset", theme.Success);
             }
             else
             {
-                context.WriteLine("Usage: watch preset [list | save <name> <description> | load <name> | delete <name> | builtin]", theme.Warning);
+                context.WriteLine(
+                    "Usage: watch preset [list | save <name> <description> | load <name> | delete <name> | builtin]",
+                    theme.Warning
+                );
             }
         }
         else

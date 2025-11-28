@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Serilog;
+using Serilog.Core;
 using Serilog.Events;
 using Serilog.Sinks.Spectre;
 
@@ -32,7 +33,7 @@ public static class SerilogConfiguration
         else
         {
             // Programmatic configuration as fallback
-            var isDevelopment = environment.Equals(
+            bool isDevelopment = environment.Equals(
                 "Development",
                 StringComparison.OrdinalIgnoreCase
             );
@@ -78,10 +79,10 @@ public static class SerilogConfiguration
         string environment = "Production"
     )
     {
-        var serilogLogger = CreateConfiguration(configuration, environment).CreateLogger();
+        Logger serilogLogger = CreateConfiguration(configuration, environment).CreateLogger();
         Log.Logger = serilogLogger;
 
-        var loggerFactory = LoggerFactory.Create(builder =>
+        ILoggerFactory loggerFactory = LoggerFactory.Create(builder =>
         {
             builder.AddSerilog(serilogLogger, true);
         });
@@ -100,7 +101,7 @@ public static class SerilogConfiguration
         string environment = "Production"
     )
     {
-        var configBuilder = new ConfigurationBuilder()
+        IConfigurationBuilder configBuilder = new ConfigurationBuilder()
             .SetBasePath(basePath)
             .AddJsonFile("Config/appsettings.json", true, true)
             .AddJsonFile($"Config/appsettings.{environment}.json", true, true)

@@ -32,7 +32,7 @@ public class ScriptBackupManager
     )
     {
         // Read source code asynchronously to avoid blocking
-        var sourceCode = await TryReadSourceCodeAsync(typeId);
+        string? sourceCode = await TryReadSourceCodeAsync(typeId);
 
         lock (_backupLock)
         {
@@ -61,7 +61,7 @@ public class ScriptBackupManager
     /// </summary>
     public (Type type, object? instance, int version)? RestoreBackup(string typeId)
     {
-        if (_backups.TryGetValue(typeId, out var backup))
+        if (_backups.TryGetValue(typeId, out ScriptBackup backup))
         {
             _logger.LogWarning(
                 "Restoring backup for {TypeId} (version {Version})",
@@ -81,7 +81,9 @@ public class ScriptBackupManager
     public void ClearBackup(string typeId)
     {
         if (_backups.TryRemove(typeId, out _))
+        {
             _logger.LogDebug("Cleared backup for {TypeId}", typeId);
+        }
     }
 
     /// <summary>
@@ -97,7 +99,8 @@ public class ScriptBackupManager
     /// </summary>
     public BackupInfo? GetBackupInfo(string typeId)
     {
-        if (_backups.TryGetValue(typeId, out var backup))
+        if (_backups.TryGetValue(typeId, out ScriptBackup backup))
+        {
             return new BackupInfo
             {
                 TypeId = backup.TypeId,
@@ -107,6 +110,8 @@ public class ScriptBackupManager
                 HasInstance = backup.Instance != null,
                 SourceCodeLength = backup.SourceCode?.Length ?? 0,
             };
+        }
+
         return null;
     }
 
@@ -121,11 +126,13 @@ public class ScriptBackupManager
             Backups = new List<BackupInfo>(),
         };
 
-        foreach (var kvp in _backups)
+        foreach (KeyValuePair<string, ScriptBackup> kvp in _backups)
         {
-            var info = GetBackupInfo(kvp.Key);
+            BackupInfo? info = GetBackupInfo(kvp.Key);
             if (info != null)
+            {
                 stats.Backups.Add(info);
+            }
         }
 
         return stats;
@@ -136,7 +143,7 @@ public class ScriptBackupManager
     /// </summary>
     public void ClearAllBackups()
     {
-        var count = _backups.Count;
+        int count = _backups.Count;
         _backups.Clear();
         _logger.LogInformation("Cleared all backups ({Count} entries)", count);
     }
@@ -150,9 +157,11 @@ public class ScriptBackupManager
         try
         {
             // Try to read source file for diagnostics
-            var possiblePath = Path.Combine("Scripts", $"{typeId}.cs");
+            string possiblePath = Path.Combine("Scripts", $"{typeId}.cs");
             if (File.Exists(possiblePath))
+            {
                 return await File.ReadAllTextAsync(possiblePath);
+            }
         }
         catch (Exception ex)
         {
@@ -171,9 +180,11 @@ public class ScriptBackupManager
         try
         {
             // Try to read source file for diagnostics
-            var possiblePath = Path.Combine("Scripts", $"{typeId}.cs");
+            string possiblePath = Path.Combine("Scripts", $"{typeId}.cs");
             if (File.Exists(possiblePath))
+            {
                 return File.ReadAllText(possiblePath);
+            }
         }
         catch (Exception ex)
         {

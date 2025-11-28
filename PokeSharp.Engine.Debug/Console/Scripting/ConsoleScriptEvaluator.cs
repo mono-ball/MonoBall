@@ -1,5 +1,5 @@
+using System.Collections;
 using System.Reflection;
-using System.Text;
 using Arch.Core;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -9,7 +9,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
 using PokeSharp.Game.Components.Movement;
 using PokeSharp.Game.Scripting.Api;
-using PokeSharp.Game.Systems.Services;
 
 namespace PokeSharp.Engine.Debug.Console.Scripting;
 
@@ -21,12 +20,6 @@ public class ConsoleScriptEvaluator
 {
     private readonly ILogger _logger;
     private readonly ScriptOptions _scriptOptions;
-    private ScriptState<object>? _scriptState;
-
-    /// <summary>
-    /// Gets the current script state (for auto-completion tracking).
-    /// </summary>
-    public ScriptState<object>? CurrentState => _scriptState;
 
     /// <summary>
     ///     Initializes a new instance of the console script evaluator.
@@ -36,12 +29,17 @@ public class ConsoleScriptEvaluator
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
         // Configure script options with all necessary references and imports
-        _scriptOptions = ScriptOptions.Default
-            .AddReferences(GetDefaultReferences())
+        _scriptOptions = ScriptOptions
+            .Default.AddReferences(GetDefaultReferences())
             .AddImports(GetDefaultImports());
 
         _logger.LogInformation("Console script evaluator initialized");
     }
+
+    /// <summary>
+    ///     Gets the current script state (for auto-completion tracking).
+    /// </summary>
+    public ScriptState<object>? CurrentState { get; private set; }
 
     /// <summary>
     ///     Evaluates a C# code snippet and returns the result.
@@ -52,30 +50,32 @@ public class ConsoleScriptEvaluator
     public async Task<EvaluationResult> EvaluateAsync(string code, ConsoleGlobals globals)
     {
         if (string.IsNullOrWhiteSpace(code))
+        {
             return EvaluationResult.Empty();
+        }
 
         try
         {
             _logger.LogDebug("Evaluating code: {Code}", code);
 
-            if (_scriptState == null)
+            if (CurrentState == null)
             {
                 // First execution - create new script state
-                _scriptState = await CSharpScript.RunAsync(code, _scriptOptions, globals);
+                CurrentState = await CSharpScript.RunAsync(code, _scriptOptions, globals);
             }
             else
             {
                 // Continue from previous state (preserves variables)
-                _scriptState = await _scriptState.ContinueWithAsync(code);
+                CurrentState = await CurrentState.ContinueWithAsync(code);
             }
 
-            var result = _scriptState.ReturnValue;
+            object? result = CurrentState.ReturnValue;
             return EvaluationResult.Success(FormatResult(result));
         }
         catch (CompilationErrorException ex)
         {
             _logger.LogWarning(ex, "Compilation error in console script");
-            var errors = ErrorFormatter.FormatErrors(ex.Diagnostics, code);
+            List<FormattedError> errors = ErrorFormatter.FormatErrors(ex.Diagnostics, code);
             return EvaluationResult.CompilationError(errors, code);
         }
         catch (Exception ex)
@@ -90,7 +90,7 @@ public class ConsoleScriptEvaluator
     /// </summary>
     public void Reset()
     {
-        _scriptState = null;
+        CurrentState = null;
         _logger.LogDebug("Console script state reset");
     }
 
@@ -103,23 +103,25 @@ public class ConsoleScriptEvaluator
     public bool IsCodeComplete(string code)
     {
         if (string.IsNullOrWhiteSpace(code))
+        {
             return true;
+        }
 
         // Quick check for obviously incomplete code
-        var trimmed = code.Trim();
+        string trimmed = code.Trim();
 
         // Check for unclosed braces/brackets/parens
-        var braceCount = 0;
-        var bracketCount = 0;
-        var parenCount = 0;
-        var inString = false;
-        var inVerbatimString = false;
-        var inChar = false;
-        var prevChar = '\0';
+        int braceCount = 0;
+        int bracketCount = 0;
+        int parenCount = 0;
+        bool inString = false;
+        bool inVerbatimString = false;
+        bool inChar = false;
+        char prevChar = '\0';
 
-        for (var i = 0; i < code.Length; i++)
+        for (int i = 0; i < code.Length; i++)
         {
-            var c = code[i];
+            char c = code[i];
 
             // Handle string literals
             if (c == '"' && !inChar)
@@ -144,7 +146,9 @@ public class ConsoleScriptEvaluator
             else if (c == '\'' && !inString && !inVerbatimString)
             {
                 if (prevChar != '\\')
+                {
                     inChar = !inChar;
+                }
             }
 
             // Only count braces outside of strings
@@ -152,12 +156,24 @@ public class ConsoleScriptEvaluator
             {
                 switch (c)
                 {
-                    case '{': braceCount++; break;
-                    case '}': braceCount--; break;
-                    case '[': bracketCount++; break;
-                    case ']': bracketCount--; break;
-                    case '(': parenCount++; break;
-                    case ')': parenCount--; break;
+                    case '{':
+                        braceCount++;
+                        break;
+                    case '}':
+                        braceCount--;
+                        break;
+                    case '[':
+                        bracketCount++;
+                        break;
+                    case ']':
+                        bracketCount--;
+                        break;
+                    case '(':
+                        parenCount++;
+                        break;
+                    case ')':
+                        parenCount--;
+                        break;
                 }
             }
 
@@ -166,47 +182,61 @@ public class ConsoleScriptEvaluator
 
         // If any brackets are unclosed, code is incomplete
         if (braceCount > 0 || bracketCount > 0 || parenCount > 0)
+        {
             return false;
+        }
 
         // If we're still inside a string, code is incomplete
         if (inString || inVerbatimString || inChar)
+        {
             return false;
+        }
 
         // Check for lines ending with operators that expect continuation
-        var lines = code.Split('\n');
-        var lastLine = lines.LastOrDefault()?.Trim() ?? "";
+        string[] lines = code.Split('\n');
+        string lastLine = lines.LastOrDefault()?.Trim() ?? "";
 
         // Common patterns that indicate incomplete statements
-        if (lastLine.EndsWith("=>") ||
-            lastLine.EndsWith("&&") ||
-            lastLine.EndsWith("||") ||
-            lastLine.EndsWith("+") ||
-            lastLine.EndsWith("-") ||
-            lastLine.EndsWith("*") ||
-            lastLine.EndsWith("/") ||
-            lastLine.EndsWith(",") ||
-            lastLine.EndsWith("(") ||
-            lastLine.EndsWith("{") ||
-            lastLine.EndsWith("["))
+        if (
+            lastLine.EndsWith("=>")
+            || lastLine.EndsWith("&&")
+            || lastLine.EndsWith("||")
+            || lastLine.EndsWith("+")
+            || lastLine.EndsWith("-")
+            || lastLine.EndsWith("*")
+            || lastLine.EndsWith("/")
+            || lastLine.EndsWith(",")
+            || lastLine.EndsWith("(")
+            || lastLine.EndsWith("{")
+            || lastLine.EndsWith("[")
+        )
         {
             return false;
         }
 
         // Use Roslyn to parse and check for incomplete syntax
-        var tree = CSharpSyntaxTree.ParseText(code, CSharpParseOptions.Default.WithKind(SourceCodeKind.Script));
-        var diagnostics = tree.GetDiagnostics();
+        SyntaxTree tree = CSharpSyntaxTree.ParseText(
+            code,
+            CSharpParseOptions.Default.WithKind(SourceCodeKind.Script)
+        );
+        IEnumerable<Diagnostic> diagnostics = tree.GetDiagnostics();
 
         // Check for "expected" errors which indicate incomplete code
-        foreach (var diagnostic in diagnostics)
+        foreach (Diagnostic diagnostic in diagnostics)
         {
             // CS1733: Expected expression (common for incomplete for loops etc)
             // CS1026: ) expected
             // CS1513: } expected
             // CS1002: ; expected (at end of incomplete statement)
-            if (diagnostic.Id == "CS1733" ||
-                diagnostic.Id == "CS1026" ||
-                diagnostic.Id == "CS1513" ||
-                (diagnostic.Id == "CS1002" && diagnostic.Location.SourceSpan.End >= code.Length - 1))
+            if (
+                diagnostic.Id == "CS1733"
+                || diagnostic.Id == "CS1026"
+                || diagnostic.Id == "CS1513"
+                || (
+                    diagnostic.Id == "CS1002"
+                    && diagnostic.Location.SourceSpan.End >= code.Length - 1
+                )
+            )
             {
                 return false;
             }
@@ -216,36 +246,36 @@ public class ConsoleScriptEvaluator
     }
 
     /// <summary>
-    /// Gets all user-defined variables from the script state.
+    ///     Gets all user-defined variables from the script state.
     /// </summary>
     public IEnumerable<(string Name, string TypeName, Func<object?> ValueGetter)> GetVariables()
     {
-        if (_scriptState == null)
-            yield break;
-
-        foreach (var variable in _scriptState.Variables)
+        if (CurrentState == null)
         {
-            var varName = variable.Name;
-            var varType = variable.Type;
+            yield break;
+        }
+
+        foreach (ScriptVariable? variable in CurrentState.Variables)
+        {
+            string? varName = variable.Name;
+            Type? varType = variable.Type;
 
             // Create a closure to get the current value
-            yield return (
-                varName,
-                varType.Name,
-                () => GetVariableValue(varName)
-            );
+            yield return (varName, varType.Name, () => GetVariableValue(varName));
         }
     }
 
     /// <summary>
-    /// Gets the current value of a variable by name.
+    ///     Gets the current value of a variable by name.
     /// </summary>
     public object? GetVariableValue(string name)
     {
-        if (_scriptState == null)
+        if (CurrentState == null)
+        {
             return null;
+        }
 
-        var variable = _scriptState.Variables.FirstOrDefault(v => v.Name == name);
+        ScriptVariable? variable = CurrentState.Variables.FirstOrDefault(v => v.Name == name);
         return variable?.Value;
     }
 
@@ -255,37 +285,48 @@ public class ConsoleScriptEvaluator
     private static string FormatResult(object? result)
     {
         if (result == null)
+        {
             return "null";
+        }
 
         // Handle common MonoGame types
         if (result is Vector2 v2)
+        {
             return $"Vector2({v2.X:F2}, {v2.Y:F2})";
+        }
 
         if (result is Point p)
+        {
             return $"Point({p.X}, {p.Y})";
+        }
 
         if (result is Rectangle rect)
+        {
             return $"Rectangle(X:{rect.X}, Y:{rect.Y}, W:{rect.Width}, H:{rect.Height})";
+        }
 
         if (result is Color color)
+        {
             return $"Color(R:{color.R}, G:{color.G}, B:{color.B}, A:{color.A})";
+        }
 
         // Handle Entity
         if (result is Entity entity)
+        {
             return $"Entity(Id: {entity.Id})";
+        }
 
         // Handle collections
-        if (result is System.Collections.IEnumerable enumerable and not string)
+        if (result is IEnumerable enumerable and not string)
         {
             var items = enumerable.Cast<object>().Take(10).ToList();
-            var moreItems = enumerable.Cast<object>().Count() > 10;
-            var itemsStr = string.Join(", ", items.Select(FormatResult));
+            bool moreItems = enumerable.Cast<object>().Count() > 10;
+            string itemsStr = string.Join(", ", items.Select(FormatResult));
             return moreItems ? $"[{itemsStr}, ...]" : $"[{itemsStr}]";
         }
 
         return result.ToString() ?? "null";
     }
-
 
     /// <summary>
     ///     Gets the default assembly references for console scripts.
@@ -294,17 +335,17 @@ public class ConsoleScriptEvaluator
     {
         return new[]
         {
-            typeof(object).Assembly,                    // System.Private.CoreLib
-            typeof(System.Console).Assembly,            // System.Console
-            typeof(Enumerable).Assembly,                // System.Linq
-            typeof(List<>).Assembly,                    // System.Collections
-            typeof(World).Assembly,                     // Arch.Core
-            typeof(Entity).Assembly,                    // Arch.Core
-            typeof(Point).Assembly,                     // MonoGame.Framework
-            typeof(Vector2).Assembly,                   // MonoGame.Framework
-            typeof(Direction).Assembly,                 // PokeSharp.Game.Components
-            typeof(IScriptingApiProvider).Assembly,     // PokeSharp.Game.Scripting
-            typeof(ILogger).Assembly,                   // Microsoft.Extensions.Logging.Abstractions
+            typeof(object).Assembly, // System.Private.CoreLib
+            typeof(System.Console).Assembly, // System.Console
+            typeof(Enumerable).Assembly, // System.Linq
+            typeof(List<>).Assembly, // System.Collections
+            typeof(World).Assembly, // Arch.Core
+            typeof(Entity).Assembly, // Arch.Core
+            typeof(Point).Assembly, // MonoGame.Framework
+            typeof(Vector2).Assembly, // MonoGame.Framework
+            typeof(Direction).Assembly, // PokeSharp.Game.Components
+            typeof(IScriptingApiProvider).Assembly, // PokeSharp.Game.Scripting
+            typeof(ILogger).Assembly, // Microsoft.Extensions.Logging.Abstractions
         };
     }
 
@@ -328,4 +369,3 @@ public class ConsoleScriptEvaluator
         };
     }
 }
-

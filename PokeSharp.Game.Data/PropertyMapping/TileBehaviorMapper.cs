@@ -17,20 +17,28 @@ public class TileBehaviorMapper : IEntityPropertyMapper<TileBehavior>
     public TileBehavior Map(Dictionary<string, object> properties)
     {
         if (!CanMap(properties))
+        {
             throw new InvalidOperationException("Cannot map properties to TileBehavior component");
+        }
 
         string? behaviorTypeId = null;
 
         // Try "behavior_type" first, then "tile_behavior"
-        if (properties.TryGetValue("behavior_type", out var behaviorValue))
+        if (properties.TryGetValue("behavior_type", out object? behaviorValue))
+        {
             behaviorTypeId = behaviorValue?.ToString();
-        else if (properties.TryGetValue("tile_behavior", out var tileBehaviorValue))
+        }
+        else if (properties.TryGetValue("tile_behavior", out object? tileBehaviorValue))
+        {
             behaviorTypeId = tileBehaviorValue?.ToString();
+        }
 
         if (string.IsNullOrWhiteSpace(behaviorTypeId))
+        {
             throw new InvalidOperationException(
                 "behavior_type or tile_behavior property is empty or whitespace"
             );
+        }
 
         return new TileBehavior(behaviorTypeId);
     }
@@ -39,7 +47,7 @@ public class TileBehaviorMapper : IEntityPropertyMapper<TileBehavior>
     {
         if (CanMap(properties))
         {
-            var behavior = Map(properties);
+            TileBehavior behavior = Map(properties);
             world.Add(entity, behavior);
         }
     }

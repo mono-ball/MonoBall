@@ -1,35 +1,43 @@
-using System;
-
 namespace PokeSharp.Engine.UI.Debug.Animation;
 
 /// <summary>
-/// Reusable animator for smooth transitions between values.
-/// Can be used for position, size, opacity, or any numeric property.
+///     Reusable animator for smooth transitions between values.
+///     Can be used for position, size, opacity, or any numeric property.
 /// </summary>
 public class Animator
 {
-    private float _currentValue;
-    private float _targetValue;
     private float _speed;
-    private bool _isAnimating;
 
     /// <summary>
-    /// Gets the current animated value.
+    ///     Initializes a new animator.
     /// </summary>
-    public float CurrentValue => _currentValue;
+    /// <param name="initialValue">Starting value.</param>
+    /// <param name="speed">Animation speed (units per second).</param>
+    public Animator(float initialValue = 0f, float speed = 5f)
+    {
+        CurrentValue = initialValue;
+        TargetValue = initialValue;
+        _speed = speed;
+        IsAnimating = false;
+    }
 
     /// <summary>
-    /// Gets the target value being animated towards.
+    ///     Gets the current animated value.
     /// </summary>
-    public float TargetValue => _targetValue;
+    public float CurrentValue { get; private set; }
 
     /// <summary>
-    /// Gets whether the animator is currently animating.
+    ///     Gets the target value being animated towards.
     /// </summary>
-    public bool IsAnimating => _isAnimating;
+    public float TargetValue { get; private set; }
 
     /// <summary>
-    /// Gets the animation speed (units per second).
+    ///     Gets whether the animator is currently animating.
+    /// </summary>
+    public bool IsAnimating { get; private set; }
+
+    /// <summary>
+    ///     Gets the animation speed (units per second).
     /// </summary>
     public float Speed
     {
@@ -38,66 +46,55 @@ public class Animator
     }
 
     /// <summary>
-    /// Initializes a new animator.
-    /// </summary>
-    /// <param name="initialValue">Starting value.</param>
-    /// <param name="speed">Animation speed (units per second).</param>
-    public Animator(float initialValue = 0f, float speed = 5f)
-    {
-        _currentValue = initialValue;
-        _targetValue = initialValue;
-        _speed = speed;
-        _isAnimating = false;
-    }
-
-    /// <summary>
-    /// Sets a new target value and starts animating towards it.
+    ///     Sets a new target value and starts animating towards it.
     /// </summary>
     /// <param name="targetValue">The value to animate to.</param>
     public void AnimateTo(float targetValue)
     {
-        _targetValue = targetValue;
-        _isAnimating = Math.Abs(_currentValue - _targetValue) > 0.01f;
+        TargetValue = targetValue;
+        IsAnimating = Math.Abs(CurrentValue - TargetValue) > 0.01f;
     }
 
     /// <summary>
-    /// Immediately sets the value without animation.
+    ///     Immediately sets the value without animation.
     /// </summary>
     /// <param name="value">The value to set.</param>
     public void SetImmediate(float value)
     {
-        _currentValue = value;
-        _targetValue = value;
-        _isAnimating = false;
+        CurrentValue = value;
+        TargetValue = value;
+        IsAnimating = false;
     }
 
     /// <summary>
-    /// Updates the animator, smoothly interpolating towards the target.
+    ///     Updates the animator, smoothly interpolating towards the target.
     /// </summary>
     /// <param name="deltaTime">Time elapsed since last update (in seconds).</param>
     public void Update(float deltaTime)
     {
-        if (!_isAnimating)
+        if (!IsAnimating)
+        {
             return;
+        }
 
         // Smooth interpolation using exponential easing
-        float difference = _targetValue - _currentValue;
+        float difference = TargetValue - CurrentValue;
         float step = difference * _speed * deltaTime;
 
         // Stop animating if we're very close to the target
         if (Math.Abs(difference) < 0.01f)
         {
-            _currentValue = _targetValue;
-            _isAnimating = false;
+            CurrentValue = TargetValue;
+            IsAnimating = false;
         }
         else
         {
-            _currentValue += step;
+            CurrentValue += step;
         }
     }
 
     /// <summary>
-    /// Resets the animator to a specific value and stops animation.
+    ///     Resets the animator to a specific value and stops animation.
     /// </summary>
     /// <param name="value">The value to reset to.</param>
     public void Reset(float value = 0f)
@@ -105,7 +102,3 @@ public class Animator
         SetImmediate(value);
     }
 }
-
-
-
-

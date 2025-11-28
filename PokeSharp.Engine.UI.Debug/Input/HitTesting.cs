@@ -1,16 +1,17 @@
 using Microsoft.Xna.Framework;
+using PokeSharp.Engine.UI.Debug.Core;
 using PokeSharp.Engine.UI.Debug.Layout;
 
 namespace PokeSharp.Engine.UI.Debug.Input;
 
 /// <summary>
-/// Provides hit testing functionality for UI components.
-/// Uses resolved layout rectangles for accurate click detection.
+///     Provides hit testing functionality for UI components.
+///     Uses resolved layout rectangles for accurate click detection.
 /// </summary>
 public static class HitTesting
 {
     /// <summary>
-    /// Tests if a point intersects a layout rectangle.
+    ///     Tests if a point intersects a layout rectangle.
     /// </summary>
     public static bool HitTest(LayoutRect rect, Point point)
     {
@@ -18,7 +19,7 @@ public static class HitTesting
     }
 
     /// <summary>
-    /// Tests if a point intersects a layout rectangle.
+    ///     Tests if a point intersects a layout rectangle.
     /// </summary>
     public static bool HitTest(LayoutRect rect, float x, float y)
     {
@@ -26,32 +27,35 @@ public static class HitTesting
     }
 
     /// <summary>
-    /// Tests if a point intersects a layout rectangle with padding.
-    /// Shrinks the hit area by the specified padding.
+    ///     Tests if a point intersects a layout rectangle with padding.
+    ///     Shrinks the hit area by the specified padding.
     /// </summary>
     public static bool HitTestWithPadding(LayoutRect rect, Point point, float padding)
     {
-        var shrunk = rect.Shrink(padding);
+        LayoutRect shrunk = rect.Shrink(padding);
         return shrunk.Contains(point);
     }
 
     /// <summary>
-    /// Finds the topmost (highest Z-order) component at the given point.
+    ///     Finds the topmost (highest Z-order) component at the given point.
     /// </summary>
     public static string? FindTopmostComponent(
-        IEnumerable<KeyValuePair<string, Core.ComponentFrameState>> components,
-        Point point)
+        IEnumerable<KeyValuePair<string, ComponentFrameState>> components,
+        Point point
+    )
     {
-        Core.ComponentFrameState? topmost = null;
+        ComponentFrameState? topmost = null;
         int highestZ = int.MinValue;
 
-        foreach (var kvp in components)
+        foreach (KeyValuePair<string, ComponentFrameState> kvp in components)
         {
-            var component = kvp.Value;
-            if (component.IsInteractive &&
-                component.IsVisible &&
-                component.Rect.Contains(point) &&
-                component.ZOrder > highestZ)
+            ComponentFrameState component = kvp.Value;
+            if (
+                component.IsInteractive
+                && component.IsVisible
+                && component.Rect.Contains(point)
+                && component.ZOrder > highestZ
+            )
             {
                 topmost = component;
                 highestZ = component.ZOrder;
@@ -62,7 +66,7 @@ public static class HitTesting
     }
 
     /// <summary>
-    /// Converts screen coordinates to local coordinates within a rectangle.
+    ///     Converts screen coordinates to local coordinates within a rectangle.
     /// </summary>
     public static (float x, float y) ScreenToLocal(LayoutRect rect, Point screenPoint)
     {
@@ -70,7 +74,7 @@ public static class HitTesting
     }
 
     /// <summary>
-    /// Converts local coordinates to screen coordinates.
+    ///     Converts local coordinates to screen coordinates.
     /// </summary>
     public static Point LocalToScreen(LayoutRect rect, float localX, float localY)
     {
@@ -78,14 +82,10 @@ public static class HitTesting
     }
 
     /// <summary>
-    /// Tests if a rectangle intersects another rectangle.
+    ///     Tests if a rectangle intersects another rectangle.
     /// </summary>
     public static bool Intersects(LayoutRect a, LayoutRect b)
     {
         return a.ToRectangle().Intersects(b.ToRectangle());
     }
 }
-
-
-
-

@@ -111,24 +111,38 @@ public sealed class EntityTemplate
         errors = new List<string>();
 
         if (string.IsNullOrWhiteSpace(TemplateId))
+        {
             errors.Add("TemplateId is required");
+        }
 
         if (string.IsNullOrWhiteSpace(Name))
+        {
             errors.Add("Name is required");
+        }
 
         if (string.IsNullOrWhiteSpace(Tag))
+        {
             errors.Add("Tag is required");
+        }
 
         // Allow empty components if template inherits from another template
         if (Components.Count == 0 && string.IsNullOrWhiteSpace(BaseTemplateId))
+        {
             errors.Add("Template must have at least one component or inherit from a base template");
+        }
 
         // Validate component types
-        foreach (var component in Components)
+        foreach (ComponentTemplate component in Components)
+        {
             if (component.ComponentType == null)
+            {
                 errors.Add("Component has null ComponentType");
+            }
             else if (!component.ComponentType.IsValueType)
+            {
                 errors.Add($"Component type {component.ComponentType.Name} must be a struct");
+            }
+        }
 
         // Check for duplicate component types
         var duplicates = Components
@@ -138,7 +152,9 @@ public sealed class EntityTemplate
             .ToList();
 
         if (duplicates.Any())
+        {
             errors.Add($"Duplicate component types: {string.Join(", ", duplicates)}");
+        }
 
         return errors.Count == 0;
     }

@@ -43,7 +43,7 @@ public sealed class EntityFactoryService(
         ArgumentNullException.ThrowIfNull(world);
 
         // Retrieve template from cache
-        var template = _templateCache.Get(templateId);
+        EntityTemplate? template = _templateCache.Get(templateId);
         if (template == null)
         {
             _logger.LogTemplateMissing(templateId);
@@ -54,10 +54,10 @@ public sealed class EntityFactoryService(
         }
 
         // Resolve template inheritance chain
-        var resolvedTemplate = ResolveTemplateInheritance(template);
+        EntityTemplate resolvedTemplate = ResolveTemplateInheritance(template);
 
         // Validate resolved template before spawning
-        var validationResult = ValidateTemplateInternal(resolvedTemplate);
+        ValidationResult validationResult = ValidateTemplateInternal(resolvedTemplate);
         if (!validationResult.IsValid)
         {
             _logger.LogError(
@@ -71,13 +71,13 @@ public sealed class EntityFactoryService(
         }
 
         // Build component array from resolved template
-        var components = BuildComponentArray(resolvedTemplate, context);
+        List<object> components = BuildComponentArray(resolvedTemplate, context);
 
         // Create empty entity first (use pool if available)
         Entity entity;
         try
         {
-            var poolName = GetPoolNameFromTemplateId(templateId);
+            string poolName = GetPoolNameFromTemplateId(templateId);
             entity = _poolManager.Acquire(poolName);
             _logger.LogDebug(
                 "Acquired entity from pool '{PoolName}' for template '{TemplateId}'",
@@ -107,12 +107,12 @@ public sealed class EntityFactoryService(
         }
 
         // Add each component using reflection (Arch requires compile-time types)
-        foreach (var component in components)
+        foreach (object component in components)
         {
-            var componentType = component.GetType();
+            Type componentType = component.GetType();
 
             // Get cached Add<T> method for this component type
-            var addMethod = GetCachedAddMethod(componentType);
+            MethodInfo addMethod = GetCachedAddMethod(componentType);
 
             // Invoke Add<T>(entity, component)
             addMethod.Invoke(world, [entity, component]);
@@ -152,10 +152,12 @@ public sealed class EntityFactoryService(
 
         // Add custom properties if any
         if (builder.CustomProperties.Any())
+        {
             context.Metadata = builder.CustomProperties.ToDictionary(
                 kvp => kvp.Key,
                 kvp => kvp.Value
             );
+        }
 
         return SpawnFromTemplate(templateId, world, context);
     }
@@ -171,10 +173,11 @@ public sealed class EntityFactoryService(
 
         _logger.LogDebug("Batch spawning {Count} entities", templateIdList.Count);
 
-        foreach (var templateId in templateIdList)
+        foreach (string templateId in templateIdList)
+        {
             try
             {
-                var entity = SpawnFromTemplate(templateId, world);
+                Entity entity = SpawnFromTemplate(templateId, world);
                 entities.Add(entity);
             }
             catch (Exception ex)
@@ -186,6 +189,7 @@ public sealed class EntityFactoryService(
                 );
                 throw;
             }
+        }
 
         _logger.LogInformation("Successfully spawned {Count} entities in batch", entities.Count);
         return entities;
@@ -196,12 +200,14 @@ public sealed class EntityFactoryService(
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(templateId);
 
-        var template = _templateCache.Get(templateId);
+        EntityTemplate? template = _templateCache.Get(templateId);
         if (template == null)
+        {
             return ValidationResult.Failure(
                 templateId,
                 $"Template '{templateId}' not found in cache"
             );
+        }
 
         return ValidateTemplateInternal(template);
     }
@@ -260,7 +266,7 @@ public sealed class EntityFactoryService(
         );
 
         // Retrieve and validate template once
-        var template = _templateCache.Get(templateId);
+        EntityTemplate? template = _templateCache.Get(templateId);
         if (template == null)
         {
             _logger.LogTemplateMissing(templateId);
@@ -271,10 +277,10 @@ public sealed class EntityFactoryService(
         }
 
         // Resolve template inheritance chain once
-        var resolvedTemplate = ResolveTemplateInheritance(template);
+        EntityTemplate resolvedTemplate = ResolveTemplateInheritance(template);
 
         // Validate resolved template once
-        var validationResult = ValidateTemplateInternal(resolvedTemplate);
+        ValidationResult validationResult = ValidateTemplateInternal(resolvedTemplate);
         if (!validationResult.IsValid)
         {
             _logger.LogError(
@@ -289,7 +295,7 @@ public sealed class EntityFactoryService(
 
         var entities = new Entity[count];
 
-        for (var i = 0; i < count; i++)
+        for (int i = 0; i < count; i++)
         {
             EntitySpawnContext? context = null;
 
@@ -310,20 +316,22 @@ public sealed class EntityFactoryService(
                 };
 
                 if (builder.CustomProperties.Any())
+                {
                     context.Metadata = builder.CustomProperties.ToDictionary(
                         kvp => kvp.Key,
                         kvp => kvp.Value
                     );
+                }
             }
 
             // Build component array from resolved template (resolved once above)
-            var components = BuildComponentArray(resolvedTemplate, context);
+            List<object> components = BuildComponentArray(resolvedTemplate, context);
 
             // Create entity (use pool if available)
             Entity entity;
             try
             {
-                var poolName = GetPoolNameFromTemplateId(templateId);
+                string poolName = GetPoolNameFromTemplateId(templateId);
                 entity = _poolManager.Acquire(poolName);
             }
             catch (KeyNotFoundException ex)
@@ -348,10 +356,10 @@ public sealed class EntityFactoryService(
             }
 
             // Add each component using cached reflection
-            foreach (var component in components)
+            foreach (object component in components)
             {
-                var componentType = component.GetType();
-                var addMethod = GetCachedAddMethod(componentType);
+                Type componentType = component.GetType();
+                MethodInfo addMethod = GetCachedAddMethod(componentType);
                 addMethod.Invoke(world, [entity, component]);
             }
 
@@ -386,8 +394,10 @@ public sealed class EntityFactoryService(
 
         _logger.LogDebug("Releasing batch of {Count} entities", entities.Length);
 
-        foreach (var entity in entities)
+        foreach (Entity entity in entities)
+        {
             _poolManager.Release(entity);
+        }
     }
 
     // Private helper methods
@@ -401,7 +411,7 @@ public sealed class EntityFactoryService(
     private static string GetPoolNameFromTemplateId(string templateId)
     {
         // Split on '/' and take the first part
-        var parts = templateId.Split('/');
+        string[] parts = templateId.Split('/');
         return parts[0];
     }
 
@@ -414,20 +424,22 @@ public sealed class EntityFactoryService(
             componentType,
             type =>
             {
-                var method = typeof(World)
+                MethodInfo? method = typeof(World)
                     .GetMethods()
                     .Where(m => m.Name == nameof(World.Add) && m.IsGenericMethod)
                     .FirstOrDefault(m =>
                     {
-                        var parameters = m.GetParameters();
+                        ParameterInfo[] parameters = m.GetParameters();
                         return parameters.Length == 2
                             && parameters[0].ParameterType == typeof(Entity);
                     });
 
                 if (method == null)
+                {
                     throw new InvalidOperationException(
                         $"Could not find World.Add<T> method for component type {type.Name}"
                     );
+                }
 
                 // Make the generic method concrete for this component type
                 return method.MakeGenericMethod(type);
@@ -437,7 +449,7 @@ public sealed class EntityFactoryService(
 
     private static ValidationResult ValidateTemplateInternal(EntityTemplate template)
     {
-        var isValid = template.Validate(out var errors);
+        bool isValid = template.Validate(out List<string> errors);
         return isValid
             ? ValidationResult.Success(template.TemplateId)
             : ValidationResult.Failure(template.TemplateId, errors.ToArray());
@@ -454,7 +466,9 @@ public sealed class EntityFactoryService(
     {
         // If no base template, return as-is
         if (string.IsNullOrWhiteSpace(template.BaseTemplateId))
+        {
             return template;
+        }
 
         _logger.LogDebug(
             "Resolving inheritance for template '{TemplateId}' (base: '{BaseTemplateId}')",
@@ -467,21 +481,25 @@ public sealed class EntityFactoryService(
         var inheritanceChain = new List<EntityTemplate>();
 
         // Walk up the inheritance chain
-        var currentTemplateId = template.BaseTemplateId;
+        string? currentTemplateId = template.BaseTemplateId;
         while (!string.IsNullOrWhiteSpace(currentTemplateId))
         {
             // Check for circular dependency
             if (visited.Contains(currentTemplateId))
+            {
                 throw new InvalidOperationException(
                     $"Circular template inheritance detected: {string.Join(" → ", visited)} → {currentTemplateId}"
                 );
+            }
 
             // Get base template
-            var baseTemplate = _templateCache.Get(currentTemplateId);
+            EntityTemplate? baseTemplate = _templateCache.Get(currentTemplateId);
             if (baseTemplate == null)
+            {
                 throw new InvalidOperationException(
                     $"Base template '{currentTemplateId}' not found for template '{template.TemplateId}'"
                 );
+            }
 
             visited.Add(currentTemplateId);
             inheritanceChain.Add(baseTemplate);
@@ -506,14 +524,18 @@ public sealed class EntityFactoryService(
         var mergedComponents = new Dictionary<Type, ComponentTemplate>();
 
         // Start with root base template
-        foreach (var baseTemplate in inheritanceChain)
-        foreach (var component in baseTemplate.Components)
-            // Base components are added or overridden
+        foreach (EntityTemplate baseTemplate in inheritanceChain)
+        foreach (ComponentTemplate component in baseTemplate.Components)
+        // Base components are added or overridden
+        {
             mergedComponents[component.ComponentType] = component;
+        }
 
         // Apply child template components (final overrides)
-        foreach (var component in template.Components)
+        foreach (ComponentTemplate component in template.Components)
+        {
             mergedComponents[component.ComponentType] = component;
+        }
 
         // Create resolved template
         var resolvedTemplate = new EntityTemplate
@@ -545,11 +567,11 @@ public sealed class EntityFactoryService(
         var addedTypes = new HashSet<string>();
 
         // Add template components (with overrides)
-        foreach (var componentTemplate in template.Components)
+        foreach (ComponentTemplate componentTemplate in template.Components)
         {
             // Use override if available, otherwise use template's initial data
-            var componentTypeName = componentTemplate.ComponentType.Name;
-            var componentData =
+            string componentTypeName = componentTemplate.ComponentType.Name;
+            object componentData =
                 context?.Overrides?.GetValueOrDefault(componentTypeName)
                 ?? componentTemplate.InitialData;
             components.Add(componentData);
@@ -558,9 +580,15 @@ public sealed class EntityFactoryService(
 
         // Add new components from overrides that aren't in template
         if (context?.Overrides != null)
-            foreach (var (typeName, componentData) in context.Overrides)
+        {
+            foreach ((string typeName, object componentData) in context.Overrides)
+            {
                 if (!addedTypes.Contains(typeName))
+                {
                     components.Add(componentData);
+                }
+            }
+        }
 
         return components;
     }

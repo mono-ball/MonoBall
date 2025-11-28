@@ -1,7 +1,7 @@
 namespace PokeSharp.Engine.Debug.Commands.BuiltIn;
 
 /// <summary>
-/// Clears all console output.
+///     Clears all console output.
 /// </summary>
 [ConsoleCommand("clear", "Clear all console output")]
 public class ClearCommand : IConsoleCommand
@@ -16,4 +16,3 @@ public class ClearCommand : IConsoleCommand
         return Task.CompletedTask;
     }
 }
-

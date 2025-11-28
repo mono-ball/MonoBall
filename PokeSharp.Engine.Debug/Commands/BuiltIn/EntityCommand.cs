@@ -1,16 +1,21 @@
+using Microsoft.Xna.Framework;
 using PokeSharp.Engine.UI.Debug.Core;
+using PokeSharp.Engine.UI.Debug.Models;
+using TextCopy;
 
 namespace PokeSharp.Engine.Debug.Commands.BuiltIn;
 
 /// <summary>
-/// Command for browsing and managing ECS entities.
+///     Command for browsing and managing ECS entities.
 /// </summary>
 [ConsoleCommand("entity", "Browse and inspect ECS entities")]
 public class EntityCommand : IConsoleCommand
 {
     public string Name => "entity";
     public string Description => "Browse and inspect ECS entities";
-    public string Usage => @"entity <subcommand>
+
+    public string Usage =>
+        @"entity <subcommand>
 
 Subcommands:
   entity list              - List all entities (respects current filters)
@@ -59,7 +64,7 @@ Examples:
 
     public Task ExecuteAsync(IConsoleContext context, string[] args)
     {
-        var theme = context.Theme;
+        UITheme theme = context.Theme;
 
         if (args.Length == 0)
         {
@@ -68,7 +73,7 @@ Examples:
             return Task.CompletedTask;
         }
 
-        var subcommand = args[0].ToLowerInvariant();
+        string subcommand = args[0].ToLowerInvariant();
 
         switch (subcommand)
         {
@@ -86,15 +91,17 @@ Examples:
                     context.WriteLine("Usage: entity find <text>", theme.Error);
                     return Task.CompletedTask;
                 }
+
                 FindEntities(context, theme, string.Join(" ", args.Skip(1)));
                 break;
 
             case "inspect":
-                if (args.Length < 2 || !int.TryParse(args[1], out var inspectId))
+                if (args.Length < 2 || !int.TryParse(args[1], out int inspectId))
                 {
                     context.WriteLine("Usage: entity inspect <id>", theme.Error);
                     return Task.CompletedTask;
                 }
+
                 InspectEntity(context, theme, inspectId);
                 break;
 
@@ -181,25 +188,41 @@ Examples:
 
     private void ListEntities(IConsoleContext context, UITheme theme)
     {
-        var stats = context.Entities.GetStatistics();
+        (int Total, int Filtered, int Pinned, int Expanded) stats =
+            context.Entities.GetStatistics();
 
         context.WriteLine($"Entities: {stats.Filtered} shown", theme.Info);
 
         if (stats.Total != stats.Filtered)
         {
-            context.WriteLine($"  ({stats.Total} total, filtered to {stats.Filtered})", theme.TextSecondary);
+            context.WriteLine(
+                $"  ({stats.Total} total, filtered to {stats.Filtered})",
+                theme.TextSecondary
+            );
         }
 
-        var filters = context.Entities.GetFilters();
-        if (!string.IsNullOrEmpty(filters.Tag) || !string.IsNullOrEmpty(filters.Search) || !string.IsNullOrEmpty(filters.Component))
+        (string Tag, string Search, string Component) filters = context.Entities.GetFilters();
+        if (
+            !string.IsNullOrEmpty(filters.Tag)
+            || !string.IsNullOrEmpty(filters.Search)
+            || !string.IsNullOrEmpty(filters.Component)
+        )
         {
             context.WriteLine("Active filters:", theme.TextSecondary);
             if (!string.IsNullOrEmpty(filters.Tag))
+            {
                 context.WriteLine($"  Tag: {filters.Tag}", theme.TextSecondary);
+            }
+
             if (!string.IsNullOrEmpty(filters.Search))
+            {
                 context.WriteLine($"  Search: {filters.Search}", theme.TextSecondary);
+            }
+
             if (!string.IsNullOrEmpty(filters.Component))
+            {
                 context.WriteLine($"  Component: {filters.Component}", theme.TextSecondary);
+            }
         }
 
         context.WriteLine("", theme.TextPrimary);
@@ -208,7 +231,8 @@ Examples:
 
     private void ShowEntityCount(IConsoleContext context, UITheme theme)
     {
-        var stats = context.Entities.GetStatistics();
+        (int Total, int Filtered, int Pinned, int Expanded) stats =
+            context.Entities.GetStatistics();
 
         context.WriteLine("Entity Statistics:", theme.Info);
         context.WriteLine($"  Total: {stats.Total}", theme.TextPrimary);
@@ -217,15 +241,18 @@ Examples:
         context.WriteLine($"  Expanded: {stats.Expanded}", theme.TextPrimary);
 
         // Show tag breakdown
-        var tagCounts = context.Entities.GetTagCounts();
+        Dictionary<string, int> tagCounts = context.Entities.GetTagCounts();
         if (tagCounts.Count > 0)
         {
             context.WriteLine("", theme.TextPrimary);
             context.WriteLine("By Tag:", theme.Info);
-            foreach (var (tag, count) in tagCounts.OrderByDescending(kv => kv.Value).Take(10))
+            foreach (
+                (string tag, int count) in tagCounts.OrderByDescending(kv => kv.Value).Take(10)
+            )
             {
                 context.WriteLine($"  {tag}: {count}", theme.TextSecondary);
             }
+
             if (tagCounts.Count > 10)
             {
                 context.WriteLine($"  ... and {tagCounts.Count - 10} more tags", theme.TextDim);
@@ -240,9 +267,9 @@ Examples:
         if (entities.Count == 0)
         {
             // Also try parsing as ID
-            if (int.TryParse(searchText, out var id))
+            if (int.TryParse(searchText, out int id))
             {
-                var entity = context.Entities.Find(id);
+                EntityInfo? entity = context.Entities.Find(id);
                 if (entity != null)
                 {
                     entities.Add(entity);
@@ -257,10 +284,13 @@ Examples:
         }
 
         context.WriteLine($"Found {entities.Count} entities:", theme.Success);
-        foreach (var entity in entities.Take(20))
+        foreach (EntityInfo entity in entities.Take(20))
         {
-            var status = entity.IsActive ? "" : " (inactive)";
-            context.WriteLine($"  [{entity.Id}] {entity.Name}{status} - {entity.Components.Count} components", theme.TextPrimary);
+            string status = entity.IsActive ? "" : " (inactive)";
+            context.WriteLine(
+                $"  [{entity.Id}] {entity.Name}{status} - {entity.Components.Count} components",
+                theme.TextPrimary
+            );
         }
 
         if (entities.Count > 20)
@@ -271,7 +301,7 @@ Examples:
 
     private void InspectEntity(IConsoleContext context, UITheme theme, int entityId)
     {
-        var entity = context.Entities.Find(entityId);
+        EntityInfo? entity = context.Entities.Find(entityId);
 
         if (entity == null)
         {
@@ -286,14 +316,14 @@ Examples:
         if (entity.Properties.Count > 0)
         {
             context.WriteLine("  Properties:", theme.Success);
-            foreach (var (key, value) in entity.Properties)
+            foreach ((string key, string value) in entity.Properties)
             {
                 context.WriteLine($"    {key}: {value}", theme.TextSecondary);
             }
         }
 
         context.WriteLine($"  Components ({entity.Components.Count}):", theme.Warning);
-        foreach (var component in entity.Components)
+        foreach (string component in entity.Components)
         {
             context.WriteLine($"    • {component}", theme.TextSecondary);
         }
@@ -309,19 +339,28 @@ Examples:
         if (args.Length < 2)
         {
             // Show current filters
-            var filters = context.Entities.GetFilters();
+            (string Tag, string Search, string Component) filters = context.Entities.GetFilters();
             context.WriteLine("Current filters:", theme.Info);
-            context.WriteLine($"  Tag: {(string.IsNullOrEmpty(filters.Tag) ? "(none)" : filters.Tag)}", theme.TextPrimary);
-            context.WriteLine($"  Search: {(string.IsNullOrEmpty(filters.Search) ? "(none)" : filters.Search)}", theme.TextPrimary);
-            context.WriteLine($"  Component: {(string.IsNullOrEmpty(filters.Component) ? "(none)" : filters.Component)}", theme.TextPrimary);
+            context.WriteLine(
+                $"  Tag: {(string.IsNullOrEmpty(filters.Tag) ? "(none)" : filters.Tag)}",
+                theme.TextPrimary
+            );
+            context.WriteLine(
+                $"  Search: {(string.IsNullOrEmpty(filters.Search) ? "(none)" : filters.Search)}",
+                theme.TextPrimary
+            );
+            context.WriteLine(
+                $"  Component: {(string.IsNullOrEmpty(filters.Component) ? "(none)" : filters.Component)}",
+                theme.TextPrimary
+            );
             context.WriteLine("", theme.TextPrimary);
             context.WriteLine("Usage: entity filter <type> <value>", theme.TextDim);
             context.WriteLine("Types: tag, search, component", theme.TextDim);
             return;
         }
 
-        var filterType = args[0].ToLowerInvariant();
-        var filterValue = string.Join(" ", args.Skip(1));
+        string filterType = args[0].ToLowerInvariant();
+        string filterValue = string.Join(" ", args.Skip(1));
 
         switch (filterType)
         {
@@ -347,13 +386,17 @@ Examples:
         }
 
         // Show updated count
-        var stats = context.Entities.GetStatistics();
-        context.WriteLine($"Showing {stats.Filtered} of {stats.Total} entities", theme.TextSecondary);
+        (int Total, int Filtered, int Pinned, int Expanded) stats =
+            context.Entities.GetStatistics();
+        context.WriteLine(
+            $"Showing {stats.Filtered} of {stats.Total} entities",
+            theme.TextSecondary
+        );
     }
 
     private void ListTags(IConsoleContext context, UITheme theme)
     {
-        var tagCounts = context.Entities.GetTagCounts();
+        Dictionary<string, int> tagCounts = context.Entities.GetTagCounts();
 
         if (tagCounts.Count == 0)
         {
@@ -362,7 +405,7 @@ Examples:
         }
 
         context.WriteLine($"Entity Tags ({tagCounts.Count}):", theme.Info);
-        foreach (var (tag, count) in tagCounts.OrderByDescending(kv => kv.Value))
+        foreach ((string tag, int count) in tagCounts.OrderByDescending(kv => kv.Value))
         {
             context.WriteLine($"  {tag}: {count}", theme.TextPrimary);
         }
@@ -382,13 +425,16 @@ Examples:
         }
 
         context.WriteLine($"Entity Components ({components.Count}):", theme.Info);
-        foreach (var component in components)
+        foreach (string component in components)
         {
             context.WriteLine($"  • {component}", theme.TextPrimary);
         }
 
         context.WriteLine("", theme.TextPrimary);
-        context.WriteLine("Use 'entity filter component <name>' to filter by component", theme.TextDim);
+        context.WriteLine(
+            "Use 'entity filter component <name>' to filter by component",
+            theme.TextDim
+        );
     }
 
     private void HandleAutoRefresh(IConsoleContext context, UITheme theme, string[] args)
@@ -397,12 +443,12 @@ Examples:
         {
             // Toggle
             context.Entities.AutoRefresh = !context.Entities.AutoRefresh;
-            var status = context.Entities.AutoRefresh ? "enabled" : "disabled";
+            string status = context.Entities.AutoRefresh ? "enabled" : "disabled";
             context.WriteLine($"Auto-refresh {status}", theme.Success);
         }
         else
         {
-            var arg = args[0].ToLowerInvariant();
+            string arg = args[0].ToLowerInvariant();
             if (arg == "on" || arg == "true" || arg == "1")
             {
                 context.Entities.AutoRefresh = true;
@@ -419,7 +465,10 @@ Examples:
             }
         }
 
-        context.WriteLine($"  Interval: {context.Entities.RefreshInterval:F1}s", theme.TextSecondary);
+        context.WriteLine(
+            $"  Interval: {context.Entities.RefreshInterval:F1}s",
+            theme.TextSecondary
+        );
     }
 
     private void HandleSession(IConsoleContext context, UITheme theme, string[] args)
@@ -431,8 +480,10 @@ Examples:
             return;
         }
 
-        var stats = context.Entities.GetSessionStats();
-        var entityStats = context.Entities.GetStatistics();
+        (int Spawned, int Removed, int CurrentlyHighlighted) stats =
+            context.Entities.GetSessionStats();
+        (int Total, int Filtered, int Pinned, int Expanded) entityStats =
+            context.Entities.GetStatistics();
 
         context.WriteLine("Entity Session Stats:", theme.Info);
         context.WriteLine($"  Current entities: {entityStats.Total}", theme.TextPrimary);
@@ -441,14 +492,20 @@ Examples:
 
         if (stats.CurrentlyHighlighted > 0)
         {
-            context.WriteLine($"  Currently highlighted: {stats.CurrentlyHighlighted} new entities", new Microsoft.Xna.Framework.Color(100, 255, 100));
+            context.WriteLine(
+                $"  Currently highlighted: {stats.CurrentlyHighlighted} new entities",
+                new Color(100, 255, 100)
+            );
             var newIds = context.Entities.GetNewEntityIds().Take(10).ToList();
             if (newIds.Count > 0)
             {
                 context.WriteLine($"    IDs: {string.Join(", ", newIds)}", theme.TextSecondary);
                 if (stats.CurrentlyHighlighted > 10)
                 {
-                    context.WriteLine($"    ... and {stats.CurrentlyHighlighted - 10} more", theme.TextDim);
+                    context.WriteLine(
+                        $"    ... and {stats.CurrentlyHighlighted - 10} more",
+                        theme.TextDim
+                    );
                 }
             }
         }
@@ -461,40 +518,48 @@ Examples:
     {
         if (args.Length > 0)
         {
-            var format = args[0].ToLowerInvariant();
+            string format = args[0].ToLowerInvariant();
 
             if (format == "csv")
             {
-                context.Entities.CopyToClipboard(asCsv: true);
-                var stats = context.Entities.GetStatistics();
-                context.WriteLine($"Copied {stats.Filtered} entities to clipboard (CSV format)", theme.Success);
+                context.Entities.CopyToClipboard(true);
+                (int Total, int Filtered, int Pinned, int Expanded) stats =
+                    context.Entities.GetStatistics();
+                context.WriteLine(
+                    $"Copied {stats.Filtered} entities to clipboard (CSV format)",
+                    theme.Success
+                );
                 return;
             }
-            else if (format == "selected")
+
+            if (format == "selected")
             {
-                var selected = context.Entities.ExportSelected();
+                string? selected = context.Entities.ExportSelected();
                 if (selected != null)
                 {
-                    TextCopy.ClipboardService.SetText(selected);
-                    context.WriteLine($"Copied selected entity to clipboard", theme.Success);
+                    ClipboardService.SetText(selected);
+                    context.WriteLine("Copied selected entity to clipboard", theme.Success);
                 }
                 else
                 {
                     context.WriteLine("No entity selected", theme.Warning);
                 }
+
                 return;
             }
         }
 
         // Default: copy as text
-        context.Entities.CopyToClipboard(asCsv: false);
-        var entityStats = context.Entities.GetStatistics();
+        context.Entities.CopyToClipboard();
+        (int Total, int Filtered, int Pinned, int Expanded) entityStats =
+            context.Entities.GetStatistics();
         context.WriteLine($"Copied {entityStats.Filtered} entities to clipboard", theme.Success);
     }
 
     private void HandleExport(IConsoleContext context, UITheme theme, string[] args)
     {
-        var stats = context.Entities.GetStatistics();
+        (int Total, int Filtered, int Pinned, int Expanded) stats =
+            context.Entities.GetStatistics();
 
         if (stats.Total == 0)
         {
@@ -502,27 +567,31 @@ Examples:
             return;
         }
 
-        var includeComponents = true;
-        var includeProperties = true;
+        bool includeComponents = true;
+        bool includeProperties = true;
 
         // Parse optional flags
-        foreach (var arg in args)
+        foreach (string arg in args)
         {
             if (arg == "-nc" || arg == "--no-components")
+            {
                 includeComponents = false;
+            }
             else if (arg == "-np" || arg == "--no-properties")
+            {
                 includeProperties = false;
+            }
         }
 
-        var export = context.Entities.ExportToText(includeComponents, includeProperties);
+        string export = context.Entities.ExportToText(includeComponents, includeProperties);
 
         // Print to console (limited to avoid flooding)
-        var lines = export.Split('\n');
-        var maxLines = 100;
+        string[] lines = export.Split('\n');
+        int maxLines = 100;
 
         if (lines.Length <= maxLines)
         {
-            foreach (var line in lines)
+            foreach (string line in lines)
             {
                 context.WriteLine(line, theme.TextPrimary);
             }
@@ -533,77 +602,92 @@ Examples:
             {
                 context.WriteLine(lines[i], theme.TextPrimary);
             }
+
             context.WriteLine($"... ({lines.Length - maxLines} more lines)", theme.TextDim);
-            context.WriteLine("Use 'entity copy' to get full export to clipboard", theme.TextSecondary);
+            context.WriteLine(
+                "Use 'entity copy' to get full export to clipboard",
+                theme.TextSecondary
+            );
         }
     }
 
     private void HandleExpand(IConsoleContext context, UITheme theme, string[] args)
     {
-        if (args.Length < 1 || !int.TryParse(args[0], out var entityId))
+        if (args.Length < 1 || !int.TryParse(args[0], out int entityId))
         {
             context.WriteLine("Usage: entity expand <id>", theme.Error);
             return;
         }
+
         context.Entities.Expand(entityId);
         context.WriteLine($"Entity {entityId} expanded", theme.Success);
     }
 
     private void HandleCollapse(IConsoleContext context, UITheme theme, string[] args)
     {
-        if (args.Length < 1 || !int.TryParse(args[0], out var entityId))
+        if (args.Length < 1 || !int.TryParse(args[0], out int entityId))
         {
             context.WriteLine("Usage: entity collapse <id>", theme.Error);
             return;
         }
+
         context.Entities.Collapse(entityId);
         context.WriteLine($"Entity {entityId} collapsed", theme.Success);
     }
 
     private void HandlePin(IConsoleContext context, UITheme theme, string[] args)
     {
-        if (args.Length < 1 || !int.TryParse(args[0], out var entityId))
+        if (args.Length < 1 || !int.TryParse(args[0], out int entityId))
         {
             context.WriteLine("Usage: entity pin <id>", theme.Error);
             return;
         }
+
         context.Entities.Pin(entityId);
         context.WriteLine($"Entity {entityId} pinned", theme.Success);
     }
 
     private void HandleUnpin(IConsoleContext context, UITheme theme, string[] args)
     {
-        if (args.Length < 1 || !int.TryParse(args[0], out var entityId))
+        if (args.Length < 1 || !int.TryParse(args[0], out int entityId))
         {
             context.WriteLine("Usage: entity unpin <id>", theme.Error);
             return;
         }
+
         context.Entities.Unpin(entityId);
         context.WriteLine($"Entity {entityId} unpinned", theme.Success);
     }
 
     private void HandleInterval(IConsoleContext context, UITheme theme, string[] args)
     {
-        if (args.Length < 1 || !float.TryParse(args[0], out var interval))
+        if (args.Length < 1 || !float.TryParse(args[0], out float interval))
         {
-            context.WriteLine($"Current interval: {context.Entities.RefreshInterval:F1}s", theme.Info);
+            context.WriteLine(
+                $"Current interval: {context.Entities.RefreshInterval:F1}s",
+                theme.Info
+            );
             context.WriteLine("Usage: entity interval <seconds>", theme.TextDim);
             return;
         }
+
         context.Entities.RefreshInterval = interval;
         context.WriteLine($"Refresh interval set to {interval:F1}s", theme.Success);
     }
 
     private void HandleHighlight(IConsoleContext context, UITheme theme, string[] args)
     {
-        if (args.Length < 1 || !float.TryParse(args[0], out var duration))
+        if (args.Length < 1 || !float.TryParse(args[0], out float duration))
         {
-            context.WriteLine($"Current highlight duration: {context.Entities.HighlightDuration:F1}s", theme.Info);
+            context.WriteLine(
+                $"Current highlight duration: {context.Entities.HighlightDuration:F1}s",
+                theme.Info
+            );
             context.WriteLine("Usage: entity highlight <seconds>", theme.TextDim);
             return;
         }
+
         context.Entities.HighlightDuration = duration;
         context.WriteLine($"Highlight duration set to {duration:F1}s", theme.Success);
     }
 }
-

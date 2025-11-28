@@ -98,7 +98,8 @@ public class FileSystemWatcherAdapter : IScriptWatcher
         }
 
         // Cancel and dispose all pending debounce timers to prevent resource leaks
-        foreach (var cts in _debounceTimers.Values)
+        foreach (CancellationTokenSource cts in _debounceTimers.Values)
+        {
             try
             {
                 cts.Cancel();
@@ -108,6 +109,7 @@ public class FileSystemWatcherAdapter : IScriptWatcher
             {
                 // Already disposed, ignore
             }
+        }
 
         _debounceTimers.Clear();
 
@@ -130,7 +132,8 @@ public class FileSystemWatcherAdapter : IScriptWatcher
     private void OnFileChanged(object sender, FileSystemEventArgs e)
     {
         // Debounce: if file is saved multiple times rapidly, only process once
-        if (_debounceTimers.TryGetValue(e.FullPath, out var existingCts))
+        if (_debounceTimers.TryGetValue(e.FullPath, out CancellationTokenSource? existingCts))
+        {
             try
             {
                 existingCts.Cancel();
@@ -140,6 +143,7 @@ public class FileSystemWatcherAdapter : IScriptWatcher
             {
                 // Already disposed, ignore
             }
+        }
 
         var cts = new CancellationTokenSource();
         _debounceTimers[e.FullPath] = cts;
@@ -155,8 +159,15 @@ public class FileSystemWatcherAdapter : IScriptWatcher
                             await CheckStabilityAndNotify(e.FullPath, e.ChangeType.ToString());
 
                             // Remove and dispose the CancellationTokenSource
-                            if (_debounceTimers.TryRemove(e.FullPath, out var removedCts))
+                            if (
+                                _debounceTimers.TryRemove(
+                                    e.FullPath,
+                                    out CancellationTokenSource? removedCts
+                                )
+                            )
+                            {
                                 removedCts.Dispose();
+                            }
                         }
                     }
                     catch (Exception ex)
@@ -197,18 +208,22 @@ public class FileSystemWatcherAdapter : IScriptWatcher
         {
             // Wait for file to stabilize (no longer being written)
             long previousSize = -1;
-            for (var i = 0; i < 3; i++) // Max 3 checks = 300ms
+            for (int i = 0; i < 3; i++) // Max 3 checks = 300ms
             {
                 if (!File.Exists(filePath))
+                {
                     return; // File was deleted
+                }
 
                 try
                 {
                     var fileInfo = new FileInfo(filePath);
-                    var currentSize = fileInfo.Length;
+                    long currentSize = fileInfo.Length;
 
                     if (currentSize == previousSize)
+                    {
                         break; // File size stabilized
+                    }
 
                     previousSize = currentSize;
                     await Task.Delay(_stabilityCheckDelay);
@@ -223,7 +238,7 @@ public class FileSystemWatcherAdapter : IScriptWatcher
             // Final check: try to open file (ensures it's not locked)
             try
             {
-                using var stream = File.Open(
+                using FileStream stream = File.Open(
                     filePath,
                     FileMode.Open,
                     FileAccess.Read,

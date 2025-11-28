@@ -36,10 +36,12 @@ public class MapLoadLogger
         _logger?.LogMapLoaded(mapName, tmxDoc.Width, tmxDoc.Height, tilesCreated, objectsCreated);
 
         if (imageLayersCreated > 0)
+        {
             _logger?.LogDebug(
                 "[dim]Image Layers:[/] [magenta]{ImageLayerCount}[/]",
                 imageLayersCreated
             );
+        }
 
         _logger?.LogDebug(
             "[dim]MapId:[/] [grey]{MapId}[/] [dim]|[/] [dim]Animated:[/] [yellow]{AnimatedCount}[/] [dim]|[/] [dim]Tileset:[/] [cyan]{TilesetId}[/]",
@@ -55,10 +57,14 @@ public class MapLoadLogger
     public static string DescribeTilesetsForLog(IReadOnlyList<LoadedTileset> tilesets)
     {
         if (tilesets.Count == 0)
+        {
             return "none";
+        }
 
         if (tilesets.Count == 1)
+        {
             return tilesets[0].TilesetId;
+        }
 
         return string.Join(",", tilesets.Select(t => t.TilesetId));
     }

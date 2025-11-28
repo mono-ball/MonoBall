@@ -1,6 +1,6 @@
+using System.Text.Json;
 using FluentAssertions;
 using Microsoft.Xna.Framework;
-using System.Text.Json;
 using Xunit;
 
 namespace PokeSharp.Game.Data.Tests;
@@ -20,17 +20,17 @@ public class MapConnectionTests
     {
         // Arrange
         var jsonProperty = """
-        {
-            "name": "connection_north",
-            "propertytype": "Connection",
-            "type": "class",
-            "value": {
-                "direction": "North",
-                "map": "route101",
-                "offset": 0
+            {
+                "name": "connection_north",
+                "propertytype": "Connection",
+                "type": "class",
+                "value": {
+                    "direction": "North",
+                    "map": "route101",
+                    "offset": 0
+                }
             }
-        }
-        """;
+            """;
 
         // Act
         var connection = ParseConnectionFromJson(jsonProperty);
@@ -47,17 +47,17 @@ public class MapConnectionTests
     {
         // Arrange
         var jsonProperty = """
-        {
-            "name": "connection_east",
-            "propertytype": "Connection",
-            "type": "class",
-            "value": {
-                "direction": "East",
-                "map": "route103",
-                "offset": 5
+            {
+                "name": "connection_east",
+                "propertytype": "Connection",
+                "type": "class",
+                "value": {
+                    "direction": "East",
+                    "map": "route103",
+                    "offset": 5
+                }
             }
-        }
-        """;
+            """;
 
         // Act
         var connection = ParseConnectionFromJson(jsonProperty);
@@ -66,8 +66,7 @@ public class MapConnectionTests
         connection.Should().NotBeNull();
         connection!.Direction.Should().Be(ConnectionDirection.East);
         connection.TargetMap.Should().Be("route103");
-        connection.Offset.Should().Be(5,
-            "offset of 5 means maps are not aligned at 0,0");
+        connection.Offset.Should().Be(5, "offset of 5 means maps are not aligned at 0,0");
     }
 
     [Fact]
@@ -79,31 +78,35 @@ public class MapConnectionTests
             ("North", ConnectionDirection.North),
             ("South", ConnectionDirection.South),
             ("East", ConnectionDirection.East),
-            ("West", ConnectionDirection.West)
+            ("West", ConnectionDirection.West),
         };
 
         foreach (var (directionString, expectedDirection) in directions)
         {
             var json = $$"""
-            {
-                "name": "connection_{{directionString.ToLower()}}",
-                "propertytype": "Connection",
-                "type": "class",
-                "value": {
-                    "direction": "{{directionString}}",
-                    "map": "test_map",
-                    "offset": 0
+                {
+                    "name": "connection_{{directionString.ToLower()}}",
+                    "propertytype": "Connection",
+                    "type": "class",
+                    "value": {
+                        "direction": "{{directionString}}",
+                        "map": "test_map",
+                        "offset": 0
+                    }
                 }
-            }
-            """;
+                """;
 
             // Act
             var connection = ParseConnectionFromJson(json);
 
             // Assert
             connection.Should().NotBeNull();
-            connection!.Direction.Should().Be(expectedDirection,
-                $"direction '{directionString}' should parse to {expectedDirection}");
+            connection!
+                .Direction.Should()
+                .Be(
+                    expectedDirection,
+                    $"direction '{directionString}' should parse to {expectedDirection}"
+                );
         }
     }
 
@@ -112,16 +115,16 @@ public class MapConnectionTests
     {
         // Arrange
         var jsonProperty = """
-        {
-            "name": "connection_north",
-            "propertytype": "Connection",
-            "type": "class",
-            "value": {
-                "direction": "North",
-                "offset": 0
+            {
+                "name": "connection_north",
+                "propertytype": "Connection",
+                "type": "class",
+                "value": {
+                    "direction": "North",
+                    "offset": 0
+                }
             }
-        }
-        """;
+            """;
 
         // Act
         var connection = ParseConnectionFromJson(jsonProperty);
@@ -135,17 +138,17 @@ public class MapConnectionTests
     {
         // Arrange
         var jsonProperty = """
-        {
-            "name": "connection_diagonal",
-            "propertytype": "Connection",
-            "type": "class",
-            "value": {
-                "direction": "NorthEast",
-                "map": "route101",
-                "offset": 0
+            {
+                "name": "connection_diagonal",
+                "propertytype": "Connection",
+                "type": "class",
+                "value": {
+                    "direction": "NorthEast",
+                    "map": "route101",
+                    "offset": 0
+                }
             }
-        }
-        """;
+            """;
 
         // Act
         var connection = ParseConnectionFromJson(jsonProperty);
@@ -162,24 +165,17 @@ public class MapConnectionTests
     public void CalculateOffset_NorthConnection_ShouldUseSourceMapHeight()
     {
         // Arrange
-        var connection = new MapConnection(
-            ConnectionDirection.North,
-            "route101",
-            0
-        );
+        var connection = new MapConnection(ConnectionDirection.North, "route101", 0);
         var sourceMapHeight = 20; // tiles
         var sourceMapWidth = 20; // tiles
 
         // Act
-        var offset = CalculateWorldOffset(
-            connection,
-            sourceMapWidth,
-            sourceMapHeight,
-            TILE_SIZE);
+        var offset = CalculateWorldOffset(connection, sourceMapWidth, sourceMapHeight, TILE_SIZE);
 
         // Assert
-        offset.Y.Should().Be(-320,
-            "north connection: Y = -(sourceHeight * tileSize) = -(20 * 16) = -320");
+        offset
+            .Y.Should()
+            .Be(-320, "north connection: Y = -(sourceHeight * tileSize) = -(20 * 16) = -320");
         offset.X.Should().Be(0, "X matches connection offset");
     }
 
@@ -187,24 +183,15 @@ public class MapConnectionTests
     public void CalculateOffset_SouthConnection_ShouldUseSourceMapHeight()
     {
         // Arrange
-        var connection = new MapConnection(
-            ConnectionDirection.South,
-            "oldale_town",
-            0
-        );
+        var connection = new MapConnection(ConnectionDirection.South, "oldale_town", 0);
         var sourceMapHeight = 20;
         var sourceMapWidth = 20;
 
         // Act
-        var offset = CalculateWorldOffset(
-            connection,
-            sourceMapWidth,
-            sourceMapHeight,
-            TILE_SIZE);
+        var offset = CalculateWorldOffset(connection, sourceMapWidth, sourceMapHeight, TILE_SIZE);
 
         // Assert
-        offset.Y.Should().Be(320,
-            "south connection: Y = sourceHeight * tileSize = 20 * 16 = 320");
+        offset.Y.Should().Be(320, "south connection: Y = sourceHeight * tileSize = 20 * 16 = 320");
         offset.X.Should().Be(0);
     }
 
@@ -212,24 +199,15 @@ public class MapConnectionTests
     public void CalculateOffset_EastConnection_ShouldUseSourceMapWidth()
     {
         // Arrange
-        var connection = new MapConnection(
-            ConnectionDirection.East,
-            "route103",
-            0
-        );
+        var connection = new MapConnection(ConnectionDirection.East, "route103", 0);
         var sourceMapHeight = 20;
         var sourceMapWidth = 20;
 
         // Act
-        var offset = CalculateWorldOffset(
-            connection,
-            sourceMapWidth,
-            sourceMapHeight,
-            TILE_SIZE);
+        var offset = CalculateWorldOffset(connection, sourceMapWidth, sourceMapHeight, TILE_SIZE);
 
         // Assert
-        offset.X.Should().Be(320,
-            "east connection: X = sourceWidth * tileSize = 20 * 16 = 320");
+        offset.X.Should().Be(320, "east connection: X = sourceWidth * tileSize = 20 * 16 = 320");
         offset.Y.Should().Be(0);
     }
 
@@ -237,11 +215,7 @@ public class MapConnectionTests
     public void CalculateOffset_WestConnection_ShouldBeNegative()
     {
         // Arrange
-        var connection = new MapConnection(
-            ConnectionDirection.West,
-            "petalburg_city",
-            0
-        );
+        var connection = new MapConnection(ConnectionDirection.West, "petalburg_city", 0);
         var sourceMapHeight = 20;
         var sourceMapWidth = 20;
         var targetMapWidth = 30; // West map is wider
@@ -252,11 +226,13 @@ public class MapConnectionTests
             sourceMapWidth,
             sourceMapHeight,
             TILE_SIZE,
-            targetMapWidth);
+            targetMapWidth
+        );
 
         // Assert
-        offset.X.Should().Be(-480,
-            "west connection: X = -(targetWidth * tileSize) = -(30 * 16) = -480");
+        offset
+            .X.Should()
+            .Be(-480, "west connection: X = -(targetWidth * tileSize) = -(30 * 16) = -480");
         offset.Y.Should().Be(0);
     }
 
@@ -264,50 +240,31 @@ public class MapConnectionTests
     public void CalculateOffset_WithNonZeroOffset_ShouldAdjustXOrY()
     {
         // Arrange - Connection with 5 tile offset
-        var connection = new MapConnection(
-            ConnectionDirection.North,
-            "route101",
-            5
-        );
+        var connection = new MapConnection(ConnectionDirection.North, "route101", 5);
         var sourceMapHeight = 20;
         var sourceMapWidth = 20;
 
         // Act
-        var offset = CalculateWorldOffset(
-            connection,
-            sourceMapWidth,
-            sourceMapHeight,
-            TILE_SIZE);
+        var offset = CalculateWorldOffset(connection, sourceMapWidth, sourceMapHeight, TILE_SIZE);
 
         // Assert
-        offset.X.Should().Be(80,
-            "offset of 5 tiles = 5 * 16 = 80 pixels in X direction");
-        offset.Y.Should().Be(-320,
-            "Y remains same as zero-offset north connection");
+        offset.X.Should().Be(80, "offset of 5 tiles = 5 * 16 = 80 pixels in X direction");
+        offset.Y.Should().Be(-320, "Y remains same as zero-offset north connection");
     }
 
     [Fact]
     public void CalculateOffset_NegativeOffset_ShouldWork()
     {
         // Arrange - Negative offset (map is to the left)
-        var connection = new MapConnection(
-            ConnectionDirection.North,
-            "route101",
-            -3
-        );
+        var connection = new MapConnection(ConnectionDirection.North, "route101", -3);
         var sourceMapHeight = 20;
         var sourceMapWidth = 20;
 
         // Act
-        var offset = CalculateWorldOffset(
-            connection,
-            sourceMapWidth,
-            sourceMapHeight,
-            TILE_SIZE);
+        var offset = CalculateWorldOffset(connection, sourceMapWidth, sourceMapHeight, TILE_SIZE);
 
         // Assert
-        offset.X.Should().Be(-48,
-            "negative offset: -3 * 16 = -48 pixels");
+        offset.X.Should().Be(-48, "negative offset: -3 * 16 = -48 pixels");
         offset.Y.Should().Be(-320);
     }
 
@@ -319,11 +276,7 @@ public class MapConnectionTests
     public void ValidateConnection_ValidData_ShouldPass()
     {
         // Arrange
-        var connection = new MapConnection(
-            ConnectionDirection.North,
-            "route101",
-            0
-        );
+        var connection = new MapConnection(ConnectionDirection.North, "route101", 0);
 
         // Act
         var isValid = ValidateConnection(connection);
@@ -336,11 +289,7 @@ public class MapConnectionTests
     public void ValidateConnection_EmptyMapName_ShouldFail()
     {
         // Arrange
-        var connection = new MapConnection(
-            ConnectionDirection.North,
-            "",
-            0
-        );
+        var connection = new MapConnection(ConnectionDirection.North, "", 0);
 
         // Act
         var isValid = ValidateConnection(connection);
@@ -353,11 +302,7 @@ public class MapConnectionTests
     public void ValidateConnection_NullMapName_ShouldFail()
     {
         // Arrange
-        var connection = new MapConnection(
-            ConnectionDirection.North,
-            null!,
-            0
-        );
+        var connection = new MapConnection(ConnectionDirection.North, null!, 0);
 
         // Act
         var isValid = ValidateConnection(connection);
@@ -370,11 +315,7 @@ public class MapConnectionTests
     public void ValidateConnection_ExtremeOffset_ShouldStillBeValid()
     {
         // Arrange - Very large offset (edge case)
-        var connection = new MapConnection(
-            ConnectionDirection.East,
-            "route103",
-            100
-        );
+        var connection = new MapConnection(ConnectionDirection.East, "route103", 100);
 
         // Act
         var isValid = ValidateConnection(connection);
@@ -391,11 +332,7 @@ public class MapConnectionTests
     public void RealWorldExample_LittlerootToRoute101_ShouldCalculateCorrectly()
     {
         // Arrange - Based on actual Hoenn map data
-        var littlerootToRoute101 = new MapConnection(
-            ConnectionDirection.North,
-            "route101",
-            0
-        );
+        var littlerootToRoute101 = new MapConnection(ConnectionDirection.North, "route101", 0);
         var littlerootWidth = 20;
         var littlerootHeight = 20;
 
@@ -408,19 +345,16 @@ public class MapConnectionTests
         );
 
         // Assert
-        offset.Should().Be(new Vector2(0, -320),
-            "Route 101 is directly north of Littleroot, aligned at X=0");
+        offset
+            .Should()
+            .Be(new Vector2(0, -320), "Route 101 is directly north of Littleroot, aligned at X=0");
     }
 
     [Fact]
     public void RealWorldExample_PetalburgToRoute102_ShouldCalculateCorrectly()
     {
         // Arrange - Petalburg City (30x30) to Route 102 (east connection)
-        var petalburgToRoute102 = new MapConnection(
-            ConnectionDirection.East,
-            "route102",
-            0
-        );
+        var petalburgToRoute102 = new MapConnection(ConnectionDirection.East, "route102", 0);
         var petalburgWidth = 30;
         var petalburgHeight = 30;
 
@@ -433,8 +367,7 @@ public class MapConnectionTests
         );
 
         // Assert
-        offset.X.Should().Be(480,
-            "Route 102 is east of Petalburg: 30 tiles * 16 = 480 pixels");
+        offset.X.Should().Be(480, "Route 102 is east of Petalburg: 30 tiles * 16 = 480 pixels");
         offset.Y.Should().Be(0);
     }
 
@@ -443,31 +376,31 @@ public class MapConnectionTests
     {
         // Arrange - Map with connections in multiple directions
         var mapJson = """
-        {
-            "properties": [
-                {
-                    "name": "connection_north",
-                    "propertytype": "Connection",
-                    "type": "class",
-                    "value": {
-                        "direction": "North",
-                        "map": "route101",
-                        "offset": 0
+            {
+                "properties": [
+                    {
+                        "name": "connection_north",
+                        "propertytype": "Connection",
+                        "type": "class",
+                        "value": {
+                            "direction": "North",
+                            "map": "route101",
+                            "offset": 0
+                        }
+                    },
+                    {
+                        "name": "connection_south",
+                        "propertytype": "Connection",
+                        "type": "class",
+                        "value": {
+                            "direction": "South",
+                            "map": "route103",
+                            "offset": 0
+                        }
                     }
-                },
-                {
-                    "name": "connection_south",
-                    "propertytype": "Connection",
-                    "type": "class",
-                    "value": {
-                        "direction": "South",
-                        "map": "route103",
-                        "offset": 0
-                    }
-                }
-            ]
-        }
-        """;
+                ]
+            }
+            """;
 
         // Act
         var connections = ParseAllConnectionsFromMapJson(mapJson);
@@ -482,18 +415,14 @@ public class MapConnectionTests
 
     #region Test Data Structures
 
-    public record MapConnection(
-        ConnectionDirection Direction,
-        string TargetMap,
-        int Offset
-    );
+    public record MapConnection(ConnectionDirection Direction, string TargetMap, int Offset);
 
     public enum ConnectionDirection
     {
         North,
         South,
         East,
-        West
+        West,
     }
 
     #endregion
@@ -575,7 +504,8 @@ public class MapConnectionTests
         int sourceMapWidthTiles,
         int sourceMapHeightTiles,
         int tileSize,
-        int? targetMapWidthTiles = null)
+        int? targetMapWidthTiles = null
+    )
     {
         return connection.Direction switch
         {
@@ -595,7 +525,7 @@ public class MapConnectionTests
                 -((targetMapWidthTiles ?? sourceMapWidthTiles) * tileSize),
                 connection.Offset * tileSize
             ),
-            _ => Vector2.Zero
+            _ => Vector2.Zero,
         };
     }
 

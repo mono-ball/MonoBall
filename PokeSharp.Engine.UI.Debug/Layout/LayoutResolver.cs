@@ -1,19 +1,23 @@
 namespace PokeSharp.Engine.UI.Debug.Layout;
 
 /// <summary>
-/// Resolves layout constraints into absolute screen coordinates.
-/// This is the core of the constraint-based layout system.
+///     Resolves layout constraints into absolute screen coordinates.
+///     This is the core of the constraint-based layout system.
 /// </summary>
 public static class LayoutResolver
 {
     /// <summary>
-    /// Resolves a layout constraint relative to a parent rectangle.
+    ///     Resolves a layout constraint relative to a parent rectangle.
     /// </summary>
     /// <param name="constraint">The constraint to resolve</param>
     /// <param name="parent">The parent rectangle to resolve relative to</param>
     /// <param name="contentSize">Optional content size for auto-sizing (null for explicit sizes)</param>
     /// <returns>Resolved absolute rectangle</returns>
-    public static LayoutRect Resolve(LayoutConstraint constraint, LayoutRect parent, (float width, float height)? contentSize = null)
+    public static LayoutRect Resolve(
+        LayoutConstraint constraint,
+        LayoutRect parent,
+        (float width, float height)? contentSize = null
+    )
     {
         // Calculate width
         float width = CalculateWidth(constraint, parent, contentSize);
@@ -22,7 +26,7 @@ public static class LayoutResolver
         float height = CalculateHeight(constraint, parent, contentSize);
 
         // Get anchor position in parent space
-        var (anchorX, anchorY) = GetAnchorPosition(constraint.Anchor, parent);
+        (float anchorX, float anchorY) = GetAnchorPosition(constraint.Anchor, parent);
 
         // Apply offset from anchor
         float x = anchorX + constraint.OffsetX + constraint.GetMarginLeft();
@@ -34,7 +38,11 @@ public static class LayoutResolver
         return new LayoutRect(x, y, width, height);
     }
 
-    private static float CalculateWidth(LayoutConstraint constraint, LayoutRect parent, (float width, float height)? contentSize)
+    private static float CalculateWidth(
+        LayoutConstraint constraint,
+        LayoutRect parent,
+        (float width, float height)? contentSize
+    )
     {
         float width;
 
@@ -56,7 +64,10 @@ public static class LayoutResolver
         // Auto-size from content
         else if (contentSize.HasValue)
         {
-            width = contentSize.Value.width + constraint.GetPaddingLeft() + constraint.GetPaddingRight();
+            width =
+                contentSize.Value.width
+                + constraint.GetPaddingLeft()
+                + constraint.GetPaddingRight();
         }
         // Default fallback
         else
@@ -66,15 +77,23 @@ public static class LayoutResolver
 
         // Apply constraints
         if (constraint.MinWidth.HasValue)
+        {
             width = Math.Max(width, constraint.MinWidth.Value);
+        }
 
         if (constraint.MaxWidth.HasValue)
+        {
             width = Math.Min(width, constraint.MaxWidth.Value);
+        }
 
         return width;
     }
 
-    private static float CalculateHeight(LayoutConstraint constraint, LayoutRect parent, (float width, float height)? contentSize)
+    private static float CalculateHeight(
+        LayoutConstraint constraint,
+        LayoutRect parent,
+        (float width, float height)? contentSize
+    )
     {
         float height;
 
@@ -96,7 +115,10 @@ public static class LayoutResolver
         // Auto-size from content
         else if (contentSize.HasValue)
         {
-            height = contentSize.Value.height + constraint.GetPaddingTop() + constraint.GetPaddingBottom();
+            height =
+                contentSize.Value.height
+                + constraint.GetPaddingTop()
+                + constraint.GetPaddingBottom();
         }
         // Default fallback
         else
@@ -106,10 +128,14 @@ public static class LayoutResolver
 
         // Apply constraints
         if (constraint.MinHeight.HasValue)
+        {
             height = Math.Max(height, constraint.MinHeight.Value);
+        }
 
         if (constraint.MaxHeight.HasValue)
+        {
             height = Math.Min(height, constraint.MaxHeight.Value);
+        }
 
         return height;
     }
@@ -132,27 +158,33 @@ public static class LayoutResolver
             Anchor.StretchLeft => (parent.X, parent.Y),
             Anchor.StretchRight => (parent.Right, parent.Y),
             Anchor.Fill => (parent.X, parent.Y),
-            _ => (parent.X, parent.Y)
+            _ => (parent.X, parent.Y),
         };
     }
 
-    private static (float x, float y) AdjustPositionForAnchor(Anchor anchor, float x, float y, float width, float height)
+    private static (float x, float y) AdjustPositionForAnchor(
+        Anchor anchor,
+        float x,
+        float y,
+        float width,
+        float height
+    )
     {
         return anchor switch
         {
             // Top anchors - no Y adjustment needed, element grows downward
             Anchor.TopLeft => (x, y),
-            Anchor.TopCenter => (x - width / 2, y),
+            Anchor.TopCenter => (x - (width / 2), y),
             Anchor.TopRight => (x - width, y),
 
             // Middle anchors - center vertically
-            Anchor.MiddleLeft => (x, y - height / 2),
-            Anchor.Center => (x - width / 2, y - height / 2),
-            Anchor.MiddleRight => (x - width, y - height / 2),
+            Anchor.MiddleLeft => (x, y - (height / 2)),
+            Anchor.Center => (x - (width / 2), y - (height / 2)),
+            Anchor.MiddleRight => (x - width, y - (height / 2)),
 
             // Bottom anchors - element grows upward from anchor
             Anchor.BottomLeft => (x, y - height),
-            Anchor.BottomCenter => (x - width / 2, y - height),
+            Anchor.BottomCenter => (x - (width / 2), y - height),
             Anchor.BottomRight => (x - width, y - height),
 
             // Stretch anchors
@@ -162,7 +194,7 @@ public static class LayoutResolver
             Anchor.StretchRight => (x - width, y),
             Anchor.Fill => (x, y),
 
-            _ => (x, y)
+            _ => (x, y),
         };
     }
 
@@ -176,7 +208,3 @@ public static class LayoutResolver
         return anchor is Anchor.StretchLeft or Anchor.StretchRight or Anchor.Fill;
     }
 }
-
-
-
-

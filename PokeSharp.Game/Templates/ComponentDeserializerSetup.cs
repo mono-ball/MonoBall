@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
 using PokeSharp.Engine.Core.Templates.Loading;
@@ -58,25 +59,25 @@ public static class ComponentDeserializerSetup
         // TilePosition
         registry.Register(json =>
         {
-            var x = json.GetProperty("x").GetInt32();
-            var y = json.GetProperty("y").GetInt32();
+            int x = json.GetProperty("x").GetInt32();
+            int y = json.GetProperty("y").GetInt32();
             return new TilePosition(x, y);
         });
 
         // TileSprite
         registry.Register(json =>
         {
-            var tilesetId = json.GetProperty("tilesetId").GetString() ?? "default";
-            var tileId = json.GetProperty("tileId").GetInt32();
+            string tilesetId = json.GetProperty("tilesetId").GetString() ?? "default";
+            int tileId = json.GetProperty("tileId").GetInt32();
 
             // SourceRect is optional, can be calculated by renderer
-            var sourceRect = Rectangle.Empty;
-            if (json.TryGetProperty("sourceRect", out var rectElement))
+            Rectangle sourceRect = Rectangle.Empty;
+            if (json.TryGetProperty("sourceRect", out JsonElement rectElement))
             {
-                var x = rectElement.GetProperty("x").GetInt32();
-                var y = rectElement.GetProperty("y").GetInt32();
-                var width = rectElement.GetProperty("width").GetInt32();
-                var height = rectElement.GetProperty("height").GetInt32();
+                int x = rectElement.GetProperty("x").GetInt32();
+                int y = rectElement.GetProperty("y").GetInt32();
+                int width = rectElement.GetProperty("width").GetInt32();
+                int height = rectElement.GetProperty("height").GetInt32();
                 sourceRect = new Rectangle(x, y, width, height);
             }
 
@@ -86,15 +87,15 @@ public static class ComponentDeserializerSetup
         // Elevation
         registry.Register(json =>
         {
-            var level = json.GetProperty("level").GetByte();
+            byte level = json.GetProperty("level").GetByte();
             return new Elevation(level);
         });
 
         // EncounterZone
         registry.Register(json =>
         {
-            var zoneId = json.GetProperty("zoneId").GetString() ?? "default";
-            var encounterRate = json.GetProperty("encounterRate").GetInt32();
+            string zoneId = json.GetProperty("zoneId").GetString() ?? "default";
+            int encounterRate = json.GetProperty("encounterRate").GetInt32();
             return new EncounterZone(zoneId, encounterRate);
         });
     }
@@ -104,33 +105,36 @@ public static class ComponentDeserializerSetup
         // Collision
         registry.Register(json =>
         {
-            var isSolid = json.GetProperty("isSolid").GetBoolean();
+            bool isSolid = json.GetProperty("isSolid").GetBoolean();
             return new Collision(isSolid);
         });
 
         // Position
         registry.Register(json =>
         {
-            var x = json.GetProperty("x").GetInt32();
-            var y = json.GetProperty("y").GetInt32();
-            var mapId = 0;
-            if (json.TryGetProperty("mapId", out var mapIdElement))
+            int x = json.GetProperty("x").GetInt32();
+            int y = json.GetProperty("y").GetInt32();
+            int mapId = 0;
+            if (json.TryGetProperty("mapId", out JsonElement mapIdElement))
+            {
                 mapId = mapIdElement.GetInt32();
+            }
+
             return new Position(x, y, mapId);
         });
 
         // Velocity
         registry.Register(json =>
         {
-            var velocityX = json.GetProperty("velocityX").GetSingle();
-            var velocityY = json.GetProperty("velocityY").GetSingle();
+            float velocityX = json.GetProperty("velocityX").GetSingle();
+            float velocityY = json.GetProperty("velocityY").GetSingle();
             return new Velocity(velocityX, velocityY);
         });
 
         // GridMovement
         registry.Register(json =>
         {
-            var tilesPerSecond = json.GetProperty("tilesPerSecond").GetSingle();
+            float tilesPerSecond = json.GetProperty("tilesPerSecond").GetSingle();
             return new GridMovement(tilesPerSecond);
         });
     }
@@ -140,18 +144,22 @@ public static class ComponentDeserializerSetup
         // Sprite - Uses Pokemon Emerald extracted sprites
         registry.Register(json =>
         {
-            var spriteName = json.GetProperty("spriteId").GetString() ?? "boy_1";
-            var category = json.GetProperty("category").GetString() ?? "generic";
+            string spriteName = json.GetProperty("spriteId").GetString() ?? "boy_1";
+            string category = json.GetProperty("category").GetString() ?? "generic";
 
             var sprite = new Sprite(spriteName, category);
 
             // Optional: FlipHorizontal for facing left
-            if (json.TryGetProperty("flipHorizontal", out var flipElement))
+            if (json.TryGetProperty("flipHorizontal", out JsonElement flipElement))
+            {
                 sprite.FlipHorizontal = flipElement.GetBoolean();
+            }
 
             // Optional: CurrentFrame (defaults to 0)
-            if (json.TryGetProperty("currentFrame", out var frameElement))
+            if (json.TryGetProperty("currentFrame", out JsonElement frameElement))
+            {
                 sprite.CurrentFrame = frameElement.GetInt32();
+            }
 
             return sprite;
         });
@@ -159,21 +167,24 @@ public static class ComponentDeserializerSetup
         // Animation
         registry.Register(json =>
         {
-            var animationName = json.GetProperty("animationName").GetString() ?? "default";
+            string animationName = json.GetProperty("animationName").GetString() ?? "default";
             return new Animation(animationName);
         });
 
         // ImageLayer
         registry.Register(json =>
         {
-            var textureId = json.GetProperty("textureId").GetString() ?? "default";
-            var x = json.GetProperty("x").GetSingle();
-            var y = json.GetProperty("y").GetSingle();
-            var opacity = 1.0f;
-            if (json.TryGetProperty("opacity", out var opacityElement))
+            string textureId = json.GetProperty("textureId").GetString() ?? "default";
+            float x = json.GetProperty("x").GetSingle();
+            float y = json.GetProperty("y").GetSingle();
+            float opacity = 1.0f;
+            if (json.TryGetProperty("opacity", out JsonElement opacityElement))
+            {
                 opacity = opacityElement.GetSingle();
-            var layerDepth = json.GetProperty("layerDepth").GetSingle();
-            var layerIndex = json.GetProperty("layerIndex").GetInt32();
+            }
+
+            float layerDepth = json.GetProperty("layerDepth").GetSingle();
+            int layerIndex = json.GetProperty("layerIndex").GetInt32();
             return new ImageLayer(textureId, x, y, opacity, layerDepth, layerIndex);
         });
     }
@@ -183,14 +194,14 @@ public static class ComponentDeserializerSetup
         // Name
         registry.Register(json =>
         {
-            var name = json.GetProperty("name").GetString() ?? "Unnamed";
+            string name = json.GetProperty("name").GetString() ?? "Unnamed";
             return new Name(name);
         });
 
         // Wallet
         registry.Register(json =>
         {
-            var money = json.GetProperty("money").GetInt32();
+            int money = json.GetProperty("money").GetInt32();
             return new Wallet(money);
         });
     }
@@ -206,7 +217,7 @@ public static class ComponentDeserializerSetup
         // Direction (enum component)
         registry.Register(json =>
         {
-            var directionStr = json.GetProperty("direction").GetString();
+            string? directionStr = json.GetProperty("direction").GetString();
             return directionStr switch
             {
                 "none" or "None" => Direction.None,
@@ -221,10 +232,10 @@ public static class ComponentDeserializerSetup
         // InputState
         registry.Register(json =>
         {
-            var pressedDirection = Direction.None;
-            if (json.TryGetProperty("pressedDirection", out var dirElement))
+            Direction pressedDirection = Direction.None;
+            if (json.TryGetProperty("pressedDirection", out JsonElement dirElement))
             {
-                var dirStr = dirElement.GetString();
+                string? dirStr = dirElement.GetString();
                 pressedDirection = dirStr switch
                 {
                     "north" or "North" or "up" or "Up" => Direction.North,
@@ -235,9 +246,11 @@ public static class ComponentDeserializerSetup
                 };
             }
 
-            var actionPressed = false;
-            if (json.TryGetProperty("actionPressed", out var actionElement))
+            bool actionPressed = false;
+            if (json.TryGetProperty("actionPressed", out JsonElement actionElement))
+            {
                 actionPressed = actionElement.GetBoolean();
+            }
 
             return new InputState
             {
@@ -252,10 +265,12 @@ public static class ComponentDeserializerSetup
         // Npc
         registry.Register(json =>
         {
-            var npcId = json.GetProperty("npcId").GetString() ?? "";
-            var isTrainer = false;
-            if (json.TryGetProperty("isTrainer", out var isTrainerElement))
+            string npcId = json.GetProperty("npcId").GetString() ?? "";
+            bool isTrainer = false;
+            if (json.TryGetProperty("isTrainer", out JsonElement isTrainerElement))
+            {
                 isTrainer = isTrainerElement.GetBoolean();
+            }
 
             return new Npc { NpcId = npcId, IsTrainer = isTrainer };
         });
@@ -263,10 +278,12 @@ public static class ComponentDeserializerSetup
         // Behavior
         registry.Register(json =>
         {
-            var behaviorTypeId = json.GetProperty("behaviorTypeId").GetString() ?? "";
-            var isActive = true;
-            if (json.TryGetProperty("isActive", out var isActiveElement))
+            string behaviorTypeId = json.GetProperty("behaviorTypeId").GetString() ?? "";
+            bool isActive = true;
+            if (json.TryGetProperty("isActive", out JsonElement isActiveElement))
+            {
                 isActive = isActiveElement.GetBoolean();
+            }
 
             return new Behavior { BehaviorTypeId = behaviorTypeId, IsActive = isActive };
         });

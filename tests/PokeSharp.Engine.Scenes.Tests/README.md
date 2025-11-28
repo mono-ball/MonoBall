@@ -5,9 +5,11 @@ Unit tests for the `PokeSharp.Engine.Scenes` project.
 ## Test Coverage
 
 ### LoadingProgress
+
 - **LoadingProgressTests** - Tests for thread-safe progress tracking, value clamping, and concurrent access.
 
 ### SceneManager
+
 - **SceneManagerTests** - Tests for scene transitions, scene stack operations, and two-step transition pattern.
 
 ## Running Tests
@@ -39,5 +41,6 @@ PokeSharp.Engine.Scenes.Tests/
 
 ## Note
 
-Some SceneManager tests may require a real GraphicsDevice instance and are better suited for integration testing. Unit tests focus on logic and thread safety.
+Some SceneManager tests may require a real GraphicsDevice instance and are better suited for integration testing. Unit
+tests focus on logic and thread safety.
 

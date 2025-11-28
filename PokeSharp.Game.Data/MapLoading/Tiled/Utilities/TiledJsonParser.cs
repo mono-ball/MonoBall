@@ -33,35 +33,39 @@ public class TiledJsonParser
     )
     {
         using var jsonDoc = JsonDocument.Parse(tiledJson);
-        var root = jsonDoc.RootElement;
+        JsonElement root = jsonDoc.RootElement;
 
-        if (!root.TryGetProperty("layers", out var layersArray))
+        if (!root.TryGetProperty("layers", out JsonElement layersArray))
+        {
             return;
+        }
 
         // Clear existing (base deserialization might have put tilelayers in Layers)
         var tilelayers = new List<TmxLayer>();
         var objectGroups = new List<TmxObjectGroup>();
         var imageLayers = new List<TmxImageLayer>();
 
-        foreach (var layerElement in layersArray.EnumerateArray())
+        foreach (JsonElement layerElement in layersArray.EnumerateArray())
         {
-            if (!layerElement.TryGetProperty("type", out var typeProperty))
+            if (!layerElement.TryGetProperty("type", out JsonElement typeProperty))
+            {
                 continue;
+            }
 
-            var layerType = typeProperty.GetString();
+            string? layerType = typeProperty.GetString();
 
             try
             {
                 switch (layerType)
                 {
                     case "tilelayer":
-                        var tiledLayer = JsonSerializer.Deserialize<TiledJsonLayer>(
+                        TiledJsonLayer? tiledLayer = JsonSerializer.Deserialize<TiledJsonLayer>(
                             layerElement.GetRawText(),
                             jsonOptions
                         );
                         if (tiledLayer != null)
                         {
-                            var converted = TiledMapLoader.ConvertTileLayer(
+                            TmxLayer converted = TiledMapLoader.ConvertTileLayer(
                                 tiledLayer,
                                 tmxDoc.Width,
                                 tmxDoc.Height
@@ -72,18 +76,24 @@ public class TiledJsonParser
                         break;
 
                     case "objectgroup":
-                        var objectGroup = ParseObjectGroup(layerElement, jsonOptions);
+                        TmxObjectGroup? objectGroup = ParseObjectGroup(layerElement, jsonOptions);
                         if (objectGroup != null)
+                        {
                             objectGroups.Add(objectGroup);
+                        }
+
                         break;
 
                     case "imagelayer":
-                        var imageLayer = JsonSerializer.Deserialize<TmxImageLayer>(
+                        TmxImageLayer? imageLayer = JsonSerializer.Deserialize<TmxImageLayer>(
                             layerElement.GetRawText(),
                             jsonOptions
                         );
                         if (imageLayer != null)
+                        {
                             imageLayers.Add(imageLayer);
+                        }
+
                         break;
                 }
             }
@@ -116,72 +126,133 @@ public class TiledJsonParser
     {
         var objectGroup = new TmxObjectGroup
         {
-            Id = groupElement.TryGetProperty("id", out var id) ? id.GetInt32() : 0,
-            Name = groupElement.TryGetProperty("name", out var name) ? name.GetString() ?? "" : "",
+            Id = groupElement.TryGetProperty("id", out JsonElement id) ? id.GetInt32() : 0,
+            Name = groupElement.TryGetProperty("name", out JsonElement name)
+                ? name.GetString() ?? ""
+                : "",
         };
 
-        if (!groupElement.TryGetProperty("objects", out var objectsArray))
+        if (!groupElement.TryGetProperty("objects", out JsonElement objectsArray))
+        {
             return objectGroup;
+        }
 
-        foreach (var objElement in objectsArray.EnumerateArray())
+        foreach (JsonElement objElement in objectsArray.EnumerateArray())
         {
             var obj = new TmxObject
             {
-                Id = objElement.TryGetProperty("id", out var objId) ? objId.GetInt32() : 0,
-                Name = objElement.TryGetProperty("name", out var objName)
+                Id = objElement.TryGetProperty("id", out JsonElement objId) ? objId.GetInt32() : 0,
+                Name = objElement.TryGetProperty("name", out JsonElement objName)
                     ? objName.GetString() ?? ""
                     : "",
-                Type = objElement.TryGetProperty("type", out var type) ? type.GetString() : null,
-                X = objElement.TryGetProperty("x", out var x) ? x.GetSingle() : 0,
-                Y = objElement.TryGetProperty("y", out var y) ? y.GetSingle() : 0,
-                Width = objElement.TryGetProperty("width", out var width) ? width.GetSingle() : 0,
-                Height = objElement.TryGetProperty("height", out var height)
+                Type = objElement.TryGetProperty("type", out JsonElement type)
+                    ? type.GetString()
+                    : null,
+                X = objElement.TryGetProperty("x", out JsonElement x) ? x.GetSingle() : 0,
+                Y = objElement.TryGetProperty("y", out JsonElement y) ? y.GetSingle() : 0,
+                Width = objElement.TryGetProperty("width", out JsonElement width)
+                    ? width.GetSingle()
+                    : 0,
+                Height = objElement.TryGetProperty("height", out JsonElement height)
                     ? height.GetSingle()
                     : 0,
             };
 
             // Parse properties array into dictionary
-            if (objElement.TryGetProperty("properties", out var propertiesArray))
+            if (objElement.TryGetProperty("properties", out JsonElement propertiesArray))
             {
-                var properties = JsonSerializer.Deserialize<TiledJsonProperty[]>(
+                TiledJsonProperty[]? properties = JsonSerializer.Deserialize<TiledJsonProperty[]>(
                     propertiesArray.GetRawText(),
                     jsonOptions
                 );
 
                 if (properties != null)
-                    foreach (var prop in properties)
+                {
+                    foreach (TiledJsonProperty prop in properties)
                     {
                         if (string.IsNullOrEmpty(prop.Name))
-                            continue;
-
-                        object? value = prop.Value switch
                         {
-                            JsonElement jsonElement
-                                when jsonElement.ValueKind == JsonValueKind.String =>
-                                jsonElement.GetString(),
-                            JsonElement jsonElement
-                                when jsonElement.ValueKind == JsonValueKind.Number =>
-                                jsonElement.GetInt32(),
-                            JsonElement jsonElement
-                                when jsonElement.ValueKind == JsonValueKind.True => true,
-                            JsonElement jsonElement
-                                when jsonElement.ValueKind == JsonValueKind.False => false,
-                            JsonElement jsonElement
-                                when jsonElement.ValueKind == JsonValueKind.Null => null,
-                            _ => prop.Value?.ToString(),
-                        };
+                            continue;
+                        }
+
+                        object? value = ConvertPropertyValue(prop.Value, prop.Type);
 
                         if (value != null)
                         {
-                            var key = prop.Name;
+                            string key = prop.Name;
                             obj.Properties[key] = value;
                         }
                     }
+                }
             }
 
             objectGroup.Objects.Add(obj);
         }
 
         return objectGroup;
+    }
+
+    /// <summary>
+    ///     Converts a Tiled property value to an appropriate .NET type.
+    ///     Handles primitive types and nested class objects (like Warp properties).
+    /// </summary>
+    /// <param name="value">The property value (may be a JsonElement).</param>
+    /// <param name="propertyType">The Tiled property type (e.g., "string", "int", "class").</param>
+    /// <returns>Converted value or null.</returns>
+    private static object? ConvertPropertyValue(object? value, string? propertyType)
+    {
+        if (value is not JsonElement jsonElement)
+        {
+            return value;
+        }
+
+        // Handle class-type properties with nested objects (e.g., Warp)
+        if (propertyType == "class" && jsonElement.ValueKind == JsonValueKind.Object)
+        {
+            return ConvertJsonObjectToDictionary(jsonElement);
+        }
+
+        // Handle primitive types
+        return jsonElement.ValueKind switch
+        {
+            JsonValueKind.String => jsonElement.GetString(),
+            JsonValueKind.Number => jsonElement.TryGetInt32(out int intVal)
+                ? intVal
+                : jsonElement.GetDouble(),
+            JsonValueKind.True => true,
+            JsonValueKind.False => false,
+            JsonValueKind.Null => null,
+            JsonValueKind.Object => ConvertJsonObjectToDictionary(jsonElement),
+            JsonValueKind.Array => ConvertJsonArrayToList(jsonElement),
+            _ => jsonElement.ToString(),
+        };
+    }
+
+    /// <summary>
+    ///     Converts a JsonElement object to a Dictionary for nested class properties.
+    /// </summary>
+    private static Dictionary<string, object?> ConvertJsonObjectToDictionary(JsonElement element)
+    {
+        var dict = new Dictionary<string, object?>();
+        foreach (JsonProperty property in element.EnumerateObject())
+        {
+            dict[property.Name] = ConvertPropertyValue(property.Value, null);
+        }
+
+        return dict;
+    }
+
+    /// <summary>
+    ///     Converts a JsonElement array to a List.
+    /// </summary>
+    private static List<object?> ConvertJsonArrayToList(JsonElement element)
+    {
+        var list = new List<object?>();
+        foreach (JsonElement item in element.EnumerateArray())
+        {
+            list.Add(ConvertPropertyValue(item, null));
+        }
+
+        return list;
     }
 }

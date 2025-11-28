@@ -27,19 +27,24 @@ public class AssetLoadException : RenderingException
     public AssetLoadException(string assetId, string assetType, string message)
         : base("RENDER_ASSET_LOAD_FAILED", message)
     {
-        WithContext("AssetId", assetId)
-            .WithContext("AssetType", assetType);
+        WithContext("AssetId", assetId).WithContext("AssetType", assetType);
     }
 
-    public AssetLoadException(string assetId, string assetType, string message, Exception innerException)
+    public AssetLoadException(
+        string assetId,
+        string assetType,
+        string message,
+        Exception innerException
+    )
         : base("RENDER_ASSET_LOAD_FAILED", message, innerException)
     {
-        WithContext("AssetId", assetId)
-            .WithContext("AssetType", assetType);
+        WithContext("AssetId", assetId).WithContext("AssetType", assetType);
     }
 
-    public string AssetId => Context.TryGetValue("AssetId", out var id) ? id?.ToString() ?? "" : "";
-    public string AssetType => Context.TryGetValue("AssetType", out var type) ? type?.ToString() ?? "" : "";
+    public string AssetId =>
+        Context.TryGetValue("AssetId", out object? id) ? id?.ToString() ?? "" : "";
+    public string AssetType =>
+        Context.TryGetValue("AssetType", out object? type) ? type?.ToString() ?? "" : "";
 
     public override bool IsRecoverable => true; // Can use fallback textures
 
@@ -57,19 +62,24 @@ public class TextureLoadException : RenderingException
     public TextureLoadException(string textureId, string filePath, string message)
         : base("RENDER_TEXTURE_LOAD_FAILED", message)
     {
-        WithContext("TextureId", textureId)
-            .WithContext("FilePath", filePath);
+        WithContext("TextureId", textureId).WithContext("FilePath", filePath);
     }
 
-    public TextureLoadException(string textureId, string filePath, string message, Exception innerException)
+    public TextureLoadException(
+        string textureId,
+        string filePath,
+        string message,
+        Exception innerException
+    )
         : base("RENDER_TEXTURE_LOAD_FAILED", message, innerException)
     {
-        WithContext("TextureId", textureId)
-            .WithContext("FilePath", filePath);
+        WithContext("TextureId", textureId).WithContext("FilePath", filePath);
     }
 
-    public string TextureId => Context.TryGetValue("TextureId", out var id) ? id?.ToString() ?? "" : "";
-    public string FilePath => Context.TryGetValue("FilePath", out var path) ? path?.ToString() ?? "" : "";
+    public string TextureId =>
+        Context.TryGetValue("TextureId", out object? id) ? id?.ToString() ?? "" : "";
+    public string FilePath =>
+        Context.TryGetValue("FilePath", out object? path) ? path?.ToString() ?? "" : "";
 
     public override bool IsRecoverable => true; // Can use fallback textures
 
@@ -96,7 +106,8 @@ public class SpriteLoadException : RenderingException
         WithContext("SpriteId", spriteId);
     }
 
-    public string SpriteId => Context.TryGetValue("SpriteId", out var id) ? id?.ToString() ?? "" : "";
+    public string SpriteId =>
+        Context.TryGetValue("SpriteId", out object? id) ? id?.ToString() ?? "" : "";
 
     public override bool IsRecoverable => true; // Can use default sprite
 
@@ -120,9 +131,14 @@ public class CacheEvictionException : RenderingException
             .WithContext("CacheUsagePercent", (double)currentSize / maxSize * 100);
     }
 
-    public string TextureId => Context.TryGetValue("TextureId", out var id) ? id?.ToString() ?? "" : "";
-    public long CurrentCacheSize => Context.TryGetValue("CurrentCacheSize", out var size) && size is long l ? l : 0L;
-    public long MaxCacheSize => Context.TryGetValue("MaxCacheSize", out var max) && max is long m ? m : 0L;
+    public string TextureId =>
+        Context.TryGetValue("TextureId", out object? id) ? id?.ToString() ?? "" : "";
+
+    public long CurrentCacheSize =>
+        Context.TryGetValue("CurrentCacheSize", out object? size) && size is long l ? l : 0L;
+
+    public long MaxCacheSize =>
+        Context.TryGetValue("MaxCacheSize", out object? max) && max is long m ? m : 0L;
 
     public override bool IsRecoverable => true; // Can reload texture
 
@@ -149,7 +165,8 @@ public class GraphicsDeviceException : RenderingException
         WithContext("Operation", operation);
     }
 
-    public string Operation => Context.TryGetValue("Operation", out var op) ? op?.ToString() ?? "" : "";
+    public string Operation =>
+        Context.TryGetValue("Operation", out object? op) ? op?.ToString() ?? "" : "";
 
     public override bool IsRecoverable => false; // GPU errors are usually critical
 
@@ -176,7 +193,8 @@ public class AnimationException : RenderingException
         WithContext("AnimationId", animationId);
     }
 
-    public string AnimationId => Context.TryGetValue("AnimationId", out var id) ? id?.ToString() ?? "" : "";
+    public string AnimationId =>
+        Context.TryGetValue("AnimationId", out object? id) ? id?.ToString() ?? "" : "";
 
     public override bool IsRecoverable => true; // Can skip animation
 

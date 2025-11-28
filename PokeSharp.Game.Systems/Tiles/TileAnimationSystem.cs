@@ -39,13 +39,15 @@ public class TileAnimationSystem(ILogger<TileAnimationSystem>? logger = null)
         EnsureInitialized();
 
         if (!Enabled)
+        {
             return;
+        }
 
         // Update global animation timer (shared by all tiles for Pokemon-accurate sync)
         _globalAnimationTimer += deltaTime;
 
         // Capture timer for lambda (avoid closure issues)
-        var globalTimer = _globalAnimationTimer;
+        float globalTimer = _globalAnimationTimer;
 
         // CRITICAL OPTIMIZATION: Use sequential query instead of ParallelQuery
         // For 100-200 tiles, parallel overhead (task scheduling, thread sync) is MORE EXPENSIVE
@@ -65,9 +67,9 @@ public class TileAnimationSystem(ILogger<TileAnimationSystem>? logger = null)
         // Log animated tile count on first update (sequential count for logging)
         if (_animatedTileCount < 0)
         {
-            var tileCount = 0;
-            var precalcCount = 0;
-            var nullRectCount = 0;
+            int tileCount = 0;
+            int precalcCount = 0;
+            int nullRectCount = 0;
 
             world.Query(
                 in EcsQueries.AnimatedTiles,
@@ -75,9 +77,13 @@ public class TileAnimationSystem(ILogger<TileAnimationSystem>? logger = null)
                 {
                     tileCount++;
                     if (tile.FrameSourceRects != null && tile.FrameSourceRects.Length > 0)
+                    {
                         precalcCount++;
+                    }
                     else
+                    {
                         nullRectCount++;
+                    }
                 }
             );
 
@@ -119,24 +125,30 @@ public class TileAnimationSystem(ILogger<TileAnimationSystem>? logger = null)
             || animTile.FrameSourceRects == null
             || animTile.FrameSourceRects.Length == 0
         )
+        {
             return;
+        }
 
         // Calculate total animation cycle duration
-        var totalCycleDuration = 0f;
-        for (var i = 0; i < animTile.FrameDurations.Length; i++)
+        float totalCycleDuration = 0f;
+        for (int i = 0; i < animTile.FrameDurations.Length; i++)
+        {
             totalCycleDuration += animTile.FrameDurations[i];
+        }
 
         if (totalCycleDuration <= 0f)
+        {
             return;
+        }
 
         // Calculate position within the animation cycle using global timer
         // This ensures all tiles with the same animation are perfectly synchronized
-        var timeInCycle = globalTimer % totalCycleDuration;
+        float timeInCycle = globalTimer % totalCycleDuration;
 
         // Find which frame we should be displaying
-        var accumulatedTime = 0f;
-        var frameIndex = 0;
-        for (var i = 0; i < animTile.FrameDurations.Length; i++)
+        float accumulatedTime = 0f;
+        int frameIndex = 0;
+        for (int i = 0; i < animTile.FrameDurations.Length; i++)
         {
             accumulatedTime += animTile.FrameDurations[i];
             if (timeInCycle < accumulatedTime)

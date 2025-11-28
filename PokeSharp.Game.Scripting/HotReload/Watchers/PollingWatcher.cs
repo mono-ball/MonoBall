@@ -39,7 +39,9 @@ public class PollingWatcher : IScriptWatcher
     )
     {
         if (Status == WatcherStatus.Running)
+        {
             return Task.CompletedTask;
+        }
 
         Status = WatcherStatus.Starting;
         _directory = directory;
@@ -68,7 +70,9 @@ public class PollingWatcher : IScriptWatcher
     public async Task StopAsync()
     {
         if (Status == WatcherStatus.Stopped)
+        {
             return;
+        }
 
         Status = WatcherStatus.Stopping;
 
@@ -77,6 +81,7 @@ public class PollingWatcher : IScriptWatcher
             _cancellationTokenSource.Cancel();
 
             if (_pollingTask != null)
+            {
                 try
                 {
                     await _pollingTask;
@@ -85,6 +90,7 @@ public class PollingWatcher : IScriptWatcher
                 {
                     // Expected
                 }
+            }
 
             _cancellationTokenSource.Dispose();
             _cancellationTokenSource = null;
@@ -103,14 +109,21 @@ public class PollingWatcher : IScriptWatcher
     private void ScanDirectory()
     {
         if (_directory == null || _filter == null)
+        {
             return;
+        }
 
         try
         {
-            var searchPattern = _filter.Replace("*", "");
-            var files = Directory.EnumerateFiles(_directory, _filter, SearchOption.AllDirectories);
+            string searchPattern = _filter.Replace("*", "");
+            IEnumerable<string> files = Directory.EnumerateFiles(
+                _directory,
+                _filter,
+                SearchOption.AllDirectories
+            );
 
-            foreach (var file in files)
+            foreach (string file in files)
+            {
                 try
                 {
                     var fileInfo = new FileInfo(file);
@@ -120,6 +133,7 @@ public class PollingWatcher : IScriptWatcher
                 {
                     _logger.LogWarning(ex, "Failed to read file info for {File}", file);
                 }
+            }
         }
         catch (Exception ex)
         {
@@ -130,6 +144,7 @@ public class PollingWatcher : IScriptWatcher
     private async Task PollDirectoryAsync(CancellationToken cancellationToken)
     {
         while (!cancellationToken.IsCancellationRequested)
+        {
             try
             {
                 await Task.Delay(_pollingInterval, cancellationToken);
@@ -152,12 +167,15 @@ public class PollingWatcher : IScriptWatcher
                     }
                 );
             }
+        }
     }
 
     private void CheckForChanges()
     {
         if (_directory == null || _filter == null)
+        {
             return;
+        }
 
         try
         {
@@ -167,13 +185,22 @@ public class PollingWatcher : IScriptWatcher
             var currentFiles = files.ToHashSet();
 
             // Check for modified or new files
-            foreach (var file in files)
+            foreach (string file in files)
+            {
                 try
                 {
                     var fileInfo = new FileInfo(file);
-                    var currentState = (fileInfo.LastWriteTimeUtc, fileInfo.Length);
+                    (DateTime LastWriteTimeUtc, long Length) currentState = (
+                        fileInfo.LastWriteTimeUtc,
+                        fileInfo.Length
+                    );
 
-                    if (_fileStates.TryGetValue(file, out var previousState))
+                    if (
+                        _fileStates.TryGetValue(
+                            file,
+                            out (DateTime lastWrite, long size) previousState
+                        )
+                    )
                     {
                         // Check if file was modified (time or size changed)
                         if (
@@ -197,10 +224,11 @@ public class PollingWatcher : IScriptWatcher
                     // File might be locked, skip this iteration
                     _logger.LogDebug(ex, "File locked during polling: {File}", file);
                 }
+            }
 
             // Check for deleted files
             var deletedFiles = _fileStates.Keys.Where(f => !currentFiles.Contains(f)).ToList();
-            foreach (var deletedFile in deletedFiles)
+            foreach (string deletedFile in deletedFiles)
             {
                 _fileStates.TryRemove(deletedFile, out _);
                 _logger.LogDebug("File deleted: {File}", deletedFile);

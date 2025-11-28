@@ -1,104 +1,138 @@
-using PokeSharp.Game.Components.Movement;
-using PokeSharp.Game.Components.Tiles;
-using PokeSharp.Game.Components.Rendering;
-using PokeSharp.Game.Components.Player;
-using PokeSharp.Game.Components.NPCs;
-using PokeSharp.Game.Components;
+using System.Reflection;
+using Arch.Core;
+using Arch.Core.Extensions;
+using Microsoft.Extensions.Logging;
 
 namespace PokeSharp.Engine.Debug.Entities;
 
 /// <summary>
-/// Factory for creating a DebugComponentRegistry with all known game components.
+///     Factory for creating a DebugComponentRegistry with auto-discovered components.
+///     Scans assemblies for struct types in PokeSharp.Game.Components namespaces.
 /// </summary>
 public static class DebugComponentRegistryFactory
 {
     /// <summary>
-    /// Creates a DebugComponentRegistry with all standard game components registered.
+    ///     Creates a DebugComponentRegistry with auto-discovered components.
+    ///     Scans loaded assemblies for component types and registers them automatically.
     /// </summary>
-    public static DebugComponentRegistry CreateDefault()
+    public static DebugComponentRegistry CreateDefault(ILogger? logger = null)
     {
         var registry = new DebugComponentRegistry();
 
-        // Movement & Position components (high priority for entity naming)
-        registry.Register<Position>(
-            "Position",
-            pos => new Dictionary<string, string>
-            {
-                ["X"] = pos.X.ToString("F1"),
-                ["Y"] = pos.Y.ToString("F1"),
-                ["Position"] = $"({pos.X:F1}, {pos.Y:F1})"
-            },
-            category: "Movement",
-            priority: 10
-        );
-
-        registry.Register<TilePosition>(
-            "TilePosition",
-            tp => new Dictionary<string, string>
-            {
-                ["TileX"] = tp.X.ToString(),
-                ["TileY"] = tp.Y.ToString(),
-                ["TilePosition"] = $"({tp.X}, {tp.Y})"
-            },
-            category: "Movement",
-            priority: 9
-        );
-
-        registry.Register<Elevation>(
-            "Elevation",
-            elev => new Dictionary<string, string>
-            {
-                ["Elevation"] = elev.Value.ToString()
-            },
-            category: "Movement",
-            priority: 5
-        );
-
-        registry.Register<GridMovement>(
-            "GridMovement",
-            gm => new Dictionary<string, string>
-            {
-                ["Direction"] = gm.FacingDirection.ToString(),
-                ["IsMoving"] = gm.IsMoving.ToString()
-            },
-            category: "Movement",
-            priority: 8
-        );
-
-        registry.Register<MovementRequest>("MovementRequest", category: "Movement", priority: 3);
-
-        registry.Register<Collision>(
-            "Collision",
-            col => new Dictionary<string, string>
-            {
-                ["IsSolid"] = col.IsSolid.ToString()
-            },
-            category: "Movement",
-            priority: 4
-        );
-
-        // Player components (highest priority for naming)
-        registry.Register<Player>("Player", category: "Entity", priority: 100);
-
-        // NPC components
-        registry.Register<Npc>("Npc", category: "Entity", priority: 90);
-        registry.Register<Behavior>("Behavior", category: "NPC", priority: 5);
-        registry.Register<Interaction>("Interaction", category: "NPC", priority: 5);
-        registry.Register<MovementRoute>("MovementRoute", category: "NPC", priority: 5);
-
-        // Rendering components
-        registry.Register<Sprite>("Sprite", category: "Rendering", priority: 20);
-        registry.Register<Animation>("Animation", category: "Rendering", priority: 15);
-
-        // Tile components
-        registry.Register<TileSprite>("TileSprite", category: "Tile", priority: 50);
-        registry.Register<AnimatedTile>("AnimatedTile", category: "Tile", priority: 45);
-        registry.Register<TileBehavior>("TileBehavior", category: "Tile", priority: 5);
-
-        // Pooling
-        registry.Register<Pooled>("Pooled", category: "System", priority: 1);
+        // Auto-discover all component types from loaded assemblies
+        AutoDiscoverComponents(registry, logger);
 
         return registry;
     }
-}
 
+    /// <summary>
+    ///     Auto-discovers component types from assemblies matching PokeSharp.Game.Components namespace.
+    /// </summary>
+    private static void AutoDiscoverComponents(DebugComponentRegistry registry, ILogger? logger)
+    {
+        int registered = 0;
+
+        // Get all loaded assemblies
+        Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
+
+        foreach (Assembly assembly in assemblies)
+        {
+            try
+            {
+                // Skip non-PokeSharp assemblies for performance
+                string? assemblyName = assembly.GetName().Name;
+                if (assemblyName == null || !assemblyName.StartsWith("PokeSharp"))
+                {
+                    continue;
+                }
+
+                foreach (Type type in assembly.GetTypes())
+                {
+                    // Only register structs in component namespaces
+                    if (!type.IsValueType || type.IsEnum || type.IsPrimitive)
+                    {
+                        continue;
+                    }
+
+                    string? ns = type.Namespace;
+                    if (ns == null || !IsComponentNamespace(ns))
+                    {
+                        continue;
+                    }
+
+                    // Register this component type
+                    string category = DetermineCategoryFromNamespace(ns);
+                    int priority = DeterminePriorityFromType(type);
+
+                    registry.RegisterDynamic(type, type.Name, category, priority);
+                    registered++;
+                }
+            }
+            catch (ReflectionTypeLoadException)
+            {
+                // Some assemblies may have unloadable types - skip them
+            }
+            catch (Exception ex)
+            {
+                logger?.LogWarning(ex, "Error scanning assembly {Assembly} for components", assembly.GetName().Name);
+            }
+        }
+
+        logger?.LogDebug("Auto-discovered {Count} component types for debug registry", registered);
+    }
+
+    /// <summary>
+    ///     Checks if a namespace contains component types.
+    /// </summary>
+    private static bool IsComponentNamespace(string ns)
+    {
+        return ns.StartsWith("PokeSharp.Game.Components") ||
+               ns.StartsWith("PokeSharp.Engine.Core.Types");
+    }
+
+    /// <summary>
+    ///     Determines the debug category from a namespace.
+    /// </summary>
+    private static string DetermineCategoryFromNamespace(string ns)
+    {
+        // Extract the last part of the namespace as category
+        // e.g., "PokeSharp.Game.Components.Maps" -> "Maps"
+        // e.g., "PokeSharp.Game.Components.Movement" -> "Movement"
+        string[] parts = ns.Split('.');
+        if (parts.Length > 3 && parts[^1] != "Components")
+        {
+            return parts[^1];
+        }
+
+        return "General";
+    }
+
+    /// <summary>
+    ///     Determines priority for entity naming based on component type.
+    ///     Higher priority = used for naming first.
+    /// </summary>
+    private static int DeterminePriorityFromType(Type type)
+    {
+        // High priority for entity-identifying components
+        return type.Name switch
+        {
+            "Player" => 100,
+            "Npc" => 90,
+            "MapInfo" => 80,
+            "WarpPoint" => 75,
+            "MapWarps" => 70,
+            "TileSprite" => 50,
+            "AnimatedTile" => 45,
+            "Sprite" => 20,
+            "Animation" => 15,
+            "Position" => 10,
+            "TilePosition" => 9,
+            "GridMovement" => 8,
+            "Elevation" => 5,
+            "BelongsToMap" => 5,
+            "Collision" => 4,
+            "Pooled" => 1,
+            _ => 0
+        };
+    }
+}

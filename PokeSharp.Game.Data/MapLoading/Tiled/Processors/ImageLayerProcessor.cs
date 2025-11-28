@@ -1,7 +1,10 @@
 using Arch.Core;
+using Arch.Core.Extensions;
 using Microsoft.Extensions.Logging;
 using PokeSharp.Engine.Common.Logging;
+using PokeSharp.Engine.Core.Types;
 using PokeSharp.Engine.Rendering.Assets;
+using PokeSharp.Game.Components.Relationships;
 using PokeSharp.Game.Components.Rendering;
 using PokeSharp.Game.Data.MapLoading.Tiled.Tmx;
 
@@ -30,33 +33,41 @@ public class ImageLayerProcessor
     /// </summary>
     /// <param name="world">The ECS world to create entities in.</param>
     /// <param name="tmxDoc">The Tiled document.</param>
+    /// <param name="mapInfoEntity">The map entity for establishing relationships.</param>
+    /// <param name="mapId">The map runtime ID.</param>
     /// <param name="mapPath">Path to the map file (for resolving relative image paths).</param>
     /// <param name="totalLayerCount">Total number of layers (tile + image) for depth calculation.</param>
     /// <returns>Number of image layer entities created.</returns>
     public int CreateImageLayerEntities(
         World world,
         TmxDocument tmxDoc,
+        Entity mapInfoEntity,
+        MapRuntimeId mapId,
         string mapPath,
         int totalLayerCount
     )
     {
         if (tmxDoc.ImageLayers.Count == 0)
+        {
             return 0;
+        }
 
-        var created = 0;
-        var mapDirectory = Path.GetDirectoryName(mapPath) ?? string.Empty;
+        int created = 0;
+        string mapDirectory = Path.GetDirectoryName(mapPath) ?? string.Empty;
 
         // Process image layers in order
-        for (var i = 0; i < tmxDoc.ImageLayers.Count; i++)
+        for (int i = 0; i < tmxDoc.ImageLayers.Count; i++)
         {
-            var imageLayer = tmxDoc.ImageLayers[i];
+            TmxImageLayer imageLayer = tmxDoc.ImageLayers[i];
 
             // Skip invisible layers
             if (!imageLayer.Visible || imageLayer.Image == null)
+            {
                 continue;
+            }
 
             // Get image path
-            var imagePath = imageLayer.Image.Source;
+            string imagePath = imageLayer.Image.Source;
             if (string.IsNullOrEmpty(imagePath))
             {
                 _logger?.LogOperationSkipped($"Image layer '{imageLayer.Name}'", "no image source");
@@ -64,22 +75,27 @@ public class ImageLayerProcessor
             }
 
             // Create texture ID from image filename
-            var textureId = Path.GetFileNameWithoutExtension(imagePath);
+            string textureId = Path.GetFileNameWithoutExtension(imagePath);
 
             // Load texture if not already loaded
             if (!_assetManager.HasTexture(textureId))
+            {
                 try
                 {
                     // Resolve relative path from map directory
-                    var fullImagePath = Path.Combine(mapDirectory, imagePath);
+                    string fullImagePath = Path.Combine(mapDirectory, imagePath);
 
                     // If using AssetManager, make path relative to Assets root
                     // Otherwise (e.g., in tests with stub), use the path directly
                     string pathForLoader;
                     if (_assetManager is AssetManager assetManager)
+                    {
                         pathForLoader = Path.GetRelativePath(assetManager.AssetRoot, fullImagePath);
+                    }
                     else
+                    {
                         pathForLoader = imagePath;
+                    }
 
                     _assetManager.LoadTexture(textureId, pathForLoader);
                 }
@@ -93,15 +109,14 @@ public class ImageLayerProcessor
                     );
                     continue;
                 }
+            }
 
             // Calculate layer depth based on position in layer stack
             // Image layers should interleave with tile layers
             // We need to determine where this image layer falls in the overall layer order
-            var layerDepth = CalculateImageLayerDepth(imageLayer.Id, totalLayerCount);
+            float layerDepth = CalculateImageLayerDepth(imageLayer.Id, totalLayerCount);
 
-            // Create entity with ImageLayer component
-            var entity = world.Create<ImageLayer>();
-
+            // Create entity with ImageLayer component and BelongsToMap relationship
             var imageLayerComponent = new ImageLayer(
                 textureId,
                 imageLayer.X,
@@ -111,7 +126,10 @@ public class ImageLayerProcessor
                 imageLayer.Id
             );
 
-            world.Set(entity, imageLayerComponent);
+            Entity entity = world.Create(
+                imageLayerComponent,
+                new BelongsToMap(mapInfoEntity, mapId)
+            );
 
             _logger?.LogDebug(
                 "Created image layer '{LayerName}' with texture '{TextureId}' at ({X}, {Y}) depth {Depth:F2}",
@@ -141,9 +159,11 @@ public class ImageLayerProcessor
         // Lower layer IDs (created first in Tiled) should render behind (higher depth)
         // Higher layer IDs (created later in Tiled) should render in front (lower depth)
         if (totalLayerCount <= 1)
+        {
             return 0.5f;
+        }
 
-        var normalized = (float)layerId / totalLayerCount;
+        float normalized = (float)layerId / totalLayerCount;
         return 1.0f - normalized; // Invert so lower IDs = higher depth (back)
     }
 }

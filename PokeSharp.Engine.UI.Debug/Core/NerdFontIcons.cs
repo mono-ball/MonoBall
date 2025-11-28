@@ -1,10 +1,10 @@
 namespace PokeSharp.Engine.UI.Debug.Core;
 
 /// <summary>
-/// Nerd Font icon constants for the debug console UI.
-/// These icons require Iosevka Nerd Font (or another Nerd Font) to render properly.
-/// Reference: https://www.nerdfonts.com/cheat-sheet
-/// Codepoints: https://github.com/ryanoasis/nerd-fonts/wiki/Glyph-Sets-and-Code-Points
+///     Nerd Font icon constants for the debug console UI.
+///     These icons require Iosevka Nerd Font (or another Nerd Font) to render properly.
+///     Reference: https://www.nerdfonts.com/cheat-sheet
+///     Codepoints: https://github.com/ryanoasis/nerd-fonts/wiki/Glyph-Sets-and-Code-Points
 /// </summary>
 public static class NerdFontIcons
 {

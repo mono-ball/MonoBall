@@ -11,9 +11,10 @@ namespace PokeSharp.Game.Systems.Services;
 /// </remarks>
 public class GameTimeService : IGameTimeService
 {
+    private volatile float _previousTimeScale = 1.0f;
+
     // Use volatile for thread-safe reads/writes from console commands
     private volatile float _timeScale = 1.0f;
-    private volatile float _previousTimeScale = 1.0f;
 
     /// <inheritdoc />
     public event Action<float>? OnTimeScaleChanged;
@@ -36,19 +37,23 @@ public class GameTimeService : IGameTimeService
         get => _timeScale;
         set
         {
-            var oldValue = _timeScale;
+            float oldValue = _timeScale;
 
             // Clamp to reasonable range (0 to 10x)
-            var newValue = Math.Clamp(value, 0f, 10f);
+            float newValue = Math.Clamp(value, 0f, 10f);
             _timeScale = newValue;
 
             // If setting to non-zero, remember it for resume
             if (newValue > 0)
+            {
                 _previousTimeScale = newValue;
+            }
 
             // Fire event if value actually changed
             if (Math.Abs(oldValue - newValue) > 0.0001f)
+            {
                 OnTimeScaleChanged?.Invoke(newValue);
+            }
         }
     }
 
@@ -71,27 +76,33 @@ public class GameTimeService : IGameTimeService
     /// <inheritdoc />
     public void Pause()
     {
-        var oldValue = _timeScale;
+        float oldValue = _timeScale;
         if (oldValue > 0)
+        {
             _previousTimeScale = oldValue;
+        }
 
         _timeScale = 0f;
 
         if (oldValue > 0)
+        {
             OnTimeScaleChanged?.Invoke(0f);
+        }
     }
 
     /// <inheritdoc />
     public void Resume()
     {
-        var oldValue = _timeScale;
-        var newValue = _previousTimeScale > 0 ? _previousTimeScale : 1.0f;
+        float oldValue = _timeScale;
+        float newValue = _previousTimeScale > 0 ? _previousTimeScale : 1.0f;
 
         _timeScale = newValue;
         StepFrames = 0;
 
         if (Math.Abs(oldValue - newValue) > 0.0001f)
+        {
             OnTimeScaleChanged?.Invoke(newValue);
+        }
     }
 
     /// <inheritdoc />

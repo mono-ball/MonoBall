@@ -2,9 +2,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using PokeSharp.Engine.Core.Services;
 using PokeSharp.Engine.Systems.Management;
+using PokeSharp.Engine.Systems.Pooling;
 using PokeSharp.Game.Data.Factories;
+using PokeSharp.Game.Data.PropertyMapping;
+using PokeSharp.Game.Data.Services;
 using PokeSharp.Game.Infrastructure.Diagnostics;
-using PokeSharp.Game.Initialization;
 using PokeSharp.Game.Initialization.Factories;
 using PokeSharp.Game.Input;
 using PokeSharp.Game.Systems;
@@ -25,7 +27,32 @@ public static class GameServicesExtensions
         // Abstract Factory Pattern: Graphics services that depend on GraphicsDevice
         // The factory allows deferred creation of AssetManager and MapLoader until
         // GraphicsDevice is available at runtime (in PokeSharpGame.Initialize)
-        services.AddSingleton<IGraphicsServiceFactory, GraphicsServiceFactory>();
+        services.AddSingleton<IGraphicsServiceFactory>(sp =>
+        {
+            ILoggerFactory loggerFactory = sp.GetRequiredService<ILoggerFactory>();
+            SystemManager systemManager = sp.GetRequiredService<SystemManager>();
+            EntityPoolManager poolManager = sp.GetRequiredService<EntityPoolManager>();
+
+            // PropertyMapperRegistry is created lazily when needed
+            ILogger<PropertyMapperRegistry> mapperLogger =
+                sp.GetRequiredService<ILogger<PropertyMapperRegistry>>();
+            PropertyMapperRegistry propertyMapperRegistry =
+                PropertyMapperServiceExtensions.CreatePropertyMapperRegistry(mapperLogger);
+
+            NpcDefinitionService? npcDefinitionService =
+                sp.GetService<NpcDefinitionService>();
+            MapDefinitionService? mapDefinitionService =
+                sp.GetService<MapDefinitionService>();
+
+            return new GraphicsServiceFactory(
+                loggerFactory,
+                systemManager,
+                poolManager,
+                propertyMapperRegistry,
+                npcDefinitionService,
+                mapDefinitionService
+            );
+        });
 
         // Game Time Service - register as singleton so both IGameTimeService and ITimeControl
         // resolve to the same instance
@@ -36,14 +63,17 @@ public static class GameServicesExtensions
         // Collision Service - provides on-demand collision checking (not a system)
         services.AddSingleton<ICollisionService>(sp =>
         {
-            var systemManager = sp.GetRequiredService<SystemManager>();
+            SystemManager systemManager = sp.GetRequiredService<SystemManager>();
             // SpatialHashSystem is registered as a system and implements ISpatialQuery
-            var spatialQuery = systemManager.GetSystem<SpatialHashSystem>();
+            SpatialHashSystem? spatialQuery = systemManager.GetSystem<SpatialHashSystem>();
             if (spatialQuery == null)
+            {
                 throw new InvalidOperationException(
                     "SpatialHashSystem must be registered before CollisionService"
                 );
-            var logger = sp.GetService<ILogger<CollisionService>>();
+            }
+
+            ILogger<CollisionService>? logger = sp.GetService<ILogger<CollisionService>>();
             return new CollisionService(spatialQuery, logger);
         });
 

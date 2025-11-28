@@ -71,4 +71,3 @@ Print($"Viewport: {Graphics.Viewport.Width}x{Graphics.Viewport.Height}");
 
 Print("");
 Print("=== END DEBUG INFO ===");
-

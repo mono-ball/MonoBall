@@ -1,23 +1,23 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="Arch" Version="2.1.0" />
-    <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.4.1" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.11" />
-    <PackageReference Include="System.Text.Json" Version="9.0.11" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.22" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.22" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\PokeSharp.Game.Components\PokeSharp.Game.Components.csproj" />
-    <ProjectReference Include="..\PokeSharp.Engine.Common\PokeSharp.Engine.Common.csproj" />
-    <ProjectReference Include="..\PokeSharp.Engine.Core\PokeSharp.Engine.Core.csproj" />
-    <ProjectReference Include="..\PokeSharp.Engine.Rendering\PokeSharp.Engine.Rendering.csproj" />
-    <ProjectReference Include="..\PokeSharp.Engine.Systems\PokeSharp.Engine.Systems.csproj" />
-    <ProjectReference Include="..\PokeSharp.Game.Systems\PokeSharp.Game.Systems.csproj" />
-  </ItemGroup>
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="Arch" Version="2.1.0"/>
+        <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.4.1"/>
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0"/>
+        <PackageReference Include="System.Text.Json" Version="10.0.0"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.11"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.11"/>
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\PokeSharp.Game.Components\PokeSharp.Game.Components.csproj"/>
+        <ProjectReference Include="..\PokeSharp.Engine.Common\PokeSharp.Engine.Common.csproj"/>
+        <ProjectReference Include="..\PokeSharp.Engine.Core\PokeSharp.Engine.Core.csproj"/>
+        <ProjectReference Include="..\PokeSharp.Engine.Rendering\PokeSharp.Engine.Rendering.csproj"/>
+        <ProjectReference Include="..\PokeSharp.Engine.Systems\PokeSharp.Engine.Systems.csproj"/>
+        <ProjectReference Include="..\PokeSharp.Game.Systems\PokeSharp.Game.Systems.csproj"/>
+    </ItemGroup>
 </Project>

@@ -58,13 +58,15 @@ public class ValidationResult
     public string GetErrorMessage()
     {
         if (IsValid)
+        {
             return string.Empty;
+        }
 
         var lines = new List<string> { "Map validation failed:" };
 
-        foreach (var error in Errors)
+        foreach (ValidationError error in Errors)
         {
-            var location = error.Location != null ? $" (at {error.Location})" : "";
+            string location = error.Location != null ? $" (at {error.Location})" : "";
             lines.Add($"  - {error.Message}{location}");
         }
 
@@ -77,13 +79,15 @@ public class ValidationResult
     public string GetWarningMessage()
     {
         if (Warnings.Count == 0)
+        {
             return string.Empty;
+        }
 
         var lines = new List<string> { "Map validation warnings:" };
 
-        foreach (var warning in Warnings)
+        foreach (ValidationWarning warning in Warnings)
         {
-            var location = warning.Location != null ? $" (at {warning.Location})" : "";
+            string location = warning.Location != null ? $" (at {warning.Location})" : "";
             lines.Add($"  - {warning.Message}{location}");
         }
 
@@ -95,11 +99,17 @@ public class ValidationResult
     /// </summary>
     public override string ToString()
     {
-        var result = $"Valid: {IsValid}\n";
+        string result = $"Valid: {IsValid}\n";
         if (Errors.Count > 0)
+        {
             result += $"Errors ({Errors.Count}):\n" + GetErrorMessage() + "\n";
+        }
+
         if (Warnings.Count > 0)
+        {
             result += $"Warnings ({Warnings.Count}):\n" + GetWarningMessage() + "\n";
+        }
+
         return result;
     }
 }

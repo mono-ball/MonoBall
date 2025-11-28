@@ -1,17 +1,20 @@
+using Microsoft.Xna.Framework;
 using PokeSharp.Engine.UI.Debug.Core;
 using Tabs = PokeSharp.Engine.UI.Debug.Core.ConsoleTabs;
 
 namespace PokeSharp.Engine.Debug.Commands.BuiltIn;
 
 /// <summary>
-/// Command for switching between console tabs.
+///     Command for switching between console tabs.
 /// </summary>
 [ConsoleCommand("tab", "Switch between console tabs")]
 public class TabCommand : IConsoleCommand
 {
     public string Name => "tab";
     public string Description => "Switch between console tabs";
-    public string Usage => $@"tab [name|index]
+
+    public string Usage =>
+        $@"tab [name|index]
 
 Switches to the specified tab by name or index.
 
@@ -33,23 +36,26 @@ Keyboard Shortcuts:
 
     public Task ExecuteAsync(IConsoleContext context, string[] args)
     {
-        var theme = context.Theme;
+        UITheme theme = context.Theme;
 
         if (args.Length == 0)
         {
             // Show current tab and list all tabs
-            var currentTab = context.GetActiveTab();
+            int currentTab = context.GetActiveTab();
             context.WriteLine("Console Tabs:", theme.Info);
             context.WriteLine("─────────────────────────────", theme.BorderPrimary);
 
-            foreach (var tabDef in Tabs.All)
+            foreach (ConsoleTabs.TabDefinition tabDef in Tabs.All)
             {
-                var isActive = tabDef.Index == currentTab;
-                var indicator = isActive ? " → " : "   ";
-                var status = isActive ? "(active)" : "";
-                var shortcut = tabDef.Shortcut.HasValue ? $"[Ctrl+{tabDef.Index + 1}]" : "";
-                var color = isActive ? theme.Success : theme.TextSecondary;
-                context.WriteLine($"{indicator}{tabDef.Index}. {tabDef.Name} {status} {shortcut}", color);
+                bool isActive = tabDef.Index == currentTab;
+                string indicator = isActive ? " → " : "   ";
+                string status = isActive ? "(active)" : "";
+                string shortcut = tabDef.Shortcut.HasValue ? $"[Ctrl+{tabDef.Index + 1}]" : "";
+                Color color = isActive ? theme.Success : theme.TextSecondary;
+                context.WriteLine(
+                    $"{indicator}{tabDef.Index}. {tabDef.Name} {status} {shortcut}",
+                    color
+                );
             }
 
             context.WriteLine("", theme.TextPrimary);
@@ -57,9 +63,9 @@ Keyboard Shortcuts:
             return Task.CompletedTask;
         }
 
-        var target = args[0];
+        string target = args[0];
 
-        if (Tabs.TryGet(target, out var matchedTab) && matchedTab != null)
+        if (Tabs.TryGet(target, out ConsoleTabs.TabDefinition? matchedTab) && matchedTab != null)
         {
             context.SwitchToTab(matchedTab.Index);
             context.WriteLine($"Switched to {matchedTab.Name} tab", theme.Success);
@@ -67,11 +73,10 @@ Keyboard Shortcuts:
         else
         {
             context.WriteLine($"Unknown tab: '{target}'", theme.Error);
-            var validNames = string.Join(", ", Tabs.All.Select(t => t.Name.ToLowerInvariant()));
+            string validNames = string.Join(", ", Tabs.All.Select(t => t.Name.ToLowerInvariant()));
             context.WriteLine($"Valid tabs: {validNames} (or 0-{Tabs.Count - 1})", theme.TextDim);
         }
 
         return Task.CompletedTask;
     }
 }
-

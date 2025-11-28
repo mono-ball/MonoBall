@@ -32,13 +32,13 @@ public class TileBehaviorInitializer(
         try
         {
             // Load all behavior definitions from JSON
-            var loadedCount = await behaviorRegistry.LoadAllAsync();
+            int loadedCount = await behaviorRegistry.LoadAllAsync();
             logger.LogWorkflowStatus("Tile behavior definitions loaded", ("count", loadedCount));
 
             // Load and compile behavior scripts for each type
-            foreach (var typeId in behaviorRegistry.GetAllTypeIds())
+            foreach (string typeId in behaviorRegistry.GetAllTypeIds())
             {
-                var definition = behaviorRegistry.Get(typeId);
+                TileBehaviorDefinition? definition = behaviorRegistry.Get(typeId);
                 if (
                     definition is IScriptedType scripted
                     && !string.IsNullOrEmpty(scripted.BehaviorScript)
@@ -50,7 +50,7 @@ public class TileBehaviorInitializer(
                         ("script", scripted.BehaviorScript)
                     );
 
-                    var scriptInstance = await scriptService.LoadScriptAsync(
+                    object? scriptInstance = await scriptService.LoadScriptAsync(
                         scripted.BehaviorScript
                     );
 
@@ -80,7 +80,8 @@ public class TileBehaviorInitializer(
             }
 
             // Register TileBehaviorSystem with API services
-            var tileBehaviorLogger = loggerFactory.CreateLogger<TileBehaviorSystem>();
+            ILogger<TileBehaviorSystem> tileBehaviorLogger =
+                loggerFactory.CreateLogger<TileBehaviorSystem>();
             var tileBehaviorSystem = new TileBehaviorSystem(
                 tileBehaviorLogger,
                 loggerFactory,
@@ -97,7 +98,7 @@ public class TileBehaviorInitializer(
             }
 
             // Link TileBehaviorSystem to MovementSystem
-            var movementSystem = systemManager.GetSystem<MovementSystem>();
+            MovementSystem? movementSystem = systemManager.GetSystem<MovementSystem>();
             if (movementSystem != null)
             {
                 movementSystem.SetTileBehaviorSystem(tileBehaviorSystem);

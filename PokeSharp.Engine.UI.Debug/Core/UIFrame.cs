@@ -1,8 +1,10 @@
+using PokeSharp.Engine.UI.Debug.Layout;
+
 namespace PokeSharp.Engine.UI.Debug.Core;
 
 /// <summary>
-/// Represents a single frame of UI state in the immediate mode system.
-/// Tracks which components were rendered this frame for input handling.
+///     Represents a single frame of UI state in the immediate mode system.
+///     Tracks which components were rendered this frame for input handling.
 /// </summary>
 public class UIFrame
 {
@@ -25,7 +27,7 @@ public class UIFrame
     public string? CapturedComponentId { get; set; }
 
     /// <summary>
-    /// Clears frame state for a new frame.
+    ///     Clears frame state for a new frame.
     /// </summary>
     public void BeginFrame()
     {
@@ -36,16 +38,14 @@ public class UIFrame
 }
 
 /// <summary>
-/// State for a component in a single frame.
+///     State for a component in a single frame.
 /// </summary>
 public class ComponentFrameState
 {
     public string Id { get; init; } = string.Empty;
     public string? ParentId { get; set; }
-    public Layout.LayoutRect Rect { get; set; }
+    public LayoutRect Rect { get; set; }
     public bool IsInteractive { get; set; }
     public bool IsVisible { get; set; } = true;
     public int ZOrder { get; set; }
 }
-
-

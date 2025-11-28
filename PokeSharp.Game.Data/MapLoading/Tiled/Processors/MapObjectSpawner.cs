@@ -1,13 +1,17 @@
 using Arch.Core;
+using Arch.Core.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
 using PokeSharp.Engine.Common.Logging;
 using PokeSharp.Engine.Core.Types;
 using PokeSharp.Engine.Systems.Factories;
 using PokeSharp.Game.Components.Common;
+using PokeSharp.Game.Components.Maps;
 using PokeSharp.Game.Components.Movement;
 using PokeSharp.Game.Components.NPCs;
+using PokeSharp.Game.Components.Relationships;
 using PokeSharp.Game.Components.Rendering;
+using PokeSharp.Game.Data.Entities;
 using PokeSharp.Game.Data.MapLoading.Tiled.Tmx;
 using PokeSharp.Game.Data.Services;
 
@@ -40,7 +44,8 @@ public class MapObjectSpawner
     /// </summary>
     /// <param name="world">The ECS world.</param>
     /// <param name="tmxDoc">The Tiled map document.</param>
-    /// <param name="mapId">The map identifier.</param>
+    /// <param name="mapInfoEntity">The map info entity for establishing relationships.</param>
+    /// <param name="mapId">The map runtime ID.</param>
     /// <param name="tileWidth">Tile width for X coordinate conversion.</param>
     /// <param name="tileHeight">Tile height for Y coordinate conversion.</param>
     /// <param name="requiredSpriteIds">Collection to track sprite IDs for lazy loading.</param>
@@ -48,28 +53,38 @@ public class MapObjectSpawner
     public int SpawnMapObjects(
         World world,
         TmxDocument tmxDoc,
+        Entity mapInfoEntity,
         MapRuntimeId mapId,
         int tileWidth,
         int tileHeight,
         HashSet<SpriteId>? requiredSpriteIds = null
     )
     {
-        if (_entityFactory == null)
-            // No entity factory - can't spawn from templates
-            return 0;
+        int created = 0;
 
-        var created = 0;
-
-        foreach (var objectGroup in tmxDoc.ObjectGroups)
-        foreach (var obj in objectGroup.Objects)
+        foreach (TmxObjectGroup objectGroup in tmxDoc.ObjectGroups)
+        foreach (TmxObject obj in objectGroup.Objects)
         {
             // Get template ID from object type or properties
-            var templateId = obj.Type;
+            string? templateId = obj.Type;
             if (
                 string.IsNullOrEmpty(templateId)
-                && obj.Properties.TryGetValue("template", out var templateProp)
+                && obj.Properties.TryGetValue("template", out object? templateProp)
             )
+            {
                 templateId = templateProp.ToString();
+            }
+
+            // Handle warp_event objects specially (no template required)
+            if (templateId == "warp_event")
+            {
+                if (TrySpawnWarpEntity(world, obj, mapInfoEntity, mapId, tileWidth, tileHeight))
+                {
+                    created++;
+                }
+
+                continue;
+            }
 
             if (string.IsNullOrEmpty(templateId))
             {
@@ -78,21 +93,24 @@ public class MapObjectSpawner
             }
 
             // Check if template exists
-            if (!_entityFactory.HasTemplate(templateId))
+            if (_entityFactory == null || !_entityFactory.HasTemplate(templateId))
             {
-                _logger?.LogResourceNotFound("Template", $"{templateId} for '{obj.Name}'");
+                if (_entityFactory != null)
+                {
+                    _logger?.LogResourceNotFound("Template", $"{templateId} for '{obj.Name}'");
+                }
                 continue;
             }
 
             // Convert pixel coordinates to tile coordinates
             // Tiled Y coordinate is from top of object, use top-left corner for positioning
-            var tileX = (int)Math.Floor(obj.X / tileWidth);
-            var tileY = (int)Math.Floor(obj.Y / tileHeight);
+            int tileX = (int)Math.Floor(obj.X / tileWidth);
+            int tileY = (int)Math.Floor(obj.Y / tileHeight);
 
             try
             {
                 // Spawn entity from template
-                var entity = _entityFactory.SpawnFromTemplate(
+                Entity entity = _entityFactory.SpawnFromTemplate(
                     templateId,
                     world,
                     builder =>
@@ -101,17 +119,17 @@ public class MapObjectSpawner
                         builder.OverrideComponent(new Position(tileX, tileY, mapId, tileHeight));
 
                         // Apply custom elevation if specified (Pokemon Emerald style)
-                        if (obj.Properties.TryGetValue("elevation", out var elevProp))
+                        if (obj.Properties.TryGetValue("elevation", out object? elevProp))
                         {
-                            var elevValue = Convert.ToByte(elevProp);
+                            byte elevValue = Convert.ToByte(elevProp);
                             builder.OverrideComponent(new Elevation(elevValue));
                         }
 
                         // Apply any custom properties from the object
-                        if (obj.Properties.TryGetValue("direction", out var dirProp))
+                        if (obj.Properties.TryGetValue("direction", out object? dirProp))
                         {
-                            var dirStr = dirProp.ToString()?.ToLower();
-                            var direction = dirStr switch
+                            string? dirStr = dirProp.ToString()?.ToLower();
+                            Direction direction = dirStr switch
                             {
                                 "north" or "up" => Direction.North,
                                 "south" or "down" => Direction.South,
@@ -124,9 +142,14 @@ public class MapObjectSpawner
 
                         // Handle NPC/Trainer definitions (NEW: uses EF Core definitions)
                         if (templateId.StartsWith("npc/") || templateId.StartsWith("trainer/"))
+                        {
                             ApplyNpcDefinition(builder, obj, templateId, requiredSpriteIds);
+                        }
                     }
                 );
+
+                // Add BelongsToMap relationship for all spawned entities
+                entity.Add(new BelongsToMap(mapInfoEntity, mapId));
 
                 _logger?.LogDebug(
                     "Spawned '{ObjectName}' ({TemplateId}) at ({X}, {Y})",
@@ -148,6 +171,16 @@ public class MapObjectSpawner
             }
         }
 
+        // Log warp count
+        if (mapInfoEntity.Has<MapWarps>())
+        {
+            MapWarps warps = mapInfoEntity.Get<MapWarps>();
+            if (warps.Count > 0)
+            {
+                _logger?.LogDebug("Map has {Count} warps registered in spatial index", warps.Count);
+            }
+        }
+
         return created;
     }
 
@@ -163,12 +196,12 @@ public class MapObjectSpawner
     )
     {
         // Check for NPC definition reference
-        if (obj.Properties.TryGetValue("npcId", out var npcIdProp))
+        if (obj.Properties.TryGetValue("npcId", out object? npcIdProp))
         {
-            var npcId = npcIdProp.ToString();
+            string? npcId = npcIdProp.ToString();
             if (!string.IsNullOrWhiteSpace(npcId))
             {
-                var npcDef = _npcDefinitionService?.GetNpc(npcId);
+                NpcDefinition? npcDef = _npcDefinitionService?.GetNpc(npcId);
                 if (npcDef != null)
                 {
                     // Apply definition data
@@ -177,7 +210,7 @@ public class MapObjectSpawner
 
                     if (npcDef.SpriteId.HasValue)
                     {
-                        var spriteId = npcDef.SpriteId.Value;
+                        SpriteId spriteId = npcDef.SpriteId.Value;
                         // PHASE 2: Collect sprite ID for lazy loading
                         requiredSpriteIds?.Add(spriteId);
                         _logger?.LogTrace(
@@ -222,12 +255,12 @@ public class MapObjectSpawner
             }
         }
         // Check for Trainer definition reference
-        else if (obj.Properties.TryGetValue("trainerId", out var trainerIdProp))
+        else if (obj.Properties.TryGetValue("trainerId", out object? trainerIdProp))
         {
-            var trainerId = trainerIdProp.ToString();
+            string? trainerId = trainerIdProp.ToString();
             if (!string.IsNullOrWhiteSpace(trainerId))
             {
-                var trainerDef = _npcDefinitionService?.GetTrainer(trainerId);
+                TrainerDefinition? trainerDef = _npcDefinitionService?.GetTrainer(trainerId);
                 if (trainerDef != null)
                 {
                     // Apply trainer definition data
@@ -235,7 +268,7 @@ public class MapObjectSpawner
 
                     if (trainerDef.SpriteId.HasValue)
                     {
-                        var spriteId = trainerDef.SpriteId.Value;
+                        SpriteId spriteId = trainerDef.SpriteId.Value;
                         // PHASE 2: Collect sprite ID for lazy loading
                         requiredSpriteIds?.Add(spriteId);
                         _logger?.LogTrace(
@@ -287,25 +320,33 @@ public class MapObjectSpawner
     private void ApplyManualNpcProperties(EntityBuilder builder, TmxObject obj)
     {
         // Manual npcId from map
-        if (obj.Properties.TryGetValue("npcId", out var npcIdProp))
+        if (obj.Properties.TryGetValue("npcId", out object? npcIdProp))
         {
-            var npcId = npcIdProp?.ToString();
+            string? npcId = npcIdProp?.ToString();
             if (!string.IsNullOrWhiteSpace(npcId))
+            {
                 builder.OverrideComponent(new Npc(npcId));
+            }
         }
 
         // Manual displayName from map
-        if (obj.Properties.TryGetValue("displayName", out var displayNameProp))
+        if (obj.Properties.TryGetValue("displayName", out object? displayNameProp))
         {
-            var displayName = displayNameProp?.ToString();
+            string? displayName = displayNameProp?.ToString();
             if (!string.IsNullOrWhiteSpace(displayName))
+            {
                 builder.OverrideComponent(new Name(displayName));
+            }
         }
 
         // Manual movement speed from map
-        if (obj.Properties.TryGetValue("movementSpeed", out var speedProp))
-            if (float.TryParse(speedProp.ToString(), out var speed))
+        if (obj.Properties.TryGetValue("movementSpeed", out object? speedProp))
+        {
+            if (float.TryParse(speedProp.ToString(), out float speed))
+            {
                 builder.OverrideComponent(new GridMovement(speed));
+            }
+        }
     }
 
     /// <summary>
@@ -315,33 +356,37 @@ public class MapObjectSpawner
     private void ApplyMapLevelOverrides(EntityBuilder builder, TmxObject obj)
     {
         // Movement route (waypoints) - instance-specific
-        if (obj.Properties.TryGetValue("waypoints", out var waypointsProp))
+        if (obj.Properties.TryGetValue("waypoints", out object? waypointsProp))
         {
-            var waypointsStr = waypointsProp.ToString();
+            string? waypointsStr = waypointsProp.ToString();
             if (!string.IsNullOrEmpty(waypointsStr))
             {
                 // Parse waypoints: "x1,y1;x2,y2;x3,y3"
                 var points = new List<Point>();
-                var pairs = waypointsStr.Split(';');
-                foreach (var pair in pairs)
+                string[] pairs = waypointsStr.Split(';');
+                foreach (string pair in pairs)
                 {
-                    var coords = pair.Split(',');
+                    string[] coords = pair.Split(',');
                     if (
                         coords.Length == 2
-                        && int.TryParse(coords[0].Trim(), out var x)
-                        && int.TryParse(coords[1].Trim(), out var y)
+                        && int.TryParse(coords[0].Trim(), out int x)
+                        && int.TryParse(coords[1].Trim(), out int y)
                     )
+                    {
                         points.Add(new Point(x, y));
+                    }
                 }
 
                 if (points.Count > 0)
                 {
-                    var waypointWaitTime = 1.0f;
+                    float waypointWaitTime = 1.0f;
                     if (
-                        obj.Properties.TryGetValue("waypointWaitTime", out var waitProp)
-                        && float.TryParse(waitProp.ToString(), out var waitTime)
+                        obj.Properties.TryGetValue("waypointWaitTime", out object? waitProp)
+                        && float.TryParse(waitProp.ToString(), out float waitTime)
                     )
+                    {
                         waypointWaitTime = waitTime;
+                    }
 
                     builder.OverrideComponent(
                         new MovementRoute(points.ToArray(), true, waypointWaitTime)
@@ -350,6 +395,118 @@ public class MapObjectSpawner
                     _logger?.LogDebug("Applied waypoint route with {Count} points", points.Count);
                 }
             }
+        }
+    }
+
+    /// <summary>
+    ///     Spawns a warp entity from a warp_event Tiled object.
+    ///     Creates entity with Position, WarpPoint, and BelongsToMap components.
+    ///     Registers warp in MapWarps spatial index for O(1) lookup.
+    /// </summary>
+    /// <param name="world">The ECS world.</param>
+    /// <param name="obj">The Tiled object with warp_event type.</param>
+    /// <param name="mapInfoEntity">The map entity for relationship and spatial index.</param>
+    /// <param name="mapId">The current map's runtime ID.</param>
+    /// <param name="tileWidth">Tile width for coordinate conversion.</param>
+    /// <param name="tileHeight">Tile height for coordinate conversion.</param>
+    /// <returns>True if warp entity was created successfully.</returns>
+    private bool TrySpawnWarpEntity(
+        World world,
+        TmxObject obj,
+        Entity mapInfoEntity,
+        MapRuntimeId mapId,
+        int tileWidth,
+        int tileHeight
+    )
+    {
+        // Get the warp property (nested class object)
+        if (!obj.Properties.TryGetValue("warp", out object? warpProp))
+        {
+            _logger?.LogWarning(
+                "warp_event '{Name}' missing 'warp' property, skipping",
+                obj.Name
+            );
+            return false;
+        }
+
+        // Parse warp data from Dictionary (parsed from Tiled class property)
+        if (warpProp is not Dictionary<string, object?> warpData)
+        {
+            _logger?.LogWarning(
+                "warp_event '{Name}' has invalid 'warp' property format, expected Dictionary",
+                obj.Name
+            );
+            return false;
+        }
+
+        // Extract warp destination data
+        string? targetMap = warpData.TryGetValue("map", out object? mapVal)
+            ? mapVal?.ToString()
+            : null;
+
+        if (string.IsNullOrEmpty(targetMap))
+        {
+            _logger?.LogWarning(
+                "warp_event '{Name}' missing target map in warp property",
+                obj.Name
+            );
+            return false;
+        }
+
+        int targetX = warpData.TryGetValue("x", out object? xVal) && xVal != null
+            ? Convert.ToInt32(xVal)
+            : 0;
+        int targetY = warpData.TryGetValue("y", out object? yVal) && yVal != null
+            ? Convert.ToInt32(yVal)
+            : 0;
+
+        // Always use default ground elevation (3) - don't read from map data
+        // Pokemon Emerald elevation values in map files are often incorrect
+        const byte targetElevation = 3;
+
+        // Convert pixel coordinates to tile coordinates
+        int tileX = (int)Math.Floor(obj.X / tileWidth);
+        int tileY = (int)Math.Floor(obj.Y / tileHeight);
+
+        try
+        {
+            // Create warp entity with Position, WarpPoint, and BelongsToMap components
+            Entity warpEntity = world.Create(
+                new Position(tileX, tileY, mapId, tileHeight),
+                new WarpPoint(targetMap, targetX, targetY, targetElevation),
+                new BelongsToMap(mapInfoEntity, mapId)
+            );
+
+            // Register warp in MapWarps spatial index for O(1) lookup
+            ref MapWarps mapWarps = ref mapInfoEntity.Get<MapWarps>();
+            if (!mapWarps.AddWarp(tileX, tileY, warpEntity))
+            {
+                _logger?.LogWarning(
+                    "Warp at ({TileX}, {TileY}) overwrites existing warp - duplicate warp positions",
+                    tileX,
+                    tileY
+                );
+            }
+
+            _logger?.LogDebug(
+                "Created warp at ({TileX}, {TileY}) → {TargetMap} @ ({TargetX}, {TargetY})",
+                tileX,
+                tileY,
+                targetMap,
+                targetX,
+                targetY
+            );
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogExceptionWithContext(
+                ex,
+                "Failed to create warp entity for '{ObjectName}'",
+                obj.Name
+            );
+            return false;
         }
     }
 }

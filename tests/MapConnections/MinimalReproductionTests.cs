@@ -34,7 +34,7 @@ public class MinimalReproductionTests
             source: mapA,
             target: mapB,
             direction: ConnectionDirection.North,
-            sourceEdgeTile: 5  // Middle of north edge
+            sourceEdgeTile: 5 // Middle of north edge
         );
 
         // Expected: When exiting north from MapA at tile X=5,
@@ -45,13 +45,15 @@ public class MinimalReproductionTests
         var actualPosition = SimulateConnection(connection, startTile: new TilePosition(5, 0));
 
         // Assert
-        actualPosition.Should().Be(expectedPosition,
-            "Connection should place player at exact edge of target map");
+        actualPosition
+            .Should()
+            .Be(expectedPosition, "Connection should place player at exact edge of target map");
 
         // Specific check for the 2-tile offset bug
         var yDifference = expectedPosition.Y - actualPosition.Y;
-        yDifference.Should().Be(0,
-            $"Should have no Y offset, but has {yDifference} tile offset (bug: -2 tiles)");
+        yDifference
+            .Should()
+            .Be(0, $"Should have no Y offset, but has {yDifference} tile offset (bug: -2 tiles)");
     }
 
     /// <summary>
@@ -79,12 +81,17 @@ public class MinimalReproductionTests
         var actualPosition = SimulateConnection(connection, startTile: new TilePosition(5, 9));
 
         // Assert
-        actualPosition.Should().Be(expectedPosition,
-            "South connection should place player at north edge of target map");
+        actualPosition
+            .Should()
+            .Be(
+                expectedPosition,
+                "South connection should place player at north edge of target map"
+            );
 
         var yDifference = actualPosition.Y - expectedPosition.Y;
-        yDifference.Should().Be(0,
-            $"Should have no Y offset, but has {yDifference} tile offset (bug: +2 tiles)");
+        yDifference
+            .Should()
+            .Be(0, $"Should have no Y offset, but has {yDifference} tile offset (bug: +2 tiles)");
     }
 
     /// <summary>
@@ -101,7 +108,8 @@ public class MinimalReproductionTests
         int startY,
         int expectedX,
         int expectedY,
-        string testName)
+        string testName
+    )
     {
         // Arrange
         var mapA = CreateTestMap("MapA", width: 10, height: 10);
@@ -125,8 +133,7 @@ public class MinimalReproductionTests
 
         // Check for horizontal offset bug
         var xDifference = Math.Abs(expectedPosition.X - actualPosition.X);
-        xDifference.Should().Be(0,
-            $"Should have no X offset, but has {xDifference} tile offset");
+        xDifference.Should().Be(0, $"Should have no X offset, but has {xDifference} tile offset");
     }
 
     /// <summary>
@@ -160,19 +167,25 @@ public class MinimalReproductionTests
         var actualPixel = SimulateConnectionPixels(connection, startPixel);
 
         // Assert
-        actualPixel.Should().Be(expectedPixel,
-            "Pixel-perfect alignment required at connection point");
+        actualPixel
+            .Should()
+            .Be(expectedPixel, "Pixel-perfect alignment required at connection point");
 
         // Detect the specific 32-pixel offset bug
         var pixelOffsetY = expectedPixel.Y - actualPixel.Y;
-        pixelOffsetY.Should().Be(0,
-            $"Should have no pixel offset, but has {pixelOffsetY} pixel offset (bug: -32 pixels)");
+        pixelOffsetY
+            .Should()
+            .Be(
+                0,
+                $"Should have no pixel offset, but has {pixelOffsetY} pixel offset (bug: -32 pixels)"
+            );
 
         if (Math.Abs(pixelOffsetY) == PROBLEMATIC_OFFSET)
         {
             throw new Exception(
-                $"CONFIRMED BUG: Detected exactly {PROBLEMATIC_OFFSET} pixel offset " +
-                $"({PROBLEMATIC_OFFSET / TILE_SIZE} tiles) in connection logic");
+                $"CONFIRMED BUG: Detected exactly {PROBLEMATIC_OFFSET} pixel offset "
+                    + $"({PROBLEMATIC_OFFSET / TILE_SIZE} tiles) in connection logic"
+            );
         }
     }
 
@@ -204,11 +217,13 @@ public class MinimalReproductionTests
         );
 
         // Assert
-        actualOffsets.SourceOffset.Should().Be(expectedSourceOffset,
-            "Source offset should be at connection point on edge");
+        actualOffsets
+            .SourceOffset.Should()
+            .Be(expectedSourceOffset, "Source offset should be at connection point on edge");
 
-        actualOffsets.TargetOffset.Should().Be(expectedTargetOffset,
-            "Target offset should be at opposite edge");
+        actualOffsets
+            .TargetOffset.Should()
+            .Be(expectedTargetOffset, "Target offset should be at opposite edge");
 
         // Verify the offset difference
         var offsetDifference = CalculateOffsetDifference(
@@ -218,8 +233,9 @@ public class MinimalReproductionTests
             targetMap.Height
         );
 
-        offsetDifference.Should().Be(0,
-            "Offset calculation should account for both map dimensions with no remainder");
+        offsetDifference
+            .Should()
+            .Be(0, "Offset calculation should account for both map dimensions with no remainder");
     }
 
     #region Test Data Structures
@@ -237,17 +253,14 @@ public class MinimalReproductionTests
 
     public record struct PixelPosition(int X, int Y);
 
-    public record ConnectionOffsets(
-        TilePosition SourceOffset,
-        TilePosition TargetOffset
-    );
+    public record ConnectionOffsets(TilePosition SourceOffset, TilePosition TargetOffset);
 
     public enum ConnectionDirection
     {
         North,
         South,
         East,
-        West
+        West,
     }
 
     #endregion
@@ -263,7 +276,8 @@ public class MinimalReproductionTests
         TestMap source,
         TestMap target,
         ConnectionDirection direction,
-        int sourceEdgeTile)
+        int sourceEdgeTile
+    )
     {
         return new MapConnection(source, target, direction, sourceEdgeTile);
     }
@@ -281,19 +295,10 @@ public class MinimalReproductionTests
                 startTile.X,
                 connection.Target.Height - 1
             ),
-            ConnectionDirection.South => new TilePosition(
-                startTile.X,
-                0
-            ),
-            ConnectionDirection.East => new TilePosition(
-                0,
-                startTile.Y
-            ),
-            ConnectionDirection.West => new TilePosition(
-                connection.Target.Width - 1,
-                startTile.Y
-            ),
-            _ => throw new ArgumentException("Invalid direction")
+            ConnectionDirection.South => new TilePosition(startTile.X, 0),
+            ConnectionDirection.East => new TilePosition(0, startTile.Y),
+            ConnectionDirection.West => new TilePosition(connection.Target.Width - 1, startTile.Y),
+            _ => throw new ArgumentException("Invalid direction"),
         };
     }
 
@@ -301,13 +306,13 @@ public class MinimalReproductionTests
     /// Simulates connection at pixel level for precise offset detection.
     /// TODO: Replace with actual game logic implementation.
     /// </summary>
-    private PixelPosition SimulateConnectionPixels(MapConnection connection, PixelPosition startPixel)
+    private PixelPosition SimulateConnectionPixels(
+        MapConnection connection,
+        PixelPosition startPixel
+    )
     {
         // Placeholder implementation
-        return new PixelPosition(
-            startPixel.X,
-            (connection.Target.Height - 1) * TILE_SIZE
-        );
+        return new PixelPosition(startPixel.X, (connection.Target.Height - 1) * TILE_SIZE);
     }
 
     /// <summary>
@@ -318,7 +323,8 @@ public class MinimalReproductionTests
         TestMap source,
         TestMap target,
         ConnectionDirection direction,
-        int connectionPoint)
+        int connectionPoint
+    )
     {
         // Placeholder implementation
         return direction switch
@@ -331,7 +337,7 @@ public class MinimalReproductionTests
                 new TilePosition(connectionPoint, source.Height - 1),
                 new TilePosition(connectionPoint, 0)
             ),
-            _ => throw new ArgumentException("Invalid direction")
+            _ => throw new ArgumentException("Invalid direction"),
         };
     }
 
@@ -342,7 +348,8 @@ public class MinimalReproductionTests
         TilePosition sourceOffset,
         TilePosition targetOffset,
         int sourceHeight,
-        int targetHeight)
+        int targetHeight
+    )
     {
         // The difference should be exactly the sum of the map dimensions minus 1
         var expectedDifference = sourceHeight + targetHeight - 1;

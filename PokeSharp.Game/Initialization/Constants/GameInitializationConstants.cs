@@ -41,4 +41,3 @@ public static class GameInitializationConstants
     /// </summary>
     public const string DefaultWindowTitle = "PokeSharp - Week 1 Demo";
 }
-

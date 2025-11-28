@@ -1,8 +1,6 @@
 using Microsoft.Extensions.Logging;
-using PokeSharp.Engine.Rendering.Systems;
 using PokeSharp.Engine.Scenes;
 using PokeSharp.Game.Systems;
-using PokeSharp.Game.Initialization.Pipeline;
 
 namespace PokeSharp.Game.Initialization.Pipeline.Steps;
 
@@ -29,14 +27,18 @@ public class LoadSpriteTexturesStep : InitializationStepBase
     )
     {
         if (context.GameInitializer == null)
+        {
             throw new InvalidOperationException(
                 "GameInitializer must be initialized before loading sprite textures"
             );
+        }
 
-        var logger = context.LoggerFactory.CreateLogger<LoadSpriteTexturesStep>();
+        ILogger<LoadSpriteTexturesStep> logger =
+            context.LoggerFactory.CreateLogger<LoadSpriteTexturesStep>();
 
         // Create sprite texture loader for lazy loading
-        var spriteTextureLogger = context.LoggerFactory.CreateLogger<SpriteTextureLoader>();
+        ILogger<SpriteTextureLoader> spriteTextureLogger =
+            context.LoggerFactory.CreateLogger<SpriteTextureLoader>();
         var spriteTextureLoader = new SpriteTextureLoader(
             context.SpriteLoader,
             context.GameInitializer.RenderSystem.AssetManager,
@@ -56,4 +58,3 @@ public class LoadSpriteTexturesStep : InitializationStepBase
         return Task.CompletedTask;
     }
 }
-

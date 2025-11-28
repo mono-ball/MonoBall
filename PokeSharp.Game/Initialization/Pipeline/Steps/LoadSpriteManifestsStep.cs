@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 using PokeSharp.Engine.Scenes;
-using PokeSharp.Game.Initialization.Pipeline;
 
 namespace PokeSharp.Game.Initialization.Pipeline.Steps;
 
@@ -26,9 +25,9 @@ public class LoadSpriteManifestsStep : InitializationStepBase
         CancellationToken cancellationToken
     )
     {
-        var logger = context.LoggerFactory.CreateLogger<LoadSpriteManifestsStep>();
+        ILogger<LoadSpriteManifestsStep> logger =
+            context.LoggerFactory.CreateLogger<LoadSpriteManifestsStep>();
         await context.SpriteLoader.LoadAllSpritesAsync();
         logger.LogInformation("Sprite manifests loaded");
     }
 }
-

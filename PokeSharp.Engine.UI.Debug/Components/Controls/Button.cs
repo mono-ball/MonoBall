@@ -1,11 +1,12 @@
 using Microsoft.Xna.Framework;
 using PokeSharp.Engine.UI.Debug.Components.Base;
 using PokeSharp.Engine.UI.Debug.Core;
+using PokeSharp.Engine.UI.Debug.Input;
 
 namespace PokeSharp.Engine.UI.Debug.Components.Controls;
 
 /// <summary>
-/// A clickable button component.
+///     A clickable button component.
 /// </summary>
 public class Button : UIComponent
 {
@@ -15,7 +16,10 @@ public class Button : UIComponent
     /// <summary>Callback when button is clicked</summary>
     public Action? OnClick { get; set; }
 
-    protected override bool IsInteractive() => Enabled;
+    protected override bool IsInteractive()
+    {
+        return Enabled;
+    }
 
     protected override void OnRender(UIContext context)
     {
@@ -47,21 +51,19 @@ public class Button : UIComponent
         // Draw text (centered)
         if (!string.IsNullOrEmpty(Text))
         {
-            var textSize = context.Renderer.MeasureText(Text);
-            float textX = Rect.X + (Rect.Width - textSize.X) / 2;
-            float textY = Rect.Y + (Rect.Height - textSize.Y) / 2;
+            Vector2 textSize = context.Renderer.MeasureText(Text);
+            float textX = Rect.X + ((Rect.Width - textSize.X) / 2);
+            float textY = Rect.Y + ((Rect.Height - textSize.Y) / 2);
 
-            var textColor = Enabled ? Theme.ButtonText : Theme.TextDim;
+            Color textColor = Enabled ? Theme.ButtonText : Theme.TextDim;
             context.Renderer.DrawText(Text, textX, textY, textColor);
         }
 
         // Handle click
         // Handle click on mouse RELEASE (standard click behavior)
-        if (Enabled && IsHovered() && context.Input.IsMouseButtonReleased(Input.MouseButton.Left))
+        if (Enabled && IsHovered() && context.Input.IsMouseButtonReleased(MouseButton.Left))
         {
             OnClick?.Invoke();
         }
     }
 }
-
-

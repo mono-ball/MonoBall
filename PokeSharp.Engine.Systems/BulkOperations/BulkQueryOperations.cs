@@ -225,11 +225,15 @@ public sealed class BulkQueryOperations
     /// </example>
     public int DestroyMatching(in QueryDescription query)
     {
-        var entitiesToDestroy = CollectEntities(query);
+        List<Entity> entitiesToDestroy = CollectEntities(query);
 
-        foreach (var entity in entitiesToDestroy)
+        foreach (Entity entity in entitiesToDestroy)
+        {
             if (_world.IsAlive(entity))
+            {
                 _world.Destroy(entity);
+            }
+        }
 
         return entitiesToDestroy.Count;
     }
@@ -253,7 +257,7 @@ public sealed class BulkQueryOperations
     public int AddComponentToMatching<T>(in QueryDescription query, T component)
         where T : struct
     {
-        var count = 0;
+        int count = 0;
 
         _world.Query(
             in query,
@@ -286,7 +290,7 @@ public sealed class BulkQueryOperations
     public int RemoveComponentFromMatching<T>(in QueryDescription query)
         where T : struct
     {
-        var count = 0;
+        int count = 0;
 
         _world.Query(
             in query,
@@ -317,7 +321,7 @@ public sealed class BulkQueryOperations
     /// </example>
     public int CountMatching(in QueryDescription query)
     {
-        var count = 0;
+        int count = 0;
         _world.Query(
             in query,
             entity =>
@@ -345,7 +349,7 @@ public sealed class BulkQueryOperations
     /// </example>
     public bool HasMatching(in QueryDescription query)
     {
-        var hasAny = false;
+        bool hasAny = false;
 
         _world.Query(
             in query,

@@ -1,3 +1,4 @@
+using System.Reflection;
 using Arch.Core;
 
 namespace PokeSharp.Engine.Systems.BulkOperations;
@@ -132,21 +133,25 @@ public sealed class BatchEntityBuilder
     {
         var entities = new Entity[_count];
 
-        for (var i = 0; i < _count; i++)
+        for (int i = 0; i < _count; i++)
         {
             // Create entity
-            var entity = _world.Create();
+            Entity entity = _world.Create();
 
             // Add shared components (same for all entities)
-            foreach (var (type, component) in _sharedComponents)
+            foreach ((Type type, object component) in _sharedComponents)
+            {
                 AddComponentDynamic(entity, type, component);
+            }
 
             // Add factory-generated components (unique per entity)
-            foreach (var (type, factory) in _componentFactories)
+            foreach ((Type type, Delegate factory) in _componentFactories)
             {
-                var component = factory.DynamicInvoke(i);
+                object? component = factory.DynamicInvoke(i);
                 if (component != null)
+                {
                     AddComponentDynamic(entity, type, component);
+                }
             }
 
             entities[i] = entity;
@@ -178,10 +183,12 @@ public sealed class BatchEntityBuilder
     {
         ArgumentNullException.ThrowIfNull(configure);
 
-        var entities = Build();
+        Entity[] entities = Build();
 
-        for (var i = 0; i < entities.Length; i++)
+        for (int i = 0; i < entities.Length; i++)
+        {
             configure(entities[i], i);
+        }
 
         return entities;
     }
@@ -205,21 +212,23 @@ public sealed class BatchEntityBuilder
     /// </summary>
     private void AddComponentDynamic(Entity entity, Type componentType, object component)
     {
-        var addMethod = typeof(Entity)
+        MethodInfo? addMethod = typeof(Entity)
             .GetMethods()
             .Where(m => m.Name == "Add" && m.IsGenericMethod)
             .FirstOrDefault(m =>
             {
-                var parameters = m.GetParameters();
+                ParameterInfo[] parameters = m.GetParameters();
                 return parameters.Length == 1 && parameters[0].ParameterType.IsByRef;
             });
 
         if (addMethod == null)
+        {
             throw new InvalidOperationException(
                 $"Could not find Entity.Add<T> method for component type {componentType.Name}"
             );
+        }
 
-        var genericAdd = addMethod.MakeGenericMethod(componentType);
+        MethodInfo genericAdd = addMethod.MakeGenericMethod(componentType);
         genericAdd.Invoke(entity, [component]);
     }
 }

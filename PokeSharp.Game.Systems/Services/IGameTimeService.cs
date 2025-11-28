@@ -8,7 +8,7 @@ namespace PokeSharp.Game.Systems.Services;
 ///     Supports time scaling for debug purposes (slow-mo, pause, step).
 /// </summary>
 /// <remarks>
-///     Extends <see cref="ITimeControl"/> to provide the standard time control interface
+///     Extends <see cref="ITimeControl" /> to provide the standard time control interface
 ///     that can be used by engine-level debug tools without layer violations.
 /// </remarks>
 public interface IGameTimeService : ITimeControl
@@ -25,13 +25,13 @@ public interface IGameTimeService : ITimeControl
 
     /// <summary>
     ///     Gets the time since the last frame in seconds (delta time).
-    ///     This value is scaled by <see cref="ITimeControl.TimeScale"/>.
+    ///     This value is scaled by <see cref="ITimeControl.TimeScale" />.
     /// </summary>
     float DeltaTime { get; }
 
     /// <summary>
     ///     Gets the unscaled time since the last frame in seconds.
-    ///     Not affected by <see cref="ITimeControl.TimeScale"/> - useful for UI animations.
+    ///     Not affected by <see cref="ITimeControl.TimeScale" /> - useful for UI animations.
     /// </summary>
     float UnscaledDeltaTime { get; }
 

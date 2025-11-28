@@ -21,15 +21,23 @@ public class SystemPerformanceTrackerSortingTests
         var tracker = new SystemPerformanceTracker();
 
         // Track systems with different update counts
-        for (var i = 0; i < 10; i++)
+        for (int i = 0; i < 10; i++)
+        {
             tracker.TrackSystemPerformance("SystemA", 5.0);
-        for (var i = 0; i < 5; i++)
+        }
+
+        for (int i = 0; i < 5; i++)
+        {
             tracker.TrackSystemPerformance("SystemB", 3.0);
-        for (var i = 0; i < 15; i++)
+        }
+
+        for (int i = 0; i < 15; i++)
+        {
             tracker.TrackSystemPerformance("SystemC", 4.0);
+        }
 
         // Act
-        var allMetrics = tracker.GetAllMetrics();
+        IReadOnlyDictionary<string, SystemMetrics> allMetrics = tracker.GetAllMetrics();
         var sorted = allMetrics.OrderByDescending(x => x.Value.UpdateCount).ToList();
 
         // Assert - Should be sorted by UpdateCount (C=15, A=10, B=5)
@@ -52,24 +60,26 @@ public class SystemPerformanceTrackerSortingTests
         // Arrange
         var tracker = new SystemPerformanceTracker();
 
-        for (var i = 0; i < 20; i++)
+        for (int i = 0; i < 20; i++)
+        {
             tracker.TrackSystemPerformance($"System{i}", i * 1.5);
+        }
 
         GC.Collect();
         GC.WaitForPendingFinalizers();
         GC.Collect();
 
-        var memoryBefore = GC.GetTotalMemory(false);
+        long memoryBefore = GC.GetTotalMemory(false);
 
         // Act - Get metrics multiple times
-        for (var i = 0; i < 100; i++)
+        for (int i = 0; i < 100; i++)
         {
-            var metrics = tracker.GetAllMetrics();
+            IReadOnlyDictionary<string, SystemMetrics> metrics = tracker.GetAllMetrics();
             var sorted = metrics.OrderByDescending(x => x.Value.UpdateCount).ToList();
         }
 
-        var memoryAfter = GC.GetTotalMemory(false);
-        var allocatedBytes = memoryAfter - memoryBefore;
+        long memoryAfter = GC.GetTotalMemory(false);
+        long allocatedBytes = memoryAfter - memoryBefore;
 
         // Assert - Should allocate minimal memory
         // Note: Some allocation is expected for dictionary, but LINQ overhead should be minimal
@@ -83,7 +93,7 @@ public class SystemPerformanceTrackerSortingTests
         var tracker = new SystemPerformanceTracker();
 
         // Act
-        var allMetrics = tracker.GetAllMetrics();
+        IReadOnlyDictionary<string, SystemMetrics> allMetrics = tracker.GetAllMetrics();
 
         // Assert
         allMetrics.Should().BeEmpty();
@@ -97,7 +107,7 @@ public class SystemPerformanceTrackerSortingTests
         tracker.TrackSystemPerformance("OnlySystem", 5.0);
 
         // Act
-        var allMetrics = tracker.GetAllMetrics();
+        IReadOnlyDictionary<string, SystemMetrics> allMetrics = tracker.GetAllMetrics();
 
         // Assert
         allMetrics.Should().HaveCount(1);
@@ -116,11 +126,13 @@ public class SystemPerformanceTrackerSortingTests
         tracker.TrackSystemPerformance("Medium", 5.0);
 
         // More updates to change ordering
-        for (var i = 0; i < 10; i++)
+        for (int i = 0; i < 10; i++)
+        {
             tracker.TrackSystemPerformance("Fast", 1.0);
+        }
 
         // Act
-        var allMetrics = tracker.GetAllMetrics();
+        IReadOnlyDictionary<string, SystemMetrics> allMetrics = tracker.GetAllMetrics();
         var sorted = allMetrics.OrderByDescending(x => x.Value.UpdateCount).ToList();
 
         // Assert
@@ -137,24 +149,26 @@ public class SystemPerformanceTrackerSortingTests
         var tracker = new SystemPerformanceTracker();
 
         // Create realistic scenario with multiple systems
-        for (var i = 0; i < 10; i++)
-        for (var j = 0; j < i * 5; j++)
+        for (int i = 0; i < 10; i++)
+        for (int j = 0; j < i * 5; j++)
+        {
             tracker.TrackSystemPerformance($"System{i}", i * 2.5);
+        }
 
         GC.Collect();
         GC.WaitForPendingFinalizers();
         GC.Collect();
 
-        var memoryBefore = GC.GetTotalMemory(false);
+        long memoryBefore = GC.GetTotalMemory(false);
 
         // Act - Generate report multiple times
-        for (var i = 0; i < 10; i++)
+        for (int i = 0; i < 10; i++)
         {
-            var report = tracker.GenerateReport();
+            string report = tracker.GenerateReport();
         }
 
-        var memoryAfter = GC.GetTotalMemory(false);
-        var allocatedKB = (memoryAfter - memoryBefore) / 1024;
+        long memoryAfter = GC.GetTotalMemory(false);
+        long allocatedKB = (memoryAfter - memoryBefore) / 1024;
 
         // Assert - Should allocate reasonably for string building
         // Note: String building with StringBuilder may allocate slightly more on first iterations
@@ -169,14 +183,16 @@ public class SystemPerformanceTrackerSortingTests
 
         // Act - Update from multiple threads
         var tasks = new List<Task>();
-        for (var i = 0; i < 10; i++)
+        for (int i = 0; i < 10; i++)
         {
-            var systemName = $"System{i}";
+            string systemName = $"System{i}";
             tasks.Add(
                 Task.Run(() =>
                 {
-                    for (var j = 0; j < 100; j++)
+                    for (int j = 0; j < 100; j++)
+                    {
                         tracker.TrackSystemPerformance(systemName, j * 1.5);
+                    }
                 })
             );
         }
@@ -184,11 +200,13 @@ public class SystemPerformanceTrackerSortingTests
         await Task.WhenAll(tasks);
 
         // Assert - Should have 10 systems with 100 updates each
-        var allMetrics = tracker.GetAllMetrics();
+        IReadOnlyDictionary<string, SystemMetrics> allMetrics = tracker.GetAllMetrics();
         allMetrics.Should().HaveCount(10);
 
-        foreach (var metric in allMetrics.Values)
+        foreach (SystemMetrics metric in allMetrics.Values)
+        {
             metric.UpdateCount.Should().Be(100);
+        }
     }
 
     [Fact]
@@ -205,7 +223,7 @@ public class SystemPerformanceTrackerSortingTests
         tracker.TrackSystemPerformance("TestSystem", 8.0);
 
         // Assert
-        var metrics = tracker.GetMetrics("TestSystem");
+        SystemMetrics? metrics = tracker.GetMetrics("TestSystem");
         metrics.Should().NotBeNull();
         metrics!.MaxUpdateMs.Should().Be(20.0);
         metrics.UpdateCount.Should().Be(5);
@@ -223,7 +241,7 @@ public class SystemPerformanceTrackerSortingTests
         tracker.TrackSystemPerformance("TestSystem", 30.0);
 
         // Assert
-        var metrics = tracker.GetMetrics("TestSystem");
+        SystemMetrics? metrics = tracker.GetMetrics("TestSystem");
         metrics.Should().NotBeNull();
         metrics!.TotalTimeMs.Should().Be(60.0);
         metrics.UpdateCount.Should().Be(3);
@@ -241,13 +259,13 @@ public class SystemPerformanceTrackerSortingTests
         tracker.IncrementFrame();
         tracker.IncrementFrame();
 
-        var frameCountBefore = tracker.FrameCount;
+        ulong frameCountBefore = tracker.FrameCount;
 
         // Act
         tracker.ResetMetrics();
 
         // Assert
-        var allMetrics = tracker.GetAllMetrics();
+        IReadOnlyDictionary<string, SystemMetrics> allMetrics = tracker.GetAllMetrics();
         allMetrics.Should().BeEmpty();
         tracker.FrameCount.Should().Be(frameCountBefore, "frame count should not be reset");
     }
@@ -267,7 +285,7 @@ public class SystemPerformanceTrackerSortingTests
         var tracker = new SystemPerformanceTracker(mockLogger.Object, config);
 
         // Act - Advance frames and trigger slow system
-        for (var i = 0; i < 15; i++)
+        for (int i = 0; i < 15; i++)
         {
             tracker.IncrementFrame();
             tracker.TrackSystemPerformance("SlowSystem", 5.0); // Exceeds threshold
@@ -298,7 +316,7 @@ public class SystemPerformanceTrackerSortingTests
         tracker.TrackSystemPerformance("Physics", 5.5);
 
         // Act
-        var report = tracker.GenerateReport();
+        string report = tracker.GenerateReport();
 
         // Assert
         report.Should().Contain("Movement");
@@ -316,14 +334,16 @@ public class SystemPerformanceTrackerSortingTests
 
         // Arrange - Create many systems
         var tracker = new SystemPerformanceTracker();
-        for (var i = 0; i < 100; i++)
+        for (int i = 0; i < 100; i++)
+        {
             tracker.TrackSystemPerformance($"System{i:D3}", i * 1.5);
+        }
 
         // Act - Measure sorting time
         var sw = Stopwatch.StartNew();
-        for (var i = 0; i < 1000; i++)
+        for (int i = 0; i < 1000; i++)
         {
-            var metrics = tracker.GetAllMetrics();
+            IReadOnlyDictionary<string, SystemMetrics> metrics = tracker.GetAllMetrics();
             var sorted = metrics.OrderByDescending(x => x.Value.UpdateCount).ToList();
         }
 
@@ -348,25 +368,25 @@ public class SystemPerformanceTrackerIntegrationTests
         var random = new Random(42);
 
         // Act - Simulate 1000 frames of 5 systems
-        for (var frame = 0; frame < 1000; frame++)
+        for (int frame = 0; frame < 1000; frame++)
         {
             tracker.IncrementFrame();
 
             // Simulate realistic system times with variance
-            tracker.TrackSystemPerformance("InputSystem", 0.5 + random.NextDouble() * 0.5);
-            tracker.TrackSystemPerformance("MovementSystem", 2.0 + random.NextDouble() * 1.0);
-            tracker.TrackSystemPerformance("PhysicsSystem", 3.0 + random.NextDouble() * 2.0);
-            tracker.TrackSystemPerformance("RenderSystem", 8.0 + random.NextDouble() * 3.0);
-            tracker.TrackSystemPerformance("AudioSystem", 1.0 + random.NextDouble() * 0.5);
+            tracker.TrackSystemPerformance("InputSystem", 0.5 + (random.NextDouble() * 0.5));
+            tracker.TrackSystemPerformance("MovementSystem", 2.0 + (random.NextDouble() * 1.0));
+            tracker.TrackSystemPerformance("PhysicsSystem", 3.0 + (random.NextDouble() * 2.0));
+            tracker.TrackSystemPerformance("RenderSystem", 8.0 + (random.NextDouble() * 3.0));
+            tracker.TrackSystemPerformance("AudioSystem", 1.0 + (random.NextDouble() * 0.5));
         }
 
         // Assert
         tracker.FrameCount.Should().Be(1000);
 
-        var allMetrics = tracker.GetAllMetrics();
+        IReadOnlyDictionary<string, SystemMetrics> allMetrics = tracker.GetAllMetrics();
         allMetrics.Should().HaveCount(5);
 
-        foreach (var metric in allMetrics.Values)
+        foreach (SystemMetrics metric in allMetrics.Values)
         {
             metric.UpdateCount.Should().Be(1000);
             metric.AverageUpdateMs.Should().BeGreaterThan(0);
@@ -374,7 +394,7 @@ public class SystemPerformanceTrackerIntegrationTests
         }
 
         // Verify RenderSystem is slowest on average
-        var renderMetrics = tracker.GetMetrics("RenderSystem");
+        SystemMetrics? renderMetrics = tracker.GetMetrics("RenderSystem");
         renderMetrics.Should().NotBeNull();
         renderMetrics!.AverageUpdateMs.Should().BeGreaterThan(8.0);
     }
@@ -386,7 +406,7 @@ public class SystemPerformanceTrackerIntegrationTests
         var tracker = new SystemPerformanceTracker();
 
         // Simulate realistic frame
-        for (var i = 0; i < 60; i++)
+        for (int i = 0; i < 60; i++)
         {
             tracker.IncrementFrame();
             tracker.TrackSystemPerformance("FastSystem", 0.5);
@@ -395,7 +415,7 @@ public class SystemPerformanceTrackerIntegrationTests
         }
 
         // Act
-        var report = tracker.GenerateReport();
+        string report = tracker.GenerateReport();
 
         // Assert - Report should contain key information
         report.Should().Contain("FastSystem");
@@ -405,7 +425,7 @@ public class SystemPerformanceTrackerIntegrationTests
         report.Should().Contain("Max");
 
         // Verify readability
-        var lines = report.Split('\n');
+        string[] lines = report.Split('\n');
         lines.Should().HaveCountGreaterThan(5, "report should be multi-line");
     }
 }

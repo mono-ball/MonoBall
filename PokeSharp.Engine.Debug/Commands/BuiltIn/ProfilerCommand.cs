@@ -1,19 +1,21 @@
-using System.Threading.Tasks;
+using Microsoft.Xna.Framework;
 using PokeSharp.Engine.UI.Debug.Core;
 using PokeSharp.Engine.UI.Debug.Interfaces;
 
 namespace PokeSharp.Engine.Debug.Commands.BuiltIn;
 
 /// <summary>
-/// Command to control the system profiler panel.
-/// Also accessible via alias "perf".
+///     Command to control the system profiler panel.
+///     Also accessible via alias "perf".
 /// </summary>
 [ConsoleCommand("profiler", "Control system profiler display")]
 public class ProfilerCommand : IConsoleCommand
 {
     public string Name => "profiler";
     public string Description => "Control system profiler display and view system metrics";
-    public string Usage => @"profiler                   - Show profiler statistics
+
+    public string Usage =>
+        @"profiler                   - Show profiler statistics
 profiler show              - Switch to Profiler tab
 profiler sort <mode>       - Set sort mode (time, avg, max, name)
 profiler active <on|off>   - Show only active systems
@@ -25,8 +27,8 @@ Keyboard: Ctrl+6 to open Profiler tab directly";
 
     public Task ExecuteAsync(IConsoleContext context, string[] args)
     {
-        var theme = context.Theme;
-        var profiler = context.Profiler;
+        UITheme theme = context.Theme;
+        IProfilerOperations? profiler = context.Profiler;
 
         // Check if profiler is available
         if (profiler == null)
@@ -35,7 +37,7 @@ Keyboard: Ctrl+6 to open Profiler tab directly";
             return Task.CompletedTask;
         }
 
-        var subCommand = args.Length > 0 ? args[0].ToLower() : "";
+        string subCommand = args.Length > 0 ? args[0].ToLower() : "";
 
         switch (subCommand)
         {
@@ -79,9 +81,13 @@ Keyboard: Ctrl+6 to open Profiler tab directly";
         return Task.CompletedTask;
     }
 
-    private static void HandleSort(IConsoleContext context, string[] args, IProfilerOperations profiler)
+    private static void HandleSort(
+        IConsoleContext context,
+        string[] args,
+        IProfilerOperations profiler
+    )
     {
-        var theme = context.Theme;
+        UITheme theme = context.Theme;
 
         if (args.Length < 2)
         {
@@ -90,14 +96,14 @@ Keyboard: Ctrl+6 to open Profiler tab directly";
             return;
         }
 
-        var modeStr = args[1].ToLower();
+        string modeStr = args[1].ToLower();
         ProfilerSortMode? mode = modeStr switch
         {
             "time" or "exec" or "last" => ProfilerSortMode.ByExecutionTime,
             "avg" or "average" => ProfilerSortMode.ByAverageTime,
             "max" or "peak" => ProfilerSortMode.ByMaxTime,
             "name" or "alpha" => ProfilerSortMode.ByName,
-            _ => null
+            _ => null,
         };
 
         if (mode == null)
@@ -111,23 +117,27 @@ Keyboard: Ctrl+6 to open Profiler tab directly";
         context.WriteLine($"Sort mode set to: {mode.Value}", theme.Success);
     }
 
-    private static void HandleActive(IConsoleContext context, string[] args, IProfilerOperations profiler)
+    private static void HandleActive(
+        IConsoleContext context,
+        string[] args,
+        IProfilerOperations profiler
+    )
     {
-        var theme = context.Theme;
+        UITheme theme = context.Theme;
 
         if (args.Length < 2)
         {
-            var current = profiler.GetShowOnlyActive() ? "on" : "off";
+            string current = profiler.GetShowOnlyActive() ? "on" : "off";
             context.WriteLine($"Show only active systems: {current}", theme.Info);
             return;
         }
 
-        var value = args[1].ToLower();
-        var showActive = value switch
+        string value = args[1].ToLower();
+        bool? showActive = value switch
         {
             "on" or "true" or "1" or "yes" => true,
             "off" or "false" or "0" or "no" => false,
-            _ => (bool?)null
+            _ => null,
         };
 
         if (showActive == null)
@@ -137,12 +147,19 @@ Keyboard: Ctrl+6 to open Profiler tab directly";
         }
 
         profiler.SetShowOnlyActive(showActive.Value);
-        context.WriteLine($"Show only active systems: {(showActive.Value ? "on" : "off")}", theme.Success);
+        context.WriteLine(
+            $"Show only active systems: {(showActive.Value ? "on" : "off")}",
+            theme.Success
+        );
     }
 
-    private static void HandleSystem(IConsoleContext context, string[] args, IProfilerOperations profiler)
+    private static void HandleSystem(
+        IConsoleContext context,
+        string[] args,
+        IProfilerOperations profiler
+    )
     {
-        var theme = context.Theme;
+        UITheme theme = context.Theme;
 
         if (args.Length < 2)
         {
@@ -150,8 +167,9 @@ Keyboard: Ctrl+6 to open Profiler tab directly";
             return;
         }
 
-        var systemName = args[1];
-        var metrics = profiler.GetSystemMetrics(systemName);
+        string systemName = args[1];
+        (double LastMs, double AvgMs, double MaxMs, long UpdateCount)? metrics =
+            profiler.GetSystemMetrics(systemName);
 
         if (metrics == null)
         {
@@ -169,18 +187,21 @@ Keyboard: Ctrl+6 to open Profiler tab directly";
 
     private static void HandleList(IConsoleContext context, IProfilerOperations profiler)
     {
-        var theme = context.Theme;
-        var systems = profiler.GetSystemNames();
-        var count = 0;
+        UITheme theme = context.Theme;
+        IEnumerable<string> systems = profiler.GetSystemNames();
+        int count = 0;
 
         context.WriteLine("Tracked Systems:", theme.Info);
-        foreach (var name in systems)
+        foreach (string name in systems)
         {
-            var metrics = profiler.GetSystemMetrics(name);
+            (double LastMs, double AvgMs, double MaxMs, long UpdateCount)? metrics =
+                profiler.GetSystemMetrics(name);
             if (metrics != null)
             {
-                var color = metrics.Value.LastMs > 2.0 ? theme.Warning :
-                           metrics.Value.LastMs > 0.5 ? theme.TextPrimary : theme.TextSecondary;
+                Color color =
+                    metrics.Value.LastMs > 2.0 ? theme.Warning
+                    : metrics.Value.LastMs > 0.5 ? theme.TextPrimary
+                    : theme.TextSecondary;
                 context.WriteLine($"  {name}: {metrics.Value.LastMs:F2}ms", color);
                 count++;
             }
@@ -198,8 +219,8 @@ Keyboard: Ctrl+6 to open Profiler tab directly";
 
     private static void ShowStatistics(IConsoleContext context, IProfilerOperations profiler)
     {
-        var theme = context.Theme;
-        var (systemCount, totalMs, maxMs, slowest) = profiler.GetStatistics();
+        UITheme theme = context.Theme;
+        (int systemCount, float totalMs, float maxMs, string slowest) = profiler.GetStatistics();
 
         context.WriteLine("═══ System Profiler ═══", theme.Info);
 
@@ -208,25 +229,45 @@ Keyboard: Ctrl+6 to open Profiler tab directly";
             context.WriteLine("  No systems tracked yet.", theme.Warning);
             context.WriteLine("", theme.TextPrimary);
             context.WriteLine("Possible reasons:", theme.TextSecondary);
-            context.WriteLine("  • Game hasn't started yet (still on title/menu)", theme.TextSecondary);
+            context.WriteLine(
+                "  • Game hasn't started yet (still on title/menu)",
+                theme.TextSecondary
+            );
             context.WriteLine("  • Systems haven't executed a frame yet", theme.TextSecondary);
-            context.WriteLine("  • 'Active only' filter is hiding systems with 0 updates", theme.TextSecondary);
+            context.WriteLine(
+                "  • 'Active only' filter is hiding systems with 0 updates",
+                theme.TextSecondary
+            );
             context.WriteLine("", theme.TextPrimary);
             context.WriteLine("Try:", theme.TextDim);
-            context.WriteLine("  profiler active off    Show all systems (not just active)", theme.TextDim);
-            context.WriteLine("  profiler show          Open Profiler tab to watch live", theme.TextDim);
+            context.WriteLine(
+                "  profiler active off    Show all systems (not just active)",
+                theme.TextDim
+            );
+            context.WriteLine(
+                "  profiler show          Open Profiler tab to watch live",
+                theme.TextDim
+            );
         }
         else
         {
             context.WriteLine($"  Systems:  {systemCount}", theme.TextPrimary);
             context.WriteLine($"  Total:    {totalMs:F2} ms", theme.TextPrimary);
-            context.WriteLine($"  Max:      {maxMs:F2} ms", maxMs > 2.0 ? theme.Warning : theme.TextPrimary);
+            context.WriteLine(
+                $"  Max:      {maxMs:F2} ms",
+                maxMs > 2.0 ? theme.Warning : theme.TextPrimary
+            );
             context.WriteLine($"  Slowest:  {slowest}", theme.TextSecondary);
             context.WriteLine($"  Sort:     {profiler.GetSortMode()}", theme.TextSecondary);
-            context.WriteLine($"  Active:   {(profiler.GetShowOnlyActive() ? "only" : "all")}", theme.TextSecondary);
+            context.WriteLine(
+                $"  Active:   {(profiler.GetShowOnlyActive() ? "only" : "all")}",
+                theme.TextSecondary
+            );
             context.WriteLine("", theme.TextPrimary);
-            context.WriteLine("Use 'profiler show' or Ctrl+6 to open the Profiler tab.", theme.TextDim);
+            context.WriteLine(
+                "Use 'profiler show' or Ctrl+6 to open the Profiler tab.",
+                theme.TextDim
+            );
         }
     }
 }
-

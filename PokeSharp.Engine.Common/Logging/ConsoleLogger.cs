@@ -18,7 +18,7 @@ public sealed class ConsoleLogger<T> : ILogger<T>
         string? categoryNameOverride = null
     )
     {
-        var fullName = categoryNameOverride ?? typeof(T).Name;
+        string fullName = categoryNameOverride ?? typeof(T).Name;
         // Extract just the class name without namespace (e.g., "SystemManager" from "PokeSharp.Core.Systems.SystemManager")
         _categoryName = fullName.Contains('.') ? fullName.Split('.')[^1] : fullName;
         _minLevel = minLevel;
@@ -44,13 +44,15 @@ public sealed class ConsoleLogger<T> : ILogger<T>
     )
     {
         if (!IsEnabled(logLevel))
+        {
             return;
+        }
 
-        var message = formatter(state, exception);
-        var scope = LogScope.CurrentScope;
-        var timestamp = DateTime.Now;
-        var isMarkup = LogFormatting.ContainsMarkup(message);
-        var logLine = LogFormatting.FormatLogLine(
+        string message = formatter(state, exception);
+        string scope = LogScope.CurrentScope;
+        DateTime timestamp = DateTime.Now;
+        bool isMarkup = LogFormatting.ContainsMarkup(message);
+        string logLine = LogFormatting.FormatLogLine(
             logLevel,
             _categoryName,
             message,
@@ -60,23 +62,35 @@ public sealed class ConsoleLogger<T> : ILogger<T>
         );
 
         if (LogFormatting.SupportsMarkup)
+        {
             AnsiConsole.MarkupLine(logLine);
+        }
         else
+        {
             AnsiConsole.WriteLine(logLine);
+        }
 
         if (exception == null)
+        {
             return;
+        }
 
-        var exceptionLines = LogFormatting.FormatExceptionLines(
+        IEnumerable<string> exceptionLines = LogFormatting.FormatExceptionLines(
             exception,
             logLevel >= LogLevel.Debug
         );
 
-        foreach (var line in exceptionLines)
+        foreach (string line in exceptionLines)
+        {
             if (LogFormatting.SupportsMarkup)
+            {
                 AnsiConsole.MarkupLine(line);
+            }
             else
+            {
                 AnsiConsole.WriteLine(line);
+            }
+        }
     }
 
     /// <summary>
@@ -102,7 +116,9 @@ public sealed class ConsoleLogger<T> : ILogger<T>
             get
             {
                 if (_scopeStack.Value == null || _scopeStack.Value.Count == 0)
+                {
                     return string.Empty;
+                }
 
                 return string.Join(" > ", _scopeStack.Value.Reverse());
             }
@@ -111,7 +127,9 @@ public sealed class ConsoleLogger<T> : ILogger<T>
         public void Dispose()
         {
             if (_scopeStack.Value != null && _scopeStack.Value.Count > 0)
+            {
                 _scopeStack.Value.Pop();
+            }
         }
     }
 }

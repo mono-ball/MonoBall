@@ -20,10 +20,12 @@ public static class TmxParser
     public static TmxDocument Load(string tmxPath)
     {
         if (!File.Exists(tmxPath))
+        {
             throw new FileNotFoundException($"TMX file not found: {tmxPath}");
+        }
 
         var doc = XDocument.Load(tmxPath);
-        var mapElement =
+        XElement mapElement =
             doc.Root
             ?? throw new InvalidOperationException("Invalid TMX file: missing root element");
 
@@ -47,9 +49,9 @@ public static class TmxParser
     private static List<TmxTileset> ParseTilesets(XElement mapElement, string tmxPath)
     {
         var tilesets = new List<TmxTileset>();
-        var mapDirectory = Path.GetDirectoryName(tmxPath) ?? string.Empty;
+        string mapDirectory = Path.GetDirectoryName(tmxPath) ?? string.Empty;
 
-        foreach (var tilesetElement in mapElement.Elements("tileset"))
+        foreach (XElement tilesetElement in mapElement.Elements("tileset"))
         {
             var tileset = new TmxTileset
             {
@@ -62,21 +64,25 @@ public static class TmxParser
             };
 
             // Parse embedded image
-            var imageElement = tilesetElement.Element("image");
+            XElement? imageElement = tilesetElement.Element("image");
             if (imageElement != null)
+            {
                 tileset.Image = new TmxImage
                 {
                     Source = imageElement.Attribute("source")?.Value ?? string.Empty,
                     Width = ParseInt(imageElement, "width"),
                     Height = ParseInt(imageElement, "height"),
                 };
+            }
 
             // Handle external tileset reference (.tsx)
             if (!string.IsNullOrEmpty(tileset.Source))
             {
-                var tsxPath = Path.Combine(mapDirectory, tileset.Source);
+                string tsxPath = Path.Combine(mapDirectory, tileset.Source);
                 if (File.Exists(tsxPath))
+                {
                     LoadExternalTileset(tileset, tsxPath);
+                }
             }
 
             tilesets.Add(tileset);
@@ -88,28 +94,30 @@ public static class TmxParser
     private static void LoadExternalTileset(TmxTileset tileset, string tsxPath)
     {
         var doc = XDocument.Load(tsxPath);
-        var tilesetElement = doc.Root!;
+        XElement tilesetElement = doc.Root!;
 
         tileset.Name = tilesetElement.Attribute("name")?.Value ?? tileset.Name;
         tileset.TileWidth = ParseInt(tilesetElement, "tilewidth", tileset.TileWidth);
         tileset.TileHeight = ParseInt(tilesetElement, "tileheight", tileset.TileHeight);
         tileset.TileCount = ParseInt(tilesetElement, "tilecount", tileset.TileCount);
 
-        var imageElement = tilesetElement.Element("image");
+        XElement? imageElement = tilesetElement.Element("image");
         if (imageElement != null)
+        {
             tileset.Image = new TmxImage
             {
                 Source = imageElement.Attribute("source")?.Value ?? string.Empty,
                 Width = ParseInt(imageElement, "width"),
                 Height = ParseInt(imageElement, "height"),
             };
+        }
     }
 
     private static List<TmxLayer> ParseLayers(XElement mapElement)
     {
         var layers = new List<TmxLayer>();
 
-        foreach (var layerElement in mapElement.Elements("layer"))
+        foreach (XElement layerElement in mapElement.Elements("layer"))
         {
             var layer = new TmxLayer
             {
@@ -122,18 +130,24 @@ public static class TmxParser
             };
 
             // Parse tile data
-            var dataElement = layerElement.Element("data");
+            XElement? dataElement = layerElement.Element("data");
             if (dataElement != null)
             {
-                var encoding = dataElement.Attribute("encoding")?.Value;
+                string? encoding = dataElement.Attribute("encoding")?.Value;
 
                 if (encoding == "csv")
+                {
                     layer.Data = ParseCsvData(dataElement.Value, layer.Width, layer.Height);
+                }
                 else if (encoding == null)
-                    // XML encoding (tile elements)
+                // XML encoding (tile elements)
+                {
                     layer.Data = ParseXmlData(dataElement, layer.Width, layer.Height);
+                }
                 else
+                {
                     throw new NotSupportedException($"Unsupported tile data encoding: {encoding}");
+                }
             }
 
             layers.Add(layer);
@@ -144,35 +158,40 @@ public static class TmxParser
 
     private static uint[] ParseCsvData(string csv, int width, int height)
     {
-        var values = csv.Split(',', StringSplitOptions.RemoveEmptyEntries)
+        uint[] values = csv.Split(',', StringSplitOptions.RemoveEmptyEntries)
             .Select(s => uint.Parse(s.Trim(), CultureInfo.InvariantCulture))
             .ToArray();
 
         if (values.Length != width * height)
+        {
             throw new InvalidOperationException(
                 $"CSV data length mismatch. Expected {width * height}, got {values.Length}"
             );
+        }
 
         return values; // Return flat array (row-major order)
     }
 
     private static uint[] ParseXmlData(XElement dataElement, int width, int height)
     {
-        var data = new uint[width * height];
-        var tiles = dataElement.Elements("tile").ToArray();
+        uint[] data = new uint[width * height];
+        XElement[] tiles = dataElement.Elements("tile").ToArray();
 
-        for (var i = 0; i < tiles.Length && i < data.Length; i++)
+        for (int i = 0; i < tiles.Length && i < data.Length; i++)
         {
-            var gidAttr = tiles[i].Attribute("gid")?.Value ?? "0";
+            string gidAttr = tiles[i].Attribute("gid")?.Value ?? "0";
             if (
                 !uint.TryParse(
                     gidAttr,
                     NumberStyles.Integer,
                     CultureInfo.InvariantCulture,
-                    out var gid
+                    out uint gid
                 )
             )
+            {
                 gid = 0;
+            }
+
             data[i] = gid;
         }
 
@@ -183,7 +202,7 @@ public static class TmxParser
     {
         var objectGroups = new List<TmxObjectGroup>();
 
-        foreach (var groupElement in mapElement.Elements("objectgroup"))
+        foreach (XElement groupElement in mapElement.Elements("objectgroup"))
         {
             var group = new TmxObjectGroup
             {
@@ -202,7 +221,7 @@ public static class TmxParser
     {
         var objects = new List<TmxObject>();
 
-        foreach (var objElement in groupElement.Elements("object"))
+        foreach (XElement objElement in groupElement.Elements("object"))
         {
             var obj = new TmxObject
             {
@@ -225,19 +244,23 @@ public static class TmxParser
     private static Dictionary<string, object> ParseProperties(XElement objectElement)
     {
         var properties = new Dictionary<string, object>();
-        var propertiesElement = objectElement.Element("properties");
+        XElement? propertiesElement = objectElement.Element("properties");
 
         if (propertiesElement == null)
-            return properties;
-
-        foreach (var propElement in propertiesElement.Elements("property"))
         {
-            var name = propElement.Attribute("name")?.Value;
-            var type = propElement.Attribute("type")?.Value ?? "string";
-            var value = propElement.Attribute("value")?.Value ?? string.Empty;
+            return properties;
+        }
+
+        foreach (XElement propElement in propertiesElement.Elements("property"))
+        {
+            string? name = propElement.Attribute("name")?.Value;
+            string type = propElement.Attribute("type")?.Value ?? "string";
+            string value = propElement.Attribute("value")?.Value ?? string.Empty;
 
             if (string.IsNullOrEmpty(name))
+            {
                 continue;
+            }
 
             properties[name] = type switch
             {
@@ -254,18 +277,19 @@ public static class TmxParser
 
     private static int ParseInt(XElement element, string attributeName, int defaultValue = 0)
     {
-        var attr = element.Attribute(attributeName);
+        XAttribute? attr = element.Attribute(attributeName);
         return
-            attr != null && int.TryParse(attr.Value, CultureInfo.InvariantCulture, out var result)
+            attr != null && int.TryParse(attr.Value, CultureInfo.InvariantCulture, out int result)
             ? result
             : defaultValue;
     }
 
     private static float ParseFloat(XElement element, string attributeName, float defaultValue = 0f)
     {
-        var attr = element.Attribute(attributeName);
+        XAttribute? attr = element.Attribute(attributeName);
         return
-            attr != null && float.TryParse(attr.Value, CultureInfo.InvariantCulture, out var result)
+            attr != null
+            && float.TryParse(attr.Value, CultureInfo.InvariantCulture, out float result)
             ? result
             : defaultValue;
     }
@@ -274,7 +298,7 @@ public static class TmxParser
     {
         var imageLayers = new List<TmxImageLayer>();
 
-        foreach (var layerElement in mapElement.Elements("imagelayer"))
+        foreach (XElement layerElement in mapElement.Elements("imagelayer"))
         {
             var imageLayer = new TmxImageLayer
             {
@@ -287,14 +311,16 @@ public static class TmxParser
             };
 
             // Parse image element
-            var imageElement = layerElement.Element("image");
+            XElement? imageElement = layerElement.Element("image");
             if (imageElement != null)
+            {
                 imageLayer.Image = new TmxImage
                 {
                     Source = imageElement.Attribute("source")?.Value ?? string.Empty,
                     Width = ParseInt(imageElement, "width"),
                     Height = ParseInt(imageElement, "height"),
                 };
+            }
 
             imageLayers.Add(imageLayer);
         }

@@ -47,14 +47,18 @@ public class InputBuffer
     {
         // Ignore None direction
         if (direction == Direction.None)
+        {
             return false;
+        }
 
         // Remove expired inputs
         RemoveExpiredInputs(currentTime);
 
         // Check if buffer has space
         if (_buffer.Count >= _maxBufferSize)
+        {
             return false;
+        }
 
         // Add new input
         var command = new InputCommand(direction, currentTime);
@@ -77,7 +81,7 @@ public class InputBuffer
         // Try to consume oldest input
         if (_buffer.Count > 0)
         {
-            var command = _buffer.Dequeue();
+            InputCommand command = _buffer.Dequeue();
             direction = command.Direction;
             return true;
         }
@@ -101,7 +105,7 @@ public class InputBuffer
         // Try to peek at oldest input
         if (_buffer.Count > 0)
         {
-            var command = _buffer.Peek();
+            InputCommand command = _buffer.Peek();
             direction = command.Direction;
             return true;
         }
@@ -126,13 +130,17 @@ public class InputBuffer
     {
         while (_buffer.Count > 0)
         {
-            var command = _buffer.Peek();
-            var age = currentTime - command.Timestamp;
+            InputCommand command = _buffer.Peek();
+            float age = currentTime - command.Timestamp;
 
             if (age > _bufferTimeoutSeconds)
+            {
                 _buffer.Dequeue(); // Remove expired input
+            }
             else
+            {
                 break; // Queue is ordered by time, so we can stop here
+            }
         }
     }
 }

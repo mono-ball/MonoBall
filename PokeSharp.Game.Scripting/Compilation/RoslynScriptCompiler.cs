@@ -5,6 +5,7 @@ using System.Text;
 using Arch.Core;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Emit;
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
 using PokeSharp.Game.Components.Movement;
@@ -76,11 +77,13 @@ public class RoslynScriptCompiler : IScriptCompiler
     public async Task<CompilationResult> CompileScriptAsync(string filePath)
     {
         if (string.IsNullOrWhiteSpace(filePath))
+        {
             return new CompilationResult
             {
                 Success = false,
                 Errors = new List<string> { "File path cannot be null or empty" },
             };
+        }
 
         if (!File.Exists(filePath))
         {
@@ -95,13 +98,13 @@ public class RoslynScriptCompiler : IScriptCompiler
         try
         {
             // Read script content
-            var scriptContent = await File.ReadAllTextAsync(filePath);
+            string scriptContent = await File.ReadAllTextAsync(filePath);
 
             // Compute content hash for caching
-            var contentHash = ComputeContentHash(scriptContent);
+            string contentHash = ComputeContentHash(scriptContent);
 
             // Check cache first
-            if (_compilationCache.TryGetValue(contentHash, out var cached))
+            if (_compilationCache.TryGetValue(contentHash, out CachedCompilation? cached))
             {
                 _logger.LogDebug(
                     "Cache hit for {FileName} (hash: {Hash})",
@@ -124,17 +127,17 @@ public class RoslynScriptCompiler : IScriptCompiler
             );
 
             // Prepare script with global usings
-            var fullScript = PrepareScriptWithUsings(scriptContent);
+            string fullScript = PrepareScriptWithUsings(scriptContent);
 
             // Parse the script
-            var syntaxTree = CSharpSyntaxTree.ParseText(
+            SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(
                 fullScript,
                 CSharpParseOptions.Default.WithLanguageVersion(LanguageVersion.Latest),
                 filePath
             );
 
             // Create compilation
-            var assemblyName =
+            string assemblyName =
                 $"Script_{Path.GetFileNameWithoutExtension(filePath)}_{Guid.NewGuid():N}";
             var compilation = CSharpCompilation.Create(
                 assemblyName,
@@ -145,10 +148,10 @@ public class RoslynScriptCompiler : IScriptCompiler
 
             // Emit to memory stream
             using var ms = new MemoryStream();
-            var emitResult = compilation.Emit(ms);
+            EmitResult emitResult = compilation.Emit(ms);
 
             // Process diagnostics
-            var diagnostics = ProcessDiagnostics(emitResult.Diagnostics);
+            List<CompilationDiagnostic> diagnostics = ProcessDiagnostics(emitResult.Diagnostics);
 
             if (!emitResult.Success)
             {
@@ -175,7 +178,7 @@ public class RoslynScriptCompiler : IScriptCompiler
             var assembly = Assembly.Load(ms.ToArray());
 
             // Find the first public class that inherits from TypeScriptBase
-            var compiledType = FindScriptType(assembly);
+            Type? compiledType = FindScriptType(assembly);
 
             if (compiledType == null)
             {
@@ -237,8 +240,8 @@ public class RoslynScriptCompiler : IScriptCompiler
     /// </summary>
     private static string ComputeContentHash(string content)
     {
-        var bytes = Encoding.UTF8.GetBytes(content);
-        var hash = SHA256.HashData(bytes);
+        byte[] bytes = Encoding.UTF8.GetBytes(content);
+        byte[] hash = SHA256.HashData(bytes);
         return Convert.ToHexString(hash);
     }
 
@@ -250,8 +253,10 @@ public class RoslynScriptCompiler : IScriptCompiler
         var sb = new StringBuilder();
 
         // Add global usings
-        foreach (var globalUsing in _globalUsings)
+        foreach (string globalUsing in _globalUsings)
+        {
             sb.AppendLine($"using {globalUsing};");
+        }
 
         sb.AppendLine(); // Blank line for readability
         sb.Append(scriptContent);
@@ -268,9 +273,9 @@ public class RoslynScriptCompiler : IScriptCompiler
     {
         var diagnostics = new List<CompilationDiagnostic>();
 
-        foreach (var diagnostic in roslynDiagnostics)
+        foreach (Diagnostic diagnostic in roslynDiagnostics)
         {
-            var lineSpan = diagnostic.Location.GetLineSpan();
+            FileLinePositionSpan lineSpan = diagnostic.Location.GetLineSpan();
             diagnostics.Add(
                 new CompilationDiagnostic
                 {
@@ -311,7 +316,7 @@ public class RoslynScriptCompiler : IScriptCompiler
     {
         try
         {
-            var baseType = typeof(TypeScriptBase);
+            Type baseType = typeof(TypeScriptBase);
             return assembly
                 .GetTypes()
                 .FirstOrDefault(t =>
@@ -324,9 +329,14 @@ public class RoslynScriptCompiler : IScriptCompiler
                 ex,
                 "ReflectionTypeLoadException while searching for script type in assembly"
             );
-            foreach (var loaderException in ex.LoaderExceptions)
+            foreach (Exception? loaderException in ex.LoaderExceptions)
+            {
                 if (loaderException != null)
+                {
                     _logger.LogError("Loader exception: {Message}", loaderException.Message);
+                }
+            }
+
             return null;
         }
     }
@@ -350,10 +360,10 @@ public class RoslynScriptCompiler : IScriptCompiler
         };
 
         // Add runtime references for .NET 9
-        var runtimePath = Path.GetDirectoryName(typeof(object).Assembly.Location);
+        string? runtimePath = Path.GetDirectoryName(typeof(object).Assembly.Location);
         if (!string.IsNullOrEmpty(runtimePath))
         {
-            var runtimeRefs = new[]
+            string[] runtimeRefs = new[]
             {
                 "System.Runtime.dll",
                 "System.Collections.dll",
@@ -361,11 +371,13 @@ public class RoslynScriptCompiler : IScriptCompiler
                 "netstandard.dll",
             };
 
-            foreach (var runtimeRef in runtimeRefs)
+            foreach (string runtimeRef in runtimeRefs)
             {
-                var refPath = Path.Combine(runtimePath, runtimeRef);
+                string refPath = Path.Combine(runtimePath, runtimeRef);
                 if (File.Exists(refPath))
+                {
                     references.Add(MetadataReference.CreateFromFile(refPath));
+                }
             }
         }
 

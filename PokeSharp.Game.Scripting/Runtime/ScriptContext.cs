@@ -261,16 +261,20 @@ public sealed class ScriptContext
         where T : struct
     {
         if (!_entity.HasValue)
+        {
             throw new InvalidOperationException(
                 $"Cannot get state of type '{typeof(T).Name}' for global script. "
                     + "Use TryGetState instead, or check IsEntityScript before calling."
             );
+        }
 
         if (!World.Has<T>(_entity.Value))
+        {
             throw new InvalidOperationException(
                 $"Entity {_entity.Value.Id} does not have component '{typeof(T).Name}'. "
                     + "Use HasState or TryGetState to check existence first."
             );
+        }
 
         return ref World.Get<T>(_entity.Value);
     }
@@ -300,10 +304,14 @@ public sealed class ScriptContext
         state = default;
 
         if (!_entity.HasValue)
+        {
             return false;
+        }
 
         if (!World.Has<T>(_entity.Value))
+        {
             return false;
+        }
 
         state = World.Get<T>(_entity.Value);
         return true;
@@ -332,12 +340,14 @@ public sealed class ScriptContext
         where T : struct
     {
         if (!_entity.HasValue)
+        {
             throw new InvalidOperationException(
                 $"Cannot get or add state of type '{typeof(T).Name}' for global script. "
                     + "Use TryGetState or check IsEntityScript before calling."
             );
+        }
 
-        var entity = _entity.Value;
+        Entity entity = _entity.Value;
 
         if (!World.Has<T>(entity))
         {
@@ -398,7 +408,9 @@ public sealed class ScriptContext
         where T : struct
     {
         if (!_entity.HasValue || !World.Has<T>(_entity.Value))
+        {
             return false;
+        }
 
         World.Remove<T>(_entity.Value);
         Logger.LogDebug(

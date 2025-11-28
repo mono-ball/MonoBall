@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework.Input;
 namespace PokeSharp.Engine.UI.Debug.Input;
 
 /// <summary>
-/// Represents a UI input event (mouse, keyboard, etc.).
+///     Represents a UI input event (mouse, keyboard, etc.).
 /// </summary>
 public abstract class InputEvent
 {
@@ -13,7 +13,7 @@ public abstract class InputEvent
 }
 
 /// <summary>
-/// Mouse click event.
+///     Mouse click event.
 /// </summary>
 public class MouseClickEvent : InputEvent
 {
@@ -23,7 +23,7 @@ public class MouseClickEvent : InputEvent
 }
 
 /// <summary>
-/// Mouse move event.
+///     Mouse move event.
 /// </summary>
 public class MouseMoveEvent : InputEvent
 {
@@ -32,7 +32,7 @@ public class MouseMoveEvent : InputEvent
 }
 
 /// <summary>
-/// Mouse scroll event.
+///     Mouse scroll event.
 /// </summary>
 public class MouseScrollEvent : InputEvent
 {
@@ -41,7 +41,7 @@ public class MouseScrollEvent : InputEvent
 }
 
 /// <summary>
-/// Key press event.
+///     Key press event.
 /// </summary>
 public class KeyPressEvent : InputEvent
 {
@@ -52,13 +52,9 @@ public class KeyPressEvent : InputEvent
 }
 
 /// <summary>
-/// Text input event (for typed characters).
+///     Text input event (for typed characters).
 /// </summary>
 public class TextInputEvent : InputEvent
 {
     public char Character { get; init; }
 }
-
-
-
-

@@ -3,13 +3,13 @@ using Microsoft.Xna.Framework.Input;
 namespace PokeSharp.Engine.UI.Debug.Utilities;
 
 /// <summary>
-/// Utility class for keyboard input processing.
-/// Provides shared keyboard-to-character conversion logic.
+///     Utility class for keyboard input processing.
+///     Provides shared keyboard-to-character conversion logic.
 /// </summary>
 public static class KeyboardHelper
 {
     /// <summary>
-    /// Converts a keyboard key to its character representation.
+    ///     Converts a keyboard key to its character representation.
     /// </summary>
     /// <param name="key">The key pressed</param>
     /// <param name="shift">Whether shift is held</param>
@@ -40,9 +40,10 @@ public static class KeyboardHelper
                     Keys.D7 => '&',
                     Keys.D8 => '*',
                     Keys.D9 => '(',
-                    _ => null
+                    _ => null,
                 };
             }
+
             return (char)('0' + (key - Keys.D0));
         }
 
@@ -67,8 +68,7 @@ public static class KeyboardHelper
             Keys.OemCloseBrackets => shift ? '}' : ']',
             Keys.OemPipe => shift ? '|' : '\\',
             Keys.OemTilde => shift ? '~' : '`',
-            _ => null
+            _ => null,
         };
     }
 }
-

@@ -1,60 +1,19 @@
-using System;
 using System.Collections.Concurrent;
-using System.Threading;
 
 namespace PokeSharp.Engine.UI.Debug.Components.Debug;
 
 /// <summary>
-/// Evaluates watch expressions on a background thread to prevent blocking the game loop.
-/// Results are collected on the main thread during the next update cycle.
+///     Evaluates watch expressions on a background thread to prevent blocking the game loop.
+///     Results are collected on the main thread during the next update cycle.
 /// </summary>
 public class WatchEvaluator : IDisposable
 {
-    /// <summary>
-    /// Request to evaluate a watch expression.
-    /// </summary>
-    public class EvaluationRequest
-    {
-        public required string WatchName { get; init; }
-        public required Func<object?> ValueGetter { get; init; }
-        public required Func<bool>? ConditionEvaluator { get; init; }
-        public DateTime QueuedAt { get; init; } = DateTime.Now;
-    }
-
-    /// <summary>
-    /// Result of a watch evaluation.
-    /// </summary>
-    public class EvaluationResult
-    {
-        public required string WatchName { get; init; }
-        public object? Value { get; init; }
-        public bool ConditionMet { get; init; } = true;
-        public bool HasError { get; init; }
-        public string? ErrorMessage { get; init; }
-        public DateTime EvaluatedAt { get; init; } = DateTime.Now;
-        public TimeSpan EvaluationTime { get; init; }
-    }
+    private readonly CancellationTokenSource _cts = new();
 
     private readonly ConcurrentQueue<EvaluationRequest> _requestQueue = new();
     private readonly ConcurrentQueue<EvaluationResult> _resultQueue = new();
-    private readonly Thread _workerThread;
-    private readonly CancellationTokenSource _cts = new();
     private readonly AutoResetEvent _workAvailable = new(false);
-
-    /// <summary>
-    /// Maximum time allowed for a single evaluation before it's considered timed out.
-    /// </summary>
-    public TimeSpan EvaluationTimeout { get; set; } = TimeSpan.FromSeconds(5);
-
-    /// <summary>
-    /// Number of pending evaluations in the queue.
-    /// </summary>
-    public int PendingCount => _requestQueue.Count;
-
-    /// <summary>
-    /// Number of results ready to be collected.
-    /// </summary>
-    public int ResultCount => _resultQueue.Count;
+    private readonly Thread _workerThread;
 
     public WatchEvaluator()
     {
@@ -62,28 +21,58 @@ public class WatchEvaluator : IDisposable
         {
             Name = "WatchEvaluator",
             IsBackground = true,
-            Priority = ThreadPriority.BelowNormal
+            Priority = ThreadPriority.BelowNormal,
         };
         _workerThread.Start();
     }
 
     /// <summary>
-    /// Queues a watch for evaluation on the background thread.
+    ///     Maximum time allowed for a single evaluation before it's considered timed out.
     /// </summary>
-    public void QueueEvaluation(string watchName, Func<object?> valueGetter, Func<bool>? conditionEvaluator = null)
+    public TimeSpan EvaluationTimeout { get; set; } = TimeSpan.FromSeconds(5);
+
+    /// <summary>
+    ///     Number of pending evaluations in the queue.
+    /// </summary>
+    public int PendingCount => _requestQueue.Count;
+
+    /// <summary>
+    ///     Number of results ready to be collected.
+    /// </summary>
+    public int ResultCount => _resultQueue.Count;
+
+    public void Dispose()
     {
-        _requestQueue.Enqueue(new EvaluationRequest
-        {
-            WatchName = watchName,
-            ValueGetter = valueGetter,
-            ConditionEvaluator = conditionEvaluator
-        });
+        _cts.Cancel();
+        _workAvailable.Set(); // Wake up worker thread
+        _workerThread.Join(1000); // Wait up to 1 second for graceful shutdown
+        _cts.Dispose();
+        _workAvailable.Dispose();
+    }
+
+    /// <summary>
+    ///     Queues a watch for evaluation on the background thread.
+    /// </summary>
+    public void QueueEvaluation(
+        string watchName,
+        Func<object?> valueGetter,
+        Func<bool>? conditionEvaluator = null
+    )
+    {
+        _requestQueue.Enqueue(
+            new EvaluationRequest
+            {
+                WatchName = watchName,
+                ValueGetter = valueGetter,
+                ConditionEvaluator = conditionEvaluator,
+            }
+        );
         _workAvailable.Set();
     }
 
     /// <summary>
-    /// Tries to get the next available result. Returns false if no results are ready.
-    /// Call this from the main thread during update.
+    ///     Tries to get the next available result. Returns false if no results are ready.
+    ///     Call this from the main thread during update.
     /// </summary>
     public bool TryGetResult(out EvaluationResult? result)
     {
@@ -91,18 +80,18 @@ public class WatchEvaluator : IDisposable
     }
 
     /// <summary>
-    /// Collects all available results. Call this from the main thread during update.
+    ///     Collects all available results. Call this from the main thread during update.
     /// </summary>
     public IEnumerable<EvaluationResult> CollectResults()
     {
-        while (_resultQueue.TryDequeue(out var result))
+        while (_resultQueue.TryDequeue(out EvaluationResult? result))
         {
             yield return result;
         }
     }
 
     /// <summary>
-    /// Clears all pending evaluations (e.g., when watches are cleared).
+    ///     Clears all pending evaluations (e.g., when watches are cleared).
     /// </summary>
     public void ClearPending()
     {
@@ -119,12 +108,14 @@ public class WatchEvaluator : IDisposable
                 _workAvailable.WaitOne(100); // Check periodically for cancellation
 
                 // Process all queued requests
-                while (_requestQueue.TryDequeue(out var request))
+                while (_requestQueue.TryDequeue(out EvaluationRequest? request))
                 {
                     if (_cts.Token.IsCancellationRequested)
+                    {
                         break;
+                    }
 
-                    var result = EvaluateRequest(request);
+                    EvaluationResult result = EvaluateRequest(request);
                     _resultQueue.Enqueue(result);
                 }
             }
@@ -137,7 +128,7 @@ public class WatchEvaluator : IDisposable
 
     private EvaluationResult EvaluateRequest(EvaluationRequest request)
     {
-        var startTime = DateTime.Now;
+        DateTime startTime = DateTime.Now;
 
         try
         {
@@ -163,7 +154,7 @@ public class WatchEvaluator : IDisposable
                 using var evalCts = CancellationTokenSource.CreateLinkedTokenSource(_cts.Token);
                 evalCts.CancelAfter(EvaluationTimeout);
 
-                var evalTask = System.Threading.Tasks.Task.Run(() => request.ValueGetter(), evalCts.Token);
+                var evalTask = Task.Run(() => request.ValueGetter(), evalCts.Token);
 
                 if (evalTask.Wait(EvaluationTimeout))
                 {
@@ -175,9 +166,10 @@ public class WatchEvaluator : IDisposable
                     {
                         WatchName = request.WatchName,
                         HasError = true,
-                        ErrorMessage = $"Evaluation timed out after {EvaluationTimeout.TotalSeconds:F1}s",
+                        ErrorMessage =
+                            $"Evaluation timed out after {EvaluationTimeout.TotalSeconds:F1}s",
                         EvaluatedAt = DateTime.Now,
-                        EvaluationTime = DateTime.Now - startTime
+                        EvaluationTime = DateTime.Now - startTime,
                     };
                 }
             }
@@ -189,7 +181,7 @@ public class WatchEvaluator : IDisposable
                 ConditionMet = conditionMet,
                 HasError = false,
                 EvaluatedAt = DateTime.Now,
-                EvaluationTime = DateTime.Now - startTime
+                EvaluationTime = DateTime.Now - startTime,
             };
         }
         catch (Exception ex)
@@ -200,18 +192,33 @@ public class WatchEvaluator : IDisposable
                 HasError = true,
                 ErrorMessage = ex.InnerException?.Message ?? ex.Message,
                 EvaluatedAt = DateTime.Now,
-                EvaluationTime = DateTime.Now - startTime
+                EvaluationTime = DateTime.Now - startTime,
             };
         }
     }
 
-    public void Dispose()
+    /// <summary>
+    ///     Request to evaluate a watch expression.
+    /// </summary>
+    public class EvaluationRequest
     {
-        _cts.Cancel();
-        _workAvailable.Set(); // Wake up worker thread
-        _workerThread.Join(1000); // Wait up to 1 second for graceful shutdown
-        _cts.Dispose();
-        _workAvailable.Dispose();
+        public required string WatchName { get; init; }
+        public required Func<object?> ValueGetter { get; init; }
+        public required Func<bool>? ConditionEvaluator { get; init; }
+        public DateTime QueuedAt { get; init; } = DateTime.Now;
+    }
+
+    /// <summary>
+    ///     Result of a watch evaluation.
+    /// </summary>
+    public class EvaluationResult
+    {
+        public required string WatchName { get; init; }
+        public object? Value { get; init; }
+        public bool ConditionMet { get; init; } = true;
+        public bool HasError { get; init; }
+        public string? ErrorMessage { get; init; }
+        public DateTime EvaluatedAt { get; init; } = DateTime.Now;
+        public TimeSpan EvaluationTime { get; init; }
     }
 }
-

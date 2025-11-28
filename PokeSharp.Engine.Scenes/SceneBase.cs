@@ -1,4 +1,3 @@
-using System;
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
@@ -14,8 +13,8 @@ public abstract class SceneBase : IScene
 {
     private readonly object _lock = new();
     private bool _disposed;
-    private bool _isInitialized;
     private bool _isContentLoaded;
+    private bool _isInitialized;
 
     /// <summary>
     ///     Initializes a new instance of the SceneBase class.
@@ -156,10 +155,14 @@ public abstract class SceneBase : IScene
     public virtual void Initialize()
     {
         if (IsDisposed)
+        {
             throw new ObjectDisposedException(nameof(SceneBase));
+        }
 
         if (IsInitialized)
+        {
             return;
+        }
 
         IsInitialized = true;
         Logger.LogDebug("Scene {SceneType} initialized", GetType().Name);
@@ -171,10 +174,14 @@ public abstract class SceneBase : IScene
     public virtual void LoadContent()
     {
         if (IsDisposed)
+        {
             throw new ObjectDisposedException(nameof(SceneBase));
+        }
 
         if (IsContentLoaded)
+        {
             return;
+        }
 
         IsContentLoaded = true;
         Logger.LogDebug("Scene {SceneType} content loaded", GetType().Name);
@@ -221,7 +228,9 @@ public abstract class SceneBase : IScene
     protected virtual void Dispose(bool disposing)
     {
         if (IsDisposed)
+        {
             return;
+        }
 
         if (disposing)
         {
@@ -241,4 +250,3 @@ public abstract class SceneBase : IScene
         Dispose(false);
     }
 }
-

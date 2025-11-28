@@ -6,35 +6,33 @@ using PokeSharp.Engine.UI.Debug.Layout;
 namespace PokeSharp.Engine.UI.Debug.Core;
 
 /// <summary>
-/// Low-level rendering primitives for the debug UI system.
-/// Handles drawing rectangles, text, and clipping.
+///     Low-level rendering primitives for the debug UI system.
+///     Handles drawing rectangles, text, and clipping.
 /// </summary>
 public class UIRenderer : IDisposable
 {
-    private readonly SpriteBatch _spriteBatch;
-    private readonly GraphicsDevice _graphicsDevice;
-    private readonly Texture2D _pixel;
-    private FontSystem? _fontSystem;
-    private SpriteFontBase? _font;
-    private int _fontSize = 16;
-
     // Font size limits
     public const int MinFontSize = 10;
     public const int MaxFontSize = 32;
     public const int DefaultFontSize = 16;
-    private bool _disposed;
-    private bool _isInBatch; // Track if SpriteBatch.Begin() has been called
+
+    // Static reusable RasterizerState for scissor testing
+    private static readonly RasterizerState _scissorRasterizerState = new()
+    {
+        CullMode = CullMode.None,
+        ScissorTestEnable = true,
+    };
 
     // Clipping stack
     private readonly Stack<Rectangle> _clipStack = new();
+    private readonly GraphicsDevice _graphicsDevice;
+    private readonly Texture2D _pixel;
+    private readonly SpriteBatch _spriteBatch;
     private Rectangle? _currentClipRect;
-
-    // Static reusable RasterizerState for scissor testing
-    private static readonly RasterizerState _scissorRasterizerState = new RasterizerState
-    {
-        CullMode = CullMode.None,
-        ScissorTestEnable = true
-    };
+    private bool _disposed;
+    private SpriteFontBase? _font;
+    private FontSystem? _fontSystem;
+    private bool _isInBatch; // Track if SpriteBatch.Begin() has been called
 
     public UIRenderer(GraphicsDevice graphicsDevice)
     {
@@ -47,54 +45,88 @@ public class UIRenderer : IDisposable
     }
 
     /// <summary>
-    /// Sets the font system to use for text rendering.
+    ///     Gets the current font size.
+    /// </summary>
+    public int FontSize { get; private set; } = 16;
+
+    /// <summary>
+    ///     Gets the current font (throws if not set).
+    /// </summary>
+    public SpriteFontBase Font
+    {
+        get
+        {
+            if (_font == null)
+            {
+                throw new InvalidOperationException("Font not set. Call SetFontSystem first.");
+            }
+
+            return _font;
+        }
+    }
+
+    public void Dispose()
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        _spriteBatch?.Dispose();
+        _pixel?.Dispose();
+
+        _disposed = true;
+        GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    ///     Sets the font system to use for text rendering.
     /// </summary>
     public void SetFontSystem(FontSystem fontSystem, int fontSize = 16)
     {
         _fontSystem = fontSystem ?? throw new ArgumentNullException(nameof(fontSystem));
-        _fontSize = Math.Clamp(fontSize, MinFontSize, MaxFontSize);
-        _font = fontSystem.GetFont(_fontSize);
+        FontSize = Math.Clamp(fontSize, MinFontSize, MaxFontSize);
+        _font = fontSystem.GetFont(FontSize);
         if (_font == null)
         {
-            throw new InvalidOperationException($"GetFont returned NULL for fontSize={_fontSize}");
+            throw new InvalidOperationException($"GetFont returned NULL for fontSize={FontSize}");
         }
     }
 
     /// <summary>
-    /// Gets the current font size.
-    /// </summary>
-    public int FontSize => _fontSize;
-
-    /// <summary>
-    /// Sets the font size. Requires font system to be initialized.
+    ///     Sets the font size. Requires font system to be initialized.
     /// </summary>
     public void SetFontSize(int fontSize)
     {
         if (_fontSystem == null)
-            throw new InvalidOperationException("Font system not initialized. Call SetFontSystem first.");
+        {
+            throw new InvalidOperationException(
+                "Font system not initialized. Call SetFontSystem first."
+            );
+        }
 
-        _fontSize = Math.Clamp(fontSize, MinFontSize, MaxFontSize);
-        _font = _fontSystem.GetFont(_fontSize);
+        FontSize = Math.Clamp(fontSize, MinFontSize, MaxFontSize);
+        _font = _fontSystem.GetFont(FontSize);
     }
 
     /// <summary>
-    /// Increases font size by the specified amount.
+    ///     Increases font size by the specified amount.
     /// </summary>
     public void IncreaseFontSize(int amount = 2)
     {
-        SetFontSize(_fontSize + amount);
+        SetFontSize(FontSize + amount);
     }
 
     /// <summary>
-    /// Decreases font size by the specified amount.
+    ///     Decreases font size by the specified amount.
     /// </summary>
     public void DecreaseFontSize(int amount = 2)
     {
-        SetFontSize(_fontSize - amount);
+        SetFontSize(FontSize - amount);
     }
 
     /// <summary>
-    /// Resets font size to default.
+    ///     Resets font size to default.
     /// </summary>
     public void ResetFontSize()
     {
@@ -102,20 +134,7 @@ public class UIRenderer : IDisposable
     }
 
     /// <summary>
-    /// Gets the current font (throws if not set).
-    /// </summary>
-    public SpriteFontBase Font
-    {
-        get
-        {
-            if (_font == null)
-                throw new InvalidOperationException("Font not set. Call SetFontSystem first.");
-            return _font;
-        }
-    }
-
-    /// <summary>
-    /// Begins a new rendering batch.
+    ///     Begins a new rendering batch.
     /// </summary>
     public void Begin()
     {
@@ -129,13 +148,16 @@ public class UIRenderer : IDisposable
             catch (Exception ex)
             {
                 // Recovery from unbalanced Begin/End - log in DEBUG for diagnostics
-                System.Diagnostics.Debug.WriteLine($"[UIRenderer] SpriteBatch recovery: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine(
+                    $"[UIRenderer] SpriteBatch recovery: {ex.Message}"
+                );
             }
+
             _isInBatch = false;
         }
 
         // Get the appropriate rasterizer state FIRST
-        var rasterState = GetRasterizerState();
+        RasterizerState rasterState = GetRasterizerState();
 
         // Set scissor rectangle if clipping is enabled
         if (_currentClipRect.HasValue)
@@ -148,21 +170,23 @@ public class UIRenderer : IDisposable
         _graphicsDevice.RasterizerState = rasterState;
 
         _spriteBatch.Begin(
-            sortMode: SpriteSortMode.Deferred,
-            blendState: BlendState.AlphaBlend,
-            samplerState: SamplerState.PointClamp,
+            SpriteSortMode.Deferred,
+            BlendState.AlphaBlend,
+            SamplerState.PointClamp,
             rasterizerState: rasterState
         );
         _isInBatch = true;
     }
 
     /// <summary>
-    /// Ends the current rendering batch.
+    ///     Ends the current rendering batch.
     /// </summary>
     public void End()
     {
         if (!_isInBatch)
+        {
             return;
+        }
 
         _spriteBatch.End();
         _isInBatch = false;
@@ -170,8 +194,8 @@ public class UIRenderer : IDisposable
     }
 
     /// <summary>
-    /// Pushes a clipping rectangle onto the stack.
-    /// All subsequent draw calls will be clipped to this rectangle.
+    ///     Pushes a clipping rectangle onto the stack.
+    ///     All subsequent draw calls will be clipped to this rectangle.
     /// </summary>
     public void PushClip(LayoutRect rect)
     {
@@ -184,7 +208,7 @@ public class UIRenderer : IDisposable
         }
 
         // Clamp to viewport bounds to ensure valid scissor rectangle
-        var viewport = _graphicsDevice.Viewport;
+        Viewport viewport = _graphicsDevice.Viewport;
         var viewportRect = new Rectangle(0, 0, viewport.Width, viewport.Height);
         clipRect = Rectangle.Intersect(clipRect, viewportRect);
 
@@ -198,15 +222,15 @@ public class UIRenderer : IDisposable
         if (_isInBatch)
         {
             _spriteBatch.End();
-            var rasterState = GetRasterizerState();
+            RasterizerState rasterState = GetRasterizerState();
 
             // EXPLICITLY set the RasterizerState on the device BEFORE SpriteBatch.Begin
             _graphicsDevice.RasterizerState = rasterState;
 
             _spriteBatch.Begin(
-                sortMode: SpriteSortMode.Deferred,
-                blendState: BlendState.AlphaBlend,
-                samplerState: SamplerState.PointClamp,
+                SpriteSortMode.Deferred,
+                BlendState.AlphaBlend,
+                SamplerState.PointClamp,
                 rasterizerState: rasterState
             );
             // _isInBatch remains true
@@ -214,15 +238,17 @@ public class UIRenderer : IDisposable
     }
 
     /// <summary>
-    /// Pops the top clipping rectangle from the stack.
-    /// Gracefully handles stack imbalance to prevent game crashes.
+    ///     Pops the top clipping rectangle from the stack.
+    ///     Gracefully handles stack imbalance to prevent game crashes.
     /// </summary>
     public void PopClip()
     {
         if (_clipStack.Count == 0)
         {
 #if DEBUG
-            System.Diagnostics.Debug.WriteLine("[UIRenderer] PopClip called with empty stack - ignoring");
+            System.Diagnostics.Debug.WriteLine(
+                "[UIRenderer] PopClip called with empty stack - ignoring"
+            );
 #endif
             return;
         }
@@ -240,15 +266,15 @@ public class UIRenderer : IDisposable
         if (_isInBatch)
         {
             _spriteBatch.End();
-            var rasterState = GetRasterizerState();
+            RasterizerState rasterState = GetRasterizerState();
 
             // EXPLICITLY set the RasterizerState on the device BEFORE SpriteBatch.Begin
             _graphicsDevice.RasterizerState = rasterState;
 
             _spriteBatch.Begin(
-                sortMode: SpriteSortMode.Deferred,
-                blendState: BlendState.AlphaBlend,
-                samplerState: SamplerState.PointClamp,
+                SpriteSortMode.Deferred,
+                BlendState.AlphaBlend,
+                SamplerState.PointClamp,
                 rasterizerState: rasterState
             );
             // _isInBatch remains true
@@ -256,7 +282,7 @@ public class UIRenderer : IDisposable
     }
 
     /// <summary>
-    /// Draws a filled rectangle.
+    ///     Draws a filled rectangle.
     /// </summary>
     public void DrawRectangle(LayoutRect rect, Color color)
     {
@@ -264,7 +290,7 @@ public class UIRenderer : IDisposable
     }
 
     /// <summary>
-    /// Draws a rectangle outline.
+    ///     Draws a rectangle outline.
     /// </summary>
     public void DrawRectangleOutline(LayoutRect rect, Color color, int thickness = 1)
     {
@@ -273,20 +299,30 @@ public class UIRenderer : IDisposable
         // Top
         _spriteBatch.Draw(_pixel, new Rectangle(r.X, r.Y, r.Width, thickness), color);
         // Bottom
-        _spriteBatch.Draw(_pixel, new Rectangle(r.X, r.Bottom - thickness, r.Width, thickness), color);
+        _spriteBatch.Draw(
+            _pixel,
+            new Rectangle(r.X, r.Bottom - thickness, r.Width, thickness),
+            color
+        );
         // Left
         _spriteBatch.Draw(_pixel, new Rectangle(r.X, r.Y, thickness, r.Height), color);
         // Right
-        _spriteBatch.Draw(_pixel, new Rectangle(r.Right - thickness, r.Y, thickness, r.Height), color);
+        _spriteBatch.Draw(
+            _pixel,
+            new Rectangle(r.Right - thickness, r.Y, thickness, r.Height),
+            color
+        );
     }
 
     /// <summary>
-    /// Draws text at the specified position.
+    ///     Draws text at the specified position.
     /// </summary>
     public void DrawText(string text, Vector2 position, Color color)
     {
         if (string.IsNullOrEmpty(text))
+        {
             return;
+        }
 
         if (_font == null)
         {
@@ -298,7 +334,7 @@ public class UIRenderer : IDisposable
     }
 
     /// <summary>
-    /// Draws text at the specified position.
+    ///     Draws text at the specified position.
     /// </summary>
     public void DrawText(string text, float x, float y, Color color)
     {
@@ -306,20 +342,22 @@ public class UIRenderer : IDisposable
     }
 
     /// <summary>
-    /// Measures the size of a text string.
+    ///     Measures the size of a text string.
     /// </summary>
     public Vector2 MeasureText(string text)
     {
         if (string.IsNullOrEmpty(text) || _font == null)
+        {
             return Vector2.Zero;
+        }
 
-        var size = _font.MeasureString(text);
+        Vector2 size = _font.MeasureString(text);
 
         return size;
     }
 
     /// <summary>
-    /// Gets the line height of the current font.
+    ///     Gets the line height of the current font.
     /// </summary>
     public int GetLineHeight()
     {
@@ -329,22 +367,11 @@ public class UIRenderer : IDisposable
     private RasterizerState GetRasterizerState()
     {
         if (!_currentClipRect.HasValue)
+        {
             return RasterizerState.CullNone;
+        }
 
         // Use static shared RasterizerState with scissor test enabled
         return _scissorRasterizerState;
     }
-
-    public void Dispose()
-    {
-        if (_disposed)
-            return;
-
-        _spriteBatch?.Dispose();
-        _pixel?.Dispose();
-
-        _disposed = true;
-        GC.SuppressFinalize(this);
-    }
 }
-

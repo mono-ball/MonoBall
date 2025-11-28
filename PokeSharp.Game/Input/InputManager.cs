@@ -42,7 +42,7 @@ public class InputManager(ILogger<InputManager> logger)
         ElevationRenderSystem? renderSystem = null
     )
     {
-        var currentKeyboardState = Keyboard.GetState();
+        KeyboardState currentKeyboardState = Keyboard.GetState();
 
         HandleZoomControls(world, currentKeyboardState);
         HandleDebugControls(renderSystem, currentKeyboardState);
@@ -57,7 +57,7 @@ public class InputManager(ILogger<InputManager> logger)
     /// </summary>
     private void HandleZoomControls(World world, KeyboardState currentKeyboardState)
     {
-        var query = new QueryDescription().WithAll<Player, Camera>();
+        QueryDescription query = new QueryDescription().WithAll<Player, Camera>();
         world.Query(
             in query,
             (Entity entity, ref Player player, ref Camera camera) =>
@@ -85,14 +85,14 @@ public class InputManager(ILogger<InputManager> logger)
                 // Preset zoom levels
                 if (IsKeyPressed(currentKeyboardState, Keys.D1))
                 {
-                    var gbaZoom = camera.CalculateGbaZoom();
+                    float gbaZoom = camera.CalculateGbaZoom();
                     camera.SetZoomSmooth(gbaZoom);
                     logger.LogZoomChanged("GBA (240x160)", gbaZoom);
                 }
 
                 if (IsKeyPressed(currentKeyboardState, Keys.D2))
                 {
-                    var ndsZoom = camera.CalculateNdsZoom();
+                    float ndsZoom = camera.CalculateNdsZoom();
                     camera.SetZoomSmooth(ndsZoom);
                     logger.LogZoomChanged("NDS (256x192)", ndsZoom);
                 }
@@ -111,7 +111,10 @@ public class InputManager(ILogger<InputManager> logger)
     ///     P key: Toggle detailed rendering profiling
     ///     F3 key: Toggle performance overlay
     /// </summary>
-    private void HandleDebugControls(ElevationRenderSystem? renderSystem, KeyboardState currentKeyboardState)
+    private void HandleDebugControls(
+        ElevationRenderSystem? renderSystem,
+        KeyboardState currentKeyboardState
+    )
     {
         // Toggle detailed rendering profiling with P key
         if (IsKeyPressed(currentKeyboardState, Keys.P))

@@ -4,11 +4,13 @@ using Microsoft.Extensions.Logging;
 namespace PokeSharp.Engine.Debug.Commands;
 
 /// <summary>
-/// Registry that discovers and manages console commands.
+///     Registry that discovers and manages console commands.
 /// </summary>
 public class ConsoleCommandRegistry
 {
-    private readonly Dictionary<string, IConsoleCommand> _commands = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, IConsoleCommand> _commands = new(
+        StringComparer.OrdinalIgnoreCase
+    );
     private readonly ILogger _logger;
 
     public ConsoleCommandRegistry(ILogger logger)
@@ -18,12 +20,12 @@ public class ConsoleCommandRegistry
     }
 
     /// <summary>
-    /// Gets all registered commands.
+    ///     Gets all registered commands.
     /// </summary>
     public IReadOnlyDictionary<string, IConsoleCommand> Commands => _commands;
 
     /// <summary>
-    /// Registers a command instance.
+    ///     Registers a command instance.
     /// </summary>
     public void RegisterCommand(IConsoleCommand command)
     {
@@ -37,7 +39,7 @@ public class ConsoleCommandRegistry
     }
 
     /// <summary>
-    /// Tries to get a command by name.
+    ///     Tries to get a command by name.
     /// </summary>
     public bool TryGetCommand(string name, out IConsoleCommand? command)
     {
@@ -45,16 +47,16 @@ public class ConsoleCommandRegistry
     }
 
     /// <summary>
-    /// Gets a command by name, or null if not found.
+    ///     Gets a command by name, or null if not found.
     /// </summary>
     public IConsoleCommand? GetCommand(string name)
     {
-        _commands.TryGetValue(name, out var command);
+        _commands.TryGetValue(name, out IConsoleCommand? command);
         return command;
     }
 
     /// <summary>
-    /// Gets all registered commands.
+    ///     Gets all registered commands.
     /// </summary>
     public IEnumerable<IConsoleCommand> GetAllCommands()
     {
@@ -62,11 +64,11 @@ public class ConsoleCommandRegistry
     }
 
     /// <summary>
-    /// Executes a command by name with given arguments.
+    ///     Executes a command by name with given arguments.
     /// </summary>
     public async Task<bool> ExecuteAsync(string commandName, string[] args, IConsoleContext context)
     {
-        if (TryGetCommand(commandName, out var command))
+        if (TryGetCommand(commandName, out IConsoleCommand? command))
         {
             try
             {
@@ -85,17 +87,18 @@ public class ConsoleCommandRegistry
     }
 
     /// <summary>
-    /// Automatically discovers and registers commands with [ConsoleCommand] attribute.
+    ///     Automatically discovers and registers commands with [ConsoleCommand] attribute.
     /// </summary>
     private void DiscoverCommands()
     {
-        var commandTypes = Assembly.GetExecutingAssembly()
+        IEnumerable<Type> commandTypes = Assembly
+            .GetExecutingAssembly()
             .GetTypes()
             .Where(t => t.GetCustomAttribute<ConsoleCommandAttribute>() != null)
             .Where(t => typeof(IConsoleCommand).IsAssignableFrom(t))
             .Where(t => !t.IsAbstract && !t.IsInterface);
 
-        foreach (var type in commandTypes)
+        foreach (Type type in commandTypes)
         {
             try
             {
@@ -108,7 +111,9 @@ public class ConsoleCommandRegistry
             }
         }
 
-        _logger.LogInformation("Discovered and registered {Count} console commands", _commands.Count);
+        _logger.LogInformation(
+            "Discovered and registered {Count} console commands",
+            _commands.Count
+        );
     }
 }
-

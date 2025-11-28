@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 using PokeSharp.Engine.Scenes;
-using PokeSharp.Game.Initialization.Pipeline;
 
 namespace PokeSharp.Game.Initialization.Pipeline.Steps;
 
@@ -26,9 +25,9 @@ public class InitializeTemplateCacheStep : InitializationStepBase
         CancellationToken cancellationToken
     )
     {
-        var logger = context.LoggerFactory.CreateLogger<InitializeTemplateCacheStep>();
+        ILogger<InitializeTemplateCacheStep> logger =
+            context.LoggerFactory.CreateLogger<InitializeTemplateCacheStep>();
         await context.TemplateCacheInitializer.InitializeAsync();
         logger.LogInformation("Template cache initialized successfully");
     }
 }
-

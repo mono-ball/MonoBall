@@ -18,15 +18,17 @@ public readonly record struct SpriteId
     public SpriteId(string value)
     {
         if (string.IsNullOrWhiteSpace(value))
+        {
             throw new ArgumentException(
                 "Sprite ID cannot be null, empty, or whitespace.",
                 nameof(value)
             );
+        }
 
         Value = value;
 
         // Parse category and sprite name
-        var parts = value.Split('/', 2);
+        string[] parts = value.Split('/', 2);
         if (parts.Length == 2)
         {
             Category = parts[0];
@@ -86,7 +88,10 @@ public readonly record struct SpriteId
     public static SpriteId? TryCreate(string? value)
     {
         if (string.IsNullOrWhiteSpace(value))
+        {
             return null;
+        }
+
         return new SpriteId(value);
     }
 
@@ -96,15 +101,20 @@ public readonly record struct SpriteId
     public static SpriteId Create(string category, string spriteName)
     {
         if (string.IsNullOrWhiteSpace(category))
+        {
             throw new ArgumentException(
                 "Category cannot be null, empty, or whitespace.",
                 nameof(category)
             );
+        }
+
         if (string.IsNullOrWhiteSpace(spriteName))
+        {
             throw new ArgumentException(
                 "Sprite name cannot be null, empty, or whitespace.",
                 nameof(spriteName)
             );
+        }
 
         return new SpriteId($"{category}/{spriteName}");
     }

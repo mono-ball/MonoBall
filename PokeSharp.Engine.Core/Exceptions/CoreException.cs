@@ -34,7 +34,8 @@ public class EcsException : CoreException
         WithContext("Operation", operation);
     }
 
-    public string Operation => Context.TryGetValue("Operation", out var op) ? op?.ToString() ?? "" : "";
+    public string Operation =>
+        Context.TryGetValue("Operation", out object? op) ? op?.ToString() ?? "" : "";
 
     public override bool IsRecoverable => false; // ECS errors are critical
 
@@ -61,7 +62,8 @@ public class TemplateException : CoreException
         WithContext("TemplateName", templateName);
     }
 
-    public string TemplateName => Context.TryGetValue("TemplateName", out var name) ? name?.ToString() ?? "" : "";
+    public string TemplateName =>
+        Context.TryGetValue("TemplateName", out object? name) ? name?.ToString() ?? "" : "";
 
     public override bool IsRecoverable => true; // Can skip template-based entities
 
@@ -88,7 +90,8 @@ public class SystemManagementException : CoreException
         WithContext("SystemName", systemName);
     }
 
-    public string SystemName => Context.TryGetValue("SystemName", out var name) ? name?.ToString() ?? "" : "";
+    public string SystemName =>
+        Context.TryGetValue("SystemName", out object? name) ? name?.ToString() ?? "" : "";
 
     public override bool IsRecoverable => false; // System failures are critical
 
@@ -109,13 +112,18 @@ public class ComponentRegistrationException : CoreException
         WithContext("ComponentType", componentType);
     }
 
-    public ComponentRegistrationException(string componentType, string message, Exception innerException)
+    public ComponentRegistrationException(
+        string componentType,
+        string message,
+        Exception innerException
+    )
         : base("CORE_COMPONENT_REGISTRATION_ERROR", message, innerException)
     {
         WithContext("ComponentType", componentType);
     }
 
-    public string ComponentType => Context.TryGetValue("ComponentType", out var type) ? type?.ToString() ?? "" : "";
+    public string ComponentType =>
+        Context.TryGetValue("ComponentType", out object? type) ? type?.ToString() ?? "" : "";
 
     public override bool IsRecoverable => false; // Component registration failures are critical
 
@@ -142,7 +150,8 @@ public class EventBusException : CoreException
         WithContext("EventType", eventType);
     }
 
-    public string EventType => Context.TryGetValue("EventType", out var type) ? type?.ToString() ?? "" : "";
+    public string EventType =>
+        Context.TryGetValue("EventType", out object? type) ? type?.ToString() ?? "" : "";
 
     public override bool IsRecoverable => true; // Event failures shouldn't crash the game
 
@@ -169,7 +178,8 @@ public class ModdingException : CoreException
         WithContext("ModName", modName);
     }
 
-    public string ModName => Context.TryGetValue("ModName", out var name) ? name?.ToString() ?? "" : "";
+    public string ModName =>
+        Context.TryGetValue("ModName", out object? name) ? name?.ToString() ?? "" : "";
 
     public override bool IsRecoverable => true; // Can continue without mod
 

@@ -1,20 +1,22 @@
 using Microsoft.Extensions.Logging;
 using PokeSharp.Engine.UI.Debug.Components.Controls;
-using PokeSharp.Engine.UI.Debug.Core;
 using PokeSharp.Engine.UI.Debug.Layout;
 
 namespace PokeSharp.Engine.UI.Debug.Components.Debug;
 
 /// <summary>
-/// Builder for creating LogsPanel with customizable components.
+///     Builder for creating LogsPanel with customizable components.
 /// </summary>
 public class LogsPanelBuilder
 {
+    private LogLevel _filterLevel = LogLevel.Trace;
     private TextBuffer? _logBuffer;
     private int _maxLogs = 5000;
-    private LogLevel _filterLevel = LogLevel.Trace;
 
-    public static LogsPanelBuilder Create() => new();
+    public static LogsPanelBuilder Create()
+    {
+        return new LogsPanelBuilder();
+    }
 
     public LogsPanelBuilder WithLogBuffer(TextBuffer buffer)
     {
@@ -51,10 +53,7 @@ public class LogsPanelBuilder
             // BackgroundColor uses theme fallback - don't set explicitly
             AutoScroll = true,
             MaxLines = _maxLogs,
-            Constraint = new LayoutConstraint
-            {
-                Anchor = Anchor.StretchTop
-            }
+            Constraint = new LayoutConstraint { Anchor = Anchor.StretchTop },
         };
     }
 
@@ -62,10 +61,7 @@ public class LogsPanelBuilder
     {
         return new StatusBar("logs_status")
         {
-            Constraint = new LayoutConstraint
-            {
-                Anchor = Anchor.StretchBottom
-            }
+            Constraint = new LayoutConstraint { Anchor = Anchor.StretchBottom },
         };
     }
 }

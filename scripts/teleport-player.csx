@@ -38,4 +38,3 @@ Print("");
 
 Print("⚠️  No teleport executed. Uncomment a line above to teleport.");
 Print("   Edit this script with your desired coordinates, then reload it.");
-

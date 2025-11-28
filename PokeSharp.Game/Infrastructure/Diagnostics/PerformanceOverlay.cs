@@ -12,21 +12,16 @@ namespace PokeSharp.Game.Infrastructure.Diagnostics;
 /// </summary>
 public class PerformanceOverlay : IDisposable
 {
-    private readonly GraphicsDevice _graphicsDevice;
-    private readonly SpriteBatch _spriteBatch;
     private readonly Texture2D _backgroundTexture;
+    private readonly GraphicsDevice _graphicsDevice;
     private readonly PerformanceMonitor _performanceMonitor;
     private readonly EntityPoolManager? _poolManager;
+    private readonly SpriteBatch _spriteBatch;
     private readonly World _world;
-    private FontSystem? _fontSystem;
-    private SpriteFontBase? _font;
 
     private bool _disposed;
-
-    /// <summary>
-    ///     Whether the overlay is currently visible.
-    /// </summary>
-    public bool IsVisible { get; set; }
+    private SpriteFontBase? _font;
+    private FontSystem? _fontSystem;
 
     /// <summary>
     ///     Creates a new performance overlay.
@@ -35,7 +30,8 @@ public class PerformanceOverlay : IDisposable
         GraphicsDevice graphicsDevice,
         PerformanceMonitor performanceMonitor,
         World world,
-        EntityPoolManager? poolManager = null)
+        EntityPoolManager? poolManager = null
+    )
     {
         _graphicsDevice = graphicsDevice;
         _spriteBatch = new SpriteBatch(graphicsDevice);
@@ -49,6 +45,25 @@ public class PerformanceOverlay : IDisposable
 
         // Try to load system font
         LoadFont();
+    }
+
+    /// <summary>
+    ///     Whether the overlay is currently visible.
+    /// </summary>
+    public bool IsVisible { get; set; }
+
+    public void Dispose()
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        _disposed = true;
+
+        _spriteBatch.Dispose();
+        _backgroundTexture.Dispose();
+        _fontSystem?.Dispose();
     }
 
     private void LoadFont()
@@ -70,10 +85,10 @@ public class PerformanceOverlay : IDisposable
             // Linux
             "/usr/share/fonts/truetype/liberation/LiberationMono-Regular.ttf",
             "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf",
-            "/usr/share/fonts/TTF/DejaVuSansMono.ttf"
+            "/usr/share/fonts/TTF/DejaVuSansMono.ttf",
         ];
 
-        foreach (var path in fontPaths)
+        foreach (string path in fontPaths)
         {
             if (File.Exists(path))
             {
@@ -105,9 +120,11 @@ public class PerformanceOverlay : IDisposable
     public void Draw()
     {
         if (!IsVisible || _font == null)
+        {
             return;
+        }
 
-        var stats = GatherStats();
+        PerformanceStats stats = GatherStats();
         RenderOverlay(stats);
     }
 
@@ -129,7 +146,7 @@ public class PerformanceOverlay : IDisposable
         // Get pool stats if available
         if (_poolManager != null)
         {
-            var poolStats = _poolManager.GetStatistics();
+            AggregatePoolStatistics poolStats = _poolManager.GetStatistics();
             stats.PooledEntities = poolStats.TotalActive;
             stats.AvailablePooled = poolStats.TotalAvailable;
         }
@@ -141,51 +158,69 @@ public class PerformanceOverlay : IDisposable
     {
         const int padding = 8;
         const int lineHeight = 18;
-        var x = padding;
-        var y = padding;
+        int x = padding;
+        int y = padding;
 
         // Build text lines
         var lines = new List<(string text, Color color)>
         {
             ($"FPS: {stats.Fps:F1}", GetFpsColor(stats.Fps)),
-            ($"Frame: {stats.FrameTimeMs:F2}ms (min: {stats.MinFrameTimeMs:F2}, max: {stats.MaxFrameTimeMs:F2})", Color.White),
+            (
+                $"Frame: {stats.FrameTimeMs:F2}ms (min: {stats.MinFrameTimeMs:F2}, max: {stats.MaxFrameTimeMs:F2})",
+                Color.White
+            ),
             ($"Memory: {stats.MemoryMb:F1} MB", GetMemoryColor(stats.MemoryMb)),
-            ($"GC: Gen0={stats.Gen0Collections}, Gen1={stats.Gen1Collections}, Gen2={stats.Gen2Collections}", Color.White),
+            (
+                $"GC: Gen0={stats.Gen0Collections}, Gen1={stats.Gen1Collections}, Gen2={stats.Gen2Collections}",
+                Color.White
+            ),
             ($"Entities: {stats.EntityCount:N0}", Color.Cyan),
         };
 
         if (_poolManager != null)
         {
-            lines.Add(($"Pooled: {stats.PooledEntities:N0} active, {stats.AvailablePooled:N0} available", Color.Yellow));
+            lines.Add(
+                (
+                    $"Pooled: {stats.PooledEntities:N0} active, {stats.AvailablePooled:N0} available",
+                    Color.Yellow
+                )
+            );
         }
 
         // Add helpful tip
         lines.Add(("Press F3 to hide", Color.Gray));
 
         // Calculate background size
-        var maxWidth = 0f;
-        foreach (var (text, _) in lines)
+        float maxWidth = 0f;
+        foreach ((string text, Color _) in lines)
         {
-            var size = _font!.MeasureString(text);
+            Vector2 size = _font!.MeasureString(text);
             maxWidth = Math.Max(maxWidth, size.X);
         }
 
-        var bgWidth = (int)maxWidth + padding * 2;
-        var bgHeight = lines.Count * lineHeight + padding * 2;
+        int bgWidth = (int)maxWidth + (padding * 2);
+        int bgHeight = (lines.Count * lineHeight) + (padding * 2);
 
         _spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
 
         // Draw semi-transparent background
         _spriteBatch.Draw(
             _backgroundTexture,
-            new Rectangle(x - padding / 2, y - padding / 2, bgWidth, bgHeight),
-            new Color(0, 0, 0, 200));
+            new Rectangle(x - (padding / 2), y - (padding / 2), bgWidth, bgHeight),
+            new Color(0, 0, 0, 200)
+        );
 
         // Draw border
-        DrawBorder(x - padding / 2, y - padding / 2, bgWidth, bgHeight, new Color(100, 100, 100));
+        DrawBorder(
+            x - (padding / 2),
+            y - (padding / 2),
+            bgWidth,
+            bgHeight,
+            new Color(100, 100, 100)
+        );
 
         // Draw each line
-        foreach (var (text, color) in lines)
+        foreach ((string text, Color color) in lines)
         {
             _spriteBatch.DrawString(_font, text, new Vector2(x, y), color);
             y += lineHeight;
@@ -208,26 +243,32 @@ public class PerformanceOverlay : IDisposable
 
     private static Color GetFpsColor(float fps)
     {
-        if (fps >= 58) return Color.LimeGreen;
-        if (fps >= 30) return Color.Yellow;
+        if (fps >= 58)
+        {
+            return Color.LimeGreen;
+        }
+
+        if (fps >= 30)
+        {
+            return Color.Yellow;
+        }
+
         return Color.Red;
     }
 
     private static Color GetMemoryColor(double memoryMb)
     {
-        if (memoryMb < 256) return Color.LimeGreen;
-        if (memoryMb < 512) return Color.Yellow;
+        if (memoryMb < 256)
+        {
+            return Color.LimeGreen;
+        }
+
+        if (memoryMb < 512)
+        {
+            return Color.Yellow;
+        }
+
         return Color.Orange;
-    }
-
-    public void Dispose()
-    {
-        if (_disposed) return;
-        _disposed = true;
-
-        _spriteBatch.Dispose();
-        _backgroundTexture.Dispose();
-        _fontSystem?.Dispose();
     }
 
     private struct PerformanceStats

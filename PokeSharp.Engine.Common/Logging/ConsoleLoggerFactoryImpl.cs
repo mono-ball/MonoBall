@@ -1,3 +1,4 @@
+using System.Reflection;
 using Microsoft.Extensions.Logging;
 using Spectre.Console;
 
@@ -19,10 +20,14 @@ internal sealed class ConsoleLoggerFactoryImpl(LogLevel minLevel = LogLevel.Info
     public ILogger CreateLogger(string categoryName)
     {
         // Create ConsoleLogger<object> with categoryName override to show proper class names
-        var loggerType = typeof(ConsoleLogger<>).MakeGenericType(typeof(object));
-        var constructor = loggerType.GetConstructor(new[] { typeof(LogLevel), typeof(string) });
+        Type loggerType = typeof(ConsoleLogger<>).MakeGenericType(typeof(object));
+        ConstructorInfo? constructor = loggerType.GetConstructor(
+            new[] { typeof(LogLevel), typeof(string) }
+        );
         if (constructor != null)
+        {
             return (ILogger)constructor.Invoke(new object[] { _minLevel, categoryName });
+        }
 
         // Fallback to a simple implementation
         return new SimpleLogger(categoryName, _minLevel);
@@ -68,11 +73,13 @@ internal sealed class ConsoleLoggerFactoryImpl(LogLevel minLevel = LogLevel.Info
         )
         {
             if (!IsEnabled(logLevel))
+            {
                 return;
+            }
 
-            var message = formatter(state, exception);
-            var scope = SimpleLogScope.CurrentScope;
-            var formattedLine = LogFormatting.FormatLogLine(
+            string message = formatter(state, exception);
+            string scope = SimpleLogScope.CurrentScope;
+            string formattedLine = LogFormatting.FormatLogLine(
                 logLevel,
                 _categoryName,
                 message,
@@ -82,23 +89,35 @@ internal sealed class ConsoleLoggerFactoryImpl(LogLevel minLevel = LogLevel.Info
             );
 
             if (LogFormatting.SupportsMarkup)
+            {
                 AnsiConsole.MarkupLine(formattedLine);
+            }
             else
+            {
                 AnsiConsole.WriteLine(formattedLine);
+            }
 
             if (exception == null)
+            {
                 return;
+            }
 
-            var exceptionLines = LogFormatting.FormatExceptionLines(
+            IEnumerable<string> exceptionLines = LogFormatting.FormatExceptionLines(
                 exception,
                 logLevel >= LogLevel.Debug
             );
 
-            foreach (var line in exceptionLines)
+            foreach (string line in exceptionLines)
+            {
                 if (LogFormatting.SupportsMarkup)
+                {
                     AnsiConsole.MarkupLine(line);
+                }
                 else
+                {
                     AnsiConsole.WriteLine(line);
+                }
+            }
         }
 
         private sealed class SimpleLogScope : IDisposable
@@ -117,7 +136,9 @@ internal sealed class ConsoleLoggerFactoryImpl(LogLevel minLevel = LogLevel.Info
                 get
                 {
                     if (_scopeStack.Value == null || _scopeStack.Value.Count == 0)
+                    {
                         return string.Empty;
+                    }
 
                     return string.Join(" > ", _scopeStack.Value.Reverse());
                 }
@@ -126,7 +147,9 @@ internal sealed class ConsoleLoggerFactoryImpl(LogLevel minLevel = LogLevel.Info
             public void Dispose()
             {
                 if (_scopeStack.Value != null && _scopeStack.Value.Count > 0)
+                {
                     _scopeStack.Value.Pop();
+                }
             }
         }
     }

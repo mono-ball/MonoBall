@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 using PokeSharp.Engine.Scenes;
-using PokeSharp.Game.Initialization.Pipeline;
 
 namespace PokeSharp.Game.Initialization.Pipeline.Steps;
 
@@ -27,15 +26,35 @@ public class LoadInitialMapStep : InitializationStepBase
     )
     {
         if (context.MapInitializer == null)
+        {
             throw new InvalidOperationException(
                 "MapInitializer must be created before loading map"
             );
+        }
 
-        var logger = context.LoggerFactory.CreateLogger<LoadInitialMapStep>();
-        await context.MapInitializer.LoadMap(
-            context.Configuration.Initialization.InitialMap
-        );
-        logger.LogInformation("Initial map loaded successfully");
+        ILogger<LoadInitialMapStep> logger =
+            context.LoggerFactory.CreateLogger<LoadInitialMapStep>();
+
+        string mapId = context.Configuration.Initialization.InitialMap;
+        var mapEntity = await context.MapInitializer.LoadMap(mapId);
+
+        // Log appropriately based on whether the map was actually loaded
+        if (mapEntity.HasValue)
+        {
+            logger.LogInformation(
+                "Initial map loaded successfully: {MapId} (entity: {EntityId})",
+                mapId,
+                mapEntity.Value.Id
+            );
+        }
+        else
+        {
+            // Map loading failed but game continues - this is not an error
+            // because MapInitializer already logged the specific failure reason
+            logger.LogWarning(
+                "Initial map '{MapId}' could not be loaded - game will continue without map",
+                mapId
+            );
+        }
     }
 }
-

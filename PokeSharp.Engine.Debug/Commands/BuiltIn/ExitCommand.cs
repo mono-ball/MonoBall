@@ -1,7 +1,7 @@
 namespace PokeSharp.Engine.Debug.Commands.BuiltIn;
 
 /// <summary>
-/// Closes the console.
+///     Closes the console.
 /// </summary>
 [ConsoleCommand("exit", "Close the console")]
 public class ExitCommand : IConsoleCommand
@@ -16,4 +16,3 @@ public class ExitCommand : IConsoleCommand
         return Task.CompletedTask;
     }
 }
-

@@ -2,9 +2,9 @@ using System.Text;
 using Arch.Core;
 using Arch.Core.Extensions;
 using Microsoft.Extensions.Logging;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using PokeSharp.Engine.Systems.Management;
+using PokeSharp.Game.Components.Player;
 using PokeSharp.Game.Scripting.Api;
 using PokeSharp.Game.Scripting.Services;
 
@@ -21,7 +21,13 @@ public class ConsoleGlobals
     /// <summary>
     ///     Initializes a new instance of ConsoleGlobals.
     /// </summary>
-    public ConsoleGlobals(IScriptingApiProvider apis, World world, SystemManager systems, GraphicsDevice graphics, ILogger logger)
+    public ConsoleGlobals(
+        IScriptingApiProvider apis,
+        World world,
+        SystemManager systems,
+        GraphicsDevice graphics,
+        ILogger logger
+    )
     {
         _apis = apis ?? throw new ArgumentNullException(nameof(apis));
         World = world ?? throw new ArgumentNullException(nameof(world));
@@ -107,7 +113,7 @@ public class ConsoleGlobals
     /// <param name="obj">The object to print.</param>
     public void Print(object? obj)
     {
-        var text = obj?.ToString() ?? "null";
+        string text = obj?.ToString() ?? "null";
         OutputAction?.Invoke(text);
         System.Console.WriteLine(text);
     }
@@ -118,9 +124,9 @@ public class ConsoleGlobals
     /// <returns>The player entity, or null if not found.</returns>
     public Entity? GetPlayer()
     {
-        var query = new QueryDescription().WithAll<PokeSharp.Game.Components.Player.Player>();
+        QueryDescription query = new QueryDescription().WithAll<Player>();
         var entities = new List<Entity>();
-        World.Query(in query, (Entity entity) => entities.Add(entity));
+        World.Query(in query, entity => entities.Add(entity));
         return entities.FirstOrDefault();
     }
 
@@ -131,7 +137,7 @@ public class ConsoleGlobals
     public IEnumerable<Entity> GetAllEntities()
     {
         var entities = new List<Entity>();
-        World.Query(new QueryDescription(), (Entity entity) => entities.Add(entity));
+        World.Query(new QueryDescription(), entity => entities.Add(entity));
         return entities;
     }
 
@@ -142,9 +148,9 @@ public class ConsoleGlobals
     /// <returns>Collection of entities with the specified component.</returns>
     public IEnumerable<Entity> GetEntitiesWith<T>()
     {
-        var query = new QueryDescription().WithAll<T>();
+        QueryDescription query = new QueryDescription().WithAll<T>();
         var entities = new List<Entity>();
-        World.Query(in query, (Entity entity) => entities.Add(entity));
+        World.Query(in query, entity => entities.Add(entity));
         return entities;
     }
 
@@ -155,7 +161,7 @@ public class ConsoleGlobals
     /// <returns>Count of entities with the specified component.</returns>
     public int CountEntitiesWith<T>()
     {
-        var query = new QueryDescription().WithAll<T>();
+        QueryDescription query = new QueryDescription().WithAll<T>();
         return World.CountEntities(in query);
     }
 
@@ -184,10 +190,10 @@ public class ConsoleGlobals
         var sb = new StringBuilder();
         sb.AppendLine($"Entity {entity.Id}:");
 
-        var components = entity.GetAllComponents();
+        object?[] components = entity.GetAllComponents();
         if (components.Any())
         {
-            foreach (var component in components)
+            foreach (object? component in components)
             {
                 if (component != null)
                 {
@@ -211,9 +217,9 @@ public class ConsoleGlobals
         var entities = GetAllEntities().ToList();
         Print($"Total entities: {entities.Count}");
 
-        foreach (var entity in entities.Take(20)) // Limit to first 20 for readability
+        foreach (Entity entity in entities.Take(20)) // Limit to first 20 for readability
         {
-            var componentCount = entity.GetAllComponents().Count();
+            int componentCount = entity.GetAllComponents().Count();
             Print($"  Entity {entity.Id}: {componentCount} component(s)");
         }
 
@@ -343,4 +349,3 @@ public class ConsoleGlobals
 
     #endregion
 }
-

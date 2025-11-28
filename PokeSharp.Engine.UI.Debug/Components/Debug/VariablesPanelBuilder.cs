@@ -1,18 +1,20 @@
 using PokeSharp.Engine.UI.Debug.Components.Controls;
-using PokeSharp.Engine.UI.Debug.Core;
 using PokeSharp.Engine.UI.Debug.Layout;
 
 namespace PokeSharp.Engine.UI.Debug.Components.Debug;
 
 /// <summary>
-/// Builder for creating VariablesPanel with customizable components.
+///     Builder for creating VariablesPanel with customizable components.
 /// </summary>
 public class VariablesPanelBuilder
 {
-    private TextBuffer? _variablesBuffer;
     private int _maxLines = 1000;
+    private TextBuffer? _variablesBuffer;
 
-    public static VariablesPanelBuilder Create() => new();
+    public static VariablesPanelBuilder Create()
+    {
+        return new VariablesPanelBuilder();
+    }
 
     public VariablesPanelBuilder WithVariablesBuffer(TextBuffer buffer)
     {
@@ -41,10 +43,7 @@ public class VariablesPanelBuilder
             // BackgroundColor uses theme fallback - don't set explicitly
             AutoScroll = false,
             MaxLines = _maxLines,
-            Constraint = new LayoutConstraint
-            {
-                Anchor = Anchor.StretchTop
-            }
+            Constraint = new LayoutConstraint { Anchor = Anchor.StretchTop },
         };
     }
 
@@ -52,10 +51,7 @@ public class VariablesPanelBuilder
     {
         return new StatusBar("variables_status")
         {
-            Constraint = new LayoutConstraint
-            {
-                Anchor = Anchor.StretchBottom
-            }
+            Constraint = new LayoutConstraint { Anchor = Anchor.StretchBottom },
         };
     }
 }

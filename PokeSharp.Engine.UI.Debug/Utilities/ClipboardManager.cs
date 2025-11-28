@@ -1,23 +1,24 @@
-using System;
 using TextCopy;
 
 namespace PokeSharp.Engine.UI.Debug.Utilities;
 
 /// <summary>
-/// Cross-platform clipboard manager for copying and pasting text.
-/// Uses the TextCopy library for cross-platform clipboard access.
+///     Cross-platform clipboard manager for copying and pasting text.
+///     Uses the TextCopy library for cross-platform clipboard access.
 /// </summary>
 public static class ClipboardManager
 {
     /// <summary>
-    /// Copies text to the system clipboard.
+    ///     Copies text to the system clipboard.
     /// </summary>
     /// <param name="text">The text to copy.</param>
     /// <returns>True if successful, false otherwise.</returns>
     public static bool SetText(string text)
     {
         if (string.IsNullOrEmpty(text))
+        {
             return false;
+        }
 
         try
         {
@@ -31,14 +32,14 @@ public static class ClipboardManager
     }
 
     /// <summary>
-    /// Gets text from the system clipboard.
+    ///     Gets text from the system clipboard.
     /// </summary>
     /// <returns>The clipboard text, or empty string if failed.</returns>
     public static string GetText()
     {
         try
         {
-            var text = ClipboardService.GetText();
+            string? text = ClipboardService.GetText();
             return text ?? string.Empty;
         }
         catch
@@ -48,14 +49,14 @@ public static class ClipboardManager
     }
 
     /// <summary>
-    /// Checks if the clipboard has text available.
+    ///     Checks if the clipboard has text available.
     /// </summary>
     /// <returns>True if clipboard has text, false otherwise.</returns>
     public static bool HasText()
     {
         try
         {
-            var text = ClipboardService.GetText();
+            string? text = ClipboardService.GetText();
             return !string.IsNullOrEmpty(text);
         }
         catch
@@ -64,4 +65,3 @@ public static class ClipboardManager
         }
     }
 }
-

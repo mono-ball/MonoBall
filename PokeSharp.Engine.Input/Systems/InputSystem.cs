@@ -26,9 +26,9 @@ public class InputSystem(
     IInputBlocker? inputBlocker = null
 ) : SystemBase, IUpdateSystem
 {
+    private readonly IInputBlocker? _inputBlocker = inputBlocker;
     private readonly InputBuffer _inputBuffer = new(maxBufferSize, bufferTimeout);
     private readonly ILogger<InputSystem>? _logger = logger;
-    private readonly IInputBlocker? _inputBlocker = inputBlocker;
 
     // Cache query description to avoid allocation every frame
     private readonly QueryDescription _playerQuery = QueryCache.Get<
@@ -89,10 +89,12 @@ public class InputSystem(
             ) =>
             {
                 if (!input.InputEnabled)
+                {
                     return;
+                }
 
                 // Get current input direction (uses cached input states)
-                var currentDirection = GetInputDirection(_keyboardState, _gamepadState);
+                Direction currentDirection = GetInputDirection(_keyboardState, _gamepadState);
 
                 // Pokemon Emerald-style running state logic (pokeemerald field_player_avatar.c:584-592)
                 if (currentDirection == Direction.None)
@@ -109,14 +111,16 @@ public class InputSystem(
                     input.PressedDirection = currentDirection;
 
                     // Synchronize Direction component with input direction
-                    ref var direction = ref entity.Get<Direction>();
+                    ref Direction direction = ref entity.Get<Direction>();
                     direction = currentDirection;
 
                     // Check if we need to turn in place first (pokeemerald behavior)
                     // If input direction != facing direction AND not already moving -> TURN_DIRECTION
-                    if (currentDirection != movement.FacingDirection &&
-                        movement.RunningState != RunningState.Moving &&
-                        !movement.IsMoving)
+                    if (
+                        currentDirection != movement.FacingDirection
+                        && movement.RunningState != RunningState.Moving
+                        && !movement.IsMoving
+                    )
                     {
                         // Turn in place - start turn animation
                         // DON'T buffer input here - only move if key is still held when turn completes
@@ -138,14 +142,16 @@ public class InputSystem(
                         // 1. Not currently moving (allows holding keys for continuous movement), OR
                         // 2. Direction changed (allows queuing direction changes during movement)
                         // But only if we haven't buffered this exact direction very recently (prevents duplicates)
-                        var shouldBuffer =
+                        bool shouldBuffer =
                             !movement.IsMoving || currentDirection != _lastBufferedDirection;
 
                         // Also prevent buffering the same direction multiple times per frame
-                        var isDifferentTiming =
-                            _totalTime != _lastBufferTime || currentDirection != _lastBufferedDirection;
+                        bool isDifferentTiming =
+                            _totalTime != _lastBufferTime
+                            || currentDirection != _lastBufferedDirection;
 
                         if (shouldBuffer && isDifferentTiming)
+                        {
                             if (_inputBuffer.AddInput(currentDirection, _totalTime))
                             {
                                 _lastBufferedDirection = currentDirection;
@@ -155,6 +161,7 @@ public class InputSystem(
                                     currentDirection
                                 );
                             }
+                        }
                     }
                     // else: RunningState == TurnDirection - wait for turn animation to complete
                     // MovementSystem will set RunningState = NotMoving when turn completes
@@ -171,13 +178,13 @@ public class InputSystem(
                 // Check if there's buffered input and no active movement request
                 if (
                     !movement.IsMoving
-                    && _inputBuffer.TryConsumeInput(_totalTime, out var bufferedDirection)
+                    && _inputBuffer.TryConsumeInput(_totalTime, out Direction bufferedDirection)
                 )
                 {
                     // Use component pooling: reuse existing component or add new one
                     if (entity.Has<MovementRequest>())
                     {
-                        ref var request = ref entity.Get<MovementRequest>();
+                        ref MovementRequest request = ref entity.Get<MovementRequest>();
                         if (!request.Active)
                         {
                             request.Direction = bufferedDirection;
@@ -209,24 +216,46 @@ public class InputSystem(
     {
         // Keyboard input (priority: most recently pressed)
         if (keyboard.IsKeyDown(Keys.Up) || keyboard.IsKeyDown(Keys.W))
+        {
             return Direction.North;
+        }
+
         if (keyboard.IsKeyDown(Keys.Down) || keyboard.IsKeyDown(Keys.S))
+        {
             return Direction.South;
+        }
+
         if (keyboard.IsKeyDown(Keys.Left) || keyboard.IsKeyDown(Keys.A))
+        {
             return Direction.West;
+        }
+
         if (keyboard.IsKeyDown(Keys.Right) || keyboard.IsKeyDown(Keys.D))
+        {
             return Direction.East;
+        }
 
         // Gamepad input
-        var thumbstick = gamepad.ThumbSticks.Left;
+        Vector2 thumbstick = gamepad.ThumbSticks.Left;
         if (thumbstick.Y > 0.5f || gamepad.DPad.Up == ButtonState.Pressed)
+        {
             return Direction.North;
+        }
+
         if (thumbstick.Y < -0.5f || gamepad.DPad.Down == ButtonState.Pressed)
+        {
             return Direction.South;
+        }
+
         if (thumbstick.X < -0.5f || gamepad.DPad.Left == ButtonState.Pressed)
+        {
             return Direction.West;
+        }
+
         if (thumbstick.X > 0.5f || gamepad.DPad.Right == ButtonState.Pressed)
+        {
             return Direction.East;
+        }
 
         return Direction.None;
     }

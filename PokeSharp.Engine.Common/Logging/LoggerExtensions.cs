@@ -32,11 +32,11 @@ public static class LoggerExtensions
             ["ExceptionSource"] = ex.Source ?? "Unknown",
         };
 
-        var contextString = string.Join(
+        string contextString = string.Join(
             ", ",
             contextData.Select(kvp => $"[cyan]{kvp.Key}[/]=[yellow]{kvp.Value}[/]")
         );
-        var fullMessage = $"{message} | Context: {contextString}";
+        string fullMessage = $"{message} | Context: {contextString}";
 
         logger.LogError(ex, fullMessage, args);
     }
@@ -48,14 +48,14 @@ public static class LoggerExtensions
     /// <param name="includeGcStats">Whether to include GC collection statistics (default: true).</param>
     public static void LogMemoryStats(this ILogger logger, bool includeGcStats = true)
     {
-        var totalMemoryBytes = GC.GetTotalMemory(false);
-        var totalMemoryMb = totalMemoryBytes / 1024.0 / 1024.0;
+        long totalMemoryBytes = GC.GetTotalMemory(false);
+        double totalMemoryMb = totalMemoryBytes / 1024.0 / 1024.0;
 
         if (includeGcStats)
         {
-            var gen0 = GC.CollectionCount(0);
-            var gen1 = GC.CollectionCount(1);
-            var gen2 = GC.CollectionCount(2);
+            int gen0 = GC.CollectionCount(0);
+            int gen1 = GC.CollectionCount(1);
+            int gen2 = GC.CollectionCount(2);
 
             logger.LogInformation(
                 "[lightsteelblue1]MEM[/] Memory: [yellow]{MemoryMb:F2}MB[/] | GC Collections - Gen0: [yellow]{Gen0}[/], Gen1: [yellow]{Gen1}[/], Gen2: [yellow]{Gen2}[/]",
@@ -81,14 +81,14 @@ public static class LoggerExtensions
     /// <param name="logger">The logger instance.</param>
     public static void LogMemoryStatsWithCollection(this ILogger logger)
     {
-        var beforeMemory = GC.GetTotalMemory(false) / 1024.0 / 1024.0;
+        double beforeMemory = GC.GetTotalMemory(false) / 1024.0 / 1024.0;
 
         GC.Collect();
         GC.WaitForPendingFinalizers();
         GC.Collect();
 
-        var afterMemory = GC.GetTotalMemory(false) / 1024.0 / 1024.0;
-        var freedMemory = beforeMemory - afterMemory;
+        double afterMemory = GC.GetTotalMemory(false) / 1024.0 / 1024.0;
+        double freedMemory = beforeMemory - afterMemory;
 
         logger.LogInformation(
             "[lightsteelblue1]MEM[/] Memory after GC: [yellow]{AfterMb:F2}MB[/] (freed [green]{FreedMb:F2}MB[/] from [yellow]{BeforeMb:F2}MB[/])",
@@ -120,21 +120,25 @@ public static class LoggerExtensions
         finally
         {
             sw.Stop();
-            var elapsedMs = sw.Elapsed.TotalMilliseconds;
+            double elapsedMs = sw.Elapsed.TotalMilliseconds;
 
             if (elapsedMs > warnThresholdMs)
+            {
                 logger.LogWarning(
                     "[plum1]P[/] [orange3]⚠[/] [cyan]{OperationName}[/] took [yellow]{TimeMs:F2}ms[/] (threshold: [yellow]{ThresholdMs:F2}ms[/])",
                     operationName,
                     elapsedMs,
                     warnThresholdMs
                 );
+            }
             else
+            {
                 logger.LogDebug(
                     "[plum1]P[/] [green]✓[/] [cyan]{OperationName}[/] completed in [yellow]{TimeMs:F2}ms[/]",
                     operationName,
                     elapsedMs
                 );
+            }
         }
     }
 
@@ -162,21 +166,25 @@ public static class LoggerExtensions
         finally
         {
             sw.Stop();
-            var elapsedMs = sw.Elapsed.TotalMilliseconds;
+            double elapsedMs = sw.Elapsed.TotalMilliseconds;
 
             if (elapsedMs > warnThresholdMs)
+            {
                 logger.LogWarning(
                     "[plum1]P[/] [orange3]⚠[/] [cyan]{OperationName}[/] took [yellow]{TimeMs:F2}ms[/] (threshold: [yellow]{ThresholdMs:F2}ms[/])",
                     operationName,
                     elapsedMs,
                     warnThresholdMs
                 );
+            }
             else
+            {
                 logger.LogDebug(
                     "[plum1]P[/] [green]✓[/] [cyan]{OperationName}[/] completed in [yellow]{TimeMs:F2}ms[/]",
                     operationName,
                     elapsedMs
                 );
+            }
         }
     }
 }

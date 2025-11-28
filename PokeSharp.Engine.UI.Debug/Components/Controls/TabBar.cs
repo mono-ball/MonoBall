@@ -1,4 +1,3 @@
-using System;
 using Microsoft.Xna.Framework;
 using PokeSharp.Engine.UI.Debug.Components.Base;
 using PokeSharp.Engine.UI.Debug.Core;
@@ -7,7 +6,7 @@ using PokeSharp.Engine.UI.Debug.Layout;
 namespace PokeSharp.Engine.UI.Debug.Components.Controls;
 
 /// <summary>
-/// Horizontal container for tab buttons.
+///     Horizontal container for tab buttons.
 /// </summary>
 public class TabBar : UIContainer
 {
@@ -24,7 +23,7 @@ public class TabBar : UIContainer
     public float TabSpacing { get; set; } = 2f;
 
     /// <summary>Currently active tab index</summary>
-    public int ActiveTabIndex { get; set; } = 0;
+    public int ActiveTabIndex { get; set; }
 
     /// <summary>Gets the number of tabs in this tab bar</summary>
     public int TabCount => Children.Count;
@@ -33,32 +32,35 @@ public class TabBar : UIContainer
     public Action<int>? OnTabChanged { get; set; }
 
     /// <summary>
-    /// Adds a tab to the bar.
+    ///     Adds a tab to the bar.
     /// </summary>
     public void AddTab(string text, string id)
     {
-        var tabIndex = Children.Count;
+        int tabIndex = Children.Count;
         var tab = new Tab
         {
             Id = id,
             Text = text,
             IsActive = tabIndex == ActiveTabIndex,
-            OnClick = () => SetActiveTab(tabIndex)
+            OnClick = () => SetActiveTab(tabIndex),
         };
         AddChild(tab);
-
     }
 
     /// <summary>
-    /// Sets the active tab by index.
+    ///     Sets the active tab by index.
     /// </summary>
     public void SetActiveTab(int index)
     {
         if (index < 0 || index >= Children.Count)
+        {
             return;
+        }
 
         if (ActiveTabIndex == index)
+        {
             return;
+        }
 
         ActiveTabIndex = index;
 
@@ -100,14 +102,14 @@ public class TabBar : UIContainer
         // Layout tabs horizontally
         float currentX = 0;
 
-        foreach (var child in Children)
+        foreach (UIComponent child in Children)
         {
             if (child is Tab tab && tab.Visible)
             {
                 // Measure text size using the context's renderer
-                var textSize = context.Renderer.MeasureText(tab.Text);
-                var tabWidth = Math.Max(tab.MinWidth, textSize.X + tab.Padding * 2);
-                var tabHeight = context.Theme.ButtonHeight;
+                Vector2 textSize = context.Renderer.MeasureText(tab.Text);
+                float tabWidth = Math.Max(tab.MinWidth, textSize.X + (tab.Padding * 2));
+                int tabHeight = context.Theme.ButtonHeight;
 
                 // Update tab constraint for horizontal layout
                 tab.Constraint = new LayoutConstraint
@@ -116,7 +118,7 @@ public class TabBar : UIContainer
                     OffsetX = currentX,
                     OffsetY = 0,
                     Width = tabWidth,
-                    Height = tabHeight
+                    Height = tabHeight,
                 };
 
                 // Move to next position
@@ -135,4 +137,3 @@ public class TabBar : UIContainer
         return null;
     }
 }
-

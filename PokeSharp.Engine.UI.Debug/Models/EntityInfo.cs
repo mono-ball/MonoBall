@@ -1,7 +1,7 @@
 namespace PokeSharp.Engine.UI.Debug.Models;
 
 /// <summary>
-/// Information about an entity for debug display.
+///     Information about an entity for debug display.
 /// </summary>
 public class EntityInfo
 {
@@ -23,7 +23,3 @@ public class EntityInfo
     /// <summary>Optional tag/category for filtering</summary>
     public string? Tag { get; set; }
 }
-
-
-
-

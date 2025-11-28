@@ -21,11 +21,16 @@ public sealed class TemplateJsonCache
         _templateJsonByPath[filePath] = templateJson;
 
         // Extract templateId from JSON
-        if (templateJson is JsonObject obj && obj.TryGetPropertyValue("templateId", out var idNode))
+        if (
+            templateJson is JsonObject obj
+            && obj.TryGetPropertyValue("templateId", out JsonNode? idNode)
+        )
         {
-            var templateId = idNode?.ToString().Trim('"');
+            string? templateId = idNode?.ToString().Trim('"');
             if (!string.IsNullOrEmpty(templateId))
+            {
                 _pathByTemplateId[templateId] = filePath;
+            }
         }
     }
 
@@ -34,7 +39,7 @@ public sealed class TemplateJsonCache
     /// </summary>
     public JsonNode? GetByPath(string filePath)
     {
-        return _templateJsonByPath.TryGetValue(filePath, out var json) ? json : null;
+        return _templateJsonByPath.TryGetValue(filePath, out JsonNode? json) ? json : null;
     }
 
     /// <summary>
@@ -42,8 +47,11 @@ public sealed class TemplateJsonCache
     /// </summary>
     public JsonNode? GetByTemplateId(string templateId)
     {
-        if (_pathByTemplateId.TryGetValue(templateId, out var path))
+        if (_pathByTemplateId.TryGetValue(templateId, out string? path))
+        {
             return GetByPath(path);
+        }
+
         return null;
     }
 
@@ -52,7 +60,7 @@ public sealed class TemplateJsonCache
     /// </summary>
     public string? GetPathByTemplateId(string templateId)
     {
-        return _pathByTemplateId.TryGetValue(templateId, out var path) ? path : null;
+        return _pathByTemplateId.TryGetValue(templateId, out string? path) ? path : null;
     }
 
     /// <summary>
@@ -60,8 +68,10 @@ public sealed class TemplateJsonCache
     /// </summary>
     public void Update(string templateId, JsonNode patchedJson)
     {
-        if (_pathByTemplateId.TryGetValue(templateId, out var path))
+        if (_pathByTemplateId.TryGetValue(templateId, out string? path))
+        {
             _templateJsonByPath[path] = patchedJson;
+        }
     }
 
     /// <summary>

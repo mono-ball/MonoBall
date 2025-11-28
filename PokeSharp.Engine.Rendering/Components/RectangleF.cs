@@ -51,7 +51,7 @@ public struct RectangleF
     /// <summary>
     ///     Gets the center point of the rectangle.
     /// </summary>
-    public Vector2 Center => new(X + Width / 2f, Y + Height / 2f);
+    public Vector2 Center => new(X + (Width / 2f), Y + (Height / 2f));
 
     /// <summary>
     ///     Initializes a new instance of the RectangleF struct.

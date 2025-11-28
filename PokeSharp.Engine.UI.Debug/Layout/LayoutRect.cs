@@ -3,8 +3,8 @@ using Microsoft.Xna.Framework;
 namespace PokeSharp.Engine.UI.Debug.Layout;
 
 /// <summary>
-/// Represents a resolved layout rectangle with absolute screen coordinates.
-/// This is the result of constraint resolution.
+///     Represents a resolved layout rectangle with absolute screen coordinates.
+///     This is the result of constraint resolution.
 /// </summary>
 public readonly struct LayoutRect : IEquatable<LayoutRect>
 {
@@ -27,10 +27,10 @@ public readonly struct LayoutRect : IEquatable<LayoutRect>
     public float Bottom => Y + Height;
 
     /// <summary>Center X coordinate</summary>
-    public float CenterX => X + Width / 2f;
+    public float CenterX => X + (Width / 2f);
 
     /// <summary>Center Y coordinate</summary>
-    public float CenterY => Y + Height / 2f;
+    public float CenterY => Y + (Height / 2f);
 
     public LayoutRect(float x, float y, float width, float height)
     {
@@ -41,7 +41,7 @@ public readonly struct LayoutRect : IEquatable<LayoutRect>
     }
 
     /// <summary>
-    /// Creates a LayoutRect from a MonoGame Rectangle.
+    ///     Creates a LayoutRect from a MonoGame Rectangle.
     /// </summary>
     public static LayoutRect FromRectangle(Rectangle rect)
     {
@@ -49,7 +49,7 @@ public readonly struct LayoutRect : IEquatable<LayoutRect>
     }
 
     /// <summary>
-    /// Converts this LayoutRect to a MonoGame Rectangle.
+    ///     Converts this LayoutRect to a MonoGame Rectangle.
     /// </summary>
     public Rectangle ToRectangle()
     {
@@ -57,7 +57,7 @@ public readonly struct LayoutRect : IEquatable<LayoutRect>
     }
 
     /// <summary>
-    /// Checks if a point is inside this rectangle.
+    ///     Checks if a point is inside this rectangle.
     /// </summary>
     public bool Contains(float x, float y)
     {
@@ -65,7 +65,7 @@ public readonly struct LayoutRect : IEquatable<LayoutRect>
     }
 
     /// <summary>
-    /// Checks if a point is inside this rectangle.
+    ///     Checks if a point is inside this rectangle.
     /// </summary>
     public bool Contains(Point point)
     {
@@ -73,7 +73,7 @@ public readonly struct LayoutRect : IEquatable<LayoutRect>
     }
 
     /// <summary>
-    /// Checks if a point is inside this rectangle.
+    ///     Checks if a point is inside this rectangle.
     /// </summary>
     public bool Contains(Vector2 point)
     {
@@ -81,20 +81,20 @@ public readonly struct LayoutRect : IEquatable<LayoutRect>
     }
 
     /// <summary>
-    /// Returns a new LayoutRect with padding applied (shrinks the rectangle inward).
+    ///     Returns a new LayoutRect with padding applied (shrinks the rectangle inward).
     /// </summary>
     public LayoutRect Shrink(float padding)
     {
         return new LayoutRect(
             X + padding,
             Y + padding,
-            Math.Max(0, Width - padding * 2),
-            Math.Max(0, Height - padding * 2)
+            Math.Max(0, Width - (padding * 2)),
+            Math.Max(0, Height - (padding * 2))
         );
     }
 
     /// <summary>
-    /// Returns a new LayoutRect with padding applied (different on each side).
+    ///     Returns a new LayoutRect with padding applied (different on each side).
     /// </summary>
     public LayoutRect Shrink(float left, float top, float right, float bottom)
     {
@@ -107,16 +107,11 @@ public readonly struct LayoutRect : IEquatable<LayoutRect>
     }
 
     /// <summary>
-    /// Returns a new LayoutRect expanded by the given margin.
+    ///     Returns a new LayoutRect expanded by the given margin.
     /// </summary>
     public LayoutRect Expand(float margin)
     {
-        return new LayoutRect(
-            X - margin,
-            Y - margin,
-            Width + margin * 2,
-            Height + margin * 2
-        );
+        return new LayoutRect(X - margin, Y - margin, Width + (margin * 2), Height + (margin * 2));
     }
 
     public override string ToString()
@@ -125,7 +120,7 @@ public readonly struct LayoutRect : IEquatable<LayoutRect>
     }
 
     /// <summary>
-    /// Checks equality with another LayoutRect.
+    ///     Checks equality with another LayoutRect.
     /// </summary>
     public bool Equals(LayoutRect other)
     {
@@ -133,7 +128,7 @@ public readonly struct LayoutRect : IEquatable<LayoutRect>
     }
 
     /// <summary>
-    /// Checks equality with another object.
+    ///     Checks equality with another object.
     /// </summary>
     public override bool Equals(object? obj)
     {
@@ -141,7 +136,7 @@ public readonly struct LayoutRect : IEquatable<LayoutRect>
     }
 
     /// <summary>
-    /// Gets the hash code for this LayoutRect.
+    ///     Gets the hash code for this LayoutRect.
     /// </summary>
     public override int GetHashCode()
     {
@@ -149,15 +144,18 @@ public readonly struct LayoutRect : IEquatable<LayoutRect>
     }
 
     /// <summary>
-    /// Equality operator.
+    ///     Equality operator.
     /// </summary>
-    public static bool operator ==(LayoutRect left, LayoutRect right) => left.Equals(right);
+    public static bool operator ==(LayoutRect left, LayoutRect right)
+    {
+        return left.Equals(right);
+    }
 
     /// <summary>
-    /// Inequality operator.
+    ///     Inequality operator.
     /// </summary>
-    public static bool operator !=(LayoutRect left, LayoutRect right) => !left.Equals(right);
+    public static bool operator !=(LayoutRect left, LayoutRect right)
+    {
+        return !left.Equals(right);
+    }
 }
-
-
-

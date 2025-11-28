@@ -1,8 +1,8 @@
 namespace PokeSharp.Engine.UI.Debug.Core;
 
 /// <summary>
-/// Defines the active overlay mode for the console.
-/// These modes are mutually exclusive - only one can be active at a time.
+///     Defines the active overlay mode for the console.
+///     These modes are mutually exclusive - only one can be active at a time.
 /// </summary>
 public enum ConsoleOverlayMode
 {
@@ -22,6 +22,5 @@ public enum ConsoleOverlayMode
     ParameterHints,
 
     /// <summary>Documentation popup is showing.</summary>
-    Documentation
+    Documentation,
 }
-

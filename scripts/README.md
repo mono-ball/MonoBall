@@ -4,7 +4,8 @@ This directory contains C# script files (`.csx`) for the debug console.
 
 ## What are these scripts?
 
-These are reusable C# scripts that can be loaded and executed in the debug console during gameplay. They provide quick debugging tools and common operations.
+These are reusable C# scripts that can be loaded and executed in the debug console during gameplay. They provide quick
+debugging tools and common operations.
 
 ## How to use them
 
@@ -57,9 +58,11 @@ Print("Gave player $1000");
 
 ## Build Process
 
-These scripts are automatically copied to `PokeSharp.Game/bin/Debug/net9.0/Scripts/` during build. Scripts created using the `save` command in the console are saved to the runtime location.
+These scripts are automatically copied to `PokeSharp.Game/bin/Debug/net9.0/Scripts/` during build. Scripts created using
+the `save` command in the console are saved to the runtime location.
 
 To version control new scripts:
+
 1. Create/save the script in the console
 2. Copy it from `bin/Debug/net9.0/Scripts/` to this directory
 3. Commit to git

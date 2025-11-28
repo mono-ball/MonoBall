@@ -17,10 +17,12 @@ public readonly record struct MapIdentifier
     public MapIdentifier(string value)
     {
         if (string.IsNullOrWhiteSpace(value))
+        {
             throw new ArgumentException(
                 "Map identifier cannot be null, empty, or whitespace.",
                 nameof(value)
             );
+        }
 
         Value = value;
     }
@@ -60,7 +62,10 @@ public readonly record struct MapIdentifier
     public static MapIdentifier? TryCreate(string? value)
     {
         if (string.IsNullOrWhiteSpace(value))
+        {
             return null;
+        }
+
         return new MapIdentifier(value);
     }
 }

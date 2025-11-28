@@ -54,23 +54,25 @@ public class CollisionService : ICollisionService
     )
     {
         // Get all entities at this position from spatial hash
-        var entities = _spatialQuery.GetEntitiesAt(mapId, tileX, tileY);
+        IReadOnlyList<Entity> entities = _spatialQuery.GetEntitiesAt(mapId, tileX, tileY);
 
-        foreach (var entity in entities)
+        foreach (Entity entity in entities)
         {
             // Check elevation first - only collide with entities at same elevation
             if (entity.Has<Elevation>())
             {
-                ref var elevation = ref entity.Get<Elevation>();
+                ref Elevation elevation = ref entity.Get<Elevation>();
                 if (elevation.Value != entityElevation)
-                    // Different elevation - no collision (e.g., walking under bridge)
+                // Different elevation - no collision (e.g., walking under bridge)
+                {
                     continue;
+                }
             }
 
             // NEW: Check tile behaviors first (if TileBehaviorSystem is available)
             if (_tileBehaviorSystem != null && _world != null && entity.Has<TileBehavior>())
             {
-                var toDirection =
+                Direction toDirection =
                     fromDirection != Direction.None ? fromDirection.Opposite() : Direction.None;
                 if (
                     _tileBehaviorSystem.IsMovementBlocked(
@@ -80,17 +82,21 @@ public class CollisionService : ICollisionService
                         toDirection
                     )
                 )
+                {
                     return false; // Behavior blocks movement
+                }
             }
 
             // Check if entity has Collision component
             if (entity.Has<Collision>())
             {
-                ref var collision = ref entity.Get<Collision>();
+                ref Collision collision = ref entity.Get<Collision>();
 
                 if (collision.IsSolid)
-                    // Solid collision blocks movement
+                // Solid collision blocks movement
+                {
                     return false;
+                }
             }
         }
 
@@ -129,22 +135,24 @@ public class CollisionService : ICollisionService
     )
     {
         // OPTIMIZATION: Single spatial query instead of 2-3 separate queries
-        var entities = _spatialQuery.GetEntitiesAt(mapId, tileX, tileY);
+        IReadOnlyList<Entity> entities = _spatialQuery.GetEntitiesAt(mapId, tileX, tileY);
 
-        var isJumpTile = false;
-        var allowedJumpDir = Direction.None;
-        var isWalkable = true;
+        bool isJumpTile = false;
+        Direction allowedJumpDir = Direction.None;
+        bool isWalkable = true;
 
         // Single pass through entities - check for jump behavior AND collision in one loop
-        foreach (var entity in entities)
+        foreach (Entity entity in entities)
         {
             // Check elevation first - only collide with entities at same elevation
             if (entity.Has<Elevation>())
             {
-                ref var elevation = ref entity.Get<Elevation>();
+                ref Elevation elevation = ref entity.Get<Elevation>();
                 if (elevation.Value != entityElevation)
-                    // Different elevation - no collision (e.g., walking under bridge)
+                // Different elevation - no collision (e.g., walking under bridge)
+                {
                     continue;
+                }
             }
 
             // Check for jump behavior
@@ -153,9 +161,9 @@ public class CollisionService : ICollisionService
                 // fromDirection is the direction the player is moving (e.g., South)
                 // But from the tile's perspective, they're coming FROM the opposite direction (North)
                 // So we pass the opposite direction to GetJumpDirection
-                var tileFromDirection =
+                Direction tileFromDirection =
                     fromDirection != Direction.None ? fromDirection.Opposite() : Direction.None;
-                var jumpDir = _tileBehaviorSystem.GetJumpDirection(
+                Direction jumpDir = _tileBehaviorSystem.GetJumpDirection(
                     _world,
                     entity,
                     tileFromDirection
@@ -167,7 +175,7 @@ public class CollisionService : ICollisionService
                 }
 
                 // Check if behavior blocks movement
-                var toDirection =
+                Direction toDirection =
                     fromDirection != Direction.None ? fromDirection.Opposite() : Direction.None;
                 if (
                     _tileBehaviorSystem.IsMovementBlocked(
@@ -177,17 +185,21 @@ public class CollisionService : ICollisionService
                         toDirection
                     )
                 )
+                {
                     isWalkable = false;
+                }
             }
 
             // Check for solid collision (if not already blocked)
             if (isWalkable && entity.Has<Collision>())
             {
-                ref var collision = ref entity.Get<Collision>();
+                ref Collision collision = ref entity.Get<Collision>();
 
                 if (collision.IsSolid)
-                    // Solid collision blocks movement
+                // Solid collision blocks movement
+                {
                     isWalkable = false;
+                }
             }
         }
 

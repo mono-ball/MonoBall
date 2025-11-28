@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using PokeSharp.Engine.Core.Events;
 using PokeSharp.Game.Data.PropertyMapping;
+using PokeSharp.Game.Infrastructure.Services;
 using PokeSharp.Game.Scripting.Api;
 using PokeSharp.Game.Scripting.Services;
 
@@ -21,7 +22,7 @@ public static class ScriptingServicesExtensions
         // Event Bus
         services.AddSingleton<IEventBus>(sp =>
         {
-            var logger = sp.GetRequiredService<ILogger<EventBus>>();
+            ILogger<EventBus> logger = sp.GetRequiredService<ILogger<EventBus>>();
             return new EventBus(logger);
         });
 
@@ -33,8 +34,8 @@ public static class ScriptingServicesExtensions
         services.AddSingleton<NpcApiService>();
         services.AddSingleton<MapApiService>(sp =>
         {
-            var world = sp.GetRequiredService<World>();
-            var logger = sp.GetRequiredService<ILogger<MapApiService>>();
+            World world = sp.GetRequiredService<World>();
+            ILogger<MapApiService> logger = sp.GetRequiredService<ILogger<MapApiService>>();
             // SpatialHashSystem is initialized later in GameInitializer
             // It will be set via SetSpatialQuery method after initialization
             return new MapApiService(world, logger);
@@ -47,13 +48,15 @@ public static class ScriptingServicesExtensions
         // Scripting API Provider
         services.AddSingleton<IScriptingApiProvider, ScriptingApiProvider>();
 
-        // Scripting Service
+        // Scripting Service - uses path resolver for correct path resolution
         services.AddSingleton(sp =>
         {
-            var logger = sp.GetRequiredService<ILogger<ScriptService>>();
-            var loggerFactory = sp.GetRequiredService<ILoggerFactory>();
-            var apis = sp.GetRequiredService<IScriptingApiProvider>();
-            return new ScriptService("Assets/Scripts", logger, loggerFactory, apis);
+            IAssetPathResolver pathResolver = sp.GetRequiredService<IAssetPathResolver>();
+            ILogger<ScriptService> logger = sp.GetRequiredService<ILogger<ScriptService>>();
+            ILoggerFactory loggerFactory = sp.GetRequiredService<ILoggerFactory>();
+            IScriptingApiProvider apis = sp.GetRequiredService<IScriptingApiProvider>();
+            string scriptsPath = pathResolver.Resolve("Scripts");
+            return new ScriptService(scriptsPath, logger, loggerFactory, apis);
         });
 
         return services;

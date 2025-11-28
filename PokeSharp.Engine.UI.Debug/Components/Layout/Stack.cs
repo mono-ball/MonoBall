@@ -5,16 +5,16 @@ using PokeSharp.Engine.UI.Debug.Layout;
 namespace PokeSharp.Engine.UI.Debug.Components.Layout;
 
 /// <summary>
-/// Layout direction for stack containers.
+///     Layout direction for stack containers.
 /// </summary>
 public enum StackDirection
 {
     Vertical,
-    Horizontal
+    Horizontal,
 }
 
 /// <summary>
-/// A container that lays out children in a vertical or horizontal stack.
+///     A container that lays out children in a vertical or horizontal stack.
 /// </summary>
 public class Stack : UIContainer
 {
@@ -28,21 +28,27 @@ public class Stack : UIContainer
     {
         float currentOffset = 0;
 
-        foreach (var child in Children)
+        foreach (UIComponent child in Children)
         {
             // Modify child constraint based on stack direction
-            var originalConstraint = child.Constraint;
+            LayoutConstraint originalConstraint = child.Constraint;
             child.Constraint = new LayoutConstraint
             {
                 Anchor = Direction == StackDirection.Vertical ? Anchor.TopLeft : Anchor.TopLeft,
-                OffsetX = Direction == StackDirection.Horizontal ? currentOffset : originalConstraint.OffsetX,
-                OffsetY = Direction == StackDirection.Vertical ? currentOffset : originalConstraint.OffsetY,
+                OffsetX =
+                    Direction == StackDirection.Horizontal
+                        ? currentOffset
+                        : originalConstraint.OffsetX,
+                OffsetY =
+                    Direction == StackDirection.Vertical
+                        ? currentOffset
+                        : originalConstraint.OffsetY,
                 Width = originalConstraint.Width,
                 Height = originalConstraint.Height,
                 WidthPercent = originalConstraint.WidthPercent,
                 HeightPercent = originalConstraint.HeightPercent,
                 Margin = originalConstraint.Margin,
-                Padding = originalConstraint.Padding
+                Padding = originalConstraint.Padding,
             };
 
             child.Render(context);
@@ -52,12 +58,19 @@ public class Stack : UIContainer
             // For now, use explicit sizes or defaults
             if (Direction == StackDirection.Vertical)
             {
-                float height = originalConstraint.Height ?? originalConstraint.HeightPercent * context.CurrentContainer.ContentRect.Height ?? 30;
+                float height =
+                    originalConstraint.Height
+                    ?? originalConstraint.HeightPercent
+                        * context.CurrentContainer.ContentRect.Height
+                    ?? 30;
                 currentOffset += height + Spacing;
             }
             else
             {
-                float width = originalConstraint.Width ?? originalConstraint.WidthPercent * context.CurrentContainer.ContentRect.Width ?? 100;
+                float width =
+                    originalConstraint.Width
+                    ?? originalConstraint.WidthPercent * context.CurrentContainer.ContentRect.Width
+                    ?? 100;
                 currentOffset += width + Spacing;
             }
 
@@ -66,7 +79,3 @@ public class Stack : UIContainer
         }
     }
 }
-
-
-
-

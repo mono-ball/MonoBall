@@ -1,14 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="Arch" Version="2.1.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.11" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\PokeSharp.Engine.Common\PokeSharp.Engine.Common.csproj" />
-  </ItemGroup>
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="Arch" Version="2.1.0"/>
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0"/>
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\PokeSharp.Engine.Common\PokeSharp.Engine.Common.csproj"/>
+    </ItemGroup>
 </Project>

@@ -25,8 +25,10 @@ public class MapTextureTracker
     {
         var textureIds = new HashSet<string>();
 
-        foreach (var loadedTileset in tilesets)
+        foreach (LoadedTileset loadedTileset in tilesets)
+        {
             textureIds.Add(loadedTileset.TilesetId);
+        }
 
         _mapTextureIds[mapId] = textureIds;
         _logger?.LogDebug("Tracked {Count} texture IDs for map {MapId}", textureIds.Count, mapId);
@@ -40,7 +42,7 @@ public class MapTextureTracker
     /// <returns>HashSet of texture IDs used by the map.</returns>
     public HashSet<string> GetLoadedTextureIds(int mapId)
     {
-        return _mapTextureIds.TryGetValue(mapId, out var textureIds)
+        return _mapTextureIds.TryGetValue(mapId, out HashSet<string>? textureIds)
             ? new HashSet<string>(textureIds) // Return copy to prevent external modification
             : new HashSet<string>();
     }

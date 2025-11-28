@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 using PokeSharp.Engine.Scenes;
-using PokeSharp.Game.Initialization.Pipeline;
 
 namespace PokeSharp.Game.Initialization.Pipeline.Steps;
 
@@ -26,7 +25,8 @@ public class CreateInitialPlayerStep : InitializationStepBase
         CancellationToken cancellationToken
     )
     {
-        var logger = context.LoggerFactory.CreateLogger<CreateInitialPlayerStep>();
+        ILogger<CreateInitialPlayerStep> logger =
+            context.LoggerFactory.CreateLogger<CreateInitialPlayerStep>();
         context.PlayerFactory.CreatePlayer(
             context.Configuration.Initialization.PlayerSpawnX,
             context.Configuration.Initialization.PlayerSpawnY,
@@ -37,4 +37,3 @@ public class CreateInitialPlayerStep : InitializationStepBase
         return Task.CompletedTask;
     }
 }
-

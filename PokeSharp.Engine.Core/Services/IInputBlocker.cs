@@ -12,4 +12,3 @@ public interface IInputBlocker
     /// </summary>
     bool IsInputBlocked { get; }
 }
-

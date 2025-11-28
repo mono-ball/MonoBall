@@ -19,20 +19,22 @@ public static class GameLoggingExtensions
         Dictionary<string, object>? additionalData = null
     )
     {
-        using var scope = logger.BeginScope(
+        using IDisposable? scope = logger.BeginScope(
             new Dictionary<string, object> { ["EntityId"] = entityId, ["EntityType"] = entityType }
         );
 
-        var message =
+        string message =
             "[gold1]E[/] [green]✓[/] Entity created | id: [cyan]{EntityId}[/], type: [cyan]{EntityType}[/]";
         var args = new List<object> { entityId, entityType };
 
         if (additionalData != null)
-            foreach (var kvp in additionalData)
+        {
+            foreach (KeyValuePair<string, object> kvp in additionalData)
             {
                 message += $", {kvp.Key}: [cyan]{{{kvp.Key}}}[/]";
                 args.Add(kvp.Value);
             }
+        }
 
         logger.LogInformation(message, args.ToArray());
     }
@@ -47,7 +49,7 @@ public static class GameLoggingExtensions
         object? componentData = null
     )
     {
-        using var scope = logger.BeginScope(
+        using IDisposable? scope = logger.BeginScope(
             new Dictionary<string, object>
             {
                 ["EntityId"] = entityId,
@@ -56,18 +58,22 @@ public static class GameLoggingExtensions
         );
 
         if (componentData != null)
+        {
             logger.LogDebug(
                 "[gold1]E[/] [green]✓[/] Component added | entity: [cyan]{EntityId}[/], component: [cyan]{ComponentType}[/], data: {@ComponentData}",
                 entityId,
                 componentType,
                 componentData
             );
+        }
         else
+        {
             logger.LogDebug(
                 "[gold1]E[/] [green]✓[/] Component added | entity: [cyan]{EntityId}[/], component: [cyan]{ComponentType}[/]",
                 entityId,
                 componentType
             );
+        }
     }
 
     /// <summary>
@@ -80,7 +86,7 @@ public static class GameLoggingExtensions
         int entitiesProcessed = 0
     )
     {
-        using var scope = logger.BeginScope(
+        using IDisposable? scope = logger.BeginScope(
             new Dictionary<string, object>
             {
                 ["SystemName"] = systemName,
@@ -90,19 +96,23 @@ public static class GameLoggingExtensions
         );
 
         if (executionTimeMs > 16.67) // More than one frame at 60fps
+        {
             logger.LogWarning(
                 "[orange3]SYS[/] [orange3]⚠[/] System execution slow | system: [cyan]{SystemName}[/], time: [yellow]{ExecutionTimeMs:F2}ms[/], entities: [yellow]{EntitiesProcessed}[/]",
                 systemName,
                 executionTimeMs,
                 entitiesProcessed
             );
+        }
         else
+        {
             logger.LogDebug(
                 "[orange3]SYS[/] [green]✓[/] System executed | system: [cyan]{SystemName}[/], time: [yellow]{ExecutionTimeMs:F2}ms[/], entities: [yellow]{EntitiesProcessed}[/]",
                 systemName,
                 executionTimeMs,
                 entitiesProcessed
             );
+        }
     }
 
     /// <summary>
@@ -115,19 +125,21 @@ public static class GameLoggingExtensions
         Dictionary<string, object>? metadata = null
     )
     {
-        using var scope = logger.BeginScope(
+        using IDisposable? scope = logger.BeginScope(
             new Dictionary<string, object> { ["WorkflowName"] = workflowName, ["Status"] = status }
         );
 
-        var message = "[steelblue1]WF[/] [cyan]{WorkflowName}[/] | status: [cyan]{Status}[/]";
+        string message = "[steelblue1]WF[/] [cyan]{WorkflowName}[/] | status: [cyan]{Status}[/]";
         var args = new List<object> { workflowName, status };
 
         if (metadata != null)
-            foreach (var kvp in metadata)
+        {
+            foreach (KeyValuePair<string, object> kvp in metadata)
             {
                 message += $", {kvp.Key}: [cyan]{{{kvp.Key}}}[/]";
                 args.Add(kvp.Value);
             }
+        }
 
         logger.LogInformation(message, args.ToArray());
     }
@@ -164,10 +176,14 @@ public static class GameLoggingExtensions
         };
 
         if (additionalContext != null)
-            foreach (var kvp in additionalContext)
+        {
+            foreach (KeyValuePair<string, object> kvp in additionalContext)
+            {
                 contextData[kvp.Key] = kvp.Value;
+            }
+        }
 
-        using var scope = logger.BeginScope(contextData);
+        using IDisposable? scope = logger.BeginScope(contextData);
         logger.LogError(ex, message);
     }
 
@@ -181,7 +197,7 @@ public static class GameLoggingExtensions
         double loadTimeMs
     )
     {
-        using var scope = logger.BeginScope(
+        using IDisposable? scope = logger.BeginScope(
             new Dictionary<string, object>
             {
                 ["AssetPath"] = assetPath,
@@ -191,19 +207,23 @@ public static class GameLoggingExtensions
         );
 
         if (loadTimeMs > 50.0)
+        {
             logger.LogWarning(
                 "[aqua]A[/] [orange3]⚠[/] Asset loaded (slow) | path: [cyan]{AssetPath}[/], type: [cyan]{AssetType}[/], time: [yellow]{LoadTimeMs:F2}ms[/]",
                 assetPath,
                 assetType,
                 loadTimeMs
             );
+        }
         else
+        {
             logger.LogDebug(
                 "[aqua]A[/] [green]✓[/] Asset loaded | path: [cyan]{AssetPath}[/], type: [cyan]{AssetType}[/], time: [yellow]{LoadTimeMs:F2}ms[/]",
                 assetPath,
                 assetType,
                 loadTimeMs
             );
+        }
     }
 
     /// <summary>
@@ -237,21 +257,25 @@ public static class GameLoggingExtensions
         public void Dispose()
         {
             _stopwatch.Stop();
-            var elapsedMs = _stopwatch.Elapsed.TotalMilliseconds;
+            double elapsedMs = _stopwatch.Elapsed.TotalMilliseconds;
 
             if (elapsedMs > _warnThresholdMs)
+            {
                 _logger.LogWarning(
                     "[orange3]SYS[/] [orange3]⚠[/] Operation completed (slow) | operation: [cyan]{OperationName}[/], time: [yellow]{ElapsedMs:F2}ms[/], threshold: [yellow]{ThresholdMs:F2}ms[/]",
                     _operationName,
                     elapsedMs,
                     _warnThresholdMs
                 );
+            }
             else
+            {
                 _logger.LogDebug(
                     "[orange3]SYS[/] [green]✓[/] Operation completed | operation: [cyan]{OperationName}[/], time: [yellow]{ElapsedMs:F2}ms[/]",
                     _operationName,
                     elapsedMs
                 );
+            }
 
             _scope?.Dispose();
         }

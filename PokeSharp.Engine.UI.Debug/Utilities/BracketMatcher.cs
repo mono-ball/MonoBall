@@ -1,8 +1,8 @@
 namespace PokeSharp.Engine.UI.Debug.Utilities;
 
 /// <summary>
-/// Utility for finding matching brackets in text.
-/// Supports (), [], and {} bracket pairs.
+///     Utility for finding matching brackets in text.
+///     Supports (), [], and {} bracket pairs.
 /// </summary>
 public static class BracketMatcher
 {
@@ -10,18 +10,18 @@ public static class BracketMatcher
     {
         { '(', ')' },
         { '[', ']' },
-        { '{', '}' }
+        { '{', '}' },
     };
 
     private static readonly Dictionary<char, char> _closeToOpen = new()
     {
         { ')', '(' },
         { ']', '[' },
-        { '}', '{' }
+        { '}', '{' },
     };
 
     /// <summary>
-    /// Checks if a character is an opening bracket.
+    ///     Checks if a character is an opening bracket.
     /// </summary>
     public static bool IsOpeningBracket(char ch)
     {
@@ -29,7 +29,7 @@ public static class BracketMatcher
     }
 
     /// <summary>
-    /// Checks if a character is a closing bracket.
+    ///     Checks if a character is a closing bracket.
     /// </summary>
     public static bool IsClosingBracket(char ch)
     {
@@ -37,7 +37,7 @@ public static class BracketMatcher
     }
 
     /// <summary>
-    /// Checks if a character is any kind of bracket.
+    ///     Checks if a character is any kind of bracket.
     /// </summary>
     public static bool IsBracket(char ch)
     {
@@ -45,21 +45,29 @@ public static class BracketMatcher
     }
 
     /// <summary>
-    /// Finds the matching bracket for the bracket at the given position.
-    /// Returns the position of the matching bracket, or null if not found.
+    ///     Finds the matching bracket for the bracket at the given position.
+    ///     Returns the position of the matching bracket, or null if not found.
     /// </summary>
     /// <param name="lines">The text lines.</param>
     /// <param name="line">The line index of the bracket.</param>
     /// <param name="column">The column index of the bracket.</param>
     /// <returns>The (line, column) of the matching bracket, or null if not found or not a bracket.</returns>
-    public static (int line, int column)? FindMatchingBracket(List<string> lines, int line, int column)
+    public static (int line, int column)? FindMatchingBracket(
+        List<string> lines,
+        int line,
+        int column
+    )
     {
         if (line < 0 || line >= lines.Count)
+        {
             return null;
+        }
 
-        var currentLine = lines[line];
+        string currentLine = lines[line];
         if (column < 0 || column >= currentLine.Length)
+        {
             return null;
+        }
 
         char bracketChar = currentLine[column];
 
@@ -68,7 +76,8 @@ public static class BracketMatcher
             // Search forward for closing bracket
             return FindClosingBracket(lines, line, column, bracketChar, _openToClose[bracketChar]);
         }
-        else if (IsClosingBracket(bracketChar))
+
+        if (IsClosingBracket(bracketChar))
         {
             // Search backward for opening bracket
             return FindOpeningBracket(lines, line, column, _closeToOpen[bracketChar], bracketChar);
@@ -78,16 +87,21 @@ public static class BracketMatcher
     }
 
     private static (int line, int column)? FindClosingBracket(
-        List<string> lines, int startLine, int startCol, char openChar, char closeChar)
+        List<string> lines,
+        int startLine,
+        int startCol,
+        char openChar,
+        char closeChar
+    )
     {
         int depth = 1; // We start at an opening bracket
 
         // Start searching from the character after the opening bracket
-        var col = startCol + 1;
+        int col = startCol + 1;
 
         for (int lineIdx = startLine; lineIdx < lines.Count; lineIdx++)
         {
-            var line = lines[lineIdx];
+            string line = lines[lineIdx];
 
             for (int i = col; i < line.Length; i++)
             {
@@ -115,16 +129,21 @@ public static class BracketMatcher
     }
 
     private static (int line, int column)? FindOpeningBracket(
-        List<string> lines, int startLine, int startCol, char openChar, char closeChar)
+        List<string> lines,
+        int startLine,
+        int startCol,
+        char openChar,
+        char closeChar
+    )
     {
         int depth = 1; // We start at a closing bracket
 
         // Start searching from the character before the closing bracket
-        var col = startCol - 1;
+        int col = startCol - 1;
 
         for (int lineIdx = startLine; lineIdx >= 0; lineIdx--)
         {
-            var line = lines[lineIdx];
+            string line = lines[lineIdx];
 
             for (int i = col; i >= 0; i--)
             {
@@ -146,28 +165,34 @@ public static class BracketMatcher
 
             // Continue from end of previous line
             if (lineIdx > 0)
+            {
                 col = lines[lineIdx - 1].Length - 1;
+            }
         }
 
         return null; // No matching bracket found
     }
 
     /// <summary>
-    /// Finds bracket positions near the cursor (before or at cursor).
-    /// Returns positions for both the cursor bracket and its match.
+    ///     Finds bracket positions near the cursor (before or at cursor).
+    ///     Returns positions for both the cursor bracket and its match.
     /// </summary>
-    public static ((int line, int col) cursor, (int line, int col) match)? FindBracketPairNearCursor(
-        List<string> lines, int cursorLine, int cursorColumn)
+    public static (
+        (int line, int col) cursor,
+        (int line, int col) match
+    )? FindBracketPairNearCursor(List<string> lines, int cursorLine, int cursorColumn)
     {
         if (cursorLine < 0 || cursorLine >= lines.Count)
+        {
             return null;
+        }
 
-        var line = lines[cursorLine];
+        string line = lines[cursorLine];
 
         // Check character at cursor
         if (cursorColumn < line.Length)
         {
-            var match = FindMatchingBracket(lines, cursorLine, cursorColumn);
+            (int line, int column)? match = FindMatchingBracket(lines, cursorLine, cursorColumn);
             if (match.HasValue)
             {
                 return ((cursorLine, cursorColumn), match.Value);
@@ -177,7 +202,11 @@ public static class BracketMatcher
         // Check character before cursor
         if (cursorColumn > 0)
         {
-            var match = FindMatchingBracket(lines, cursorLine, cursorColumn - 1);
+            (int line, int column)? match = FindMatchingBracket(
+                lines,
+                cursorLine,
+                cursorColumn - 1
+            );
             if (match.HasValue)
             {
                 return ((cursorLine, cursorColumn - 1), match.Value);
@@ -187,7 +216,3 @@ public static class BracketMatcher
         return null;
     }
 }
-
-
-
-

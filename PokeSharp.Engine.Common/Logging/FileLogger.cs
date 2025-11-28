@@ -52,7 +52,9 @@ public sealed class FileLogger<T> : ILogger<T>, IDisposable
     public void Dispose()
     {
         if (_disposed)
+        {
             return;
+        }
 
         _disposed = true;
 
@@ -95,12 +97,14 @@ public sealed class FileLogger<T> : ILogger<T>, IDisposable
     )
     {
         if (!IsEnabled(logLevel) || _disposed)
+        {
             return;
+        }
 
-        var rawMessage = formatter(state, exception);
-        var message = LogFormatting.StripMarkup(rawMessage);
-        var timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
-        var logLevelStr = GetLogLevelString(logLevel);
+        string rawMessage = formatter(state, exception);
+        string message = LogFormatting.StripMarkup(rawMessage);
+        string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
+        string logLevelStr = GetLogLevelString(logLevel);
 
         var logEntry = new StringBuilder();
         logEntry.Append($"[{timestamp}] [{logLevelStr}] {_categoryName}: {message}");
@@ -125,8 +129,10 @@ public sealed class FileLogger<T> : ILogger<T>, IDisposable
     {
         try
         {
-            foreach (var logEntry in _logQueue.GetConsumingEnumerable(_cancellationToken.Token))
+            foreach (string logEntry in _logQueue.GetConsumingEnumerable(_cancellationToken.Token))
+            {
                 WriteToFile(logEntry);
+            }
         }
         catch (OperationCanceledException)
         {
@@ -140,7 +146,9 @@ public sealed class FileLogger<T> : ILogger<T>, IDisposable
         {
             // Check if we need to rotate the file
             if (_currentWriter == null || _currentFileSize >= _maxFileSize)
+            {
                 RotateLogFile();
+            }
 
             if (_currentWriter != null)
             {
@@ -165,7 +173,7 @@ public sealed class FileLogger<T> : ILogger<T>, IDisposable
         _currentWriter = null;
 
         // Create new log file with timestamp
-        var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+        string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
         _currentLogFile = Path.Combine(_logDirectory, $"pokesharp_{timestamp}.log");
         // PERFORMANCE: Disable AutoFlush to allow buffered writes
         // This dramatically reduces disk I/O overhead (95%+ reduction)
@@ -189,7 +197,8 @@ public sealed class FileLogger<T> : ILogger<T>, IDisposable
                 .Skip(10)
                 .ToList();
 
-            foreach (var oldFile in logFiles)
+            foreach (string oldFile in logFiles)
+            {
                 try
                 {
                     File.Delete(oldFile);
@@ -198,6 +207,7 @@ public sealed class FileLogger<T> : ILogger<T>, IDisposable
                 {
                     // Ignore errors deleting old files
                 }
+            }
         }
         catch
         {

@@ -104,9 +104,11 @@ public class SystemManager
         lock (_lock)
         {
             // Search update systems
-            var updateSystem = _updateSystems.OfType<T>().FirstOrDefault();
+            T? updateSystem = _updateSystems.OfType<T>().FirstOrDefault();
             if (updateSystem != null)
+            {
                 return updateSystem;
+            }
 
             // Search render systems
             return _renderSystems.OfType<T>().FirstOrDefault();
@@ -169,16 +171,20 @@ public class SystemManager
         ArgumentNullException.ThrowIfNull(world);
 
         if (_initialized)
+        {
             throw new InvalidOperationException("SystemManager has already been initialized.");
+        }
 
-        var totalSystems = _updateSystems.Count + _renderSystems.Count;
+        int totalSystems = _updateSystems.Count + _renderSystems.Count;
         _logger?.LogSystemsInitializing(totalSystems);
 
         lock (_lock)
         {
             // Initialize update systems
-            foreach (var system in _updateSystems)
+            foreach (IUpdateSystem system in _updateSystems)
+            {
                 if (system is ISystem legacySystem)
+                {
                     try
                     {
                         _logger?.LogSystemInitializing(system.GetType().Name);
@@ -193,10 +199,14 @@ public class SystemManager
                         );
                         throw;
                     }
+                }
+            }
 
             // Initialize render systems
-            foreach (var system in _renderSystems)
+            foreach (IRenderSystem system in _renderSystems)
+            {
                 if (system is ISystem legacySystem)
+                {
                     try
                     {
                         _logger?.LogSystemInitializing(system.GetType().Name);
@@ -211,6 +221,8 @@ public class SystemManager
                         );
                         throw;
                     }
+                }
+            }
         }
 
         _initialized = true;
@@ -225,17 +237,27 @@ public class SystemManager
     private void RebuildEnabledCache()
     {
         if (!_enabledCacheDirty)
+        {
             return;
+        }
 
         _cachedEnabledUpdateSystems.Clear();
-        foreach (var system in _updateSystems)
+        foreach (IUpdateSystem system in _updateSystems)
+        {
             if (system.Enabled)
+            {
                 _cachedEnabledUpdateSystems.Add(system);
+            }
+        }
 
         _cachedEnabledRenderSystems.Clear();
-        foreach (var system in _renderSystems)
+        foreach (IRenderSystem system in _renderSystems)
+        {
             if (system.Enabled)
+            {
                 _cachedEnabledRenderSystems.Add(system);
+            }
+        }
 
         _enabledCacheDirty = false;
     }
@@ -269,7 +291,8 @@ public class SystemManager
 
         _performanceTracker.IncrementFrame();
 
-        foreach (var system in _cachedEnabledUpdateSystems)
+        foreach (IUpdateSystem system in _cachedEnabledUpdateSystems)
+        {
             try
             {
                 var sw = Stopwatch.StartNew();
@@ -286,10 +309,13 @@ public class SystemManager
                     system.GetType().Name
                 );
             }
+        }
 
         // Log performance stats periodically (every 5 seconds at 60fps)
         if (_performanceTracker.FrameCount % 300 == 0)
+        {
             _performanceTracker.LogPerformanceStats();
+        }
     }
 
     /// <summary>
@@ -306,7 +332,8 @@ public class SystemManager
             RebuildEnabledCache();
         }
 
-        foreach (var system in _cachedEnabledRenderSystems)
+        foreach (IRenderSystem system in _cachedEnabledRenderSystems)
+        {
             try
             {
                 var sw = Stopwatch.StartNew();
@@ -323,6 +350,7 @@ public class SystemManager
                     system.GetType().Name
                 );
             }
+        }
     }
 
     /// <summary>

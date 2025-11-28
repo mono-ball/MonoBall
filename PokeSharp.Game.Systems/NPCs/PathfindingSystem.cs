@@ -80,11 +80,15 @@ public class PathfindingSystem : SystemBase, IUpdateSystem
     {
         // Skip if no waypoints
         if (movementRoute.Waypoints == null || movementRoute.Waypoints.Length == 0)
+        {
             return;
+        }
 
         // Skip if entity is currently moving
         if (movement.IsMoving)
+        {
             return;
+        }
 
         // Check if at end of path
         if (movementRoute.IsAtEnd)
@@ -102,7 +106,7 @@ public class PathfindingSystem : SystemBase, IUpdateSystem
 
         // Get current and target positions
         var currentPos = new Point(position.X, position.Y);
-        var targetWaypoint = movementRoute.CurrentWaypoint;
+        Point targetWaypoint = movementRoute.CurrentWaypoint;
 
         // If already at current waypoint, advance to next
         if (currentPos == targetWaypoint)
@@ -111,7 +115,9 @@ public class PathfindingSystem : SystemBase, IUpdateSystem
 
             // Check if we just reached the end
             if (movementRoute.IsAtEnd)
+            {
                 return;
+            }
 
             targetWaypoint = movementRoute.CurrentWaypoint;
         }
@@ -142,27 +148,37 @@ public class PathfindingSystem : SystemBase, IUpdateSystem
     )
     {
         // Calculate direction to target
-        var dx = target.X - current.X;
-        var dy = target.Y - current.Y;
+        int dx = target.X - current.X;
+        int dy = target.Y - current.Y;
 
         Direction moveDirection;
 
         // Prioritize movement based on larger delta
         if (Math.Abs(dx) > Math.Abs(dy))
+        {
             moveDirection = dx > 0 ? Direction.East : Direction.West;
+        }
         else if (Math.Abs(dy) > 0)
+        {
             moveDirection = dy > 0 ? Direction.South : Direction.North;
+        }
         else
-            // Already at target
+        // Already at target
+        {
             return true;
+        }
 
         // Create movement request
         var movementRequest = new MovementRequest(moveDirection);
 
         if (world.Has<MovementRequest>(entity))
+        {
             world.Set(entity, movementRequest);
+        }
         else
+        {
             world.Add(entity, movementRequest);
+        }
 
         return true;
     }
@@ -179,10 +195,18 @@ public class PathfindingSystem : SystemBase, IUpdateSystem
     )
     {
         if (_spatialQuery == null)
+        {
             return;
+        }
 
         // Use A* to find path
-        var path = _pathfindingService.FindPath(current, target, mapId, _spatialQuery, 500);
+        Queue<Point>? path = _pathfindingService.FindPath(
+            current,
+            target,
+            mapId,
+            _spatialQuery,
+            500
+        );
 
         if (path == null || path.Count == 0)
         {
@@ -203,11 +227,11 @@ public class PathfindingSystem : SystemBase, IUpdateSystem
         // 2. This only happens when pathfinding recalculates (NPC hits obstacle)
         // 3. Frequency is low (typically once per NPC per obstacle encounter)
         // This is acceptable because it's not a per-frame allocation
-        var newWaypoints = path.ToArray();
+        Point[] newWaypoints = path.ToArray();
 
         if (world.Has<MovementRoute>(entity))
         {
-            ref var movementRoute = ref world.Get<MovementRoute>(entity);
+            ref MovementRoute movementRoute = ref world.Get<MovementRoute>(entity);
             movementRoute.Waypoints = newWaypoints;
             movementRoute.CurrentWaypointIndex = 0;
             movementRoute.CurrentWaitTime = 0f;

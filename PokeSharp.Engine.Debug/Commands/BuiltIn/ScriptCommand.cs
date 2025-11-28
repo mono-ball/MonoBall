@@ -1,19 +1,18 @@
-using System;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
+using PokeSharp.Engine.UI.Debug.Core;
 
 namespace PokeSharp.Engine.Debug.Commands.BuiltIn;
 
 /// <summary>
-/// Manages script files and script evaluator state.
+///     Manages script files and script evaluator state.
 /// </summary>
 [ConsoleCommand("script", "Manage scripts")]
 public class ScriptCommand : IConsoleCommand
 {
     public string Name => "script";
     public string Description => "Manage scripts";
-    public string Usage => @"script                     - List all scripts
+
+    public string Usage =>
+        @"script                     - List all scripts
 script list                - List all scripts
 script load <filename>     - Load and execute script
 script save <name> <code>  - Save script to file
@@ -27,7 +26,7 @@ Examples:
 
     public async Task ExecuteAsync(IConsoleContext context, string[] args)
     {
-        var theme = context.Theme;
+        UITheme theme = context.Theme;
 
         // No args = list scripts
         if (args.Length == 0)
@@ -36,7 +35,7 @@ Examples:
             return;
         }
 
-        var subCommand = args[0].ToLower();
+        string subCommand = args[0].ToLower();
 
         switch (subCommand)
         {
@@ -66,8 +65,8 @@ Examples:
 
     private void ListScripts(IConsoleContext context)
     {
-        var theme = context.Theme;
-        var scripts = context.ListScripts();
+        UITheme theme = context.Theme;
+        List<string> scripts = context.ListScripts();
 
         if (scripts.Count == 0)
         {
@@ -76,40 +75,53 @@ Examples:
             context.WriteLine("Scripts are stored in:", theme.Info);
             context.WriteLine($"  {context.GetScriptsDirectory()}", theme.TextSecondary);
             context.WriteLine("", theme.TextPrimary);
-            context.WriteLine("Create a script with: script save <filename> <code>", theme.TextSecondary);
+            context.WriteLine(
+                "Create a script with: script save <filename> <code>",
+                theme.TextSecondary
+            );
             return;
         }
 
-        context.WriteLine("══════════════════════════════════════════════════════════════════", theme.Success);
+        context.WriteLine(
+            "══════════════════════════════════════════════════════════════════",
+            theme.Success
+        );
         context.WriteLine($"  AVAILABLE SCRIPTS ({scripts.Count} total)", theme.Success);
-        context.WriteLine("══════════════════════════════════════════════════════════════════", theme.Success);
+        context.WriteLine(
+            "══════════════════════════════════════════════════════════════════",
+            theme.Success
+        );
         context.WriteLine("Location:", theme.Info);
         context.WriteLine($"  {context.GetScriptsDirectory()}", theme.TextSecondary);
         context.WriteLine("");
 
         // Group scripts by type for better organization
-        var exampleScripts = scripts.Where(s => s.StartsWith("example", StringComparison.OrdinalIgnoreCase)).ToList();
+        var exampleScripts = scripts
+            .Where(s => s.StartsWith("example", StringComparison.OrdinalIgnoreCase))
+            .ToList();
         var userScripts = scripts.Except(exampleScripts).ToList();
 
         if (exampleScripts.Any())
         {
             context.WriteLine("  EXAMPLE SCRIPTS:", theme.BorderFocus);
-            foreach (var script in exampleScripts)
+            foreach (string script in exampleScripts)
             {
-                var name = Path.GetFileNameWithoutExtension(script);
-                context.WriteLine($"    {script,-30} script load {name}", theme.Info);
+                string name = Path.GetFileNameWithoutExtension(script);
+                context.WriteLine($"    {script, -30} script load {name}", theme.Info);
             }
+
             context.WriteLine("");
         }
 
         if (userScripts.Any())
         {
             context.WriteLine("  USER SCRIPTS:", theme.BorderFocus);
-            foreach (var script in userScripts)
+            foreach (string script in userScripts)
             {
-                var name = Path.GetFileNameWithoutExtension(script);
-                context.WriteLine($"    {script,-30} script load {name}", theme.TextPrimary);
+                string name = Path.GetFileNameWithoutExtension(script);
+                context.WriteLine($"    {script, -30} script load {name}", theme.TextPrimary);
             }
+
             context.WriteLine("");
         }
 
@@ -118,7 +130,7 @@ Examples:
 
     private async Task LoadScript(IConsoleContext context, string[] args)
     {
-        var theme = context.Theme;
+        UITheme theme = context.Theme;
 
         if (args.Length == 0)
         {
@@ -129,10 +141,10 @@ Examples:
             return;
         }
 
-        var filename = args[0];
+        string filename = args[0];
 
         // Load the script content
-        var scriptContent = context.LoadScript(filename);
+        string? scriptContent = context.LoadScript(filename);
         if (scriptContent == null)
         {
             context.WriteLine($"Failed to load script: {filename}", theme.Error);
@@ -151,7 +163,7 @@ Examples:
 
     private void SaveScript(IConsoleContext context, string[] args)
     {
-        var theme = context.Theme;
+        UITheme theme = context.Theme;
 
         if (args.Length < 2)
         {
@@ -159,14 +171,17 @@ Examples:
             context.WriteLine("Example: script save test Player.GetMoney()", theme.TextSecondary);
             context.WriteLine("", theme.TextPrimary);
             context.WriteLine("Note: For complex multi-line scripts, it's better to:", theme.Info);
-            context.WriteLine("  1. Create a .csx file in the Scripts directory", theme.TextSecondary);
+            context.WriteLine(
+                "  1. Create a .csx file in the Scripts directory",
+                theme.TextSecondary
+            );
             context.WriteLine("  2. Edit it in your favorite editor", theme.TextSecondary);
             context.WriteLine("  3. Load it with: script load <filename>", theme.TextSecondary);
             return;
         }
 
-        var filename = args[0];
-        var content = string.Join(" ", args.Skip(1));
+        string filename = args[0];
+        string content = string.Join(" ", args.Skip(1));
 
         // Save the script
         if (context.SaveScript(filename, content))
@@ -183,12 +198,14 @@ Examples:
 
     private void ResetScript(IConsoleContext context)
     {
-        var theme = context.Theme;
+        UITheme theme = context.Theme;
 
         context.ResetScriptState();
         context.WriteLine("Script state reset - all variables cleared", theme.Success);
         context.WriteLine("", theme.TextPrimary);
-        context.WriteLine("Note: Built-in globals (Player, Api, World, etc.) remain available", theme.Info);
+        context.WriteLine(
+            "Note: Built-in globals (Player, Api, World, etc.) remain available",
+            theme.Info
+        );
     }
 }
-

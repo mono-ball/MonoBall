@@ -1,27 +1,25 @@
-using Microsoft.Xna.Framework;
+using System.Text;
 using PokeSharp.Engine.Systems.Management;
 using PokeSharp.Engine.UI.Debug.Components.Base;
 using PokeSharp.Engine.UI.Debug.Components.Controls;
 using PokeSharp.Engine.UI.Debug.Core;
 using PokeSharp.Engine.UI.Debug.Interfaces;
 using PokeSharp.Engine.UI.Debug.Layout;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using PokeSharp.Engine.UI.Debug.Utilities;
 
 namespace PokeSharp.Engine.UI.Debug.Components.Debug;
 
 /// <summary>
-/// Panel that displays system performance metrics with horizontal bar charts.
-/// Shows per-system execution times sorted by impact.
+///     Panel that displays system performance metrics with horizontal bar charts.
+///     Shows per-system execution times sorted by impact.
 /// </summary>
 public class ProfilerPanel : DebugPanelBase, IProfilerOperations
 {
     private readonly ProfilerContent _content;
 
     /// <summary>
-    /// Creates a ProfilerPanel with the specified components.
-    /// Use <see cref="ProfilerPanelBuilder"/> to construct instances.
+    ///     Creates a ProfilerPanel with the specified components.
+    ///     Use <see cref="ProfilerPanelBuilder" /> to construct instances.
     /// </summary>
     internal ProfilerPanel(ProfilerContent content, StatusBar statusBar)
         : base(statusBar)
@@ -36,51 +34,66 @@ public class ProfilerPanel : DebugPanelBase, IProfilerOperations
         AddChild(_content);
     }
 
-    protected override UIComponent GetContentComponent() => _content;
-
-    // Delegate to content
-    public void SetMetricsProvider(Func<IReadOnlyDictionary<string, SystemMetrics>?>? provider) => _content.SetMetricsProvider(provider);
-    public void SetSortMode(ProfilerSortMode mode) => _content.SetSortMode(mode);
-    public ProfilerSortMode GetSortMode() => _content.GetSortMode();
-    public void SetShowOnlyActive(bool showOnlyActive) => _content.SetShowOnlyActive(showOnlyActive);
-    public bool GetShowOnlyActive() => _content.GetShowOnlyActive();
-    public void SetRefreshInterval(float intervalSeconds) => _content.SetRefreshInterval(intervalSeconds);
-    public void Refresh() => _content.Refresh();
-    public (int SystemCount, float TotalMs, float MaxSystemMs, string SlowestSystem) GetStatistics() => _content.GetStatistics();
-    public IEnumerable<string> GetSystemNames() => _content.GetSystemNames();
-    public (double LastMs, double AvgMs, double MaxMs, long UpdateCount)? GetSystemMetrics(string systemName) => _content.GetSystemMetrics(systemName);
-    public void ScrollToTop() => _content.ScrollToTop();
-    public void ScrollToBottom() => _content.ScrollToBottom();
-    public int GetScrollOffset() => _content.GetScrollOffset();
-
-    protected override void UpdateStatusBar()
+    public void SetSortMode(ProfilerSortMode mode)
     {
-        // Handle empty state
-        if (!_content.HasProvider)
-        {
-            SetStatusBar("No profiler provider configured", "");
-            return;
-        }
+        _content.SetSortMode(mode);
+    }
 
-        var stats = _content.GetStatistics();
-        var frameBudgetPercent = (stats.TotalMs / _content.TargetFrameTimeMs) * 100;
-        var statusIndicator = frameBudgetPercent > 100 ? Core.NerdFontIcons.StatusError :
-                             frameBudgetPercent > 80 ? Core.NerdFontIcons.StatusWarning : Core.NerdFontIcons.StatusHealthy;
-        var statsText = $"{statusIndicator} Systems: {stats.SystemCount} | Frame: {stats.TotalMs:F2}ms ({frameBudgetPercent:F0}% of budget)";
+    public ProfilerSortMode GetSortMode()
+    {
+        return _content.GetSortMode();
+    }
 
-        var activeFilter = _content.GetShowOnlyActive() ? "Active only" : "All";
-        var refreshRate = 60 / _content.RefreshFrameInterval;
-        var hints = $"Sort: {_content.GetSortMode()} | {activeFilter} | ~{refreshRate}fps";
+    public void SetShowOnlyActive(bool showOnlyActive)
+    {
+        _content.SetShowOnlyActive(showOnlyActive);
+    }
 
-        SetStatusBar(statsText, hints);
+    public bool GetShowOnlyActive()
+    {
+        return _content.GetShowOnlyActive();
+    }
 
-        var theme = ThemeManager.Current;
-        if (frameBudgetPercent <= 80)
-            StatusBar.ResetStatsColor();
-        else if (frameBudgetPercent <= 100)
-            StatusBar.StatsColor = theme.Warning;
-        else
-            StatusBar.StatsColor = theme.Error;
+    public void SetRefreshInterval(float intervalSeconds)
+    {
+        _content.SetRefreshInterval(intervalSeconds);
+    }
+
+    public void Refresh()
+    {
+        _content.Refresh();
+    }
+
+    public (int SystemCount, float TotalMs, float MaxSystemMs, string SlowestSystem) GetStatistics()
+    {
+        return _content.GetStatistics();
+    }
+
+    public IEnumerable<string> GetSystemNames()
+    {
+        return _content.GetSystemNames();
+    }
+
+    public (double LastMs, double AvgMs, double MaxMs, long UpdateCount)? GetSystemMetrics(
+        string systemName
+    )
+    {
+        return _content.GetSystemMetrics(systemName);
+    }
+
+    public void ScrollToTop()
+    {
+        _content.ScrollToTop();
+    }
+
+    public void ScrollToBottom()
+    {
+        _content.ScrollToBottom();
+    }
+
+    public int GetScrollOffset()
+    {
+        return _content.GetScrollOffset();
     }
 
     // ═══════════════════════════════════════════════════════════════════════════
@@ -89,19 +102,25 @@ public class ProfilerPanel : DebugPanelBase, IProfilerOperations
 
     public string ExportToString()
     {
-        var stats = _content.GetStatistics();
+        (int SystemCount, float TotalMs, float MaxSystemMs, string SlowestSystem) stats =
+            _content.GetStatistics();
         var sb = new StringBuilder();
         sb.AppendLine($"# Profiler Export - {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
         sb.AppendLine($"# Total Frame Time: {stats.TotalMs:F2}ms");
         sb.AppendLine();
-        sb.AppendLine($"{"System",-40} {"Last(ms)",10} {"Avg(ms)",10} {"Max(ms)",10}");
+        sb.AppendLine($"{"System", -40} {"Last(ms)", 10} {"Avg(ms)", 10} {"Max(ms)", 10}");
         sb.AppendLine(new string('-', 72));
 
-        foreach (var name in _content.GetSystemNames())
+        foreach (string name in _content.GetSystemNames())
         {
-            var m = _content.GetSystemMetrics(name);
+            (double LastMs, double AvgMs, double MaxMs, long UpdateCount)? m =
+                _content.GetSystemMetrics(name);
             if (m.HasValue)
-                sb.AppendLine($"{name,-40} {m.Value.LastMs,10:F3} {m.Value.AvgMs,10:F3} {m.Value.MaxMs,10:F3}");
+            {
+                sb.AppendLine(
+                    $"{name, -40} {m.Value.LastMs, 10:F3} {m.Value.AvgMs, 10:F3} {m.Value.MaxMs, 10:F3}"
+                );
+            }
         }
 
         return sb.ToString();
@@ -112,11 +131,16 @@ public class ProfilerPanel : DebugPanelBase, IProfilerOperations
         var sb = new StringBuilder();
         sb.AppendLine("System,LastMs,AvgMs,MaxMs,UpdateCount");
 
-        foreach (var name in _content.GetSystemNames())
+        foreach (string name in _content.GetSystemNames())
         {
-            var m = _content.GetSystemMetrics(name);
+            (double LastMs, double AvgMs, double MaxMs, long UpdateCount)? m =
+                _content.GetSystemMetrics(name);
             if (m.HasValue)
-                sb.AppendLine($"\"{name}\",{m.Value.LastMs:F3},{m.Value.AvgMs:F3},{m.Value.MaxMs:F3},{m.Value.UpdateCount}");
+            {
+                sb.AppendLine(
+                    $"\"{name}\",{m.Value.LastMs:F3},{m.Value.AvgMs:F3},{m.Value.MaxMs:F3},{m.Value.UpdateCount}"
+                );
+            }
         }
 
         return sb.ToString();
@@ -124,7 +148,58 @@ public class ProfilerPanel : DebugPanelBase, IProfilerOperations
 
     public void CopyToClipboard(bool asCsv = false)
     {
-        var text = asCsv ? ExportToCsv() : ExportToString();
-        PokeSharp.Engine.UI.Debug.Utilities.ClipboardManager.SetText(text);
+        string text = asCsv ? ExportToCsv() : ExportToString();
+        ClipboardManager.SetText(text);
+    }
+
+    protected override UIComponent GetContentComponent()
+    {
+        return _content;
+    }
+
+    // Delegate to content
+    public void SetMetricsProvider(Func<IReadOnlyDictionary<string, SystemMetrics>?>? provider)
+    {
+        _content.SetMetricsProvider(provider);
+    }
+
+    protected override void UpdateStatusBar()
+    {
+        // Handle empty state
+        if (!_content.HasProvider)
+        {
+            SetStatusBar("No profiler provider configured", "");
+            return;
+        }
+
+        (int SystemCount, float TotalMs, float MaxSystemMs, string SlowestSystem) stats =
+            _content.GetStatistics();
+        float frameBudgetPercent = stats.TotalMs / _content.TargetFrameTimeMs * 100;
+        string statusIndicator =
+            frameBudgetPercent > 100 ? NerdFontIcons.StatusError
+            : frameBudgetPercent > 80 ? NerdFontIcons.StatusWarning
+            : NerdFontIcons.StatusHealthy;
+        string statsText =
+            $"{statusIndicator} Systems: {stats.SystemCount} | Frame: {stats.TotalMs:F2}ms ({frameBudgetPercent:F0}% of budget)";
+
+        string activeFilter = _content.GetShowOnlyActive() ? "Active only" : "All";
+        int refreshRate = 60 / _content.RefreshFrameInterval;
+        string hints = $"Sort: {_content.GetSortMode()} | {activeFilter} | ~{refreshRate}fps";
+
+        SetStatusBar(statsText, hints);
+
+        UITheme theme = ThemeManager.Current;
+        if (frameBudgetPercent <= 80)
+        {
+            StatusBar.ResetStatsColor();
+        }
+        else if (frameBudgetPercent <= 100)
+        {
+            StatusBar.StatsColor = theme.Warning;
+        }
+        else
+        {
+            StatusBar.StatsColor = theme.Error;
+        }
     }
 }

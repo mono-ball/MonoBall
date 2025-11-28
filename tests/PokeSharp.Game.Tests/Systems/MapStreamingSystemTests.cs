@@ -50,15 +50,21 @@ public class MapStreamingSystemTests : IDisposable
         var playerEntity = _world.Create(new Player(), playerPos, streaming);
 
         // Act
-        var distanceToEdge = mapWorldPos.GetDistanceToEdge(new Vector2(playerPos.PixelX, playerPos.PixelY));
+        var distanceToEdge = mapWorldPos.GetDistanceToEdge(
+            new Vector2(playerPos.PixelX, playerPos.PixelY)
+        );
         var isNearEdge = distanceToEdge < STREAMING_RADIUS;
         var isNorthEdge = playerPos.Y < STREAMING_RADIUS;
 
         // Assert
         isNearEdge.Should().BeTrue("player should be within streaming radius of an edge");
         isNorthEdge.Should().BeTrue("player should be near north edge");
-        distanceToEdge.Should().BeLessThan(STREAMING_RADIUS,
-            "distance to nearest edge should be less than streaming radius");
+        distanceToEdge
+            .Should()
+            .BeLessThan(
+                STREAMING_RADIUS,
+                "distance to nearest edge should be less than streaming radius"
+            );
     }
 
     [Fact]
@@ -74,15 +80,19 @@ public class MapStreamingSystemTests : IDisposable
         var playerEntity = _world.Create(new Player(), playerPos, streaming);
 
         // Act
-        var distanceToEdge = mapWorldPos.GetDistanceToEdge(new Vector2(playerPos.PixelX, playerPos.PixelY));
+        var distanceToEdge = mapWorldPos.GetDistanceToEdge(
+            new Vector2(playerPos.PixelX, playerPos.PixelY)
+        );
         var mapHeightPixels = 20 * TILE_SIZE;
         var distanceToSouth = mapHeightPixels - playerPos.PixelY;
 
         // Assert
-        distanceToSouth.Should().BeLessThan(STREAMING_RADIUS,
-            "player should be within streaming radius of south edge");
-        distanceToEdge.Should().Be(distanceToSouth,
-            "distance to edge should equal distance to south edge");
+        distanceToSouth
+            .Should()
+            .BeLessThan(STREAMING_RADIUS, "player should be within streaming radius of south edge");
+        distanceToEdge
+            .Should()
+            .Be(distanceToSouth, "distance to edge should equal distance to south edge");
     }
 
     [Fact]
@@ -93,7 +103,9 @@ public class MapStreamingSystemTests : IDisposable
         var playerPos = new Position(18, 10); // Near east edge (tile coordinates)
 
         // Act
-        var distanceToEdge = mapWorldPos.GetDistanceToEdge(new Vector2(playerPos.PixelX, playerPos.PixelY));
+        var distanceToEdge = mapWorldPos.GetDistanceToEdge(
+            new Vector2(playerPos.PixelX, playerPos.PixelY)
+        );
         var mapWidthPixels = 20 * TILE_SIZE;
         var distanceToEast = mapWidthPixels - playerPos.PixelX;
 
@@ -110,12 +122,15 @@ public class MapStreamingSystemTests : IDisposable
         var playerPos = new Position(2, 10); // Near west edge (tile coordinates)
 
         // Act
-        var distanceToEdge = mapWorldPos.GetDistanceToEdge(new Vector2(playerPos.PixelX, playerPos.PixelY));
+        var distanceToEdge = mapWorldPos.GetDistanceToEdge(
+            new Vector2(playerPos.PixelX, playerPos.PixelY)
+        );
 
         // Assert
         distanceToEdge.Should().BeLessThan(STREAMING_RADIUS);
-        distanceToEdge.Should().Be(playerPos.PixelX,
-            "distance should equal distance from west edge (0)");
+        distanceToEdge
+            .Should()
+            .Be(playerPos.PixelX, "distance should equal distance from west edge (0)");
     }
 
     [Fact]
@@ -126,12 +141,18 @@ public class MapStreamingSystemTests : IDisposable
         var playerPos = new Position(2, 2); // Tile coordinates
 
         // Act
-        var distanceToEdge = mapWorldPos.GetDistanceToEdge(new Vector2(playerPos.PixelX, playerPos.PixelY));
+        var distanceToEdge = mapWorldPos.GetDistanceToEdge(
+            new Vector2(playerPos.PixelX, playerPos.PixelY)
+        );
 
         // Assert
         distanceToEdge.Should().BeLessThan(STREAMING_RADIUS);
-        distanceToEdge.Should().Be(playerPos.PixelX,
-            "should return distance to nearest edge (west and north are equidistant)");
+        distanceToEdge
+            .Should()
+            .Be(
+                playerPos.PixelX,
+                "should return distance to nearest edge (west and north are equidistant)"
+            );
     }
 
     [Fact]
@@ -142,11 +163,14 @@ public class MapStreamingSystemTests : IDisposable
         var playerPos = new Position(10, 10); // Tile coordinates
 
         // Act
-        var distanceToEdge = mapWorldPos.GetDistanceToEdge(new Vector2(playerPos.PixelX, playerPos.PixelY));
+        var distanceToEdge = mapWorldPos.GetDistanceToEdge(
+            new Vector2(playerPos.PixelX, playerPos.PixelY)
+        );
 
         // Assert
-        distanceToEdge.Should().BeGreaterThan(STREAMING_RADIUS,
-            "center of map should be far from all edges");
+        distanceToEdge
+            .Should()
+            .BeGreaterThan(STREAMING_RADIUS, "center of map should be far from all edges");
     }
 
     #endregion
@@ -204,8 +228,7 @@ public class MapStreamingSystemTests : IDisposable
         streaming.AddLoadedMap(new MapIdentifier("oldale_town"), new Vector2(0, -320)); // North (hypothetical)
 
         // Assert
-        streaming.LoadedMaps.Should().HaveCount(4,
-            "should track current map + 3 adjacent maps");
+        streaming.LoadedMaps.Should().HaveCount(4, "should track current map + 3 adjacent maps");
         streaming.IsMapLoaded(new MapIdentifier("route102")).Should().BeTrue();
         streaming.IsMapLoaded(new MapIdentifier("route110")).Should().BeTrue();
         streaming.IsMapLoaded(new MapIdentifier("oldale_town")).Should().BeTrue();
@@ -226,13 +249,14 @@ public class MapStreamingSystemTests : IDisposable
         var worldOffset = CalculateNorthConnectionOffset(
             littlerootHeight,
             connectionOffset,
-            TILE_SIZE);
+            TILE_SIZE
+        );
 
         // Assert
-        worldOffset.Y.Should().Be(-320,
-            "north connection should have negative Y offset (20 tiles * 16 pixels)");
-        worldOffset.X.Should().Be(0,
-            "X offset should match connection offset");
+        worldOffset
+            .Y.Should()
+            .Be(-320, "north connection should have negative Y offset (20 tiles * 16 pixels)");
+        worldOffset.X.Should().Be(0, "X offset should match connection offset");
     }
 
     [Fact]
@@ -246,11 +270,11 @@ public class MapStreamingSystemTests : IDisposable
         var worldOffset = CalculateSouthConnectionOffset(
             route101Height,
             connectionOffset,
-            TILE_SIZE);
+            TILE_SIZE
+        );
 
         // Assert
-        worldOffset.Y.Should().Be(320,
-            "south connection should have positive Y offset");
+        worldOffset.Y.Should().Be(320, "south connection should have positive Y offset");
         worldOffset.X.Should().Be(0);
     }
 
@@ -265,11 +289,11 @@ public class MapStreamingSystemTests : IDisposable
         var worldOffset = CalculateEastConnectionOffset(
             currentMapWidth,
             connectionOffset,
-            TILE_SIZE);
+            TILE_SIZE
+        );
 
         // Assert
-        worldOffset.X.Should().Be(320,
-            "east connection should have positive X offset");
+        worldOffset.X.Should().Be(320, "east connection should have positive X offset");
         worldOffset.Y.Should().Be(0);
     }
 
@@ -284,11 +308,13 @@ public class MapStreamingSystemTests : IDisposable
         var worldOffset = CalculateWestConnectionOffset(
             adjacentMapWidth,
             connectionOffset,
-            TILE_SIZE);
+            TILE_SIZE
+        );
 
         // Assert
-        worldOffset.X.Should().Be(-800,
-            "west connection should have negative X offset (50 tiles * 16 pixels)");
+        worldOffset
+            .X.Should()
+            .Be(-800, "west connection should have negative X offset (50 tiles * 16 pixels)");
         worldOffset.Y.Should().Be(0);
     }
 
@@ -303,13 +329,12 @@ public class MapStreamingSystemTests : IDisposable
         var worldOffset = CalculateNorthConnectionOffset(
             currentMapHeight,
             connectionOffset,
-            TILE_SIZE);
+            TILE_SIZE
+        );
 
         // Assert
-        worldOffset.X.Should().Be(80,
-            "X should be offset by 5 tiles * 16 pixels");
-        worldOffset.Y.Should().Be(-320,
-            "Y should still be negative for north connection");
+        worldOffset.X.Should().Be(80, "X should be offset by 5 tiles * 16 pixels");
+        worldOffset.Y.Should().Be(-320, "Y should still be negative for north connection");
     }
 
     #endregion
@@ -409,36 +434,40 @@ public class MapStreamingSystemTests : IDisposable
 
     #region Helper Methods
 
-    private Vector2 CalculateNorthConnectionOffset(int currentMapHeightTiles, int offsetTiles, int tileSize)
+    private Vector2 CalculateNorthConnectionOffset(
+        int currentMapHeightTiles,
+        int offsetTiles,
+        int tileSize
+    )
     {
-        return new Vector2(
-            offsetTiles * tileSize,
-            -(currentMapHeightTiles * tileSize)
-        );
+        return new Vector2(offsetTiles * tileSize, -(currentMapHeightTiles * tileSize));
     }
 
-    private Vector2 CalculateSouthConnectionOffset(int currentMapHeightTiles, int offsetTiles, int tileSize)
+    private Vector2 CalculateSouthConnectionOffset(
+        int currentMapHeightTiles,
+        int offsetTiles,
+        int tileSize
+    )
     {
-        return new Vector2(
-            offsetTiles * tileSize,
-            currentMapHeightTiles * tileSize
-        );
+        return new Vector2(offsetTiles * tileSize, currentMapHeightTiles * tileSize);
     }
 
-    private Vector2 CalculateEastConnectionOffset(int currentMapWidthTiles, int offsetTiles, int tileSize)
+    private Vector2 CalculateEastConnectionOffset(
+        int currentMapWidthTiles,
+        int offsetTiles,
+        int tileSize
+    )
     {
-        return new Vector2(
-            currentMapWidthTiles * tileSize,
-            offsetTiles * tileSize
-        );
+        return new Vector2(currentMapWidthTiles * tileSize, offsetTiles * tileSize);
     }
 
-    private Vector2 CalculateWestConnectionOffset(int adjacentMapWidthTiles, int offsetTiles, int tileSize)
+    private Vector2 CalculateWestConnectionOffset(
+        int adjacentMapWidthTiles,
+        int offsetTiles,
+        int tileSize
+    )
     {
-        return new Vector2(
-            -(adjacentMapWidthTiles * tileSize),
-            offsetTiles * tileSize
-        );
+        return new Vector2(-(adjacentMapWidthTiles * tileSize), offsetTiles * tileSize);
     }
 
     #endregion

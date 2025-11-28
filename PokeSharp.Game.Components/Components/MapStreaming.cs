@@ -49,10 +49,7 @@ public struct MapStreaming
     {
         CurrentMapId = currentMapId;
         LoadedMaps = new HashSet<MapIdentifier> { currentMapId };
-        MapWorldOffsets = new Dictionary<MapIdentifier, Vector2>
-        {
-            { currentMapId, Vector2.Zero }
-        };
+        MapWorldOffsets = new Dictionary<MapIdentifier, Vector2> { { currentMapId, Vector2.Zero } };
     }
 
     /// <summary>
@@ -72,7 +69,7 @@ public struct MapStreaming
     /// <returns>The world offset in pixels, or null if the map is not loaded.</returns>
     public readonly Vector2? GetMapOffset(MapIdentifier mapId)
     {
-        return MapWorldOffsets.TryGetValue(mapId, out var offset) ? offset : null;
+        return MapWorldOffsets.TryGetValue(mapId, out Vector2 offset) ? offset : null;
     }
 
     /// <summary>
