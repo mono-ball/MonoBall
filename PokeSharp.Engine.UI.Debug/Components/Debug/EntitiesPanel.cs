@@ -936,6 +936,13 @@ public class EntitiesPanel : DebugPanelBase, IEntityOperations
             return;
         }
 
+        // Check if mouse is over the scrollbar area - if so, skip entity selection
+        // to allow TextBuffer's scrollbar handler to process the click
+        if (IsMouseOverScrollbar(input.MousePosition, contentBounds))
+        {
+            return;
+        }
+
         // Handle left mouse button click
         if (input.IsMouseButtonPressed(MouseButton.Left))
         {
@@ -1021,6 +1028,38 @@ public class EntitiesPanel : DebugPanelBase, IEntityOperations
             Rect.Width - paddingLeft - paddingRight,
             Rect.Height - paddingTop - paddingBottom - statusBarHeight
         );
+    }
+
+    /// <summary>
+    ///     Checks if the mouse position is over the scrollbar area.
+    ///     This prevents entity selection from consuming scrollbar clicks.
+    /// </summary>
+    private bool IsMouseOverScrollbar(Point mousePos, LayoutRect contentBounds)
+    {
+        // Check if TextBuffer has a scrollbar (more lines than visible)
+        int totalLines = _entityListBuffer.TotalLines;
+        int visibleLines = _entityListBuffer.VisibleLineCount;
+        if (totalLines <= visibleLines)
+        {
+            return false; // No scrollbar needed
+        }
+
+        // Use contentBounds for scrollbar calculation (TextBuffer's Rect is protected)
+        LayoutRect bufferRect = contentBounds;
+
+        // Calculate scrollbar area (matches TextBuffer's HandleScrollbarInput calculation)
+        // Scrollbar input area: from Right - ScrollbarWidth to Right
+        // Y range: from Y + LinePadding to Y + Height - LinePadding
+        float scrollbarStartX = bufferRect.Right - _entityListBuffer.ScrollbarWidth;
+        float scrollbarEndX = bufferRect.Right;
+        float scrollbarStartY = bufferRect.Y + _entityListBuffer.LinePadding;
+        float scrollbarEndY = bufferRect.Y + bufferRect.Height - _entityListBuffer.LinePadding;
+
+        // Check if mouse is within scrollbar area
+        return mousePos.X >= scrollbarStartX 
+            && mousePos.X <= scrollbarEndX
+            && mousePos.Y >= scrollbarStartY
+            && mousePos.Y <= scrollbarEndY;
     }
 
     /// <summary>

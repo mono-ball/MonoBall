@@ -457,3 +457,4 @@ public override void OnStep(ScriptContext ctx, Entity entity)
 4. Test each animation type (toggle, one_way, temporary)
 5. Add state persistence if needed (save/load)
 
+

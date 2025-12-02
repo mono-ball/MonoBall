@@ -289,3 +289,4 @@ Test cases:
 - Multiple trigger animations work independently
 - State persists across map loads (if needed)
 
+

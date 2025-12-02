@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Input;
 using PokeSharp.Engine.UI.Debug.Components.Base;
 using PokeSharp.Engine.UI.Debug.Components.Controls;
 using PokeSharp.Engine.UI.Debug.Core;
+using PokeSharp.Engine.UI.Debug.Input;
 using PokeSharp.Engine.UI.Debug.Layout;
 
 namespace PokeSharp.Engine.UI.Debug.Components.Debug;
@@ -64,6 +65,11 @@ public class StatsContent : UIComponent
     private float _scrollOffset;
     private Func<StatsData>? _statsProvider;
     private float _totalContentHeight;
+
+    // Scrollbar drag tracking
+    private bool _isDraggingScrollbar;
+    private float _scrollbarDragStartY;
+    private float _scrollbarDragStartOffset;
 
     public StatsContent(string id)
     {
@@ -194,11 +200,17 @@ public class StatsContent : UIComponent
         float contentWidth = Rect.Width - (linePadding * 2) - (needsScrollbar ? scrollbarWidth : 0);
         float contentX = Rect.X + linePadding;
 
-        // Handle scroll input
-        if (context.Input != null && Rect.Contains(context.Input.MousePosition))
-        {
-            float maxScroll = Math.Max(0, _totalContentHeight - visibleHeight);
+        float maxScroll = Math.Max(0, _totalContentHeight - visibleHeight);
 
+        // Handle scrollbar input first (before other input to get priority)
+        if (context.Input != null && needsScrollbar)
+        {
+            HandleScrollbarInput(context, context.Input, visibleHeight, maxScroll);
+        }
+
+        // Handle scroll input (mouse wheel and keyboard)
+        if (context.Input != null && Rect.Contains(context.Input.MousePosition) && !_isDraggingScrollbar)
+        {
             // Mouse wheel scrolling
             if (context.Input.ScrollWheelDelta != 0)
             {
@@ -485,6 +497,87 @@ public class StatsContent : UIComponent
         if (needsScrollbar)
         {
             DrawScrollbar(renderer, theme, visibleHeight);
+        }
+    }
+
+    /// <summary>
+    ///     Handles all scrollbar mouse interactions with proper input capture.
+    /// </summary>
+    private void HandleScrollbarInput(
+        UIContext context,
+        InputState input,
+        float visibleHeight,
+        float maxScroll
+    )
+    {
+        int scrollbarWidth = ThemeManager.Current.ScrollbarWidth;
+        float trackX = Rect.Right - scrollbarWidth;
+        float trackY = Rect.Y;
+        float trackHeight = Rect.Height;
+
+        var scrollbarRect = new LayoutRect(trackX, trackY, scrollbarWidth, trackHeight);
+
+        // Calculate thumb size and position (minimum thumb height for usability)
+        const float MinThumbHeight = 20f;
+        float thumbHeight = Math.Max(
+            MinThumbHeight,
+            visibleHeight / _totalContentHeight * trackHeight
+        );
+        float scrollRatio = maxScroll > 0 ? _scrollOffset / maxScroll : 0;
+        float thumbY = trackY + (scrollRatio * (trackHeight - thumbHeight));
+
+        var thumbRect = new LayoutRect(trackX, thumbY, scrollbarWidth, thumbHeight);
+
+        bool isOverScrollbar = scrollbarRect.Contains(input.MousePosition);
+
+        // Handle dragging (continues even outside bounds due to input capture)
+        if (_isDraggingScrollbar)
+        {
+            if (input.IsMouseButtonDown(MouseButton.Left))
+            {
+                int deltaY = input.MousePosition.Y - (int)_scrollbarDragStartY;
+                float dragRatio = deltaY / trackHeight;
+                float scrollDelta = dragRatio * _totalContentHeight;
+
+                _scrollOffset = Math.Clamp(_scrollbarDragStartOffset + scrollDelta, 0, maxScroll);
+            }
+
+            // Handle mouse release (end drag)
+            if (input.IsMouseButtonReleased(MouseButton.Left))
+            {
+                _isDraggingScrollbar = false;
+                context.ReleaseCapture();
+            }
+        }
+        // Handle new click on scrollbar
+        else if (isOverScrollbar && input.IsMouseButtonPressed(MouseButton.Left))
+        {
+            // Capture input so drag continues even if mouse leaves scrollbar
+            context.CaptureInput(Id);
+
+            // Check if clicking on thumb (drag) or track (jump)
+            if (thumbRect.Contains(input.MousePosition))
+            {
+                // Start dragging the thumb
+                _isDraggingScrollbar = true;
+                _scrollbarDragStartY = input.MousePosition.Y;
+                _scrollbarDragStartOffset = _scrollOffset;
+            }
+            else
+            {
+                // Click on track - jump to that position immediately
+                float clickRatio = (input.MousePosition.Y - trackY) / trackHeight;
+                float targetScroll = clickRatio * _totalContentHeight - (visibleHeight / 2);
+                _scrollOffset = Math.Clamp(targetScroll, 0, maxScroll);
+
+                // Also start dragging from this new position in case they want to continue dragging
+                _isDraggingScrollbar = true;
+                _scrollbarDragStartY = input.MousePosition.Y;
+                _scrollbarDragStartOffset = _scrollOffset;
+            }
+
+            // Consume the mouse button to prevent other components from processing
+            input.ConsumeMouseButton(MouseButton.Left);
         }
     }
 

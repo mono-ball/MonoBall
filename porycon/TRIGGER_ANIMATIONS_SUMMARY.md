@@ -122,3 +122,4 @@ The foundation is there (animation scanner, tile system), you just need to:
 
 See `IMPLEMENTATION_TRIGGER_ANIMATIONS.md` for detailed code!
 
+

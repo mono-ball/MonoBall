@@ -93,16 +93,6 @@ public class ConsoleGlobals
     /// </summary>
     public GameStateApiService GameState => _apis.GameState;
 
-    /// <summary>
-    ///     Gets the Dialogue API service - same pattern as ScriptContext.Dialogue in NPC behaviors.
-    /// </summary>
-    public DialogueApiService Dialogue => _apis.Dialogue;
-
-    /// <summary>
-    ///     Gets the Effects API service - same pattern as ScriptContext.Effects in NPC behaviors.
-    /// </summary>
-    public EffectApiService Effects => _apis.Effects;
-
     #endregion
 
     #region Helper Methods
@@ -275,15 +265,9 @@ public class ConsoleGlobals
         Print("    GameState.SetVariable(n, v)     Set string variable");
         Print("    GameState.GetVariable(name)     Get string variable");
         Print("");
-        Print("  Dialogue Service:");
-        Print("    Dialogue.ShowMessage(text)      Display message box");
-        Print("");
         Print("  NPC Service:");
         Print("    Npc.SetPosition(entity, x, y)   Move NPC");
-        Print("    Npc.PlayAnimation(entity, anim) Change NPC animation");
-        Print("");
-        Print("  Effects Service:");
-        Print("    Effects.ShowEffect(type, x, y)  Display visual effect");
+        Print("    Npc.FaceDirection(entity, dir)  Change NPC facing");
         Print("");
 
         Print("═══ HELPER METHODS ═══");
