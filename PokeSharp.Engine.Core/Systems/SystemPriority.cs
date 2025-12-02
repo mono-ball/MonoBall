@@ -12,6 +12,9 @@ public static class SystemPriority
     // Spatial indexing (must run early)
     public const int SpatialHash = 25;
 
+    // Scripting (must run before behaviors)
+    public const int ScriptAttachment = 40;
+
     // AI and behaviors
     public const int AI = 50;
     public const int TileBehavior = 60;

@@ -70,6 +70,19 @@ public class InitializeBehaviorSystemsStep : InitializationStepBase
         );
         await tileBehaviorInitializer.InitializeAsync();
 
+        // Initialize script attachment system (Phase 3: Multi-Script Composition)
+        ILogger<ScriptAttachmentSystemInitializer> scriptAttachmentInitializerLogger =
+            context.LoggerFactory.CreateLogger<ScriptAttachmentSystemInitializer>();
+        var scriptAttachmentSystemInitializer = new ScriptAttachmentSystemInitializer(
+            scriptAttachmentInitializerLogger,
+            context.LoggerFactory,
+            context.SystemManager,
+            context.ScriptService,
+            context.ApiProvider,
+            eventBus
+        );
+        scriptAttachmentSystemInitializer.Initialize();
+
         // Set sprite texture loader in MapInitializer (must be called after MapInitializer is created)
         if (context.SpriteTextureLoader != null && context.MapInitializer != null)
         {
