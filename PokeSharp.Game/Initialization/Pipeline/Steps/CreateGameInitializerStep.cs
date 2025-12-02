@@ -1,4 +1,6 @@
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using PokeSharp.Engine.Core.Events;
 using PokeSharp.Engine.Scenes;
 using PokeSharp.Game.Initialization.Initializers;
 
@@ -43,6 +45,8 @@ public class CreateGameInitializerStep : InitializationStepBase
         ILogger<GameInitializer> gameInitializerLogger =
             context.LoggerFactory.CreateLogger<GameInitializer>();
 
+        IEventBus eventBus = context.Services.GetRequiredService<IEventBus>();
+
         var gameInitializer = new GameInitializer(
             gameInitializerLogger,
             context.LoggerFactory,
@@ -52,7 +56,8 @@ public class CreateGameInitializerStep : InitializationStepBase
             context.PoolManager,
             context.SpriteLoader,
             context.MapLoader,
-            context.MapDefinitionService
+            context.MapDefinitionService,
+            eventBus
         );
 
         context.GameInitializer = gameInitializer;

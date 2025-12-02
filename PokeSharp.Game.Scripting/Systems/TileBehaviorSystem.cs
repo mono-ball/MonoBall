@@ -4,8 +4,11 @@ using Arch.Core.Extensions;
 using Microsoft.Extensions.Logging;
 using PokeSharp.Engine.Common.Configuration;
 using PokeSharp.Engine.Common.Logging;
+using PokeSharp.Engine.Core.Events;
 using PokeSharp.Engine.Core.Systems;
 using PokeSharp.Engine.Core.Types;
+using PokeSharp.Engine.Core.Types.Events;
+using PokeSharp.Engine.Core.Events.Tile;
 using PokeSharp.Game.Components.Interfaces;
 using PokeSharp.Game.Components.Movement;
 using PokeSharp.Game.Components.Tiles;
@@ -28,6 +31,7 @@ public class TileBehaviorSystem : SystemBase, IUpdateSystem, ITileBehaviorSystem
 {
     private readonly IScriptingApiProvider _apis;
     private readonly PerformanceConfiguration _config;
+    private readonly IEventBus? _eventBus;
     private readonly ILogger<TileBehaviorSystem> _logger;
     private readonly ILoggerFactory _loggerFactory;
     private readonly ConcurrentDictionary<string, ILogger> _scriptLoggerCache = new();
@@ -39,12 +43,14 @@ public class TileBehaviorSystem : SystemBase, IUpdateSystem, ITileBehaviorSystem
         ILogger<TileBehaviorSystem> logger,
         ILoggerFactory loggerFactory,
         IScriptingApiProvider apis,
+        IEventBus? eventBus = null,
         PerformanceConfiguration? config = null
     )
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _loggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
         _apis = apis ?? throw new ArgumentNullException(nameof(apis));
+        _eventBus = eventBus;
         _config = config ?? PerformanceConfiguration.Default;
     }
 
@@ -355,6 +361,138 @@ public class TileBehaviorSystem : SystemBase, IUpdateSystem, ITileBehaviorSystem
     {
         _behaviorRegistry = registry;
         _logger.LogWorkflowStatus("Tile behavior registry linked", ("behaviors", registry.Count));
+    }
+
+    /// <summary>
+    ///     Called when an entity steps onto a tile.
+    ///     Publishes TileSteppedOnEvent and calls OnStep on tile behavior scripts.
+    ///     Returns false if the event was cancelled (entity should not step on tile).
+    /// </summary>
+    /// <param name="world">ECS world</param>
+    /// <param name="entity">Entity stepping on tile</param>
+    /// <param name="tileEntity">Tile entity being stepped on</param>
+    /// <param name="tilePosition">Position of the tile</param>
+    /// <returns>True if stepping is allowed, false if cancelled by script</returns>
+    public bool OnEntityStepOnTile(
+        World world,
+        Entity entity,
+        Entity tileEntity,
+        TilePosition tilePosition
+    )
+    {
+        // Get tile type from TileBehavior component if available
+        string tileType = "unknown";
+        if (tileEntity.Has<TileBehavior>())
+        {
+            ref TileBehavior behavior = ref tileEntity.Get<TileBehavior>();
+            tileType = behavior.BehaviorTypeId;
+        }
+
+        // Publish TileSteppedOnEvent if EventBus is available
+        if (_eventBus != null)
+        {
+            var steppedOnEvent = new TileSteppedOnEvent
+            {
+                Entity = entity,
+                TileX = tilePosition.X,
+                TileY = tilePosition.Y,
+                TileType = tileType,
+                FromDirection = 0, // TODO: Get actual direction if needed
+                Elevation = 0 // TODO: Get actual elevation if needed
+            };
+
+            _eventBus.Publish(steppedOnEvent);
+
+            // If event was cancelled by a subscriber, block the step
+            if (steppedOnEvent.IsCancelled)
+            {
+                _logger.LogDebug(
+                    "Entity {EntityId} blocked from stepping on tile at ({X}, {Y}): {Reason}",
+                    entity.Id,
+                    tilePosition.X,
+                    tilePosition.Y,
+                    steppedOnEvent.CancellationReason ?? "No reason provided"
+                );
+                return false;
+            }
+        }
+
+        // Call OnStep on tile behavior script (maintains backward compatibility)
+        if (
+            _behaviorRegistry != null
+            && tileEntity.Has<TileBehavior>()
+        )
+        {
+            ref TileBehavior behavior = ref tileEntity.Get<TileBehavior>();
+            if (behavior.IsActive)
+            {
+                object? scriptObj = _behaviorRegistry.GetScript(behavior.BehaviorTypeId);
+                if (scriptObj is TileBehaviorScriptBase script)
+                {
+                    try
+                    {
+                        var context = new ScriptContext(world, tileEntity, _logger, _apis);
+                        script.OnStep(context, entity);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogExceptionWithContext(
+                            ex,
+                            "Error in OnStep for tile at ({X}, {Y})",
+                            tilePosition.X,
+                            tilePosition.Y
+                        );
+                    }
+                }
+            }
+        }
+
+        return true; // Stepping allowed
+    }
+
+    /// <summary>
+    ///     Called when an entity steps off a tile.
+    ///     Publishes TileSteppedOffEvent and allows scripts to react to departure.
+    /// </summary>
+    /// <param name="world">ECS world</param>
+    /// <param name="entity">Entity stepping off tile</param>
+    /// <param name="tileEntity">Tile entity being stepped off</param>
+    /// <param name="tilePosition">Position of the tile</param>
+    public void OnEntityStepOffTile(
+        World world,
+        Entity entity,
+        Entity tileEntity,
+        TilePosition tilePosition
+    )
+    {
+        // Get tile type from TileBehavior component if available
+        string tileType = "unknown";
+        if (tileEntity.Has<TileBehavior>())
+        {
+            ref TileBehavior behavior = ref tileEntity.Get<TileBehavior>();
+            tileType = behavior.BehaviorTypeId;
+        }
+
+        // Publish TileSteppedOffEvent if EventBus is available
+        if (_eventBus != null)
+        {
+            var steppedOffEvent = new TileSteppedOffEvent
+            {
+                Entity = entity,
+                TileX = tilePosition.X,
+                TileY = tilePosition.Y,
+                TileType = tileType,
+                NewTileX = tilePosition.X, // TODO: Get actual new tile position from movement system
+                NewTileY = tilePosition.Y, // TODO: Get actual new tile position from movement system
+                ExitDirection = 0, // TODO: Get actual exit direction if needed
+                Elevation = 0 // TODO: Get actual elevation if needed
+            };
+
+            _eventBus.Publish(steppedOffEvent);
+        }
+
+        // Note: TileBehaviorScriptBase doesn't have an OnStepOff method yet
+        // This is just for event publishing to support event-driven mods
     }
 
     /// <summary>

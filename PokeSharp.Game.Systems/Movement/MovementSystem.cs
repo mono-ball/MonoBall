@@ -3,6 +3,7 @@ using Arch.Core.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
 using PokeSharp.Engine.Common.Logging;
+using PokeSharp.Engine.Core.Events;
 using PokeSharp.Engine.Core.Systems;
 using PokeSharp.Game.Components;
 using PokeSharp.Game.Components.Interfaces;
@@ -10,6 +11,7 @@ using PokeSharp.Game.Components.Maps;
 using PokeSharp.Game.Components.Movement;
 using PokeSharp.Game.Components.Rendering;
 using PokeSharp.Game.Components.Tiles;
+using PokeSharp.Game.Systems.Events;
 using PokeSharp.Game.Systems.Services;
 using EcsQueries = PokeSharp.Engine.Systems.Queries.Queries;
 
@@ -38,6 +40,7 @@ public class MovementSystem : SystemBase, IUpdateSystem
     };
 
     private readonly ICollisionService _collisionService;
+    private readonly IEventBus? _eventBus;
 
     // Cache for entities to remove (reused across frames to avoid allocation)
     private readonly List<Entity> _entitiesToRemove = new(32);
@@ -52,21 +55,28 @@ public class MovementSystem : SystemBase, IUpdateSystem
 
     private ITileBehaviorSystem? _tileBehaviorSystem;
 
+    // Performance tracking for event overhead
+    private float _totalEventTime;
+    private int _eventPublishCount;
+
     /// <summary>
     ///     Creates a new MovementSystem with required collision service and optional logger.
     /// </summary>
     /// <param name="collisionService">Collision service for movement validation (required).</param>
     /// <param name="spatialQuery">Optional spatial query for getting tile entities.</param>
+    /// <param name="eventBus">Optional event bus for publishing movement events.</param>
     /// <param name="logger">Optional logger for system diagnostics.</param>
     public MovementSystem(
         ICollisionService collisionService,
         ISpatialQuery? spatialQuery = null,
+        IEventBus? eventBus = null,
         ILogger<MovementSystem>? logger = null
     )
     {
         _collisionService =
             collisionService ?? throw new ArgumentNullException(nameof(collisionService));
         _spatialQuery = spatialQuery;
+        _eventBus = eventBus;
         _logger = logger;
     }
 
@@ -115,7 +125,7 @@ public class MovementSystem : SystemBase, IUpdateSystem
                 }
                 else
                 {
-                    ProcessMovementNoAnimation(world, ref position, ref movement, deltaTime);
+                    ProcessMovementNoAnimation(world, entity, ref position, ref movement, deltaTime);
                 }
             }
         );
@@ -181,6 +191,9 @@ public class MovementSystem : SystemBase, IUpdateSystem
 
             if (movement.MovementProgress >= 1.0f)
             {
+                // Store old position for event
+                (int oldX, int oldY) = (position.X, position.Y);
+
                 // Movement complete - snap to target position
                 movement.MovementProgress = 1.0f;
                 position.PixelX = movement.TargetPosition.X;
@@ -199,13 +212,34 @@ public class MovementSystem : SystemBase, IUpdateSystem
                 // Check if there's a pending movement request (player still holding direction)
                 // This prevents animation reset between consecutive tile movements
                 bool hasNextMovement = world.Has<MovementRequest>(entity);
-                
+
                 if (!hasNextMovement)
                 {
                     // No more movement - switch to idle
                     animation.ChangeAnimation(movement.FacingDirection.ToIdleAnimation());
                 }
-                // else: Keep walk animation playing (Pokemon Emerald behavior)
+
+                // PHASE 1.2: Publish MovementCompletedEvent AFTER successful movement
+                if (_eventBus != null)
+                {
+                    var startTime = DateTime.UtcNow;
+                    _eventBus.Publish(new MovementCompletedEvent
+                    {
+                        TypeId = "MovementCompleted",
+                        Timestamp = (float)DateTime.UtcNow.TimeOfDay.TotalSeconds,
+                        Entity = entity,
+                        OldPosition = (oldX, oldY),
+                        NewPosition = (position.X, position.Y),
+                        Direction = movement.FacingDirection,
+                        MapId = position.MapId,
+                        MovementTime = 1.0f / movement.MovementSpeed // Approximate movement duration
+                    });
+
+                    // Track performance overhead
+                    var elapsed = (DateTime.UtcNow - startTime).TotalMilliseconds;
+                    _totalEventTime += (float)elapsed;
+                    _eventPublishCount++;
+                }
             }
             else
             {
@@ -281,6 +315,7 @@ public class MovementSystem : SystemBase, IUpdateSystem
     /// </summary>
     private void ProcessMovementNoAnimation(
         World world,
+        Entity entity,
         ref Position position,
         ref GridMovement movement,
         float deltaTime
@@ -293,6 +328,9 @@ public class MovementSystem : SystemBase, IUpdateSystem
 
             if (movement.MovementProgress >= 1.0f)
             {
+                // Store old position for event
+                (int oldX, int oldY) = (position.X, position.Y);
+
                 // Movement complete - snap to target position
                 movement.MovementProgress = 1.0f;
                 position.PixelX = movement.TargetPosition.X;
@@ -306,6 +344,28 @@ public class MovementSystem : SystemBase, IUpdateSystem
                 position.Y = (int)((position.PixelY - mapOffset.Y) / tileSize);
 
                 movement.CompleteMovement();
+
+                // PHASE 1.2: Publish MovementCompletedEvent AFTER successful movement
+                if (_eventBus != null)
+                {
+                    var startTime = DateTime.UtcNow;
+                    _eventBus.Publish(new MovementCompletedEvent
+                    {
+                        TypeId = "MovementCompleted",
+                        Timestamp = (float)DateTime.UtcNow.TimeOfDay.TotalSeconds,
+                        Entity = entity,
+                        OldPosition = (oldX, oldY),
+                        NewPosition = (position.X, position.Y),
+                        Direction = movement.FacingDirection,
+                        MapId = position.MapId,
+                        MovementTime = 1.0f / movement.MovementSpeed // Approximate movement duration
+                    });
+
+                    // Track performance overhead
+                    var elapsed = (DateTime.UtcNow - startTime).TotalMilliseconds;
+                    _totalEventTime += (float)elapsed;
+                    _eventPublishCount++;
+                }
             }
             else
             {
@@ -415,10 +475,78 @@ public class MovementSystem : SystemBase, IUpdateSystem
                 return; // Invalid direction
         }
 
+        // Get map world offset for event publishing
+        Vector2 mapOffset = GetMapWorldOffset(world, position.MapId);
+        var targetPixels = new Vector2(
+            (targetX * tileSize) + mapOffset.X,
+            (targetY * tileSize) + mapOffset.Y
+        );
+
+        // PHASE 1.2: Publish MovementStartedEvent BEFORE validation
+        // This allows handlers (scripts, mods, cutscenes) to cancel movement
+        if (_eventBus != null)
+        {
+            var startTime = DateTime.UtcNow;
+            var startEvent = new MovementStartedEvent
+            {
+                TypeId = "MovementStarted",
+                Timestamp = (float)DateTime.UtcNow.TimeOfDay.TotalSeconds,
+                Entity = entity,
+                TargetPosition = targetPixels,
+                StartPosition = new Vector2(position.PixelX, position.PixelY),
+                Direction = direction
+            };
+
+            _eventBus.Publish(startEvent);
+
+            // Track performance overhead
+            var elapsed = (DateTime.UtcNow - startTime).TotalMilliseconds;
+            _totalEventTime += (float)elapsed;
+            _eventPublishCount++;
+
+            // Check if event was cancelled by any handler
+            if (startEvent.IsCancelled)
+            {
+                // Movement blocked by event handler
+                _eventBus.Publish(new MovementBlockedEvent
+                {
+                    TypeId = "MovementBlocked",
+                    Timestamp = (float)DateTime.UtcNow.TimeOfDay.TotalSeconds,
+                    Entity = entity,
+                    BlockReason = startEvent.CancellationReason ?? "Cancelled by event handler",
+                    TargetPosition = (targetX, targetY),
+                    Direction = direction,
+                    MapId = position.MapId
+                });
+
+                _logger?.LogDebug(
+                    "Movement cancelled by event handler: {Reason}",
+                    startEvent.CancellationReason
+                );
+                return;
+            }
+        }
+
         // Check map boundaries
         if (!IsWithinMapBounds(world, position.MapId, targetX, targetY))
         {
             _logger?.LogMovementBlocked(targetX, targetY, position.MapId);
+
+            // Publish blocked event
+            if (_eventBus != null)
+            {
+                _eventBus.Publish(new MovementBlockedEvent
+                {
+                    TypeId = "MovementBlocked",
+                    Timestamp = (float)DateTime.UtcNow.TimeOfDay.TotalSeconds,
+                    Entity = entity,
+                    BlockReason = "Out of map bounds",
+                    TargetPosition = (targetX, targetY),
+                    Direction = direction,
+                    MapId = position.MapId
+                });
+            }
+
             return; // Outside map bounds - block movement
         }
 
@@ -581,21 +709,15 @@ public class MovementSystem : SystemBase, IUpdateSystem
         // Start the grid movement
         var startPixels = new Vector2(position.PixelX, position.PixelY);
 
-        // Get map world offset for multi-map support
-        // Position.PixelX/PixelY must be in world space for rendering and map streaming
-        Vector2 mapOffset = GetMapWorldOffset(world, position.MapId);
-        var targetPixels = new Vector2(
-            (targetX * tileSize) + mapOffset.X,
-            (targetY * tileSize) + mapOffset.Y
-        );
-                movement.StartMovement(startPixels, targetPixels, direction);
+        // Reuse mapOffset and targetPixels already calculated above (lines 463-467)
+        movement.StartMovement(startPixels, targetPixels, direction);
 
-                // Update grid position immediately to prevent entities from passing through each other
-                // The pixel position will still interpolate smoothly for rendering
-                position.X = targetX;
-                position.Y = targetY;
+        // Update grid position immediately to prevent entities from passing through each other
+        // The pixel position will still interpolate smoothly for rendering
+        position.X = targetX;
+        position.Y = targetY;
 
-                // Note: FacingDirection and MovementDirection are already set by StartMovement
+        // Note: FacingDirection and MovementDirection are already set by StartMovement
     }
 
     /// <summary>

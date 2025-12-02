@@ -34,7 +34,7 @@ public class EventBus(ILogger<EventBus>? logger = null) : IEventBus
 
     /// <inheritdoc />
     public void Publish<TEvent>(TEvent eventData)
-        where TEvent : TypeEventBase
+        where TEvent : class
     {
         if (eventData == null)
         {
@@ -71,7 +71,7 @@ public class EventBus(ILogger<EventBus>? logger = null) : IEventBus
 
     /// <inheritdoc />
     public IDisposable Subscribe<TEvent>(Action<TEvent> handler)
-        where TEvent : TypeEventBase
+        where TEvent : class
     {
         if (handler == null)
         {
@@ -94,7 +94,7 @@ public class EventBus(ILogger<EventBus>? logger = null) : IEventBus
 
     /// <inheritdoc />
     public int GetSubscriberCount<TEvent>()
-        where TEvent : TypeEventBase
+        where TEvent : class
     {
         Type eventType = typeof(TEvent);
         return _handlers.TryGetValue(eventType, out ConcurrentDictionary<int, Delegate>? handlers)
@@ -104,7 +104,7 @@ public class EventBus(ILogger<EventBus>? logger = null) : IEventBus
 
     /// <inheritdoc />
     public void ClearSubscriptions<TEvent>()
-        where TEvent : TypeEventBase
+        where TEvent : class
     {
         Type eventType = typeof(TEvent);
         _handlers.TryRemove(eventType, out _);

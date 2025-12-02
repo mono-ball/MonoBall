@@ -11,6 +11,7 @@ using PokeSharp.Game.Initialization.Factories;
 using PokeSharp.Game.Input;
 using PokeSharp.Game.Systems;
 using PokeSharp.Game.Systems.Services;
+using PokeSharp.Engine.Core.Events;
 
 namespace PokeSharp.Game.Infrastructure.ServiceRegistration;
 
@@ -72,8 +73,9 @@ public static class GameServicesExtensions
                 );
             }
 
+            IEventBus eventBus = sp.GetRequiredService<IEventBus>();
             ILogger<CollisionService>? logger = sp.GetService<ILogger<CollisionService>>();
-            return new CollisionService(spatialQuery, logger);
+            return new CollisionService(spatialQuery, eventBus, logger);
         });
 
         // Game Initializers and Helpers

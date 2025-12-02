@@ -5,32 +5,33 @@ namespace PokeSharp.Engine.Core.Events;
 /// <summary>
 ///     Event bus interface for publishing and subscribing to events.
 ///     Provides decoupled communication between systems.
+///     Supports both legacy TypeEventBase and new IGameEvent interfaces for backwards compatibility.
 /// </summary>
 public interface IEventBus
 {
     /// <summary>
     ///     Subscribe to events of type TEvent.
     /// </summary>
-    /// <typeparam name="TEvent">The event type to subscribe to.</typeparam>
+    /// <typeparam name="TEvent">The event type to subscribe to (any class type).</typeparam>
     /// <param name="handler">The handler to invoke when the event is published.</param>
     /// <returns>A disposable subscription that can be used to unsubscribe.</returns>
     IDisposable Subscribe<TEvent>(Action<TEvent> handler)
-        where TEvent : TypeEventBase;
+        where TEvent : class;
 
     /// <summary>
     ///     Publish an event to all subscribers.
     /// </summary>
-    /// <typeparam name="TEvent">The event type to publish.</typeparam>
+    /// <typeparam name="TEvent">The event type to publish (any class type).</typeparam>
     /// <param name="eventData">The event data.</param>
     void Publish<TEvent>(TEvent eventData)
-        where TEvent : TypeEventBase;
+        where TEvent : class;
 
     /// <summary>
     ///     Clear all subscriptions for a specific event type.
     /// </summary>
-    /// <typeparam name="TEvent">The event type to clear subscriptions for.</typeparam>
+    /// <typeparam name="TEvent">The event type to clear subscriptions for (any class type).</typeparam>
     void ClearSubscriptions<TEvent>()
-        where TEvent : TypeEventBase;
+        where TEvent : class;
 
     /// <summary>
     ///     Clear all subscriptions across all event types.
@@ -40,8 +41,8 @@ public interface IEventBus
     /// <summary>
     ///     Get the number of subscribers for a specific event type.
     /// </summary>
-    /// <typeparam name="TEvent">The event type to check.</typeparam>
+    /// <typeparam name="TEvent">The event type to check (any class type).</typeparam>
     /// <returns>The number of subscribers.</returns>
     int GetSubscriberCount<TEvent>()
-        where TEvent : TypeEventBase;
+        where TEvent : class;
 }

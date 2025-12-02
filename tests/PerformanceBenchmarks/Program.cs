@@ -1,4 +1,4 @@
-using PokeSharp.Benchmarks;
+using PerformanceBenchmarks;
 
 namespace PokeSharp.Benchmarks;
 
@@ -6,6 +6,7 @@ class Program
 {
     static void Main(string[] args)
     {
-        SimplePerformanceTest.RunAllTests();
+        // Run comprehensive event performance validation
+        EventPerformanceValidator.RunValidation();
     }
 }

@@ -1,11 +1,13 @@
 using Arch.Core;
 using Arch.Core.Extensions;
 using Microsoft.Extensions.Logging;
+using PokeSharp.Engine.Core.Events;
 using PokeSharp.Engine.Core.Systems;
 using PokeSharp.Game.Components.Interfaces;
 using PokeSharp.Game.Components.Movement;
 using PokeSharp.Game.Components.Rendering;
 using PokeSharp.Game.Components.Tiles;
+using PokeSharp.Game.Systems.Events;
 using PokeSharp.Game.Systems.Services;
 
 namespace PokeSharp.Game.Systems;
@@ -15,16 +17,27 @@ namespace PokeSharp.Game.Systems;
 ///     Uses spatial hash to query entities with Collision components.
 ///     This is a service, not a system - it doesn't run every frame.
 /// </summary>
+/// <remarks>
+///     Event-Driven Collision: This service publishes collision events to enable
+///     script-based collision handling and modification. Scripts can subscribe to
+///     CollisionCheckEvent to block collisions, CollisionDetectedEvent for collision
+///     notifications, and CollisionResolvedEvent for post-resolution handling.
+/// </remarks>
 public class CollisionService : ICollisionService
 {
     private readonly ILogger<CollisionService>? _logger;
     private readonly ISpatialQuery _spatialQuery;
+    private readonly IEventBus? _eventBus;
     private ITileBehaviorSystem? _tileBehaviorSystem;
     private World? _world;
 
-    public CollisionService(ISpatialQuery spatialQuery, ILogger<CollisionService>? logger = null)
+    public CollisionService(
+        ISpatialQuery spatialQuery,
+        IEventBus? eventBus = null,
+        ILogger<CollisionService>? logger = null)
     {
         _spatialQuery = spatialQuery ?? throw new ArgumentNullException(nameof(spatialQuery));
+        _eventBus = eventBus;
         _logger = logger;
     }
 
@@ -53,6 +66,52 @@ public class CollisionService : ICollisionService
         byte entityElevation = Elevation.Default
     )
     {
+        // EVENT-DRIVEN: Publish CollisionCheckEvent for script interception
+        if (_eventBus != null)
+        {
+            Direction toDirection =
+                fromDirection != Direction.None ? fromDirection.Opposite() : Direction.None;
+
+            var checkEvent = new CollisionCheckEvent
+            {
+                TypeId = "collision.check",
+                Timestamp = 0f, // TODO: Get actual game time when available
+                Entity = Entity.Null, // Entity reference not available in service layer
+                MapId = mapId,
+                TilePosition = (tileX, tileY),
+                FromDirection = fromDirection,
+                ToDirection = toDirection,
+                Elevation = entityElevation,
+                IsBlocked = false
+            };
+
+            _eventBus.Publish(checkEvent);
+
+            // If scripts blocked the collision, return immediately
+            if (checkEvent.IsBlocked)
+            {
+                _logger?.LogDebug(
+                    "Collision blocked by script at ({X},{Y}) on map {MapId}. Reason: {Reason}",
+                    tileX,
+                    tileY,
+                    mapId,
+                    checkEvent.BlockReason ?? "No reason provided"
+                );
+
+                // Publish resolution event for script-blocked collision
+                PublishCollisionResolved(
+                    Entity.Null,
+                    mapId,
+                    (tileX, tileY),
+                    (tileX, tileY),
+                    wasBlocked: true,
+                    ResolutionStrategy.Custom
+                );
+
+                return false;
+            }
+        }
+
         // Get all entities at this position from spatial hash
         IReadOnlyList<Entity> entities = _spatialQuery.GetEntitiesAt(mapId, tileX, tileY);
 
@@ -83,6 +142,27 @@ public class CollisionService : ICollisionService
                     )
                 )
                 {
+                    // EVENT-DRIVEN: Publish CollisionDetectedEvent for behavior blocking
+                    PublishCollisionDetected(
+                        Entity.Null,
+                        entity,
+                        mapId,
+                        tileX,
+                        tileY,
+                        fromDirection,
+                        CollisionType.Behavior
+                    );
+
+                    // Publish resolution event for blocked movement
+                    PublishCollisionResolved(
+                        Entity.Null,
+                        mapId,
+                        (tileX, tileY),
+                        (tileX, tileY),
+                        wasBlocked: true,
+                        ResolutionStrategy.Blocked
+                    );
+
                     return false; // Behavior blocks movement
                 }
             }
@@ -95,12 +175,45 @@ public class CollisionService : ICollisionService
                 if (collision.IsSolid)
                 // Solid collision blocks movement
                 {
+                    // EVENT-DRIVEN: Publish CollisionDetectedEvent for solid collision
+                    PublishCollisionDetected(
+                        Entity.Null,
+                        entity,
+                        mapId,
+                        tileX,
+                        tileY,
+                        fromDirection,
+                        entity.Has<TileBehavior>() ? CollisionType.Tile : CollisionType.Entity
+                    );
+
+                    // Publish resolution event for blocked movement
+                    PublishCollisionResolved(
+                        Entity.Null,
+                        mapId,
+                        (tileX, tileY),
+                        (tileX, tileY),
+                        wasBlocked: true,
+                        ResolutionStrategy.Blocked
+                    );
+
                     return false;
                 }
             }
         }
 
-        // No blocking collisions found
+        // No blocking collisions found - publish successful resolution
+        if (_eventBus != null)
+        {
+            PublishCollisionResolved(
+                Entity.Null,
+                mapId,
+                (tileX, tileY),
+                (tileX, tileY),
+                wasBlocked: false,
+                ResolutionStrategy.Blocked
+            );
+        }
+
         return true;
     }
 
@@ -134,6 +247,44 @@ public class CollisionService : ICollisionService
         Direction fromDirection
     )
     {
+        // EVENT-DRIVEN: Publish CollisionCheckEvent for script interception
+        if (_eventBus != null)
+        {
+            Direction toDirection =
+                fromDirection != Direction.None ? fromDirection.Opposite() : Direction.None;
+
+            var checkEvent = new CollisionCheckEvent
+            {
+                TypeId = "collision.check",
+                Timestamp = 0f,
+                Entity = Entity.Null,
+                MapId = mapId,
+                TilePosition = (tileX, tileY),
+                FromDirection = fromDirection,
+                ToDirection = toDirection,
+                Elevation = entityElevation,
+                IsBlocked = false
+            };
+
+            _eventBus.Publish(checkEvent);
+
+            // If scripts blocked the collision, return early with blocked status
+            if (checkEvent.IsBlocked)
+            {
+                // Publish resolution event for script-blocked collision
+                PublishCollisionResolved(
+                    Entity.Null,
+                    mapId,
+                    (tileX, tileY),
+                    (tileX, tileY),
+                    wasBlocked: true,
+                    ResolutionStrategy.Custom
+                );
+
+                return (false, Direction.None, false);
+            }
+        }
+
         // OPTIMIZATION: Single spatial query instead of 2-3 separate queries
         IReadOnlyList<Entity> entities = _spatialQuery.GetEntitiesAt(mapId, tileX, tileY);
 
@@ -203,6 +354,19 @@ public class CollisionService : ICollisionService
             }
         }
 
+        // Publish resolution event if collision was checked
+        if (_eventBus != null)
+        {
+            PublishCollisionResolved(
+                Entity.Null,
+                mapId,
+                (tileX, tileY),
+                (tileX, tileY),
+                wasBlocked: !isWalkable,
+                ResolutionStrategy.Blocked
+            );
+        }
+
         return (isJumpTile, allowedJumpDir, isWalkable);
     }
 
@@ -222,5 +386,104 @@ public class CollisionService : ICollisionService
     public void SetTileBehaviorSystem(ITileBehaviorSystem tileBehaviorSystem)
     {
         _tileBehaviorSystem = tileBehaviorSystem;
+    }
+
+    /// <summary>
+    ///     Publishes a CollisionDetectedEvent when collision is detected.
+    /// </summary>
+    /// <param name="entity">The entity attempting to move.</param>
+    /// <param name="collidedWith">The entity or tile that was collided with.</param>
+    /// <param name="mapId">Map identifier.</param>
+    /// <param name="tileX">Tile X coordinate.</param>
+    /// <param name="tileY">Tile Y coordinate.</param>
+    /// <param name="direction">Direction of collision.</param>
+    /// <param name="collisionType">Type of collision.</param>
+    private void PublishCollisionDetected(
+        Entity entity,
+        Entity collidedWith,
+        int mapId,
+        int tileX,
+        int tileY,
+        Direction direction,
+        CollisionType collisionType
+    )
+    {
+        if (_eventBus == null)
+        {
+            return;
+        }
+
+        var detectedEvent = new CollisionDetectedEvent
+        {
+            TypeId = "collision.detected",
+            Timestamp = 0f, // TODO: Get actual game time when available
+            Entity = entity,
+            CollidedWith = collidedWith,
+            MapId = mapId,
+            TilePosition = (tileX, tileY),
+            CollisionDirection = direction,
+            CollisionType = collisionType
+        };
+
+        _eventBus.Publish(detectedEvent);
+
+        _logger?.LogDebug(
+            "Collision detected: Entity {Entity} collided with {CollidedWith} at ({X},{Y}) on map {MapId}. Type: {Type}",
+            entity,
+            collidedWith,
+            tileX,
+            tileY,
+            mapId,
+            collisionType
+        );
+    }
+
+    /// <summary>
+    ///     Publishes a CollisionResolvedEvent after collision resolution.
+    /// </summary>
+    /// <param name="entity">The entity involved in the collision.</param>
+    /// <param name="mapId">Map identifier.</param>
+    /// <param name="originalTarget">Original target position that was blocked.</param>
+    /// <param name="finalPosition">Final position after resolution.</param>
+    /// <param name="wasBlocked">Whether the collision prevented movement.</param>
+    /// <param name="strategy">Resolution strategy used.</param>
+    private void PublishCollisionResolved(
+        Entity entity,
+        int mapId,
+        (int X, int Y) originalTarget,
+        (int X, int Y) finalPosition,
+        bool wasBlocked,
+        ResolutionStrategy strategy = ResolutionStrategy.Blocked
+    )
+    {
+        if (_eventBus == null)
+        {
+            return;
+        }
+
+        var resolvedEvent = new CollisionResolvedEvent
+        {
+            TypeId = "collision.resolved",
+            Timestamp = 0f, // TODO: Get actual game time when available
+            Entity = entity,
+            MapId = mapId,
+            OriginalTarget = originalTarget,
+            FinalPosition = finalPosition,
+            WasBlocked = wasBlocked,
+            Strategy = strategy
+        };
+
+        _eventBus.Publish(resolvedEvent);
+
+        _logger?.LogDebug(
+            "Collision resolved: Entity {Entity} on map {MapId}. Target: ({TargetX},{TargetY}), Final: ({FinalX},{FinalY}), Blocked: {Blocked}",
+            entity,
+            mapId,
+            originalTarget.X,
+            originalTarget.Y,
+            finalPosition.X,
+            finalPosition.Y,
+            wasBlocked
+        );
     }
 }

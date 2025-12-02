@@ -28,7 +28,7 @@ public class MovementSystemTests : IDisposable
         _world = World.Create();
         _mockCollisionService = new Mock<ICollisionService>();
         _mockLogger = new Mock<ILogger<MovementSystem>>();
-        _system = new MovementSystem(_mockCollisionService.Object, null, _mockLogger.Object);
+        _system = new MovementSystem(_mockCollisionService.Object, null, null, _mockLogger.Object);
     }
 
     public void Dispose()

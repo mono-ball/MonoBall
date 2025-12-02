@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using PokeSharp.Engine.Core.Modding;
+using PokeSharp.Engine.Core.Events;
 using PokeSharp.Engine.Systems.Management;
 using PokeSharp.Engine.Systems.Pooling;
 using PokeSharp.Game.Data;
@@ -32,7 +33,7 @@ public static class CoreServicesExtensions
     }
 
     /// <summary>
-    ///     Registers core ECS services (World, SystemManager, EntityPoolManager).
+    ///     Registers core ECS services (World, SystemManager, EntityPoolManager, EventBus).
     /// </summary>
     public static IServiceCollection AddCoreEcsServices(this IServiceCollection services)
     {
@@ -49,6 +50,13 @@ public static class CoreServicesExtensions
         {
             ILogger<SystemManager>? logger = sp.GetService<ILogger<SystemManager>>();
             return new SystemManager(logger);
+        });
+
+        // Event Bus - Phase 1 event-driven ECS integration
+        services.AddSingleton<IEventBus>(sp =>
+        {
+            ILogger<EventBus>? logger = sp.GetService<ILogger<EventBus>>();
+            return new EventBus(logger);
         });
 
         // Entity Pool Manager - For entity recycling and pooling

@@ -14,6 +14,7 @@ using PokeSharp.Game.Infrastructure.Configuration;
 using PokeSharp.Game.Infrastructure.Services;
 using PokeSharp.Game.Systems;
 using PokeSharp.Game.Systems.Warps;
+using PokeSharp.Engine.Core.Events;
 
 namespace PokeSharp.Game.Initialization.Initializers;
 
@@ -29,7 +30,8 @@ public class GameInitializer(
     EntityPoolManager poolManager,
     SpriteLoader spriteLoader,
     MapLoader mapLoader,
-    MapDefinitionService mapDefinitionService
+    MapDefinitionService mapDefinitionService,
+    IEventBus eventBus
 ) : IGameInitializer
 {
     // Store reference to MapStreamingSystem so we can wire up lifecycle manager later
@@ -130,7 +132,7 @@ public class GameInitializer(
         // Register CollisionService (not a system, but a service used by MovementSystem)
         ILogger<CollisionService> collisionServiceLogger =
             loggerFactory.CreateLogger<CollisionService>();
-        CollisionService = new CollisionService(SpatialHashSystem, collisionServiceLogger);
+        CollisionService = new CollisionService(SpatialHashSystem, eventBus, collisionServiceLogger);
         CollisionService.SetWorld(world);
 
         // Register MovementSystem (Priority: 100, handles movement and collision checking)
@@ -138,6 +140,7 @@ public class GameInitializer(
         var movementSystem = new MovementSystem(
             CollisionService,
             SpatialHashSystem,
+            eventBus, // EventBus for Phase 1 event publishing
             movementLogger
         );
         systemManager.RegisterUpdateSystem(movementSystem);
