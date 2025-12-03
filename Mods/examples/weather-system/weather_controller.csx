@@ -2,10 +2,10 @@
 #load "events/WeatherEvents.csx"
 
 using PokeSharp.Engine.Core.Events;
+using PokeSharp.Engine.Core.Events.System;
 using PokeSharp.Engine.Core.Scripting;
 using System;
-using System.Threading;
-using System.Threading.Tasks;
+using System.Linq;
 
 /// <summary>
 /// Central weather controller that manages dynamic weather changes over time.
@@ -18,125 +18,92 @@ using System.Threading.Tasks;
 /// </summary>
 public class WeatherController : ScriptBase
 {
-    private string? _currentWeather;
-    private DateTime _lastWeatherChange;
-    private Random _random = new Random();
-    private CancellationTokenSource? _weatherLoopCancellation;
-    private Task? _weatherLoopTask;
-
     // Weather types
     private static readonly string[] WeatherTypes = { "Clear", "Rain", "Thunder", "Snow", "Sunshine", "Fog" };
 
-    // Configuration (loaded from mod.json)
-    private int _changeDurationMinutes = 5;
-    private float _thunderProbability = 0.3f;
-    private float _snowProbabilityWinter = 0.6f;
+    // Configuration (hardcoded - previously loaded from mod.json)
+    private const int ChangeDurationMinutes = 5;
+    private const float ThunderProbability = 0.3f;
+    private const float SnowProbabilityWinter = 0.6f;
 
-    public override async Task OnInitializedAsync()
+    public override void Initialize(ScriptContext ctx)
     {
-        await base.OnInitializedAsync();
-
-        LogInfo("Weather Controller initialized");
-
-        // Load configuration
-        LoadConfiguration();
-
-        // Set initial weather
-        SetInitialWeather();
-
-        // Start weather loop
-        StartWeatherLoop();
+        base.Initialize(ctx);
+        Context.Logger.LogInformation("Weather Controller initialized");
     }
 
-    public override Task OnDisposedAsync()
+    public override void RegisterEventHandlers(ScriptContext ctx)
     {
-        LogInfo("Weather Controller shutting down");
-        StopWeatherLoop();
-        return base.OnDisposedAsync();
-    }
-
-    private void LoadConfiguration()
-    {
-        if (Configuration != null)
+        On<TickEvent>(evt =>
         {
-            _changeDurationMinutes = Configuration.GetValueOrDefault("weatherChangeDurationMinutes", 5);
-            _thunderProbability = Configuration.GetValueOrDefault("thunderProbabilityDuringRain", 0.3f);
-            _snowProbabilityWinter = Configuration.GetValueOrDefault("snowProbabilityInWinter", 0.6f);
-
-            LogInfo($"Configuration loaded: Change every {_changeDurationMinutes} minutes");
-        }
-    }
-
-    private void SetInitialWeather()
-    {
-        // Start with clear weather
-        _currentWeather = "Clear";
-        _lastWeatherChange = DateTime.UtcNow;
-
-        // Publish initial sunshine event
-        PublishWeatherEvent(new SunshineEvent
-        {
-            WeatherType = "Sunshine",
-            Intensity = 0.7f,
-            DurationSeconds = _changeDurationMinutes * 60
-        });
-
-        LogInfo("Initial weather set to Clear/Sunshine");
-    }
-
-    private void StartWeatherLoop()
-    {
-        _weatherLoopCancellation = new CancellationTokenSource();
-
-        _weatherLoopTask = Task.Run(async () =>
-        {
-            while (!_weatherLoopCancellation.Token.IsCancellationRequested)
+            // Initialize state on first tick
+            if (!Context.HasState<WeatherState>())
             {
-                try
-                {
-                    // Check if it's time to change weather
-                    var timeSinceLastChange = DateTime.UtcNow - _lastWeatherChange;
-
-                    if (timeSinceLastChange.TotalMinutes >= _changeDurationMinutes)
+                Context.World.Add(
+                    Context.Entity.Value,
+                    new WeatherState
                     {
-                        ChangeWeather();
+                        CurrentWeather = "Clear",
+                        TicksSinceLastChange = 0,
+                        ChangeIntervalSeconds = ChangeDurationMinutes * 60f,
+                        ThunderCheckTimer = 0f,
+                        RandomSeed = DateTime.UtcNow.Millisecond
                     }
+                );
 
-                    // Check for thunder during rain
-                    if (_currentWeather == "Rain" && _random.NextDouble() < 0.1) // 10% check per loop
-                    {
-                        TriggerThunderstrike();
-                    }
+                // Publish initial sunshine event
+                PublishWeatherEvent(new SunshineEvent
+                {
+                    WeatherType = "Sunshine",
+                    Intensity = 0.7f,
+                    DurationSeconds = ChangeDurationMinutes * 60
+                });
 
-                    // Wait before next check (10 seconds)
-                    await Task.Delay(10000, _weatherLoopCancellation.Token);
-                }
-                catch (TaskCanceledException)
-                {
-                    break;
-                }
-                catch (Exception ex)
-                {
-                    LogError($"Error in weather loop: {ex.Message}");
-                }
+                Context.Logger.LogInformation("Initial weather set to Clear/Sunshine");
+                return;
             }
-        }, _weatherLoopCancellation.Token);
+
+            // Get state
+            ref var state = ref Context.GetState<WeatherState>();
+            var random = new Random(state.RandomSeed + (int)(state.TicksSinceLastChange * 1000));
+
+            // Accumulate time
+            state.TicksSinceLastChange += evt.DeltaTime;
+            state.ThunderCheckTimer += evt.DeltaTime;
+
+            // Check if it's time to change weather
+            if (state.TicksSinceLastChange >= state.ChangeIntervalSeconds)
+            {
+                ChangeWeather(ref state, random);
+                state.TicksSinceLastChange = 0;
+                state.RandomSeed = DateTime.UtcNow.Millisecond;
+            }
+
+            // Check for thunder during rain (every 10 seconds)
+            if (state.CurrentWeather == "Rain" && state.ThunderCheckTimer >= 10f)
+            {
+                if (random.NextDouble() < 0.1) // 10% chance per check
+                {
+                    TriggerThunderstrike(random);
+                }
+                state.ThunderCheckTimer = 0f;
+            }
+        });
     }
 
-    private void StopWeatherLoop()
+    public override void OnUnload()
     {
-        if (_weatherLoopCancellation != null)
+        Context.Logger.LogInformation("Weather Controller shutting down");
+        if (Context.HasState<WeatherState>())
         {
-            _weatherLoopCancellation.Cancel();
-            _weatherLoopTask?.Wait(TimeSpan.FromSeconds(2));
-            _weatherLoopCancellation.Dispose();
+            Context.RemoveState<WeatherState>();
         }
     }
 
-    private void ChangeWeather()
+    private void ChangeWeather(ref WeatherState state, Random random)
     {
-        string? previousWeather = _currentWeather;
-        string newWeather = SelectNewWeather();
+        string? previousWeather = state.CurrentWeather;
+        string newWeather = SelectNewWeather(random);
 
         // Stop previous weather
         if (previousWeather != null && previousWeather != "Clear")
@@ -145,10 +112,8 @@ public class WeatherController : ScriptBase
         }
 
         // Start new weather
-        _currentWeather = newWeather;
-        _lastWeatherChange = DateTime.UtcNow;
-
-        StartWeather(newWeather);
+        state.CurrentWeather = newWeather;
+        StartWeather(newWeather, random);
 
         // Publish weather changed event
         PublishWeatherEvent(new WeatherChangedEvent
@@ -158,10 +123,10 @@ public class WeatherController : ScriptBase
             IsNaturalTransition = true
         });
 
-        LogInfo($"Weather changed: {previousWeather ?? "None"} -> {newWeather}");
+        Context.Logger.LogInformation($"Weather changed: {previousWeather ?? "None"} -> {newWeather}");
     }
 
-    private string SelectNewWeather()
+    private string SelectNewWeather(Random random)
     {
         // Consider seasonal factors
         int month = DateTime.UtcNow.Month;
@@ -169,9 +134,9 @@ public class WeatherController : ScriptBase
         bool isSummer = month >= 6 && month <= 8;
 
         // Weight different weather types
-        double roll = _random.NextDouble();
+        double roll = random.NextDouble();
 
-        if (isWinter && roll < _snowProbabilityWinter)
+        if (isWinter && roll < SnowProbabilityWinter)
         {
             return "Snow";
         }
@@ -197,10 +162,10 @@ public class WeatherController : ScriptBase
         }
     }
 
-    private void StartWeather(string weather)
+    private void StartWeather(string weather, Random random)
     {
-        int duration = _changeDurationMinutes * 60;
-        float intensity = 0.5f + (float)_random.NextDouble() * 0.5f; // 0.5-1.0
+        int duration = ChangeDurationMinutes * 60;
+        float intensity = 0.5f + (float)random.NextDouble() * 0.5f; // 0.5-1.0
 
         switch (weather)
         {
@@ -211,7 +176,7 @@ public class WeatherController : ScriptBase
                     Intensity = intensity,
                     DurationSeconds = duration,
                     CreatePuddles = true,
-                    CanThunder = _random.NextDouble() < _thunderProbability
+                    CanThunder = random.NextDouble() < ThunderProbability
                 });
                 break;
 
@@ -256,7 +221,7 @@ public class WeatherController : ScriptBase
             case "Clear":
             case "Fog":
                 // These don't have specific start events yet
-                LogInfo($"Weather set to {weather}");
+                Context.Logger.LogInformation($"Weather set to {weather}");
                 break;
         }
     }
@@ -286,13 +251,13 @@ public class WeatherController : ScriptBase
         }
     }
 
-    private void TriggerThunderstrike()
+    private void TriggerThunderstrike(Random random)
     {
         // Random position for lightning (would normally use actual map bounds)
-        int x = _random.Next(0, 100);
-        int y = _random.Next(0, 100);
+        int x = random.Next(0, 100);
+        int y = random.Next(0, 100);
 
-        bool enableDamage = Configuration?.GetValueOrDefault("enableWeatherDamage", true) ?? true;
+        bool enableDamage = true; // Hardcoded (was from Configuration)
 
         PublishWeatherEvent(new ThunderstrikeEvent
         {
@@ -304,13 +269,12 @@ public class WeatherController : ScriptBase
             CausesEnvironmentalEffects = enableDamage
         });
 
-        LogInfo($"Thunder struck at ({x}, {y})!");
+        Context.Logger.LogInformation($"Thunder struck at ({x}, {y})!");
     }
 
     private void PublishWeatherEvent(IGameEvent weatherEvent)
     {
-        // Publish to event bus
-        EventBus?.Publish(weatherEvent);
+        Context.Events.Publish(weatherEvent);
     }
 
     /// <summary>
@@ -320,26 +284,33 @@ public class WeatherController : ScriptBase
     {
         if (!WeatherTypes.Contains(weatherType))
         {
-            LogWarning($"Unknown weather type: {weatherType}");
+            Context.Logger.LogWarning($"Unknown weather type: {weatherType}");
             return;
         }
 
-        string? previousWeather = _currentWeather;
+        if (!Context.HasState<WeatherState>())
+        {
+            return; // Not initialized yet
+        }
+
+        ref var state = ref Context.GetState<WeatherState>();
+        string? previousWeather = state.CurrentWeather;
 
         if (previousWeather != null && previousWeather != "Clear")
         {
             StopWeather(previousWeather);
         }
 
-        _currentWeather = weatherType;
-        _lastWeatherChange = DateTime.UtcNow;
+        state.CurrentWeather = weatherType;
+        state.TicksSinceLastChange = 0;
 
         if (durationSeconds > 0)
         {
-            _changeDurationMinutes = durationSeconds / 60;
+            state.ChangeIntervalSeconds = durationSeconds;
         }
 
-        StartWeather(weatherType);
+        var random = new Random(DateTime.UtcNow.Millisecond);
+        StartWeather(weatherType, random);
 
         PublishWeatherEvent(new WeatherChangedEvent
         {
@@ -348,13 +319,31 @@ public class WeatherController : ScriptBase
             IsNaturalTransition = false
         });
 
-        LogInfo($"Weather manually set to {weatherType}");
+        Context.Logger.LogInformation($"Weather manually set to {weatherType}");
     }
 
     /// <summary>
     /// Get current weather type.
     /// </summary>
-    public string? GetCurrentWeather() => _currentWeather;
+    public string? GetCurrentWeather()
+    {
+        if (!Context.HasState<WeatherState>())
+        {
+            return null;
+        }
+        ref var state = ref Context.GetState<WeatherState>();
+        return state.CurrentWeather;
+    }
+}
+
+// Component to store weather-specific state
+public struct WeatherState
+{
+    public string? CurrentWeather;
+    public float TicksSinceLastChange;
+    public float ChangeIntervalSeconds;
+    public float ThunderCheckTimer;
+    public int RandomSeed;
 }
 
 // Instantiate and return the controller

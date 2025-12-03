@@ -457,9 +457,8 @@ public class MapObjectSpawner
         int targetY =
             warpData.TryGetValue("y", out object? yVal) && yVal != null ? Convert.ToInt32(yVal) : 0;
 
-        // Always use default ground elevation (3) - don't read from map data
-        // Pokemon Emerald elevation values in map files are often incorrect
-        const byte targetElevation = 3;
+        // Note: Elevation is not used in Position struct - using default tile size instead
+        // Pokemon Emerald elevation values in map files are often incorrect anyway
 
         // Convert pixel coordinates to tile coordinates
         int tileX = (int)Math.Floor(obj.X / tileWidth);

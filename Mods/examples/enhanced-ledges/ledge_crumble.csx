@@ -45,7 +45,7 @@ public class CrumbleLedgeBehavior : ScriptBase
             ctx.State.SetBool(STATE_CRUMBLED, false);
         }
 
-        Context.Logger.LogInfo($"Crumble ledge initialized: max={_maxJumps} jumps, direction={_ledgeDirection}");
+        Context.Logger.LogInformation("Crumble ledge initialized: max={MaxJumps} jumps, direction={Direction}", _maxJumps, _ledgeDirection);
     }
 
     public override void RegisterEventHandlers(ScriptContext ctx)
@@ -90,10 +90,10 @@ public class CrumbleLedgeBehavior : ScriptBase
             jumpCount++;
             Context.State.SetInt(STATE_JUMP_COUNT, jumpCount);
 
-            Context.Logger.LogInfo($"Ledge jumped: {jumpCount}/{_maxJumps} times");
+            Context.Logger.LogInformation("Ledge jumped: {JumpCount}/{MaxJumps} times", jumpCount, _maxJumps);
 
             // Publish jump event
-            Context.PublishEvent(new LedgeJumpedEvent
+            Context.Events.Publish(new LedgeJumpedEvent
             {
                 Entity = evt.Entity,
                 Direction = _ledgeDirection,
@@ -127,7 +127,7 @@ public class CrumbleLedgeBehavior : ScriptBase
             // If at max jumps but not yet crumbled, crumble as player leaves
             if (!isCrumbled && jumpCount >= _maxJumps)
             {
-                Context.Logger.LogInfo("Ledge crumbling as player steps off");
+                Context.Logger.LogInformation("Ledge crumbling as player steps off");
                 CrumbleLedge(evt.Entity);
             }
         });
@@ -140,10 +140,10 @@ public class CrumbleLedgeBehavior : ScriptBase
 
         var jumpCount = Context.State.GetInt(STATE_JUMP_COUNT);
 
-        Context.Logger.LogWarning($"Ledge crumbled after {jumpCount} jumps at ({Context.TileData.X}, {Context.TileData.Y})");
+        Context.Logger.LogWarning("Ledge crumbled after {JumpCount} jumps at ({X}, {Y})", jumpCount, Context.TileData.X, Context.TileData.Y);
 
         // Publish crumble event
-        Context.PublishEvent(new LedgeCrumbledEvent
+        Context.Events.Publish(new LedgeCrumbledEvent
         {
             TileX = Context.TileData.X,
             TileY = Context.TileData.Y,

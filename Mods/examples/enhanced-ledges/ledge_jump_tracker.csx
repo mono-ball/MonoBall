@@ -55,7 +55,7 @@ public class LedgeJumpTrackerBehavior : ScriptBase
         }
 
         var totalJumps = ctx.State.GetInt(STATE_TOTAL_JUMPS);
-        Context.Logger.LogInfo($"Jump tracker initialized: {totalJumps} total jumps");
+        Context.Logger.LogInformation("Jump tracker initialized: {TotalJumps} total jumps", totalJumps);
     }
 
     public override void RegisterEventHandlers(ScriptContext ctx)
@@ -68,7 +68,7 @@ public class LedgeJumpTrackerBehavior : ScriptBase
             totalJumps++;
             Context.State.SetInt(STATE_TOTAL_JUMPS, totalJumps);
 
-            Context.Logger.LogInfo($"Ledge jumped! Total: {totalJumps}");
+            Context.Logger.LogInformation("Ledge jumped! Total: {TotalJumps}", totalJumps);
 
             // Track boosted jumps
             if (evt.IsBoosted)
@@ -77,7 +77,7 @@ public class LedgeJumpTrackerBehavior : ScriptBase
                 boostedJumps++;
                 Context.State.SetInt(STATE_BOOSTED_JUMPS, boostedJumps);
 
-                Context.Logger.LogInfo($"Boosted jump! Total boosted: {boostedJumps}");
+                Context.Logger.LogInformation("Boosted jump! Total boosted: {BoostedJumps}", boostedJumps);
                 CheckAchievement("boosted", 1, boostedJumps);
             }
 
@@ -91,7 +91,7 @@ public class LedgeJumpTrackerBehavior : ScriptBase
         // Track ledge crumbles (especially if player was on it)
         On<LedgeCrumbledEvent>((evt) =>
         {
-            Context.Logger.LogWarning($"Ledge crumbled at ({evt.TileX}, {evt.TileY}) after {evt.TotalJumps} jumps");
+            Context.Logger.LogWarning("Ledge crumbled at ({X}, {Y}) after {TotalJumps} jumps", evt.TileX, evt.TileY, evt.TotalJumps);
 
             if (evt.WasPlayerOn)
             {
@@ -99,7 +99,7 @@ public class LedgeJumpTrackerBehavior : ScriptBase
                 survivedCrumbles++;
                 Context.State.SetInt(STATE_SURVIVED_CRUMBLES, survivedCrumbles);
 
-                Context.Logger.LogInfo($"Survived crumble! Total survived: {survivedCrumbles}");
+                Context.Logger.LogInformation("Survived crumble! Total survived: {SurvivedCrumbles}", survivedCrumbles);
                 CheckAchievement("survivor", 1, survivedCrumbles);
             }
         });
@@ -107,7 +107,7 @@ public class LedgeJumpTrackerBehavior : ScriptBase
         // Track jump boosts
         On<JumpBoostActivatedEvent>((evt) =>
         {
-            Context.Logger.LogInfo($"Jump boost activated: {evt.BoostMultiplier}x for {evt.DurationSeconds}s");
+            Context.Logger.LogInformation("Jump boost activated: {Multiplier}x for {Duration}s", evt.BoostMultiplier, evt.DurationSeconds);
         });
     }
 
@@ -143,7 +143,7 @@ public class LedgeJumpTrackerBehavior : ScriptBase
         achievementList.Add(key);
         Context.State.SetString(STATE_ACHIEVEMENTS, string.Join(",", achievementList));
 
-        Context.Logger.LogInfo($"🏆 ACHIEVEMENT UNLOCKED: {name}");
+        Context.Logger.LogInformation("🏆 ACHIEVEMENT UNLOCKED: {Name}", name);
 
         // Would trigger achievement UI notification here
     }

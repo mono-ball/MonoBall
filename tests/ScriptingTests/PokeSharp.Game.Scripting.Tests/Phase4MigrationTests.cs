@@ -91,15 +91,6 @@ namespace PokeSharp.Tests.ScriptingTests
             iceScript.Initialize(tileContext);
             iceScript.RegisterEventHandlers(tileContext);
 
-            bool slidingTriggered = false;
-            _eventBus.Subscribe<MovementCompletedEvent>(evt =>
-            {
-                if (evt.Entity == _playerEntity)
-                {
-                    slidingTriggered = true;
-                }
-            });
-
             // ACT - Step onto ice tile
             var tileStepEvent = new TileSteppedOnEvent
             {
@@ -596,6 +587,69 @@ namespace PokeSharp.Tests.ScriptingTests
             _output.WriteLine("✅ PASS: Script state preserved across reload");
         }
 
+        [Fact]
+        [Trait("Category", "HotReload")]
+        [Trait("Priority", "High")]
+        [Trait("Phase", "4")]
+        public void HotReloadTest_VerifiesEventResubscription()
+        {
+            // ARRANGE
+            _output.WriteLine("=== TEST: Event handlers resubscribe correctly after hot-reload ===");
+            var testScript = new MigratedEventTestScript();
+            testScript.Initialize(_context);
+            testScript.RegisterEventHandlers(_context);
+
+            // Verify initial subscription works
+            var evt1 = new MovementCompletedEvent
+            {
+                Entity = _playerEntity,
+                PreviousX = 5,
+                PreviousY = 5,
+                CurrentX = 6,
+                CurrentY = 5,
+                Direction = 2,
+                MovementDuration = 0.5f,
+                TileTransition = false
+            };
+            _eventBus.Publish(evt1);
+            Assert.Equal(1, testScript.EventCount);
+            _output.WriteLine("✓ Initial subscription verified (1 event received)");
+
+            // ACT - Simulate hot-reload lifecycle
+            _output.WriteLine("Simulating hot-reload: unload → reload → resubscribe");
+            int countBeforeUnload = testScript.EventCount;
+            testScript.OnUnload(); // Unsubscribe from all events
+
+            var reloadedScript = new MigratedEventTestScript();
+            reloadedScript.Initialize(_context);
+            reloadedScript.RegisterEventHandlers(_context); // Re-register event handlers
+
+            // Publish event after hot-reload - old script should not receive it
+            var evt2 = new MovementCompletedEvent
+            {
+                Entity = _playerEntity,
+                PreviousX = 6,
+                PreviousY = 5,
+                CurrentX = 7,
+                CurrentY = 5,
+                Direction = 2,
+                MovementDuration = 0.5f,
+                TileTransition = false
+            };
+            _eventBus.Publish(evt2);
+
+            // ASSERT
+            // Original script's count should remain unchanged (not receiving new events)
+            Assert.Equal(countBeforeUnload, testScript.EventCount);
+            _output.WriteLine($"✓ Original script did not receive new event (count stayed at {testScript.EventCount})");
+
+            // Reloaded script should have received the new event
+            Assert.Equal(1, reloadedScript.EventCount);
+            _output.WriteLine("✓ Reloaded script received event (properly resubscribed)");
+
+            _output.WriteLine("✅ PASS: Event resubscription lifecycle works correctly");
+        }
+
         #endregion
 
         #region 7. Multi-Script Composition Tests
@@ -658,7 +712,8 @@ namespace PokeSharp.Tests.ScriptingTests
                 logger,
                 loggerFactory,
                 _mockApis,
-                _eventBus
+                _eventBus,
+                _world
             );
         }
 
@@ -786,17 +841,20 @@ namespace PokeSharp.Tests.ScriptingTests
             Context.Logger.LogDebug($"NPC patrolling to point {_currentPoint}: ({targetPos.X}, {targetPos.Y})");
 
             // Publish movement event
-            Publish(new MovementCompletedEvent
+            if (Context.Entity.HasValue)
             {
-                Entity = Context.Entity.Value,
-                PreviousX = (int)_patrolPoints[(_currentPoint - 1 + _patrolPoints.Length) % _patrolPoints.Length].X,
-                PreviousY = (int)_patrolPoints[(_currentPoint - 1 + _patrolPoints.Length) % _patrolPoints.Length].Y,
-                CurrentX = (int)targetPos.X,
-                CurrentY = (int)targetPos.Y,
-                Direction = 0,
-                MovementDuration = 1.0f,
-                TileTransition = true
-            });
+                Publish(new MovementCompletedEvent
+                {
+                    Entity = Context.Entity.Value,
+                    PreviousX = (int)_patrolPoints[(_currentPoint - 1 + _patrolPoints.Length) % _patrolPoints.Length].X,
+                    PreviousY = (int)_patrolPoints[(_currentPoint - 1 + _patrolPoints.Length) % _patrolPoints.Length].Y,
+                    CurrentX = (int)targetPos.X,
+                    CurrentY = (int)targetPos.Y,
+                    Direction = 0,
+                    MovementDuration = 1.0f,
+                    TileTransition = true
+                });
+            }
         }
     }
 
@@ -939,7 +997,9 @@ namespace PokeSharp.Tests.ScriptingTests
         public int StepFrames { get; set; } = 0;
         public bool IsPaused => false;
         public float TimeScale { get; set; } = 1.0f;
+#pragma warning disable CS0067 // Event is never used - this is a mock implementation
         public event Action<float>? OnTimeScaleChanged;
+#pragma warning restore CS0067
 
         public void Update(float deltaTime, float unscaledDeltaTime) { }
         public void Pause() { }

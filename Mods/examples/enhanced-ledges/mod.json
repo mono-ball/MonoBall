@@ -8,6 +8,7 @@
   },
   "scripts": [
     "events/LedgeEvents.csx",
+    "events/ItemEvents.csx",
     "ledge_crumble.csx",
     "jump_boost_item.csx",
     "ledge_jump_tracker.csx",

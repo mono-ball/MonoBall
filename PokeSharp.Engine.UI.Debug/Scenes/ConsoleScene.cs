@@ -35,6 +35,7 @@ public class ConsoleScene : SceneBase
     private UIContext? _uiContext;
     private VariablesPanel? _variablesPanel;
     private WatchPanel? _watchPanel;
+    private EventInspectorPanel? _eventInspectorPanel;
 
     public ConsoleScene(
         GraphicsDevice graphicsDevice,
@@ -71,6 +72,9 @@ public class ConsoleScene : SceneBase
 
     /// <summary>Gets the stats operations interface, or null if panel not loaded.</summary>
     public IStatsOperations? StatsOperations => _statsPanel;
+
+    /// <summary>Gets the event inspector panel, or null if panel not loaded.</summary>
+    public EventInspectorPanel? EventInspectorPanel => _eventInspectorPanel;
 
     // Events for integration with ConsoleSystem
     public event Action<string>? OnCommandSubmitted;
@@ -255,6 +259,14 @@ public class ConsoleScene : SceneBase
     public void SetStatsProvider(Func<StatsData>? provider)
     {
         _statsPanel?.SetStatsProvider(provider);
+    }
+
+    /// <summary>
+    ///     Sets the event inspector data provider function for the Events panel.
+    /// </summary>
+    public void SetEventInspectorProvider(Func<EventInspectorData>? provider)
+    {
+        _eventInspectorPanel?.SetDataProvider(provider);
     }
 
     /// <summary>
@@ -451,6 +463,15 @@ public class ConsoleScene : SceneBase
             _statsPanel.BorderThickness = 0;
             _statsPanel.Constraint = new LayoutConstraint { Anchor = Anchor.Fill, Padding = 0 };
 
+            // Create event inspector panel
+            _eventInspectorPanel = new EventInspectorPanelBuilder()
+                .WithRefreshInterval(2) // Update every 2 frames (30fps for events)
+                .Build();
+            _eventInspectorPanel.BackgroundColor = Color.Transparent;
+            _eventInspectorPanel.BorderColor = Color.Transparent;
+            _eventInspectorPanel.BorderThickness = 0;
+            _eventInspectorPanel.Constraint = new LayoutConstraint { Anchor = Anchor.Fill, Padding = 0 };
+
             // Add tabs to container
             _tabContainer.AddTab("Console", _consolePanel);
             _tabContainer.AddTab("Logs", _logsPanel);
@@ -459,6 +480,7 @@ public class ConsoleScene : SceneBase
             _tabContainer.AddTab("Entities", _entitiesPanel);
             _tabContainer.AddTab("Profiler", _profilerPanel);
             _tabContainer.AddTab("Stats", _statsPanel);
+            _tabContainer.AddTab("Events", _eventInspectorPanel);
             _tabContainer.SetActiveTab(0);
 
             // Show the console

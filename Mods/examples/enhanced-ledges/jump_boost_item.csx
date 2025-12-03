@@ -1,6 +1,7 @@
 using PokeSharp.Game.Scripting.Runtime;
 using PokeSharp.Engine.Core.Events.Movement;
 using EnhancedLedges.Events;
+using Arch.Core;
 
 /// <summary>
 ///     Jump Boost Item behavior - consumable that temporarily increases jump height.
@@ -31,7 +32,7 @@ public class JumpBoostItemBehavior : ScriptBase
         _durationSeconds = ctx.ItemData?.GetFloatProperty("duration_seconds", 30.0f) ?? 30.0f;
         _isConsumable = ctx.ItemData?.GetBoolProperty("consumable", true) ?? true;
 
-        Context.Logger.LogInfo($"Jump boost item initialized: multiplier={_boostMultiplier}x, duration={_durationSeconds}s");
+        Context.Logger.LogInformation("Jump boost item initialized: multiplier={Multiplier}x, duration={Duration}s", _boostMultiplier, _durationSeconds);
     }
 
     public override void RegisterEventHandlers(ScriptContext ctx)
@@ -68,24 +69,19 @@ public class JumpBoostItemBehavior : ScriptBase
 
             if (isJumping)
             {
-                Context.Logger.LogDebug($"Jump boost active: applying {_boostMultiplier}x multiplier");
+                Context.Logger.LogDebug("Jump boost active: applying {Multiplier}x multiplier", _boostMultiplier);
 
                 // Modify movement to jump 2 tiles instead of 1
                 var extendedX = evt.ToX + GetDirectionDeltaX(evt.Direction);
                 var extendedY = evt.ToY + GetDirectionDeltaY(evt.Direction);
 
-                Context.Logger.LogInfo($"Extended jump: ({evt.ToX},{evt.ToY}) -> ({extendedX},{extendedY})");
+                Context.Logger.LogInformation("Extended jump: ({FromX},{FromY}) -> ({ToX},{ToY})", evt.ToX, evt.ToY, extendedX, extendedY);
 
                 // Note: Would need to update evt.ToX/ToY if events were mutable
                 // Alternatively, publish a separate JumpExtendedEvent for systems to handle
             }
         });
 
-        // Clean up expired boosts
-        On<TickEvent>((evt) =>
-        {
-            CleanupExpiredBoosts();
-        });
     }
 
     private void ActivateBoost(Entity entity)
@@ -95,10 +91,10 @@ public class JumpBoostItemBehavior : ScriptBase
         // Store boost data in global state (would need entity-specific state in real implementation)
         Context.State.SetFloat($"boost_expires_{entity.Id}", (float)expiresAt.Ticks);
 
-        Context.Logger.LogInfo($"Jump boost activated for entity {entity.Id}, expires at {expiresAt}");
+        Context.Logger.LogInformation("Jump boost activated for entity {EntityId}, expires at {ExpiresAt}", entity.Id, expiresAt);
 
         // Publish boost activation event
-        Context.PublishEvent(new JumpBoostActivatedEvent
+        Context.Events.Publish(new JumpBoostActivatedEvent
         {
             Entity = entity,
             BoostMultiplier = _boostMultiplier,
@@ -157,18 +153,6 @@ public class JumpBoostItemBehavior : ScriptBase
             _ => 0
         };
     }
-}
-
-/// <summary>
-///     Event published when a player uses an item.
-///     This would normally be part of the core engine events.
-/// </summary>
-public sealed record ItemUsedEvent : IGameEvent
-{
-    public Guid EventId { get; init; } = Guid.NewGuid();
-    public DateTime Timestamp { get; init; } = DateTime.UtcNow;
-    public required Entity Entity { get; init; }
-    public required string ItemId { get; init; }
 }
 
 return new JumpBoostItemBehavior();

@@ -57,6 +57,13 @@ public class ModDependencyResolver
                     );
                 }
 
+                if (depId == null)
+                {
+                    throw new ModDependencyException(
+                        $"Mod '{mod.Id}' has invalid dependency: '{dependency}' - dependency ID is null"
+                    );
+                }
+
                 if (!modLookup.TryGetValue(depId, out ModManifest? depMod))
                 {
                     throw new ModDependencyException(
@@ -91,7 +98,7 @@ public class ModDependencyResolver
 
             foreach (string dependency in mod.Dependencies)
             {
-                if (TryParseDependency(dependency, out string? depId, out _, out _))
+                if (TryParseDependency(dependency, out string? depId, out _, out _) && depId != null)
                 {
                     graph[mod.Id].Add(depId);
                 }

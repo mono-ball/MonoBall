@@ -45,7 +45,6 @@ public class InitializeBehaviorSystemsStep : InitializationStepBase
         var npcBehaviorInitializer = new NPCBehaviorInitializer(
             npcBehaviorInitializerLogger,
             context.LoggerFactory,
-            context.World,
             context.SystemManager,
             context.BehaviorRegistry,
             context.ScriptService,

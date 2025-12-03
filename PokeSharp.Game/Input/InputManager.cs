@@ -31,6 +31,11 @@ public class InputManager(ILogger<InputManager> logger)
     public event Action? OnPerformanceOverlayToggled;
 
     /// <summary>
+    ///     Event fired when event inspector toggle is requested.
+    /// </summary>
+    public event Action? OnEventInspectorToggled;
+
+    /// <summary>
     ///     Handles zoom controls and debug inputs.
     /// </summary>
     /// <param name="world">The ECS world.</param>
@@ -110,6 +115,7 @@ public class InputManager(ILogger<InputManager> logger)
     ///     Handles debug controls for profiling and diagnostics.
     ///     P key: Toggle detailed rendering profiling
     ///     F3 key: Toggle performance overlay
+    ///     F9 key: Toggle event inspector
     /// </summary>
     private void HandleDebugControls(
         ElevationRenderSystem? renderSystem,
@@ -136,6 +142,13 @@ public class InputManager(ILogger<InputManager> logger)
                 "Performance overlay: {State}",
                 IsPerformanceOverlayEnabled ? "ON" : "OFF"
             );
+        }
+
+        // Toggle event inspector with F9 key
+        if (IsKeyPressed(currentKeyboardState, Keys.F9))
+        {
+            OnEventInspectorToggled?.Invoke();
+            logger.LogInformation("Event inspector toggle requested");
         }
     }
 

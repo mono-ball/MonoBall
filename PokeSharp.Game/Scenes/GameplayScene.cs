@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using PokeSharp.Engine.Core.Events;
 using PokeSharp.Engine.Scenes;
 using PokeSharp.Engine.Systems.Management;
 using PokeSharp.Engine.Systems.Pooling;
@@ -28,6 +29,7 @@ public class GameplayScene : SceneBase
     private readonly SceneManager? _sceneManager;
     private readonly SystemManager _systemManager;
     private readonly World _world;
+    private readonly EventInspectorOverlay? _eventInspectorOverlay;
 
     /// <summary>
     ///     Initializes a new instance of the GameplayScene class.
@@ -84,8 +86,32 @@ public class GameplayScene : SceneBase
             poolManager
         );
 
+        // Get EventBus from services and create Event Inspector
+        IEventBus? eventBus = services.GetService<IEventBus>();
+        if (eventBus is EventBus concreteEventBus)
+        {
+            _eventInspectorOverlay = new EventInspectorOverlay(
+                graphicsDevice,
+                concreteEventBus
+            );
+            logger.LogInformation("Event Inspector initialized (F9 to toggle)");
+        }
+
         // Hook up F3 toggle
         _inputManager.OnPerformanceOverlayToggled += () => _performanceOverlay.Toggle();
+
+        // Hook up F9 toggle for Event Inspector
+        _inputManager.OnEventInspectorToggled += () =>
+        {
+            if (_eventInspectorOverlay != null)
+            {
+                _eventInspectorOverlay.Toggle();
+                Logger.LogInformation(
+                    "Event Inspector {Status}",
+                    _eventInspectorOverlay.IsVisible ? "enabled" : "disabled"
+                );
+            }
+        };
     }
 
     /// <inheritdoc />
@@ -133,6 +159,9 @@ public class GameplayScene : SceneBase
 
         // Draw performance overlay on top (F3 to toggle)
         _performanceOverlay.Draw();
+
+        // Draw Event Inspector (F9 to toggle)
+        _eventInspectorOverlay?.Draw(GraphicsDevice);
     }
 
     /// <summary>
@@ -143,6 +172,7 @@ public class GameplayScene : SceneBase
         if (disposing)
         {
             _performanceOverlay.Dispose();
+            _eventInspectorOverlay?.Dispose();
         }
 
         base.Dispose(disposing);

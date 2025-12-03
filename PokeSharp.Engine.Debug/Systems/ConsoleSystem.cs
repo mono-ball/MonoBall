@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using PokeSharp.Engine.Core.Events;
 using PokeSharp.Engine.Core.Services;
 using PokeSharp.Engine.Core.Systems;
 using PokeSharp.Engine.Debug.Breakpoints;
@@ -72,6 +73,9 @@ public class ConsoleSystem : IUpdateSystem
     private DebugComponentRegistry _componentRegistry = null!;
     private ConsoleScene? _consoleScene;
     private ConsoleDocumentationProvider _documentationProvider = null!;
+
+    // Event Inspector integration
+    private EventInspectorAdapter? _eventInspectorAdapter;
 
     // Core console components (shared between console features)
     private ConsoleScriptEvaluator _evaluator = null!;
@@ -362,6 +366,27 @@ public class ConsoleSystem : IUpdateSystem
 
         // Set up stats provider for the Stats panel
         _consoleScene?.SetStatsProvider(CreateStatsProvider());
+
+        // Set up Event Inspector provider for the Events panel
+        try
+        {
+            var eventBus = _services.GetRequiredService<IEventBus>();
+            if (eventBus is EventBus concreteEventBus)
+            {
+                var eventMetrics = new EventMetrics { IsEnabled = true }; // Enabled for Phase 6 testing
+                _eventInspectorAdapter = new EventInspectorAdapter(concreteEventBus, eventMetrics, maxLogEntries: 100);
+                _consoleScene?.SetEventInspectorProvider(() => _eventInspectorAdapter.GetInspectorData());
+                _logger.LogDebug("Event Inspector initialized successfully");
+            }
+            else
+            {
+                _logger.LogWarning("EventBus is not the concrete type, Event Inspector will not be available");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to initialize Event Inspector - feature will be unavailable");
+        }
 
         // Welcome message - use theme colors
         UITheme theme = ThemeManager.Current;

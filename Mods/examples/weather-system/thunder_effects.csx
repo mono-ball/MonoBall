@@ -2,9 +2,9 @@
 #load "events/WeatherEvents.csx"
 
 using PokeSharp.Engine.Core.Events;
+using PokeSharp.Engine.Core.Events.System;
 using PokeSharp.Engine.Core.Scripting;
 using System;
-using System.Threading.Tasks;
 
 /// <summary>
 /// Handles lightning flash and thunder sound effects during thunderstorms.
@@ -13,48 +13,63 @@ using System.Threading.Tasks;
 /// </summary>
 public class ThunderEffects : ScriptBase
 {
-    private int _thunderstrikeCount = 0;
-    private bool _enableDamage = true;
-
-    public override async Task OnInitializedAsync()
+    public override void Initialize(ScriptContext ctx)
     {
-        await base.OnInitializedAsync();
+        base.Initialize(ctx);
+        Context.Logger.LogInformation("Thunder Effects system initialized");
+    }
 
-        LogInfo("Thunder Effects system initialized");
-
-        // Load configuration
-        if (Configuration != null)
+    public override void RegisterEventHandlers(ScriptContext ctx)
+    {
+        // Initialize state on first tick
+        On<TickEvent>(evt =>
         {
-            _enableDamage = Configuration.GetValueOrDefault("enableWeatherDamage", true);
-        }
+            if (!Context.HasState<ThunderState>())
+            {
+                Context.World.Add(
+                    Context.Entity.Value,
+                    new ThunderState
+                    {
+                        ThunderstrikeCount = 0,
+                        EnableDamage = true // Hardcoded (was from Configuration)
+                    }
+                );
+                Context.Logger.LogInformation("Thunder state initialized (damage: True)");
+            }
+        });
 
         // Subscribe to thunder events
-        EventBus?.Subscribe<ThunderstrikeEvent>(OnThunderstrike);
+        On<ThunderstrikeEvent>(OnThunderstrike);
 
-        LogInfo($"Subscribed to thunder events (damage: {_enableDamage})");
+        Context.Logger.LogInformation("Subscribed to thunder events");
     }
 
-    public override Task OnDisposedAsync()
+    public override void OnUnload()
     {
-        LogInfo($"Thunder Effects shutting down ({_thunderstrikeCount} total strikes)");
-        return base.OnDisposedAsync();
+        if (Context.HasState<ThunderState>())
+        {
+            ref var state = ref Context.GetState<ThunderState>();
+            Context.Logger.LogInformation($"Thunder Effects shutting down ({state.ThunderstrikeCount} total strikes)");
+            Context.RemoveState<ThunderState>();
+        }
     }
 
-    private async void OnThunderstrike(ThunderstrikeEvent evt)
+    private void OnThunderstrike(ThunderstrikeEvent evt)
     {
-        _thunderstrikeCount++;
+        ref var state = ref Context.GetState<ThunderState>();
+        state.ThunderstrikeCount++;
 
-        LogInfo($"⚡ THUNDERSTRIKE #{_thunderstrikeCount} at ({evt.StrikePosition.X}, {evt.StrikePosition.Y})!");
-        LogInfo($"   Intensity: {evt.Intensity:F2}, Damage: {evt.Damage}, Radius: {evt.AffectRadius}");
+        Context.Logger.LogInformation($"⚡ THUNDERSTRIKE #{state.ThunderstrikeCount} at ({evt.StrikePosition.X}, {evt.StrikePosition.Y})!");
+        Context.Logger.LogInformation($"   Intensity: {evt.Intensity:F2}, Damage: {evt.Damage}, Radius: {evt.AffectRadius}");
 
         // Create visual lightning flash effect
-        await CreateLightningFlash(evt);
+        CreateLightningFlash(evt);
 
         // Play thunder sound with delay based on distance
-        await PlayThunderSound(evt);
+        PlayThunderSound(evt);
 
         // Apply damage to entities if enabled
-        if (evt.Damage > 0 && _enableDamage)
+        if (evt.Damage > 0 && state.EnableDamage)
         {
             ApplyThunderDamage(evt);
         }
@@ -69,7 +84,7 @@ public class ThunderEffects : ScriptBase
         CreateScorchMark(evt.StrikePosition.X, evt.StrikePosition.Y);
     }
 
-    private async Task CreateLightningFlash(ThunderstrikeEvent evt)
+    private void CreateLightningFlash(ThunderstrikeEvent evt)
     {
         // In real implementation, this would:
         // 1. Create bright white flash overlay
@@ -77,7 +92,7 @@ public class ThunderEffects : ScriptBase
         // 3. Flash intensity based on event intensity
         // 4. Brief screen shake
 
-        LogInfo($"⚡ Lightning flash at ({evt.StrikePosition.X}, {evt.StrikePosition.Y})");
+        Context.Logger.LogInformation($"⚡ Lightning flash at ({evt.StrikePosition.X}, {evt.StrikePosition.Y})");
 
         // Example: Would call game rendering system
         // Renderer.CreateFlash(Color.White, evt.Intensity);
@@ -91,15 +106,13 @@ public class ThunderEffects : ScriptBase
         // Flash duration based on intensity
         int flashDurationMs = (int)(evt.Intensity * 200); // 0-200ms
 
-        LogInfo($"Flash duration: {flashDurationMs}ms");
-
-        await Task.Delay(flashDurationMs);
+        Context.Logger.LogInformation($"Flash duration: {flashDurationMs}ms");
 
         // Example: Would fade out flash
         // Renderer.FadeOutFlash(50);
     }
 
-    private async Task PlayThunderSound(ThunderstrikeEvent evt)
+    private void PlayThunderSound(ThunderstrikeEvent evt)
     {
         // Simulate sound travel delay
         // Lightning is instant, thunder sound takes time based on distance
@@ -108,9 +121,7 @@ public class ThunderEffects : ScriptBase
         var random = new Random();
         int delayMs = random.Next(100, 500); // 0.1-0.5 seconds
 
-        await Task.Delay(delayMs);
-
-        LogInfo($"💥 THUNDER! (delay: {delayMs}ms)");
+        Context.Logger.LogInformation($"💥 THUNDER! (delay: {delayMs}ms)");
 
         // In real implementation, would:
         // 1. Calculate distance from player to strike
@@ -123,7 +134,7 @@ public class ThunderEffects : ScriptBase
         // Example: Would call game audio system
         // AudioManager.PlaySound("thunder_crack", volume);
 
-        LogInfo($"Thunder sound played at volume {volume:F2}");
+        Context.Logger.LogInformation($"Thunder sound played at volume {volume:F2}");
     }
 
     private void ApplyThunderDamage(ThunderstrikeEvent evt)
@@ -134,7 +145,7 @@ public class ThunderEffects : ScriptBase
         // 3. Apply damage to exposed entities
         // 4. Apply status effects (paralysis?)
 
-        LogInfo($"Applying {evt.Damage} thunder damage in radius {evt.AffectRadius}");
+        Context.Logger.LogInformation($"Applying {evt.Damage} thunder damage in radius {evt.AffectRadius}");
 
         // Example: Would query game entity system
         // var entities = EntityManager.GetEntitiesInRadius(
@@ -153,12 +164,12 @@ public class ThunderEffects : ScriptBase
         // }
 
         // For now, just log hypothetical damage
-        LogInfo($"Thunder damaged entities at ({evt.StrikePosition.X}, {evt.StrikePosition.Y})");
+        Context.Logger.LogInformation($"Thunder damaged entities at ({evt.StrikePosition.X}, {evt.StrikePosition.Y})");
     }
 
     private void CreateEnvironmentalEffects(ThunderstrikeEvent evt)
     {
-        LogInfo("Creating environmental effects from lightning strike");
+        Context.Logger.LogInformation("Creating environmental effects from lightning strike");
 
         // In real implementation, could:
         // 1. Start fires on flammable tiles
@@ -171,7 +182,7 @@ public class ThunderEffects : ScriptBase
         // Small chance to start a fire
         if (random.NextDouble() < 0.2) // 20% chance
         {
-            LogInfo($"⚠️  Lightning started a fire at ({evt.StrikePosition.X}, {evt.StrikePosition.Y})!");
+            Context.Logger.LogInformation($"⚠️  Lightning started a fire at ({evt.StrikePosition.X}, {evt.StrikePosition.Y})!");
 
             // Example: Would call fire system
             // FireManager.StartFire(evt.StrikePosition.X, evt.StrikePosition.Y, evt.Intensity);
@@ -180,7 +191,7 @@ public class ThunderEffects : ScriptBase
         // Scare away wild Pokémon in the area
         if (random.NextDouble() < 0.5) // 50% chance
         {
-            LogInfo("Wild Pokémon fled from the thunderstrike");
+            Context.Logger.LogInformation("Wild Pokémon fled from the thunderstrike");
 
             // Example: Would affect encounter system
             // EncounterManager.ClearEncountersInRadius(
@@ -198,7 +209,7 @@ public class ThunderEffects : ScriptBase
         // 2. Scorch mark fades over time
         // 3. Multiple strikes in same area make darker marks
 
-        LogInfo($"Scorch mark created at ({x}, {y})");
+        Context.Logger.LogInformation($"Scorch mark created at ({x}, {y})");
 
         // Example: Would call game map/tile system
         // MapManager.GetTile(x, y).AddEffect("scorch_mark");
@@ -212,7 +223,15 @@ public class ThunderEffects : ScriptBase
     /// <summary>
     /// Get total number of thunderstrikes that have occurred.
     /// </summary>
-    public int GetThunderstrikeCount() => _thunderstrikeCount;
+    public int GetThunderstrikeCount()
+    {
+        if (!Context.HasState<ThunderState>())
+        {
+            return 0;
+        }
+        ref var state = ref Context.GetState<ThunderState>();
+        return state.ThunderstrikeCount;
+    }
 
     /// <summary>
     /// Manually trigger a thunderstrike at a specific position (for testing/items).
@@ -229,10 +248,17 @@ public class ThunderEffects : ScriptBase
             CausesEnvironmentalEffects = true
         };
 
-        EventBus?.Publish(evt);
+        Context.Events.Publish(evt);
 
-        LogInfo($"Manual thunderstrike triggered at ({x}, {y})");
+        Context.Logger.LogInformation($"Manual thunderstrike triggered at ({x}, {y})");
     }
+}
+
+// Component to store thunder-specific state
+public struct ThunderState
+{
+    public int ThunderstrikeCount;
+    public bool EnableDamage;
 }
 
 // Instantiate and return the thunder effects handler

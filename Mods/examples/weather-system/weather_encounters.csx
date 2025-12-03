@@ -2,10 +2,10 @@
 #load "events/WeatherEvents.csx"
 
 using PokeSharp.Engine.Core.Events;
+using PokeSharp.Engine.Core.Events.System;
 using PokeSharp.Engine.Core.Scripting;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 /// <summary>
 /// Modifies Pokémon encounter rates and types based on current weather.
@@ -20,76 +20,90 @@ using System.Threading.Tasks;
 /// </summary>
 public class WeatherEncounters : ScriptBase
 {
-    private string _currentWeather = "Clear";
-    private Dictionary<string, float> _typeMultipliers = new Dictionary<string, float>();
-    private float _globalMultiplier = 1.0f;
+    // Configuration (hardcoded - previously from mod.json)
+    private const float WeatherEncounterMultiplier = 1.5f;
 
-    // Configuration
-    private float _weatherEncounterMultiplier = 1.5f;
-
-    public override async Task OnInitializedAsync()
+    public override void Initialize(ScriptContext ctx)
     {
-        await base.OnInitializedAsync();
-
-        LogInfo("Weather Encounters system initialized");
-
-        // Load configuration
-        if (Configuration != null)
-        {
-            _weatherEncounterMultiplier = Configuration.GetValueOrDefault("weatherEncounterMultiplier", 1.5f);
-        }
-
-        // Subscribe to all weather events
-        EventBus?.Subscribe<RainStartedEvent>(OnRainStarted);
-        EventBus?.Subscribe<RainStoppedEvent>(OnRainStopped);
-        EventBus?.Subscribe<ThunderstrikeEvent>(OnThunderstrike);
-        EventBus?.Subscribe<SnowStartedEvent>(OnSnowStarted);
-        EventBus?.Subscribe<SunshineEvent>(OnSunshine);
-        EventBus?.Subscribe<WeatherChangedEvent>(OnWeatherChanged);
-        EventBus?.Subscribe<WeatherClearedEvent>(OnWeatherCleared);
-
-        // Initialize with clear weather multipliers
-        ResetMultipliers();
-
-        LogInfo($"Subscribed to weather events (multiplier: {_weatherEncounterMultiplier})");
+        base.Initialize(ctx);
+        Context.Logger.LogInformation("Weather Encounters system initialized");
     }
 
-    public override Task OnDisposedAsync()
+    public override void RegisterEventHandlers(ScriptContext ctx)
     {
-        LogInfo("Weather Encounters system shutting down");
-        ResetMultipliers();
-        return base.OnDisposedAsync();
+        // Initialize state on first tick
+        On<TickEvent>(evt =>
+        {
+            if (!Context.HasState<EncounterState>())
+            {
+                Context.World.Add(
+                    Context.Entity.Value,
+                    new EncounterState
+                    {
+                        CurrentWeather = "Clear",
+                        TypeMultipliers = new Dictionary<string, float>(),
+                        GlobalMultiplier = 1.0f
+                    }
+                );
+                Context.Logger.LogInformation($"Encounter state initialized (multiplier: {WeatherEncounterMultiplier})");
+            }
+        });
+
+        // Subscribe to all weather events
+        On<RainStartedEvent>(OnRainStarted);
+        On<RainStoppedEvent>(OnRainStopped);
+        On<ThunderstrikeEvent>(OnThunderstrike);
+        On<SnowStartedEvent>(OnSnowStarted);
+        On<SunshineEvent>(OnSunshine);
+        On<WeatherChangedEvent>(OnWeatherChanged);
+        On<WeatherClearedEvent>(OnWeatherCleared);
+
+        Context.Logger.LogInformation("Subscribed to weather events");
+    }
+
+    public override void OnUnload()
+    {
+        Context.Logger.LogInformation("Weather Encounters system shutting down");
+        if (Context.HasState<EncounterState>())
+        {
+            ResetMultipliers();
+            Context.RemoveState<EncounterState>();
+        }
     }
 
     private void OnRainStarted(RainStartedEvent evt)
     {
-        LogInfo($"Rain weather active - adjusting encounters (intensity: {evt.Intensity:F2})");
+        ref var state = ref Context.GetState<EncounterState>();
 
-        _currentWeather = "Rain";
+        Context.Logger.LogInformation($"Rain weather active - adjusting encounters (intensity: {evt.Intensity:F2})");
+
+        state.CurrentWeather = "Rain";
         ResetMultipliers();
 
         // Water types spawn more in rain
-        float waterMultiplier = 1.0f + (evt.Intensity * _weatherEncounterMultiplier);
-        _typeMultipliers["Water"] = waterMultiplier;
+        float waterMultiplier = 1.0f + (evt.Intensity * WeatherEncounterMultiplier);
+        state.TypeMultipliers["Water"] = waterMultiplier;
 
         // Bug types also more active in rain
-        _typeMultipliers["Bug"] = 1.0f + (evt.Intensity * 0.3f);
+        state.TypeMultipliers["Bug"] = 1.0f + (evt.Intensity * 0.3f);
 
         // Fire types less common in rain
-        _typeMultipliers["Fire"] = 1.0f - (evt.Intensity * 0.5f);
+        state.TypeMultipliers["Fire"] = 1.0f - (evt.Intensity * 0.5f);
 
         ApplyEncounterMultipliers();
 
-        LogInfo($"Water-type encounter rate: {waterMultiplier:F2}x");
+        Context.Logger.LogInformation($"Water-type encounter rate: {waterMultiplier:F2}x");
     }
 
     private void OnRainStopped(RainStoppedEvent evt)
     {
-        LogInfo("Rain stopped - resetting encounter rates");
+        ref var state = ref Context.GetState<EncounterState>();
 
-        if (_currentWeather == "Rain" || _currentWeather == "Thunder")
+        Context.Logger.LogInformation("Rain stopped - resetting encounter rates");
+
+        if (state.CurrentWeather == "Rain" || state.CurrentWeather == "Thunder")
         {
-            _currentWeather = "Clear";
+            state.CurrentWeather = "Clear";
             ResetMultipliers();
             ApplyEncounterMultipliers();
         }
@@ -97,93 +111,99 @@ public class WeatherEncounters : ScriptBase
 
     private void OnThunderstrike(ThunderstrikeEvent evt)
     {
-        // Thunder events indicate thunderstorm weather
-        if (_currentWeather != "Thunder")
-        {
-            LogInfo("Thunderstorm active - electric types surging!");
+        ref var state = ref Context.GetState<EncounterState>();
 
-            _currentWeather = "Thunder";
+        // Thunder events indicate thunderstorm weather
+        if (state.CurrentWeather != "Thunder")
+        {
+            Context.Logger.LogInformation("Thunderstorm active - electric types surging!");
+
+            state.CurrentWeather = "Thunder";
             ResetMultipliers();
 
             // Electric types much more common in thunderstorms
-            float electricMultiplier = 1.0f + (_weatherEncounterMultiplier * 1.5f); // 2.25x default
-            _typeMultipliers["Electric"] = electricMultiplier;
+            float electricMultiplier = 1.0f + (WeatherEncounterMultiplier * 1.5f); // 2.25x default
+            state.TypeMultipliers["Electric"] = electricMultiplier;
 
             // Water types still boosted
-            _typeMultipliers["Water"] = 1.0f + (_weatherEncounterMultiplier * 0.5f);
+            state.TypeMultipliers["Water"] = 1.0f + (WeatherEncounterMultiplier * 0.5f);
 
             // Flying types avoid thunderstorms
-            _typeMultipliers["Flying"] = 0.4f;
+            state.TypeMultipliers["Flying"] = 0.4f;
 
             // Fire types very rare
-            _typeMultipliers["Fire"] = 0.2f;
+            state.TypeMultipliers["Fire"] = 0.2f;
 
             ApplyEncounterMultipliers();
 
-            LogInfo($"Electric-type encounter rate: {electricMultiplier:F2}x");
+            Context.Logger.LogInformation($"Electric-type encounter rate: {electricMultiplier:F2}x");
         }
     }
 
     private void OnSnowStarted(SnowStartedEvent evt)
     {
-        LogInfo($"Snow weather active - ice types appearing (intensity: {evt.Intensity:F2})");
+        ref var state = ref Context.GetState<EncounterState>();
 
-        _currentWeather = "Snow";
+        Context.Logger.LogInformation($"Snow weather active - ice types appearing (intensity: {evt.Intensity:F2})");
+
+        state.CurrentWeather = "Snow";
         ResetMultipliers();
 
         // Ice types much more common in snow
-        float iceMultiplier = 1.0f + (evt.Intensity * _weatherEncounterMultiplier * 1.5f);
-        _typeMultipliers["Ice"] = iceMultiplier;
+        float iceMultiplier = 1.0f + (evt.Intensity * WeatherEncounterMultiplier * 1.5f);
+        state.TypeMultipliers["Ice"] = iceMultiplier;
 
         // Steel types more common in snow
-        _typeMultipliers["Steel"] = 1.0f + (evt.Intensity * 0.3f);
+        state.TypeMultipliers["Steel"] = 1.0f + (evt.Intensity * 0.3f);
 
         // Water types can appear (as ice-water types)
-        _typeMultipliers["Water"] = 1.0f + (evt.Intensity * 0.2f);
+        state.TypeMultipliers["Water"] = 1.0f + (evt.Intensity * 0.2f);
 
         // Fire, Grass, Bug types much less common
-        _typeMultipliers["Fire"] = 0.3f;
-        _typeMultipliers["Grass"] = 0.5f;
-        _typeMultipliers["Bug"] = 0.2f;
+        state.TypeMultipliers["Fire"] = 0.3f;
+        state.TypeMultipliers["Grass"] = 0.5f;
+        state.TypeMultipliers["Bug"] = 0.2f;
 
         ApplyEncounterMultipliers();
 
-        LogInfo($"Ice-type encounter rate: {iceMultiplier:F2}x");
+        Context.Logger.LogInformation($"Ice-type encounter rate: {iceMultiplier:F2}x");
     }
 
     private void OnSunshine(SunshineEvent evt)
     {
-        LogInfo($"Sunshine weather active - fire and grass types thriving (intensity: {evt.Intensity:F2})");
+        ref var state = ref Context.GetState<EncounterState>();
 
-        _currentWeather = "Sunshine";
+        Context.Logger.LogInformation($"Sunshine weather active - fire and grass types thriving (intensity: {evt.Intensity:F2})");
+
+        state.CurrentWeather = "Sunshine";
         ResetMultipliers();
 
         // Fire types more common in intense sunshine
-        float fireMultiplier = 1.0f + (evt.Intensity * _weatherEncounterMultiplier * 0.8f);
-        _typeMultipliers["Fire"] = fireMultiplier;
+        float fireMultiplier = 1.0f + (evt.Intensity * WeatherEncounterMultiplier * 0.8f);
+        state.TypeMultipliers["Fire"] = fireMultiplier;
 
         // Grass types boosted if configured
         if (evt.BoostsGrassTypes)
         {
-            float grassMultiplier = 1.0f + (evt.Intensity * _weatherEncounterMultiplier * 0.7f);
-            _typeMultipliers["Grass"] = grassMultiplier;
+            float grassMultiplier = 1.0f + (evt.Intensity * WeatherEncounterMultiplier * 0.7f);
+            state.TypeMultipliers["Grass"] = grassMultiplier;
         }
 
         // Bug types more active in sunshine
-        _typeMultipliers["Bug"] = 1.0f + (evt.Intensity * 0.3f);
+        state.TypeMultipliers["Bug"] = 1.0f + (evt.Intensity * 0.3f);
 
         // Water and Ice types less common
-        _typeMultipliers["Water"] = 0.6f;
-        _typeMultipliers["Ice"] = 0.3f;
+        state.TypeMultipliers["Water"] = 0.6f;
+        state.TypeMultipliers["Ice"] = 0.3f;
 
         ApplyEncounterMultipliers();
 
-        LogInfo($"Fire-type encounter rate: {fireMultiplier:F2}x");
+        Context.Logger.LogInformation($"Fire-type encounter rate: {fireMultiplier:F2}x");
     }
 
     private void OnWeatherChanged(WeatherChangedEvent evt)
     {
-        LogInfo($"Weather changed: {evt.PreviousWeather ?? "None"} -> {evt.NewWeather}");
+        Context.Logger.LogInformation($"Weather changed: {evt.PreviousWeather ?? "None"} -> {evt.NewWeather}");
 
         // The specific weather events will handle multiplier changes
         // This is just for logging and tracking
@@ -191,34 +211,39 @@ public class WeatherEncounters : ScriptBase
 
     private void OnWeatherCleared(WeatherClearedEvent evt)
     {
-        LogInfo($"Weather cleared: {evt.ClearedWeather}");
+        ref var state = ref Context.GetState<EncounterState>();
 
-        _currentWeather = "Clear";
+        Context.Logger.LogInformation($"Weather cleared: {evt.ClearedWeather}");
+
+        state.CurrentWeather = "Clear";
         ResetMultipliers();
         ApplyEncounterMultipliers();
     }
 
     private void ResetMultipliers()
     {
-        _typeMultipliers.Clear();
-        _globalMultiplier = 1.0f;
+        ref var state = ref Context.GetState<EncounterState>();
+        state.TypeMultipliers.Clear();
+        state.GlobalMultiplier = 1.0f;
     }
 
     private void ApplyEncounterMultipliers()
     {
+        ref var state = ref Context.GetState<EncounterState>();
+
         // In real implementation, would:
         // 1. Access the game's encounter system
         // 2. Modify spawn rates for each Pokémon type
         // 3. Update encounter tables based on multipliers
 
-        LogInfo($"Applying encounter multipliers for {_currentWeather} weather:");
+        Context.Logger.LogInformation($"Applying encounter multipliers for {state.CurrentWeather} weather:");
 
-        foreach (var kvp in _typeMultipliers)
+        foreach (var kvp in state.TypeMultipliers)
         {
             string pokemonType = kvp.Key;
             float multiplier = kvp.Value;
 
-            LogInfo($"  {pokemonType} type: {multiplier:F2}x");
+            Context.Logger.LogInformation($"  {pokemonType} type: {multiplier:F2}x");
 
             // Example: Would call game encounter system
             // EncounterManager.SetTypeMultiplier(pokemonType, multiplier);
@@ -227,7 +252,7 @@ public class WeatherEncounters : ScriptBase
         // Example: Would update encounter tables
         // EncounterManager.RefreshEncounterTables();
 
-        LogInfo($"Encounter multipliers applied for {_typeMultipliers.Count} types");
+        Context.Logger.LogInformation($"Encounter multipliers applied for {state.TypeMultipliers.Count} types");
     }
 
     /// <summary>
@@ -235,7 +260,13 @@ public class WeatherEncounters : ScriptBase
     /// </summary>
     public float GetTypeMultiplier(string pokemonType)
     {
-        if (_typeMultipliers.TryGetValue(pokemonType, out float multiplier))
+        if (!Context.HasState<EncounterState>())
+        {
+            return 1.0f;
+        }
+
+        ref var state = ref Context.GetState<EncounterState>();
+        if (state.TypeMultipliers.TryGetValue(pokemonType, out float multiplier))
         {
             return multiplier;
         }
@@ -248,21 +279,42 @@ public class WeatherEncounters : ScriptBase
     /// </summary>
     public Dictionary<string, float> GetAllMultipliers()
     {
-        return new Dictionary<string, float>(_typeMultipliers);
+        if (!Context.HasState<EncounterState>())
+        {
+            return new Dictionary<string, float>();
+        }
+
+        ref var state = ref Context.GetState<EncounterState>();
+        return new Dictionary<string, float>(state.TypeMultipliers);
     }
 
     /// <summary>
     /// Get current weather affecting encounters.
     /// </summary>
-    public string GetCurrentWeather() => _currentWeather;
+    public string GetCurrentWeather()
+    {
+        if (!Context.HasState<EncounterState>())
+        {
+            return "Clear";
+        }
+
+        ref var state = ref Context.GetState<EncounterState>();
+        return state.CurrentWeather;
+    }
 
     /// <summary>
     /// Calculate effective spawn chance for a Pokémon type.
     /// </summary>
     public float CalculateSpawnChance(string pokemonType, float baseChance)
     {
+        if (!Context.HasState<EncounterState>())
+        {
+            return baseChance;
+        }
+
+        ref var state = ref Context.GetState<EncounterState>();
         float multiplier = GetTypeMultiplier(pokemonType);
-        return baseChance * multiplier * _globalMultiplier;
+        return baseChance * multiplier * state.GlobalMultiplier;
     }
 
     /// <summary>
@@ -270,10 +322,24 @@ public class WeatherEncounters : ScriptBase
     /// </summary>
     public void SetTypeMultiplier(string pokemonType, float multiplier)
     {
-        _typeMultipliers[pokemonType] = multiplier;
-        LogInfo($"Manual multiplier set: {pokemonType} = {multiplier:F2}x");
+        if (!Context.HasState<EncounterState>())
+        {
+            return;
+        }
+
+        ref var state = ref Context.GetState<EncounterState>();
+        state.TypeMultipliers[pokemonType] = multiplier;
+        Context.Logger.LogInformation($"Manual multiplier set: {pokemonType} = {multiplier:F2}x");
         ApplyEncounterMultipliers();
     }
+}
+
+// Component to store encounter-specific state
+public struct EncounterState
+{
+    public string CurrentWeather;
+    public Dictionary<string, float> TypeMultipliers;
+    public float GlobalMultiplier;
 }
 
 // Instantiate and return the weather encounters handler

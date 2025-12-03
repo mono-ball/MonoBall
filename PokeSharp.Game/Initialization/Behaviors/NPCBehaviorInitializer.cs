@@ -16,7 +16,6 @@ namespace PokeSharp.Game.Initialization.Behaviors;
 public class NPCBehaviorInitializer(
     ILogger<NPCBehaviorInitializer> logger,
     ILoggerFactory loggerFactory,
-    World world,
     SystemManager systemManager,
     TypeRegistry<BehaviorDefinition> behaviorRegistry,
     ScriptService scriptService,

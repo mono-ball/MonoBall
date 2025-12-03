@@ -24,7 +24,7 @@ public class VisualEffectsBehavior : ScriptBase
     public override void Initialize(ScriptContext ctx)
     {
         base.Initialize(ctx);
-        Context.Logger.LogInfo("Visual effects handler initialized");
+        Context.Logger.LogInformation("Visual effects handler initialized");
     }
 
     public override void RegisterEventHandlers(ScriptContext ctx)

@@ -2,10 +2,11 @@
 #load "events/WeatherEvents.csx"
 
 using PokeSharp.Engine.Core.Events;
+using PokeSharp.Engine.Core.Events.System;
 using PokeSharp.Engine.Core.Scripting;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
+using System.Linq;
 
 /// <summary>
 /// Handles visual and audio effects for rain weather.
@@ -14,46 +15,85 @@ using System.Threading.Tasks;
 /// </summary>
 public class RainEffects : ScriptBase
 {
-    private bool _isRaining = false;
-    private float _rainIntensity = 0.0f;
-    private HashSet<(int X, int Y)> _puddlePositions = new HashSet<(int, int)>();
-    private DateTime _rainStoppedTime;
-
-    public override async Task OnInitializedAsync()
+    public override void Initialize(ScriptContext ctx)
     {
-        await base.OnInitializedAsync();
-
-        LogInfo("Rain Effects system initialized");
-
-        // Subscribe to rain events
-        EventBus?.Subscribe<RainStartedEvent>(OnRainStarted);
-        EventBus?.Subscribe<RainStoppedEvent>(OnRainStopped);
-        EventBus?.Subscribe<SunshineEvent>(OnSunshine);
-
-        LogInfo("Subscribed to rain weather events");
+        base.Initialize(ctx);
+        Context.Logger.LogInformation("Rain Effects system initialized");
     }
 
-    public override Task OnDisposedAsync()
+    public override void RegisterEventHandlers(ScriptContext ctx)
     {
-        LogInfo("Rain Effects system shutting down");
-
-        // Clean up effects
-        if (_isRaining)
+        // Initialize state on first tick
+        On<TickEvent>(evt =>
         {
-            StopRainEffects();
+            if (!Context.HasState<RainState>())
+            {
+                Context.World.Add(
+                    Context.Entity.Value,
+                    new RainState
+                    {
+                        IsRaining = false,
+                        RainIntensity = 0.0f,
+                        PuddlePositions = new HashSet<(int, int)>(),
+                        EvaporationTimer = 0f,
+                        EvaporationDuration = 0f,
+                        IsEvaporating = false
+                    }
+                );
+                Context.Logger.LogInformation("Rain state initialized");
+            }
+
+            // Handle puddle evaporation if active
+            ref var state = ref Context.GetState<RainState>();
+            if (state.IsEvaporating && state.PuddlePositions.Count > 0)
+            {
+                state.EvaporationTimer += evt.DeltaTime;
+
+                // Evaporate puddles gradually
+                if (state.EvaporationTimer >= state.EvaporationDuration / state.PuddlePositions.Count)
+                {
+                    var puddle = state.PuddlePositions.First();
+                    RemovePuddle(puddle.Item1, puddle.Item2);
+                    state.EvaporationTimer = 0f;
+                }
+            }
+        });
+
+        // Subscribe to rain events
+        On<RainStartedEvent>(OnRainStarted);
+        On<RainStoppedEvent>(OnRainStopped);
+        On<SunshineEvent>(OnSunshine);
+
+        Context.Logger.LogInformation("Subscribed to rain weather events");
+    }
+
+    public override void OnUnload()
+    {
+        Context.Logger.LogInformation("Rain Effects system shutting down");
+
+        if (Context.HasState<RainState>())
+        {
+            ref var state = ref Context.GetState<RainState>();
+
+            // Clean up effects
+            if (state.IsRaining)
+            {
+                StopRainEffects();
+            }
+
+            ClearAllPuddles();
+            Context.RemoveState<RainState>();
         }
-
-        ClearAllPuddles();
-
-        return base.OnDisposedAsync();
     }
 
     private void OnRainStarted(RainStartedEvent evt)
     {
-        LogInfo($"Rain started! Intensity: {evt.Intensity:F2}, Duration: {evt.DurationSeconds}s");
+        ref var state = ref Context.GetState<RainState>();
 
-        _isRaining = true;
-        _rainIntensity = evt.Intensity;
+        Context.Logger.LogInformation($"Rain started! Intensity: {evt.Intensity:F2}, Duration: {evt.DurationSeconds}s");
+
+        state.IsRaining = true;
+        state.RainIntensity = evt.Intensity;
 
         // Start visual rain effects
         StartRainEffects(evt.Intensity);
@@ -70,17 +110,18 @@ public class RainEffects : ScriptBase
         // Log thunder capability
         if (evt.CanThunder)
         {
-            LogInfo("Thunderstorm possible during this rain");
+            Context.Logger.LogInformation("Thunderstorm possible during this rain");
         }
     }
 
     private void OnRainStopped(RainStoppedEvent evt)
     {
-        LogInfo($"Rain stopped. Puddles persist: {evt.PersistPuddles}");
+        ref var state = ref Context.GetState<RainState>();
 
-        _isRaining = false;
-        _rainIntensity = 0.0f;
-        _rainStoppedTime = DateTime.UtcNow;
+        Context.Logger.LogInformation($"Rain stopped. Puddles persist: {evt.PersistPuddles}");
+
+        state.IsRaining = false;
+        state.RainIntensity = 0.0f;
 
         // Stop rain effects
         StopRainEffects();
@@ -101,10 +142,12 @@ public class RainEffects : ScriptBase
 
     private void OnSunshine(SunshineEvent evt)
     {
+        ref var state = ref Context.GetState<RainState>();
+
         // Accelerate puddle evaporation in sunshine
-        if (evt.AcceleratesEvaporation && _puddlePositions.Count > 0)
+        if (evt.AcceleratesEvaporation && state.PuddlePositions.Count > 0)
         {
-            LogInfo("Sunshine accelerating puddle evaporation");
+            Context.Logger.LogInformation("Sunshine accelerating puddle evaporation");
 
             // Reduce evaporation time
             int acceleratedTime = Math.Max(30, 120 - (int)(evt.Intensity * 60));
@@ -120,7 +163,7 @@ public class RainEffects : ScriptBase
         // 3. Add splash effects when droplets hit ground
         // 4. Darken the lighting/sky
 
-        LogInfo($"Starting rain particle effects (intensity: {intensity:F2})");
+        Context.Logger.LogInformation($"Starting rain particle effects (intensity: {intensity:F2})");
 
         // Calculate particle count based on intensity
         int particleCount = (int)(intensity * 500); // 0-500 particles
@@ -130,18 +173,18 @@ public class RainEffects : ScriptBase
         // ParticleSystem.SetVelocity(new Vector2(0, -5 * intensity));
         // Lighting.SetBrightness(1.0f - intensity * 0.3f);
 
-        LogInfo($"Rain particles created: {particleCount}");
+        Context.Logger.LogInformation($"Rain particles created: {particleCount}");
     }
 
     private void StopRainEffects()
     {
-        LogInfo("Stopping rain particle effects");
+        Context.Logger.LogInformation("Stopping rain particle effects");
 
         // Example: Would call game engine
         // ParticleSystem.Destroy("rain_droplets");
         // Lighting.SetBrightness(1.0f);
 
-        LogInfo("Rain visual effects stopped");
+        Context.Logger.LogInformation("Rain visual effects stopped");
     }
 
     private void PlayRainSound(float intensity)
@@ -151,7 +194,7 @@ public class RainEffects : ScriptBase
         // 2. Adjust volume based on intensity
         // 3. Loop the sound
 
-        LogInfo($"Playing rain sound at volume {intensity:F2}");
+        Context.Logger.LogInformation($"Playing rain sound at volume {intensity:F2}");
 
         // Example: Would call game audio system
         // AudioManager.PlayAmbient("rain_loop", intensity);
@@ -159,7 +202,7 @@ public class RainEffects : ScriptBase
 
     private void StopRainSound()
     {
-        LogInfo("Stopping rain sound");
+        Context.Logger.LogInformation("Stopping rain sound");
 
         // Example: Would call game audio system
         // AudioManager.StopAmbient("rain_loop");
@@ -167,12 +210,14 @@ public class RainEffects : ScriptBase
 
     private void StartCreatingPuddles(float intensity)
     {
+        ref var state = ref Context.GetState<RainState>();
+
         // Create puddles on walkable tiles over time
         // More intense rain = more puddles, faster
 
         int puddleCount = (int)(intensity * 20); // 0-20 puddles
 
-        LogInfo($"Creating {puddleCount} puddles");
+        Context.Logger.LogInformation($"Creating {puddleCount} puddles");
 
         var random = new Random();
 
@@ -189,21 +234,22 @@ public class RainEffects : ScriptBase
 
     private void CreatePuddle(int x, int y)
     {
+        ref var state = ref Context.GetState<RainState>();
         var position = (x, y);
 
-        if (_puddlePositions.Contains(position))
+        if (state.PuddlePositions.Contains(position))
         {
             return; // Puddle already exists
         }
 
-        _puddlePositions.Add(position);
+        state.PuddlePositions.Add(position);
 
         // In real implementation, would:
         // 1. Check if tile at (x,y) is walkable
         // 2. Add puddle sprite/animation to tile
         // 3. Modify tile properties (slippery, splash effect)
 
-        LogInfo($"Puddle created at ({x}, {y})");
+        Context.Logger.LogInformation($"Puddle created at ({x}, {y})");
 
         // Example: Would call game map/tile system
         // MapManager.GetTile(x, y).AddEffect("puddle");
@@ -211,16 +257,17 @@ public class RainEffects : ScriptBase
 
     private void RemovePuddle(int x, int y)
     {
+        ref var state = ref Context.GetState<RainState>();
         var position = (x, y);
 
-        if (!_puddlePositions.Contains(position))
+        if (!state.PuddlePositions.Contains(position))
         {
             return;
         }
 
-        _puddlePositions.Remove(position);
+        state.PuddlePositions.Remove(position);
 
-        LogInfo($"Puddle removed at ({x}, {y})");
+        Context.Logger.LogInformation($"Puddle removed at ({x}, {y})");
 
         // Example: Would call game map/tile system
         // MapManager.GetTile(x, y).RemoveEffect("puddle");
@@ -228,47 +275,34 @@ public class RainEffects : ScriptBase
 
     private void ClearAllPuddles()
     {
-        int puddleCount = _puddlePositions.Count;
+        ref var state = ref Context.GetState<RainState>();
+        int puddleCount = state.PuddlePositions.Count;
 
         if (puddleCount == 0)
         {
             return;
         }
 
-        LogInfo($"Clearing {puddleCount} puddles");
+        Context.Logger.LogInformation($"Clearing {puddleCount} puddles");
 
-        foreach (var position in _puddlePositions.ToList())
+        foreach (var position in state.PuddlePositions.ToList())
         {
-            RemovePuddle(position.X, position.Y);
+            RemovePuddle(position.Item1, position.Item2);
         }
 
-        _puddlePositions.Clear();
+        state.PuddlePositions.Clear();
     }
 
-    private async void SchedulePuddleEvaporation(int seconds)
+    private void SchedulePuddleEvaporation(int seconds)
     {
-        LogInfo($"Puddles will evaporate in {seconds} seconds");
+        ref var state = ref Context.GetState<RainState>();
 
-        // Gradual evaporation
-        int puddleCount = _puddlePositions.Count;
+        Context.Logger.LogInformation($"Puddles will evaporate in {seconds} seconds");
 
-        if (puddleCount == 0)
-        {
-            return;
-        }
-
-        int intervalMs = (seconds * 1000) / puddleCount;
-
-        var random = new Random();
-        var puddlesList = _puddlePositions.ToList();
-
-        foreach (var position in puddlesList)
-        {
-            await Task.Delay(intervalMs);
-            RemovePuddle(position.X, position.Y);
-        }
-
-        LogInfo("All puddles evaporated");
+        // Set up evaporation timer (handled in tick event)
+        state.EvaporationDuration = seconds;
+        state.EvaporationTimer = 0f;
+        state.IsEvaporating = true;
     }
 
     /// <summary>
@@ -277,23 +311,63 @@ public class RainEffects : ScriptBase
     /// </summary>
     public bool HasPuddle(int x, int y)
     {
-        return _puddlePositions.Contains((x, y));
+        if (!Context.HasState<RainState>())
+        {
+            return false;
+        }
+        ref var state = ref Context.GetState<RainState>();
+        return state.PuddlePositions.Contains((x, y));
     }
 
     /// <summary>
     /// Get count of active puddles.
     /// </summary>
-    public int GetPuddleCount() => _puddlePositions.Count;
+    public int GetPuddleCount()
+    {
+        if (!Context.HasState<RainState>())
+        {
+            return 0;
+        }
+        ref var state = ref Context.GetState<RainState>();
+        return state.PuddlePositions.Count;
+    }
 
     /// <summary>
     /// Get current rain intensity.
     /// </summary>
-    public float GetRainIntensity() => _rainIntensity;
+    public float GetRainIntensity()
+    {
+        if (!Context.HasState<RainState>())
+        {
+            return 0f;
+        }
+        ref var state = ref Context.GetState<RainState>();
+        return state.RainIntensity;
+    }
 
     /// <summary>
     /// Check if it's currently raining.
     /// </summary>
-    public bool IsRaining() => _isRaining;
+    public bool IsRaining()
+    {
+        if (!Context.HasState<RainState>())
+        {
+            return false;
+        }
+        ref var state = ref Context.GetState<RainState>();
+        return state.IsRaining;
+    }
+}
+
+// Component to store rain-specific state
+public struct RainState
+{
+    public bool IsRaining;
+    public float RainIntensity;
+    public HashSet<(int, int)> PuddlePositions;
+    public float EvaporationTimer;
+    public float EvaporationDuration;
+    public bool IsEvaporating;
 }
 
 // Instantiate and return the rain effects handler
