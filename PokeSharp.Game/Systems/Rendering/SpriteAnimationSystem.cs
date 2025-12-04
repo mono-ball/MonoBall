@@ -1,11 +1,11 @@
 using Arch.Core;
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
-using PokeSharp.Engine.Core.Systems;
+using PokeSharp.Game.Engine.Core.Systems;
 using PokeSharp.Game.Components.Movement;
 using PokeSharp.Game.Components.Rendering;
 using PokeSharp.Game.Infrastructure.Services;
-using EcsQueries = PokeSharp.Engine.Systems.Queries.Queries;
+using EcsQueries = PokeSharp.Game.Engine.Systems.Queries.Queries;
 
 namespace PokeSharp.Game.Systems;
 

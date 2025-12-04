@@ -1,7 +1,7 @@
 using System.Linq;
 using Arch.Core;
 using Microsoft.Xna.Framework;
-using PokeSharp.Engine.Core.Events.System;
+using PokeSharp.Game.Engine.Core.Events.System;
 using PokeSharp.Game.Components.Movement;
 using PokeSharp.Game.Components.NPCs;
 using PokeSharp.Game.Scripting.Runtime;

@@ -1,14 +1,14 @@
 using Arch.Core;
 using Arch.Core.Extensions;
 using Microsoft.Extensions.Logging;
-using PokeSharp.Engine.Common.Logging;
-using PokeSharp.Engine.Core.Types;
-using PokeSharp.Engine.Rendering.Systems;
+using PokeSharp.Game.Engine.Common.Logging;
+using PokeSharp.Game.Engine.Core.Types;
+using PokeSharp.Game.Engine.Rendering.Systems;
 using PokeSharp.Game.Components.Maps;
 using PokeSharp.Game.Data.MapLoading.Tiled.Core;
 using PokeSharp.Game.Data.Validation;
 using PokeSharp.Game.Systems;
-using EcsQueries = PokeSharp.Engine.Systems.Queries.Queries;
+using EcsQueries = PokeSharp.Game.Engine.Systems.Queries.Queries;
 
 namespace PokeSharp.Game.Initialization.Initializers;
 

@@ -2,16 +2,16 @@ using Arch.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using PokeSharp.Engine.Core.Events;
-using PokeSharp.Engine.Core.Modding;
-using PokeSharp.Engine.Systems.Management;
-using PokeSharp.Engine.Systems.Pooling;
+using PokeSharp.Game.Engine.Core.Events;
+using PokeSharp.Game.Engine.Core.Modding;
+using PokeSharp.Game.Engine.Systems.Management;
+using PokeSharp.Game.Engine.Systems.Pooling;
 using PokeSharp.Game.Data;
 using PokeSharp.Game.Data.Loading;
 using PokeSharp.Game.Data.Services;
 using PokeSharp.Game.Infrastructure.Configuration;
 using PokeSharp.Game.Infrastructure.Services;
-using static PokeSharp.Engine.Systems.Pooling.PoolNames;
+using static PokeSharp.Game.Engine.Systems.Pooling.PoolNames;
 
 namespace PokeSharp.Game.Infrastructure.ServiceRegistration;
 

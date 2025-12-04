@@ -1,8 +1,8 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using PokeSharp.Engine.Common.Logging;
-using PokeSharp.Engine.Debug.Logging;
+using PokeSharp.Game.Engine.Common.Logging;
+using PokeSharp.Game.Engine.Debug.Logging;
 using Serilog;
 using Serilog.Core;
 

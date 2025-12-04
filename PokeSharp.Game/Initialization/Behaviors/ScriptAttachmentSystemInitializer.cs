@@ -1,8 +1,8 @@
 using Microsoft.Extensions.Logging;
-using PokeSharp.Engine.Common.Logging;
-using PokeSharp.Engine.Core.Events;
-using PokeSharp.Engine.Core.Systems;
-using PokeSharp.Engine.Systems.Management;
+using PokeSharp.Game.Engine.Common.Logging;
+using PokeSharp.Game.Engine.Core.Events;
+using PokeSharp.Game.Engine.Core.Systems;
+using PokeSharp.Game.Engine.Systems.Management;
 using PokeSharp.Game.Scripting.Api;
 using PokeSharp.Game.Scripting.Services;
 using PokeSharp.Game.Scripting.Systems;

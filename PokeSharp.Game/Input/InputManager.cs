@@ -1,9 +1,9 @@
 using Arch.Core;
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework.Input;
-using PokeSharp.Engine.Common.Logging;
-using PokeSharp.Engine.Rendering.Components;
-using PokeSharp.Engine.Rendering.Systems;
+using PokeSharp.Game.Engine.Common.Logging;
+using PokeSharp.Game.Engine.Rendering.Components;
+using PokeSharp.Game.Engine.Rendering.Systems;
 using PokeSharp.Game.Components.Player;
 
 namespace PokeSharp.Game.Input;

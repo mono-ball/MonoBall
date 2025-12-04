@@ -1,8 +1,8 @@
 using Microsoft.Xna.Framework.Graphics;
-using PokeSharp.Engine.Core.Events;
-using PokeSharp.Engine.UI.Debug.Components.Debug;
-using PokeSharp.Engine.UI.Debug.Core;
-using PokeSharp.Engine.UI.Debug.Input;
+using PokeSharp.Game.Engine.Core.Events;
+using PokeSharp.Game.Engine.UI.Debug.Components.Debug;
+using PokeSharp.Game.Engine.UI.Debug.Core;
+using PokeSharp.Game.Engine.UI.Debug.Input;
 
 namespace PokeSharp.Game.Infrastructure.Diagnostics;
 

@@ -1,9 +1,9 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using PokeSharp.Engine.Core.Events;
-using PokeSharp.Engine.Core.Services;
-using PokeSharp.Engine.Systems.Management;
-using PokeSharp.Engine.Systems.Pooling;
+using PokeSharp.Game.Engine.Core.Events;
+using PokeSharp.Game.Engine.Core.Services;
+using PokeSharp.Game.Engine.Systems.Management;
+using PokeSharp.Game.Engine.Systems.Pooling;
 using PokeSharp.Game.Data.Factories;
 using PokeSharp.Game.Data.PropertyMapping;
 using PokeSharp.Game.Data.Services;

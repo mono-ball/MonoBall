@@ -1,8 +1,8 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework.Graphics;
-using PokeSharp.Engine.Common.Logging;
-using PokeSharp.Engine.Core.Types;
-using PokeSharp.Engine.Rendering.Assets;
+using PokeSharp.Game.Engine.Common.Logging;
+using PokeSharp.Game.Engine.Core.Types;
+using PokeSharp.Game.Engine.Rendering.Assets;
 using PokeSharp.Game.Infrastructure.Services;
 
 namespace PokeSharp.Game.Systems;

@@ -1,5 +1,5 @@
 using Arch.Core;
-using PokeSharp.Engine.Core.Types;
+using PokeSharp.Game.Engine.Core.Types;
 using PokeSharp.Game.Systems;
 
 namespace PokeSharp.Game.Initialization.Initializers;

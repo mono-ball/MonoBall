@@ -1,7 +1,7 @@
 using Arch.Core;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using PokeSharp.Engine.Core.Events;
+using PokeSharp.Game.Engine.Core.Events;
 using PokeSharp.Game.Data.PropertyMapping;
 using PokeSharp.Game.Infrastructure.Services;
 using PokeSharp.Game.Scripting.Api;

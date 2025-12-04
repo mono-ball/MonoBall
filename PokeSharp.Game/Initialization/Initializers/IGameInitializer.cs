@@ -1,7 +1,7 @@
 using Microsoft.Xna.Framework.Graphics;
-using PokeSharp.Engine.Core.Services;
-using PokeSharp.Engine.Rendering.Systems;
-using PokeSharp.Engine.Systems.Pooling;
+using PokeSharp.Game.Engine.Core.Services;
+using PokeSharp.Game.Engine.Rendering.Systems;
+using PokeSharp.Game.Engine.Systems.Pooling;
 using PokeSharp.Game.Systems;
 using PokeSharp.Game.Systems.Warps;
 

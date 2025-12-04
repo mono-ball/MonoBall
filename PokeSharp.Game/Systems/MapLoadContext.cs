@@ -1,7 +1,7 @@
 using Arch.Core;
 using Arch.Core.Extensions;
 using Microsoft.Xna.Framework;
-using PokeSharp.Engine.Core.Types;
+using PokeSharp.Game.Engine.Core.Types;
 using PokeSharp.Game.Components;
 using PokeSharp.Game.Components.Maps;
 using PokeSharp.Game.Components.Movement;

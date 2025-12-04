@@ -1,4 +1,4 @@
-using PokeSharp.Engine.Scenes;
+using PokeSharp.Game.Engine.Scenes;
 
 namespace PokeSharp.Game.Initialization.Pipeline;
 

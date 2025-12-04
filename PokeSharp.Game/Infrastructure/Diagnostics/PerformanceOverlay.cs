@@ -2,7 +2,7 @@ using Arch.Core;
 using FontStashSharp;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using PokeSharp.Engine.Systems.Pooling;
+using PokeSharp.Game.Engine.Systems.Pooling;
 
 namespace PokeSharp.Game.Infrastructure.Diagnostics;
 

@@ -1,5 +1,5 @@
 using Microsoft.Extensions.Logging;
-using PokeSharp.Engine.Scenes;
+using PokeSharp.Game.Engine.Scenes;
 using PokeSharp.Game.Systems;
 
 namespace PokeSharp.Game.Initialization.Pipeline.Steps;

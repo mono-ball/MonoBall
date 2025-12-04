@@ -1,8 +1,8 @@
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
-using PokeSharp.Engine.Core.Templates.Loading;
-using PokeSharp.Engine.Input.Components;
+using PokeSharp.Game.Engine.Core.Templates.Loading;
+using PokeSharp.Game.Engine.Input.Components;
 using PokeSharp.Game.Components.Common;
 using PokeSharp.Game.Components.Maps;
 using PokeSharp.Game.Components.Movement;

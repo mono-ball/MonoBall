@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using PokeSharp.Engine.Debug;
+using PokeSharp.Game.Engine.Debug;
 using PokeSharp.Game.Infrastructure.Configuration;
 using PokeSharp.Game.Infrastructure.ServiceRegistration;
 

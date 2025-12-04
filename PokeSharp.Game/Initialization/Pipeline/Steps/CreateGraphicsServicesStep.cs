@@ -1,7 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using PokeSharp.Engine.Rendering.Assets;
-using PokeSharp.Engine.Scenes;
+using PokeSharp.Game.Engine.Rendering.Assets;
+using PokeSharp.Game.Engine.Scenes;
 using PokeSharp.Game.Data.Factories;
 using PokeSharp.Game.Data.MapLoading.Tiled.Core;
 

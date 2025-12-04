@@ -1,7 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using PokeSharp.Engine.Core.Events;
-using PokeSharp.Engine.Scenes;
+using PokeSharp.Game.Engine.Core.Events;
+using PokeSharp.Game.Engine.Scenes;
 using PokeSharp.Game.Initialization.Behaviors;
 
 namespace PokeSharp.Game.Initialization.Pipeline.Steps;

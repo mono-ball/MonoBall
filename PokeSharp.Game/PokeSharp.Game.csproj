@@ -16,24 +16,41 @@
       Include="Microsoft.Extensions.Configuration.EnvironmentVariables"
       Version="10.0.0"
     />
+    <PackageReference Include="Serilog" Version="4.3.0" />
+    <PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1" />
+    <PackageReference Include="Serilog.Enrichers.Thread" Version="4.0.0" />
+    <PackageReference Include="Serilog.Extensions.Logging" Version="9.0.0" />
     <PackageReference Include="Serilog.Settings.Configuration" Version="10.0.0" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\PokeSharp.Engine.Common\PokeSharp.Engine.Common.csproj" />
-    <ProjectReference Include="..\PokeSharp.Engine.Core\PokeSharp.Engine.Core.csproj" />
-    <ProjectReference Include="..\PokeSharp.Engine.Systems\PokeSharp.Engine.Systems.csproj" />
-    <ProjectReference Include="..\PokeSharp.Engine.Rendering\PokeSharp.Engine.Rendering.csproj" />
-    <ProjectReference Include="..\PokeSharp.Engine.Input\PokeSharp.Engine.Input.csproj" />
-    <ProjectReference Include="..\PokeSharp.Engine.Scenes\PokeSharp.Engine.Scenes.csproj" />
-    <ProjectReference Include="..\PokeSharp.Engine.Debug\PokeSharp.Engine.Debug.csproj" />
-    <ProjectReference Include="..\PokeSharp.Game.Components\PokeSharp.Game.Components.csproj" />
-    <ProjectReference Include="..\PokeSharp.Game.Systems\PokeSharp.Game.Systems.csproj" />
-    <ProjectReference Include="..\PokeSharp.Game.Data\PokeSharp.Game.Data.csproj" />
-    <ProjectReference Include="..\PokeSharp.Game.Scripting\PokeSharp.Game.Scripting.csproj" />
+    <PackageReference Include="Serilog.Sinks.Async" Version="2.1.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
+    <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
+    <PackageReference Include="Serilog.Sinks.Spectre" Version="0.5.0" />
+    <PackageReference Include="Spectre.Console" Version="0.49.1" />
+    <!-- ECS -->
+    <PackageReference Include="Arch" Version="2.1.0" />
+    <PackageReference Include="Arch.Relationships" Version="1.0.0" />
+    <!-- Additional logging -->
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="10.0.0" />
+    <!-- Additional DI -->
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.0" />
+    <!-- UI/Debug tools -->
+    <PackageReference Include="FontStashSharp.MonoGame" Version="1.5.2" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.0.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="5.0.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="5.0.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Features" Version="5.0.0" />
+    <PackageReference Include="TextCopy" Version="6.2.1" />
+    <!-- Compression -->
+    <PackageReference Include="ZstdSharp.Port" Version="0.8.6" />
   </ItemGroup>
   <ItemGroup>
     <!-- Copy all assets to the output directory -->
     <None Include="Assets\**\*.*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <!-- Copy Engine UI assets (fonts, etc.) to output directory -->
+    <None Include="Engine\UI\Assets\**\*.*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <!-- Copy configuration files to output directory -->

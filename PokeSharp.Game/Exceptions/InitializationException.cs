@@ -1,4 +1,4 @@
-using PokeSharp.Engine.Core.Exceptions;
+using PokeSharp.Game.Engine.Core.Exceptions;
 
 namespace PokeSharp.Game.Exceptions;
 

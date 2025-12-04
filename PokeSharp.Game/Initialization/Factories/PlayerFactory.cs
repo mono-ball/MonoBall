@@ -1,11 +1,11 @@
 using Arch.Core;
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
-using PokeSharp.Engine.Common.Logging;
-using PokeSharp.Engine.Core.Types;
-using PokeSharp.Engine.Rendering.Components;
-using PokeSharp.Engine.Systems.Factories;
-using PokeSharp.Engine.Systems.Management;
+using PokeSharp.Game.Engine.Common.Logging;
+using PokeSharp.Game.Engine.Core.Types;
+using PokeSharp.Game.Engine.Rendering.Components;
+using PokeSharp.Game.Engine.Systems.Factories;
+using PokeSharp.Game.Engine.Systems.Management;
 using PokeSharp.Game.Components;
 using PokeSharp.Game.Components.Maps;
 using PokeSharp.Game.Components.Movement;

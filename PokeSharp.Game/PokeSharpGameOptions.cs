@@ -1,8 +1,8 @@
 using Arch.Core;
-using PokeSharp.Engine.Core.Types;
-using PokeSharp.Engine.Systems.Factories;
-using PokeSharp.Engine.Systems.Management;
-using PokeSharp.Engine.Systems.Pooling;
+using PokeSharp.Game.Engine.Core.Types;
+using PokeSharp.Game.Engine.Systems.Factories;
+using PokeSharp.Game.Engine.Systems.Management;
+using PokeSharp.Game.Engine.Systems.Pooling;
 using PokeSharp.Game.Data.Loading;
 using PokeSharp.Game.Data.Services;
 using PokeSharp.Game.Infrastructure.Diagnostics;

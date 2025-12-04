@@ -1,8 +1,8 @@
 using System.Text.Json.Nodes;
 using Microsoft.Extensions.Logging;
-using PokeSharp.Engine.Core.Modding;
-using PokeSharp.Engine.Core.Templates;
-using PokeSharp.Engine.Core.Templates.Loading;
+using PokeSharp.Game.Engine.Core.Modding;
+using PokeSharp.Game.Engine.Core.Templates;
+using PokeSharp.Game.Engine.Core.Templates.Loading;
 using PokeSharp.Game.Infrastructure.Services;
 
 namespace PokeSharp.Game.Initialization.Initializers;

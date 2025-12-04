@@ -1,9 +1,9 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using PokeSharp.Engine.Core.Templates;
-using PokeSharp.Engine.Core.Templates.Loading;
-using PokeSharp.Engine.Core.Types;
-using PokeSharp.Engine.Systems.Factories;
+using PokeSharp.Game.Engine.Core.Templates;
+using PokeSharp.Game.Engine.Core.Templates.Loading;
+using PokeSharp.Game.Engine.Core.Types;
+using PokeSharp.Game.Engine.Systems.Factories;
 using PokeSharp.Game.Infrastructure.Services;
 using PokeSharp.Game.Initialization.Initializers;
 using PokeSharp.Game.Templates;
