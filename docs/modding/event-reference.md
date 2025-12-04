@@ -1,6 +1,6 @@
 # Event Reference Guide
 
-Complete reference for all built-in events in the PokeSharp modding system.
+Complete reference for all built-in events in the MonoBall Framework modding system.
 
 ## Table of Contents
 
@@ -21,7 +21,7 @@ Complete reference for all built-in events in the PokeSharp modding system.
 
 ## Event System Overview
 
-PokeSharp uses an event-driven architecture where systems publish events and mods subscribe to handle them.
+MonoBall Framework uses an event-driven architecture where systems publish events and mods subscribe to handle them.
 
 ### Event Flow
 

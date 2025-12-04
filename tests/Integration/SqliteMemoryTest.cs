@@ -1,11 +1,11 @@
 using System.Diagnostics;
 using Microsoft.EntityFrameworkCore;
-using PokeSharp.Game.Data;
-using PokeSharp.Game.Data.Entities;
+using MonoBallFramework.Game.Data;
+using MonoBallFramework.Game.Data.Entities;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace PokeSharp.Integration.Tests;
+namespace MonoBallFramework.Integration.Tests;
 
 /// <summary>
 /// Integration test that validates SQLite memory usage in a realistic game startup scenario.

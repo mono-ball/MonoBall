@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 using Spectre.Console;
 using Xunit;
 
-namespace PokeSharp.Tests;
+namespace MonoBallFramework.Tests;
 
 /// <summary>
 /// Comprehensive test suite for LogTemplate conversions
@@ -266,7 +266,7 @@ public class LogTemplateTests
     {
         // Search for direct string interpolation in log calls
         var sourceFiles = Directory.GetFiles(
-            "/mnt/c/Users/nate0/RiderProjects/PokeSharp",
+            "/mnt/c/Users/nate0/RiderProjects/MonoBallFramework",
             "*.cs",
             SearchOption.AllDirectories
         );

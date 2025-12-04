@@ -7,14 +7,14 @@ using System.Collections.Generic;
 using System.Linq;
 using Arch.Core;
 using Microsoft.Xna.Framework;
-using PokeSharp.Engine.Events;
-using PokeSharp.Game.Components.Movement;
-using PokeSharp.Game.Scripting.EventDriven;
-using PokeSharp.Game.Scripting.Runtime;
+using MonoBallFramework.Engine.Events;
+using MonoBallFramework.Game.Components.Movement;
+using MonoBallFramework.Game.Scripting.EventDriven;
+using MonoBallFramework.Game.Scripting.Runtime;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace PokeSharp.Tests.ScriptingTests
+namespace MonoBallFramework.Tests.ScriptingTests
 {
     /// <summary>
     /// Phase 3 Composition Tests - Multi-script behaviors with event-driven architecture.

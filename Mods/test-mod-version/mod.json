@@ -1,12 +1,12 @@
 {
-  "modId": "pokesharp.test.version",
+  "modId": "MonoBall Framework.test.version",
   "name": "Version Test Mod",
   "author": "Test Suite",
   "version": "2.5.13",
   "description": "Tests semantic versioning validation",
   "dependencies": [],
   "loadBefore": [],
-  "loadAfter": ["pokesharp.test.basic"],
+  "loadAfter": ["MonoBall Framework.test.basic"],
   "loadPriority": 50,
   "patches": [],
   "contentFolders": {}

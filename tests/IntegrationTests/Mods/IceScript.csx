@@ -1,8 +1,8 @@
 // Ice Tile Script - Example Test Mod
 // Triggers forced sliding movement when player steps on ice tiles
 
-using PokeSharp.Engine.Core.Events.Tile;
-using PokeSharp.Game.Scripting.Runtime;
+using MonoBallFramework.Engine.Core.Events.Tile;
+using MonoBallFramework.Game.Scripting.Runtime;
 
 public class IceScript : ScriptBase
 {

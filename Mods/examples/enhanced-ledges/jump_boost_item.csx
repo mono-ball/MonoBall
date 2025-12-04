@@ -1,7 +1,7 @@
 using Arch.Core;
 using EnhancedLedges.Events;
-using PokeSharp.Engine.Core.Events.Movement;
-using PokeSharp.Game.Scripting.Runtime;
+using MonoBallFramework.Engine.Core.Events.Movement;
+using MonoBallFramework.Game.Scripting.Runtime;
 
 /// <summary>
 ///     Jump Boost Item behavior - consumable that temporarily increases jump height.

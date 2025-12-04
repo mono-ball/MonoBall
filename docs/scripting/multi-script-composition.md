@@ -10,7 +10,7 @@ The Multi-Script Composition system allows multiple `ScriptAttachment` component
 
 ### 1. ScriptAttachment Component
 
-**Location**: `/PokeSharp.Game.Components/Components/Scripting/ScriptAttachment.cs`
+**Location**: `/MonoBallFramework.Game.Components/Components/Scripting/ScriptAttachment.cs`
 
 ```csharp
 public struct ScriptAttachment
@@ -31,7 +31,7 @@ public struct ScriptAttachment
 
 ### 2. ScriptAttachmentSystem
 
-**Location**: `/PokeSharp.Game.Scripting/Systems/ScriptAttachmentSystem.cs`
+**Location**: `/MonoBallFramework.Game.Scripting/Systems/ScriptAttachmentSystem.cs`
 
 **Responsibilities**:
 - Load scripts using ScriptService
@@ -355,8 +355,8 @@ public void TestDynamicScriptManagement()
 
 ## References
 
-- **Component**: `/PokeSharp.Game.Components/Components/Scripting/ScriptAttachment.cs`
-- **System**: `/PokeSharp.Game.Scripting/Systems/ScriptAttachmentSystem.cs`
-- **System Priority**: `/PokeSharp.Engine.Core/Systems/SystemPriority.cs` (line 16)
+- **Component**: `/MonoBallFramework.Game.Components/Components/Scripting/ScriptAttachment.cs`
+- **System**: `/MonoBallFramework.Game.Scripting/Systems/ScriptAttachmentSystem.cs`
+- **System Priority**: `/MonoBallFramework.Engine.Core/Systems/SystemPriority.cs` (line 16)
 - **Examples**: `/src/examples/multi-script-composition/MultiScriptExample.cs`
 - **Roadmap**: `/docs/IMPLEMENTATION-ROADMAP.md` (lines 477-514)

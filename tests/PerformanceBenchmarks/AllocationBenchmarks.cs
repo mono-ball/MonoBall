@@ -1,9 +1,9 @@
 using System.Diagnostics;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Engines;
-using PokeSharp.Game.Components.Rendering;
+using MonoBallFramework.Game.Components.Rendering;
 
-namespace PokeSharp.Tests.Performance;
+namespace MonoBallFramework.Tests.Performance;
 
 /// <summary>
 ///     Benchmarks to validate allocation reductions from optimizations.

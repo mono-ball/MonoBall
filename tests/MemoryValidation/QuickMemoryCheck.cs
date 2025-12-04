@@ -1,7 +1,7 @@
 using System;
 using System.Threading;
 
-namespace PokeSharp.Tests.MemoryValidation
+namespace MonoBallFramework.Tests.MemoryValidation
 {
     /// <summary>
     /// Quick memory check utility for manual testing during development

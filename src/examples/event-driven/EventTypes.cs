@@ -4,9 +4,9 @@
 
 using Arch.Core;
 using Microsoft.Xna.Framework;
-using PokeSharp.Game.Components.Movement;
+using MonoBallFramework.Game.Components.Movement;
 
-namespace PokeSharp.Engine.Events;
+namespace MonoBallFramework.Engine.Events;
 
 #region Core Event Interfaces
 

@@ -1,8 +1,8 @@
 using EnhancedLedges.Events;
-using PokeSharp.Engine.Core.Events.Movement;
-using PokeSharp.Engine.Core.Events.Tile;
-using PokeSharp.Game.Components.Movement;
-using PokeSharp.Game.Scripting.Runtime;
+using MonoBallFramework.Engine.Core.Events.Movement;
+using MonoBallFramework.Engine.Core.Events.Tile;
+using MonoBallFramework.Game.Components.Movement;
+using MonoBallFramework.Game.Scripting.Runtime;
 
 /// <summary>
 ///     Crumbling ledge behavior - extends jump ledges with durability.

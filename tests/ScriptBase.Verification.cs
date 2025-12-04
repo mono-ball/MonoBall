@@ -4,10 +4,10 @@
 using Arch.Core;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Xna.Framework;
-using PokeSharp.Engine.Core.Events;
-using PokeSharp.Game.Scripting.Runtime;
+using MonoBallFramework.Engine.Core.Events;
+using MonoBallFramework.Game.Scripting.Runtime;
 
-namespace PokeSharp.Tests;
+namespace MonoBallFramework.Tests;
 
 /// <summary>
 /// Verification test script to ensure ScriptBase API compiles correctly.

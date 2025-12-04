@@ -5,7 +5,7 @@ using BenchmarkDotNet.Running;
 using FluentAssertions;
 using NUnit.Framework;
 
-namespace PokeSharp.EcsEvents.Tests.Performance;
+namespace MonoBallFramework.EcsEvents.Tests.Performance;
 
 /// <summary>
 /// Performance benchmarks for event dispatch system.

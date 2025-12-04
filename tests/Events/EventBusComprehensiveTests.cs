@@ -8,10 +8,10 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using NUnit.Framework;
-using PokeSharp.Engine.Core.Events;
-using PokeSharp.Engine.Core.Types.Events;
+using MonoBallFramework.Engine.Core.Events;
+using MonoBallFramework.Engine.Core.Types.Events;
 
-namespace PokeSharp.Tests.Events;
+namespace MonoBallFramework.Tests.Events;
 
 /// <summary>
 /// Comprehensive unit tests for EventBus with 100% coverage.

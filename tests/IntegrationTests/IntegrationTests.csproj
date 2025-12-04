@@ -20,10 +20,10 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\PokeSharp.Engine.Core\PokeSharp.Engine.Core.csproj" />
-    <ProjectReference Include="..\..\PokeSharp.Game\PokeSharp.Game.csproj" />
-    <ProjectReference Include="..\..\PokeSharp.Game.Systems\PokeSharp.Game.Systems.csproj" />
-    <ProjectReference Include="..\..\PokeSharp.Game.Scripting\PokeSharp.Game.Scripting.csproj" />
+    <ProjectReference Include="..\..\MonoBallFramework.Engine.Core\MonoBallFramework.Engine.Core.csproj" />
+    <ProjectReference Include="..\..\MonoBallFramework.Game\MonoBallFramework.Game.csproj" />
+    <ProjectReference Include="..\..\MonoBallFramework.Game.Systems\MonoBallFramework.Game.Systems.csproj" />
+    <ProjectReference Include="..\..\MonoBallFramework.Game.Scripting\MonoBallFramework.Game.Scripting.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Update="Mods\**\*.csx">

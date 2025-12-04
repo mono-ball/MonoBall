@@ -61,7 +61,7 @@ The test provides detailed logging:
 
 ```
 === SQLite Memory Integration Test ===
-Database: /tmp/pokesharp_integration_xxx.db
+Database: /tmp/MonoBall Framework_integration_xxx.db
 Max Expected Memory: 100MB
 
 [BASELINE] Memory: 45.2 MB
@@ -202,7 +202,7 @@ public class NewIntegrationTest : IDisposable
     {
         _output = output;
         _testDbPath = Path.Combine(Path.GetTempPath(),
-            $"pokesharp_test_{Guid.NewGuid()}.db");
+            $"MonoBall Framework_test_{Guid.NewGuid()}.db");
     }
 
     [Fact]

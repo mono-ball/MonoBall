@@ -1,7 +1,7 @@
 using System;
 using System.Diagnostics;
-using PokeSharp.Engine.Core.Events;
-using PokeSharp.Engine.Core.Types.Events;
+using MonoBallFramework.Engine.Core.Events;
+using MonoBallFramework.Engine.Core.Types.Events;
 
 namespace PerformanceBenchmarks;
 

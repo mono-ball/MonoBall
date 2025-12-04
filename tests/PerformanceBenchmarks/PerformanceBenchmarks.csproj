@@ -8,10 +8,10 @@
     <ServerGarbageCollection>true</ServerGarbageCollection>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="../../PokeSharp.Engine.Common/PokeSharp.Engine.Common.csproj" />
-    <ProjectReference Include="../../PokeSharp.Engine.Core/PokeSharp.Engine.Core.csproj" />
-    <ProjectReference Include="../../PokeSharp.Engine.Systems/PokeSharp.Engine.Systems.csproj" />
-    <ProjectReference Include="../../PokeSharp.Game.Components/PokeSharp.Game.Components.csproj" />
+    <ProjectReference Include="../../MonoBallFramework.Engine.Common/MonoBallFramework.Engine.Common.csproj" />
+    <ProjectReference Include="../../MonoBallFramework.Engine.Core/MonoBallFramework.Engine.Core.csproj" />
+    <ProjectReference Include="../../MonoBallFramework.Engine.Systems/MonoBallFramework.Engine.Systems.csproj" />
+    <ProjectReference Include="../../MonoBallFramework.Game.Components/MonoBallFramework.Game.Components.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" Version="0.13.12" />

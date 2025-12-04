@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "MonoBall Framework.Game": {
+      "commandName": "Project",
+      "workingDirectory": "$(OutDir)"
+    }
+  }
+}
+
+
+
+

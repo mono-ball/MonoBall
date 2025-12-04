@@ -1,8 +1,8 @@
 using FluentAssertions;
 using Microsoft.Extensions.Logging.Abstractions;
-using PokeSharp.Engine.Core.Modding;
+using MonoBallFramework.Engine.Core.Modding;
 
-namespace PokeSharp.Tests.Phase5;
+namespace MonoBallFramework.Tests.Phase5;
 
 /// <summary>
 /// Test suite for Phase 5.1: Mod Autoloading functionality
@@ -33,7 +33,7 @@ public class ModLoaderTests
         var mods = _loader.DiscoverMods();
 
         // Assert
-        mods.Should().Contain(m => m.Manifest.ModId == "pokesharp.test.basic");
+        mods.Should().Contain(m => m.Manifest.ModId == "MonoBallFramework.test.basic");
     }
 
     [Fact]
@@ -45,7 +45,7 @@ public class ModLoaderTests
         // Assert
         mods.Should()
             .NotContain(
-                m => m.Manifest.ModId == "pokesharp.test.badversion",
+                m => m.Manifest.ModId == "MonoBallFramework.test.badversion",
                 "invalid semantic version should fail validation"
             );
     }
@@ -55,7 +55,7 @@ public class ModLoaderTests
     {
         // Act
         var mods = _loader.DiscoverMods();
-        var versionMod = mods.FirstOrDefault(m => m.Manifest.ModId == "pokesharp.test.version");
+        var versionMod = mods.FirstOrDefault(m => m.Manifest.ModId == "MonoBallFramework.test.version");
 
         // Assert
         versionMod.Should().NotBeNull();
@@ -72,8 +72,8 @@ public class ModLoaderTests
         var sorted = _loader.SortByLoadOrder(mods);
 
         // Assert - basic should load before dependency
-        var basicIndex = sorted.FindIndex(m => m.Manifest.ModId == "pokesharp.test.basic");
-        var depIndex = sorted.FindIndex(m => m.Manifest.ModId == "pokesharp.test.dependency");
+        var basicIndex = sorted.FindIndex(m => m.Manifest.ModId == "MonoBallFramework.test.basic");
+        var depIndex = sorted.FindIndex(m => m.Manifest.ModId == "MonoBallFramework.test.dependency");
 
         basicIndex.Should().BeLessThan(depIndex, "dependencies must load after their requirements");
     }
@@ -88,8 +88,8 @@ public class ModLoaderTests
         var sorted = _loader.SortByLoadOrder(mods);
 
         // Assert - basic should load before version (LoadAfter)
-        var basicIndex = sorted.FindIndex(m => m.Manifest.ModId == "pokesharp.test.basic");
-        var versionIndex = sorted.FindIndex(m => m.Manifest.ModId == "pokesharp.test.version");
+        var basicIndex = sorted.FindIndex(m => m.Manifest.ModId == "MonoBallFramework.test.basic");
+        var versionIndex = sorted.FindIndex(m => m.Manifest.ModId == "MonoBallFramework.test.version");
 
         if (basicIndex >= 0 && versionIndex >= 0)
         {
@@ -107,8 +107,8 @@ public class ModLoaderTests
         var sorted = _loader.SortByLoadOrder(mods);
 
         // Assert - lower priority loads first
-        var versionMod = sorted.FirstOrDefault(m => m.Manifest.ModId == "pokesharp.test.version");
-        var basicMod = sorted.FirstOrDefault(m => m.Manifest.ModId == "pokesharp.test.basic");
+        var versionMod = sorted.FirstOrDefault(m => m.Manifest.ModId == "MonoBallFramework.test.version");
+        var basicMod = sorted.FirstOrDefault(m => m.Manifest.ModId == "MonoBallFramework.test.basic");
 
         if (versionMod != null && basicMod != null)
         {
@@ -136,8 +136,8 @@ public class ModLoaderTests
         // Assert - both should load successfully even with same priority
         sorted
             .Should()
-            .Contain(m => m.Manifest.ModId == "pokesharp.test.basic")
-            .And.Contain(m => m.Manifest.ModId == "pokesharp.test.conflict");
+            .Contain(m => m.Manifest.ModId == "MonoBallFramework.test.basic")
+            .And.Contain(m => m.Manifest.ModId == "MonoBallFramework.test.conflict");
     }
 
     [Fact]

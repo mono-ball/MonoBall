@@ -3,12 +3,12 @@
 
 using Arch.Core;
 using Arch.Core.Extensions;
-using PokeSharp.Game.Components.Movement;
-using PokeSharp.Game.Components.Scripting;
-using PokeSharp.Game.Components.Tiles;
-using PokeSharp.Game.Scripting.Runtime;
+using MonoBallFramework.Game.Components.Movement;
+using MonoBallFramework.Game.Components.Scripting;
+using MonoBallFramework.Game.Components.Tiles;
+using MonoBallFramework.Game.Scripting.Runtime;
 
-namespace PokeSharp.Examples.MultiScript;
+namespace MonoBallFramework.Examples.MultiScript;
 
 /// <summary>
 /// Example: Ice tile with encounter rate and warp functionality.

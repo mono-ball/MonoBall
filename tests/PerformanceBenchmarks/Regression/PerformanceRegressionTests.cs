@@ -1,10 +1,10 @@
 using System.Diagnostics;
 using Arch.Core;
-using PokeSharp.Game.Components.Movement;
-using PokeSharp.Game.Components.Rendering;
+using MonoBallFramework.Game.Components.Movement;
+using MonoBallFramework.Game.Components.Rendering;
 using Xunit;
 
-namespace PokeSharp.Tests.Performance.Regression;
+namespace MonoBallFramework.Tests.Performance.Regression;
 
 /// <summary>
 ///     Performance regression tests to ensure optimizations don't degrade over time.

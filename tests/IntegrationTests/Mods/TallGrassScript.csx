@@ -1,9 +1,9 @@
 // Tall Grass Script - Example Test Mod
 // Triggers random wild Pokemon encounters in tall grass
 
-using PokeSharp.Engine.Core.Events;
-using PokeSharp.Engine.Core.Events.Tile;
-using PokeSharp.Game.Scripting.Runtime;
+using MonoBallFramework.Engine.Core.Events;
+using MonoBallFramework.Engine.Core.Events.Tile;
+using MonoBallFramework.Game.Scripting.Runtime;
 
 public class TallGrassScript : ScriptBase
 {

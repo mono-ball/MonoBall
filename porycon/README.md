@@ -8,6 +8,7 @@ A Python tool to convert Pokemon Emerald decompilation maps to Tiled JSON format
 - Splits metatiles into individual tiles across separate BG layers
 - Creates complete tilesets (no metatiles) for Tiled editing
 - Generates Tiled world files from map connections
+- **Tile animations**: Converts automatic and trigger-based animations (see [Animation Guide](docs/animations.md))
 - Organizes output: Maps in region folders, Worlds at root, Tilesets in region folders
 
 ## Project Structure
@@ -91,10 +92,16 @@ output/
 - Pillow (for image processing)
 - See requirements.txt for full dependencies
 
+## Documentation
+
+- **[Animation Guide](docs/animations.md)** - Complete guide to tile animations (automatic & trigger-based)
+- **Project Structure** - See directory layout above
+
 ## Notes
 
 - The converter creates tilesets with only used tiles (not all tiles from source)
 - Tile IDs are remapped to be sequential (1-based for Tiled)
 - Maps reference tilesets via relative paths
 - World files use a simple grid layout (can be improved with graph algorithms)
+- Animation support includes water, flowers, waterfalls, and more (see Animation Guide)
 

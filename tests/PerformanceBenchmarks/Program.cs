@@ -1,6 +1,6 @@
 using PerformanceBenchmarks;
 
-namespace PokeSharp.Benchmarks;
+namespace MonoBallFramework.Benchmarks;
 
 class Program
 {

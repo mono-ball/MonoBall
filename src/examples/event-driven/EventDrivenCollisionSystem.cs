@@ -2,13 +2,13 @@
 // Demonstrates event-driven collision detection with mod injection points.
 
 using Arch.Core;
-using PokeSharp.Engine.Events;
-using PokeSharp.Game.Components.Interfaces;
-using PokeSharp.Game.Components.Movement;
-using PokeSharp.Game.Components.Tiles;
-using PokeSharp.Game.Systems.Services;
+using MonoBallFramework.Engine.Events;
+using MonoBallFramework.Game.Components.Interfaces;
+using MonoBallFramework.Game.Components.Movement;
+using MonoBallFramework.Game.Components.Tiles;
+using MonoBallFramework.Game.Systems.Services;
 
-namespace PokeSharp.Game.Systems.EventDriven;
+namespace MonoBallFramework.Game.Systems.EventDriven;
 
 /// <summary>
 /// Event-driven collision service that fires events for mod injection.

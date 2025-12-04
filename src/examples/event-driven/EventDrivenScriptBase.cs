@@ -2,11 +2,11 @@
 // Modern scripting interface using events instead of virtual methods.
 
 using Arch.Core;
-using PokeSharp.Engine.Events;
-using PokeSharp.Game.Components.Movement;
-using PokeSharp.Game.Scripting.Runtime;
+using MonoBallFramework.Engine.Events;
+using MonoBallFramework.Game.Components.Movement;
+using MonoBallFramework.Game.Scripting.Runtime;
 
-namespace PokeSharp.Game.Scripting.EventDriven;
+namespace MonoBallFramework.Game.Scripting.EventDriven;
 
 /// <summary>
 /// Modern event-driven base class for tile behavior scripts.

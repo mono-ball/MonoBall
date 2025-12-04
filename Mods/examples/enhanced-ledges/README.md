@@ -198,4 +198,4 @@ On<LedgeCrumbledEvent>((evt) => {
 
 ## License
 
-Part of PokeSharp examples - free to use and modify for learning purposes.
+Part of MonoBall Framework examples - free to use and modify for learning purposes.

@@ -58,7 +58,7 @@ Print("Gave player $1000");
 
 ## Build Process
 
-These scripts are automatically copied to `PokeSharp.Game/bin/Debug/net9.0/Scripts/` during build. Scripts created using
+These scripts are automatically copied to `MonoBall Framework.Game/bin/Debug/net9.0/Scripts/` during build. Scripts created using
 the `save` command in the console are saved to the runtime location.
 
 To version control new scripts:

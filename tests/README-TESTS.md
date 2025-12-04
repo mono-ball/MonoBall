@@ -1,4 +1,4 @@
-# PokeSharp Test Suite
+# MonoBall Framework Test Suite
 
 ## SQLite Database Migration Tests
 
@@ -13,16 +13,16 @@ Comprehensive test suite for validating the SQLite database migration.
 ## Test Suites
 
 ### 1. Unit Tests
-**Location**: `PokeSharp.Game.Data.Tests/`
+**Location**: `MonoBall Framework.Game.Data.Tests/`
 **Tests**: 20 comprehensive unit tests
 **Focus**: Database creation, data loading, EF queries, memory management
 
 ```bash
-cd PokeSharp.Game.Data.Tests
+cd MonoBall Framework.Game.Data.Tests
 dotnet test
 ```
 
-[Read More →](PokeSharp.Game.Data.Tests/README.md)
+[Read More →](MonoBall Framework.Game.Data.Tests/README.md)
 
 ### 2. Integration Tests
 **Location**: `Integration/`
@@ -99,7 +99,7 @@ Expected output:
 **Purpose**: System performance testing
 
 ### Engine Systems Tests
-**Location**: `PokeSharp.Engine.Systems.Tests/`
+**Location**: `MonoBall Framework.Engine.Systems.Tests/`
 **Purpose**: Core engine testing
 
 ## Documentation

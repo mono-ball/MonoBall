@@ -1,9 +1,9 @@
-using PokeSharp.Engine.Core.Components.Movement;
-using PokeSharp.Engine.Core.Components.Rendering;
-using PokeSharp.Engine.Core.Pooling;
+using MonoBallFramework.Engine.Core.Components.Movement;
+using MonoBallFramework.Engine.Core.Components.Rendering;
+using MonoBallFramework.Engine.Core.Pooling;
 using Xunit;
 
-namespace PokeSharp.Tests.Pooling;
+namespace MonoBallFramework.Tests.Pooling;
 
 /// <summary>
 ///     Tests for component pooling system.

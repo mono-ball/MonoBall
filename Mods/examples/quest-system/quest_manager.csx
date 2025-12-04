@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using Arch.Core;
-using PokeSharp.Engine.Core.Events.System;
-using PokeSharp.Game.Scripting.Runtime;
+using MonoBallFramework.Engine.Core.Events.System;
+using MonoBallFramework.Game.Scripting.Runtime;
 
 /// <summary>
 /// Central quest management system using ScriptBase.

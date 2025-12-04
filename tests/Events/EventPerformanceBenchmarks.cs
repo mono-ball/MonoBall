@@ -2,10 +2,10 @@ using System;
 using System.Diagnostics;
 using FluentAssertions;
 using NUnit.Framework;
-using PokeSharp.Engine.Core.Events;
-using PokeSharp.Engine.Core.Types.Events;
+using MonoBallFramework.Engine.Core.Events;
+using MonoBallFramework.Engine.Core.Types.Events;
 
-namespace PokeSharp.Tests.Events;
+namespace MonoBallFramework.Tests.Events;
 
 /// <summary>
 /// Performance benchmarks for EventBus.

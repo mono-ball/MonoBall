@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <RootNamespace>MonoBallFramework.Tests.ScriptingTests</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="6.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\MonoBallFramework.Engine.Core\MonoBallFramework.Engine.Core.csproj" />
+    <ProjectReference Include="..\..\..\MonoBallFramework.Engine.Common\MonoBallFramework.Engine.Common.csproj" />
+    <ProjectReference Include="..\..\..\MonoBallFramework.Game.Scripting\MonoBallFramework.Game.Scripting.csproj" />
+    <ProjectReference Include="..\..\..\MonoBallFramework.Game.Components\MonoBallFramework.Game.Components.csproj" />
+    <ProjectReference Include="..\..\..\MonoBallFramework.Game.Systems\MonoBallFramework.Game.Systems.csproj" />
+  </ItemGroup>
+</Project>

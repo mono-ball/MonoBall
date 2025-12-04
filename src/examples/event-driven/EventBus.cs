@@ -6,7 +6,7 @@ using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
 using Arch.Core;
 
-namespace PokeSharp.Engine.Events;
+namespace MonoBallFramework.Engine.Events;
 
 /// <summary>
 /// Delegate for event handlers that operate on events by reference (zero-copy).

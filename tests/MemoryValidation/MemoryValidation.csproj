@@ -20,8 +20,8 @@
     <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.4.1" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\PokeSharp.Engine.Rendering\PokeSharp.Engine.Rendering.csproj" />
-    <ProjectReference Include="..\..\PokeSharp.Game\PokeSharp.Game.csproj" />
-    <ProjectReference Include="..\..\PokeSharp.Game.Systems\PokeSharp.Game.Systems.csproj" />
+    <ProjectReference Include="..\..\MonoBallFramework.Engine.Rendering\MonoBallFramework.Engine.Rendering.csproj" />
+    <ProjectReference Include="..\..\MonoBallFramework.Game\MonoBallFramework.Game.csproj" />
+    <ProjectReference Include="..\..\MonoBallFramework.Game.Systems\MonoBallFramework.Game.Systems.csproj" />
   </ItemGroup>
 </Project>

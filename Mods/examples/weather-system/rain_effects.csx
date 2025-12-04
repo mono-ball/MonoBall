@@ -1,12 +1,12 @@
-#r "PokeSharp.Engine.Core.dll"
+#r "MonoBallFramework.Engine.Core.dll"
 #load "events/WeatherEvents.csx"
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using PokeSharp.Engine.Core.Events;
-using PokeSharp.Engine.Core.Events.System;
-using PokeSharp.Engine.Core.Scripting;
+using MonoBallFramework.Engine.Core.Events;
+using MonoBallFramework.Engine.Core.Events.System;
+using MonoBallFramework.Engine.Core.Scripting;
 
 /// <summary>
 /// Handles visual and audio effects for rain weather.

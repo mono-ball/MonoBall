@@ -1,6 +1,6 @@
 # Event-Driven ECS Test Suite
 
-Comprehensive testing infrastructure for PokeSharp's event-driven ECS architecture migration.
+Comprehensive testing infrastructure for MonoBall Framework's event-driven ECS architecture migration.
 
 ## Overview
 
@@ -20,7 +20,7 @@ ecs-events/
 │   └── ModLoadingTests.cs    # Mod loading and isolation
 ├── scripts/                   # Script validation tests
 │   └── ScriptValidationTests.cs  # Script security and execution
-└── PokeSharp.EcsEvents.Tests.csproj
+└── MonoBall Framework.EcsEvents.Tests.csproj
 ```
 
 ## Running Tests

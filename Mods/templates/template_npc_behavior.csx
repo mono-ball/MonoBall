@@ -1,9 +1,9 @@
 using Arch.Core;
 using Microsoft.Xna.Framework;
-using PokeSharp.Engine.Core.Events.Movement;
-using PokeSharp.Engine.Core.Events.System;
-using PokeSharp.Game.Components.Movement;
-using PokeSharp.Game.Scripting.Runtime;
+using MonoBallFramework.Engine.Core.Events.Movement;
+using MonoBallFramework.Engine.Core.Events.System;
+using MonoBallFramework.Game.Components.Movement;
+using MonoBallFramework.Game.Scripting.Runtime;
 
 /// <summary>
 /// Template for creating NPC behavior scripts.

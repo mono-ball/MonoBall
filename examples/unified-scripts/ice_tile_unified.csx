@@ -4,9 +4,9 @@
 // Uses ScriptBase for unified event handling
 
 using System.Numerics;
-using PokeSharp.Core.Components;
-using PokeSharp.Game.Scripting.Events;
-using PokeSharp.Game.Scripting.Runtime;
+using MonoBallFramework.Core.Components;
+using MonoBallFramework.Game.Scripting.Events;
+using MonoBallFramework.Game.Scripting.Runtime;
 
 public class IceTileScript : ScriptBase
 {

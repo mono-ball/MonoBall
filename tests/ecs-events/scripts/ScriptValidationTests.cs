@@ -5,10 +5,10 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.Extensions.Logging.Abstractions;
 using NUnit.Framework;
-using PokeSharp.Game.Scripting.Runtime;
-using PokeSharp.Game.Scripting.Services;
+using MonoBallFramework.Game.Scripting.Runtime;
+using MonoBallFramework.Game.Scripting.Services;
 
-namespace PokeSharp.EcsEvents.Tests.Scripts;
+namespace MonoBallFramework.EcsEvents.Tests.Scripts;
 
 /// <summary>
 /// Tests for script compilation, validation, and security.
@@ -35,8 +35,8 @@ public class ScriptValidationTests
         // Arrange
         var script =
             @"
-using PokeSharp.Game.Scripting.Runtime;
-using PokeSharp.Game.Components.Movement;
+using MonoBallFramework.Game.Scripting.Runtime;
+using MonoBallFramework.Game.Components.Movement;
 
 public class TestBehavior : TileBehaviorScriptBase
 {

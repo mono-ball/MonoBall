@@ -1,9 +1,9 @@
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
-using PokeSharp.Engine.Core.Events;
-using PokeSharp.Engine.Core.Types.Events;
+using MonoBallFramework.Engine.Core.Events;
+using MonoBallFramework.Engine.Core.Types.Events;
 
-namespace PokeSharp.Tests.Benchmarks;
+namespace MonoBallFramework.Tests.Benchmarks;
 
 /// <summary>
 ///     Performance benchmarks for the EventBus implementation.

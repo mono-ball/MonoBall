@@ -1,6 +1,6 @@
-# PokeSharp Mod Templates
+# MonoBall Framework Mod Templates
 
-This folder contains production-ready templates for creating mods in PokeSharp. Each template is fully documented with TODO comments and examples to help you get started quickly.
+This folder contains production-ready templates for creating mods in MonoBall Framework. Each template is fully documented with TODO comments and examples to help you get started quickly.
 
 ## 📋 Available Templates
 
@@ -179,7 +179,7 @@ Template for the mod manifest file that defines mod metadata and configuration.
    - Validate JSON syntax
 
 5. **Test Your Mod:**
-   - Place your mod folder in `PokeSharp/Mods/`
+   - Place your mod folder in `MonoBall Framework/Mods/`
    - Launch the game and check the console for errors
    - Test all features thoroughly
    - Check for hot-reload support during development
@@ -412,7 +412,7 @@ var direction = Context.Map.GetDirectionTo(
 - [Event System Architecture](../docs/IMPLEMENTATION-ROADMAP.md)
 
 ### Example Mods
-- Check `PokeSharp.Game/Assets/Scripts/Behaviors/` for built-in examples:
+- Check `MonoBall Framework.Game/Assets/Scripts/Behaviors/` for built-in examples:
   - `wander_behavior.csx` - Example NPC wandering
   - `guard_behavior.csx` - Example stationary NPC
   - `patrol_behavior.csx` - Example patrol pattern

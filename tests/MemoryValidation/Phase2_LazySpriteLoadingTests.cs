@@ -5,13 +5,13 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework.Graphics;
-using PokeSharp.Engine.Rendering.Assets;
-using PokeSharp.Game.Services;
-using PokeSharp.Game.Systems;
+using MonoBallFramework.Engine.Rendering.Assets;
+using MonoBallFramework.Game.Services;
+using MonoBallFramework.Game.Systems;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace PokeSharp.Tests.MemoryValidation
+namespace MonoBallFramework.Tests.MemoryValidation
 {
     /// <summary>
     /// Phase 2 Integration Tests: Lazy Sprite Loading
@@ -53,7 +53,7 @@ namespace PokeSharp.Tests.MemoryValidation
 
             // Get initial texture count (baseline)
             var graphicsDevice = CreateMockGraphicsDevice();
-            var assetManager = new AssetManager(graphicsDevice, "PokeSharp.Game/Assets");
+            var assetManager = new AssetManager(graphicsDevice, "MonoBallFramework.Game/Assets");
             var initialTextureCount = assetManager.LoadedTextureCount;
             _output.WriteLine($"Initial Texture Count: {initialTextureCount}");
 
@@ -111,7 +111,7 @@ namespace PokeSharp.Tests.MemoryValidation
             {
                 _output.WriteLine($"⚠️  SKIP: Test map not found: {ex.Message}");
                 _output.WriteLine("This test requires valid map files.");
-                _output.WriteLine("Expected location: PokeSharp.Game/Assets/Data/Maps/");
+                _output.WriteLine("Expected location: MonoBallFramework.Game/Assets/Data/Maps/");
 
                 // Skip test gracefully - just return from test
                 return;
@@ -148,7 +148,7 @@ namespace PokeSharp.Tests.MemoryValidation
             );
 
             var graphicsDevice = CreateMockGraphicsDevice();
-            var assetManager = new AssetManager(graphicsDevice, "PokeSharp.Game/Assets");
+            var assetManager = new AssetManager(graphicsDevice, "MonoBallFramework.Game/Assets");
             ForceGarbageCollection();
             var baselineMemoryMB = GetCurrentMemoryMB();
             _output.WriteLine($"\nBaseline Memory: {baselineMemoryMB:F2}MB");

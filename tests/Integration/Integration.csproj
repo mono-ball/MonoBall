@@ -21,7 +21,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.0" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\PokeSharp.Game.Data\PokeSharp.Game.Data.csproj" />
-    <ProjectReference Include="..\..\PokeSharp.Engine.Common\PokeSharp.Engine.Common.csproj" />
+    <ProjectReference Include="..\..\MonoBallFramework.Game.Data\MonoBallFramework.Game.Data.csproj" />
+    <ProjectReference Include="..\..\MonoBallFramework.Engine.Common\MonoBallFramework.Engine.Common.csproj" />
   </ItemGroup>
 </Project>

@@ -1,6 +1,6 @@
 using Arch.Core;
-using PokeSharp.Engine.Core.Events.System;
-using PokeSharp.Game.Scripting.Runtime;
+using MonoBallFramework.Engine.Core.Events.System;
+using MonoBallFramework.Game.Scripting.Runtime;
 
 /// <summary>
 /// Template for creating item behavior scripts.

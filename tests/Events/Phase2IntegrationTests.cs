@@ -8,14 +8,14 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Xna.Framework;
 using NUnit.Framework;
-using PokeSharp.Engine.Core.Events;
-using PokeSharp.Engine.Core.Events.Tile;
-using PokeSharp.Game.Components.Movement;
-using PokeSharp.Game.Scripting.HotReload.Cache;
-using PokeSharp.Game.Scripting.Runtime;
-using PokeSharp.Game.Systems.Events;
+using MonoBallFramework.Engine.Core.Events;
+using MonoBallFramework.Engine.Core.Events.Tile;
+using MonoBallFramework.Game.Components.Movement;
+using MonoBallFramework.Game.Scripting.HotReload.Cache;
+using MonoBallFramework.Game.Scripting.Runtime;
+using MonoBallFramework.Game.Systems.Events;
 
-namespace PokeSharp.Tests.Phase2Integration;
+namespace MonoBallFramework.Tests.Phase2Integration;
 
 /// <summary>
 /// Phase 2 CSX Event Integration Tests
@@ -389,7 +389,7 @@ public class Phase2IntegrationTests
                 TypeId = "tile_step",
                 Timestamp = 0.3f,
                 Entity = entity,
-                TilePosition = new PokeSharp.Game.Components.Tiles.TilePosition(0, 1),
+                TilePosition = new MonoBallFramework.Game.Components.Tiles.TilePosition(0, 1),
                 TileType = "grass",
             }
         );
@@ -435,7 +435,7 @@ public class Phase2IntegrationTests
                 TypeId = "tile_step",
                 Timestamp = 0.1f,
                 Entity = entity,
-                TilePosition = new PokeSharp.Game.Components.Tiles.TilePosition(0, 1),
+                TilePosition = new MonoBallFramework.Game.Components.Tiles.TilePosition(0, 1),
                 TileType = "grass",
             }
         );

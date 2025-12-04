@@ -2,7 +2,7 @@
   "id": "example-enhanced-ledges",
   "name": "Enhanced Ledges Mod",
   "version": "1.0.0",
-  "author": "PokeSharp Team",
+  "author": "MonoBall Framework Team",
   "description": "Example mod demonstrating ledge mechanics with crumbling and jump boost items",
   "scripts": [
     "ledge_crumble.csx",

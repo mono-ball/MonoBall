@@ -1,7 +1,7 @@
 using FluentAssertions;
 using Xunit;
 
-namespace PokeSharp.Game.Maps.Tests.MapConnections;
+namespace MonoBallFramework.Game.Maps.Tests.MapConnections;
 
 /// <summary>
 /// Tests comparing expected coordinates vs actual coordinates at map connections.

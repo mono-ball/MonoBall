@@ -2,10 +2,10 @@
   "id": "weather-system",
   "name": "Weather System",
   "version": "1.0.0",
-  "author": "PokeSharp Team",
+  "author": "MonoBall Framework Team",
   "description": "Comprehensive weather system with dynamic weather changes, visual effects, and weather-based Pokémon encounters. Demonstrates custom event creation and mod extensibility.",
   "dependencies": [
-    "pokesharp-core"
+    "MonoBall Framework-core"
   ],
   "scripts": [
     "events/WeatherEvents.csx",

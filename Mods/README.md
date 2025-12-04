@@ -1,6 +1,6 @@
-# PokeSharp Mods Directory
+# MonoBall Framework Mods Directory
 
-This directory contains user-created mods that extend PokeSharp functionality.
+This directory contains user-created mods that extend MonoBall Framework functionality.
 
 ## 📁 Directory Structure
 
@@ -32,7 +32,7 @@ Each mod **must** have a `mod.json` file in its root directory:
     "script2.csx"
   ],
   "dependencies": [
-    "pokesharp-core >= 1.0.0",
+    "MonoBall Framework-core >= 1.0.0",
     "another-mod == 2.1.0"
   ],
   "permissions": [
@@ -86,8 +86,8 @@ All mod scripts must:
 ### Example Script Template
 
 ```csharp
-using PokeSharp.Game.Scripting.Runtime;
-using PokeSharp.Engine.Core.Events;
+using MonoBall Framework.Game.Scripting.Runtime;
+using MonoBall Framework.Engine.Core.Events;
 
 public class MyModScript : ScriptBase
 {

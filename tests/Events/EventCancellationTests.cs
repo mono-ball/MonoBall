@@ -3,14 +3,14 @@ using Arch.Core;
 using FluentAssertions;
 using Microsoft.Xna.Framework;
 using NUnit.Framework;
-using PokeSharp.Engine.Core.Events;
-using PokeSharp.Engine.Core.Events.Tile;
-using PokeSharp.Engine.Core.Types.Events;
-using PokeSharp.Game.Components.Movement;
-using PokeSharp.Game.Components.Tiles;
-using PokeSharp.Game.Systems.Events;
+using MonoBallFramework.Engine.Core.Events;
+using MonoBallFramework.Engine.Core.Events.Tile;
+using MonoBallFramework.Engine.Core.Types.Events;
+using MonoBallFramework.Game.Components.Movement;
+using MonoBallFramework.Game.Components.Tiles;
+using MonoBallFramework.Game.Systems.Events;
 
-namespace PokeSharp.Tests.Events;
+namespace MonoBallFramework.Tests.Events;
 
 /// <summary>
 /// Tests for event cancellation functionality.

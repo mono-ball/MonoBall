@@ -1,6 +1,6 @@
 # Script Templates Reference
 
-Ready-to-use templates for common PokeSharp modding scenarios. Copy, customize, and extend!
+Ready-to-use templates for common MonoBall Framework modding scenarios. Copy, customize, and extend!
 
 ## Table of Contents
 
@@ -44,8 +44,8 @@ Create custom tile behaviors (tall grass, ice, warps, etc.).
 ### Basic Tile Behavior
 
 ```csharp
-using PokeSharp.Game.Scripting.Runtime;
-using PokeSharp.Engine.Core.Events.Tile;
+using MonoBallFramework.Game.Scripting.Runtime;
+using MonoBallFramework.Engine.Core.Events.Tile;
 using Microsoft.Extensions.Logging;
 
 /// <summary>
@@ -120,8 +120,8 @@ public class TileBehaviorTemplate : ScriptBase
 ### Tall Grass Encounters
 
 ```csharp
-using PokeSharp.Game.Scripting.Runtime;
-using PokeSharp.Engine.Core.Events.Tile;
+using MonoBallFramework.Game.Scripting.Runtime;
+using MonoBallFramework.Engine.Core.Events.Tile;
 using Microsoft.Extensions.Logging;
 
 /// <summary>
@@ -196,9 +196,9 @@ public sealed record WildEncounterEvent : IGameEvent
 ### Ice Tile Sliding
 
 ```csharp
-using PokeSharp.Game.Scripting.Runtime;
-using PokeSharp.Engine.Core.Events.Tile;
-using PokeSharp.Engine.Core.Events.Movement;
+using MonoBallFramework.Game.Scripting.Runtime;
+using MonoBallFramework.Engine.Core.Events.Tile;
+using MonoBallFramework.Engine.Core.Events.Movement;
 using Microsoft.Extensions.Logging;
 
 /// <summary>
@@ -288,8 +288,8 @@ public class IceTileSliding : ScriptBase
 ### Warp Tile
 
 ```csharp
-using PokeSharp.Game.Scripting.Runtime;
-using PokeSharp.Engine.Core.Events.Tile;
+using MonoBallFramework.Game.Scripting.Runtime;
+using MonoBallFramework.Engine.Core.Events.Tile;
 using Microsoft.Xna.Framework;
 
 /// <summary>
@@ -385,8 +385,8 @@ Create NPC interactions, dialogue, and battles.
 ### Basic NPC Interaction
 
 ```csharp
-using PokeSharp.Game.Scripting.Runtime;
-using PokeSharp.Engine.Core.Events.NPC;
+using MonoBallFramework.Game.Scripting.Runtime;
+using MonoBallFramework.Engine.Core.Events.NPC;
 using Microsoft.Extensions.Logging;
 
 /// <summary>
@@ -526,8 +526,8 @@ public class NPCBehaviorTemplate : ScriptBase
 ### Trainer NPC with Dialogue
 
 ```csharp
-using PokeSharp.Game.Scripting.Runtime;
-using PokeSharp.Engine.Core.Events.NPC;
+using MonoBallFramework.Game.Scripting.Runtime;
+using MonoBallFramework.Engine.Core.Events.NPC;
 
 /// <summary>
 /// Trainer NPC that battles the player once and has different dialogue afterward.
@@ -653,8 +653,8 @@ Create collectible items with effects.
 ### Basic Item Pickup
 
 ```csharp
-using PokeSharp.Game.Scripting.Runtime;
-using PokeSharp.Engine.Core.Events.Collision;
+using MonoBallFramework.Game.Scripting.Runtime;
+using MonoBallFramework.Engine.Core.Events.Collision;
 using Microsoft.Extensions.Logging;
 
 /// <summary>
@@ -743,8 +743,8 @@ public sealed record ItemCollectedEvent : IGameEvent
 ### Hidden Item (Requires ItemFinder)
 
 ```csharp
-using PokeSharp.Game.Scripting.Runtime;
-using PokeSharp.Engine.Core.Events.Tile;
+using MonoBallFramework.Game.Scripting.Runtime;
+using MonoBallFramework.Engine.Core.Events.Tile;
 
 /// <summary>
 /// Hidden item that requires ItemFinder to detect.
@@ -823,8 +823,8 @@ Create custom entities with behaviors.
 ### Basic Custom Entity
 
 ```csharp
-using PokeSharp.Game.Scripting.Runtime;
-using PokeSharp.Engine.Core.Events.System;
+using MonoBallFramework.Game.Scripting.Runtime;
+using MonoBallFramework.Engine.Core.Events.System;
 using Microsoft.Extensions.Logging;
 
 /// <summary>
@@ -924,9 +924,9 @@ public class CustomEntityTemplate : ScriptBase
 ### Wandering NPC
 
 ```csharp
-using PokeSharp.Game.Scripting.Runtime;
-using PokeSharp.Engine.Core.Events.System;
-using PokeSharp.Engine.Core.Events.Movement;
+using MonoBallFramework.Game.Scripting.Runtime;
+using MonoBallFramework.Engine.Core.Events.System;
+using MonoBallFramework.Engine.Core.Events.Movement;
 
 /// <summary>
 /// NPC that wanders randomly around the map.
@@ -1057,7 +1057,7 @@ Create custom events for mod communication.
 ### Custom Event Definition
 
 ```csharp
-using PokeSharp.Engine.Core.Events;
+using MonoBallFramework.Engine.Core.Events;
 using Arch.Core;
 
 /// <summary>
@@ -1172,8 +1172,8 @@ public sealed record QuestEventTriggered : IGameEvent
 ### Event Publisher Script
 
 ```csharp
-using PokeSharp.Game.Scripting.Runtime;
-using PokeSharp.Engine.Core.Events.Movement;
+using MonoBallFramework.Game.Scripting.Runtime;
+using MonoBallFramework.Engine.Core.Events.Movement;
 
 /// <summary>
 /// Example script that publishes custom events.
@@ -1275,7 +1275,7 @@ Mod metadata and configuration.
   "homepage": "https://github.com/yourusername/your-mod",
   "license": "MIT",
 
-  "pokesharp_version": "1.0.0+",
+  "MonoBall Framework_version": "1.0.0+",
 
   "scripts": [
     "MyAwesomeMod.csx"
@@ -1302,7 +1302,7 @@ Mod metadata and configuration.
   "license": "GPL-3.0",
   "icon": "icon.png",
 
-  "pokesharp_version": "1.0.0+",
+  "MonoBall Framework_version": "1.0.0+",
 
   "scripts": [
     "EncounterCore.csx",
@@ -1370,8 +1370,8 @@ Complex patterns for advanced modding.
 ### State Machine Template
 
 ```csharp
-using PokeSharp.Game.Scripting.Runtime;
-using PokeSharp.Engine.Core.Events.Tile;
+using MonoBallFramework.Game.Scripting.Runtime;
+using MonoBallFramework.Engine.Core.Events.Tile;
 
 /// <summary>
 /// Template for state machine based scripts.

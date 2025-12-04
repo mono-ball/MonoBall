@@ -1,7 +1,7 @@
 using System.Text;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
-using PokeSharp.Engine.Common.Logging;
+using MonoBallFramework.Engine.Common.Logging;
 using Xunit;
 
 namespace LoggingTests;

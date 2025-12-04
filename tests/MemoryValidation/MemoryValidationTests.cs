@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using Microsoft.Xna.Framework.Graphics;
-using PokeSharp.Engine.Rendering.Assets;
+using MonoBallFramework.Engine.Rendering.Assets;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace PokeSharp.Tests.MemoryValidation
+namespace MonoBallFramework.Tests.MemoryValidation
 {
     /// <summary>
     /// Critical memory validation tests to ensure memory stays below 500MB
@@ -43,7 +43,7 @@ namespace PokeSharp.Tests.MemoryValidation
             // ACT
             // Simulate game initialization (minimal setup)
             var graphicsDevice = CreateMockGraphicsDevice();
-            var assetManager = new AssetManager(graphicsDevice, "PokeSharp.Game/Assets");
+            var assetManager = new AssetManager(graphicsDevice, "MonoBallFramework.Game/Assets");
 
             // Wait for any async initialization
             Thread.Sleep(1000);
@@ -75,7 +75,7 @@ namespace PokeSharp.Tests.MemoryValidation
             _output.WriteLine("Target: <100MB increase per map load");
 
             var graphicsDevice = CreateMockGraphicsDevice();
-            var assetManager = new AssetManager(graphicsDevice, "PokeSharp.Game/Assets");
+            var assetManager = new AssetManager(graphicsDevice, "MonoBallFramework.Game/Assets");
             ForceGarbageCollection();
             var beforeLoadMemoryMB = GetCurrentMemoryMB();
             _output.WriteLine($"Memory Before Load: {beforeLoadMemoryMB:F1}MB");
@@ -120,7 +120,7 @@ namespace PokeSharp.Tests.MemoryValidation
             _output.WriteLine("Target: Memory returns to baseline + 1 map after transition");
 
             var graphicsDevice = CreateMockGraphicsDevice();
-            var assetManager = new AssetManager(graphicsDevice, "PokeSharp.Game/Assets");
+            var assetManager = new AssetManager(graphicsDevice, "MonoBallFramework.Game/Assets");
             ForceGarbageCollection();
             var baselineMemoryMB = GetCurrentMemoryMB();
             _output.WriteLine($"Baseline Memory: {baselineMemoryMB:F1}MB");
@@ -172,7 +172,7 @@ namespace PokeSharp.Tests.MemoryValidation
             _output.WriteLine($"Target: Memory stays <{TARGET_STRESS_TEST_MAX_MB}MB throughout");
 
             var graphicsDevice = CreateMockGraphicsDevice();
-            var assetManager = new AssetManager(graphicsDevice, "PokeSharp.Game/Assets");
+            var assetManager = new AssetManager(graphicsDevice, "MonoBallFramework.Game/Assets");
             ForceGarbageCollection();
             var baselineMemoryMB = GetCurrentMemoryMB();
             _output.WriteLine($"Baseline Memory: {baselineMemoryMB:F1}MB");
@@ -253,7 +253,7 @@ namespace PokeSharp.Tests.MemoryValidation
             _output.WriteLine("Target: Cache evicts oldest textures when limit hit (50MB)");
 
             var graphicsDevice = CreateMockGraphicsDevice();
-            var assetManager = new AssetManager(graphicsDevice, "PokeSharp.Game/Assets");
+            var assetManager = new AssetManager(graphicsDevice, "MonoBallFramework.Game/Assets");
             const long MAX_CACHE_SIZE_MB = 50;
 
             _output.WriteLine($"Cache Limit: {MAX_CACHE_SIZE_MB}MB");

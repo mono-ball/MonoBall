@@ -1,4 +1,4 @@
-# Known Issues - PokeSharp Event-Driven Modding Platform
+# Known Issues - MonoBall Framework Event-Driven Modding Platform
 
 **Last Updated**: December 3, 2025
 **Build Status**: ✅ PASSED (0 errors, 0 warnings) 🎉
@@ -118,7 +118,7 @@ Two tests in `Phase4MigrationTests.cs` fail due to mock service setup issues, no
 **Impact**: Some links don't work yet, but documentation is otherwise complete
 
 **Description**:
-Several documentation files contain placeholder links to `pokesharp.dev` and Discord channels that may not exist yet.
+Several documentation files contain placeholder links to `MonoBall Framework.dev` and Discord channels that may not exist yet.
 
 **Affected Files**:
 - `/docs/api/ModAPI.md` - External site links
@@ -126,7 +126,7 @@ Several documentation files contain placeholder links to `pokesharp.dev` and Dis
 
 **Reproduction Steps**:
 1. Open `ModAPI.md`
-2. Click links to `pokesharp.dev`
+2. Click links to `MonoBall Framework.dev`
 3. Observe: Links may not resolve
 
 **Workaround**: Use local documentation
@@ -151,8 +151,8 @@ Several documentation files contain placeholder links to `pokesharp.dev` and Dis
 - Both test code and service registration updated
 
 **Fixed Files**:
-1. `/tests/ScriptingTests/PokeSharp.Game.Scripting.Tests/Phase4MigrationTests.cs:656`
-2. `/PokeSharp.Game/Infrastructure/ServiceRegistration/ScriptingServicesExtensions.cs:57`
+1. `/tests/ScriptingTests/MonoBall Framework.Game.Scripting.Tests/Phase4MigrationTests.cs:656`
+2. `/MonoBall Framework.Game/Infrastructure/ServiceRegistration/ScriptingServicesExtensions.cs:57`
 
 **Resolution Date**: December 3, 2025
 

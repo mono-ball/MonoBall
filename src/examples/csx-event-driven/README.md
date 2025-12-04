@@ -1,6 +1,6 @@
 # Event-Driven CSX Script Examples
 
-This directory contains example CSX scripts demonstrating event-driven patterns integrated with PokeSharp's Roslyn scripting service.
+This directory contains example CSX scripts demonstrating event-driven patterns integrated with MonoBall Framework's Roslyn scripting service.
 
 ## 📋 Scripts Included
 
@@ -184,7 +184,7 @@ public override void OnTick(ScriptContext ctx, float deltaTime) {
 
 ### 1. Copy to Your Project
 ```bash
-cp src/examples/csx-event-driven/*.csx PokeSharp.Game/Assets/Scripts/
+cp src/examples/csx-event-driven/*.csx MonoBall Framework.Game/Assets/Scripts/
 ```
 
 ### 2. Reference in Map Data

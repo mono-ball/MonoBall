@@ -8,12 +8,12 @@ using System.Threading.Tasks;
 using Arch.Core;
 using FluentAssertions;
 using Microsoft.Extensions.Logging.Abstractions;
-using PokeSharp.Engine.Core.Events;
-using PokeSharp.Engine.Core.Events.Tile;
+using MonoBallFramework.Engine.Core.Events;
+using MonoBallFramework.Engine.Core.Events.Tile;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace PokeSharp.Tests.IntegrationTests;
+namespace MonoBallFramework.Tests.IntegrationTests;
 
 /// <summary>
 /// Phase 6.1 Integration Tests - Hot-Reload System

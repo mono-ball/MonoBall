@@ -7,9 +7,9 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Threading.Tasks;
-using PokeSharp.Core.Components;
-using PokeSharp.Game.Scripting.Events;
-using PokeSharp.Game.Scripting.Runtime;
+using MonoBallFramework.Core.Components;
+using MonoBallFramework.Game.Scripting.Events;
+using MonoBallFramework.Game.Scripting.Runtime;
 
 public class NPCPatrolScript : ScriptBase
 {

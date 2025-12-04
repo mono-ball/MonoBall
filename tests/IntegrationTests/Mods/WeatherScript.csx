@@ -1,9 +1,9 @@
 // Weather System Script - Example Test Mod
 // Publishes weather events that other mods can react to
 
-using PokeSharp.Engine.Core.Events;
-using PokeSharp.Engine.Core.Events.System;
-using PokeSharp.Game.Scripting.Runtime;
+using MonoBallFramework.Engine.Core.Events;
+using MonoBallFramework.Engine.Core.Events.System;
+using MonoBallFramework.Game.Scripting.Runtime;
 
 public class WeatherScript : ScriptBase
 {

@@ -1,4 +1,4 @@
-# PokeSharp Modding Quick Reference
+# MonoBall Framework Modding Quick Reference
 
 **1-page cheat sheet for experienced modders**
 

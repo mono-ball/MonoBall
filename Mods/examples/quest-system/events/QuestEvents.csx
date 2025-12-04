@@ -1,6 +1,6 @@
 using System;
 using Arch.Core;
-using PokeSharp.Engine.Core.Events;
+using MonoBallFramework.Engine.Core.Events;
 
 /// <summary>
 /// Custom event published when an NPC offers a quest to the player.

@@ -1,10 +1,10 @@
 using Arch.Core;
-using PokeSharp.Game.Components.Movement;
-using PokeSharp.Game.Components.Rendering;
-using PokeSharp.Game.Components.Tiles;
+using MonoBallFramework.Game.Components.Movement;
+using MonoBallFramework.Game.Components.Rendering;
+using MonoBallFramework.Game.Components.Tiles;
 using Xunit;
 
-namespace PokeSharp.Tests.Integration;
+namespace MonoBallFramework.Tests.Integration;
 
 /// <summary>
 ///     Integration tests for the complete optimization suite.

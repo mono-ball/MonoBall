@@ -1,6 +1,6 @@
-# PokeSharp Modding API Reference
+# MonoBall Framework Modding API Reference
 
-Complete API reference for PokeSharp modding system.
+Complete API reference for MonoBall Framework modding system.
 
 ## Table of Contents
 
@@ -14,7 +14,7 @@ Complete API reference for PokeSharp modding system.
 
 ## ScriptBase Class
 
-Base class for all PokeSharp mods. Provides event-driven architecture with automatic subscription management.
+Base class for all MonoBall Framework mods. Provides event-driven architecture with automatic subscription management.
 
 ### Lifecycle Methods
 

@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 using Arch.Core;
 using FluentAssertions;
 using Microsoft.Extensions.Logging.Abstractions;
-using PokeSharp.Engine.Core.Events;
-using PokeSharp.Engine.Core.Events.Tile;
-using PokeSharp.Game.Scripting.Runtime;
+using MonoBallFramework.Engine.Core.Events;
+using MonoBallFramework.Engine.Core.Events.Tile;
+using MonoBallFramework.Game.Scripting.Runtime;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace PokeSharp.Tests.IntegrationTests;
+namespace MonoBallFramework.Tests.IntegrationTests;
 
 /// <summary>
 /// Phase 6.1 Integration Tests - Event-Driven Modding System

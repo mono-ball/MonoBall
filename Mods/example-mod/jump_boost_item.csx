@@ -3,8 +3,8 @@
  * Adds an item that temporarily allows jumping over multiple tiles.
  */
 
-using PokeSharp.Engine.Core.Events;
-using PokeSharp.Game.Scripting.Runtime;
+using MonoBallFramework.Engine.Core.Events;
+using MonoBallFramework.Game.Scripting.Runtime;
 
 public class JumpBoostItemScript : ScriptBase
 {

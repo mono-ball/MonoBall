@@ -18,7 +18,7 @@
   "_comment_description": "1-2 sentences explaining the mod's purpose and features.",
 
   "game_version": "0.1.0",
-  "_comment_game_version": "Minimum PokeSharp version required. Check the main game version.",
+  "_comment_game_version": "Minimum MonoBall Framework version required. Check the main game version.",
 
   "homepage": "https://github.com/yourusername/your-mod",
   "_comment_homepage": "OPTIONAL: URL to your mod's website, GitHub repo, or documentation.",

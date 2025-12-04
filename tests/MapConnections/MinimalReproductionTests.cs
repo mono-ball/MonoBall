@@ -1,7 +1,7 @@
 using FluentAssertions;
 using Xunit;
 
-namespace PokeSharp.Game.Maps.Tests.MapConnections;
+namespace MonoBallFramework.Game.Maps.Tests.MapConnections;
 
 /// <summary>
 /// Minimal reproduction test cases for the 2-tile offset bug.

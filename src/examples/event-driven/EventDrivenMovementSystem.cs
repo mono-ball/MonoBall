@@ -6,17 +6,17 @@ using Arch.Core;
 using Arch.Core.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
-using PokeSharp.Engine.Core.Systems;
-using PokeSharp.Engine.Events;
-using PokeSharp.Game.Components;
-using PokeSharp.Game.Components.Interfaces;
-using PokeSharp.Game.Components.Maps;
-using PokeSharp.Game.Components.Movement;
-using PokeSharp.Game.Components.Rendering;
-using PokeSharp.Game.Systems.Services;
-using EcsQueries = PokeSharp.Engine.Systems.Queries.Queries;
+using MonoBallFramework.Engine.Core.Systems;
+using MonoBallFramework.Engine.Events;
+using MonoBallFramework.Game.Components;
+using MonoBallFramework.Game.Components.Interfaces;
+using MonoBallFramework.Game.Components.Maps;
+using MonoBallFramework.Game.Components.Movement;
+using MonoBallFramework.Game.Components.Rendering;
+using MonoBallFramework.Game.Systems.Services;
+using EcsQueries = MonoBallFramework.Engine.Systems.Queries.Queries;
 
-namespace PokeSharp.Game.Systems.EventDriven;
+namespace MonoBallFramework.Game.Systems.EventDriven;
 
 /// <summary>
 /// Event-driven movement system prototype.

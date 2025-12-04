@@ -400,9 +400,12 @@ public override void OnTick(ScriptContext ctx, float deltaTime)
 
 ## 📖 Additional Resources
 
+- **Master Documentation**: `/docs/scripting/unified-scripting-guide.md` - Complete guide ⭐
+- **Architecture Decision**: `/docs/architecture/Phase3-1-ScriptBase-ADR.md` - Design rationale
 - **Phase 2 Examples**: `/examples/csx-event-driven/` - Legacy event-driven examples
-- **Roadmap**: `/docs/IMPLEMENTATION-ROADMAP.md` - Complete implementation plan
-- **Migration Guide**: Coming in Phase 3.4
+- **Migration Guide**: `/docs/scripting/MIGRATION-GUIDE.md`
+
+**Note**: This is the **canonical** unified scripting system (ScriptBase). The alternative system (`src/examples/unified-scripts/`) has been archived.
 
 ## ✅ Success Criteria
 

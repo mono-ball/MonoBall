@@ -1,8 +1,8 @@
 using Arch.Core;
 using Microsoft.Xna.Framework;
-using PokeSharp.Engine.Core.Events.System;
-using PokeSharp.Engine.Core.Events.Tile;
-using PokeSharp.Game.Scripting.Runtime;
+using MonoBallFramework.Engine.Core.Events.System;
+using MonoBallFramework.Engine.Core.Events.Tile;
+using MonoBallFramework.Game.Scripting.Runtime;
 
 /// <summary>
 /// Template for creating tile behavior scripts.

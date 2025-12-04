@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using FluentAssertions;
 using NUnit.Framework;
 
-namespace PokeSharp.EcsEvents.Tests.Unit;
+namespace MonoBallFramework.EcsEvents.Tests.Unit;
 
 /// <summary>
 /// Unit tests for EventBus core functionality.

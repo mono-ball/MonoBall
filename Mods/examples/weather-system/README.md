@@ -1,6 +1,6 @@
 # Weather System Mod
 
-A comprehensive weather system mod for PokeSharp demonstrating custom event creation, inter-script communication, and mod extensibility.
+A comprehensive weather system mod for MonoBall Framework demonstrating custom event creation, inter-script communication, and mod extensibility.
 
 ## Features
 
@@ -37,10 +37,10 @@ A comprehensive weather system mod for PokeSharp demonstrating custom event crea
 
 1. Copy the `weather-system` folder to your `Mods/examples/` directory:
    ```
-   PokeSharp/Mods/examples/weather-system/
+   MonoBall Framework/Mods/examples/weather-system/
    ```
 
-2. The mod will be automatically loaded by the PokeSharp modding engine.
+2. The mod will be automatically loaded by the MonoBall Framework modding engine.
 
 3. Verify installation by checking the logs for:
    ```
@@ -171,10 +171,10 @@ EventBus?.Subscribe<FogStartedEvent>(OnFogStarted);
 Other mods can subscribe to weather events without modifying this mod:
 
 ```csharp
-#r "PokeSharp.Engine.Core.dll"
+#r "MonoBall Framework.Engine.Core.dll"
 #load "../weather-system/events/WeatherEvents.csx"
 
-using PokeSharp.Engine.Core.Events;
+using MonoBall Framework.Engine.Core.Events;
 
 public class MyWeatherMod : ScriptBase
 {
@@ -341,18 +341,18 @@ Potential additions:
 ## Contributing
 
 To contribute improvements:
-1. Fork the PokeSharp repository
+1. Fork the MonoBall Framework repository
 2. Create a branch for your weather enhancement
 3. Submit a pull request with your changes
 4. Update this README with new features
 
 ## License
 
-Part of the PokeSharp project. See main project license.
+Part of the MonoBall Framework project. See main project license.
 
 ## Credits
 
-Created by the PokeSharp Team as an example mod demonstrating:
+Created by the MonoBall Framework Team as an example mod demonstrating:
 - Custom event creation with IGameEvent
 - Event-driven architecture
 - Inter-script communication via EventBus
@@ -360,4 +360,4 @@ Created by the PokeSharp Team as an example mod demonstrating:
 - Configuration system usage
 - Mod composition and extensibility
 
-This mod serves as a reference implementation for building complex, event-driven mods in PokeSharp.
+This mod serves as a reference implementation for building complex, event-driven mods in MonoBall Framework.

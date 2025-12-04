@@ -1,10 +1,10 @@
 # Hot-Reload Testing Guide for Event-Driven CSX Scripts
 
 ## Overview
-This guide provides step-by-step instructions for testing hot-reload functionality with event-driven CSX scripts in PokeSharp.
+This guide provides step-by-step instructions for testing hot-reload functionality with event-driven CSX scripts in MonoBall Framework.
 
 ## Prerequisites
-- PokeSharp.Game running in development mode
+- MonoBall Framework.Game running in development mode
 - CSX scripting service enabled
 - Test map with ice tiles and tall grass configured
 

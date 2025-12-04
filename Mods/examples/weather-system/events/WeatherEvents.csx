@@ -1,6 +1,6 @@
-#r "PokeSharp.Engine.Core.dll"
+#r "MonoBallFramework.Engine.Core.dll"
 
-using PokeSharp.Engine.Core.Events;
+using MonoBallFramework.Engine.Core.Events;
 
 /// <summary>
 /// Base record for all weather-related events.

@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Arch.Core;
-using PokeSharp.Engine.Core.Events.System;
-using PokeSharp.Game.Scripting.Runtime;
+using MonoBallFramework.Engine.Core.Events.System;
+using MonoBallFramework.Game.Scripting.Runtime;
 
 /// <summary>
 /// Quest tracker UI component using ScriptBase.

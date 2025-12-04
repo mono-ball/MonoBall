@@ -1,6 +1,6 @@
 # Advanced Modding Guide
 
-Master advanced PokeSharp modding techniques including multi-script composition, custom events, state management, and performance optimization.
+Master advanced MonoBall Framework modding techniques including multi-script composition, custom events, state management, and performance optimization.
 
 ## Table of Contents
 
@@ -1567,7 +1567,7 @@ Prepare your mod for distribution.
   "author": "YourName",
   "description": "Enhances wild Pokemon encounters with new mechanics",
   "dependencies": [],
-  "compatibleWith": ["PokeSharp 1.0.0+"],
+  "compatibleWith": ["MonoBall Framework 1.0.0+"],
   "scripts": [
     "MyAwesomeMod.csx"
   ],
@@ -1595,7 +1595,7 @@ Enhances wild Pokemon encounters with configurable rates and shiny mechanics.
 ## Installation
 1. Download `MyAwesomeMod.csx`
 2. Place in `/mods` directory
-3. Restart PokeSharp or hot-reload
+3. Restart MonoBall Framework or hot-reload
 
 ## Configuration
 Edit manifest.json:
@@ -1607,7 +1607,7 @@ Edit manifest.json:
 ```
 
 ## Compatibility
-- PokeSharp 1.0.0+
+- MonoBall Framework 1.0.0+
 - Compatible with all encounter mods
 
 ## Known Issues
@@ -1624,6 +1624,6 @@ Edit manifest.json:
 
 ---
 
-**Congratulations!** You now have advanced knowledge of PokeSharp modding. Happy modding! 🎮✨
+**Congratulations!** You now have advanced knowledge of MonoBall Framework modding. Happy modding! 🎮✨
 
 **Next:** [Script Templates Reference](./script-templates.md) - Ready-to-use templates

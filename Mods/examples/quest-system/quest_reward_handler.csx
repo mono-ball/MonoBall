@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Arch.Core;
-using PokeSharp.Game.Scripting.Runtime;
+using MonoBallFramework.Game.Scripting.Runtime;
 
 /// <summary>
 /// Quest reward handler using ScriptBase.

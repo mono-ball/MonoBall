@@ -89,10 +89,10 @@ Test04_StressTest_Should10MapsStayBelow500MB: FAILED
 
 ## 🔧 Adding Memory Monitoring to Your Game
 
-### In PokeSharpGame.cs
+### In MonoBall FrameworkGame.cs
 
 ```csharp
-using PokeSharp.Tests.MemoryValidation;
+using MonoBall Framework.Tests.MemoryValidation;
 
 private int _frameCount = 0;
 

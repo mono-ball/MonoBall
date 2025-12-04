@@ -1,6 +1,6 @@
 # Modding Getting Started Guide
 
-Welcome to PokeSharp modding! This guide will help you create your first mod using the ScriptBase API and event-driven architecture.
+Welcome to MonoBall Framework modding! This guide will help you create your first mod using the ScriptBase API and event-driven architecture.
 
 ## Table of Contents
 
@@ -19,7 +19,7 @@ Welcome to PokeSharp modding! This guide will help you create your first mod usi
 
 ## Prerequisites
 
-Before you start modding PokeSharp, you should have:
+Before you start modding MonoBall Framework, you should have:
 
 ### Required Knowledge
 - **C# Basics**: Classes, methods, properties, and types
@@ -28,9 +28,9 @@ Before you start modding PokeSharp, you should have:
 - **Basic Game Concepts**: Entities, tiles, events, and game loops
 
 ### Development Environment
-- PokeSharp installed and running
+- MonoBall Framework installed and running
 - Text editor or IDE (Visual Studio, VS Code, Rider)
-- Access to the `/mods` directory in your PokeSharp installation
+- Access to the `/mods` directory in your MonoBall Framework installation
 - .NET 9.0 SDK installed
 
 ### Recommended Reading
@@ -54,8 +54,8 @@ Create a new file in the `/mods` directory:
 ### Step 2: Write the Script
 
 ```csharp
-using PokeSharp.Game.Scripting.Runtime;
-using PokeSharp.Engine.Core.Events.Tile;
+using MonoBallFramework.Game.Scripting.Runtime;
+using MonoBallFramework.Engine.Core.Events.Tile;
 
 /// <summary>
 /// A simple mod that logs when the player steps on tall grass.
@@ -89,13 +89,13 @@ The mod will be automatically loaded when the game starts. You'll see output in 
 [INFO] Player stepped on tall grass at (10, 15)
 ```
 
-**Congratulations!** You've created your first PokeSharp mod! 🎉
+**Congratulations!** You've created your first MonoBall Framework mod! 🎉
 
 ---
 
 ## ScriptBase API Overview
 
-The `ScriptBase` class is the foundation for all PokeSharp mods. It provides:
+The `ScriptBase` class is the foundation for all MonoBall Framework mods. It provides:
 
 ### Lifecycle Methods
 
@@ -255,7 +255,7 @@ On<MovementStartedEvent>(evt =>
 
 ## Hot-Reload Workflow
 
-PokeSharp supports hot-reloading, meaning you can modify your mod without restarting the game!
+MonoBall Framework supports hot-reloading, meaning you can modify your mod without restarting the game!
 
 ### Step 1: Edit Your Mod
 
@@ -594,7 +594,7 @@ public class MyScript : ScriptBase
 ```
 Error: CS0246: The type or namespace 'ScriptBase' could not be found
 ```
-**Fix:** Add `using PokeSharp.Game.Scripting.Runtime;`
+**Fix:** Add `using MonoBallFramework.Game.Scripting.Runtime;`
 
 ### Events Aren't Firing
 
@@ -792,7 +792,7 @@ public class WarpTileMod : ScriptBase
 ## Community and Support
 
 - **GitHub Repository**: Submit issues and contribute
-- **Discord**: Join the PokeSharp modding community
+- **Discord**: Join the MonoBall Framework modding community
 - **Documentation**: Comprehensive API reference available
 
 **Happy Modding!** 🎮✨

@@ -1,6 +1,6 @@
 using Arch.Core;
-using PokeSharp.Engine.Core.Events;
-using PokeSharp.Game.Scripting.Runtime;
+using MonoBallFramework.Engine.Core.Events;
+using MonoBallFramework.Game.Scripting.Runtime;
 
 /// <summary>
 /// Template for creating custom event types and event-driven mod communication.

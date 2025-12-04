@@ -18,7 +18,7 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\PokeSharp.Engine.Common\PokeSharp.Engine.Common.csproj" />
-    <ProjectReference Include="..\..\PokeSharp.Game\PokeSharp.Game.csproj" />
+    <ProjectReference Include="..\..\MonoBallFramework.Engine.Common\MonoBallFramework.Engine.Common.csproj" />
+    <ProjectReference Include="..\..\MonoBallFramework.Game\MonoBallFramework.Game.csproj" />
   </ItemGroup>
 </Project>

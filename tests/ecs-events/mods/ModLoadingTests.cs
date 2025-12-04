@@ -5,7 +5,7 @@ using System.Security;
 using FluentAssertions;
 using NUnit.Framework;
 
-namespace PokeSharp.EcsEvents.Tests.Mods;
+namespace MonoBallFramework.EcsEvents.Tests.Mods;
 
 /// <summary>
 /// Tests for mod loading, isolation, and safety.

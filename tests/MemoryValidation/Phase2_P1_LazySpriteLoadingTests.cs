@@ -6,13 +6,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Xna.Framework.Graphics;
-using PokeSharp.Engine.Rendering.Assets;
-using PokeSharp.Game.Services;
-using PokeSharp.Game.Systems;
+using MonoBallFramework.Engine.Rendering.Assets;
+using MonoBallFramework.Game.Services;
+using MonoBallFramework.Game.Systems;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace PokeSharp.Tests.MemoryValidation
+namespace MonoBallFramework.Tests.MemoryValidation
 {
     /// <summary>
     /// PHASE 2 CRITICAL TEST P1: Memory Reduction Validation
@@ -180,7 +180,7 @@ namespace PokeSharp.Tests.MemoryValidation
                     presentationParameters
                 );
 
-                return new AssetManager(_graphicsDevice, "PokeSharp.Game/Assets");
+                return new AssetManager(_graphicsDevice, "MonoBallFramework.Game/Assets");
             }
             catch (Exception ex)
             {
@@ -195,13 +195,13 @@ namespace PokeSharp.Tests.MemoryValidation
         /// </summary>
         private List<string> DiscoverAllSpriteFiles()
         {
-            var spritesPath = Path.Combine("PokeSharp.Game", SPRITES_BASE_PATH);
+            var spritesPath = Path.Combine("MonoBallFramework.Game", SPRITES_BASE_PATH);
 
             if (!Directory.Exists(spritesPath))
             {
                 // Try alternate path (bin/Release or bin/Debug)
                 spritesPath = Path.Combine(
-                    "PokeSharp.Game",
+                    "MonoBallFramework.Game",
                     "bin",
                     "Release",
                     "net9.0",

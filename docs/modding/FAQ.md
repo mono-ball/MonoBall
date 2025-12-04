@@ -1,4 +1,4 @@
-# PokeSharp Modding FAQ
+# MonoBall Framework Modding FAQ
 
 Frequently asked questions and troubleshooting guide for mod developers.
 
@@ -22,7 +22,7 @@ Frequently asked questions and troubleshooting guide for mod developers.
 **A:** Place `.csx` files in `/mods/` or a subdirectory like `/mods/MyMod/`.
 
 ```
-PokeSharp/
+MonoBall Framework/
   /mods/
     my_mod.csx           ✅ Direct
     /MyMod/              ✅ Organized
@@ -36,8 +36,8 @@ PokeSharp/
 **A:** Inherit from `ScriptBase` and override `RegisterEventHandlers()`:
 
 ```csharp
-using PokeSharp.Game.Scripting.Runtime;
-using PokeSharp.Engine.Core.Events.Tile;
+using MonoBallFramework.Game.Scripting.Runtime;
+using MonoBallFramework.Engine.Core.Events.Tile;
 
 public class MinimalMod : ScriptBase
 {

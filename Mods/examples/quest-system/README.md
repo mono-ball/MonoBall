@@ -1,6 +1,6 @@
 # Quest System Example Mod
 
-A comprehensive quest system demonstrating complex state management, NPC integration, UI components, and event-driven design patterns in PokeSharp.
+A comprehensive quest system demonstrating complex state management, NPC integration, UI components, and event-driven design patterns in MonoBall Framework.
 
 ## Overview
 
@@ -403,10 +403,10 @@ private void CheckAchievements(Entity player, string questId)
 
 ## Dependencies
 
-- **pokesharp-core** - Core game systems and events
+- **MonoBall Framework-core** - Core game systems and events
 - **ScriptBase** - Event-driven script foundation
 - **ECS Components** - State storage
 
 ## License
 
-Part of PokeSharp Examples - free to use and modify.
+Part of MonoBall Framework Examples - free to use and modify.

@@ -6,15 +6,15 @@ using System.Threading.Tasks;
 using Arch.Core;
 using FluentAssertions;
 using Microsoft.Extensions.Logging.Abstractions;
-using PokeSharp.Engine.Core.Events;
-using PokeSharp.Game.Scripting.Api;
-using PokeSharp.Game.Scripting.Modding;
-using PokeSharp.Game.Scripting.Runtime;
-using PokeSharp.Game.Scripting.Services;
+using MonoBallFramework.Engine.Core.Events;
+using MonoBallFramework.Game.Scripting.Api;
+using MonoBallFramework.Game.Scripting.Modding;
+using MonoBallFramework.Game.Scripting.Runtime;
+using MonoBallFramework.Game.Scripting.Services;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace PokeSharp.Tests.IntegrationTests;
+namespace MonoBallFramework.Tests.IntegrationTests;
 
 /// <summary>
 /// Phase 6.1 Integration Tests - Mod Loading and Lifecycle

@@ -1,9 +1,9 @@
-# PokeSharp Performance Benchmarks
+# MonoBall Framework Performance Benchmarks
 
 ## Quick Start
 
 ```bash
-cd /Users/ntomsic/Documents/PokeSharp/tests/PerformanceBenchmarks
+cd /Users/ntomsic/Documents/MonoBall Framework/tests/PerformanceBenchmarks
 dotnet run -c Release
 ```
 
@@ -29,7 +29,7 @@ Frame Budget:        12% used (88% headroom)
 
 - **Detailed Analysis**: `/docs/performance/PHASE-4-BASELINE-PERFORMANCE.md`
 - **Quick Summary**: `/docs/performance/PERFORMANCE-SUMMARY.md`
-- **Parallel Execution**: `/PokeSharp.Core/tests/ParallelExecutionValidationReport.md`
+- **Parallel Execution**: `/MonoBall Framework.Core/tests/ParallelExecutionValidationReport.md`
 
 ## Performance Targets
 

@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using Arch.Core;
 using FluentAssertions;
 using NUnit.Framework;
-using PokeSharp.Engine.Core.Systems;
+using MonoBallFramework.Engine.Core.Systems;
 
-namespace PokeSharp.EcsEvents.Tests.Integration;
+namespace MonoBallFramework.EcsEvents.Tests.Integration;
 
 /// <summary>
 /// Integration tests verifying system decoupling through events.

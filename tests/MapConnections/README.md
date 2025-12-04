@@ -2,7 +2,7 @@
 
 ## Overview
 
-This test suite validates map connection logic and specifically reproduces the coordinate offset issues identified in the PokeSharp map conversion process.
+This test suite validates map connection logic and specifically reproduces the coordinate offset issues identified in the MonoBall Framework map conversion process.
 
 ## Identified Issues
 

@@ -3,8 +3,8 @@
  * Makes ledges crumble after being jumped over multiple times.
  */
 
-using PokeSharp.Engine.Core.Events;
-using PokeSharp.Game.Scripting.Runtime;
+using MonoBallFramework.Engine.Core.Events;
+using MonoBallFramework.Game.Scripting.Runtime;
 
 public class CrumblingLedgeScript : ScriptBase
 {

@@ -1,7 +1,7 @@
 # Event-Driven Patterns in CSX Scripts
 
 ## Overview
-This document provides a comprehensive guide to event-driven programming patterns used in PokeSharp's CSX scripting system.
+This document provides a comprehensive guide to event-driven programming patterns used in MonoBall Framework's CSX scripting system.
 
 ---
 

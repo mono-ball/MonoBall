@@ -1,11 +1,11 @@
 {
-  "id": "pokesharp.examples.quest-system",
+  "id": "MonoBall Framework.examples.quest-system",
   "name": "Quest System Example",
   "version": "1.0.0",
-  "author": "PokeSharp Examples",
+  "author": "MonoBall Framework Examples",
   "description": "Comprehensive quest system demonstrating complex state management, NPC integration, and UI components. Shows best practices for data-driven design and event coordination.",
   "dependencies": [
-    "pokesharp-core"
+    "MonoBall Framework-core"
   ],
   "scripts": {
     "behaviors": [

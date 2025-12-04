@@ -1,5 +1,5 @@
 using EnhancedLedges.Events;
-using PokeSharp.Game.Scripting.Runtime;
+using MonoBallFramework.Game.Scripting.Runtime;
 
 /// <summary>
 ///     Visual Effects Handler - manages animations, particles, and sounds for ledge interactions.

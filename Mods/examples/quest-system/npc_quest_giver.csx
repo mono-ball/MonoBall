@@ -1,8 +1,8 @@
 using System;
 using Arch.Core;
 using Microsoft.Xna.Framework;
-using PokeSharp.Engine.Core.Events.System;
-using PokeSharp.Game.Scripting.Runtime;
+using MonoBallFramework.Engine.Core.Events.System;
+using MonoBallFramework.Game.Scripting.Runtime;
 
 /// <summary>
 /// NPC behavior for quest givers using ScriptBase.
@@ -123,7 +123,7 @@ public class QuestGiverBehavior : ScriptBase
         if (!playerEntity.HasValue)
             return;
 
-        ref var playerPos = ref Context.World.Get<PokeSharp.Game.Components.Movement.Position>(
+        ref var playerPos = ref Context.World.Get<MonoBallFramework.Game.Components.Movement.Position>(
             playerEntity.Value
         );
         ref var npcPos = ref Context.Position;
