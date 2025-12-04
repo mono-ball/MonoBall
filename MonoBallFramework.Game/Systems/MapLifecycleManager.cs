@@ -156,6 +156,14 @@ public class MapLifecycleManager(
             }
         );
 
+        // Debug: Check poolManager status
+        if (poolManager == null)
+        {
+            logger?.LogWarning(
+                "PoolManager is NULL - all entities will be destroyed instead of released to pool!"
+            );
+        }
+
         // 2. If we found the map entity, iterate its children using ParentOf relationships
         if (
             mapInfoEntity.HasValue
@@ -184,6 +192,13 @@ public class MapLifecycleManager(
                 }
             }
         }
+
+        logger?.LogInformation(
+            "Collected entities for map {MapId}: {PooledCount} pooled, {DestroyCount} to destroy",
+            mapId.Value,
+            pooledEntities.Count,
+            entitiesToDestroy.Count
+        );
 
         // Release pooled entities back to pool for reuse
         int releasedCount = 0;
@@ -226,7 +241,7 @@ public class MapLifecycleManager(
         }
 
         int totalProcessed = releasedCount + entitiesToDestroy.Count;
-        logger?.LogDebug(
+        logger?.LogInformation(
             "Processed {Count} entities for map {MapId} (released: {Released}, destroyed: {Destroyed})",
             totalProcessed,
             mapId.Value,
@@ -400,9 +415,11 @@ public class MapLifecycleManager(
     ///     Destroys ALL map-related entities in the world, regardless of registration status.
     ///     Uses BelongsToMap relationship for unified cleanup.
     ///     Used for complete world cleanup during warp transitions.
+    ///     IMPORTANT: Pooled entities are released back to pool, not destroyed.
     /// </summary>
     private int DestroyAllMapEntities()
     {
+        var pooledEntities = new List<(Entity parent, Entity child)>();
         var entitiesToDestroy = new List<Entity>();
 
         // 1. Collect ALL MapInfo entities and their children
@@ -411,7 +428,7 @@ public class MapLifecycleManager(
             mapInfoQuery,
             entity =>
             {
-                // Add the map entity itself
+                // Add the map entity itself (MapInfo entities are never pooled)
                 entitiesToDestroy.Add(entity);
 
                 // If it has children, collect them all
@@ -424,14 +441,60 @@ public class MapLifecycleManager(
                         Entity childEntity = kvp.Key;
                         if (world.IsAlive(childEntity))
                         {
-                            entitiesToDestroy.Add(childEntity);
+                            // Separate pooled entities from non-pooled for reuse
+                            if (poolManager != null && childEntity.Has<Pooled>())
+                            {
+                                // Store both parent and child for relationship cleanup
+                                pooledEntities.Add((entity, childEntity));
+                            }
+                            else
+                            {
+                                entitiesToDestroy.Add(childEntity);
+                            }
                         }
                     }
                 }
             }
         );
 
-        // Destroy all collected entities
+        logger?.LogInformation(
+            "Collected ALL map entities: {PooledCount} pooled, {DestroyCount} to destroy",
+            pooledEntities.Count,
+            entitiesToDestroy.Count
+        );
+
+        // Release pooled entities back to pool for reuse
+        int releasedCount = 0;
+        foreach ((Entity parentEntity, Entity childEntity) in pooledEntities)
+        {
+            try
+            {
+                // CRITICAL: Remove ParentOf relationship BEFORE releasing to pool
+                // The automatic cleanup only happens when the parent is destroyed,
+                // but we're releasing children to pool BEFORE destroying the parent!
+                if (world.IsAlive(parentEntity))
+                {
+                    parentEntity.RemoveRelationship<ParentOf>(childEntity);
+                }
+
+                // Strip tile-specific components before releasing
+                StripTileComponents(childEntity);
+                poolManager!.Release(childEntity);
+                releasedCount++;
+            }
+            catch (Exception ex)
+            {
+                // If release fails, destroy the entity instead
+                logger?.LogWarning(
+                    ex,
+                    "Failed to release entity {EntityId} to pool during full cleanup, destroying",
+                    childEntity.Id
+                );
+                world.Destroy(childEntity);
+            }
+        }
+
+        // Destroy non-pooled entities
         foreach (Entity entity in entitiesToDestroy)
         {
             if (world.IsAlive(entity))
@@ -440,11 +503,14 @@ public class MapLifecycleManager(
             }
         }
 
-        logger?.LogDebug(
-            "Destroyed {Count} map entities during full cleanup",
+        int totalProcessed = releasedCount + entitiesToDestroy.Count;
+        logger?.LogInformation(
+            "Destroyed {Count} map entities during full cleanup (released: {Released}, destroyed: {Destroyed})",
+            totalProcessed,
+            releasedCount,
             entitiesToDestroy.Count
         );
-        return entitiesToDestroy.Count;
+        return totalProcessed;
     }
 
     private record MapMetadata(
