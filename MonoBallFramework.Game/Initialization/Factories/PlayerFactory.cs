@@ -104,7 +104,7 @@ public class PlayerFactory(
             ("Camera", "attached")
         );
         logger.LogControlsHint("Use WASD or Arrow Keys to move!");
-        logger.LogControlsHint("Zoom: +/- to zoom in/out, 1=GBA, 2=NDS, 3=Default");
+        logger.LogControlsHint("Zoom: +/- to zoom in/out");
 
         return playerEntity;
     }

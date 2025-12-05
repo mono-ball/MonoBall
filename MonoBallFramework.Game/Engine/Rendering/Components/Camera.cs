@@ -173,8 +173,9 @@ public struct Camera
         ZoomTransitionSpeed = CameraConstants.DefaultZoomTransitionSpeed;
         Rotation = 0f;
         Viewport = viewport;
-        ReferenceWidth = viewport.Width;
-        ReferenceHeight = viewport.Height;
+        // ReferenceWidth/Height left at 0 so UpdateViewportForResize can initialize zoom properly
+        ReferenceWidth = 0;
+        ReferenceHeight = 0;
         VirtualViewport = viewport; // Initially same as viewport
         SmoothingSpeed = smoothingSpeed;
         LeadDistance = leadDistance;
@@ -293,39 +294,9 @@ public struct Camera
 
 
     /// <summary>
-    ///     Calculates the zoom level to match GBA native resolution (240x160).
-    /// </summary>
-    /// <returns>The calculated zoom factor.</returns>
-    public readonly float CalculateGbaZoom()
-    {
-        const int gbaWidth = 240;
-        const int gbaHeight = 160;
-
-        float zoomX = (float)Viewport.Width / gbaWidth;
-        float zoomY = (float)Viewport.Height / gbaHeight;
-        return Math.Min(zoomX, zoomY); // Use smaller zoom to fit entirely
-    }
-
-    /// <summary>
-    ///     Calculates the zoom level to match NDS native resolution (256x192).
-    /// </summary>
-    /// <returns>The calculated zoom factor.</returns>
-    public readonly float CalculateNdsZoom()
-    {
-        const int ndsWidth = 256;
-        const int ndsHeight = 192;
-
-        float zoomX = (float)Viewport.Width / ndsWidth;
-        float zoomY = (float)Viewport.Height / ndsHeight;
-        return Math.Min(zoomX, zoomY); // Use smaller zoom to fit entirely
-    }
-
-
-    /// <summary>
     ///     Updates the viewport to maintain aspect ratio when the window is resized.
     ///     Uses integer scaling based on GBA native resolution (240x160) to maintain pixel-perfect rendering.
-    ///     The Viewport is set to an integer GBA multiple to ensure viewportScale is always an integer,
-    ///     and zoom is adjusted to maintain the same world-space view and tile count.
+    ///     The Viewport is set to an integer GBA multiple, and zoom is set to match GBA's 240x160 world view.
     /// </summary>
     /// <param name="windowWidth">The new window width.</param>
     /// <param name="windowHeight">The new window height.</param>
@@ -343,23 +314,6 @@ public struct Camera
         int viewportWidth = GbaNativeWidth * scale;
         int viewportHeight = GbaNativeHeight * scale;
 
-        // If this is the first resize (initialization), store reference and adjust zoom
-        if (ReferenceWidth == 0 || ReferenceHeight == 0)
-        {
-            ReferenceWidth = windowWidth;
-            ReferenceHeight = windowHeight;
-
-            // Calculate zoom adjustment to maintain same world view
-            // If window is 1280x800 but viewport is 1200x800, we need to scale zoom by 1280/1200
-            float zoomAdjustmentX = (float)windowWidth / viewportWidth;
-            float zoomAdjustmentY = (float)windowHeight / viewportHeight;
-            float zoomAdjustment = Math.Max(zoomAdjustmentX, zoomAdjustmentY);
-
-            // Adjust zoom to maintain the same world-space view as the reference window size
-            Zoom *= zoomAdjustment;
-            TargetZoom *= zoomAdjustment;
-        }
-
         // Set Viewport to the integer GBA multiple
         Viewport = new Rectangle(0, 0, viewportWidth, viewportHeight);
 
@@ -371,6 +325,39 @@ public struct Camera
             viewportWidth,
             viewportHeight
         );
+
+        // On first resize (initialization), set zoom to match GBA native resolution
+        // This ensures exactly 15x10 tiles (240/16 x 160/16) are visible
+        // Zoom = scale means: Viewport pixels / Zoom = GBA native pixels (240x160)
+        if (ReferenceWidth == 0 || ReferenceHeight == 0)
+        {
+            ReferenceWidth = windowWidth;
+            ReferenceHeight = windowHeight;
+
+            // Set zoom to the integer scale factor for pixel-perfect GBA viewport
+            Zoom = scale;
+            TargetZoom = scale;
+        }
+        else
+        {
+            // On subsequent resizes, maintain the same world-view ratio
+            // Calculate what the previous scale was
+            int previousScaleX = Math.Max(1, ReferenceWidth / GbaNativeWidth);
+            int previousScaleY = Math.Max(1, ReferenceHeight / GbaNativeHeight);
+            int previousScale = Math.Min(previousScaleX, previousScaleY);
+
+            // Scale zoom proportionally to maintain same world view
+            if (previousScale > 0)
+            {
+                float zoomRatio = (float)scale / previousScale;
+                Zoom *= zoomRatio;
+                TargetZoom *= zoomRatio;
+            }
+
+            // Update reference dimensions
+            ReferenceWidth = windowWidth;
+            ReferenceHeight = windowHeight;
+        }
 
         IsDirty = true;
     }

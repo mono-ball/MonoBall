@@ -60,7 +60,7 @@ public class InputManager(ILogger<InputManager> logger)
 
     /// <summary>
     ///     Handles zoom control keyboard input.
-    ///     +/- keys for zoom in/out, number keys for presets.
+    ///     +/- keys for zoom in/out.
     /// </summary>
     private void HandleZoomControls(World world, KeyboardState currentKeyboardState)
     {
@@ -95,27 +95,6 @@ public class InputManager(ILogger<InputManager> logger)
                         Camera.MaxZoom
                     );
                     logger.LogZoomChanged("Manual", camera.TargetZoom);
-                }
-
-                // Preset zoom levels
-                if (IsKeyPressed(currentKeyboardState, Keys.D1))
-                {
-                    float gbaZoom = camera.CalculateGbaZoom();
-                    camera.TargetZoom = MathHelper.Clamp(gbaZoom, Camera.MinZoom, Camera.MaxZoom);
-                    logger.LogZoomChanged("GBA (240x160)", gbaZoom);
-                }
-
-                if (IsKeyPressed(currentKeyboardState, Keys.D2))
-                {
-                    float ndsZoom = camera.CalculateNdsZoom();
-                    camera.TargetZoom = MathHelper.Clamp(ndsZoom, Camera.MinZoom, Camera.MaxZoom);
-                    logger.LogZoomChanged("NDS (256x192)", ndsZoom);
-                }
-
-                if (IsKeyPressed(currentKeyboardState, Keys.D3))
-                {
-                    camera.TargetZoom = MathHelper.Clamp(3.0f, Camera.MinZoom, Camera.MaxZoom);
-                    logger.LogZoomChanged("Default", 3.0f);
                 }
             }
         );

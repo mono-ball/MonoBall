@@ -6,10 +6,12 @@ namespace MonoBallFramework.Game.Infrastructure.Configuration;
 public class GameplayConfig
 {
     /// <summary>
-    ///     Default camera zoom level.
-    ///     4.0 = GBA style (240x160 native resolution scaled to 960x640 window).
+    ///     Default camera zoom level (fallback only).
+    ///     Note: The actual zoom is calculated automatically by Camera.UpdateViewportForResize()
+    ///     to match GBA native resolution (240x160 = 15x10 tiles visible).
+    ///     This value is overridden on first window resize.
     /// </summary>
-    public float DefaultZoom { get; set; } = 4.0f;
+    public float DefaultZoom { get; set; } = 1.0f;
 
     /// <summary>
     ///     Camera zoom transition speed (0.0 to 1.0).
