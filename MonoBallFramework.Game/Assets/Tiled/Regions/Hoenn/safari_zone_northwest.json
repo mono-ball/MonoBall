@@ -4921,7 +4921,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_SAFARI_ZONE_NORTH_WEST_TM_SOLAR_BEAM"
+              "value": "base:flag:item/safari_zone_north_west_tm_solar_beam"
             }
           ]
         }
@@ -4947,7 +4947,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

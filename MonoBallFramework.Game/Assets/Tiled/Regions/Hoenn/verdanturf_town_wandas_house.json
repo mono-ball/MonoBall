@@ -565,7 +565,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_VERDANTURF_TOWN_WANDAS_HOUSE_WALLY"
+              "value": "base:flag:visibility/verdanturf_town_wandas_house_wally"
             }
           ]
         },
@@ -607,7 +607,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_VERDANTURF_TOWN_WANDAS_HOUSE_WANDAS_BOYFRIEND"
+              "value": "base:flag:visibility/verdanturf_town_wandas_house_wandas_boyfriend"
             }
           ]
         },
@@ -649,7 +649,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_VERDANTURF_TOWN_WANDAS_HOUSE_WALLYS_UNCLE"
+              "value": "base:flag:visibility/verdanturf_town_wandas_house_wallys_uncle"
             }
           ]
         },
@@ -728,7 +728,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_VERDANTURF_TOWN_WANDAS_HOUSE_WANDA"
+              "value": "base:flag:visibility/verdanturf_town_wandas_house_wanda"
             }
           ]
         }
@@ -754,7 +754,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

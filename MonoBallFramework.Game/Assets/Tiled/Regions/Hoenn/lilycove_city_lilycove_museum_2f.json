@@ -1325,7 +1325,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_LILYCOVE_MUSEUM_PATRON_2"
+              "value": "base:flag:visibility/lilycove_museum_patron_2"
             }
           ]
         },
@@ -1372,7 +1372,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_LILYCOVE_MUSEUM_TOURISTS"
+              "value": "base:flag:visibility/lilycove_museum_tourists"
             }
           ]
         },
@@ -1419,7 +1419,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_LILYCOVE_MUSEUM_TOURISTS"
+              "value": "base:flag:visibility/lilycove_museum_tourists"
             }
           ]
         }
@@ -1445,7 +1445,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

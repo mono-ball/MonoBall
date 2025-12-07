@@ -427,7 +427,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_FALLARBOR_HOUSE_PROF_COZMO"
+              "value": "base:flag:visibility/fallarbor_house_prof_cozmo"
             }
           ]
         },
@@ -495,7 +495,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

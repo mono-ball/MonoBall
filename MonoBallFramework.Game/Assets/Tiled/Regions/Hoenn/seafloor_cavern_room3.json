@@ -989,7 +989,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_12"
+              "value": "base:flag:temporary/12"
             }
           ]
         },
@@ -1026,7 +1026,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_14"
+              "value": "base:flag:temporary/14"
             }
           ]
         },
@@ -1063,7 +1063,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_15"
+              "value": "base:flag:temporary/15"
             }
           ]
         },
@@ -1100,7 +1100,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_16"
+              "value": "base:flag:temporary/16"
             }
           ]
         },
@@ -1137,7 +1137,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_17"
+              "value": "base:flag:temporary/17"
             }
           ]
         },
@@ -1174,7 +1174,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_18"
+              "value": "base:flag:temporary/18"
             }
           ]
         },
@@ -1211,7 +1211,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_19"
+              "value": "base:flag:temporary/19"
             }
           ]
         },
@@ -1253,7 +1253,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_SEAFLOOR_CAVERN_AQUA_GRUNTS"
+              "value": "base:flag:visibility/seafloor_cavern_aqua_grunts"
             },
             {
               "name": "trainerType",
@@ -1305,7 +1305,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_SEAFLOOR_CAVERN_AQUA_GRUNTS"
+              "value": "base:flag:visibility/seafloor_cavern_aqua_grunts"
             },
             {
               "name": "trainerType",
@@ -1341,7 +1341,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

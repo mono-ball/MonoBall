@@ -6656,7 +6656,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_POTION",
-                "flag": "FLAG_HIDDEN_ITEM_PETALBURG_WOODS_POTION"
+                "flag": "base:flag:hidden_item/petalburg_woods_potion"
               }
             }
           ]
@@ -6676,7 +6676,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_TINY_MUSHROOM",
-                "flag": "FLAG_HIDDEN_ITEM_PETALBURG_WOODS_TINY_MUSHROOM_1"
+                "flag": "base:flag:hidden_item/petalburg_woods_tiny_mushroom_1"
               }
             }
           ]
@@ -6696,7 +6696,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_TINY_MUSHROOM",
-                "flag": "FLAG_HIDDEN_ITEM_PETALBURG_WOODS_TINY_MUSHROOM_2"
+                "flag": "base:flag:hidden_item/petalburg_woods_tiny_mushroom_2"
               }
             }
           ]
@@ -6716,7 +6716,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_POKE_BALL",
-                "flag": "FLAG_HIDDEN_ITEM_PETALBURG_WOODS_POKE_BALL"
+                "flag": "base:flag:hidden_item/petalburg_woods_poke_ball"
               }
             }
           ]
@@ -6789,7 +6789,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_11"
+              "value": "base:flag:temporary/11"
             }
           ]
         },
@@ -6826,7 +6826,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_12"
+              "value": "base:flag:temporary/12"
             }
           ]
         },
@@ -6861,14 +6861,9 @@
               "value": "right"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_PETALBURG_WOODS_AQUA_GRUNT"
+              "value": "base:flag:visibility/petalburg_woods_aqua_grunt"
             }
           ]
         },
@@ -6898,14 +6893,9 @@
               "value": 3
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_PETALBURG_WOODS_DEVON_EMPLOYEE"
+              "value": "base:flag:visibility/petalburg_woods_devon_employee"
             }
           ]
         },
@@ -6947,7 +6937,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_PETALBURG_WOODS_GREAT_BALL"
+              "value": "base:flag:item/petalburg_woods_great_ball"
             }
           ]
         },
@@ -6989,7 +6979,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_PETALBURG_WOODS_X_ATTACK"
+              "value": "base:flag:item/petalburg_woods_x_attack"
             }
           ]
         },
@@ -7026,7 +7016,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_PETALBURG_WOODS_ETHER"
+              "value": "base:flag:item/petalburg_woods_ether"
             }
           ]
         },
@@ -7241,7 +7231,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_PETALBURG_WOODS_PARALYZE_HEAL"
+              "value": "base:flag:item/petalburg_woods_paralyze_heal"
             }
           ]
         },
@@ -7299,7 +7289,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

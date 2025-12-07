@@ -1605,7 +1605,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MR_BRINEY_DEWFORD_TOWN"
+              "value": "base:flag:visibility/mr_briney_dewford_town"
             }
           ]
         },
@@ -1682,14 +1682,9 @@
               "value": "down"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MR_BRINEY_BOAT_DEWFORD_TOWN"
+              "value": "base:flag:visibility/mr_briney_boat_dewford_town"
             }
           ]
         },
@@ -1747,7 +1742,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

@@ -7711,7 +7711,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_REVIVE",
-                "flag": "FLAG_HIDDEN_ITEM_ROUTE_109_REVIVE"
+                "flag": "base:flag:hidden_item/route_109_revive"
               }
             }
           ]
@@ -7731,7 +7731,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_HEART_SCALE",
-                "flag": "FLAG_HIDDEN_ITEM_ROUTE_109_HEART_SCALE_1"
+                "flag": "base:flag:hidden_item/route_109_heart_scale_1"
               }
             }
           ]
@@ -7751,7 +7751,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_GREAT_BALL",
-                "flag": "FLAG_HIDDEN_ITEM_ROUTE_109_GREAT_BALL"
+                "flag": "base:flag:hidden_item/route_109_great_ball"
               }
             }
           ]
@@ -7771,7 +7771,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_ETHER",
-                "flag": "FLAG_HIDDEN_ITEM_ROUTE_109_ETHER"
+                "flag": "base:flag:hidden_item/route_109_ether"
               }
             }
           ]
@@ -7791,7 +7791,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_HEART_SCALE",
-                "flag": "FLAG_HIDDEN_ITEM_ROUTE_109_HEART_SCALE_2"
+                "flag": "base:flag:hidden_item/route_109_heart_scale_2"
               }
             }
           ]
@@ -7811,7 +7811,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_HEART_SCALE",
-                "flag": "FLAG_HIDDEN_ITEM_ROUTE_109_HEART_SCALE_3"
+                "flag": "base:flag:hidden_item/route_109_heart_scale_3"
               }
             }
           ]
@@ -7858,14 +7858,9 @@
               "value": "up"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_109_MR_BRINEY_BOAT"
+              "value": "base:flag:visibility/route_109_mr_briney_boat"
             }
           ]
         },
@@ -7907,7 +7902,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_109_MR_BRINEY"
+              "value": "base:flag:visibility/route_109_mr_briney"
             }
           ]
         },
@@ -8263,7 +8258,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_109_PP_UP"
+              "value": "base:flag:item/route_109_pp_up"
             }
           ]
         },
@@ -8804,7 +8799,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_109_POTION"
+              "value": "base:flag:item/route_109_potion"
             }
           ]
         },
@@ -8877,7 +8872,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

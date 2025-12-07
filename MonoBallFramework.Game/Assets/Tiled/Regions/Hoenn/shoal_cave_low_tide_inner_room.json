@@ -5702,7 +5702,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_SHOAL_CAVE_INNER_ROOM_RARE_CANDY"
+              "value": "base:flag:item/shoal_cave_inner_room_rare_candy"
             }
           ]
         }
@@ -5728,7 +5728,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

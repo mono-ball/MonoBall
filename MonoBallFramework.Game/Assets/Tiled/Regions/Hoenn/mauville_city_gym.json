@@ -958,7 +958,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MAUVILLE_GYM_WATTSON"
+              "value": "base:flag:visibility/mauville_gym_wattson"
             }
           ]
         },
@@ -1256,7 +1256,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

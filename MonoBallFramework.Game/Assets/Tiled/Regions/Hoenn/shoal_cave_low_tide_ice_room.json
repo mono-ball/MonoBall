@@ -1921,7 +1921,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_SHOAL_CAVE_ICE_ROOM_TM_HAIL"
+              "value": "base:flag:item/shoal_cave_ice_room_tm_hail"
             }
           ]
         },
@@ -1958,7 +1958,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_SHOAL_CAVE_ICE_ROOM_NEVER_MELT_ICE"
+              "value": "base:flag:item/shoal_cave_ice_room_never_melt_ice"
             }
           ]
         }
@@ -1984,7 +1984,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

@@ -1352,7 +1352,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_SEAFLOOR_CAVERN_ENTRANCE_AQUA_GRUNT"
+              "value": "base:flag:visibility/seafloor_cavern_entrance_aqua_grunt"
             }
           ]
         }
@@ -1378,7 +1378,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

@@ -1944,7 +1944,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_REGIROCK"
+              "value": "base:flag:visibility/regirock"
             }
           ]
         }
@@ -1970,7 +1970,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

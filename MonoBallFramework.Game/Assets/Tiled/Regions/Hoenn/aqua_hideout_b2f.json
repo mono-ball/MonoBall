@@ -2871,7 +2871,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_AQUA_HIDEOUT_GRUNTS"
+              "value": "base:flag:visibility/aqua_hideout_grunts"
             }
           ]
         },
@@ -2913,7 +2913,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_AQUA_HIDEOUT_GRUNTS"
+              "value": "base:flag:visibility/aqua_hideout_grunts"
             },
             {
               "name": "trainerType",
@@ -2960,7 +2960,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_AQUA_HIDEOUT_B2F_NEST_BALL"
+              "value": "base:flag:item/aqua_hideout_b2f_nest_ball"
             }
           ]
         },
@@ -2995,14 +2995,9 @@
               "value": "left"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_AQUA_HIDEOUT_B2F_SUBMARINE_SHADOW"
+              "value": "base:flag:visibility/aqua_hideout_b2f_submarine_shadow"
             }
           ]
         },
@@ -3044,7 +3039,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_AQUA_HIDEOUT_GRUNTS"
+              "value": "base:flag:visibility/aqua_hideout_grunts"
             },
             {
               "name": "trainerType",
@@ -3096,7 +3091,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_AQUA_HIDEOUT_GRUNTS"
+              "value": "base:flag:visibility/aqua_hideout_grunts"
             },
             {
               "name": "trainerType",
@@ -3132,7 +3127,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

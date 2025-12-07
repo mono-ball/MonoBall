@@ -19329,7 +19329,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_STAR_PIECE",
-                "flag": "FLAG_HIDDEN_ITEM_UNDERWATER_127_STAR_PIECE"
+                "flag": "base:flag:hidden_item/underwater_127_star_piece"
               }
             }
           ]
@@ -19349,7 +19349,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_HP_UP",
-                "flag": "FLAG_HIDDEN_ITEM_UNDERWATER_127_HP_UP"
+                "flag": "base:flag:hidden_item/underwater_127_hp_up"
               }
             }
           ]
@@ -19369,7 +19369,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_HEART_SCALE",
-                "flag": "FLAG_HIDDEN_ITEM_UNDERWATER_127_HEART_SCALE"
+                "flag": "base:flag:hidden_item/underwater_127_heart_scale"
               }
             }
           ]
@@ -19389,7 +19389,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_RED_SHARD",
-                "flag": "FLAG_HIDDEN_ITEM_UNDERWATER_127_RED_SHARD"
+                "flag": "base:flag:hidden_item/underwater_127_red_shard"
               }
             }
           ]
@@ -19416,7 +19416,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

@@ -1065,7 +1065,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_119_TEAM_AQUA"
+              "value": "base:flag:visibility/route_119_team_aqua"
             },
             {
               "name": "trainerType",
@@ -1117,7 +1117,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_119_TEAM_AQUA"
+              "value": "base:flag:visibility/route_119_team_aqua"
             },
             {
               "name": "trainerType",
@@ -1169,7 +1169,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_WEATHER_INSTITUTE_1F_WORKERS"
+              "value": "base:flag:visibility/weather_institute_1f_workers"
             }
           ]
         },
@@ -1206,7 +1206,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_WEATHER_INSTITUTE_1F_WORKERS"
+              "value": "base:flag:visibility/weather_institute_1f_workers"
             }
           ]
         },
@@ -1274,7 +1274,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

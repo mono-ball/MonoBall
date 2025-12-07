@@ -2125,14 +2125,9 @@
               "value": "up"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_SOUTHERN_ISLAND_EON_STONE"
+              "value": "base:flag:visibility/southern_island_eon_stone"
             }
           ]
         },
@@ -2167,14 +2162,9 @@
               "value": "down"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_SOUTHERN_ISLAND_UNCHOSEN_EON_DUO_MON"
+              "value": "base:flag:visibility/southern_island_unchosen_eon_duo_mon"
             }
           ]
         }
@@ -2200,7 +2190,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

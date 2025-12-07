@@ -4422,7 +4422,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_AQUA_HIDEOUT_GRUNTS"
+              "value": "base:flag:visibility/aqua_hideout_grunts"
             },
             {
               "name": "trainerType",
@@ -4474,7 +4474,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_AQUA_HIDEOUT_GRUNTS"
+              "value": "base:flag:visibility/aqua_hideout_grunts"
             },
             {
               "name": "trainerType",
@@ -4521,7 +4521,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_AQUA_HIDEOUT_B1F_MAX_ELIXIR"
+              "value": "base:flag:item/aqua_hideout_b1f_max_elixir"
             }
           ]
         },
@@ -4558,7 +4558,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_AQUA_HIDEOUT_GRUNTS"
+              "value": "base:flag:visibility/aqua_hideout_grunts"
             },
             {
               "name": "trainerType",
@@ -4605,7 +4605,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_AQUA_HIDEOUT_B1F_MASTER_BALL"
+              "value": "base:flag:item/aqua_hideout_b1f_master_ball"
             }
           ]
         },
@@ -4642,7 +4642,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_AQUA_HIDEOUT_B1F_ELECTRODE_1"
+              "value": "base:flag:visibility/aqua_hideout_b1f_electrode_1"
             }
           ]
         },
@@ -4679,7 +4679,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_AQUA_HIDEOUT_B1F_NUGGET"
+              "value": "base:flag:item/aqua_hideout_b1f_nugget"
             }
           ]
         },
@@ -4716,7 +4716,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_AQUA_HIDEOUT_B1F_ELECTRODE_2"
+              "value": "base:flag:visibility/aqua_hideout_b1f_electrode_2"
             }
           ]
         },
@@ -4758,7 +4758,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_AQUA_HIDEOUT_GRUNTS"
+              "value": "base:flag:visibility/aqua_hideout_grunts"
             },
             {
               "name": "trainerType",
@@ -4794,7 +4794,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

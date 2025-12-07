@@ -7581,7 +7581,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_ZINC",
-                "flag": "FLAG_HIDDEN_ITEM_ARTISAN_CAVE_B1F_ZINC"
+                "flag": "base:flag:hidden_item/artisan_cave_b1f_zinc"
               }
             }
           ]
@@ -7601,7 +7601,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_CALCIUM",
-                "flag": "FLAG_HIDDEN_ITEM_ARTISAN_CAVE_B1F_CALCIUM"
+                "flag": "base:flag:hidden_item/artisan_cave_b1f_calcium"
               }
             }
           ]
@@ -7621,7 +7621,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_PROTEIN",
-                "flag": "FLAG_HIDDEN_ITEM_ARTISAN_CAVE_B1F_PROTEIN"
+                "flag": "base:flag:hidden_item/artisan_cave_b1f_protein"
               }
             }
           ]
@@ -7641,7 +7641,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_IRON",
-                "flag": "FLAG_HIDDEN_ITEM_ARTISAN_CAVE_B1F_IRON"
+                "flag": "base:flag:hidden_item/artisan_cave_b1f_iron"
               }
             }
           ]
@@ -7690,7 +7690,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ARTISAN_CAVE_B1F_HP_UP"
+              "value": "base:flag:item/artisan_cave_b1f_hp_up"
             }
           ]
         }
@@ -7716,7 +7716,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

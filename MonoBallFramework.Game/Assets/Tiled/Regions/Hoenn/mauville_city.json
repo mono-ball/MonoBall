@@ -3079,7 +3079,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MAUVILLE_CITY_WALLY"
+              "value": "base:flag:visibility/mauville_city_wally"
             }
           ]
         },
@@ -3121,7 +3121,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MAUVILLE_CITY_WALLYS_UNCLE"
+              "value": "base:flag:visibility/mauville_city_wallys_uncle"
             }
           ]
         },
@@ -3158,7 +3158,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MAUVILLE_CITY_WATTSON"
+              "value": "base:flag:visibility/mauville_city_wattson"
             }
           ]
         },
@@ -3195,7 +3195,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_MAUVILLE_CITY_X_SPEED"
+              "value": "base:flag:item/mauville_city_x_speed"
             }
           ]
         },
@@ -3267,14 +3267,9 @@
               "value": "up"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MAUVILLE_CITY_SCOTT"
+              "value": "base:flag:visibility/mauville_city_scott"
             }
           ]
         }
@@ -3300,7 +3295,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

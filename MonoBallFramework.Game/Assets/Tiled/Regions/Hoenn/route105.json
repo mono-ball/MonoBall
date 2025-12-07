@@ -9703,7 +9703,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_HEART_SCALE",
-                "flag": "FLAG_HIDDEN_ITEM_ROUTE_105_HEART_SCALE"
+                "flag": "base:flag:hidden_item/route_105_heart_scale"
               }
             }
           ]
@@ -9723,7 +9723,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_BIG_PEARL",
-                "flag": "FLAG_HIDDEN_ITEM_ROUTE_105_BIG_PEARL"
+                "flag": "base:flag:hidden_item/route_105_big_pearl"
               }
             }
           ]
@@ -9955,7 +9955,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_105_IRON"
+              "value": "base:flag:item/route_105_iron"
             }
           ]
         },
@@ -10122,7 +10122,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

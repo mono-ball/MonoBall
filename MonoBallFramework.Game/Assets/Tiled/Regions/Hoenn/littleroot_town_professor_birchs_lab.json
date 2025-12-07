@@ -1074,7 +1074,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_LITTLEROOT_TOWN_BIRCHS_LAB_BIRCH"
+              "value": "base:flag:visibility/littleroot_town_birchs_lab_birch"
             }
           ]
         },
@@ -1116,7 +1116,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_LITTLEROOT_TOWN_BIRCHS_LAB_RIVAL"
+              "value": "base:flag:visibility/littleroot_town_birchs_lab_rival"
             }
           ]
         },
@@ -1158,7 +1158,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_LITTLEROOT_TOWN_BIRCHS_LAB_POKEBALL_CYNDAQUIL"
+              "value": "base:flag:visibility/littleroot_town_birchs_lab_pokeball_cyndaquil"
             }
           ]
         },
@@ -1200,7 +1200,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_LITTLEROOT_TOWN_BIRCHS_LAB_POKEBALL_TOTODILE"
+              "value": "base:flag:visibility/littleroot_town_birchs_lab_pokeball_totodile"
             }
           ]
         },
@@ -1242,7 +1242,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_LITTLEROOT_TOWN_BIRCHS_LAB_POKEBALL_CHIKORITA"
+              "value": "base:flag:visibility/littleroot_town_birchs_lab_pokeball_chikorita"
             }
           ]
         }
@@ -1268,7 +1268,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

@@ -14466,7 +14466,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_HEART_SCALE",
-                "flag": "FLAG_HIDDEN_ITEM_ROUTE_128_HEART_SCALE_1"
+                "flag": "base:flag:hidden_item/route_128_heart_scale_1"
               }
             }
           ]
@@ -14486,7 +14486,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_HEART_SCALE",
-                "flag": "FLAG_HIDDEN_ITEM_ROUTE_128_HEART_SCALE_2"
+                "flag": "base:flag:hidden_item/route_128_heart_scale_2"
               }
             }
           ]
@@ -14506,7 +14506,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_HEART_SCALE",
-                "flag": "FLAG_HIDDEN_ITEM_ROUTE_128_HEART_SCALE_3"
+                "flag": "base:flag:hidden_item/route_128_heart_scale_3"
               }
             }
           ]
@@ -14647,14 +14647,9 @@
               "value": "down"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_128_STEVEN"
+              "value": "base:flag:visibility/route_128_steven"
             }
           ]
         },
@@ -14689,14 +14684,9 @@
               "value": "left"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_128_ARCHIE"
+              "value": "base:flag:visibility/route_128_archie"
             }
           ]
         },
@@ -14731,14 +14721,9 @@
               "value": "up"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_128_MAXIE"
+              "value": "base:flag:visibility/route_128_maxie"
             }
           ]
         },
@@ -14994,7 +14979,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

@@ -2100,14 +2100,9 @@
               "value": "down"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_SKY_PILLAR_TOP_RAYQUAZA"
+              "value": "base:flag:visibility/sky_pillar_top_rayquaza"
             }
           ]
         },
@@ -2149,7 +2144,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_SKY_PILLAR_TOP_RAYQUAZA_STILL"
+              "value": "base:flag:visibility/sky_pillar_top_rayquaza_still"
             }
           ]
         }
@@ -2175,7 +2170,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

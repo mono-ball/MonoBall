@@ -2240,7 +2240,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_SACRED_ASH",
-                "flag": "FLAG_HIDDEN_ITEM_NAVEL_ROCK_TOP_SACRED_ASH"
+                "flag": "base:flag:hidden_item/navel_rock_top_sacred_ash"
               }
             }
           ]
@@ -2287,14 +2287,9 @@
               "value": "down"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_HO_OH"
+              "value": "base:flag:visibility/ho_oh"
             }
           ]
         }
@@ -2320,7 +2315,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

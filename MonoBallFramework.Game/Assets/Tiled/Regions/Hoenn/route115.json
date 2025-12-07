@@ -10012,7 +10012,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_HEART_SCALE",
-                "flag": "FLAG_HIDDEN_ITEM_ROUTE_115_HEART_SCALE"
+                "flag": "base:flag:hidden_item/route_115_heart_scale"
               }
             }
           ]
@@ -10444,7 +10444,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_115_SUPER_POTION"
+              "value": "base:flag:item/route_115_super_potion"
             }
           ]
         },
@@ -10481,7 +10481,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_115_TM_FOCUS_PUNCH"
+              "value": "base:flag:item/route_115_tm_focus_punch"
             }
           ]
         },
@@ -10518,7 +10518,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_115_IRON"
+              "value": "base:flag:item/route_115_iron"
             }
           ]
         },
@@ -10629,7 +10629,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_11"
+              "value": "base:flag:temporary/11"
             }
           ]
         },
@@ -10666,7 +10666,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_115_GREAT_BALL"
+              "value": "base:flag:item/route_115_great_ball"
             }
           ]
         },
@@ -10938,7 +10938,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_115_PP_UP"
+              "value": "base:flag:item/route_115_pp_up"
             }
           ]
         },
@@ -10975,7 +10975,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_115_HEAL_POWDER"
+              "value": "base:flag:item/route_115_heal_powder"
             }
           ]
         }
@@ -11001,7 +11001,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

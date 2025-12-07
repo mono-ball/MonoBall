@@ -1399,7 +1399,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_SLATEPORT_CITY_HARBOR_PATRONS"
+              "value": "base:flag:visibility/slateport_city_harbor_patrons"
             }
           ]
         },
@@ -1441,7 +1441,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_SLATEPORT_CITY_HARBOR_PATRONS"
+              "value": "base:flag:visibility/slateport_city_harbor_patrons"
             }
           ]
         },
@@ -1483,7 +1483,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_SLATEPORT_CITY_HARBOR_PATRONS"
+              "value": "base:flag:visibility/slateport_city_harbor_patrons"
             }
           ]
         },
@@ -1520,7 +1520,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_SLATEPORT_CITY_HARBOR_CAPTAIN_STERN"
+              "value": "base:flag:visibility/slateport_city_harbor_captain_stern"
             }
           ]
         },
@@ -1555,14 +1555,9 @@
               "value": "right"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_SLATEPORT_CITY_HARBOR_SS_TIDAL"
+              "value": "base:flag:visibility/slateport_city_harbor_ss_tidal"
             }
           ]
         },
@@ -1597,14 +1592,9 @@
               "value": "right"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_SLATEPORT_CITY_HARBOR_AQUA_GRUNT"
+              "value": "base:flag:visibility/slateport_city_harbor_aqua_grunt"
             }
           ]
         },
@@ -1639,14 +1629,9 @@
               "value": "left"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_SLATEPORT_CITY_HARBOR_ARCHIE"
+              "value": "base:flag:visibility/slateport_city_harbor_archie"
             }
           ]
         },
@@ -1681,14 +1666,9 @@
               "value": "right"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_SLATEPORT_CITY_HARBOR_SUBMARINE_SHADOW"
+              "value": "base:flag:visibility/slateport_city_harbor_submarine_shadow"
             }
           ]
         }
@@ -1714,7 +1694,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

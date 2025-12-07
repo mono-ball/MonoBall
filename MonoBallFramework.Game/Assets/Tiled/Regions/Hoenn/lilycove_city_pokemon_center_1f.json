@@ -704,7 +704,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_LILYCOVE_POKEMON_CENTER_CONTEST_LADY_MON"
+              "value": "base:flag:visibility/lilycove_pokemon_center_contest_lady_mon"
             }
           ]
         }
@@ -730,7 +730,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

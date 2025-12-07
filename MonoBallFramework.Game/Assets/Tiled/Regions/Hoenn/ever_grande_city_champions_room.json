@@ -650,11 +650,6 @@
               "name": "direction",
               "type": "string",
               "value": "down"
-            },
-            {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
             }
           ]
         },
@@ -689,14 +684,9 @@
               "value": "up"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_CHAMPIONS_ROOM_RIVAL"
+              "value": "base:flag:visibility/champions_room_rival"
             }
           ]
         },
@@ -731,14 +721,9 @@
               "value": "up"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_CHAMPIONS_ROOM_BIRCH"
+              "value": "base:flag:visibility/champions_room_birch"
             }
           ]
         }
@@ -764,7 +749,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

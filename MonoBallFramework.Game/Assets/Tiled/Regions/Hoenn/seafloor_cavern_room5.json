@@ -1373,7 +1373,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_11"
+              "value": "base:flag:temporary/11"
             }
           ]
         },
@@ -1410,7 +1410,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_12"
+              "value": "base:flag:temporary/12"
             }
           ]
         },
@@ -1447,7 +1447,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_13"
+              "value": "base:flag:temporary/13"
             }
           ]
         },
@@ -1484,7 +1484,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_15"
+              "value": "base:flag:temporary/15"
             }
           ]
         },
@@ -1521,7 +1521,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_16"
+              "value": "base:flag:temporary/16"
             }
           ]
         },
@@ -1558,7 +1558,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_14"
+              "value": "base:flag:temporary/14"
             }
           ]
         }
@@ -1584,7 +1584,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

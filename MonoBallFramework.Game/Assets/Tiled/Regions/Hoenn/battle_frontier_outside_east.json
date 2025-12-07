@@ -16690,7 +16690,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_BATTLE_FRONTIER_SUDOWOODO"
+              "value": "base:flag:visibility/battle_frontier_sudowoodo"
             }
           ]
         },
@@ -17160,7 +17160,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

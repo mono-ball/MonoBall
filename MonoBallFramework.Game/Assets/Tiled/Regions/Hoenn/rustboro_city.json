@@ -8715,7 +8715,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_RUSTBORO_CITY_DEVON_EMPLOYEE_1"
+              "value": "base:flag:visibility/rustboro_city_devon_employee_1"
             }
           ]
         },
@@ -8750,14 +8750,9 @@
               "value": "right"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_RUSTBORO_CITY_AQUA_GRUNT"
+              "value": "base:flag:visibility/rustboro_city_aqua_grunt"
             }
           ]
         },
@@ -8836,7 +8831,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_RUSTBORO_CITY_X_DEFEND"
+              "value": "base:flag:item/rustboro_city_x_defend"
             }
           ]
         },
@@ -8910,7 +8905,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_RUSTBORO_CITY_RIVAL"
+              "value": "base:flag:visibility/rustboro_city_rival"
             }
           ]
         },
@@ -8940,14 +8935,9 @@
               "value": 0
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_RUSTBORO_CITY_SCIENTIST"
+              "value": "base:flag:visibility/rustboro_city_scientist"
             }
           ]
         },
@@ -9005,7 +8995,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

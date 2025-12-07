@@ -2586,14 +2586,9 @@
               "value": "down"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MARINE_CAVE_KYOGRE"
+              "value": "base:flag:visibility/marine_cave_kyogre"
             }
           ]
         }
@@ -2619,7 +2614,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

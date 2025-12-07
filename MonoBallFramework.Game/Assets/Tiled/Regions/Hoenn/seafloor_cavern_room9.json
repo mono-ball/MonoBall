@@ -3882,14 +3882,9 @@
               "value": "down"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_SEAFLOOR_CAVERN_ROOM_9_KYOGRE"
+              "value": "base:flag:visibility/seafloor_cavern_room_9_kyogre"
             }
           ]
         },
@@ -3924,14 +3919,9 @@
               "value": "right"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_SEAFLOOR_CAVERN_ROOM_9_ARCHIE"
+              "value": "base:flag:visibility/seafloor_cavern_room_9_archie"
             }
           ]
         },
@@ -3966,14 +3956,9 @@
               "value": "right"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_SEAFLOOR_CAVERN_ROOM_9_MAXIE"
+              "value": "base:flag:visibility/seafloor_cavern_room_9_maxie"
             }
           ]
         },
@@ -4008,14 +3993,9 @@
               "value": "right"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_SEAFLOOR_CAVERN_ROOM_9_MAGMA_GRUNTS"
+              "value": "base:flag:visibility/seafloor_cavern_room_9_magma_grunts"
             }
           ]
         },
@@ -4050,14 +4030,9 @@
               "value": "right"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_SEAFLOOR_CAVERN_ROOM_9_MAGMA_GRUNTS"
+              "value": "base:flag:visibility/seafloor_cavern_room_9_magma_grunts"
             }
           ]
         },
@@ -4094,7 +4069,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_SEAFLOOR_CAVERN_ROOM_9_TM_EARTHQUAKE"
+              "value": "base:flag:item/seafloor_cavern_room_9_tm_earthquake"
             }
           ]
         },
@@ -4129,14 +4104,9 @@
               "value": "down"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_SEAFLOOR_CAVERN_ROOM_9_KYOGRE_ASLEEP"
+              "value": "base:flag:visibility/seafloor_cavern_room_9_kyogre_asleep"
             }
           ]
         }
@@ -4162,7 +4132,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

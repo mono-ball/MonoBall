@@ -766,7 +766,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_LEFTOVERS",
-                "flag": "FLAG_HIDDEN_ITEM_SS_TIDAL_LOWER_DECK_LEFTOVERS"
+                "flag": "base:flag:hidden_item/ss_tidal_lower_deck_leftovers"
               }
             }
           ]
@@ -898,7 +898,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

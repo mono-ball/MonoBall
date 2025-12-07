@@ -1221,7 +1221,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_BATTLE_TOWER_REPORTER"
+              "value": "base:flag:visibility/battle_tower_reporter"
             }
           ]
         },
@@ -1263,7 +1263,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_APPRENTICE"
+              "value": "base:flag:visibility/apprentice"
             }
           ]
         },
@@ -1400,7 +1400,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

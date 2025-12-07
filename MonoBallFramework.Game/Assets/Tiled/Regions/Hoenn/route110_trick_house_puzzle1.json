@@ -1339,7 +1339,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_13"
+              "value": "base:flag:temporary/13"
             }
           ]
         },
@@ -1376,7 +1376,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_12"
+              "value": "base:flag:temporary/12"
             }
           ]
         },
@@ -1413,7 +1413,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_14"
+              "value": "base:flag:temporary/14"
             }
           ]
         },
@@ -1450,7 +1450,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_17"
+              "value": "base:flag:temporary/17"
             }
           ]
         },
@@ -1487,7 +1487,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_16"
+              "value": "base:flag:temporary/16"
             }
           ]
         },
@@ -1524,7 +1524,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_15"
+              "value": "base:flag:temporary/15"
             }
           ]
         },
@@ -1561,7 +1561,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_19"
+              "value": "base:flag:temporary/19"
             }
           ]
         },
@@ -1598,7 +1598,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_18"
+              "value": "base:flag:temporary/18"
             }
           ]
         },
@@ -1635,7 +1635,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_1B"
+              "value": "base:flag:temporary/1_b"
             }
           ]
         },
@@ -1672,7 +1672,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_TRICK_HOUSE_PUZZLE_1_ORANGE_MAIL"
+              "value": "base:flag:item/trick_house_puzzle_1_orange_mail"
             }
           ]
         },
@@ -1709,7 +1709,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_1C"
+              "value": "base:flag:temporary/1_c"
             }
           ]
         },
@@ -1746,7 +1746,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_1E"
+              "value": "base:flag:temporary/1_e"
             }
           ]
         }
@@ -1772,7 +1772,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

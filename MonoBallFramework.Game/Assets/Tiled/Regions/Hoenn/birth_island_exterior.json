@@ -2826,7 +2826,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_BIRTH_ISLAND_DEOXYS_TRIANGLE"
+              "value": "base:flag:visibility/birth_island_deoxys_triangle"
             }
           ]
         },
@@ -2861,14 +2861,9 @@
               "value": "down"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_DEOXYS"
+              "value": "base:flag:visibility/deoxys"
             }
           ]
         }
@@ -2894,7 +2889,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

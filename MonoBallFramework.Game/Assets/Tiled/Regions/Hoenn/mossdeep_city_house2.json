@@ -496,7 +496,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MOSSDEEP_CITY_HOUSE_2_WINGULL"
+              "value": "base:flag:visibility/mossdeep_city_house_2_wingull"
             }
           ]
         }
@@ -522,7 +522,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

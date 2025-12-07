@@ -1181,7 +1181,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_SLATEPORT_CITY_OCEANIC_MUSEUM_2F_CAPTAIN_STERN"
+              "value": "base:flag:visibility/slateport_city_oceanic_museum_2f_captain_stern"
             }
           ]
         },
@@ -1216,14 +1216,9 @@
               "value": "down"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_SLATEPORT_CITY_OCEANIC_MUSEUM_2F_ARCHIE"
+              "value": "base:flag:visibility/slateport_city_oceanic_museum_2f_archie"
             }
           ]
         },
@@ -1258,14 +1253,9 @@
               "value": "down"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_SLATEPORT_CITY_OCEANIC_MUSEUM_2F_AQUA_GRUNT_1"
+              "value": "base:flag:visibility/slateport_city_oceanic_museum_2f_aqua_grunt_1"
             }
           ]
         },
@@ -1300,14 +1290,9 @@
               "value": "down"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_SLATEPORT_CITY_OCEANIC_MUSEUM_2F_AQUA_GRUNT_2"
+              "value": "base:flag:visibility/slateport_city_oceanic_museum_2f_aqua_grunt_2"
             }
           ]
         },
@@ -1349,7 +1334,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_SLATEPORT_MUSEUM_POPULATION"
+              "value": "base:flag:visibility/slateport_museum_population"
             }
           ]
         },
@@ -1386,7 +1371,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_SLATEPORT_MUSEUM_POPULATION"
+              "value": "base:flag:visibility/slateport_museum_population"
             }
           ]
         },
@@ -1428,7 +1413,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_SLATEPORT_MUSEUM_POPULATION"
+              "value": "base:flag:visibility/slateport_museum_population"
             }
           ]
         }
@@ -1454,7 +1439,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

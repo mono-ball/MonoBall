@@ -3324,7 +3324,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_RARE_CANDY",
-                "flag": "FLAG_HIDDEN_ITEM_PETALBURG_CITY_RARE_CANDY"
+                "flag": "base:flag:hidden_item/petalburg_city_rare_candy"
               }
             }
           ]
@@ -3383,7 +3383,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_PETALBURG_CITY_WALLYS_MOM"
+              "value": "base:flag:visibility/petalburg_city_wallys_mom"
             }
           ]
         },
@@ -3418,14 +3418,9 @@
               "value": "up"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_PETALBURG_CITY_WALLY"
+              "value": "base:flag:visibility/petalburg_city_wally"
             }
           ]
         },
@@ -3539,14 +3534,9 @@
               "value": "up"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_PETALBURG_CITY_WALLYS_DAD"
+              "value": "base:flag:visibility/petalburg_city_wallys_dad"
             }
           ]
         },
@@ -3583,7 +3573,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_PETALBURG_CITY_MAX_REVIVE"
+              "value": "base:flag:item/petalburg_city_max_revive"
             }
           ]
         },
@@ -3620,7 +3610,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_PETALBURG_CITY_ETHER"
+              "value": "base:flag:item/petalburg_city_ether"
             }
           ]
         },
@@ -3682,14 +3672,9 @@
               "value": 3
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_PETALBURG_CITY_SCOTT"
+              "value": "base:flag:visibility/petalburg_city_scott"
             }
           ]
         }
@@ -3715,7 +3700,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

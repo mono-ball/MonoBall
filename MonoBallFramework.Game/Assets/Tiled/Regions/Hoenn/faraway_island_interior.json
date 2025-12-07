@@ -2419,7 +2419,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MEW"
+              "value": "base:flag:visibility/mew"
             }
           ]
         }
@@ -2445,7 +2445,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

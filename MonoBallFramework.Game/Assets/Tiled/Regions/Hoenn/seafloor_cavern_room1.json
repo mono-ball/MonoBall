@@ -1433,7 +1433,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_11"
+              "value": "base:flag:temporary/11"
             }
           ]
         },
@@ -1470,7 +1470,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_12"
+              "value": "base:flag:temporary/12"
             }
           ]
         },
@@ -1507,7 +1507,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_13"
+              "value": "base:flag:temporary/13"
             }
           ]
         },
@@ -1544,7 +1544,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_SEAFLOOR_CAVERN_AQUA_GRUNTS"
+              "value": "base:flag:visibility/seafloor_cavern_aqua_grunts"
             },
             {
               "name": "trainerType",
@@ -1596,7 +1596,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_SEAFLOOR_CAVERN_AQUA_GRUNTS"
+              "value": "base:flag:visibility/seafloor_cavern_aqua_grunts"
             },
             {
               "name": "trainerType",
@@ -1632,7 +1632,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

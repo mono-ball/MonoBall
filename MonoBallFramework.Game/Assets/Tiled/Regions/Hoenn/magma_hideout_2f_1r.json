@@ -4039,7 +4039,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MAGMA_HIDEOUT_GRUNTS"
+              "value": "base:flag:visibility/magma_hideout_grunts"
             },
             {
               "name": "trainerType",
@@ -4091,7 +4091,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MAGMA_HIDEOUT_GRUNTS"
+              "value": "base:flag:visibility/magma_hideout_grunts"
             },
             {
               "name": "trainerType",
@@ -4143,7 +4143,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MAGMA_HIDEOUT_GRUNTS"
+              "value": "base:flag:visibility/magma_hideout_grunts"
             },
             {
               "name": "trainerType",
@@ -4195,7 +4195,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MAGMA_HIDEOUT_GRUNTS"
+              "value": "base:flag:visibility/magma_hideout_grunts"
             },
             {
               "name": "trainerType",
@@ -4231,7 +4231,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

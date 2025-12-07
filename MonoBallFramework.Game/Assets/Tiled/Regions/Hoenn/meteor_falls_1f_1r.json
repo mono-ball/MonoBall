@@ -4028,41 +4028,6 @@
     },
     {
       "id": 6,
-      "name": "Interactions",
-      "type": "objectgroup",
-      "visible": true,
-      "opacity": 1,
-      "x": 0,
-      "y": 0,
-      "objects": [
-        {
-          "id": 8,
-          "name": "Sign: 0x0",
-          "type": "sign_event",
-          "x": 144,
-          "y": 928,
-          "width": 16,
-          "height": 16,
-          "properties": [
-            {
-              "name": "sign",
-              "propertytype": "SignEvent",
-              "type": "class",
-              "value": {
-                "interactionScript": "Interactions/0x0.csx"
-              }
-            },
-            {
-              "name": "elevation",
-              "type": "int",
-              "value": 0
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": 7,
       "name": "NPCs",
       "type": "objectgroup",
       "visible": true,
@@ -4071,8 +4036,8 @@
       "y": 0,
       "objects": [
         {
-          "id": 9,
-          "name": "NPC_9",
+          "id": 8,
+          "name": "NPC_8",
           "type": "npc",
           "x": 32,
           "y": 64,
@@ -4103,13 +4068,13 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_METEOR_FALLS_1F_1R_TM_IRON_TAIL"
+              "value": "base:flag:item/meteor_falls_1f_1r_tm_iron_tail"
             }
           ]
         },
         {
-          "id": 10,
-          "name": "NPC_10",
+          "id": 9,
+          "name": "NPC_9",
           "type": "npc",
           "x": 32,
           "y": 224,
@@ -4140,13 +4105,13 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_METEOR_FALLS_1F_1R_MOON_STONE"
+              "value": "base:flag:item/meteor_falls_1f_1r_moon_stone"
             }
           ]
         },
         {
-          "id": 11,
-          "name": "NPC_11",
+          "id": 10,
+          "name": "NPC_10",
           "type": "npc",
           "x": 432,
           "y": 80,
@@ -4177,13 +4142,13 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_METEOR_FALLS_1F_1R_FULL_HEAL"
+              "value": "base:flag:item/meteor_falls_1f_1r_full_heal"
             }
           ]
         },
         {
-          "id": 12,
-          "name": "NPC_12",
+          "id": 11,
+          "name": "NPC_11",
           "type": "npc",
           "x": 416,
           "y": 512,
@@ -4214,12 +4179,12 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_METEOR_FALLS_1F_1R_PP_UP"
+              "value": "base:flag:item/meteor_falls_1f_1r_pp_up"
             }
           ]
         },
         {
-          "id": 13,
+          "id": 12,
           "name": "LOCALID_METEOR_FALLS_MAGMA_GRUNT_1",
           "type": "npc",
           "x": 192,
@@ -4249,19 +4214,14 @@
               "value": "down"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_METEOR_FALLS_TEAM_MAGMA"
+              "value": "base:flag:visibility/meteor_falls_team_magma"
             }
           ]
         },
         {
-          "id": 14,
+          "id": 13,
           "name": "LOCALID_METEOR_FALLS_MAGMA_GRUNT_2",
           "type": "npc",
           "x": 224,
@@ -4291,19 +4251,14 @@
               "value": "left"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_METEOR_FALLS_TEAM_MAGMA"
+              "value": "base:flag:visibility/meteor_falls_team_magma"
             }
           ]
         },
         {
-          "id": 15,
+          "id": 14,
           "name": "LOCALID_METEOR_FALLS_ARCHIE",
           "type": "npc",
           "x": 96,
@@ -4333,19 +4288,14 @@
               "value": "right"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_METEOR_FALLS_TEAM_AQUA"
+              "value": "base:flag:visibility/meteor_falls_team_aqua"
             }
           ]
         },
         {
-          "id": 16,
+          "id": 15,
           "name": "LOCALID_METEOR_FALLS_AQUA_GRUNT_1",
           "type": "npc",
           "x": 96,
@@ -4375,19 +4325,14 @@
               "value": "right"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_METEOR_FALLS_TEAM_AQUA"
+              "value": "base:flag:visibility/meteor_falls_team_aqua"
             }
           ]
         },
         {
-          "id": 17,
+          "id": 16,
           "name": "LOCALID_METEOR_FALLS_AQUA_GRUNT_2",
           "type": "npc",
           "x": 96,
@@ -4412,20 +4357,15 @@
               "value": 3
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_METEOR_FALLS_TEAM_AQUA"
+              "value": "base:flag:visibility/meteor_falls_team_aqua"
             }
           ]
         },
         {
-          "id": 18,
-          "name": "NPC_18",
+          "id": 17,
+          "name": "NPC_17",
           "type": "npc",
           "x": 208,
           "y": 368,
@@ -4461,7 +4401,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_METEOR_FALLS_1F_1R_COZMO"
+              "value": "base:flag:visibility/meteor_falls_1f_1r_cozmo"
             }
           ]
         }
@@ -4469,7 +4409,7 @@
     }
   ],
   "nextlayerid": 1,
-  "nextobjectid": 19,
+  "nextobjectid": 18,
   "orientation": "orthogonal",
   "renderorder": "right-down",
   "tiledversion": "1.11.2",
@@ -4487,7 +4427,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

@@ -4268,7 +4268,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MAGMA_HIDEOUT_GRUNTS"
+              "value": "base:flag:visibility/magma_hideout_grunts"
             },
             {
               "name": "trainerType",
@@ -4320,7 +4320,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MAGMA_HIDEOUT_GRUNTS"
+              "value": "base:flag:visibility/magma_hideout_grunts"
             },
             {
               "name": "trainerType",
@@ -4367,7 +4367,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_MAGMA_HIDEOUT_2F_2R_MAX_ELIXIR"
+              "value": "base:flag:item/magma_hideout_2f_2r_max_elixir"
             }
           ]
         },
@@ -4409,7 +4409,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MAGMA_HIDEOUT_GRUNTS"
+              "value": "base:flag:visibility/magma_hideout_grunts"
             },
             {
               "name": "trainerType",
@@ -4461,7 +4461,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MAGMA_HIDEOUT_GRUNTS"
+              "value": "base:flag:visibility/magma_hideout_grunts"
             },
             {
               "name": "trainerType",
@@ -4508,7 +4508,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_MAGMA_HIDEOUT_2F_2R_FULL_RESTORE"
+              "value": "base:flag:item/magma_hideout_2f_2r_full_restore"
             }
           ]
         }
@@ -4534,7 +4534,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

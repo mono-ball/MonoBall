@@ -779,7 +779,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_MT_PYRE_2F_ULTRA_BALL"
+              "value": "base:flag:item/mt_pyre_2f_ultra_ball"
             }
           ]
         },
@@ -1067,7 +1067,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

@@ -2698,7 +2698,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_AQUA_HIDEOUT_1F_GRUNT_1_BLOCKING_ENTRANCE"
+              "value": "base:flag:visibility/aqua_hideout_1f_grunt_1_blocking_entrance"
             }
           ]
         },
@@ -2740,7 +2740,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_AQUA_HIDEOUT_1F_GRUNT_2_BLOCKING_ENTRANCE"
+              "value": "base:flag:visibility/aqua_hideout_1f_grunt_2_blocking_entrance"
             }
           ]
         },
@@ -2782,7 +2782,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_AQUA_HIDEOUT_GRUNTS"
+              "value": "base:flag:visibility/aqua_hideout_grunts"
             },
             {
               "name": "trainerType",
@@ -2818,7 +2818,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

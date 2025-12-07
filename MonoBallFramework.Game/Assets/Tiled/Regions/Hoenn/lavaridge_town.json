@@ -1642,7 +1642,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_ICE_HEAL",
-                "flag": "FLAG_HIDDEN_ITEM_LAVARIDGE_TOWN_ICE_HEAL"
+                "flag": "base:flag:hidden_item/lavaridge_town_ice_heal"
               }
             }
           ]
@@ -1916,14 +1916,9 @@
               "value": "left"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_LAVARIDGE_TOWN_RIVAL_ON_BIKE"
+              "value": "base:flag:visibility/lavaridge_town_rival_on_bike"
             }
           ]
         },
@@ -1958,14 +1953,9 @@
               "value": "down"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_LAVARIDGE_TOWN_RIVAL"
+              "value": "base:flag:visibility/lavaridge_town_rival"
             }
           ]
         },
@@ -2028,7 +2018,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

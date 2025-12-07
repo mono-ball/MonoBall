@@ -4866,7 +4866,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_RARE_CANDY",
-                "flag": "FLAG_HIDDEN_ITEM_SAFARI_ZONE_NORTH_EAST_RARE_CANDY"
+                "flag": "base:flag:hidden_item/safari_zone_north_east_rare_candy"
               }
             }
           ]
@@ -4886,7 +4886,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_ZINC",
-                "flag": "FLAG_HIDDEN_ITEM_SAFARI_ZONE_NORTH_EAST_ZINC"
+                "flag": "base:flag:hidden_item/safari_zone_north_east_zinc"
               }
             }
           ]
@@ -4999,7 +4999,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_15"
+              "value": "base:flag:temporary/15"
             }
           ]
         },
@@ -5068,7 +5068,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_13"
+              "value": "base:flag:temporary/13"
             }
           ]
         },
@@ -5105,7 +5105,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_11"
+              "value": "base:flag:temporary/11"
             }
           ]
         },
@@ -5142,7 +5142,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_14"
+              "value": "base:flag:temporary/14"
             }
           ]
         },
@@ -5179,7 +5179,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_12"
+              "value": "base:flag:temporary/12"
             }
           ]
         },
@@ -5216,7 +5216,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_SAFARI_ZONE_NORTH_EAST_NUGGET"
+              "value": "base:flag:item/safari_zone_north_east_nugget"
             }
           ]
         }
@@ -5242,7 +5242,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

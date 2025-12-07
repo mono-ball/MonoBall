@@ -590,7 +590,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_LITTLEROOT_TOWN_BRENDANS_HOUSE_MOM"
+              "value": "base:flag:visibility/littleroot_town_brendans_house_mom"
             }
           ]
         },
@@ -632,7 +632,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_LITTLEROOT_TOWN_PLAYERS_HOUSE_VIGOROTH_2"
+              "value": "base:flag:visibility/littleroot_town_players_house_vigoroth_2"
             }
           ]
         },
@@ -669,7 +669,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_LITTLEROOT_TOWN_PLAYERS_HOUSE_VIGOROTH_1"
+              "value": "base:flag:visibility/littleroot_town_players_house_vigoroth_1"
             }
           ]
         },
@@ -711,7 +711,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_LITTLEROOT_TOWN_BRENDANS_HOUSE_RIVAL_MOM"
+              "value": "base:flag:visibility/littleroot_town_brendans_house_rival_mom"
             }
           ]
         },
@@ -746,14 +746,9 @@
               "value": "left"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_PLAYERS_HOUSE_DAD"
+              "value": "base:flag:visibility/players_house_dad"
             }
           ]
         },
@@ -800,7 +795,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_LITTLEROOT_TOWN_BRENDANS_HOUSE_RIVAL_SIBLING"
+              "value": "base:flag:visibility/littleroot_town_brendans_house_rival_sibling"
             }
           ]
         },
@@ -835,14 +830,9 @@
               "value": "up"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_LITTLEROOT_TOWN_BRENDANS_HOUSE_BRENDAN"
+              "value": "base:flag:visibility/littleroot_town_brendans_house_brendan"
             }
           ]
         }
@@ -868,7 +858,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

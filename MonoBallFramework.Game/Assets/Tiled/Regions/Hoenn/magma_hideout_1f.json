@@ -4422,7 +4422,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MAGMA_HIDEOUT_GRUNTS"
+              "value": "base:flag:visibility/magma_hideout_grunts"
             },
             {
               "name": "trainerType",
@@ -4469,7 +4469,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_MAGMA_HIDEOUT_1F_RARE_CANDY"
+              "value": "base:flag:item/magma_hideout_1f_rare_candy"
             }
           ]
         },
@@ -4511,7 +4511,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MAGMA_HIDEOUT_GRUNTS"
+              "value": "base:flag:visibility/magma_hideout_grunts"
             },
             {
               "name": "trainerType",
@@ -4558,7 +4558,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_11"
+              "value": "base:flag:temporary/11"
             }
           ]
         },
@@ -4595,7 +4595,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_12"
+              "value": "base:flag:temporary/12"
             }
           ]
         },
@@ -4632,7 +4632,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_13"
+              "value": "base:flag:temporary/13"
             }
           ]
         }
@@ -4658,7 +4658,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

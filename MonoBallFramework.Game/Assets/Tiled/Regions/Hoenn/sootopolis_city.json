@@ -11434,7 +11434,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_SOOTOPOLIS_CITY_RESIDENTS"
+              "value": "base:flag:visibility/sootopolis_city_residents"
             }
           ]
         },
@@ -11592,7 +11592,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_SOOTOPOLIS_CITY_MAN_1"
+              "value": "base:flag:visibility/sootopolis_city_man_1"
             }
           ]
         },
@@ -11634,7 +11634,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_SOOTOPOLIS_CITY_STEVEN"
+              "value": "base:flag:visibility/sootopolis_city_steven"
             }
           ]
         },
@@ -11711,14 +11711,9 @@
               "value": true
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_SOOTOPOLIS_CITY_GROUDON"
+              "value": "base:flag:visibility/sootopolis_city_groudon"
             }
           ]
         },
@@ -11753,14 +11748,9 @@
               "value": true
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_SOOTOPOLIS_CITY_KYOGRE"
+              "value": "base:flag:visibility/sootopolis_city_kyogre"
             }
           ]
         },
@@ -11795,14 +11785,9 @@
               "value": "right"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_SOOTOPOLIS_CITY_RAYQUAZA"
+              "value": "base:flag:visibility/sootopolis_city_rayquaza"
             }
           ]
         },
@@ -11844,7 +11829,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_SOOTOPOLIS_CITY_RESIDENTS"
+              "value": "base:flag:visibility/sootopolis_city_residents"
             }
           ]
         },
@@ -11886,7 +11871,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_SOOTOPOLIS_CITY_RESIDENTS"
+              "value": "base:flag:visibility/sootopolis_city_residents"
             }
           ]
         },
@@ -11928,7 +11913,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_SOOTOPOLIS_CITY_RESIDENTS"
+              "value": "base:flag:visibility/sootopolis_city_residents"
             }
           ]
         },
@@ -11970,7 +11955,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_SOOTOPOLIS_CITY_RESIDENTS"
+              "value": "base:flag:visibility/sootopolis_city_residents"
             }
           ]
         },
@@ -12012,7 +11997,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_SOOTOPOLIS_CITY_MAXIE"
+              "value": "base:flag:visibility/sootopolis_city_maxie"
             }
           ]
         },
@@ -12054,7 +12039,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_SOOTOPOLIS_CITY_ARCHIE"
+              "value": "base:flag:visibility/sootopolis_city_archie"
             }
           ]
         },
@@ -12096,7 +12081,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_SOOTOPOLIS_CITY_WALLACE"
+              "value": "base:flag:visibility/sootopolis_city_wallace"
             }
           ]
         }
@@ -12122,7 +12107,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

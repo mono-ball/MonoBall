@@ -499,7 +499,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_UNDERWATER_SEA_FLOOR_CAVERN_STOLEN_SUBMARINE"
+              "value": "base:flag:visibility/underwater_sea_floor_cavern_stolen_submarine"
             }
           ]
         },
@@ -536,7 +536,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_UNDERWATER_SEA_FLOOR_CAVERN_STOLEN_SUBMARINE"
+              "value": "base:flag:visibility/underwater_sea_floor_cavern_stolen_submarine"
             }
           ]
         },
@@ -573,7 +573,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_UNDERWATER_SEA_FLOOR_CAVERN_STOLEN_SUBMARINE"
+              "value": "base:flag:visibility/underwater_sea_floor_cavern_stolen_submarine"
             }
           ]
         },
@@ -610,7 +610,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_UNDERWATER_SEA_FLOOR_CAVERN_STOLEN_SUBMARINE"
+              "value": "base:flag:visibility/underwater_sea_floor_cavern_stolen_submarine"
             }
           ]
         }
@@ -636,7 +636,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

@@ -10042,7 +10042,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_SUPER_POTION",
-                "flag": "FLAG_HIDDEN_ITEM_ROUTE_104_SUPER_POTION"
+                "flag": "base:flag:hidden_item/route_104_super_potion"
               }
             }
           ]
@@ -10062,7 +10062,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_POKE_BALL",
-                "flag": "FLAG_HIDDEN_ITEM_ROUTE_104_POKE_BALL"
+                "flag": "base:flag:hidden_item/route_104_poke_ball"
               }
             }
           ]
@@ -10082,7 +10082,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_POTION",
-                "flag": "FLAG_HIDDEN_ITEM_ROUTE_104_POTION"
+                "flag": "base:flag:hidden_item/route_104_potion"
               }
             }
           ]
@@ -10102,7 +10102,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_ANTIDOTE",
-                "flag": "FLAG_HIDDEN_ITEM_ROUTE_104_ANTIDOTE"
+                "flag": "base:flag:hidden_item/route_104_antidote"
               }
             }
           ]
@@ -10122,7 +10122,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_HEART_SCALE",
-                "flag": "FLAG_HIDDEN_ITEM_ROUTE_104_HEART_SCALE"
+                "flag": "base:flag:hidden_item/route_104_heart_scale"
               }
             }
           ]
@@ -10416,14 +10416,9 @@
               "value": "up"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_104_MR_BRINEY_BOAT"
+              "value": "base:flag:visibility/route_104_mr_briney_boat"
             }
           ]
         },
@@ -10458,14 +10453,9 @@
               "value": "right"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_104_MR_BRINEY"
+              "value": "base:flag:visibility/route_104_mr_briney"
             }
           ]
         },
@@ -10951,7 +10941,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_104_PP_UP"
+              "value": "base:flag:item/route_104_pp_up"
             }
           ]
         },
@@ -10998,7 +10988,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_104_WHITE_HERB_FLORIST"
+              "value": "base:flag:visibility/route_104_white_herb_florist"
             }
           ]
         },
@@ -11218,7 +11208,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_104_POKE_BALL"
+              "value": "base:flag:item/route_104_poke_ball"
             }
           ]
         },
@@ -11302,7 +11292,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_104_X_ACCURACY"
+              "value": "base:flag:item/route_104_x_accuracy"
             }
           ]
         },
@@ -11339,7 +11329,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_11"
+              "value": "base:flag:temporary/11"
             }
           ]
         },
@@ -11376,7 +11366,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_104_POTION"
+              "value": "base:flag:item/route_104_potion"
             }
           ]
         },
@@ -11487,7 +11477,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_104_RIVAL"
+              "value": "base:flag:visibility/route_104_rival"
             }
           ]
         }
@@ -11513,7 +11503,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

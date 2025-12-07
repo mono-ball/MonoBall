@@ -200,11 +200,6 @@
               "name": "direction",
               "type": "string",
               "value": "down"
-            },
-            {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
             }
           ]
         }
@@ -230,7 +225,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

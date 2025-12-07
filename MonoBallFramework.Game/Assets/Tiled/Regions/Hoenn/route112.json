@@ -7539,7 +7539,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_112_TEAM_MAGMA"
+              "value": "base:flag:visibility/route_112_team_magma"
             }
           ]
         },
@@ -7764,7 +7764,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_112_TEAM_MAGMA"
+              "value": "base:flag:visibility/route_112_team_magma"
             }
           ]
         },
@@ -7986,7 +7986,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_112_NUGGET"
+              "value": "base:flag:item/route_112_nugget"
             }
           ]
         },
@@ -8106,7 +8106,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

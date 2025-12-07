@@ -667,7 +667,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_FALLARBOR_POKEMON_CENTER_LANETTE"
+              "value": "base:flag:visibility/fallarbor_pokemon_center_lanette"
             }
           ]
         }
@@ -693,7 +693,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

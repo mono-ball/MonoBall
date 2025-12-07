@@ -3105,7 +3105,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_FORTREE_CITY_KECLEON"
+              "value": "base:flag:visibility/fortree_city_kecleon"
             }
           ]
         }
@@ -3131,7 +3131,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

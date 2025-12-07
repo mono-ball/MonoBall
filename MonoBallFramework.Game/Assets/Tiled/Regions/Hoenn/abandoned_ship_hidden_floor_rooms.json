@@ -2291,7 +2291,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_ROOM_1_KEY",
-                "flag": "FLAG_HIDDEN_ITEM_ABANDONED_SHIP_RM_1_KEY"
+                "flag": "base:flag:hidden_item/abandoned_ship_rm_1_key"
               }
             }
           ]
@@ -2311,7 +2311,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_ROOM_2_KEY",
-                "flag": "FLAG_HIDDEN_ITEM_ABANDONED_SHIP_RM_2_KEY"
+                "flag": "base:flag:hidden_item/abandoned_ship_rm_2_key"
               }
             }
           ]
@@ -2331,7 +2331,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_ROOM_4_KEY",
-                "flag": "FLAG_HIDDEN_ITEM_ABANDONED_SHIP_RM_4_KEY"
+                "flag": "base:flag:hidden_item/abandoned_ship_rm_4_key"
               }
             }
           ]
@@ -2351,7 +2351,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_ROOM_6_KEY",
-                "flag": "FLAG_HIDDEN_ITEM_ABANDONED_SHIP_RM_6_KEY"
+                "flag": "base:flag:hidden_item/abandoned_ship_rm_6_key"
               }
             }
           ]
@@ -2544,7 +2544,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ABANDONED_SHIP_HIDDEN_FLOOR_ROOM_6_LUXURY_BALL"
+              "value": "base:flag:item/abandoned_ship_hidden_floor_room_6_luxury_ball"
             }
           ]
         },
@@ -2581,7 +2581,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ABANDONED_SHIP_HIDDEN_FLOOR_ROOM_2_SCANNER"
+              "value": "base:flag:item/abandoned_ship_hidden_floor_room_2_scanner"
             }
           ]
         },
@@ -2618,7 +2618,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ABANDONED_SHIP_HIDDEN_FLOOR_ROOM_1_TM_RAIN_DANCE"
+              "value": "base:flag:item/abandoned_ship_hidden_floor_room_1_tm_rain_dance"
             }
           ]
         },
@@ -2655,7 +2655,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ABANDONED_SHIP_HIDDEN_FLOOR_ROOM_3_WATER_STONE"
+              "value": "base:flag:item/abandoned_ship_hidden_floor_room_3_water_stone"
             }
           ]
         }
@@ -2681,7 +2681,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

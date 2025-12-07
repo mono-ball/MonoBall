@@ -1579,7 +1579,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_NUGGET",
-                "flag": "FLAG_HIDDEN_ITEM_FALLARBOR_TOWN_NUGGET"
+                "flag": "base:flag:hidden_item/fallarbor_town_nugget"
               }
             }
           ]
@@ -1749,7 +1749,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_FALLARBOR_AZURILL"
+              "value": "base:flag:visibility/fallarbor_azurill"
             }
           ]
         }
@@ -1775,7 +1775,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

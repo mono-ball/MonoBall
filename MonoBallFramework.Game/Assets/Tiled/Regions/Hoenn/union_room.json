@@ -671,7 +671,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_UNION_ROOM_PLAYER_4"
+              "value": "base:flag:visibility/union_room_player_4"
             }
           ]
         },
@@ -718,7 +718,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_UNION_ROOM_PLAYER_8"
+              "value": "base:flag:visibility/union_room_player_8"
             }
           ]
         },
@@ -765,7 +765,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_UNION_ROOM_PLAYER_7"
+              "value": "base:flag:visibility/union_room_player_7"
             }
           ]
         },
@@ -812,7 +812,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_UNION_ROOM_PLAYER_6"
+              "value": "base:flag:visibility/union_room_player_6"
             }
           ]
         },
@@ -859,7 +859,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_UNION_ROOM_PLAYER_5"
+              "value": "base:flag:visibility/union_room_player_5"
             }
           ]
         },
@@ -906,7 +906,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_UNION_ROOM_PLAYER_3"
+              "value": "base:flag:visibility/union_room_player_3"
             }
           ]
         },
@@ -953,7 +953,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_UNION_ROOM_PLAYER_2"
+              "value": "base:flag:visibility/union_room_player_2"
             }
           ]
         },
@@ -1000,7 +1000,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_UNION_ROOM_PLAYER_1"
+              "value": "base:flag:visibility/union_room_player_1"
             }
           ]
         }
@@ -1026,7 +1026,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

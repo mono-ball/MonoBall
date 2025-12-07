@@ -735,7 +735,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_VERDANTURF_TOWN_SCOTT"
+              "value": "base:flag:visibility/verdanturf_town_scott"
             }
           ]
         },
@@ -798,7 +798,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

@@ -10231,7 +10231,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_125_BIG_PEARL"
+              "value": "base:flag:item/route_125_big_pearl"
             }
           ]
         }
@@ -10257,7 +10257,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

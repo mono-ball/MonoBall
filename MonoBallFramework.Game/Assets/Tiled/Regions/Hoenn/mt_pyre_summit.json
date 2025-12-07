@@ -5872,7 +5872,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_ZINC",
-                "flag": "FLAG_HIDDEN_ITEM_MT_PYRE_SUMMIT_ZINC"
+                "flag": "base:flag:hidden_item/mt_pyre_summit_zinc"
               }
             }
           ]
@@ -5892,7 +5892,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_RARE_CANDY",
-                "flag": "FLAG_HIDDEN_ITEM_MT_PYRE_SUMMIT_RARE_CANDY"
+                "flag": "base:flag:hidden_item/mt_pyre_summit_rare_candy"
               }
             }
           ]
@@ -5976,14 +5976,9 @@
               "value": "up"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MT_PYRE_SUMMIT_ARCHIE"
+              "value": "base:flag:visibility/mt_pyre_summit_archie"
             }
           ]
         },
@@ -6062,7 +6057,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MT_PYRE_SUMMIT_TEAM_AQUA"
+              "value": "base:flag:visibility/mt_pyre_summit_team_aqua"
             },
             {
               "name": "trainerType",
@@ -6114,7 +6109,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MT_PYRE_SUMMIT_TEAM_AQUA"
+              "value": "base:flag:visibility/mt_pyre_summit_team_aqua"
             },
             {
               "name": "trainerType",
@@ -6166,7 +6161,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MT_PYRE_SUMMIT_TEAM_AQUA"
+              "value": "base:flag:visibility/mt_pyre_summit_team_aqua"
             },
             {
               "name": "trainerType",
@@ -6218,7 +6213,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MT_PYRE_SUMMIT_TEAM_AQUA"
+              "value": "base:flag:visibility/mt_pyre_summit_team_aqua"
             },
             {
               "name": "trainerType",
@@ -6263,14 +6258,9 @@
               "value": "up"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MT_PYRE_SUMMIT_MAXIE"
+              "value": "base:flag:visibility/mt_pyre_summit_maxie"
             }
           ]
         }
@@ -6296,7 +6286,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

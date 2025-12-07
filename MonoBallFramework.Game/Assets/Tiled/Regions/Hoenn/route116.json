@@ -6440,7 +6440,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_SUPER_POTION",
-                "flag": "FLAG_HIDDEN_ITEM_ROUTE_116_SUPER_POTION"
+                "flag": "base:flag:hidden_item/route_116_super_potion"
               }
             }
           ]
@@ -6460,7 +6460,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_BLACK_GLASSES",
-                "flag": "FLAG_HIDDEN_ITEM_ROUTE_116_BLACK_GLASSES"
+                "flag": "base:flag:hidden_item/route_116_black_glasses"
               }
             }
           ]
@@ -6630,7 +6630,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_11"
+              "value": "base:flag:temporary/11"
             }
           ]
         },
@@ -6667,7 +6667,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_12"
+              "value": "base:flag:temporary/12"
             }
           ]
         },
@@ -6746,7 +6746,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_116_ETHER"
+              "value": "base:flag:item/route_116_ether"
             }
           ]
         },
@@ -6783,7 +6783,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_116_REPEL"
+              "value": "base:flag:item/route_116_repel"
             }
           ]
         },
@@ -6894,7 +6894,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_116_MR_BRINEY"
+              "value": "base:flag:visibility/route_116_mr_briney"
             }
           ]
         },
@@ -6931,7 +6931,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_13"
+              "value": "base:flag:temporary/13"
             }
           ]
         },
@@ -7015,7 +7015,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_14"
+              "value": "base:flag:temporary/14"
             }
           ]
         },
@@ -7052,7 +7052,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_116_HP_UP"
+              "value": "base:flag:item/route_116_hp_up"
             }
           ]
         },
@@ -7230,7 +7230,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_116_DEVON_EMPLOYEE"
+              "value": "base:flag:visibility/route_116_devon_employee"
             }
           ]
         },
@@ -7267,7 +7267,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_116_X_SPECIAL"
+              "value": "base:flag:item/route_116_x_special"
             }
           ]
         },
@@ -7309,7 +7309,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_116_WANDAS_BOYFRIEND"
+              "value": "base:flag:visibility/route_116_wandas_boyfriend"
             }
           ]
         },
@@ -7346,7 +7346,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_116_DROPPED_GLASSES_MAN"
+              "value": "base:flag:visibility/route_116_dropped_glasses_man"
             }
           ]
         },
@@ -7477,7 +7477,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_116_POTION"
+              "value": "base:flag:item/route_116_potion"
             }
           ]
         },
@@ -7514,7 +7514,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_15"
+              "value": "base:flag:temporary/15"
             }
           ]
         },
@@ -7634,7 +7634,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

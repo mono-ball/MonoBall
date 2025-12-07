@@ -375,7 +375,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_FORTREE_CITY_HOUSE_4_WINGULL"
+              "value": "base:flag:visibility/fortree_city_house_4_wingull"
             }
           ]
         }
@@ -401,7 +401,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

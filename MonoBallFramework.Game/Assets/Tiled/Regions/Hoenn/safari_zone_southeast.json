@@ -4866,7 +4866,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_PP_UP",
-                "flag": "FLAG_HIDDEN_ITEM_SAFARI_ZONE_SOUTH_EAST_PP_UP"
+                "flag": "base:flag:hidden_item/safari_zone_south_east_pp_up"
               }
             }
           ]
@@ -4886,7 +4886,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_FULL_RESTORE",
-                "flag": "FLAG_HIDDEN_ITEM_SAFARI_ZONE_SOUTH_EAST_FULL_RESTORE"
+                "flag": "base:flag:hidden_item/safari_zone_south_east_full_restore"
               }
             }
           ]
@@ -5051,7 +5051,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_SAFARI_ZONE_SOUTH_EAST_BIG_PEARL"
+              "value": "base:flag:item/safari_zone_south_east_big_pearl"
             }
           ]
         },
@@ -5093,7 +5093,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_SAFARI_ZONE_SOUTH_EAST_EXPANSION"
+              "value": "base:flag:visibility/safari_zone_south_east_expansion"
             }
           ]
         }
@@ -5119,7 +5119,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

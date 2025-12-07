@@ -19484,7 +19484,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_127_ZINC"
+              "value": "base:flag:item/route_127_zinc"
             }
           ]
         },
@@ -19521,7 +19521,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_127_CARBOS"
+              "value": "base:flag:item/route_127_carbos"
             }
           ]
         },
@@ -19820,7 +19820,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_127_RARE_CANDY"
+              "value": "base:flag:item/route_127_rare_candy"
             }
           ]
         }
@@ -19846,7 +19846,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

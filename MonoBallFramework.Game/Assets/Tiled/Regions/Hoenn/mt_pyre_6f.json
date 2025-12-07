@@ -696,7 +696,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_MT_PYRE_6F_TM_SHADOW_BALL"
+              "value": "base:flag:item/mt_pyre_6f_tm_shadow_ball"
             }
           ]
         },
@@ -764,7 +764,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

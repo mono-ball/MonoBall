@@ -9783,7 +9783,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_HIDE_MIRAGE_ISLAND_BERRY_TREE"
+              "value": "base:flag:temporary/hide_mirage_island_berry_tree"
             }
           ]
         },
@@ -9856,7 +9856,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

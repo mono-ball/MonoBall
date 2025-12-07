@@ -1594,14 +1594,9 @@
               "value": true
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_101_BIRCH_ZIGZAGOON_BATTLE"
+              "value": "base:flag:visibility/route_101_birch_zigzagoon_battle"
             }
           ]
         },
@@ -1638,7 +1633,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_101_BIRCH_STARTERS_BAG"
+              "value": "base:flag:visibility/route_101_birch_starters_bag"
             }
           ]
         },
@@ -1673,14 +1668,9 @@
               "value": true
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_101_ZIGZAGOON"
+              "value": "base:flag:visibility/route_101_zigzagoon"
             }
           ]
         },
@@ -1717,7 +1707,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_101_BIRCH"
+              "value": "base:flag:visibility/route_101_birch"
             }
           ]
         },
@@ -1764,7 +1754,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_101_BOY"
+              "value": "base:flag:visibility/route_101_boy"
             }
           ]
         }
@@ -1790,7 +1780,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

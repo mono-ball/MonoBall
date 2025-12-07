@@ -19576,7 +19576,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_124_RED_SHARD"
+              "value": "base:flag:item/route_124_red_shard"
             }
           ]
         },
@@ -19613,7 +19613,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_124_BLUE_SHARD"
+              "value": "base:flag:item/route_124_blue_shard"
             }
           ]
         },
@@ -19650,7 +19650,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_124_YELLOW_SHARD"
+              "value": "base:flag:item/route_124_yellow_shard"
             }
           ]
         },
@@ -19859,7 +19859,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

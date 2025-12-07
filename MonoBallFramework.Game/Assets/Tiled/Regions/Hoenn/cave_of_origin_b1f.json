@@ -1209,7 +1209,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_CAVE_OF_ORIGIN_B1F_WALLACE"
+              "value": "base:flag:visibility/cave_of_origin_b1f_wallace"
             }
           ]
         }
@@ -1235,7 +1235,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

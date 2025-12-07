@@ -9825,7 +9825,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_133_BIG_PEARL"
+              "value": "base:flag:item/route_133_big_pearl"
             }
           ]
         },
@@ -9862,7 +9862,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_133_STAR_PIECE"
+              "value": "base:flag:item/route_133_star_piece"
             }
           ]
         },
@@ -10087,7 +10087,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_133_MAX_REVIVE"
+              "value": "base:flag:item/route_133_max_revive"
             }
           ]
         }
@@ -10113,7 +10113,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

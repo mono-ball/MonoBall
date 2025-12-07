@@ -2126,7 +2126,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_GRANITE_CAVE_1F_ESCAPE_ROPE"
+              "value": "base:flag:item/granite_cave_1f_escape_rope"
             }
           ]
         }
@@ -2152,7 +2152,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

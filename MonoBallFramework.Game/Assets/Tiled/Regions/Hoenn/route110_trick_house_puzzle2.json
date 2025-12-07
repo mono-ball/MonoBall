@@ -1454,7 +1454,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_TRICK_HOUSE_PUZZLE_2_WAVE_MAIL"
+              "value": "base:flag:item/trick_house_puzzle_2_wave_mail"
             }
           ]
         },
@@ -1491,7 +1491,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_TRICK_HOUSE_PUZZLE_2_HARBOR_MAIL"
+              "value": "base:flag:item/trick_house_puzzle_2_harbor_mail"
             }
           ]
         }
@@ -1517,7 +1517,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

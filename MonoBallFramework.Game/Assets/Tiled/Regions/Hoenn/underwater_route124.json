@@ -19266,7 +19266,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_CARBOS",
-                "flag": "FLAG_HIDDEN_ITEM_UNDERWATER_124_CARBOS"
+                "flag": "base:flag:hidden_item/underwater_124_carbos"
               }
             }
           ]
@@ -19286,7 +19286,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_GREEN_SHARD",
-                "flag": "FLAG_HIDDEN_ITEM_UNDERWATER_124_GREEN_SHARD"
+                "flag": "base:flag:hidden_item/underwater_124_green_shard"
               }
             }
           ]
@@ -19306,7 +19306,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_PEARL",
-                "flag": "FLAG_HIDDEN_ITEM_UNDERWATER_124_PEARL"
+                "flag": "base:flag:hidden_item/underwater_124_pearl"
               }
             }
           ]
@@ -19326,7 +19326,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_BIG_PEARL",
-                "flag": "FLAG_HIDDEN_ITEM_UNDERWATER_124_BIG_PEARL"
+                "flag": "base:flag:hidden_item/underwater_124_big_pearl"
               }
             }
           ]
@@ -19346,7 +19346,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_HEART_SCALE",
-                "flag": "FLAG_HIDDEN_ITEM_UNDERWATER_124_HEART_SCALE_1"
+                "flag": "base:flag:hidden_item/underwater_124_heart_scale_1"
               }
             }
           ]
@@ -19366,7 +19366,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_CALCIUM",
-                "flag": "FLAG_HIDDEN_ITEM_UNDERWATER_124_CALCIUM"
+                "flag": "base:flag:hidden_item/underwater_124_calcium"
               }
             }
           ]
@@ -19386,7 +19386,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_HEART_SCALE",
-                "flag": "FLAG_HIDDEN_ITEM_UNDERWATER_124_HEART_SCALE_2"
+                "flag": "base:flag:hidden_item/underwater_124_heart_scale_2"
               }
             }
           ]
@@ -19413,7 +19413,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

@@ -1418,7 +1418,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_SS_TIDAL_CORRIDOR_MR_BRINEY"
+              "value": "base:flag:visibility/ss_tidal_corridor_mr_briney"
             }
           ]
         },
@@ -1455,7 +1455,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_SS_TIDAL_CORRIDOR_MR_BRINEY"
+              "value": "base:flag:visibility/ss_tidal_corridor_mr_briney"
             }
           ]
         },
@@ -1490,14 +1490,9 @@
               "value": "left"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_SS_TIDAL_CORRIDOR_SCOTT"
+              "value": "base:flag:visibility/ss_tidal_corridor_scott"
             }
           ]
         }
@@ -1523,7 +1518,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

@@ -1021,7 +1021,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_SCORCHED_SLAB_TM_SUNNY_DAY"
+              "value": "base:flag:item/scorched_slab_tm_sunny_day"
             }
           ]
         }
@@ -1047,7 +1047,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

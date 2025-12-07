@@ -17192,7 +17192,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_CALCIUM",
-                "flag": "FLAG_HIDDEN_ITEM_ROUTE_119_CALCIUM"
+                "flag": "base:flag:hidden_item/route_119_calcium"
               }
             }
           ]
@@ -17212,7 +17212,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_ULTRA_BALL",
-                "flag": "FLAG_HIDDEN_ITEM_ROUTE_119_ULTRA_BALL"
+                "flag": "base:flag:hidden_item/route_119_ultra_ball"
               }
             }
           ]
@@ -17327,7 +17327,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_FULL_HEAL",
-                "flag": "FLAG_HIDDEN_ITEM_ROUTE_119_FULL_HEAL"
+                "flag": "base:flag:hidden_item/route_119_full_heal"
               }
             }
           ]
@@ -17347,7 +17347,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_MAX_ETHER",
-                "flag": "FLAG_HIDDEN_ITEM_ROUTE_119_MAX_ETHER"
+                "flag": "base:flag:hidden_item/route_119_max_ether"
               }
             }
           ]
@@ -18123,14 +18123,9 @@
               "value": "up"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_119_RIVAL"
+              "value": "base:flag:visibility/route_119_rival"
             }
           ]
         },
@@ -18167,7 +18162,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_119_SUPER_REPEL"
+              "value": "base:flag:item/route_119_super_repel"
             }
           ]
         },
@@ -18204,7 +18199,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_119_ZINC"
+              "value": "base:flag:item/route_119_zinc"
             }
           ]
         },
@@ -18241,7 +18236,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_119_ELIXIR_1"
+              "value": "base:flag:item/route_119_elixir_1"
             }
           ]
         },
@@ -18278,7 +18273,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_119_LEAF_STONE"
+              "value": "base:flag:item/route_119_leaf_stone"
             }
           ]
         },
@@ -18315,7 +18310,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_119_RARE_CANDY"
+              "value": "base:flag:item/route_119_rare_candy"
             }
           ]
         },
@@ -18352,7 +18347,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_119_HYPER_POTION_1"
+              "value": "base:flag:item/route_119_hyper_potion_1"
             }
           ]
         },
@@ -18394,7 +18389,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_119_TEAM_AQUA"
+              "value": "base:flag:visibility/route_119_team_aqua"
             }
           ]
         },
@@ -18436,7 +18431,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_119_TEAM_AQUA"
+              "value": "base:flag:visibility/route_119_team_aqua"
             }
           ]
         },
@@ -18471,14 +18466,9 @@
               "value": "up"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_119_RIVAL_ON_BIKE"
+              "value": "base:flag:visibility/route_119_rival_on_bike"
             }
           ]
         },
@@ -18742,7 +18732,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_119_HYPER_POTION_2"
+              "value": "base:flag:item/route_119_hyper_potion_2"
             }
           ]
         },
@@ -18868,7 +18858,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_119_KECLEON_1"
+              "value": "base:flag:visibility/route_119_kecleon_1"
             }
           ]
         },
@@ -18905,7 +18895,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_119_KECLEON_2"
+              "value": "base:flag:visibility/route_119_kecleon_2"
             }
           ]
         },
@@ -19125,7 +19115,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_119_NUGGET"
+              "value": "base:flag:item/route_119_nugget"
             }
           ]
         },
@@ -19162,7 +19152,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_119_ELIXIR_2"
+              "value": "base:flag:item/route_119_elixir_2"
             }
           ]
         },
@@ -19197,14 +19187,9 @@
               "value": "down"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_119_SCOTT"
+              "value": "base:flag:visibility/route_119_scott"
             }
           ]
         }
@@ -19230,7 +19215,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

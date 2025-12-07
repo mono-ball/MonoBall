@@ -848,7 +848,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MOSSDEEP_CITY_SPACE_CENTER_1F_TEAM_MAGMA"
+              "value": "base:flag:visibility/mossdeep_city_space_center_1f_team_magma"
             },
             {
               "name": "trainerType",
@@ -900,7 +900,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MOSSDEEP_CITY_SPACE_CENTER_1F_TEAM_MAGMA"
+              "value": "base:flag:visibility/mossdeep_city_space_center_1f_team_magma"
             },
             {
               "name": "trainerType",
@@ -952,7 +952,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MOSSDEEP_CITY_SPACE_CENTER_1F_TEAM_MAGMA"
+              "value": "base:flag:visibility/mossdeep_city_space_center_1f_team_magma"
             },
             {
               "name": "trainerType",
@@ -1004,7 +1004,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MOSSDEEP_CITY_SPACE_CENTER_1F_TEAM_MAGMA"
+              "value": "base:flag:visibility/mossdeep_city_space_center_1f_team_magma"
             },
             {
               "name": "trainerType",
@@ -1046,7 +1046,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MOSSDEEP_CITY_SPACE_CENTER_MAGMA_NOTE"
+              "value": "base:flag:visibility/mossdeep_city_space_center_magma_note"
             }
           ]
         },
@@ -1088,7 +1088,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MOSSDEEP_CITY_SPACE_CENTER_1F_STEVEN"
+              "value": "base:flag:visibility/mossdeep_city_space_center_1f_steven"
             }
           ]
         }
@@ -1114,7 +1114,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

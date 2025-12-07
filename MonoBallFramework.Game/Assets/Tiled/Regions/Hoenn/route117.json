@@ -3775,7 +3775,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_REPEL",
-                "flag": "FLAG_HIDDEN_ITEM_ROUTE_117_REPEL"
+                "flag": "base:flag:hidden_item/route_117_repel"
               }
             }
           ]
@@ -3926,11 +3926,6 @@
               "name": "elevation",
               "type": "int",
               "value": 3
-            },
-            {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
             }
           ]
         },
@@ -3958,11 +3953,6 @@
               "name": "elevation",
               "type": "int",
               "value": 3
-            },
-            {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
             }
           ]
         },
@@ -3990,11 +3980,6 @@
               "name": "elevation",
               "type": "int",
               "value": 3
-            },
-            {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
             }
           ]
         },
@@ -4022,11 +4007,6 @@
               "name": "elevation",
               "type": "int",
               "value": 3
-            },
-            {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
             }
           ]
         },
@@ -4310,7 +4290,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_117_GREAT_BALL"
+              "value": "base:flag:item/route_117_great_ball"
             }
           ]
         },
@@ -4347,7 +4327,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_11"
+              "value": "base:flag:temporary/11"
             }
           ]
         },
@@ -4384,7 +4364,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_117_REVIVE"
+              "value": "base:flag:item/route_117_revive"
             }
           ]
         },
@@ -4781,7 +4761,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

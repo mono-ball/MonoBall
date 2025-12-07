@@ -18117,7 +18117,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_STARDUST",
-                "flag": "FLAG_HIDDEN_ITEM_ROUTE_111_STARDUST"
+                "flag": "base:flag:hidden_item/route_111_stardust"
               }
             }
           ]
@@ -18218,7 +18218,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_PROTEIN",
-                "flag": "FLAG_HIDDEN_ITEM_ROUTE_111_PROTEIN"
+                "flag": "base:flag:hidden_item/route_111_protein"
               }
             }
           ]
@@ -18238,7 +18238,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_RARE_CANDY",
-                "flag": "FLAG_HIDDEN_ITEM_ROUTE_111_RARE_CANDY"
+                "flag": "base:flag:hidden_item/route_111_rare_candy"
               }
             }
           ]
@@ -18316,7 +18316,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_111_VICTOR_WINSTRATE"
+              "value": "base:flag:visibility/route_111_victor_winstrate"
             }
           ]
         },
@@ -18351,14 +18351,9 @@
               "value": "down"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_111_VICTORIA_WINSTRATE"
+              "value": "base:flag:visibility/route_111_victoria_winstrate"
             }
           ]
         },
@@ -18393,14 +18388,9 @@
               "value": "down"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_111_VIVI_WINSTRATE"
+              "value": "base:flag:visibility/route_111_vivi_winstrate"
             }
           ]
         },
@@ -18435,14 +18425,9 @@
               "value": "down"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_111_VICKY_WINSTRATE"
+              "value": "base:flag:visibility/route_111_vicky_winstrate"
             }
           ]
         },
@@ -18830,7 +18815,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_111_GABBY_AND_TY_1"
+              "value": "base:flag:visibility/route_111_gabby_and_ty_1"
             }
           ]
         },
@@ -18872,7 +18857,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_111_GABBY_AND_TY_1"
+              "value": "base:flag:visibility/route_111_gabby_and_ty_1"
             }
           ]
         },
@@ -18909,7 +18894,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_11"
+              "value": "base:flag:temporary/11"
             }
           ]
         },
@@ -18946,7 +18931,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_12"
+              "value": "base:flag:temporary/12"
             }
           ]
         },
@@ -19025,7 +19010,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_111_TM_SANDSTORM"
+              "value": "base:flag:item/route_111_tm_sandstorm"
             }
           ]
         },
@@ -19141,7 +19126,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_111_GABBY_AND_TY_2"
+              "value": "base:flag:visibility/route_111_gabby_and_ty_2"
             }
           ]
         },
@@ -19183,7 +19168,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_111_GABBY_AND_TY_2"
+              "value": "base:flag:visibility/route_111_gabby_and_ty_2"
             }
           ]
         },
@@ -19225,7 +19210,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_111_GABBY_AND_TY_3"
+              "value": "base:flag:visibility/route_111_gabby_and_ty_3"
             }
           ]
         },
@@ -19267,7 +19252,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_111_GABBY_AND_TY_3"
+              "value": "base:flag:visibility/route_111_gabby_and_ty_3"
             }
           ]
         },
@@ -19304,7 +19289,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_111_STARDUST"
+              "value": "base:flag:item/route_111_stardust"
             }
           ]
         },
@@ -19341,7 +19326,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_111_HP_UP"
+              "value": "base:flag:item/route_111_hp_up"
             }
           ]
         },
@@ -19378,7 +19363,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_13"
+              "value": "base:flag:temporary/13"
             }
           ]
         },
@@ -19655,7 +19640,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_111_SECRET_POWER_MAN"
+              "value": "base:flag:visibility/route_111_secret_power_man"
             }
           ]
         },
@@ -20063,7 +20048,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_111_ELIXIR"
+              "value": "base:flag:item/route_111_elixir"
             }
           ]
         },
@@ -20135,14 +20120,9 @@
               "value": "down"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_111_DESERT_FOSSIL"
+              "value": "base:flag:visibility/route_111_desert_fossil"
             }
           ]
         },
@@ -20177,14 +20157,9 @@
               "value": "down"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_111_PLAYER_DESCENT"
+              "value": "base:flag:visibility/route_111_player_descent"
             }
           ]
         },
@@ -20226,7 +20201,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_111_ROCK_SMASH_TIP_GUY"
+              "value": "base:flag:visibility/route_111_rock_smash_tip_guy"
             }
           ]
         }
@@ -20252,7 +20227,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

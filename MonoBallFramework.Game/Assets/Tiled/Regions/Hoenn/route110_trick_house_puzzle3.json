@@ -1454,7 +1454,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_TRICK_HOUSE_PUZZLE_3_WOOD_MAIL"
+              "value": "base:flag:item/trick_house_puzzle_3_wood_mail"
             }
           ]
         },
@@ -1491,7 +1491,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_TRICK_HOUSE_PUZZLE_3_SHADOW_MAIL"
+              "value": "base:flag:item/trick_house_puzzle_3_shadow_mail"
             }
           ]
         },
@@ -1528,7 +1528,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_15"
+              "value": "base:flag:temporary/15"
             }
           ]
         },
@@ -1565,7 +1565,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_16"
+              "value": "base:flag:temporary/16"
             }
           ]
         }
@@ -1591,7 +1591,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

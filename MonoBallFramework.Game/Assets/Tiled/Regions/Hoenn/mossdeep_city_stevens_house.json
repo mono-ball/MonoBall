@@ -523,7 +523,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MOSSDEEP_CITY_STEVENS_HOUSE_STEVEN"
+              "value": "base:flag:visibility/mossdeep_city_stevens_house_steven"
             }
           ]
         },
@@ -560,7 +560,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MOSSDEEP_CITY_STEVENS_HOUSE_BELDUM_POKEBALL"
+              "value": "base:flag:visibility/mossdeep_city_stevens_house_beldum_pokeball"
             }
           ]
         },
@@ -597,7 +597,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MOSSDEEP_CITY_STEVENS_HOUSE_INVISIBLE_NINJA_BOY"
+              "value": "base:flag:visibility/mossdeep_city_stevens_house_invisible_ninja_boy"
             }
           ]
         }
@@ -623,7 +623,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

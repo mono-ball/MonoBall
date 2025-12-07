@@ -3363,7 +3363,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_102_POTION"
+              "value": "base:flag:item/route_102_potion"
             }
           ]
         },
@@ -3510,7 +3510,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

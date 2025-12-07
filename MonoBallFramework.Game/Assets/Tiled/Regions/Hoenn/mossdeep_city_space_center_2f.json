@@ -722,7 +722,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MOSSDEEP_CITY_SPACE_CENTER_2F_STEVEN"
+              "value": "base:flag:visibility/mossdeep_city_space_center_2f_steven"
             }
           ]
         },
@@ -764,7 +764,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MOSSDEEP_CITY_SPACE_CENTER_2F_TEAM_MAGMA"
+              "value": "base:flag:visibility/mossdeep_city_space_center_2f_team_magma"
             }
           ]
         },
@@ -806,7 +806,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MOSSDEEP_CITY_SPACE_CENTER_2F_TEAM_MAGMA"
+              "value": "base:flag:visibility/mossdeep_city_space_center_2f_team_magma"
             }
           ]
         },
@@ -848,7 +848,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MOSSDEEP_CITY_SPACE_CENTER_2F_TEAM_MAGMA"
+              "value": "base:flag:visibility/mossdeep_city_space_center_2f_team_magma"
             }
           ]
         },
@@ -890,7 +890,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MOSSDEEP_CITY_SPACE_CENTER_2F_TEAM_MAGMA"
+              "value": "base:flag:visibility/mossdeep_city_space_center_2f_team_magma"
             }
           ]
         },
@@ -932,7 +932,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MOSSDEEP_CITY_SPACE_CENTER_2F_TEAM_MAGMA"
+              "value": "base:flag:visibility/mossdeep_city_space_center_2f_team_magma"
             }
           ]
         }
@@ -958,7 +958,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

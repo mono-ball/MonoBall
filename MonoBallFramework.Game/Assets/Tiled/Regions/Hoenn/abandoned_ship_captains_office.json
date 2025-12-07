@@ -373,7 +373,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ABANDONED_SHIP_CAPTAINS_OFFICE_STORAGE_KEY"
+              "value": "base:flag:item/abandoned_ship_captains_office_storage_key"
             }
           ]
         }
@@ -399,7 +399,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

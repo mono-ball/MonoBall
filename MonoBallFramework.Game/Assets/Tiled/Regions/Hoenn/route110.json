@@ -12756,7 +12756,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_REVIVE",
-                "flag": "FLAG_HIDDEN_ITEM_ROUTE_110_REVIVE"
+                "flag": "base:flag:hidden_item/route_110_revive"
               }
             }
           ]
@@ -12776,7 +12776,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_GREAT_BALL",
-                "flag": "FLAG_HIDDEN_ITEM_ROUTE_110_GREAT_BALL"
+                "flag": "base:flag:hidden_item/route_110_great_ball"
               }
             }
           ]
@@ -12796,7 +12796,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_POKE_BALL",
-                "flag": "FLAG_HIDDEN_ITEM_ROUTE_110_POKE_BALL"
+                "flag": "base:flag:hidden_item/route_110_poke_ball"
               }
             }
           ]
@@ -12816,7 +12816,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_FULL_HEAL",
-                "flag": "FLAG_HIDDEN_ITEM_ROUTE_110_FULL_HEAL"
+                "flag": "base:flag:hidden_item/route_110_full_heal"
               }
             }
           ]
@@ -13655,7 +13655,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_110_DIRE_HIT"
+              "value": "base:flag:item/route_110_dire_hit"
             }
           ]
         },
@@ -13692,7 +13692,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_110_RARE_CANDY"
+              "value": "base:flag:item/route_110_rare_candy"
             }
           ]
         },
@@ -13771,7 +13771,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_110_TEAM_AQUA"
+              "value": "base:flag:visibility/route_110_team_aqua"
             }
           ]
         },
@@ -13813,7 +13813,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_110_TEAM_AQUA"
+              "value": "base:flag:visibility/route_110_team_aqua"
             }
           ]
         },
@@ -13855,7 +13855,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_110_TEAM_AQUA"
+              "value": "base:flag:visibility/route_110_team_aqua"
             }
           ]
         },
@@ -13897,7 +13897,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_110_TEAM_AQUA"
+              "value": "base:flag:visibility/route_110_team_aqua"
             }
           ]
         },
@@ -13932,14 +13932,9 @@
               "value": "down"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_110_TEAM_AQUA"
+              "value": "base:flag:visibility/route_110_team_aqua"
             }
           ]
         },
@@ -14021,14 +14016,9 @@
               "value": "left,right"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_110_RIVAL"
+              "value": "base:flag:visibility/route_110_rival"
             }
           ]
         },
@@ -14063,14 +14053,9 @@
               "value": "down"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_110_RIVAL_ON_BIKE"
+              "value": "base:flag:visibility/route_110_rival_on_bike"
             }
           ]
         },
@@ -14337,7 +14322,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_110_ELIXIR"
+              "value": "base:flag:item/route_110_elixir"
             }
           ]
         },
@@ -14367,14 +14352,9 @@
               "value": 3
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_110_BIRCH"
+              "value": "base:flag:visibility/route_110_birch"
             }
           ]
         }
@@ -14400,7 +14380,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

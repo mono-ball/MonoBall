@@ -2911,7 +2911,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_RUSTURF_TUNNEL_WANDAS_BOYFRIEND"
+              "value": "base:flag:visibility/rusturf_tunnel_wandas_boyfriend"
             }
           ]
         },
@@ -2948,7 +2948,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_RUSTURF_TUNNEL_ROCK_1"
+              "value": "base:flag:visibility/rusturf_tunnel_rock_1"
             }
           ]
         },
@@ -2985,7 +2985,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_RUSTURF_TUNNEL_POKE_BALL"
+              "value": "base:flag:item/rusturf_tunnel_poke_ball"
             }
           ]
         },
@@ -3022,7 +3022,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_RUSTURF_TUNNEL_MAX_ETHER"
+              "value": "base:flag:item/rusturf_tunnel_max_ether"
             }
           ]
         },
@@ -3057,14 +3057,9 @@
               "value": "right"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_RUSTURF_TUNNEL_BRINEY"
+              "value": "base:flag:visibility/rusturf_tunnel_briney"
             }
           ]
         },
@@ -3106,7 +3101,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_RUSTURF_TUNNEL_AQUA_GRUNT"
+              "value": "base:flag:visibility/rusturf_tunnel_aqua_grunt"
             }
           ]
         },
@@ -3148,7 +3143,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_RUSTURF_TUNNEL_PEEKO"
+              "value": "base:flag:visibility/rusturf_tunnel_peeko"
             }
           ]
         },
@@ -3190,7 +3185,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_RUSTURF_TUNNEL_ROCK_2"
+              "value": "base:flag:visibility/rusturf_tunnel_rock_2"
             }
           ]
         },
@@ -3279,7 +3274,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_RUSTURF_TUNNEL_WANDA"
+              "value": "base:flag:visibility/rusturf_tunnel_wanda"
             }
           ]
         }
@@ -3305,7 +3300,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

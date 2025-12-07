@@ -5161,7 +5161,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_IRON",
-                "flag": "FLAG_HIDDEN_ITEM_ROUTE_118_IRON"
+                "flag": "base:flag:hidden_item/route_118_iron"
               }
             }
           ]
@@ -5181,7 +5181,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_HEART_SCALE",
-                "flag": "FLAG_HIDDEN_ITEM_ROUTE_118_HEART_SCALE"
+                "flag": "base:flag:hidden_item/route_118_heart_scale"
               }
             }
           ]
@@ -5393,7 +5393,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_118_GABBY_AND_TY_1"
+              "value": "base:flag:visibility/route_118_gabby_and_ty_1"
             }
           ]
         },
@@ -5435,7 +5435,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_118_GABBY_AND_TY_1"
+              "value": "base:flag:visibility/route_118_gabby_and_ty_1"
             }
           ]
         },
@@ -5519,7 +5519,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_118_GABBY_AND_TY_2"
+              "value": "base:flag:visibility/route_118_gabby_and_ty_2"
             }
           ]
         },
@@ -5561,7 +5561,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_118_GABBY_AND_TY_2"
+              "value": "base:flag:visibility/route_118_gabby_and_ty_2"
             }
           ]
         },
@@ -5603,7 +5603,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_118_GABBY_AND_TY_3"
+              "value": "base:flag:visibility/route_118_gabby_and_ty_3"
             }
           ]
         },
@@ -5645,7 +5645,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_118_GABBY_AND_TY_3"
+              "value": "base:flag:visibility/route_118_gabby_and_ty_3"
             }
           ]
         },
@@ -5682,7 +5682,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_11"
+              "value": "base:flag:temporary/11"
             }
           ]
         },
@@ -5979,14 +5979,9 @@
               "value": "down"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_118_STEVEN"
+              "value": "base:flag:visibility/route_118_steven"
             }
           ]
         },
@@ -6023,7 +6018,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_118_HYPER_POTION"
+              "value": "base:flag:item/route_118_hyper_potion"
             }
           ]
         },
@@ -6096,7 +6091,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

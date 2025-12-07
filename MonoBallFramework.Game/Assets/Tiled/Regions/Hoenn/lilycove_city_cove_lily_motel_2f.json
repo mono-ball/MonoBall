@@ -450,7 +450,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_LILYCOVE_MOTEL_GAME_DESIGNERS"
+              "value": "base:flag:visibility/lilycove_motel_game_designers"
             }
           ]
         },
@@ -492,7 +492,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_LILYCOVE_MOTEL_GAME_DESIGNERS"
+              "value": "base:flag:visibility/lilycove_motel_game_designers"
             }
           ]
         },
@@ -534,7 +534,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_LILYCOVE_MOTEL_GAME_DESIGNERS"
+              "value": "base:flag:visibility/lilycove_motel_game_designers"
             }
           ]
         },
@@ -576,7 +576,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_LILYCOVE_MOTEL_GAME_DESIGNERS"
+              "value": "base:flag:visibility/lilycove_motel_game_designers"
             }
           ]
         },
@@ -618,7 +618,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_LILYCOVE_MOTEL_GAME_DESIGNERS"
+              "value": "base:flag:visibility/lilycove_motel_game_designers"
             }
           ]
         },
@@ -660,7 +660,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_LILYCOVE_MOTEL_GAME_DESIGNERS"
+              "value": "base:flag:visibility/lilycove_motel_game_designers"
             }
           ]
         },
@@ -702,7 +702,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_LILYCOVE_MOTEL_SCOTT"
+              "value": "base:flag:visibility/lilycove_motel_scott"
             }
           ]
         }
@@ -728,7 +728,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

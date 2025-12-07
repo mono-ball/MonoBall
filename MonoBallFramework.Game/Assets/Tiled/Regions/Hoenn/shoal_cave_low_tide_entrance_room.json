@@ -3874,7 +3874,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_SHOAL_CAVE_ENTRANCE_BIG_PEARL"
+              "value": "base:flag:item/shoal_cave_entrance_big_pearl"
             }
           ]
         },
@@ -3937,7 +3937,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

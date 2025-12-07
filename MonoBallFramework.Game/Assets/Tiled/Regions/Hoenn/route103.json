@@ -5478,7 +5478,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_103_RIVAL"
+              "value": "base:flag:visibility/route_103_rival"
             }
           ]
         },
@@ -5866,7 +5866,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_103_BIRCH"
+              "value": "base:flag:visibility/route_103_birch"
             }
           ]
         },
@@ -5950,7 +5950,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_103_GUARD_SPEC"
+              "value": "base:flag:item/route_103_guard_spec"
             }
           ]
         },
@@ -5987,7 +5987,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_12"
+              "value": "base:flag:temporary/12"
             }
           ]
         },
@@ -6024,7 +6024,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_13"
+              "value": "base:flag:temporary/13"
             }
           ]
         },
@@ -6249,7 +6249,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_103_PP_UP"
+              "value": "base:flag:item/route_103_pp_up"
             }
           ]
         }
@@ -6275,7 +6275,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

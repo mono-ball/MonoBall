@@ -5903,7 +5903,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MT_CHIMNEY_TEAM_AQUA"
+              "value": "base:flag:visibility/mt_chimney_team_aqua"
             }
           ]
         },
@@ -5945,7 +5945,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MT_CHIMNEY_TEAM_MAGMA"
+              "value": "base:flag:visibility/mt_chimney_team_magma"
             }
           ]
         },
@@ -5987,7 +5987,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MT_CHIMNEY_TEAM_MAGMA"
+              "value": "base:flag:visibility/mt_chimney_team_magma"
             },
             {
               "name": "trainerType",
@@ -6039,7 +6039,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MT_CHIMNEY_TEAM_MAGMA"
+              "value": "base:flag:visibility/mt_chimney_team_magma"
             }
           ]
         },
@@ -6081,7 +6081,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MT_CHIMNEY_TEAM_MAGMA"
+              "value": "base:flag:visibility/mt_chimney_team_magma"
             }
           ]
         },
@@ -6123,7 +6123,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MT_CHIMNEY_TEAM_AQUA"
+              "value": "base:flag:visibility/mt_chimney_team_aqua"
             }
           ]
         },
@@ -6165,7 +6165,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MT_CHIMNEY_TEAM_AQUA"
+              "value": "base:flag:visibility/mt_chimney_team_aqua"
             }
           ]
         },
@@ -6207,7 +6207,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MT_CHIMNEY_TEAM_AQUA"
+              "value": "base:flag:visibility/mt_chimney_team_aqua"
             }
           ]
         },
@@ -6249,7 +6249,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MT_CHIMNEY_LAVA_COOKIE_LADY"
+              "value": "base:flag:visibility/mt_chimney_lava_cookie_lady"
             }
           ]
         },
@@ -6291,7 +6291,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MT_CHIMNEY_TEAM_MAGMA"
+              "value": "base:flag:visibility/mt_chimney_team_magma"
             }
           ]
         },
@@ -6333,7 +6333,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MT_CHIMNEY_TEAM_AQUA"
+              "value": "base:flag:visibility/mt_chimney_team_aqua"
             }
           ]
         },
@@ -6370,7 +6370,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MT_CHIMNEY_TEAM_MAGMA"
+              "value": "base:flag:visibility/mt_chimney_team_magma"
             }
           ]
         },
@@ -6412,7 +6412,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MT_CHIMNEY_TEAM_MAGMA"
+              "value": "base:flag:visibility/mt_chimney_team_magma"
             }
           ]
         },
@@ -6449,7 +6449,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MT_CHIMNEY_TEAM_MAGMA"
+              "value": "base:flag:visibility/mt_chimney_team_magma"
             }
           ]
         },
@@ -6486,7 +6486,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MT_CHIMNEY_TEAM_MAGMA"
+              "value": "base:flag:visibility/mt_chimney_team_magma"
             }
           ]
         },
@@ -6528,7 +6528,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MT_CHIMNEY_TEAM_MAGMA"
+              "value": "base:flag:visibility/mt_chimney_team_magma"
             }
           ]
         },
@@ -6570,7 +6570,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MT_CHIMNEY_TEAM_MAGMA"
+              "value": "base:flag:visibility/mt_chimney_team_magma"
             }
           ]
         },
@@ -6607,7 +6607,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MT_CHIMNEY_TEAM_AQUA"
+              "value": "base:flag:visibility/mt_chimney_team_aqua"
             }
           ]
         },
@@ -6644,7 +6644,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MT_CHIMNEY_TEAM_MAGMA"
+              "value": "base:flag:visibility/mt_chimney_team_magma"
             }
           ]
         },
@@ -6681,7 +6681,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MT_CHIMNEY_TEAM_AQUA"
+              "value": "base:flag:visibility/mt_chimney_team_aqua"
             }
           ]
         },
@@ -6718,7 +6718,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MT_CHIMNEY_TEAM_MAGMA"
+              "value": "base:flag:visibility/mt_chimney_team_magma"
             }
           ]
         },
@@ -6760,7 +6760,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MT_CHIMNEY_TEAM_MAGMA"
+              "value": "base:flag:visibility/mt_chimney_team_magma"
             },
             {
               "name": "trainerType",
@@ -6807,7 +6807,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MT_CHIMNEY_TEAM_AQUA"
+              "value": "base:flag:visibility/mt_chimney_team_aqua"
             }
           ]
         },
@@ -6844,7 +6844,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MT_CHIMNEY_TEAM_MAGMA"
+              "value": "base:flag:visibility/mt_chimney_team_magma"
             }
           ]
         },
@@ -6886,7 +6886,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MT_CHIMNEY_TRAINERS"
+              "value": "base:flag:visibility/mt_chimney_trainers"
             },
             {
               "name": "trainerType",
@@ -6938,7 +6938,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MT_CHIMNEY_TRAINERS"
+              "value": "base:flag:visibility/mt_chimney_trainers"
             },
             {
               "name": "trainerType",
@@ -6990,7 +6990,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MT_CHIMNEY_TRAINERS"
+              "value": "base:flag:visibility/mt_chimney_trainers"
             },
             {
               "name": "trainerType",
@@ -7042,7 +7042,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MT_CHIMNEY_TRAINERS"
+              "value": "base:flag:visibility/mt_chimney_trainers"
             },
             {
               "name": "trainerType",
@@ -7094,7 +7094,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MT_CHIMNEY_TEAM_MAGMA"
+              "value": "base:flag:visibility/mt_chimney_team_magma"
             },
             {
               "name": "trainerType",
@@ -7146,7 +7146,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MT_CHIMNEY_TRAINERS"
+              "value": "base:flag:visibility/mt_chimney_trainers"
             },
             {
               "name": "trainerType",
@@ -7182,7 +7182,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

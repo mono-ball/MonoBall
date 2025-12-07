@@ -4488,7 +4488,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_FULL_HEAL",
-                "flag": "FLAG_HIDDEN_ITEM_JAGGED_PASS_FULL_HEAL"
+                "flag": "base:flag:hidden_item/jagged_pass_full_heal"
               }
             }
           ]
@@ -4508,7 +4508,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_GREAT_BALL",
-                "flag": "FLAG_HIDDEN_ITEM_JAGGED_PASS_GREAT_BALL"
+                "flag": "base:flag:hidden_item/jagged_pass_great_ball"
               }
             }
           ]
@@ -4651,7 +4651,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_JAGGED_PASS_BURN_HEAL"
+              "value": "base:flag:item/jagged_pass_burn_heal"
             }
           ]
         },
@@ -4740,7 +4740,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_JAGGED_PASS_MAGMA_GUARD"
+              "value": "base:flag:visibility/jagged_pass_magma_guard"
             }
           ]
         },
@@ -4860,7 +4860,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

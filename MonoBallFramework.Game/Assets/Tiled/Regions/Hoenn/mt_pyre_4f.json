@@ -800,7 +800,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_MT_PYRE_4F_SEA_INCENSE"
+              "value": "base:flag:item/mt_pyre_4f_sea_incense"
             }
           ]
         }
@@ -826,7 +826,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

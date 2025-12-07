@@ -1244,7 +1244,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_SLATEPORT_CITY_STERNS_SHIPYARD_MR_BRINEY"
+              "value": "base:flag:visibility/slateport_city_sterns_shipyard_mr_briney"
             }
           ]
         }
@@ -1270,7 +1270,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

@@ -735,7 +735,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_FALLARBOR_TOWN_BATTLE_TENT_SCOTT"
+              "value": "base:flag:visibility/fallarbor_town_battle_tent_scott"
             }
           ]
         }
@@ -761,7 +761,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

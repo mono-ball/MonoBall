@@ -272,11 +272,6 @@
               "name": "direction",
               "type": "string",
               "value": "down"
-            },
-            {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
             }
           ]
         },
@@ -304,11 +299,6 @@
               "name": "elevation",
               "type": "int",
               "value": 3
-            },
-            {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
             }
           ]
         },
@@ -336,11 +326,6 @@
               "name": "elevation",
               "type": "int",
               "value": 3
-            },
-            {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
             }
           ]
         },
@@ -368,11 +353,6 @@
               "name": "elevation",
               "type": "int",
               "value": 3
-            },
-            {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
             }
           ]
         },
@@ -400,11 +380,6 @@
               "name": "elevation",
               "type": "int",
               "value": 3
-            },
-            {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
             }
           ]
         },
@@ -432,11 +407,6 @@
               "name": "elevation",
               "type": "int",
               "value": 3
-            },
-            {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
             }
           ]
         },
@@ -464,11 +434,6 @@
               "name": "elevation",
               "type": "int",
               "value": 3
-            },
-            {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
             }
           ]
         },
@@ -496,11 +461,6 @@
               "name": "elevation",
               "type": "int",
               "value": 0
-            },
-            {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
             }
           ]
         },
@@ -528,11 +488,6 @@
               "name": "elevation",
               "type": "int",
               "value": 3
-            },
-            {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
             }
           ]
         },
@@ -560,11 +515,6 @@
               "name": "elevation",
               "type": "int",
               "value": 3
-            },
-            {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
             }
           ]
         },
@@ -592,11 +542,6 @@
               "name": "elevation",
               "type": "int",
               "value": 0
-            },
-            {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
             }
           ]
         },
@@ -624,11 +569,6 @@
               "name": "elevation",
               "type": "int",
               "value": 0
-            },
-            {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
             }
           ]
         },
@@ -656,11 +596,6 @@
               "name": "elevation",
               "type": "int",
               "value": 0
-            },
-            {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
             }
           ]
         },
@@ -688,11 +623,6 @@
               "name": "elevation",
               "type": "int",
               "value": 0
-            },
-            {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
             }
           ]
         },
@@ -720,11 +650,6 @@
               "name": "elevation",
               "type": "int",
               "value": 0
-            },
-            {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
             }
           ]
         },
@@ -752,11 +677,6 @@
               "name": "elevation",
               "type": "int",
               "value": 0
-            },
-            {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
             }
           ]
         }
@@ -782,7 +702,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

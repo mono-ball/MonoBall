@@ -3703,7 +3703,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_RARE_CANDY",
-                "flag": "FLAG_HIDDEN_ITEM_ROUTE_108_RARE_CANDY"
+                "flag": "base:flag:hidden_item/route_108_rare_candy"
               }
             }
           ]
@@ -4029,7 +4029,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_108_STAR_PIECE"
+              "value": "base:flag:item/route_108_star_piece"
             }
           ]
         }
@@ -4055,7 +4055,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

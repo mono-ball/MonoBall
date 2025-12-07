@@ -4903,7 +4903,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_POKE_BALL",
-                "flag": "FLAG_HIDDEN_ITEM_ROUTE_106_POKE_BALL"
+                "flag": "base:flag:hidden_item/route_106_poke_ball"
               }
             }
           ]
@@ -4923,7 +4923,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_STARDUST",
-                "flag": "FLAG_HIDDEN_ITEM_ROUTE_106_STARDUST"
+                "flag": "base:flag:hidden_item/route_106_stardust"
               }
             }
           ]
@@ -4943,7 +4943,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_HEART_SCALE",
-                "flag": "FLAG_HIDDEN_ITEM_ROUTE_106_HEART_SCALE"
+                "flag": "base:flag:hidden_item/route_106_heart_scale"
               }
             }
           ]
@@ -5194,7 +5194,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_106_PROTEIN"
+              "value": "base:flag:item/route_106_protein"
             }
           ]
         }
@@ -5220,7 +5220,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

@@ -4459,7 +4459,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_ELIXIR",
-                "flag": "FLAG_HIDDEN_ITEM_VICTORY_ROAD_B2F_ELIXIR"
+                "flag": "base:flag:hidden_item/victory_road_b2f_elixir"
               }
             }
           ]
@@ -4479,7 +4479,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_MAX_REPEL",
-                "flag": "FLAG_HIDDEN_ITEM_VICTORY_ROAD_B2F_MAX_REPEL"
+                "flag": "base:flag:hidden_item/victory_road_b2f_max_repel"
               }
             }
           ]
@@ -4716,7 +4716,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_VICTORY_ROAD_B2F_FULL_HEAL"
+              "value": "base:flag:item/victory_road_b2f_full_heal"
             }
           ]
         },
@@ -4836,7 +4836,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

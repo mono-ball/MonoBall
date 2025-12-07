@@ -1339,7 +1339,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_TRICK_HOUSE_PUZZLE_6_GLITTER_MAIL"
+              "value": "base:flag:item/trick_house_puzzle_6_glitter_mail"
             }
           ]
         }
@@ -1365,7 +1365,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

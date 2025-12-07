@@ -3039,41 +3039,6 @@
     },
     {
       "id": 5,
-      "name": "Interactions",
-      "type": "objectgroup",
-      "visible": true,
-      "opacity": 1,
-      "x": 0,
-      "y": 0,
-      "objects": [
-        {
-          "id": 5,
-          "name": "Sign: 0x0",
-          "type": "sign_event",
-          "x": 144,
-          "y": 928,
-          "width": 16,
-          "height": 16,
-          "properties": [
-            {
-              "name": "sign",
-              "propertytype": "SignEvent",
-              "type": "class",
-              "value": {
-                "interactionScript": "Interactions/0x0.csx"
-              }
-            },
-            {
-              "name": "elevation",
-              "type": "int",
-              "value": 0
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": 6,
       "name": "NPCs",
       "type": "objectgroup",
       "visible": true,
@@ -3082,8 +3047,8 @@
       "y": 0,
       "objects": [
         {
-          "id": 6,
-          "name": "NPC_6",
+          "id": 5,
+          "name": "NPC_5",
           "type": "npc",
           "x": 208,
           "y": 32,
@@ -3129,8 +3094,8 @@
           ]
         },
         {
-          "id": 7,
-          "name": "NPC_7",
+          "id": 6,
+          "name": "NPC_6",
           "type": "npc",
           "x": 96,
           "y": 192,
@@ -3176,8 +3141,8 @@
           ]
         },
         {
-          "id": 8,
-          "name": "NPC_8",
+          "id": 7,
+          "name": "NPC_7",
           "type": "npc",
           "x": 112,
           "y": 192,
@@ -3226,7 +3191,7 @@
     }
   ],
   "nextlayerid": 1,
-  "nextobjectid": 9,
+  "nextobjectid": 8,
   "orientation": "orthogonal",
   "renderorder": "right-down",
   "tiledversion": "1.11.2",
@@ -3244,7 +3209,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

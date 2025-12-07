@@ -2084,7 +2084,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_SKY_PILLAR_WALLACE"
+              "value": "base:flag:visibility/sky_pillar_wallace"
             }
           ]
         }
@@ -2110,7 +2110,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

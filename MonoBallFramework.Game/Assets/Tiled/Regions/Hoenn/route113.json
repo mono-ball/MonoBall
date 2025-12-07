@@ -6270,7 +6270,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_ETHER",
-                "flag": "FLAG_HIDDEN_ITEM_ROUTE_113_ETHER"
+                "flag": "base:flag:hidden_item/route_113_ether"
               }
             }
           ]
@@ -6290,7 +6290,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_TM_DOUBLE_TEAM",
-                "flag": "FLAG_HIDDEN_ITEM_ROUTE_113_TM_DOUBLE_TEAM"
+                "flag": "base:flag:hidden_item/route_113_tm_double_team"
               }
             }
           ]
@@ -6310,7 +6310,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_NUGGET",
-                "flag": "FLAG_HIDDEN_ITEM_ROUTE_113_NUGGET"
+                "flag": "base:flag:hidden_item/route_113_nugget"
               }
             }
           ]
@@ -6579,7 +6579,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_113_MAX_ETHER"
+              "value": "base:flag:item/route_113_max_ether"
             }
           ]
         },
@@ -6616,7 +6616,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_113_SUPER_REPEL"
+              "value": "base:flag:item/route_113_super_repel"
             }
           ]
         },
@@ -6841,7 +6841,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_113_HYPER_POTION"
+              "value": "base:flag:item/route_113_hyper_potion"
             }
           ]
         },
@@ -7055,7 +7055,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

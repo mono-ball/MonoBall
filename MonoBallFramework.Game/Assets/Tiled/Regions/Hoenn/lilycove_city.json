@@ -10283,7 +10283,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_HEART_SCALE",
-                "flag": "FLAG_HIDDEN_ITEM_LILYCOVE_CITY_HEART_SCALE"
+                "flag": "base:flag:hidden_item/lilycove_city_heart_scale"
               }
             }
           ]
@@ -10303,7 +10303,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_PP_UP",
-                "flag": "FLAG_HIDDEN_ITEM_LILYCOVE_CITY_PP_UP"
+                "flag": "base:flag:hidden_item/lilycove_city_pp_up"
               }
             }
           ]
@@ -10323,7 +10323,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_POKE_BALL",
-                "flag": "FLAG_HIDDEN_ITEM_LILYCOVE_CITY_POKE_BALL"
+                "flag": "base:flag:hidden_item/lilycove_city_poke_ball"
               }
             }
           ]
@@ -10725,7 +10725,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_LILYCOVE_CITY_AQUA_GRUNTS"
+              "value": "base:flag:visibility/lilycove_city_aqua_grunts"
             }
           ]
         },
@@ -10762,7 +10762,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_LILYCOVE_CITY_MAX_REPEL"
+              "value": "base:flag:item/lilycove_city_max_repel"
             }
           ]
         },
@@ -10809,7 +10809,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_LILYCOVE_CITY_AQUA_GRUNTS"
+              "value": "base:flag:visibility/lilycove_city_aqua_grunts"
             }
           ]
         },
@@ -10851,7 +10851,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_LILYCOVE_CITY_AQUA_GRUNTS"
+              "value": "base:flag:visibility/lilycove_city_aqua_grunts"
             }
           ]
         },
@@ -10893,7 +10893,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_LILYCOVE_CITY_AQUA_GRUNTS"
+              "value": "base:flag:visibility/lilycove_city_aqua_grunts"
             }
           ]
         },
@@ -10935,7 +10935,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_LILYCOVE_CITY_AQUA_GRUNTS"
+              "value": "base:flag:visibility/lilycove_city_aqua_grunts"
             }
           ]
         },
@@ -11019,7 +11019,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_LILYCOVE_CITY_RIVAL"
+              "value": "base:flag:visibility/lilycove_city_rival"
             }
           ]
         },
@@ -11230,7 +11230,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

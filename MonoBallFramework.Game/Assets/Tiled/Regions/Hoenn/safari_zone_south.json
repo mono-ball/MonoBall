@@ -5084,7 +5084,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_SAFARI_ZONE_SOUTH_CONSTRUCTION_WORKERS"
+              "value": "base:flag:visibility/safari_zone_south_construction_workers"
             }
           ]
         },
@@ -5126,7 +5126,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_SAFARI_ZONE_SOUTH_CONSTRUCTION_WORKERS"
+              "value": "base:flag:visibility/safari_zone_south_construction_workers"
             }
           ]
         }
@@ -5152,7 +5152,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

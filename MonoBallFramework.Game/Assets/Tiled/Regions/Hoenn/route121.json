@@ -5142,7 +5142,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_HP_UP",
-                "flag": "FLAG_HIDDEN_ITEM_ROUTE_121_HP_UP"
+                "flag": "base:flag:hidden_item/route_121_hp_up"
               }
             }
           ]
@@ -5162,7 +5162,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_NUGGET",
-                "flag": "FLAG_HIDDEN_ITEM_ROUTE_121_NUGGET"
+                "flag": "base:flag:hidden_item/route_121_nugget"
               }
             }
           ]
@@ -5182,7 +5182,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_FULL_HEAL",
-                "flag": "FLAG_HIDDEN_ITEM_ROUTE_121_FULL_HEAL"
+                "flag": "base:flag:hidden_item/route_121_full_heal"
               }
             }
           ]
@@ -5202,7 +5202,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_MAX_REVIVE",
-                "flag": "FLAG_HIDDEN_ITEM_ROUTE_121_MAX_REVIVE"
+                "flag": "base:flag:hidden_item/route_121_max_revive"
               }
             }
           ]
@@ -5676,14 +5676,9 @@
               "value": "up"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_121_TEAM_AQUA_GRUNTS"
+              "value": "base:flag:visibility/route_121_team_aqua_grunts"
             }
           ]
         },
@@ -5718,14 +5713,9 @@
               "value": "right"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_121_TEAM_AQUA_GRUNTS"
+              "value": "base:flag:visibility/route_121_team_aqua_grunts"
             }
           ]
         },
@@ -5760,14 +5750,9 @@
               "value": "left"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_ROUTE_121_TEAM_AQUA_GRUNTS"
+              "value": "base:flag:visibility/route_121_team_aqua_grunts"
             }
           ]
         },
@@ -5804,7 +5789,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_11"
+              "value": "base:flag:temporary/11"
             }
           ]
         },
@@ -5841,7 +5826,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_12"
+              "value": "base:flag:temporary/12"
             }
           ]
         },
@@ -6066,7 +6051,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_121_CARBOS"
+              "value": "base:flag:item/route_121_carbos"
             }
           ]
         },
@@ -6103,7 +6088,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_13"
+              "value": "base:flag:temporary/13"
             }
           ]
         },
@@ -6375,7 +6360,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_121_REVIVE"
+              "value": "base:flag:item/route_121_revive"
             }
           ]
         },
@@ -6412,7 +6397,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_121_ZINC"
+              "value": "base:flag:item/route_121_zinc"
             }
           ]
         }
@@ -6438,7 +6423,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

@@ -9717,7 +9717,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_DESERT_UNDERPASS_FOSSIL"
+              "value": "base:flag:visibility/desert_underpass_fossil"
             }
           ]
         }
@@ -9743,7 +9743,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

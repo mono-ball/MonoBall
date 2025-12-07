@@ -4993,7 +4993,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_SAFARI_ZONE_SOUTH_WEST_MAX_REVIVE"
+              "value": "base:flag:item/safari_zone_south_west_max_revive"
             }
           ]
         }
@@ -5019,7 +5019,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

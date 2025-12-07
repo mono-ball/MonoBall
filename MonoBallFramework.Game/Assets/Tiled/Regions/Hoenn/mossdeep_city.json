@@ -10638,7 +10638,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_MOSSDEEP_CITY_NET_BALL"
+              "value": "base:flag:item/mossdeep_city_net_ball"
             }
           ]
         },
@@ -10789,14 +10789,9 @@
               "value": "down"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MOSSDEEP_CITY_TEAM_MAGMA"
+              "value": "base:flag:visibility/mossdeep_city_team_magma"
             }
           ]
         },
@@ -10831,14 +10826,9 @@
               "value": "up"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MOSSDEEP_CITY_TEAM_MAGMA"
+              "value": "base:flag:visibility/mossdeep_city_team_magma"
             }
           ]
         },
@@ -10873,14 +10863,9 @@
               "value": "down"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MOSSDEEP_CITY_TEAM_MAGMA"
+              "value": "base:flag:visibility/mossdeep_city_team_magma"
             }
           ]
         },
@@ -10915,14 +10900,9 @@
               "value": "up"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MOSSDEEP_CITY_TEAM_MAGMA"
+              "value": "base:flag:visibility/mossdeep_city_team_magma"
             }
           ]
         },
@@ -10957,14 +10937,9 @@
               "value": "left"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MOSSDEEP_CITY_TEAM_MAGMA"
+              "value": "base:flag:visibility/mossdeep_city_team_magma"
             }
           ]
         },
@@ -11038,7 +11013,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MOSSDEEP_CITY_SCOTT"
+              "value": "base:flag:visibility/mossdeep_city_scott"
             }
           ]
         },
@@ -11096,7 +11071,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

@@ -494,7 +494,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_LANETTES_HOUSE_LANETTE"
+              "value": "base:flag:visibility/lanettes_house_lanette"
             }
           ]
         }
@@ -520,7 +520,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

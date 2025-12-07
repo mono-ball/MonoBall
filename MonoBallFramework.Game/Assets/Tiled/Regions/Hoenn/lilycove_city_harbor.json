@@ -1232,7 +1232,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_LILYCOVE_HARBOR_FERRY_ATTENDANT"
+              "value": "base:flag:visibility/lilycove_harbor_ferry_attendant"
             }
           ]
         },
@@ -1267,14 +1267,9 @@
               "value": "right"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_LILYCOVE_HARBOR_SSTIDAL"
+              "value": "base:flag:visibility/lilycove_harbor_sstidal"
             }
           ]
         },
@@ -1351,14 +1346,9 @@
               "value": "down"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_LILYCOVE_HARBOR_FERRY_SAILOR"
+              "value": "base:flag:visibility/lilycove_harbor_ferry_sailor"
             }
           ]
         },
@@ -1393,14 +1383,9 @@
               "value": "down"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_LILYCOVE_HARBOR_EVENT_TICKET_TAKER"
+              "value": "base:flag:visibility/lilycove_harbor_event_ticket_taker"
             }
           ]
         }
@@ -1426,7 +1411,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

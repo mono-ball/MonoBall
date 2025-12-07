@@ -2703,7 +2703,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_EVERSTONE",
-                "flag": "FLAG_HIDDEN_ITEM_GRANITE_CAVE_B2F_EVERSTONE_1"
+                "flag": "base:flag:hidden_item/granite_cave_b2f_everstone_1"
               }
             }
           ]
@@ -2723,7 +2723,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_EVERSTONE",
-                "flag": "FLAG_HIDDEN_ITEM_GRANITE_CAVE_B2F_EVERSTONE_2"
+                "flag": "base:flag:hidden_item/granite_cave_b2f_everstone_2"
               }
             }
           ]
@@ -2772,7 +2772,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_GRANITE_CAVE_B2F_REPEL"
+              "value": "base:flag:item/granite_cave_b2f_repel"
             }
           ]
         },
@@ -2809,7 +2809,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_GRANITE_CAVE_B2F_RARE_CANDY"
+              "value": "base:flag:item/granite_cave_b2f_rare_candy"
             }
           ]
         },
@@ -2846,7 +2846,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_11"
+              "value": "base:flag:temporary/11"
             }
           ]
         },
@@ -2883,7 +2883,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_12"
+              "value": "base:flag:temporary/12"
             }
           ]
         },
@@ -2920,7 +2920,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_13"
+              "value": "base:flag:temporary/13"
             }
           ]
         },
@@ -2957,7 +2957,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_14"
+              "value": "base:flag:temporary/14"
             }
           ]
         },
@@ -2994,7 +2994,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_15"
+              "value": "base:flag:temporary/15"
             }
           ]
         },
@@ -3031,7 +3031,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_16"
+              "value": "base:flag:temporary/16"
             }
           ]
         },
@@ -3068,7 +3068,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_17"
+              "value": "base:flag:temporary/17"
             }
           ]
         }
@@ -3094,7 +3094,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

@@ -9993,7 +9993,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_CARBOS",
-                "flag": "FLAG_HIDDEN_ITEM_ROUTE_114_CARBOS"
+                "flag": "base:flag:hidden_item/route_114_carbos"
               }
             }
           ]
@@ -10032,7 +10032,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_REVIVE",
-                "flag": "FLAG_HIDDEN_ITEM_ROUTE_114_REVIVE"
+                "flag": "base:flag:hidden_item/route_114_revive"
               }
             }
           ]
@@ -10422,7 +10422,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_114_RARE_CANDY"
+              "value": "base:flag:item/route_114_rare_candy"
             }
           ]
         },
@@ -10459,7 +10459,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_114_PROTEIN"
+              "value": "base:flag:item/route_114_protein"
             }
           ]
         },
@@ -10496,7 +10496,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_11"
+              "value": "base:flag:temporary/11"
             }
           ]
         },
@@ -10775,7 +10775,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_12"
+              "value": "base:flag:temporary/12"
             }
           ]
         },
@@ -10812,7 +10812,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_13"
+              "value": "base:flag:temporary/13"
             }
           ]
         },
@@ -10849,7 +10849,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_14"
+              "value": "base:flag:temporary/14"
             }
           ]
         },
@@ -10886,7 +10886,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_15"
+              "value": "base:flag:temporary/15"
             }
           ]
         },
@@ -11111,7 +11111,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_114_ENERGY_POWDER"
+              "value": "base:flag:item/route_114_energy_powder"
             }
           ]
         },
@@ -11184,7 +11184,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

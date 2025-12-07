@@ -673,7 +673,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ABANDONED_SHIP_ROOMS_2_B1F_DIVE_BALL"
+              "value": "base:flag:item/abandoned_ship_rooms_2_b1f_dive_ball"
             }
           ]
         }
@@ -699,7 +699,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

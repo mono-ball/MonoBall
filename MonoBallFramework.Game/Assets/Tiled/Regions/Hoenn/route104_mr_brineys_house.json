@@ -476,7 +476,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_BRINEYS_HOUSE_MR_BRINEY"
+              "value": "base:flag:visibility/brineys_house_mr_briney"
             }
           ]
         },
@@ -518,7 +518,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_BRINEYS_HOUSE_PEEKO"
+              "value": "base:flag:visibility/brineys_house_peeko"
             }
           ]
         }
@@ -544,7 +544,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

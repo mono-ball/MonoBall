@@ -516,7 +516,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MIRAGE_TOWER_ROOT_FOSSIL"
+              "value": "base:flag:visibility/mirage_tower_root_fossil"
             }
           ]
         },
@@ -558,7 +558,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_MIRAGE_TOWER_CLAW_FOSSIL"
+              "value": "base:flag:visibility/mirage_tower_claw_fossil"
             }
           ]
         },
@@ -595,7 +595,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_11"
+              "value": "base:flag:temporary/11"
             }
           ]
         }
@@ -621,7 +621,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

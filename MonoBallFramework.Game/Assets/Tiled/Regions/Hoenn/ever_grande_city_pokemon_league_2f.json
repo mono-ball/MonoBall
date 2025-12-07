@@ -709,7 +709,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_POKEMON_CENTER_2F_MYSTERY_GIFT_MAN"
+              "value": "base:flag:visibility/pokemon_center_2f_mystery_gift_man"
             }
           ]
         }
@@ -735,7 +735,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

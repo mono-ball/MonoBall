@@ -1714,7 +1714,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_TRICK_HOUSE_PUZZLE_7_TROPIC_MAIL"
+              "value": "base:flag:item/trick_house_puzzle_7_tropic_mail"
             }
           ]
         },
@@ -1883,11 +1883,6 @@
               "name": "elevation",
               "type": "int",
               "value": 0
-            },
-            {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
             }
           ]
         },
@@ -1915,11 +1910,6 @@
               "name": "elevation",
               "type": "int",
               "value": 0
-            },
-            {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
             }
           ]
         }
@@ -1945,7 +1935,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

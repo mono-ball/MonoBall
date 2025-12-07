@@ -575,11 +575,6 @@
               "name": "direction",
               "type": "string",
               "value": "down"
-            },
-            {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
             }
           ]
         },
@@ -612,11 +607,6 @@
               "name": "direction",
               "type": "string",
               "value": "down"
-            },
-            {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
             }
           ]
         },
@@ -649,11 +639,6 @@
               "name": "direction",
               "type": "string",
               "value": "up"
-            },
-            {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
             }
           ]
         },
@@ -686,11 +671,6 @@
               "name": "direction",
               "type": "string",
               "value": "up"
-            },
-            {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
             }
           ]
         },
@@ -723,11 +703,6 @@
               "name": "direction",
               "type": "string",
               "value": "up"
-            },
-            {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
             }
           ]
         },
@@ -760,11 +735,6 @@
               "name": "direction",
               "type": "string",
               "value": "right"
-            },
-            {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
             }
           ]
         },
@@ -797,11 +767,6 @@
               "name": "direction",
               "type": "string",
               "value": "down"
-            },
-            {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
             }
           ]
         },
@@ -834,11 +799,6 @@
               "name": "direction",
               "type": "string",
               "value": "down"
-            },
-            {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
             }
           ]
         },
@@ -871,11 +831,6 @@
               "name": "direction",
               "type": "string",
               "value": "down"
-            },
-            {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
             }
           ]
         },
@@ -908,11 +863,6 @@
               "name": "direction",
               "type": "string",
               "value": "down"
-            },
-            {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
             }
           ]
         },
@@ -945,11 +895,6 @@
               "name": "direction",
               "type": "string",
               "value": "left"
-            },
-            {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
             }
           ]
         },
@@ -982,11 +927,6 @@
               "name": "direction",
               "type": "string",
               "value": "right"
-            },
-            {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
             }
           ]
         },
@@ -1016,14 +956,9 @@
               "value": 3
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_CONTEST_POKE_BALL"
+              "value": "base:flag:visibility/contest_poke_ball"
             }
           ]
         },
@@ -1056,11 +991,6 @@
               "name": "direction",
               "type": "string",
               "value": "up"
-            },
-            {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
             }
           ]
         },
@@ -1093,11 +1023,6 @@
               "name": "direction",
               "type": "string",
               "value": "left"
-            },
-            {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
             }
           ]
         }
@@ -1123,7 +1048,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

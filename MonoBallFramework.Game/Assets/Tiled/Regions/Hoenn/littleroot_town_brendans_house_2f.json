@@ -450,7 +450,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_LITTLEROOT_TOWN_BRENDANS_HOUSE_RIVAL_BEDROOM"
+              "value": "base:flag:visibility/littleroot_town_brendans_house_rival_bedroom"
             }
           ]
         },
@@ -480,14 +480,9 @@
               "value": 0
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_DECORATION_1"
+              "value": "base:flag:decoration/1"
             }
           ]
         },
@@ -517,14 +512,9 @@
               "value": 0
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_DECORATION_2"
+              "value": "base:flag:decoration/2"
             }
           ]
         },
@@ -554,14 +544,9 @@
               "value": 3
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_DECORATION_3"
+              "value": "base:flag:decoration/3"
             }
           ]
         },
@@ -591,14 +576,9 @@
               "value": 3
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_DECORATION_4"
+              "value": "base:flag:decoration/4"
             }
           ]
         },
@@ -628,14 +608,9 @@
               "value": 0
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_DECORATION_5"
+              "value": "base:flag:decoration/5"
             }
           ]
         },
@@ -665,14 +640,9 @@
               "value": 4
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_DECORATION_6"
+              "value": "base:flag:decoration/6"
             }
           ]
         },
@@ -702,14 +672,9 @@
               "value": 0
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_DECORATION_7"
+              "value": "base:flag:decoration/7"
             }
           ]
         },
@@ -739,14 +704,9 @@
               "value": 0
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_DECORATION_8"
+              "value": "base:flag:decoration/8"
             }
           ]
         },
@@ -776,14 +736,9 @@
               "value": 3
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_DECORATION_9"
+              "value": "base:flag:decoration/9"
             }
           ]
         },
@@ -813,14 +768,9 @@
               "value": 3
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_DECORATION_10"
+              "value": "base:flag:decoration/10"
             }
           ]
         },
@@ -850,14 +800,9 @@
               "value": 3
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_DECORATION_11"
+              "value": "base:flag:decoration/11"
             }
           ]
         },
@@ -887,14 +832,9 @@
               "value": 0
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_DECORATION_12"
+              "value": "base:flag:decoration/12"
             }
           ]
         },
@@ -929,14 +869,9 @@
               "value": "down"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_LITTLEROOT_TOWN_PLAYERS_BEDROOM_MOM"
+              "value": "base:flag:visibility/littleroot_town_players_bedroom_mom"
             }
           ]
         },
@@ -973,7 +908,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_LITTLEROOT_TOWN_BRENDANS_HOUSE_2F_POKE_BALL"
+              "value": "base:flag:visibility/littleroot_town_brendans_house_2f_poke_ball"
             }
           ]
         },
@@ -1003,14 +938,9 @@
               "value": 3
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_LITTLEROOT_TOWN_BRENDANS_HOUSE_2F_SWABLU_DOLL"
+              "value": "base:flag:visibility/littleroot_town_brendans_house_2f_swablu_doll"
             }
           ]
         }
@@ -1036,7 +966,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

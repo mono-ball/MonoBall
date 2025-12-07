@@ -10102,7 +10102,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_134_CARBOS"
+              "value": "base:flag:item/route_134_carbos"
             }
           ]
         },
@@ -10139,7 +10139,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_134_STAR_PIECE"
+              "value": "base:flag:item/route_134_star_piece"
             }
           ]
         }
@@ -10165,7 +10165,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

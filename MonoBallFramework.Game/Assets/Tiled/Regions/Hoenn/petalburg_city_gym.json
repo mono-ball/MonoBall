@@ -4461,7 +4461,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_PETALBURG_GYM_NORMAN"
+              "value": "base:flag:visibility/petalburg_gym_norman"
             }
           ]
         },
@@ -4797,7 +4797,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_PETALBURG_GYM_GREETER"
+              "value": "base:flag:visibility/petalburg_gym_greeter"
             }
           ]
         },
@@ -4832,14 +4832,9 @@
               "value": "up"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_PETALBURG_GYM_WALLY"
+              "value": "base:flag:visibility/petalburg_gym_wally"
             }
           ]
         },
@@ -4874,14 +4869,9 @@
               "value": "up"
             },
             {
-              "name": "scriptId",
-              "type": "string",
-              "value": "base:script:map/0x0"
-            },
-            {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_PETALBURG_GYM_WALLYS_DAD"
+              "value": "base:flag:visibility/petalburg_gym_wallys_dad"
             }
           ]
         }
@@ -4907,7 +4897,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

@@ -1127,7 +1127,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_SHOAL_CAVE_STAIRS_ROOM_ICE_HEAL"
+              "value": "base:flag:item/shoal_cave_stairs_room_ice_heal"
             }
           ]
         }
@@ -1153,7 +1153,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

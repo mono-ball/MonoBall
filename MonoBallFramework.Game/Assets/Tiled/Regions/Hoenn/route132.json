@@ -9778,7 +9778,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_132_RARE_CANDY"
+              "value": "base:flag:item/route_132_rare_candy"
             }
           ]
         },
@@ -10097,7 +10097,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_132_PROTEIN"
+              "value": "base:flag:item/route_132_protein"
             }
           ]
         }
@@ -10123,7 +10123,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

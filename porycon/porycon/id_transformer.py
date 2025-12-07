@@ -555,6 +555,102 @@ class IdTransformer:
         return cls.create_id(EntityType.BEHAVIOR, "movement", behavior_name)
 
     # =========================================================================
+    # FLAG IDs
+    # =========================================================================
+
+    # Flag category prefixes and their corresponding categories
+    FLAG_PREFIXES = {
+        "FLAG_HIDE_": "visibility",
+        "FLAG_HIDDEN_ITEM_": "hidden_item",
+        "FLAG_ITEM_": "item",
+        "FLAG_TEMP_": "temporary",
+        "FLAG_DECORATION_": "decoration",
+        "FLAG_DEFEATED_": "defeated",
+        "FLAG_TRAINER_": "trainer",
+        "FLAG_BADGE_": "badge",
+        "FLAG_RECEIVED_": "received",
+        "FLAG_DAILY_": "daily",
+        "FLAG_ENCOUNTERED_": "encountered",
+        "FLAG_UNLOCKED_": "unlock",
+        "FLAG_COMPLETED_": "story",
+        "FLAG_TRIGGERED_": "trigger",
+        "FLAG_INTERACTED_": "interaction",
+        "FLAG_CAUGHT_": "collection",
+    }
+
+    @classmethod
+    def flag_id(cls, pokeemerald_flag: str, region: Optional[str] = None) -> str:
+        """
+        Transform pokeemerald flag to unified format.
+
+        Args:
+            pokeemerald_flag: e.g., "FLAG_HIDE_LITTLEROOT_TOWN_FAT_MAN"
+            region: Optional region (unused, kept for API compatibility)
+
+        Returns:
+            e.g., "base:flag:visibility/littleroot_town_fat_man"
+
+        Flag categories:
+            - visibility: FLAG_HIDE_* - NPC/object visibility toggles
+            - hidden_item: FLAG_HIDDEN_ITEM_* - Hidden item collection state
+            - item: FLAG_ITEM_* - Visible item pickup state
+            - temporary: FLAG_TEMP_* - Temporary state flags
+            - decoration: FLAG_DECORATION_* - Secret base decorations
+            - defeated: FLAG_DEFEATED_* - Defeated trainer/Pokemon
+            - trainer: FLAG_TRAINER_* - Trainer battle state
+            - badge: FLAG_BADGE_* - Gym badge acquisition
+            - received: FLAG_RECEIVED_* - Items/gifts received
+            - daily: FLAG_DAILY_* - Daily reset events
+            - encountered: FLAG_ENCOUNTERED_* - Pokemon/event encounters
+            - unlock: FLAG_UNLOCKED_* - Area/feature unlocks
+            - story: FLAG_COMPLETED_* - Story progression
+            - trigger: FLAG_TRIGGERED_* - One-time triggers
+            - interaction: FLAG_INTERACTED_* - Object interactions
+            - collection: FLAG_CAUGHT_* - Pokemon collection state
+            - misc: Uncategorized flags
+        """
+        if not pokeemerald_flag or pokeemerald_flag == "0":
+            return ""
+
+        flag_name = pokeemerald_flag
+        category = "misc"
+
+        # Determine category from prefix
+        for prefix, cat in cls.FLAG_PREFIXES.items():
+            if flag_name.startswith(prefix):
+                flag_name = flag_name[len(prefix):]
+                category = cat
+                break
+        else:
+            # Handle generic FLAG_ prefix
+            if flag_name.startswith("FLAG_"):
+                flag_name = flag_name[5:]
+
+        # Normalize the flag name
+        flag_name = cls._normalize(flag_name)
+
+        return cls.create_id("flag", category, flag_name)
+
+    @classmethod
+    def flag_id_from_raw(cls, raw_flag: str, map_name: str,
+                         region: Optional[str] = None) -> str:
+        """
+        Transform a flag reference, with map context fallback.
+
+        Args:
+            raw_flag: Flag string from pokeemerald data
+            map_name: Current map name for context
+            region: Optional region override
+
+        Returns:
+            Unified flag ID or empty string if invalid
+        """
+        if not raw_flag or raw_flag == "0" or raw_flag == "NULL":
+            return ""
+
+        return cls.flag_id(raw_flag, region)
+
+    # =========================================================================
     # SCRIPT IDs
     # =========================================================================
 
@@ -611,3 +707,7 @@ def theme_id(theme_name: str) -> str:
 def normalize(value: str) -> str:
     """Shortcut for IdTransformer._normalize()"""
     return IdTransformer._normalize(value)
+
+def flag_id(pokeemerald_flag: str, region: Optional[str] = None) -> str:
+    """Shortcut for IdTransformer.flag_id()"""
+    return IdTransformer.flag_id(pokeemerald_flag, region)

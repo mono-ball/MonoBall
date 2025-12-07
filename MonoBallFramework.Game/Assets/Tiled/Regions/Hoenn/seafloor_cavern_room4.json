@@ -1230,7 +1230,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_SEAFLOOR_CAVERN_AQUA_GRUNTS"
+              "value": "base:flag:visibility/seafloor_cavern_aqua_grunts"
             },
             {
               "name": "trainerType",
@@ -1282,7 +1282,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_SEAFLOOR_CAVERN_AQUA_GRUNTS"
+              "value": "base:flag:visibility/seafloor_cavern_aqua_grunts"
             },
             {
               "name": "trainerType",
@@ -1318,7 +1318,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

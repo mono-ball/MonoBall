@@ -715,7 +715,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_METEOR_FALLS_B1F_2R_TM_DRAGON_CLAW"
+              "value": "base:flag:item/meteor_falls_b1f_2r_tm_dragon_claw"
             }
           ]
         }
@@ -741,7 +741,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

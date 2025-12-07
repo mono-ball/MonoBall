@@ -726,7 +726,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ABANDONED_SHIP_ROOMS_2_1F_REVIVE"
+              "value": "base:flag:item/abandoned_ship_rooms_2_1f_revive"
             }
           ]
         },
@@ -846,7 +846,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

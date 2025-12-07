@@ -6110,7 +6110,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_ULTRA_BALL",
-                "flag": "FLAG_HIDDEN_ITEM_MT_PYRE_EXTERIOR_ULTRA_BALL"
+                "flag": "base:flag:hidden_item/mt_pyre_exterior_ultra_ball"
               }
             }
           ]
@@ -6130,7 +6130,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_MAX_ETHER",
-                "flag": "FLAG_HIDDEN_ITEM_MT_PYRE_EXTERIOR_MAX_ETHER"
+                "flag": "base:flag:hidden_item/mt_pyre_exterior_max_ether"
               }
             }
           ]
@@ -6179,7 +6179,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_MT_PYRE_EXTERIOR_MAX_POTION"
+              "value": "base:flag:item/mt_pyre_exterior_max_potion"
             }
           ]
         },
@@ -6216,7 +6216,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_MT_PYRE_EXTERIOR_TM_SKILL_SWAP"
+              "value": "base:flag:item/mt_pyre_exterior_tm_skill_swap"
             }
           ]
         }
@@ -6242,7 +6242,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

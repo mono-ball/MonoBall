@@ -19303,7 +19303,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_HEART_SCALE",
-                "flag": "FLAG_HIDDEN_ITEM_UNDERWATER_126_HEART_SCALE"
+                "flag": "base:flag:hidden_item/underwater_126_heart_scale"
               }
             }
           ]
@@ -19323,7 +19323,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_ULTRA_BALL",
-                "flag": "FLAG_HIDDEN_ITEM_UNDERWATER_126_ULTRA_BALL"
+                "flag": "base:flag:hidden_item/underwater_126_ultra_ball"
               }
             }
           ]
@@ -19343,7 +19343,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_STARDUST",
-                "flag": "FLAG_HIDDEN_ITEM_UNDERWATER_126_STARDUST"
+                "flag": "base:flag:hidden_item/underwater_126_stardust"
               }
             }
           ]
@@ -19363,7 +19363,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_PEARL",
-                "flag": "FLAG_HIDDEN_ITEM_UNDERWATER_126_PEARL"
+                "flag": "base:flag:hidden_item/underwater_126_pearl"
               }
             }
           ]
@@ -19383,7 +19383,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_IRON",
-                "flag": "FLAG_HIDDEN_ITEM_UNDERWATER_126_IRON"
+                "flag": "base:flag:hidden_item/underwater_126_iron"
               }
             }
           ]
@@ -19403,7 +19403,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_YELLOW_SHARD",
-                "flag": "FLAG_HIDDEN_ITEM_UNDERWATER_126_YELLOW_SHARD"
+                "flag": "base:flag:hidden_item/underwater_126_yellow_shard"
               }
             }
           ]
@@ -19423,7 +19423,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_BIG_PEARL",
-                "flag": "FLAG_HIDDEN_ITEM_UNDERWATER_126_BIG_PEARL"
+                "flag": "base:flag:hidden_item/underwater_126_big_pearl"
               }
             }
           ]
@@ -19443,7 +19443,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_BLUE_SHARD",
-                "flag": "FLAG_HIDDEN_ITEM_UNDERWATER_126_BLUE_SHARD"
+                "flag": "base:flag:hidden_item/underwater_126_blue_shard"
               }
             }
           ]
@@ -19470,7 +19470,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

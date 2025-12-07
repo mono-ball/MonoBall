@@ -2729,7 +2729,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_HIDE_SS_TIDAL_ROOMS_SNATCH_GIVER"
+              "value": "base:flag:visibility/ss_tidal_rooms_snatch_giver"
             }
           ]
         }
@@ -2755,7 +2755,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",

@@ -8589,7 +8589,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_SUPER_REPEL",
-                "flag": "FLAG_HIDDEN_ITEM_ROUTE_123_SUPER_REPEL"
+                "flag": "base:flag:hidden_item/route_123_super_repel"
               }
             }
           ]
@@ -8652,7 +8652,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_REVIVE",
-                "flag": "FLAG_HIDDEN_ITEM_ROUTE_123_REVIVE"
+                "flag": "base:flag:hidden_item/route_123_revive"
               }
             }
           ]
@@ -8672,7 +8672,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_HYPER_POTION",
-                "flag": "FLAG_HIDDEN_ITEM_ROUTE_123_HYPER_POTION"
+                "flag": "base:flag:hidden_item/route_123_hyper_potion"
               }
             }
           ]
@@ -8692,7 +8692,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_PP_UP",
-                "flag": "FLAG_HIDDEN_ITEM_ROUTE_123_PP_UP"
+                "flag": "base:flag:hidden_item/route_123_pp_up"
               }
             }
           ]
@@ -8712,7 +8712,7 @@
               "type": "class",
               "value": {
                 "item": "ITEM_RARE_CANDY",
-                "flag": "FLAG_HIDDEN_ITEM_ROUTE_123_RARE_CANDY"
+                "flag": "base:flag:hidden_item/route_123_rare_candy"
               }
             }
           ]
@@ -9405,7 +9405,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_11"
+              "value": "base:flag:temporary/11"
             }
           ]
         },
@@ -9442,7 +9442,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_12"
+              "value": "base:flag:temporary/12"
             }
           ]
         },
@@ -9479,7 +9479,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_TEMP_13"
+              "value": "base:flag:temporary/13"
             }
           ]
         },
@@ -9516,7 +9516,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_123_CALCIUM"
+              "value": "base:flag:item/route_123_calcium"
             }
           ]
         },
@@ -9978,7 +9978,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_123_ULTRA_BALL"
+              "value": "base:flag:item/route_123_ultra_ball"
             }
           ]
         },
@@ -10015,7 +10015,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_123_ELIXIR"
+              "value": "base:flag:item/route_123_elixir"
             }
           ]
         },
@@ -10334,7 +10334,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_123_PP_UP"
+              "value": "base:flag:item/route_123_pp_up"
             }
           ]
         },
@@ -10465,7 +10465,7 @@
             {
               "name": "flag",
               "type": "string",
-              "value": "FLAG_ITEM_ROUTE_123_REVIVAL_HERB"
+              "value": "base:flag:item/route_123_revival_herb"
             }
           ]
         }
@@ -10491,7 +10491,7 @@
     {
       "name": "region",
       "type": "string",
-      "value": "Hoenn"
+      "value": "hoenn"
     },
     {
       "name": "music",
