@@ -1,4 +1,5 @@
 using Arch.Core;
+using MonoBallFramework.Game.Engine.Core.Types;
 using MonoBallFramework.Game.GameData.MapLoading.Tiled.Services;
 using MonoBallFramework.Game.GameData.MapLoading.Tiled.Tmx;
 
@@ -16,14 +17,14 @@ public interface ILayerProcessor
     /// <param name="world">The ECS world.</param>
     /// <param name="tmxDoc">The Tiled map document.</param>
     /// <param name="mapInfoEntity">The map entity for establishing relationships.</param>
-    /// <param name="mapId">The map runtime ID.</param>
+    /// <param name="mapId">The map's game map ID.</param>
     /// <param name="tilesets">Loaded tilesets.</param>
     /// <returns>Total number of tiles created.</returns>
     int ProcessLayers(
         World world,
         TmxDocument tmxDoc,
         Entity mapInfoEntity,
-        int mapId,
+        GameMapId mapId,
         IReadOnlyList<LoadedTileset> tilesets
     );
 

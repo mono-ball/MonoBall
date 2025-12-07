@@ -122,6 +122,7 @@ public class MapInitializer(
         string mapName
     )
     {
+        // Get loaded texture IDs directly using GameMapId
         HashSet<string>? tilesetTextureIds = mapLoader.GetLoadedTextureIds(mapInfo.MapId);
 
         // Load sprites for NPCs in this map
@@ -134,7 +135,7 @@ public class MapInitializer(
 
         // Transition to new map (cleans up old maps)
         mapLifecycleManager.TransitionToMap(mapInfo.MapId);
-        logger.LogWorkflowStatus("Map lifecycle transition complete", ("mapId", mapInfo.MapId));
+        logger.LogWorkflowStatus("Map lifecycle transition complete", ("mapId", mapInfo.MapId.Value));
 
         // Invalidate spatial hash to reindex static tiles
         spatialHashSystem.InvalidateStaticTiles();
@@ -162,7 +163,7 @@ public class MapInitializer(
     /// <summary>
     ///     Loads sprites required for the map's NPCs.
     /// </summary>
-    private async Task<HashSet<string>> LoadMapSpritesAsync(MapRuntimeId mapId)
+    private async Task<HashSet<string>> LoadMapSpritesAsync(GameMapId mapId)
     {
         if (_spriteTextureLoader == null)
         {

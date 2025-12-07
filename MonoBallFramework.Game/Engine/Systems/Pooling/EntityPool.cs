@@ -78,6 +78,7 @@ public class EntityPool
 
     /// <summary>
     ///     Absolute maximum size the pool can grow to, even with auto-resize.
+    ///     Set to 0 or int.MaxValue for unlimited growth.
     /// </summary>
     public int AbsoluteMaxSize { get; set; } = 10000;
 
@@ -185,13 +186,28 @@ public class EntityPool
                 entity = CreateNewEntity();
             }
             // Pool exhausted - try auto-resize
-            else if (AutoResize && MaxSize < AbsoluteMaxSize)
+            else if (AutoResize && (AbsoluteMaxSize == 0 || MaxSize < AbsoluteMaxSize))
             {
-                int newMaxSize = Math.Min((int)(MaxSize * GrowthFactor), AbsoluteMaxSize);
-                // Ensure we grow by at least 1
-                if (newMaxSize <= MaxSize)
+                int newMaxSize;
+                if (AbsoluteMaxSize == 0 || AbsoluteMaxSize == int.MaxValue)
                 {
-                    newMaxSize = Math.Min(MaxSize + 10, AbsoluteMaxSize);
+                    // Unlimited growth
+                    newMaxSize = (int)(MaxSize * GrowthFactor);
+                    // Ensure we grow by at least 1
+                    if (newMaxSize <= MaxSize)
+                    {
+                        newMaxSize = MaxSize + 10;
+                    }
+                }
+                else
+                {
+                    // Limited growth
+                    newMaxSize = Math.Min((int)(MaxSize * GrowthFactor), AbsoluteMaxSize);
+                    // Ensure we grow by at least 1
+                    if (newMaxSize <= MaxSize)
+                    {
+                        newMaxSize = Math.Min(MaxSize + 10, AbsoluteMaxSize);
+                    }
                 }
 
                 MaxSize = newMaxSize;
@@ -248,7 +264,7 @@ public class EntityPool
                 );
             }
 
-            if (newMaxSize > AbsoluteMaxSize)
+            if (AbsoluteMaxSize > 0 && AbsoluteMaxSize != int.MaxValue && newMaxSize > AbsoluteMaxSize)
             {
                 throw new ArgumentException(
                     $"Cannot resize pool '{_poolName}' to {newMaxSize}: exceeds absolute max of {AbsoluteMaxSize}"

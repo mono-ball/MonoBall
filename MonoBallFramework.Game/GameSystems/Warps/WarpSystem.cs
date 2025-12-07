@@ -43,7 +43,7 @@ public class WarpSystem : SystemBase, IUpdateSystem
     private readonly ILogger<WarpSystem>? _logger;
 
     // Per-frame cache of map warp lookups
-    private readonly Dictionary<MapRuntimeId, MapWarps> _mapWarpCache = new(4);
+    private readonly Dictionary<GameMapId, MapWarps> _mapWarpCache = new(4);
 
     /// <summary>
     ///     Creates a new WarpSystem with optional logger.
@@ -99,7 +99,7 @@ public class WarpSystem : SystemBase, IUpdateSystem
     }
 
     /// <summary>
-    ///     Builds a cache of MapWarps components indexed by MapRuntimeId.
+    ///     Builds a cache of MapWarps components indexed by GameMapId.
     ///     Called once per frame to enable O(1) lookups during player processing.
     /// </summary>
     private void BuildMapWarpCache(World world)
@@ -211,7 +211,7 @@ public class WarpSystem : SystemBase, IUpdateSystem
     ///     Tries to find a warp at the specified position using O(1) spatial lookup.
     ///     Matches player elevation with warp source elevation (Pokemon Emerald behavior).
     /// </summary>
-    /// <param name="mapId">The map's runtime ID.</param>
+    /// <param name="mapId">The map's game ID.</param>
     /// <param name="x">The X tile coordinate.</param>
     /// <param name="y">The Y tile coordinate.</param>
     /// <param name="playerElevation">The player's current elevation.</param>
@@ -222,7 +222,7 @@ public class WarpSystem : SystemBase, IUpdateSystem
     ///     Otherwise, warp source elevation must exactly match player elevation.
     /// </remarks>
     private bool TryFindWarp(
-        MapRuntimeId mapId,
+        GameMapId? mapId,
         int x,
         int y,
         byte playerElevation,
@@ -232,6 +232,11 @@ public class WarpSystem : SystemBase, IUpdateSystem
         warp = default;
 
         // Get the map's warp spatial index
+        if (mapId == null)
+        {
+            return false;
+        }
+
         if (!_mapWarpCache.TryGetValue(mapId, out MapWarps mapWarps))
         {
             return false;

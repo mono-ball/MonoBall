@@ -5,6 +5,7 @@ using MonoBallFramework.Game.Ecs.Components.Movement;
 using MonoBallFramework.Game.Ecs.Components.NPCs;
 using MonoBallFramework.Game.Engine.Core.Systems;
 using MonoBallFramework.Game.Engine.Core.Systems.Base;
+using MonoBallFramework.Game.Engine.Core.Types;
 using MonoBallFramework.Game.GameSystems.Pathfinding;
 using EcsQueries = MonoBallFramework.Game.Engine.Systems.Queries.Queries;
 
@@ -123,8 +124,15 @@ public class PathfindingSystem : SystemBase, IUpdateSystem
             targetWaypoint = movementRoute.CurrentWaypoint;
         }
 
+        // Ensure we have a valid map ID
+        if (position.MapId == null)
+        {
+            _logger?.LogWarning("Entity {Entity} has null MapId, cannot pathfind", entity.Id);
+            return;
+        }
+
         // Try to move toward the waypoint
-        if (!TryMoveTowardWaypoint(world, entity, currentPos, targetWaypoint, position.MapId))
+        if (!TryMoveTowardWaypoint(world, entity, currentPos, targetWaypoint, position.MapId!))
         {
             // Movement blocked - try to find alternative path to waypoint
             _logger?.LogDebug(
@@ -133,7 +141,7 @@ public class PathfindingSystem : SystemBase, IUpdateSystem
                 targetWaypoint
             );
 
-            TryFindAlternativePath(world, entity, currentPos, targetWaypoint, position.MapId);
+            TryFindAlternativePath(world, entity, currentPos, targetWaypoint, position.MapId!);
         }
     }
 
@@ -145,7 +153,7 @@ public class PathfindingSystem : SystemBase, IUpdateSystem
         Entity entity,
         Point current,
         Point target,
-        int mapId
+        GameMapId mapId
     )
     {
         // Calculate direction to target
@@ -192,7 +200,7 @@ public class PathfindingSystem : SystemBase, IUpdateSystem
         Entity entity,
         Point current,
         Point target,
-        int mapId
+        GameMapId mapId
     )
     {
         if (_spatialQuery == null)

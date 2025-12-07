@@ -70,7 +70,7 @@ public sealed class WarpEntitySpawner : IEntitySpawner
 
         // Create warp entity
         Entity warpEntity = context.World.Create(
-            new Position(tileX, tileY, context.MapRuntimeId, context.TileHeight),
+            new Position(tileX, tileY, context.MapId, context.TileHeight),
             new WarpPoint(targetMapId, targetX, targetY)
         );
 

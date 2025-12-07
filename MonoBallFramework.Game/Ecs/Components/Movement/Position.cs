@@ -32,16 +32,16 @@ public struct Position
     /// <summary>
     ///     Gets or sets the map identifier for multi-map support.
     /// </summary>
-    public MapRuntimeId MapId { get; set; }
+    public GameMapId? MapId { get; set; }
 
     /// <summary>
     ///     Initializes a new instance of the Position struct.
     /// </summary>
     /// <param name="x">Grid X coordinate.</param>
     /// <param name="y">Grid Y coordinate.</param>
-    /// <param name="mapId">Map identifier (default: 0).</param>
+    /// <param name="mapId">Map identifier (optional).</param>
     /// <param name="tileSize">Tile size in pixels (default: 16 for backward compatibility).</param>
-    public Position(int x, int y, MapRuntimeId mapId = default, int tileSize = 16)
+    public Position(int x, int y, GameMapId? mapId = null, int tileSize = 16)
     {
         X = x;
         Y = y;

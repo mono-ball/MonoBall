@@ -1,6 +1,7 @@
 using Arch.Core;
 using Microsoft.Xna.Framework;
 using MonoBallFramework.Game.Ecs.Components.Movement;
+using MonoBallFramework.Game.Engine.Core.Types;
 using MonoBallFramework.Game.Engine.Core.Types.Events;
 
 namespace MonoBallFramework.Game.GameSystems.Events;
@@ -125,7 +126,7 @@ public record MovementCompletedEvent : MovementEventBase
     /// <summary>
     ///     Map ID where movement occurred.
     /// </summary>
-    public int MapId { get; set; }
+    public GameMapId? MapId { get; set; }
 }
 
 /// <summary>
@@ -152,7 +153,7 @@ public record MovementBlockedEvent : MovementEventBase
     /// <summary>
     ///     Map ID where block occurred.
     /// </summary>
-    public int MapId { get; set; }
+    public GameMapId? MapId { get; set; }
 }
 
 /// <summary>

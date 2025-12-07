@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using MonoBallFramework.Game.Engine.Common.Logging;
+using MonoBallFramework.Game.Engine.Core.Types;
 using MonoBallFramework.Game.GameData.MapLoading.Tiled.Core;
 using MonoBallFramework.Game.GameData.MapLoading.Tiled.Services;
 using MonoBallFramework.Game.GameData.MapLoading.Tiled.Tmx;
@@ -29,7 +30,7 @@ public class MapLoadLogger
         int objectsCreated,
         int imageLayersCreated,
         int animatedTilesCreated,
-        int mapId,
+        GameMapId mapId,
         string tilesetId
     )
     {
@@ -45,7 +46,7 @@ public class MapLoadLogger
 
         _logger?.LogDebug(
             "[dim]MapId:[/] [grey]{MapId}[/] [dim]|[/] [dim]Animated:[/] [yellow]{AnimatedCount}[/] [dim]|[/] [dim]Tileset:[/] [cyan]{TilesetId}[/]",
-            mapId,
+            mapId.Value,
             animatedTilesCreated,
             tilesetId
         );

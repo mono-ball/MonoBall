@@ -128,10 +128,14 @@ public static class ComponentDeserializerSetup
         {
             int x = json.GetProperty("x").GetInt32();
             int y = json.GetProperty("y").GetInt32();
-            int mapId = 0;
+            GameMapId? mapId = null;
             if (json.TryGetProperty("mapId", out JsonElement mapIdElement))
             {
-                mapId = mapIdElement.GetInt32();
+                string mapIdStr = mapIdElement.GetString() ?? string.Empty;
+                if (!string.IsNullOrEmpty(mapIdStr))
+                {
+                    mapId = new GameMapId(mapIdStr);
+                }
             }
 
             return new Position(x, y, mapId);

@@ -10,18 +10,19 @@ namespace MonoBallFramework.Game.Engine.Common.Utilities;
 /// <remarks>
 ///     Used for collision detection, proximity queries, and spatial searches.
 ///     Rebuilt each frame to handle moving entities.
+///     Uses string keys for GameMapId values (e.g., "base:map:hoenn/littleroot_town").
 /// </remarks>
 public class SpatialHash
 {
     // Map[MapId][TileX, TileY] → List<Entity>
-    private readonly Dictionary<int, Dictionary<(int x, int y), List<Entity>>> _grid;
+    private readonly Dictionary<string, Dictionary<(int x, int y), List<Entity>>> _grid;
 
     /// <summary>
     ///     Initializes a new instance of the SpatialHash class.
     /// </summary>
     public SpatialHash()
     {
-        _grid = new Dictionary<int, Dictionary<(int x, int y), List<Entity>>>();
+        _grid = new Dictionary<string, Dictionary<(int x, int y), List<Entity>>>();
     }
 
     /// <summary>
@@ -41,10 +42,10 @@ public class SpatialHash
     ///     Adds an entity to the spatial hash at the specified position.
     /// </summary>
     /// <param name="entity">The entity to add.</param>
-    /// <param name="mapId">The map identifier.</param>
+    /// <param name="mapId">The map identifier (GameMapId.Value string).</param>
     /// <param name="x">The X tile coordinate.</param>
     /// <param name="y">The Y tile coordinate.</param>
-    public void Add(Entity entity, int mapId, int x, int y)
+    public void Add(Entity entity, string mapId, int x, int y)
     {
         // Ensure map exists
         if (!_grid.TryGetValue(mapId, out Dictionary<(int x, int y), List<Entity>>? mapGrid))
@@ -69,11 +70,11 @@ public class SpatialHash
     ///     Removes an entity from the spatial hash at the specified position.
     /// </summary>
     /// <param name="entity">The entity to remove.</param>
-    /// <param name="mapId">The map identifier.</param>
+    /// <param name="mapId">The map identifier (GameMapId.Value string).</param>
     /// <param name="x">The X tile coordinate.</param>
     /// <param name="y">The Y tile coordinate.</param>
     /// <returns>True if the entity was removed, false if not found.</returns>
-    public bool Remove(Entity entity, int mapId, int x, int y)
+    public bool Remove(Entity entity, string mapId, int x, int y)
     {
         if (!_grid.TryGetValue(mapId, out Dictionary<(int x, int y), List<Entity>>? mapGrid))
         {
@@ -92,11 +93,11 @@ public class SpatialHash
     /// <summary>
     ///     Gets all entities at the specified position.
     /// </summary>
-    /// <param name="mapId">The map identifier.</param>
+    /// <param name="mapId">The map identifier (GameMapId.Value string).</param>
     /// <param name="x">The X tile coordinate.</param>
     /// <param name="y">The Y tile coordinate.</param>
     /// <returns>Collection of entities at this position, or empty if none.</returns>
-    public IEnumerable<Entity> GetAt(int mapId, int x, int y)
+    public IEnumerable<Entity> GetAt(string mapId, int x, int y)
     {
         if (!_grid.TryGetValue(mapId, out Dictionary<(int x, int y), List<Entity>>? mapGrid))
         {
@@ -115,10 +116,10 @@ public class SpatialHash
     /// <summary>
     ///     Gets all entities within the specified bounds.
     /// </summary>
-    /// <param name="mapId">The map identifier.</param>
+    /// <param name="mapId">The map identifier (GameMapId.Value string).</param>
     /// <param name="bounds">The bounding rectangle in tile coordinates.</param>
     /// <returns>Collection of entities within the bounds.</returns>
-    public IEnumerable<Entity> GetInBounds(int mapId, Rectangle bounds)
+    public IEnumerable<Entity> GetInBounds(string mapId, Rectangle bounds)
     {
         if (!_grid.TryGetValue(mapId, out Dictionary<(int x, int y), List<Entity>>? mapGrid))
         {

@@ -9,7 +9,7 @@ public sealed class MapRenderReadyEvent : NotificationEventBase
     /// <summary>
     ///     Gets or sets the ID of the loaded map.
     /// </summary>
-    public int MapId { get; set; }
+    public string MapId { get; set; } = string.Empty;
 
     /// <summary>
     ///     Gets or sets the name of the loaded map.
@@ -26,7 +26,7 @@ public sealed class MapRenderReadyEvent : NotificationEventBase
     public override void Reset()
     {
         base.Reset();
-        MapId = 0;
+        MapId = string.Empty;
         MapName = string.Empty;
         RegionName = null;
     }

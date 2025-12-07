@@ -10,25 +10,24 @@ namespace MonoBallFramework.Game.GameSystems.Services;
 /// </summary>
 public class MapRegistry
 {
-    private readonly ConcurrentDictionary<MapRuntimeId, byte> _loadedMaps = new();
-    private readonly ConcurrentDictionary<MapRuntimeId, string> _mapIdToName = new();
-    private readonly ConcurrentDictionary<string, MapRuntimeId> _mapNameToId = new();
-    private int _nextMapId;
+    private readonly ConcurrentDictionary<string, byte> _loadedMaps = new();
+    private readonly ConcurrentDictionary<string, string> _mapIdToName = new();
+    private readonly ConcurrentDictionary<string, GameMapId> _mapNameToId = new();
 
     /// <summary>
     ///     Gets or creates a unique ID for a map name.
     ///     Thread-safe using ConcurrentDictionary.GetOrAdd pattern.
     /// </summary>
     /// <param name="mapName">The map name (without extension).</param>
-    /// <returns>Unique map runtime ID.</returns>
-    public MapRuntimeId GetOrCreateMapId(string mapName)
+    /// <returns>Unique GameMapId.</returns>
+    public GameMapId GetOrCreateMapId(string mapName)
     {
         return _mapNameToId.GetOrAdd(
             mapName,
             name =>
             {
-                var newId = new MapRuntimeId(Interlocked.Increment(ref _nextMapId) - 1);
-                _mapIdToName.TryAdd(newId, name);
+                var newId = new GameMapId(name);
+                _mapIdToName.TryAdd(newId.Value, name);
                 return newId;
             }
         );
@@ -38,60 +37,60 @@ public class MapRegistry
     ///     Gets the map ID for a map name.
     /// </summary>
     /// <param name="mapName">The map name.</param>
-    /// <returns>Map runtime ID if found, null if not registered.</returns>
-    public MapRuntimeId? GetMapId(string mapName)
+    /// <returns>GameMapId if found, null if not registered.</returns>
+    public GameMapId? GetMapId(string mapName)
     {
-        return _mapNameToId.TryGetValue(mapName, out MapRuntimeId id) ? id : null;
+        return _mapNameToId.TryGetValue(mapName, out GameMapId id) ? id : null;
     }
 
     /// <summary>
     ///     Gets the map name for a map ID.
     /// </summary>
-    /// <param name="mapId">The map runtime ID.</param>
+    /// <param name="mapId">The GameMapId.</param>
     /// <returns>Map name if found, null if not registered.</returns>
-    public string? GetMapName(MapRuntimeId mapId)
+    public string? GetMapName(GameMapId mapId)
     {
-        return _mapIdToName.TryGetValue(mapId, out string? name) ? name : null;
+        return _mapIdToName.TryGetValue(mapId.Value, out string? name) ? name : null;
     }
 
     /// <summary>
     ///     Marks a map as loaded.
     ///     Thread-safe using ConcurrentDictionary.
     /// </summary>
-    /// <param name="mapId">The map runtime ID.</param>
-    public void MarkMapLoaded(MapRuntimeId mapId)
+    /// <param name="mapId">The GameMapId.</param>
+    public void MarkMapLoaded(GameMapId mapId)
     {
-        _loadedMaps.TryAdd(mapId, 0);
+        _loadedMaps.TryAdd(mapId.Value, 0);
     }
 
     /// <summary>
     ///     Marks a map as unloaded.
     ///     Thread-safe using ConcurrentDictionary.
     /// </summary>
-    /// <param name="mapId">The map runtime ID.</param>
-    public void MarkMapUnloaded(MapRuntimeId mapId)
+    /// <param name="mapId">The GameMapId.</param>
+    public void MarkMapUnloaded(GameMapId mapId)
     {
-        _loadedMaps.TryRemove(mapId, out _);
+        _loadedMaps.TryRemove(mapId.Value, out _);
     }
 
     /// <summary>
     ///     Checks if a map is currently loaded.
     ///     Thread-safe using ConcurrentDictionary.
     /// </summary>
-    /// <param name="mapId">The map runtime ID.</param>
+    /// <param name="mapId">The GameMapId.</param>
     /// <returns>True if loaded, false otherwise.</returns>
-    public bool IsMapLoaded(MapRuntimeId mapId)
+    public bool IsMapLoaded(GameMapId mapId)
     {
-        return _loadedMaps.ContainsKey(mapId);
+        return _loadedMaps.ContainsKey(mapId.Value);
     }
 
     /// <summary>
     ///     Gets all currently loaded map IDs.
     ///     Thread-safe snapshot using ConcurrentDictionary.Keys.
     /// </summary>
-    /// <returns>Collection of loaded map runtime IDs.</returns>
-    public IEnumerable<MapRuntimeId> GetLoadedMapIds()
+    /// <returns>Collection of loaded GameMapIds.</returns>
+    public IEnumerable<GameMapId> GetLoadedMapIds()
     {
-        return _loadedMaps.Keys;
+        return _loadedMaps.Keys.Select(k => new GameMapId(k));
     }
 }

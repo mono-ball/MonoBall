@@ -73,7 +73,7 @@ public class ElevationRenderSystem(
     >();
 
     // Cache map world origins for multi-map rendering (updated per frame)
-    private readonly Dictionary<int, Vector2> _mapWorldOrigins = new(10);
+    private readonly Dictionary<string, Vector2> _mapWorldOrigins = new(10);
 
     // Map world position query for multi-map streaming
     private readonly QueryDescription _mapWorldPosQuery = QueryCache.Get<
@@ -122,7 +122,7 @@ public class ElevationRenderSystem(
     private Matrix _cachedCameraTransform = Matrix.Identity;
 
     // Cached player's current map ID (for border rendering)
-    private int _cachedPlayerMapId = -1;
+    private string? _cachedPlayerMapId;
 
     // Performance profiling
     private bool _enableDetailedProfiling;
@@ -559,7 +559,7 @@ public class ElevationRenderSystem(
             in _playerPositionQuery,
             (ref Position pos) =>
             {
-                _cachedPlayerMapId = pos.MapId.Value;
+                _cachedPlayerMapId = pos.MapId?.Value;
             }
         );
     }
@@ -591,13 +591,14 @@ public class ElevationRenderSystem(
             in _mapWorldPosQuery,
             (ref MapInfo mapInfo, ref MapWorldPosition worldPos) =>
             {
-                _mapWorldOrigins[mapInfo.MapId.Value] = worldPos.WorldOrigin;
+                string mapIdValue = mapInfo.MapId.Value;
+                _mapWorldOrigins[mapIdValue] = worldPos.WorldOrigin;
 
                 // Cache map bounds for border exclusion
                 _cachedMapBounds.Add(
                     new MapBoundsInfo
                     {
-                        MapId = mapInfo.MapId.Value,
+                        MapIdValue = mapIdValue,
                         WorldOrigin = worldPos.WorldOrigin,
                         MapWidth = mapInfo.Width,
                         MapHeight = mapInfo.Height,
@@ -639,8 +640,9 @@ public class ElevationRenderSystem(
                 ) =>
                 {
                     // Get map world origin for multi-map rendering (needed for culling)
-                    Vector2 worldOrigin = _mapWorldOrigins.TryGetValue(
-                        pos.MapId.Value,
+                    string? mapIdValue = pos.MapId?.Value;
+                    Vector2 worldOrigin = mapIdValue != null && _mapWorldOrigins.TryGetValue(
+                        mapIdValue,
                         out Vector2 origin
                     )
                         ? origin
@@ -699,10 +701,12 @@ public class ElevationRenderSystem(
                     }
 
                     // Calculate elevation-based layer depth with MapId-aware sorting
+                    // Use index in cached bounds as render order (string maps don't have numeric IDs)
+                    int mapRenderOrder = GetMapRenderOrder(mapIdValue);
                     float layerDepth = CalculateElevationDepth(
                         elevation.Value,
                         _reusablePosition.Y,
-                        pos.MapId.Value
+                        mapRenderOrder
                     );
 
                     // Apply flip flags from Tiled
@@ -847,10 +851,11 @@ public class ElevationRenderSystem(
                 groundY = (position.Y + 1) * TileSize;
             }
 
+            int mapRenderOrder = GetMapRenderOrder(position.MapId?.Value);
             float layerDepth = CalculateElevationDepth(
                 elevation.Value,
                 groundY,
-                position.MapId.Value
+                mapRenderOrder
             );
 
             // Determine sprite effects (flip horizontal for left-facing)
@@ -926,10 +931,11 @@ public class ElevationRenderSystem(
             // The pixel position is just the visual interpolation for smooth movement.
             // For a 16x16 tile grid, the entity's ground Y is at the bottom of their grid tile.
             float groundY = (position.Y + 1) * TileSize; // +1 because we want bottom of tile
+            int mapRenderOrder = GetMapRenderOrder(position.MapId?.Value);
             float layerDepth = CalculateElevationDepth(
                 elevation.Value,
                 groundY,
-                position.MapId.Value
+                mapRenderOrder
             );
 
             // Determine sprite effects (flip horizontal for left-facing)
@@ -1147,7 +1153,7 @@ public class ElevationRenderSystem(
                     _cachedMapBorders.Add(
                         new MapBorderInfo
                         {
-                            MapId = mapInfo.MapId.Value,
+                            MapIdValue = mapInfo.MapId.Value,
                             WorldOrigin = worldPos.WorldOrigin,
                             WidthInPixels = worldPos.WidthInPixels,
                             HeightInPixels = worldPos.HeightInPixels,
@@ -1171,7 +1177,7 @@ public class ElevationRenderSystem(
     /// <returns>Number of border tiles rendered.</returns>
     private int RenderBorders(World world)
     {
-        if (_cachedMapBorders.Count == 0 || !_cachedCameraBounds.HasValue || _cachedPlayerMapId < 0)
+        if (_cachedMapBorders.Count == 0 || !_cachedCameraBounds.HasValue || _cachedPlayerMapId == null)
         {
             return 0;
         }
@@ -1180,7 +1186,7 @@ public class ElevationRenderSystem(
         MapBorderInfo? playerMapBorder = null;
         foreach (MapBorderInfo borderInfo in _cachedMapBorders)
         {
-            if (borderInfo.MapId == _cachedPlayerMapId)
+            if (borderInfo.MapIdValue == _cachedPlayerMapId)
             {
                 playerMapBorder = borderInfo;
                 break;
@@ -1234,13 +1240,16 @@ public class ElevationRenderSystem(
                 _logger?.LogWarning(
                     "Border texture not found: TilesetId='{TilesetId}', MapId='{MapId}'",
                     border.TilesetId,
-                    primaryBorder.MapId
+                    primaryBorder.MapIdValue
                 );
                 _loggedBorderTextureWarning = true;
             }
 
             return 0;
         }
+
+        // Get render order for depth calculation
+        int borderMapRenderOrder = GetMapRenderOrder(primaryBorder.MapIdValue);
 
         Texture2D texture = AssetManager.GetTexture(border.TilesetId);
 
@@ -1274,7 +1283,7 @@ public class ElevationRenderSystem(
                     float bottomLayerDepth = CalculateElevationDepth(
                         Elevation.Default,
                         _reusablePosition.Y,
-                        primaryBorder.MapId
+                        borderMapRenderOrder
                     );
 
                     // Origin for bottom-left alignment (same as regular tiles)
@@ -1306,7 +1315,7 @@ public class ElevationRenderSystem(
                         float topLayerDepth = CalculateElevationDepth(
                             Elevation.Overhead,
                             _reusablePosition.Y,
-                            primaryBorder.MapId
+                            borderMapRenderOrder
                         );
 
                         _reusableTileOrigin.X = 0;
@@ -1365,11 +1374,34 @@ public class ElevationRenderSystem(
     }
 
     /// <summary>
+    ///     Gets a numeric render order for a map ID string.
+    ///     Used for depth sorting to prevent z-fighting between overlapping maps.
+    /// </summary>
+    private int GetMapRenderOrder(string? mapIdValue)
+    {
+        if (mapIdValue == null)
+        {
+            return 0;
+        }
+
+        // Find the index of this map in the cached bounds list
+        for (int i = 0; i < _cachedMapBounds.Count; i++)
+        {
+            if (_cachedMapBounds[i].MapIdValue == mapIdValue)
+            {
+                return i;
+            }
+        }
+
+        return 0;
+    }
+
+    /// <summary>
     ///     Cached border information for a single map.
     /// </summary>
     private struct MapBorderInfo
     {
-        public int MapId;
+        public string MapIdValue;
         public Vector2 WorldOrigin;
         public int WidthInPixels;
         public int HeightInPixels;
@@ -1385,7 +1417,7 @@ public class ElevationRenderSystem(
     /// </summary>
     private struct MapBoundsInfo
     {
-        public int MapId;
+        public string MapIdValue;
         public Vector2 WorldOrigin;
         public int MapWidth;
         public int MapHeight;

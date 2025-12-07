@@ -7,6 +7,7 @@ using MonoBallFramework.Game.Ecs.Components.Tiles;
 using MonoBallFramework.Game.Components.Interfaces;
 using MonoBallFramework.Game.Engine.Core.Events;
 using MonoBallFramework.Game.Engine.Core.Systems;
+using MonoBallFramework.Game.Engine.Core.Types;
 using MonoBallFramework.Game.GameSystems.Events;
 using MonoBallFramework.Game.GameSystems.Services;
 
@@ -71,13 +72,19 @@ public class CollisionService : ICollisionService
     ///     </para>
     /// </remarks>
     public bool IsPositionWalkable(
-        int mapId,
+        GameMapId? mapId,
         int tileX,
         int tileY,
         Direction fromDirection = Direction.None,
         byte entityElevation = Elevation.Default
     )
     {
+        // Return true if no map ID (entity not on any map)
+        if (mapId == null)
+        {
+            return true;
+        }
+
         // EVENT-DRIVEN: Publish CollisionCheckEvent for script interception (using pooling)
         if (_eventBus != null)
         {
@@ -91,7 +98,7 @@ public class CollisionService : ICollisionService
                 checkEvent.TypeId = "collision.check";
                 checkEvent.Timestamp = 0f; // TODO: Get actual game time when available
                 checkEvent.Entity = Entity.Null; // Entity reference not available in service layer
-                checkEvent.MapId = mapId;
+                checkEvent.MapId = mapId.Value.GetHashCode(); // TODO: Update event to use GameMapId
                 checkEvent.TilePosition = (tileX, tileY);
                 checkEvent.FromDirection = fromDirection;
                 checkEvent.ToDirection = toDirection;
@@ -131,7 +138,7 @@ public class CollisionService : ICollisionService
         }
 
         // Get all entities at this position from spatial hash
-        IReadOnlyList<Entity> entities = _spatialQuery.GetEntitiesAt(mapId, tileX, tileY);
+        IReadOnlyList<Entity> entities = _spatialQuery.GetEntitiesAt(mapId.Value, tileX, tileY);
 
         foreach (Entity entity in entities)
         {
@@ -249,13 +256,19 @@ public class CollisionService : ICollisionService
     ///     Result: ~75% reduction in collision query overhead (6.25ms -> ~1.5ms)
     /// </remarks>
     public (bool isJumpTile, Direction allowedJumpDir, bool isWalkable) GetTileCollisionInfo(
-        int mapId,
+        GameMapId? mapId,
         int tileX,
         int tileY,
         byte entityElevation,
         Direction fromDirection
     )
     {
+        // Return safe defaults if no map ID
+        if (mapId == null)
+        {
+            return (false, Direction.None, true);
+        }
+
         // EVENT-DRIVEN: Publish CollisionCheckEvent for script interception (using pooling)
         if (_eventBus != null)
         {
@@ -269,7 +282,7 @@ public class CollisionService : ICollisionService
                 checkEvent.TypeId = "collision.check";
                 checkEvent.Timestamp = 0f;
                 checkEvent.Entity = Entity.Null;
-                checkEvent.MapId = mapId;
+                checkEvent.MapId = mapId.Value.GetHashCode(); // TODO: Update event to use GameMapId
                 checkEvent.TilePosition = (tileX, tileY);
                 checkEvent.FromDirection = fromDirection;
                 checkEvent.ToDirection = toDirection;
@@ -301,7 +314,7 @@ public class CollisionService : ICollisionService
         }
 
         // OPTIMIZATION: Single spatial query instead of 2-3 separate queries
-        IReadOnlyList<Entity> entities = _spatialQuery.GetEntitiesAt(mapId, tileX, tileY);
+        IReadOnlyList<Entity> entities = _spatialQuery.GetEntitiesAt(mapId.Value, tileX, tileY);
 
         bool isJumpTile = false;
         Direction allowedJumpDir = Direction.None;
@@ -415,7 +428,7 @@ public class CollisionService : ICollisionService
     private void PublishCollisionDetected(
         Entity entity,
         Entity collidedWith,
-        int mapId,
+        GameMapId mapId,
         int tileX,
         int tileY,
         Direction direction,
@@ -435,7 +448,7 @@ public class CollisionService : ICollisionService
             detectedEvent.Timestamp = 0f; // TODO: Get actual game time when available
             detectedEvent.Entity = entity;
             detectedEvent.CollidedWith = collidedWith;
-            detectedEvent.MapId = mapId;
+            detectedEvent.MapId = mapId.GetHashCode(); // TODO: Update event to use GameMapId
             detectedEvent.TilePosition = (tileX, tileY);
             detectedEvent.CollisionDirection = direction;
             detectedEvent.CollisionType = collisionType;
@@ -453,7 +466,7 @@ public class CollisionService : ICollisionService
             collidedWith,
             tileX,
             tileY,
-            mapId,
+            mapId.Value,
             collisionType
         );
     }
@@ -469,7 +482,7 @@ public class CollisionService : ICollisionService
     /// <param name="strategy">Resolution strategy used.</param>
     private void PublishCollisionResolved(
         Entity entity,
-        int mapId,
+        GameMapId mapId,
         (int X, int Y) originalTarget,
         (int X, int Y) finalPosition,
         bool wasBlocked,
@@ -488,7 +501,7 @@ public class CollisionService : ICollisionService
             resolvedEvent.TypeId = "collision.resolved";
             resolvedEvent.Timestamp = 0f; // TODO: Get actual game time when available
             resolvedEvent.Entity = entity;
-            resolvedEvent.MapId = mapId;
+            resolvedEvent.MapId = mapId.GetHashCode(); // TODO: Update event to use GameMapId
             resolvedEvent.OriginalTarget = originalTarget;
             resolvedEvent.FinalPosition = finalPosition;
             resolvedEvent.WasBlocked = wasBlocked;
@@ -504,7 +517,7 @@ public class CollisionService : ICollisionService
         _logger?.LogDebug(
             "Collision resolved: Entity {Entity} on map {MapId}. Target: ({TargetX},{TargetY}), Final: ({FinalX},{FinalY}), Blocked: {Blocked}",
             entity,
-            mapId,
+            mapId.Value,
             originalTarget.X,
             originalTarget.Y,
             finalPosition.X,

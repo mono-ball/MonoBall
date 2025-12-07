@@ -48,7 +48,7 @@ public class LayerProcessor : ILayerProcessor
         World world,
         TmxDocument tmxDoc,
         Entity mapInfoEntity,
-        int mapId,
+        GameMapId mapId,
         IReadOnlyList<LoadedTileset> tilesets
     )
     {
@@ -129,7 +129,7 @@ public class LayerProcessor : ILayerProcessor
         World world,
         TmxDocument tmxDoc,
         Entity mapInfoEntity,
-        int mapId,
+        GameMapId mapId,
         IReadOnlyList<LoadedTileset> tilesets,
         TmxLayer layer,
         byte elevation,
@@ -297,7 +297,7 @@ public class LayerProcessor : ILayerProcessor
         EntityPool pool,
         List<TileData> tileDataList,
         IReadOnlyList<LoadedTileset> tilesets,
-        int mapId
+        GameMapId mapId
     )
     {
         var entities = new Entity[tileDataList.Count];

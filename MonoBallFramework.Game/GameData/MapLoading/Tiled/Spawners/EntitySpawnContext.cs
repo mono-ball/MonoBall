@@ -28,9 +28,9 @@ public sealed class EntitySpawnContext
     public required Entity MapInfoEntity { get; init; }
 
     /// <summary>
-    ///     Runtime ID of the current map.
+    ///     Game map ID of the current map.
     /// </summary>
-    public required MapRuntimeId MapRuntimeId { get; init; }
+    public required GameMapId MapId { get; init; }
 
     /// <summary>
     ///     Tile width for converting pixel X to tile coordinates.
@@ -66,7 +66,7 @@ public sealed class EntitySpawnContext
         var (x, y) = GetTilePosition();
         string name = TiledObject.Name ?? "(unnamed)";
         string type = TiledObject.Type ?? "(no type)";
-        return $"{type} '{name}' at tile ({x}, {y}) in map {MapRuntimeId}";
+        return $"{type} '{name}' at tile ({x}, {y}) in map {MapId}";
     }
 
     /// <summary>

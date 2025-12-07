@@ -2,6 +2,7 @@ using Arch.Core;
 using MonoBallFramework.Game.Engine.Systems.Management;
 using MonoBallFramework.Game.Components;
 using MonoBallFramework.Game.Ecs.Components;
+using MonoBallFramework.Game.Ecs.Components.GameState;
 using MonoBallFramework.Game.Ecs.Components.Maps;
 using MonoBallFramework.Game.Ecs.Components.Movement;
 using MonoBallFramework.Game.Ecs.Components.NPCs;
@@ -329,5 +330,19 @@ public static class Queries
     public static readonly QueryDescription MapWithWorldPosition = QueryCache.Get<
         MapInfo,
         MapWorldPosition
+    >();
+
+    // ============================================================================
+    // GAME STATE QUERIES
+    // ============================================================================
+
+    /// <summary>
+    ///     Game state singleton entity with flags and variables.
+    ///     Used by GameStateApiService and save/load systems.
+    /// </summary>
+    public static readonly QueryDescription GameStateEntity = QueryCache.Get<
+        GameState,
+        GameFlags,
+        GameVariables
     >();
 }

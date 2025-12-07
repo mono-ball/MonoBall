@@ -21,9 +21,9 @@ namespace MonoBallFramework.Game.Ecs.Components.Warps;
 public readonly struct WarpDestination
 {
     /// <summary>
-    ///     The runtime ID of the map the player warped to.
+    ///     The map ID the player warped to.
     /// </summary>
-    public MapRuntimeId MapId { get; init; }
+    public GameMapId MapId { get; init; }
 
     /// <summary>
     ///     The X tile coordinate where the player landed.
@@ -38,10 +38,10 @@ public readonly struct WarpDestination
     /// <summary>
     ///     Creates a new WarpDestination.
     /// </summary>
-    /// <param name="mapId">The map's runtime ID.</param>
+    /// <param name="mapId">The map ID.</param>
     /// <param name="x">The X tile coordinate.</param>
     /// <param name="y">The Y tile coordinate.</param>
-    public WarpDestination(MapRuntimeId mapId, int x, int y)
+    public WarpDestination(GameMapId mapId, int x, int y)
     {
         MapId = mapId;
         X = x;
@@ -55,7 +55,7 @@ public readonly struct WarpDestination
     /// <param name="x">The X coordinate to check.</param>
     /// <param name="y">The Y coordinate to check.</param>
     /// <returns>True if the position matches this destination.</returns>
-    public bool Matches(MapRuntimeId mapId, int x, int y)
+    public bool Matches(GameMapId? mapId, int x, int y)
     {
         return MapId == mapId && X == x && Y == y;
     }

@@ -323,7 +323,7 @@ public class MapStreamingSystem : SystemBase, IUpdateSystem
             {
                 MapInfo mapInfo = mapInfoEntity.Get<MapInfo>();
                 HashSet<string> tilesetTextureIds = _mapLoader.GetLoadedTextureIds(
-                    mapInfo.MapId.Value
+                    mapInfo.MapId
                 );
                 // Note: Sprites are loaded lazily, so pass empty set for streaming-loaded maps
                 _lifecycleManager.RegisterMap(
@@ -584,7 +584,7 @@ public class MapStreamingSystem : SystemBase, IUpdateSystem
         int tileSize
     )
     {
-        MapRuntimeId oldMapId = position.MapId;
+        GameMapId? oldMapId = position.MapId;
         int oldGridX = position.X;
         int oldGridY = position.Y;
 
@@ -630,7 +630,7 @@ public class MapStreamingSystem : SystemBase, IUpdateSystem
     ///     Publishes a MapTransitionEvent when the player crosses a map boundary.
     /// </summary>
     private void PublishMapTransitionEvent(
-        MapRuntimeId oldMapId,
+        GameMapId? oldMapId,
         string? oldMapName,
         (MapInfo Info, MapWorldPosition WorldPos, MapDefinition? Definition) newMapData
     )
@@ -672,7 +672,7 @@ public class MapStreamingSystem : SystemBase, IUpdateSystem
 
         _eventBus.PublishPooled<MapTransitionEvent>(evt =>
         {
-            evt.FromMapId = oldMapId.Value;
+            evt.FromMapId = oldMapId?.Value;
             evt.FromMapName = oldMapName;
             evt.ToMapId = newMapData.Info.MapId.Value;
             evt.ToMapName = displayName ?? newMapData.Info.MapName;
@@ -777,27 +777,27 @@ public class MapStreamingSystem : SystemBase, IUpdateSystem
                     )
                 )
                 {
-                    MapRuntimeId runtimeId = mapData.Info.MapId;
+                    GameMapId gameMapId = mapData.Info.MapId;
 
                     // Try to use MapLifecycleManager for proper cleanup (registered maps)
                     if (_lifecycleManager != null)
                     {
-                        _lifecycleManager.UnloadMap(runtimeId);
+                        _lifecycleManager.UnloadMap(gameMapId);
                         _logger?.LogInformation(
-                            "Unloaded map via lifecycle manager: {MapId} (RuntimeId: {RuntimeId})",
+                            "Unloaded map via lifecycle manager: {MapId} (GameMapId: {GameMapId})",
                             mapId.Value,
-                            runtimeId.Value
+                            gameMapId.Value
                         );
                     }
                     else
                     {
                         // Fallback: destroy entities directly if no lifecycle manager
-                        int destroyedCount = DestroyMapEntities(world, runtimeId);
+                        int destroyedCount = DestroyMapEntities(world, gameMapId);
                         _logger?.LogInformation(
-                            "Destroyed {Count} entities directly for map: {MapId} (RuntimeId: {RuntimeId})",
+                            "Destroyed {Count} entities directly for map: {MapId} (GameMapId: {GameMapId})",
                             destroyedCount,
                             mapId.Value,
-                            runtimeId.Value
+                            gameMapId.Value
                         );
                     }
                 }
@@ -828,7 +828,7 @@ public class MapStreamingSystem : SystemBase, IUpdateSystem
     ///     Destroys all entities belonging to a specific map using Arch.Relationships.
     ///     Used for cleaning up streaming-loaded maps which aren't registered with MapLifecycleManager.
     /// </summary>
-    private int DestroyMapEntities(World world, MapRuntimeId mapId)
+    private int DestroyMapEntities(World world, GameMapId mapId)
     {
         var entitiesToDestroy = new List<Entity>();
 

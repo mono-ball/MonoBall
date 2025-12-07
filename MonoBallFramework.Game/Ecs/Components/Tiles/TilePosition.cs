@@ -22,15 +22,15 @@ public struct TilePosition
     /// <summary>
     ///     Gets or sets the map identifier for multi-map support.
     /// </summary>
-    public MapRuntimeId MapId { get; set; }
+    public GameMapId? MapId { get; set; }
 
     /// <summary>
     ///     Initializes a new instance of the TilePosition struct.
     /// </summary>
     /// <param name="x">X coordinate in tile space.</param>
     /// <param name="y">Y coordinate in tile space.</param>
-    /// <param name="mapId">Map identifier.</param>
-    public TilePosition(int x, int y, MapRuntimeId mapId = default)
+    /// <param name="mapId">Map identifier (optional).</param>
+    public TilePosition(int x, int y, GameMapId? mapId = null)
     {
         X = x;
         Y = y;

@@ -73,8 +73,6 @@ public class MapLoader(
     private readonly ILogger<MapLoader>? _logger = logger;
     private readonly MapDefinitionService? _mapDefinitionService = mapDefinitionService;
 
-    // Initialize MapIdService
-
     // Initialize MapLoadLogger
     private readonly MapLoadLogger _mapLoadLogger = new(logger);
 
@@ -132,11 +130,6 @@ public class MapLoader(
     private readonly TilesetLoader _tilesetLoader = new(
         assetManager ?? throw new ArgumentNullException(nameof(assetManager))
     );
-
-    /// <summary>
-    ///     Gets the MapIdService for resolving map names to runtime IDs.
-    /// </summary>
-    public MapIdService MapIdService { get; } = new();
 
     /// <summary>
     ///     Loads a map from EF Core definition (NEW: Definition-based loading).
@@ -341,7 +334,7 @@ public class MapLoader(
         Vector2? worldOffset = null
     )
     {
-        MapRuntimeId mapId = MapIdService.GetMapIdFromIdentifier(mapDef.MapId);
+        GameMapId mapId = mapDef.MapId;
         // Use MapName (identifier like "oldale_town") NOT DisplayName ("Oldale Town")
         // MapStreamingSystem compares MapInfo.MapName against GameMapId.MapName
         string mapName = mapDef.MapId.MapName;
@@ -367,7 +360,7 @@ public class MapLoader(
             () =>
                 _tilesetLoader.LoadTilesets(tmxDoc, tiledFullPath),
             (w, doc, id, name, tilesets) =>
-                _mapMetadataFactory.CreateMapMetadataFromDefinition(w, doc, mapDef, id, tilesets)
+                _mapMetadataFactory.CreateMapMetadataFromDefinition(w, doc, mapDef, mapId, tilesets)
         );
     }
 
@@ -380,7 +373,7 @@ public class MapLoader(
         TmxDocument tmxDoc,
         MapLoadContext context,
         Func<List<LoadedTileset>> loadTilesets,
-        Func<World, TmxDocument, int, string, IReadOnlyList<LoadedTileset>, Entity> createMetadata
+        Func<World, TmxDocument, GameMapId, string, IReadOnlyList<LoadedTileset>, Entity> createMetadata
     )
     {
         // PHASE 2: Clear sprite IDs from previous map
@@ -485,7 +478,7 @@ public class MapLoader(
 
             _logger?.LogWorkflowStatus(
                 "Applied world offset to map entities",
-                ("mapId", context.MapId),
+                ("mapId", context.MapId.Value),
                 ("offsetX", context.WorldOffset.X),
                 ("offsetY", context.WorldOffset.Y)
             );
@@ -519,7 +512,7 @@ public class MapLoader(
 
         _logger?.LogWorkflowStatus(
             "MapWorldPosition component added",
-            ("mapId", context.MapId),
+            ("mapId", context.MapId.Value),
             ("offsetX", context.WorldOffset.X),
             ("offsetY", context.WorldOffset.Y),
             ("widthPixels", mapWorldPos.WidthInPixels),
@@ -561,12 +554,12 @@ public class MapLoader(
     ///     This enables multi-map rendering by positioning maps in a shared world coordinate space.
     /// </summary>
     /// <param name="world">The ECS world containing the entities.</param>
-    /// <param name="mapId">The map runtime ID to filter entities by.</param>
+    /// <param name="mapId">The game map ID to filter entities by.</param>
     /// <param name="worldOffset">The world-space offset in pixels.</param>
     /// <param name="tmxDoc">The Tiled map document (for map dimensions).</param>
     private void ApplyWorldOffsetToMapEntities(
         World world,
-        int mapId,
+        GameMapId mapId,
         Vector2 worldOffset,
         TmxDocument tmxDoc
     )
@@ -580,7 +573,7 @@ public class MapLoader(
             (Entity entity, ref Position pos) =>
             {
                 // Only update entities from this map
-                if (pos.MapId.Value != mapId)
+                if (pos.MapId == null || pos.MapId.Value != mapId.Value)
                 {
                     return;
                 }
@@ -596,29 +589,19 @@ public class MapLoader(
         _logger?.LogInformation(
             "Applied world offset to {Count} entities for map {MapId} (offset: {OffsetX}, {OffsetY})",
             entitiesUpdated,
-            mapId,
+            mapId.Value,
             worldOffset.X,
             worldOffset.Y
         );
     }
 
     /// <summary>
-    ///     Gets the map ID for a map name without loading it.
-    /// </summary>
-    /// <param name="mapName">The map name (without extension).</param>
-    /// <returns>Map runtime ID if the map has been loaded, null otherwise.</returns>
-    public MapRuntimeId? GetMapIdByName(string mapName)
-    {
-        return MapIdService.GetMapIdByName(mapName);
-    }
-
-    /// <summary>
     ///     Gets all texture IDs loaded for a specific map.
     ///     Used by MapLifecycleManager to track texture memory.
     /// </summary>
-    /// <param name="mapId">The map ID.</param>
+    /// <param name="mapId">The game map ID.</param>
     /// <returns>HashSet of texture IDs used by the map.</returns>
-    public HashSet<string> GetLoadedTextureIds(int mapId)
+    public HashSet<string> GetLoadedTextureIds(GameMapId mapId)
     {
         return _mapTextureTracker.GetLoadedTextureIds(mapId);
     }
@@ -639,7 +622,7 @@ public class MapLoader(
     /// </summary>
     private sealed class MapLoadContext
     {
-        public int MapId { get; init; }
+        public GameMapId MapId { get; init; } = null!;
         public string MapName { get; init; } = string.Empty;
         public string ImageLayerPath { get; init; } = string.Empty;
         public string LogIdentifier { get; init; } = string.Empty;

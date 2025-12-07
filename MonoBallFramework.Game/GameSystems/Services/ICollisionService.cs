@@ -1,5 +1,6 @@
 using MonoBallFramework.Game.Ecs.Components.Movement;
 using MonoBallFramework.Game.Ecs.Components.Rendering;
+using MonoBallFramework.Game.Engine.Core.Types;
 
 namespace MonoBallFramework.Game.GameSystems.Services;
 
@@ -24,7 +25,7 @@ public interface ICollisionService
     /// <param name="entityElevation">The elevation of the entity checking collision (default: standard elevation).</param>
     /// <returns>True if the position is walkable from this direction, false if blocked.</returns>
     bool IsPositionWalkable(
-        int mapId,
+        GameMapId? mapId,
         int tileX,
         int tileY,
         Direction fromDirection = Direction.None,
@@ -54,7 +55,7 @@ public interface ICollisionService
     ///     Result: ~75% reduction in collision query overhead (6.25ms -> ~1.5ms)
     /// </remarks>
     (bool isJumpTile, Direction allowedJumpDir, bool isWalkable) GetTileCollisionInfo(
-        int mapId,
+        GameMapId? mapId,
         int tileX,
         int tileY,
         byte entityElevation,

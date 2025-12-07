@@ -99,7 +99,7 @@ public sealed class NpcSpawner : IEntitySpawner
 
         // Create NPC entity with core components (same as npc/base + npc/generic templates)
         Entity npcEntity = context.World.Create(
-            new Position(tileX, tileY, context.MapRuntimeId, context.TileHeight),
+            new Position(tileX, tileY, context.MapId, context.TileHeight),
             new Sprite(spriteId),
             new Npc(GameNpcId.Create(npcId)),
             new Elevation(elevation),

@@ -46,7 +46,7 @@ public class PlayerFactory(
             (ref MapInfo mapInfo) =>
             {
                 tileSize = mapInfo.TileSize;
-                currentGameMapId = mapInfo.GameMapId;
+                currentGameMapId = mapInfo.MapId;
             }
         );
 
@@ -96,7 +96,7 @@ public class PlayerFactory(
             new Player(),
             new Name("PLAYER"),
             new Wallet(3000),
-            new Position(x, y, 0, tileSize),
+            new Position(x, y, currentGameMapId, tileSize),
             new Sprite(new GameSpriteId("base:sprite:players/may_normal")),
             new Elevation(3),
             new GridMovement(3.75f),

@@ -38,9 +38,9 @@ public class MapLifecycleManager(
     ILogger<MapLifecycleManager>? logger = null
 )
 {
-    private readonly Dictionary<MapRuntimeId, MapMetadata> _loadedMaps = new();
-    private MapRuntimeId? _currentMapId;
-    private MapRuntimeId? _previousMapId;
+    private readonly Dictionary<string, MapMetadata> _loadedMaps = new();
+    private GameMapId? _currentMapId;
+    private GameMapId? _previousMapId;
     private NPCBehaviorSystem? _npcBehaviorSystem;
 
     /// <summary>
@@ -56,19 +56,19 @@ public class MapLifecycleManager(
     /// <summary>
     ///     Gets the current active map ID
     /// </summary>
-    public MapRuntimeId? CurrentMapId => _currentMapId;
+    public GameMapId? CurrentMapId => _currentMapId;
 
     /// <summary>
     ///     Registers a newly loaded map with tileset and sprite textures
     /// </summary>
     public void RegisterMap(
-        MapRuntimeId mapId,
+        GameMapId mapId,
         string mapName,
         HashSet<string> tilesetTextureIds,
         HashSet<string> spriteTextureIds
     )
     {
-        _loadedMaps[mapId] = new MapMetadata(mapName, tilesetTextureIds, spriteTextureIds);
+        _loadedMaps[mapId.Value] = new MapMetadata(mapName, tilesetTextureIds, spriteTextureIds);
         logger?.LogWorkflowStatus(
             "Registered map",
             ("mapName", mapName),
@@ -81,21 +81,21 @@ public class MapLifecycleManager(
     /// <summary>
     ///     Transitions to a new map, cleaning up old map entities and textures
     /// </summary>
-    public void TransitionToMap(MapRuntimeId newMapId)
+    public void TransitionToMap(GameMapId newMapId)
     {
-        if (_currentMapId.HasValue && _currentMapId.Value == newMapId)
+        if (_currentMapId != null && _currentMapId.Value == newMapId.Value)
         {
             logger?.LogDebug("Already on map {MapId}, skipping transition", newMapId.Value);
             return;
         }
 
-        MapRuntimeId? oldMapId = _currentMapId;
+        GameMapId? oldMapId = _currentMapId;
         _previousMapId = _currentMapId;
         _currentMapId = newMapId;
 
         logger?.LogWorkflowStatus(
             "Map transition",
-            ("from", oldMapId?.Value ?? -1),
+            ("from", oldMapId?.Value ?? "None"),
             ("to", newMapId.Value)
         );
 
@@ -104,12 +104,14 @@ public class MapLifecycleManager(
 
         // Clean up old maps (keep current + previous for smooth transitions)
         var mapsToUnload = _loadedMaps
-            .Keys.Where(id => id != _currentMapId && id != _previousMapId)
+            .Keys.Where(id =>
+                (_currentMapId == null || id != _currentMapId.Value) &&
+                (_previousMapId == null || id != _previousMapId.Value))
             .ToList();
 
-        foreach (MapRuntimeId mapId in mapsToUnload)
+        foreach (string mapIdValue in mapsToUnload)
         {
-            UnloadMap(mapId);
+            UnloadMap(new GameMapId(mapIdValue));
         }
     }
 
@@ -117,7 +119,7 @@ public class MapLifecycleManager(
     ///     Publishes a MapTransitionEvent with map metadata for subscribers.
     ///     Extracts DisplayName and RegionSection from map entities.
     /// </summary>
-    private void PublishMapTransitionEvent(MapRuntimeId? oldMapId, MapRuntimeId newMapId)
+    private void PublishMapTransitionEvent(GameMapId? oldMapId, GameMapId newMapId)
     {
         if (eventBus == null)
         {
@@ -125,7 +127,7 @@ public class MapLifecycleManager(
         }
 
         // Get metadata for the new map
-        string? newMapName = _loadedMaps.TryGetValue(newMapId, out MapMetadata? newMetadata)
+        string? newMapName = _loadedMaps.TryGetValue(newMapId.Value, out MapMetadata? newMetadata)
             ? newMetadata.Name
             : null;
 
@@ -156,7 +158,7 @@ public class MapLifecycleManager(
         );
 
         // Get old map name if available
-        string? oldMapName = oldMapId.HasValue && _loadedMaps.TryGetValue(oldMapId.Value, out MapMetadata? oldMetadata)
+        string? oldMapName = oldMapId != null && _loadedMaps.TryGetValue(oldMapId.Value, out MapMetadata? oldMetadata)
             ? oldMetadata.Name
             : null;
 
@@ -181,9 +183,9 @@ public class MapLifecycleManager(
     /// <summary>
     ///     Unloads a specific map: destroys entities and unloads textures
     /// </summary>
-    public void UnloadMap(MapRuntimeId mapId)
+    public void UnloadMap(GameMapId mapId)
     {
-        if (!_loadedMaps.TryGetValue(mapId, out MapMetadata? metadata))
+        if (!_loadedMaps.TryGetValue(mapId.Value, out MapMetadata? metadata))
         {
             logger?.LogWarning("Attempted to unload unknown map: {MapId}", mapId.Value);
             return;
@@ -204,7 +206,7 @@ public class MapLifecycleManager(
         // 3. PHASE 2: Unload sprite textures for this map
         int spritesUnloaded = UnloadSpriteTextures(mapId, metadata.SpriteTextureIds);
 
-        _loadedMaps.Remove(mapId);
+        _loadedMaps.Remove(mapId.Value);
 
         logger?.LogWorkflowStatus(
             "Map unloaded",
@@ -220,7 +222,7 @@ public class MapLifecycleManager(
     ///     Uses BelongsToMap relationship for unified entity collection.
     ///     Pooled tile entities are released back to pool for reuse.
     /// </summary>
-    private int DestroyMapEntities(MapRuntimeId mapId)
+    private int DestroyMapEntities(GameMapId mapId)
     {
         // CRITICAL FIX: Collect entities first, then process (can't modify during query)
         var pooledEntities = new List<Entity>();
@@ -433,7 +435,7 @@ public class MapLifecycleManager(
     /// <summary>
     ///     PHASE 2: Unloads sprite textures for a map (with reference counting).
     /// </summary>
-    private int UnloadSpriteTextures(MapRuntimeId mapId, HashSet<string> spriteTextureKeys)
+    private int UnloadSpriteTextures(GameMapId mapId, HashSet<string> spriteTextureKeys)
     {
         try
         {
@@ -459,11 +461,13 @@ public class MapLifecycleManager(
     {
         logger?.LogWarning("Force cleanup triggered - unloading all inactive maps");
 
-        var mapsToUnload = _loadedMaps.Keys.Where(id => id != _currentMapId).ToList();
+        var mapsToUnload = _loadedMaps.Keys
+            .Where(id => _currentMapId == null || id != _currentMapId.Value)
+            .ToList();
 
-        foreach (MapRuntimeId mapId in mapsToUnload)
+        foreach (string mapIdValue in mapsToUnload)
         {
-            UnloadMap(mapId);
+            UnloadMap(new GameMapId(mapIdValue));
         }
 
         // PHASE 2: Clear sprite missing cache to free memory

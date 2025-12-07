@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using MonoBallFramework.Game.Engine.Core.Types;
 
 namespace MonoBallFramework.Game.GameData.MapLoading.Tiled.Services;
 
@@ -9,7 +10,7 @@ namespace MonoBallFramework.Game.GameData.MapLoading.Tiled.Services;
 public class MapTextureTracker
 {
     private readonly ILogger<MapTextureTracker>? _logger;
-    private readonly Dictionary<int, HashSet<string>> _mapTextureIds = new();
+    private readonly Dictionary<string, HashSet<string>> _mapTextureIds = new();
 
     public MapTextureTracker(ILogger<MapTextureTracker>? logger = null)
     {
@@ -19,9 +20,9 @@ public class MapTextureTracker
     /// <summary>
     ///     Tracks texture IDs used by a map for lifecycle management.
     /// </summary>
-    /// <param name="mapId">The map ID.</param>
+    /// <param name="mapId">The game map ID.</param>
     /// <param name="tilesets">List of loaded tilesets for the map.</param>
-    public void TrackMapTextures(int mapId, IReadOnlyList<LoadedTileset> tilesets)
+    public void TrackMapTextures(GameMapId mapId, IReadOnlyList<LoadedTileset> tilesets)
     {
         var textureIds = new HashSet<string>();
 
@@ -30,19 +31,19 @@ public class MapTextureTracker
             textureIds.Add(loadedTileset.TilesetId);
         }
 
-        _mapTextureIds[mapId] = textureIds;
-        _logger?.LogDebug("Tracked {Count} texture IDs for map {MapId}", textureIds.Count, mapId);
+        _mapTextureIds[mapId.Value] = textureIds;
+        _logger?.LogDebug("Tracked {Count} texture IDs for map {MapId}", textureIds.Count, mapId.Value);
     }
 
     /// <summary>
     ///     Gets all texture IDs loaded for a specific map.
     ///     Used by MapLifecycleManager to track texture memory.
     /// </summary>
-    /// <param name="mapId">The map ID.</param>
+    /// <param name="mapId">The game map ID.</param>
     /// <returns>HashSet of texture IDs used by the map.</returns>
-    public HashSet<string> GetLoadedTextureIds(int mapId)
+    public HashSet<string> GetLoadedTextureIds(GameMapId mapId)
     {
-        return _mapTextureIds.TryGetValue(mapId, out HashSet<string>? textureIds)
+        return _mapTextureIds.TryGetValue(mapId.Value, out HashSet<string>? textureIds)
             ? new HashSet<string>(textureIds) // Return copy to prevent external modification
             : new HashSet<string>();
     }

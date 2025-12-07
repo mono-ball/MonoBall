@@ -79,7 +79,7 @@ public sealed class TemplateEntitySpawner : IEntitySpawner
             builder =>
             {
                 // Override position with map coordinates
-                builder.OverrideComponent(new Position(tileX, tileY, context.MapRuntimeId, context.TileHeight));
+                builder.OverrideComponent(new Position(tileX, tileY, context.MapId, context.TileHeight));
 
                 // Apply elevation override if specified
                 byte? elevation = TiledPropertyParser.GetOptionalByte(props, "elevation", errorContext);

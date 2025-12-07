@@ -59,11 +59,11 @@ public class MovementSystem : SystemBase, IUpdateSystem
     private readonly ILogger<MovementSystem>? _logger;
 
     // Cache for map world offsets (reduces redundant queries)
-    private readonly Dictionary<int, Vector2> _mapWorldOffsetCache = new(10);
+    private readonly Dictionary<string, Vector2> _mapWorldOffsetCache = new(10);
     private readonly ISpatialQuery? _spatialQuery;
 
     // Cache for tile sizes per map (reduces redundant queries)
-    private readonly Dictionary<int, int> _tileSizeCache = new();
+    private readonly Dictionary<string, int> _tileSizeCache = new();
     private int _eventPublishCount;
 
     private ITileBehaviorSystem? _tileBehaviorSystem;
@@ -153,10 +153,10 @@ public class MovementSystem : SystemBase, IUpdateSystem
     ///     Invalidates cached map world offset when maps are loaded/unloaded.
     ///     Call this from MapStreamingSystem when map entities change.
     /// </summary>
-    /// <param name="mapId">Specific map ID to invalidate, or -1 to clear all cached offsets.</param>
-    public void InvalidateMapWorldOffset(int mapId = -1)
+    /// <param name="mapId">Specific map ID to invalidate, or null to clear all cached offsets.</param>
+    public void InvalidateMapWorldOffset(GameMapId? mapId = null)
     {
-        if (mapId < 0)
+        if (mapId == null)
         {
             _mapWorldOffsetCache.Clear();
             _tileSizeCache.Clear();
@@ -164,9 +164,11 @@ public class MovementSystem : SystemBase, IUpdateSystem
         }
         else
         {
-            _mapWorldOffsetCache.Remove(mapId);
-            _tileSizeCache.Remove(mapId);
-            _logger?.LogDebug("Invalidated cache for MapId={MapId}", mapId);
+            // mapId is a reference type, so after null check we can use it directly
+            // mapId.Value gets the string representation for dictionary key
+            _mapWorldOffsetCache.Remove(mapId.Value);
+            _tileSizeCache.Remove(mapId.Value);
+            _logger?.LogDebug("Invalidated cache for MapId={MapId}", mapId.Value);
         }
     }
 
@@ -219,8 +221,15 @@ public class MovementSystem : SystemBase, IUpdateSystem
 
                 // Recalculate grid coordinates from world pixels in case MapId changed during movement
                 // (e.g., player crossed map boundary during interpolation)
-                int tileSize = GetTileSize(world, position.MapId);
-                Vector2 mapOffset = GetMapWorldOffset(world, position.MapId);
+                // Skip if no map assigned
+                if (position.MapId == null)
+                {
+                    movement.CompleteMovement();
+                    return;
+                }
+
+                int tileSize = GetTileSize(world, new GameMapId(position.MapId.Value));
+                Vector2 mapOffset = GetMapWorldOffset(world, new GameMapId(position.MapId.Value));
                 position.X = (int)((position.PixelX - mapOffset.X) / tileSize);
                 position.Y = (int)((position.PixelY - mapOffset.Y) / tileSize);
 
@@ -245,7 +254,7 @@ public class MovementSystem : SystemBase, IUpdateSystem
                     // Copy ref parameter values before using
                     int newX = position.X;
                     int newY = position.Y;
-                    MapRuntimeId mapId = position.MapId;
+                    GameMapId? mapId = position.MapId;
                     Direction direction = movement.FacingDirection;
                     float movementSpeed = movement.MovementSpeed;
 
@@ -307,10 +316,13 @@ public class MovementSystem : SystemBase, IUpdateSystem
         {
             // Ensure pixel position matches grid position when not moving.
             // Must apply world offset for multi-map support
-            int tileSize = GetTileSize(world, position.MapId);
-            Vector2 mapOffset = GetMapWorldOffset(world, position.MapId);
-            position.PixelX = (position.X * tileSize) + mapOffset.X;
-            position.PixelY = (position.Y * tileSize) + mapOffset.Y;
+            if (position.MapId != null)
+            {
+                int tileSize = GetTileSize(world, new GameMapId(position.MapId.Value));
+                Vector2 mapOffset = GetMapWorldOffset(world, new GameMapId(position.MapId.Value));
+                position.PixelX = (position.X * tileSize) + mapOffset.X;
+                position.PixelY = (position.Y * tileSize) + mapOffset.Y;
+            }
 
             // Handle turn-in-place state (Pokemon Emerald behavior)
             if (movement.RunningState == RunningState.TurnDirection)
@@ -372,8 +384,15 @@ public class MovementSystem : SystemBase, IUpdateSystem
 
                 // Recalculate grid coordinates from world pixels in case MapId changed during movement
                 // (e.g., player crossed map boundary during interpolation)
-                int tileSize = GetTileSize(world, position.MapId);
-                Vector2 mapOffset = GetMapWorldOffset(world, position.MapId);
+                // Skip if no map assigned
+                if (position.MapId == null)
+                {
+                    movement.CompleteMovement();
+                    return;
+                }
+
+                int tileSize = GetTileSize(world, new GameMapId(position.MapId.Value));
+                Vector2 mapOffset = GetMapWorldOffset(world, new GameMapId(position.MapId.Value));
                 position.X = (int)((position.PixelX - mapOffset.X) / tileSize);
                 position.Y = (int)((position.PixelY - mapOffset.Y) / tileSize);
 
@@ -387,7 +406,7 @@ public class MovementSystem : SystemBase, IUpdateSystem
                     // Copy ref parameter values before using
                     int newX = position.X;
                     int newY = position.Y;
-                    MapRuntimeId mapId = position.MapId;
+                    GameMapId? mapId = position.MapId;
                     Direction direction = movement.FacingDirection;
                     float movementSpeed = movement.MovementSpeed;
 
@@ -437,10 +456,13 @@ public class MovementSystem : SystemBase, IUpdateSystem
         {
             // Ensure pixel position matches grid position when not moving
             // Must apply world offset for multi-map support
-            int tileSize = GetTileSize(world, position.MapId);
-            Vector2 mapOffset = GetMapWorldOffset(world, position.MapId);
-            position.PixelX = (position.X * tileSize) + mapOffset.X;
-            position.PixelY = (position.Y * tileSize) + mapOffset.Y;
+            if (position.MapId != null)
+            {
+                int tileSize = GetTileSize(world, new GameMapId(position.MapId.Value));
+                Vector2 mapOffset = GetMapWorldOffset(world, new GameMapId(position.MapId.Value));
+                position.PixelX = (position.X * tileSize) + mapOffset.X;
+                position.PixelY = (position.Y * tileSize) + mapOffset.Y;
+            }
 
             // For entities without animation, turn-in-place completes immediately
             // since there's no animation to wait for
@@ -500,8 +522,14 @@ public class MovementSystem : SystemBase, IUpdateSystem
         Direction direction
     )
     {
+        // Skip if no map assigned
+        if (position.MapId == null)
+        {
+            return;
+        }
+
         // Get tile size for this map (cached for performance)
-        int tileSize = GetTileSize(world, position.MapId);
+        int tileSize = GetTileSize(world, new GameMapId(position.MapId.Value));
 
         // Calculate target grid position
         int targetX = position.X;
@@ -526,7 +554,7 @@ public class MovementSystem : SystemBase, IUpdateSystem
         }
 
         // Get map world offset for event publishing
-        Vector2 mapOffset = GetMapWorldOffset(world, position.MapId);
+        Vector2 mapOffset = GetMapWorldOffset(world, new GameMapId(position.MapId.Value));
         var targetPixels = new Vector2(
             (targetX * tileSize) + mapOffset.X,
             (targetY * tileSize) + mapOffset.Y
@@ -542,7 +570,7 @@ public class MovementSystem : SystemBase, IUpdateSystem
             // Copy ref parameter values before using in event
             float startPixelX = position.PixelX;
             float startPixelY = position.PixelY;
-            MapRuntimeId mapId = position.MapId;
+            GameMapId mapId = new GameMapId(position.MapId.Value);
 
             // IMPORTANT: Use cached pool directly (eliminates dictionary lookup overhead)
             MovementStartedEvent startEvent = _startedEventPool.Rent();
@@ -599,15 +627,15 @@ public class MovementSystem : SystemBase, IUpdateSystem
         }
 
         // Check map boundaries
-        if (!IsWithinMapBounds(world, position.MapId, targetX, targetY))
+        if (!IsWithinMapBounds(world, new GameMapId(position.MapId.Value), targetX, targetY))
         {
-            _logger?.LogMovementBlocked(targetX, targetY, position.MapId);
+            _logger?.LogMovementBlocked(targetX, targetY, new GameMapId(position.MapId.Value));
 
             // Publish blocked event (using cached pool)
             if (_eventBus != null)
             {
                 // Copy ref parameter value
-                MapRuntimeId mapId = position.MapId;
+                GameMapId mapId = new GameMapId(position.MapId.Value);
 
                 MovementBlockedEvent blockedEvent = _blockedEventPool.Rent();
                 try
@@ -641,7 +669,7 @@ public class MovementSystem : SystemBase, IUpdateSystem
         if (_tileBehaviorSystem != null && _spatialQuery != null)
         {
             IReadOnlyList<Entity> currentTileEntities = _spatialQuery.GetEntitiesAt(
-                position.MapId,
+                position.MapId.Value,
                 position.X,
                 position.Y
             );
@@ -677,7 +705,7 @@ public class MovementSystem : SystemBase, IUpdateSystem
                         }
 
                         // Recheck bounds
-                        if (!IsWithinMapBounds(world, position.MapId, targetX, targetY))
+                        if (!IsWithinMapBounds(world, new GameMapId(position.MapId.Value), targetX, targetY))
                         {
                             return;
                         }
@@ -694,7 +722,7 @@ public class MovementSystem : SystemBase, IUpdateSystem
         // After: GetTileCollisionInfo() = 1 query
         (bool isJumpTile, Direction allowedJumpDir, bool isTargetWalkable) =
             _collisionService.GetTileCollisionInfo(
-                position.MapId,
+                new GameMapId(position.MapId.Value),
                 targetX,
                 targetY,
                 entityElevation,
@@ -728,7 +756,7 @@ public class MovementSystem : SystemBase, IUpdateSystem
                 }
 
                 // Check if landing position is within bounds
-                if (!IsWithinMapBounds(world, position.MapId, jumpLandX, jumpLandY))
+                if (!IsWithinMapBounds(world, new GameMapId(position.MapId.Value), jumpLandX, jumpLandY))
                 {
                     _logger?.LogJumpBlocked(jumpLandX, jumpLandY);
                     return; // Can't jump outside map bounds
@@ -736,7 +764,7 @@ public class MovementSystem : SystemBase, IUpdateSystem
 
                 // OPTIMIZATION: Query landing position collision info once
                 (_, _, bool isLandingWalkable) = _collisionService.GetTileCollisionInfo(
-                    position.MapId,
+                    new GameMapId(position.MapId.Value),
                     jumpLandX,
                     jumpLandY,
                     entityElevation,
@@ -754,7 +782,7 @@ public class MovementSystem : SystemBase, IUpdateSystem
                 var jumpStart = new Vector2(position.PixelX, position.PixelY);
 
                 // Get map world offset for multi-map support
-                Vector2 jumpMapOffset = GetMapWorldOffset(world, position.MapId);
+                Vector2 jumpMapOffset = GetMapWorldOffset(world, new GameMapId(position.MapId.Value));
                 var jumpEnd = new Vector2(
                     (jumpLandX * tileSize) + jumpMapOffset.X,
                     (jumpLandY * tileSize) + jumpMapOffset.Y
@@ -808,10 +836,10 @@ public class MovementSystem : SystemBase, IUpdateSystem
     /// <param name="world">The ECS world.</param>
     /// <param name="mapId">The map identifier.</param>
     /// <returns>Tile size in pixels (default: 16).</returns>
-    private int GetTileSize(World world, int mapId)
+    private int GetTileSize(World world, GameMapId mapId)
     {
-        // Cache lookup with lazy initialization
-        if (_tileSizeCache.TryGetValue(mapId, out int cachedSize))
+        // Cache lookup with lazy initialization (use mapId.Value as string key)
+        if (_tileSizeCache.TryGetValue(mapId.Value, out int cachedSize))
         {
             return cachedSize;
         }
@@ -822,14 +850,14 @@ public class MovementSystem : SystemBase, IUpdateSystem
             in EcsQueries.MapInfo,
             (ref MapInfo mapInfo) =>
             {
-                if (mapInfo.MapId == mapId)
+                if (mapInfo.MapId.Value == mapId.Value)
                 {
                     tileSize = mapInfo.TileSize;
                 }
             }
         );
 
-        _tileSizeCache[mapId] = tileSize;
+        _tileSizeCache[mapId.Value] = tileSize;
         return tileSize;
     }
 
@@ -841,10 +869,10 @@ public class MovementSystem : SystemBase, IUpdateSystem
     /// <param name="world">The ECS world.</param>
     /// <param name="mapId">The map identifier.</param>
     /// <returns>World offset in pixels (default: Vector2.Zero).</returns>
-    private Vector2 GetMapWorldOffset(World world, int mapId)
+    private Vector2 GetMapWorldOffset(World world, GameMapId mapId)
     {
-        // Cache lookup with lazy initialization
-        if (_mapWorldOffsetCache.TryGetValue(mapId, out Vector2 cachedOffset))
+        // Cache lookup with lazy initialization (use mapId.Value as string key)
+        if (_mapWorldOffsetCache.TryGetValue(mapId.Value, out Vector2 cachedOffset))
         {
             return cachedOffset;
         }
@@ -856,14 +884,14 @@ public class MovementSystem : SystemBase, IUpdateSystem
             in EcsQueries.MapWithWorldPosition,
             (ref MapInfo mapInfo, ref MapWorldPosition worldPos) =>
             {
-                if (mapInfo.MapId == mapId)
+                if (mapInfo.MapId.Value == mapId.Value)
                 {
                     worldOffset = worldPos.WorldOrigin;
                 }
             }
         );
 
-        _mapWorldOffsetCache[mapId] = worldOffset;
+        _mapWorldOffsetCache[mapId.Value] = worldOffset;
         return worldOffset;
     }
 
@@ -877,7 +905,7 @@ public class MovementSystem : SystemBase, IUpdateSystem
     /// <param name="tileX">The X coordinate in tile space.</param>
     /// <param name="tileY">The Y coordinate in tile space.</param>
     /// <returns>True if within bounds or adjacent to map edge (map connection possible), false if far outside.</returns>
-    private bool IsWithinMapBounds(World world, int mapId, int tileX, int tileY)
+    private bool IsWithinMapBounds(World world, GameMapId mapId, int tileX, int tileY)
     {
         // Use centralized query cache to avoid allocation
         bool? withinBounds = null; // null = no MapInfo found
@@ -886,7 +914,7 @@ public class MovementSystem : SystemBase, IUpdateSystem
             in EcsQueries.MapInfo,
             (ref MapInfo mapInfo) =>
             {
-                if (mapInfo.MapId == mapId)
+                if (mapInfo.MapId.Value == mapId.Value)
                 {
                     // Allow movement within current map bounds
                     if (tileX >= 0 && tileX < mapInfo.Width && tileY >= 0 && tileY < mapInfo.Height)

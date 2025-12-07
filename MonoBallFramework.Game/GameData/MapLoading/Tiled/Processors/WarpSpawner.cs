@@ -32,7 +32,7 @@ public class WarpSpawner
     /// <param name="world">The ECS world.</param>
     /// <param name="obj">The Tiled object with warp_event type.</param>
     /// <param name="mapInfoEntity">The map entity for relationship and spatial index.</param>
-    /// <param name="mapId">The current map's runtime ID.</param>
+    /// <param name="mapId">The current map's game map ID.</param>
     /// <param name="tileWidth">Tile width for coordinate conversion.</param>
     /// <param name="tileHeight">Tile height for coordinate conversion.</param>
     /// <returns>True if warp entity was created successfully.</returns>
@@ -40,7 +40,7 @@ public class WarpSpawner
         World world,
         TmxObject obj,
         Entity mapInfoEntity,
-        MapRuntimeId mapId,
+        GameMapId mapId,
         int tileWidth,
         int tileHeight
     )

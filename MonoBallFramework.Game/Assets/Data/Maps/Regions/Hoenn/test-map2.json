@@ -1,0 +1,9 @@
+{
+  "Id": "base:map:hoenn/test-map2",
+  "DisplayName": "Test Map 2",
+  "Type": "map",
+  "Region": "hoenn",
+  "Description": "",
+  "TiledPath": "Tiled/test-map2.json"
+}
+

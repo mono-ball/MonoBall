@@ -746,21 +746,21 @@ public static partial class LogTemplates
     public static void LogSpritesLoadedForMap(
         this ILogger logger,
         int loadedCount,
-        int mapId,
+        string mapId,
         int skippedCount
     )
     {
         string body =
-            $"[green]✓ Loaded[/] [yellow]{loadedCount}[/] new sprites for map [cyan]{mapId}[/] [grey]|[/] [grey]{skippedCount} already loaded[/]";
+            $"[green]✓ Loaded[/] [yellow]{loadedCount}[/] new sprites for map [cyan]{EscapeMarkup(mapId)}[/] [grey]|[/] [grey]{skippedCount} already loaded[/]";
         logger.LogInformation(LogFormatting.FormatTemplate(WithAccent(LogAccent.Map, body)));
     }
 
     /// <summary>
     ///     Logs sprites unloaded for map.
     /// </summary>
-    public static void LogSpritesUnloadedForMap(this ILogger logger, int count, int mapId)
+    public static void LogSpritesUnloadedForMap(this ILogger logger, int count, string mapId)
     {
-        string body = $"Unloaded [yellow]{count}[/] sprites for map [cyan]{mapId}[/]";
+        string body = $"Unloaded [yellow]{count}[/] sprites for map [cyan]{EscapeMarkup(mapId)}[/]";
         logger.LogInformation(LogFormatting.FormatTemplate(WithAccent(LogAccent.Map, body)));
     }
 
@@ -813,10 +813,10 @@ public static partial class LogTemplates
     /// <summary>
     ///     Logs sprites required for map (debug level).
     /// </summary>
-    public static void LogSpritesRequiredForMap(this ILogger logger, int mapId, int count)
+    public static void LogSpritesRequiredForMap(this ILogger logger, string mapId, int count)
     {
         string body =
-            $"Loading sprites for map [yellow]{mapId}[/] [grey]|[/] [grey]{count} sprites required[/]";
+            $"Loading sprites for map [yellow]{EscapeMarkup(mapId)}[/] [grey]|[/] [grey]{count} sprites required[/]";
         logger.LogDebug(LogFormatting.FormatTemplate(WithAccent(LogAccent.Map, body)));
     }
 
@@ -855,9 +855,9 @@ public static partial class LogTemplates
     /// <summary>
     ///     Logs no sprites tracked for map (debug level).
     /// </summary>
-    public static void LogNoSpritesForMap(this ILogger logger, int mapId)
+    public static void LogNoSpritesForMap(this ILogger logger, string mapId)
     {
-        string body = $"No sprites tracked for map [yellow]{mapId}[/]";
+        string body = $"No sprites tracked for map [yellow]{EscapeMarkup(mapId)}[/]";
         logger.LogDebug(LogFormatting.FormatTemplate(WithAccent(LogAccent.Map, body)));
     }
 

@@ -193,14 +193,14 @@ public class WarpExecutionSystem : SystemBase, IUpdateSystem
     /// </summary>
     private async Task ExecuteWarpAsync(World world, Entity playerEntity, WarpRequest request)
     {
-        MapRuntimeId? oldMapId = null;
+        GameMapId? oldMapId = null;
         string? oldMapName = null;
 
         try
         {
             // Store old map info before unloading (needed for MapTransitionEvent)
             oldMapId = _mapLifecycleManager!.CurrentMapId;
-            if (oldMapId.HasValue)
+            if (oldMapId != null)
             {
                 // Try to get old map name from the world
                 QueryDescription mapInfoQuery = new QueryDescription().WithAll<MapInfo>();
@@ -208,7 +208,7 @@ public class WarpExecutionSystem : SystemBase, IUpdateSystem
                     in mapInfoQuery,
                     (Entity entity, ref MapInfo info) =>
                     {
-                        if (info.MapId == oldMapId.Value)
+                        if (info.MapId == oldMapId)
                         {
                             oldMapName = info.MapName;
                         }
@@ -234,9 +234,9 @@ public class WarpExecutionSystem : SystemBase, IUpdateSystem
                 return;
             }
 
-            // Get the MapInfo to find the map's runtime ID
+            // Get the MapInfo to find the map's game ID
             MapInfo mapInfo = mapEntity.Value.Get<MapInfo>();
-            MapRuntimeId targetMapId = mapInfo.MapId;
+            GameMapId targetMapId = mapInfo.MapId;
             _logger?.LogDebug(
                 "Target map {MapName} loaded with ID {MapId}",
                 request.TargetMap.Value,
@@ -285,7 +285,7 @@ public class WarpExecutionSystem : SystemBase, IUpdateSystem
     private void TeleportPlayer(
         Entity playerEntity,
         WarpRequest request,
-        MapRuntimeId mapId,
+        GameMapId mapId,
         int tileSize
     )
     {
@@ -391,9 +391,9 @@ public class WarpExecutionSystem : SystemBase, IUpdateSystem
     private void PublishWarpTransitionEvent(
         World world,
         Entity mapEntity,
-        MapRuntimeId? oldMapId,
+        GameMapId? oldMapId,
         string? oldMapName,
-        MapRuntimeId newMapId
+        GameMapId newMapId
     )
     {
         if (_eventBus == null)

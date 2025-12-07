@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using MonoBallFramework.Game.Engine.Core.Types;
 
 namespace MonoBallFramework.Game.Engine.Common.Logging;
 
@@ -14,7 +15,7 @@ public static partial class LogMessages
         Level = LogLevel.Debug,
         Message = "Movement blocked: out of bounds ({X}, {Y}) for map {MapId}"
     )]
-    public static partial void LogMovementBlocked(this ILogger logger, int x, int y, int mapId);
+    public static partial void LogMovementBlocked(this ILogger logger, int x, int y, GameMapId mapId);
 
     [LoggerMessage(
         EventId = 1001,

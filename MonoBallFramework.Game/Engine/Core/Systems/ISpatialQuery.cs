@@ -59,13 +59,13 @@ public interface ISpatialQuery
     /// <summary>
     ///     Gets all entities at the specified tile position.
     /// </summary>
-    /// <param name="mapId">The map identifier.</param>
+    /// <param name="mapId">The map identifier (GameMapId.Value string).</param>
     /// <param name="x">The X tile coordinate.</param>
     /// <param name="y">The Y tile coordinate.</param>
     /// <returns>Collection of entities at this position. May be empty but never null.</returns>
     /// <example>
     ///     <code>
-    /// var entities = spatialQuery.GetEntitiesAt(mapId: 1, x: 10, y: 5);
+    /// var entities = spatialQuery.GetEntitiesAt(mapId: "base:map:hoenn/littleroot_town", x: 10, y: 5);
     /// foreach (var entity in entities)
     /// {
     ///     if (entity.Has&lt;Collision&gt;())
@@ -75,20 +75,20 @@ public interface ISpatialQuery
     /// }
     /// </code>
     /// </example>
-    IReadOnlyList<Entity> GetEntitiesAt(int mapId, int x, int y);
+    IReadOnlyList<Entity> GetEntitiesAt(string mapId, int x, int y);
 
     /// <summary>
     ///     Gets all entities within the specified rectangular bounds.
     /// </summary>
-    /// <param name="mapId">The map identifier.</param>
+    /// <param name="mapId">The map identifier (GameMapId.Value string).</param>
     /// <param name="bounds">The bounding rectangle in tile coordinates.</param>
     /// <returns>Collection of entities within the bounds. May be empty but never null.</returns>
     /// <example>
     ///     <code>
     /// var searchArea = new Rectangle(x: 0, y: 0, width: 10, height: 10);
-    /// var entities = spatialQuery.GetEntitiesInBounds(mapId: 1, searchArea);
+    /// var entities = spatialQuery.GetEntitiesInBounds(mapId: "base:map:hoenn/littleroot_town", searchArea);
     /// // Process all entities in 10x10 tile area...
     /// </code>
     /// </example>
-    IReadOnlyList<Entity> GetEntitiesInBounds(int mapId, Rectangle bounds);
+    IReadOnlyList<Entity> GetEntitiesInBounds(string mapId, Rectangle bounds);
 }

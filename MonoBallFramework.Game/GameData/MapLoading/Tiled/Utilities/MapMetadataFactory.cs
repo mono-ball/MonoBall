@@ -32,7 +32,7 @@ public class MapMetadataFactory
         World world,
         TmxDocument tmxDoc,
         MapDefinition mapDef,
-        int mapId,
+        GameMapId mapId,
         IReadOnlyList<LoadedTileset> tilesets
     )
     {
@@ -40,7 +40,6 @@ public class MapMetadataFactory
         // Use GameMapId for unified identification and MapName (short name) for lookups
         var mapInfo = new MapInfo(
             mapId,
-            mapDef.MapId,
             mapDef.MapId.MapName,
             tmxDoc.Width,
             tmxDoc.Height,

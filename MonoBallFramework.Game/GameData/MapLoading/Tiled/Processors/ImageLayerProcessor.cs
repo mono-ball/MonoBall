@@ -42,7 +42,7 @@ public class ImageLayerProcessor
         World world,
         TmxDocument tmxDoc,
         Entity mapInfoEntity,
-        MapRuntimeId mapId,
+        GameMapId mapId,
         string mapPath,
         int totalLayerCount
     )

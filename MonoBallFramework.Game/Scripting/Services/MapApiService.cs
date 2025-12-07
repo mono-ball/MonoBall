@@ -25,7 +25,7 @@ public class MapApiService(
     private readonly World _world = world ?? throw new ArgumentNullException(nameof(world));
     private ISpatialQuery? _spatialQuery = spatialQuery;
 
-    public bool IsPositionWalkable(MapRuntimeId mapId, int x, int y)
+    public bool IsPositionWalkable(GameMapId mapId, int x, int y)
     {
         if (_spatialQuery == null)
         {
@@ -49,7 +49,7 @@ public class MapApiService(
         return true;
     }
 
-    public Entity[] GetEntitiesAt(MapRuntimeId mapId, int x, int y)
+    public Entity[] GetEntitiesAt(GameMapId mapId, int x, int y)
     {
         if (_spatialQuery == null)
         {
@@ -60,7 +60,7 @@ public class MapApiService(
         return [.. _spatialQuery.GetEntitiesAt(mapId.Value, x, y)];
     }
 
-    public MapRuntimeId GetCurrentMapId()
+    public GameMapId GetCurrentMapId()
     {
         Entity? playerEntity = GetPlayerEntity();
         if (playerEntity.HasValue && _world.Has<Position>(playerEntity.Value))
@@ -69,10 +69,10 @@ public class MapApiService(
             return position.MapId;
         }
 
-        return new MapRuntimeId(0);
+        return GameMapId.FromComponents("unknown");
     }
 
-    public void TransitionToMap(MapRuntimeId mapId, int x, int y)
+    public void TransitionToMap(GameMapId mapId, int x, int y)
     {
         Entity? playerEntity = GetPlayerEntity();
         if (playerEntity.HasValue && _world.Has<Position>(playerEntity.Value))
@@ -87,7 +87,7 @@ public class MapApiService(
         }
     }
 
-    public (int width, int height)? GetMapDimensions(MapRuntimeId mapId)
+    public (int width, int height)? GetMapDimensions(GameMapId mapId)
     {
         (int width, int height)? result = null;
 
@@ -144,7 +144,7 @@ public class MapApiService(
         return playerEntity;
     }
 
-    private int GetTileSize(MapRuntimeId mapId)
+    private int GetTileSize(GameMapId mapId)
     {
         int tileSize = 16;
 

@@ -2,6 +2,7 @@ using Arch.Core;
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
 using MonoBallFramework.Game.Ecs.Components.Tiles;
+using MonoBallFramework.Game.Engine.Core.Types;
 using MonoBallFramework.Game.Engine.Systems.Management;
 using MonoBallFramework.Game.GameData.MapLoading.Tiled.Services;
 using MonoBallFramework.Game.GameData.MapLoading.Tiled.Tmx;
@@ -29,13 +30,13 @@ public class AnimatedTileProcessor : IAnimatedTileProcessor
     /// <param name="tmxDoc">The TMX document.</param>
     /// <param name="mapInfoEntity">The map entity (unused - tiles already have BelongsToMap).</param>
     /// <param name="tilesets">Loaded tilesets.</param>
-    /// <param name="mapId">The map ID to filter tiles by (prevents cross-map corruption).</param>
+    /// <param name="mapId">The game map ID to filter tiles by (prevents cross-map corruption).</param>
     public int CreateAnimatedTileEntities(
         World world,
         TmxDocument tmxDoc,
         Entity mapInfoEntity,
         IReadOnlyList<LoadedTileset> tilesets,
-        int mapId
+        GameMapId mapId
     )
     {
         if (tilesets.Count == 0)
@@ -58,8 +59,8 @@ public class AnimatedTileProcessor : IAnimatedTileProcessor
     /// </summary>
     /// <param name="world">The ECS world.</param>
     /// <param name="tileset">The tileset to process.</param>
-    /// <param name="mapId">The map ID to filter tiles by (prevents cross-map corruption).</param>
-    private int CreateAnimatedTileEntitiesForTileset(World world, TmxTileset tileset, int mapId)
+    /// <param name="mapId">The game map ID to filter tiles by (prevents cross-map corruption).</param>
+    private int CreateAnimatedTileEntitiesForTileset(World world, TmxTileset tileset, GameMapId mapId)
     {
         if (tileset.Animations.Count == 0)
         {
@@ -153,7 +154,7 @@ public class AnimatedTileProcessor : IAnimatedTileProcessor
                 (Entity entity, ref TilePosition pos, ref TileSprite sprite) =>
                 {
                     // CRITICAL: Only process tiles belonging to THIS map
-                    if (pos.MapId.Value != mapId)
+                    if (pos.MapId == null || pos.MapId.Value != mapId.Value)
                     {
                         return;
                     }

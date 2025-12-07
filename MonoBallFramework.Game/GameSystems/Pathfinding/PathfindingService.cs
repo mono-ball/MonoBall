@@ -3,6 +3,7 @@ using Arch.Core.Extensions;
 using Microsoft.Xna.Framework;
 using MonoBallFramework.Game.Ecs.Components.Movement;
 using MonoBallFramework.Game.Engine.Core.Systems;
+using MonoBallFramework.Game.Engine.Core.Types;
 
 namespace MonoBallFramework.Game.GameSystems.Pathfinding;
 
@@ -28,7 +29,7 @@ public class PathfindingService
     public Queue<Point>? FindPath(
         Point start,
         Point goal,
-        int mapId,
+        GameMapId mapId,
         ISpatialQuery spatialQuery,
         int maxSearchNodes = 1000
     )
@@ -118,7 +119,7 @@ public class PathfindingService
     /// <param name="mapId">Map identifier</param>
     /// <param name="spatialQuery">Spatial query interface for collision detection</param>
     /// <returns>True if path is clear, false if blocked</returns>
-    public bool IsPathValid(Queue<Point> path, int mapId, ISpatialQuery spatialQuery)
+    public bool IsPathValid(Queue<Point> path, GameMapId mapId, ISpatialQuery spatialQuery)
     {
         foreach (Point point in path)
         {
@@ -139,7 +140,7 @@ public class PathfindingService
     /// <param name="mapId">Map identifier</param>
     /// <param name="spatialQuery">Spatial query interface for collision detection</param>
     /// <returns>Smoothed path with fewer waypoints</returns>
-    public Queue<Point> SmoothPath(Queue<Point> path, int mapId, ISpatialQuery spatialQuery)
+    public Queue<Point> SmoothPath(Queue<Point> path, GameMapId mapId, ISpatialQuery spatialQuery)
     {
         if (path.Count <= 2)
         {
@@ -179,7 +180,7 @@ public class PathfindingService
     /// <summary>
     ///     Checks if there's a clear line of sight between two points.
     /// </summary>
-    private bool HasLineOfSight(Point from, Point to, int mapId, ISpatialQuery spatialQuery)
+    private bool HasLineOfSight(Point from, Point to, GameMapId mapId, ISpatialQuery spatialQuery)
     {
         // Use Bresenham's line algorithm to check all tiles in the line
         IEnumerable<Point> points = GetLinePoints(from, to);
@@ -271,11 +272,11 @@ public class PathfindingService
     /// <summary>
     ///     Checks if a position is walkable (no collision).
     /// </summary>
-    private bool IsWalkable(Point position, int mapId, ISpatialQuery spatialQuery)
+    private bool IsWalkable(Point position, GameMapId mapId, ISpatialQuery spatialQuery)
     {
         // Use the same collision detection as CollisionService
         // Check if position is walkable by querying spatial hash for collision components
-        IReadOnlyList<Entity> entities = spatialQuery.GetEntitiesAt(mapId, position.X, position.Y);
+        IReadOnlyList<Entity> entities = spatialQuery.GetEntitiesAt(mapId.Value, position.X, position.Y);
 
         foreach (Entity entity in entities)
         {

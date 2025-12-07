@@ -222,7 +222,7 @@ public class GameplayScene : SceneBase
                 // Fire the event
                 _eventBus.PublishPooled<MapRenderReadyEvent>(evt =>
                 {
-                    evt.MapId = mapInfoCopy.MapId.Value;
+                    evt.MapId = mapInfoCopy.MapId.Value; // MapId.Value is string
                     evt.MapName = mapName;
                     evt.RegionName = regionSection;
                 });

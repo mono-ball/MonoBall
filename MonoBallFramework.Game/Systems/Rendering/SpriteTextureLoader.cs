@@ -20,7 +20,7 @@ public class SpriteTextureLoader
     private readonly IAssetPathResolver _pathResolver;
 
     // PHASE 2: Per-map sprite tracking for lazy loading
-    private readonly Dictionary<MapRuntimeId, HashSet<GameSpriteId>> _mapSpriteIds = new();
+    private readonly Dictionary<GameMapId, HashSet<GameSpriteId>> _mapSpriteIds = new();
 
     // Persistent sprites that should never be unloaded (e.g., UI elements)
     // Player sprites load on-demand from entity templates
@@ -211,7 +211,7 @@ public class SpriteTextureLoader
     /// <param name="spriteIds">Collection of sprite IDs needed for this map</param>
     /// <returns>HashSet of loaded texture keys</returns>
     public async Task<HashSet<string>> LoadSpritesForMapAsync(
-        MapRuntimeId mapId,
+        GameMapId mapId,
         IEnumerable<GameSpriteId> spriteIds
     )
     {
@@ -345,7 +345,7 @@ public class SpriteTextureLoader
     /// </summary>
     /// <param name="mapId">Map ID to unload sprites for</param>
     /// <returns>Number of sprites unloaded</returns>
-    public int UnloadSpritesForMap(MapRuntimeId mapId)
+    public int UnloadSpritesForMap(GameMapId mapId)
     {
         if (!_mapSpriteIds.TryGetValue(mapId, out HashSet<GameSpriteId>? spriteIds))
         {
@@ -380,7 +380,7 @@ public class SpriteTextureLoader
         // Remove map tracking
         _mapSpriteIds.Remove(mapId);
 
-        _logger?.LogSpritesUnloadedForMap(unloadedCount, mapId);
+        _logger?.LogSpritesUnloadedForMap(unloadedCount, mapId.Value);
         return unloadedCount;
     }
 

@@ -38,7 +38,7 @@ public sealed class MapObjectSpawner
     /// <param name="world">The ECS world.</param>
     /// <param name="tmxDoc">The Tiled map document.</param>
     /// <param name="mapInfoEntity">The map info entity for establishing relationships.</param>
-    /// <param name="mapId">The map runtime ID.</param>
+    /// <param name="mapId">The game map ID.</param>
     /// <param name="tileWidth">Tile width for X coordinate conversion.</param>
     /// <param name="tileHeight">Tile height for Y coordinate conversion.</param>
     /// <param name="requiredSpriteIds">Collection to track sprite IDs for lazy loading.</param>
@@ -47,7 +47,7 @@ public sealed class MapObjectSpawner
         World world,
         TmxDocument tmxDoc,
         Entity mapInfoEntity,
-        MapRuntimeId mapId,
+        GameMapId mapId,
         int tileWidth,
         int tileHeight,
         HashSet<GameSpriteId>? requiredSpriteIds = null)
@@ -65,7 +65,7 @@ public sealed class MapObjectSpawner
                     World = world,
                     TiledObject = obj,
                     MapInfoEntity = mapInfoEntity,
-                    MapRuntimeId = mapId,
+                    MapId = mapId,
                     TileWidth = tileWidth,
                     TileHeight = tileHeight,
                     RequiredSpriteIds = requiredSpriteIds

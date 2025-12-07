@@ -110,7 +110,7 @@ public class MapPopupOrchestrator : IMapPopupOrchestrator
     /// <summary>
     ///     Shows the popup for a given map if it has ShowMapNameOnEntry.
     /// </summary>
-    private void ShowPopupForMap(int mapId, string displayName, string? regionName)
+    private void ShowPopupForMap(string mapId, string displayName, string? regionName)
     {
         try
         {
@@ -242,12 +242,12 @@ public class MapPopupOrchestrator : IMapPopupOrchestrator
     /// <summary>
     ///     Checks if the map has the ShowMapNameOnEntry component.
     /// </summary>
-    /// <param name="mapId">The map runtime ID to check.</param>
+    /// <param name="mapId">The map ID to check.</param>
     /// <returns>True if the popup should be shown, false otherwise.</returns>
-    private bool ShouldShowPopupForMap(int mapId)
+    private bool ShouldShowPopupForMap(string mapId)
     {
         bool shouldShow = false;
-        MapRuntimeId targetMapId = new(mapId);
+        GameMapId targetMapId = new(mapId);
 
         QueryDescription mapInfoQuery = QueryCache.Get<MapInfo>();
         _world.Query(

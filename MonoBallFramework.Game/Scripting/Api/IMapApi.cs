@@ -13,41 +13,41 @@ public interface IMapApi
     /// <summary>
     ///     Checks if a position is walkable (no solid collision).
     /// </summary>
-    /// <param name="mapId">The map runtime identifier.</param>
+    /// <param name="mapId">The map identifier.</param>
     /// <param name="x">Tile X coordinate.</param>
     /// <param name="y">Tile Y coordinate.</param>
     /// <returns>True if the position is walkable, false if blocked.</returns>
-    bool IsPositionWalkable(MapRuntimeId mapId, int x, int y);
+    bool IsPositionWalkable(GameMapId mapId, int x, int y);
 
     /// <summary>
     ///     Gets all entities at a specific tile position.
     /// </summary>
-    /// <param name="mapId">The map runtime identifier.</param>
+    /// <param name="mapId">The map identifier.</param>
     /// <param name="x">Tile X coordinate.</param>
     /// <param name="y">Tile Y coordinate.</param>
     /// <returns>Array of entities at that position.</returns>
-    Entity[] GetEntitiesAt(MapRuntimeId mapId, int x, int y);
+    Entity[] GetEntitiesAt(GameMapId mapId, int x, int y);
 
     /// <summary>
     ///     Gets the current active map ID.
     /// </summary>
-    /// <returns>The map runtime identifier.</returns>
-    MapRuntimeId GetCurrentMapId();
+    /// <returns>The map identifier.</returns>
+    GameMapId GetCurrentMapId();
 
     /// <summary>
     ///     Transition the player to a different map.
     /// </summary>
-    /// <param name="mapId">Target map runtime identifier.</param>
+    /// <param name="mapId">Target map identifier.</param>
     /// <param name="x">Spawn tile X coordinate.</param>
     /// <param name="y">Spawn tile Y coordinate.</param>
-    void TransitionToMap(MapRuntimeId mapId, int x, int y);
+    void TransitionToMap(GameMapId mapId, int x, int y);
 
     /// <summary>
     ///     Get map dimensions.
     /// </summary>
-    /// <param name="mapId">The map runtime identifier.</param>
+    /// <param name="mapId">The map identifier.</param>
     /// <returns>Tuple of (width, height) in tiles, or null if map not found.</returns>
-    (int width, int height)? GetMapDimensions(MapRuntimeId mapId);
+    (int width, int height)? GetMapDimensions(GameMapId mapId);
 
     /// <summary>
     ///     Calculates the primary direction from one point to another.

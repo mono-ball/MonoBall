@@ -107,7 +107,7 @@ public class PoolConfigs
     ///     Tile entity pool configuration for multi-map streaming.
     ///     A typical map has ~60x40 tiles × 3 layers = 7200 tiles.
     ///     With 5 maps loaded simultaneously (current + 4 adjacent), we need ~36000 tiles.
-    ///     AbsoluteMaxSize is set high to accommodate large maps and streaming.
+    ///     AbsoluteMaxSize is set to int.MaxValue for unlimited growth to support very large maps.
     /// </summary>
     public PoolConfig Tile { get; set; } =
         new()
@@ -116,7 +116,7 @@ public class PoolConfigs
             MaxSize = 20000,
             AutoResize = true,
             GrowthFactor = 2.0f,
-            AbsoluteMaxSize = 100000,
+            AbsoluteMaxSize = int.MaxValue,
         };
 }
 
@@ -154,7 +154,7 @@ public class PoolConfig
 
     /// <summary>
     ///     Absolute maximum size the pool can grow to, even with auto-resize.
-    ///     Set to 0 for unlimited growth (not recommended).
+    ///     Set to 0 or int.MaxValue for unlimited growth.
     /// </summary>
     public int AbsoluteMaxSize { get; set; } = 10000;
 }
