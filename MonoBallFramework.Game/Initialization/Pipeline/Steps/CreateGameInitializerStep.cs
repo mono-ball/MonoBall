@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using MonoBallFramework.Game.Engine.Core.Events;
 using MonoBallFramework.Game.Engine.Scenes;
 using MonoBallFramework.Game.Initialization.Initializers;
+using MonoBallFramework.Game.Scripting.Api;
 
 namespace MonoBallFramework.Game.Initialization.Pipeline.Steps;
 
@@ -46,6 +47,7 @@ public class CreateGameInitializerStep : InitializationStepBase
             context.LoggerFactory.CreateLogger<GameInitializer>();
 
         IEventBus eventBus = context.Services.GetRequiredService<IEventBus>();
+        IGameStateApi gameStateApi = context.Services.GetRequiredService<IGameStateApi>();
 
         var gameInitializer = new GameInitializer(
             gameInitializerLogger,
@@ -57,7 +59,8 @@ public class CreateGameInitializerStep : InitializationStepBase
             context.SpriteRegistry,
             context.MapLoader,
             context.MapDefinitionService,
-            eventBus
+            eventBus,
+            gameStateApi
         );
 
         context.GameInitializer = gameInitializer;

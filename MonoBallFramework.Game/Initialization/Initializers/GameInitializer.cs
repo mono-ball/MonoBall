@@ -20,9 +20,11 @@ using MonoBallFramework.Game.GameSystems.Tiles;
 using MonoBallFramework.Game.GameSystems.Warps;
 using MonoBallFramework.Game.Infrastructure.Configuration;
 using MonoBallFramework.Game.Infrastructure.Services;
+using MonoBallFramework.Game.Scripting.Api;
 using MonoBallFramework.Game.Systems;
 using MonoBallFramework.Game.Systems.Rendering;
 using MonoBallFramework.Game.Systems.Warps;
+using MonoBallFramework.Game.Engine.Systems.Flags;
 
 namespace MonoBallFramework.Game.Initialization.Initializers;
 
@@ -39,7 +41,8 @@ public class GameInitializer(
     SpriteRegistry spriteRegistry,
     MapLoader mapLoader,
     MapDefinitionService mapDefinitionService,
-    IEventBus eventBus
+    IEventBus eventBus,
+    IGameStateApi gameStateApi
 ) : IGameInitializer
 {
     // Store reference to MapStreamingSystem so we can wire up lifecycle manager later
@@ -89,6 +92,11 @@ public class GameInitializer(
     ///     Gets the camera viewport system (handles window resize events).
     /// </summary>
     public CameraViewportSystem CameraViewportSystem { get; private set; } = null!;
+
+    /// <summary>
+    ///     Gets the flag visibility system (reacts to flag changes to show/hide entities).
+    /// </summary>
+    public FlagVisibilitySystem FlagVisibilitySystem { get; private set; } = null!;
 
     /// <summary>
     ///     Initializes all game systems and infrastructure.
@@ -190,6 +198,13 @@ public class GameInitializer(
             loggerFactory.CreateLogger<CameraViewportSystem>();
         CameraViewportSystem = new CameraViewportSystem(cameraViewportLogger);
         systemManager.RegisterEventDrivenSystem(CameraViewportSystem);
+
+        // Register FlagVisibilitySystem (Priority: 50, event-driven for flag-based entity visibility)
+        // Enables pokeemerald-style FLAG_HIDE_*/FLAG_SHOW_* patterns for NPC spawning
+        ILogger<FlagVisibilitySystem> flagVisibilityLogger =
+            loggerFactory.CreateLogger<FlagVisibilitySystem>();
+        FlagVisibilitySystem = new FlagVisibilitySystem(eventBus, gameStateApi, flagVisibilityLogger);
+        systemManager.RegisterEventDrivenSystem(FlagVisibilitySystem);
 
         // Register CameraFollowSystem (Priority: 825, after PathfindingSystem, before CameraUpdate)
         ILogger<CameraFollowSystem> cameraFollowLogger =

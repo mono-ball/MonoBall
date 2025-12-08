@@ -19,6 +19,7 @@ using MonoBallFramework.Game.GameData.MapLoading.Tiled.Utilities;
 using MonoBallFramework.Game.GameData.PropertyMapping;
 using MonoBallFramework.Game.GameData.Services;
 using MonoBallFramework.Game.GameSystems.Spatial;
+using MonoBallFramework.Game.Scripting.Api;
 
 namespace MonoBallFramework.Game.GameData.MapLoading.Tiled.Core;
 
@@ -39,6 +40,7 @@ public class MapLoader(
     IEntityFactoryService? entityFactory = null,
     NpcDefinitionService? npcDefinitionService = null,
     MapDefinitionService? mapDefinitionService = null,
+    IGameStateApi? gameStateApi = null,
     ILogger<MapLoader>? logger = null
 )
 {
@@ -83,8 +85,9 @@ public class MapLoader(
     private readonly EntitySpawnerRegistry _entitySpawnerRegistry = CreateSpawnerRegistry(entityFactory, npcDefinitionService);
 
     // Initialize MapObjectSpawner using registry (lazy init to use already-created registry)
+    // Pass GameStateApi for flag-based NPC visibility at spawn time
     private MapObjectSpawner? _mapObjectSpawnerBacking;
-    private MapObjectSpawner _mapObjectSpawner => _mapObjectSpawnerBacking ??= new(_entitySpawnerRegistry);
+    private MapObjectSpawner _mapObjectSpawner => _mapObjectSpawnerBacking ??= new(_entitySpawnerRegistry, gameStateApi);
 
     private static EntitySpawnerRegistry CreateSpawnerRegistry(
         IEntityFactoryService? entityFactory,

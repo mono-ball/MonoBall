@@ -6,6 +6,7 @@ using MonoBallFramework.Game.Engine.Common.Logging;
 using MonoBallFramework.Game.Engine.Core.Types;
 using MonoBallFramework.Game.GameData.MapLoading.Tiled.Spawners;
 using MonoBallFramework.Game.GameData.MapLoading.Tiled.Tmx;
+using MonoBallFramework.Game.Scripting.Api;
 
 namespace MonoBallFramework.Game.GameData.MapLoading.Tiled.Processors;
 
@@ -21,13 +22,16 @@ namespace MonoBallFramework.Game.GameData.MapLoading.Tiled.Processors;
 public sealed class MapObjectSpawner
 {
     private readonly EntitySpawnerRegistry _spawnerRegistry;
+    private readonly IGameStateApi? _gameStateApi;
     private readonly ILogger<MapObjectSpawner>? _logger;
 
     public MapObjectSpawner(
         EntitySpawnerRegistry spawnerRegistry,
+        IGameStateApi? gameStateApi = null,
         ILogger<MapObjectSpawner>? logger = null)
     {
         _spawnerRegistry = spawnerRegistry;
+        _gameStateApi = gameStateApi;
         _logger = logger;
     }
 
@@ -68,7 +72,8 @@ public sealed class MapObjectSpawner
                     MapId = mapId,
                     TileWidth = tileWidth,
                     TileHeight = tileHeight,
-                    RequiredSpriteIds = requiredSpriteIds
+                    RequiredSpriteIds = requiredSpriteIds,
+                    GameStateApi = _gameStateApi
                 };
 
                 // Try to spawn using registry

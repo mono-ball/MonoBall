@@ -1,5 +1,4 @@
 using Arch.Core;
-using MonoBallFramework.Game.Engine.Systems.Management;
 using MonoBallFramework.Game.Components;
 using MonoBallFramework.Game.Ecs.Components;
 using MonoBallFramework.Game.Ecs.Components.GameState;
@@ -10,6 +9,7 @@ using MonoBallFramework.Game.Ecs.Components.Player;
 using MonoBallFramework.Game.Ecs.Components.Rendering;
 using MonoBallFramework.Game.Ecs.Components.Tiles;
 using MonoBallFramework.Game.Ecs.Components.Warps;
+using MonoBallFramework.Game.Engine.Systems.Management;
 
 namespace MonoBallFramework.Game.Engine.Systems.Queries;
 
@@ -345,4 +345,14 @@ public static class Queries
         GameFlags,
         GameVariables
     >();
+
+    // ============================================================================
+    // FLAG-BASED VISIBILITY QUERIES
+    // ============================================================================
+
+    /// <summary>
+    ///     Entities with visibility flags for flag-based show/hide control.
+    ///     Used by FlagVisibilitySystem to react to flag changes.
+    /// </summary>
+    public static readonly QueryDescription VisibilityFlags = QueryCache.Get<VisibilityFlag>();
 }

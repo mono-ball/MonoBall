@@ -38,6 +38,7 @@ public static class ScriptingServicesExtensions
             return new MapApiService(world, logger);
         });
         services.AddSingleton<GameStateApiService>();
+        services.AddSingleton<IGameStateApi>(sp => sp.GetRequiredService<GameStateApiService>());
         services.AddSingleton<DialogueApiService>();
         services.AddSingleton<EffectApiService>();
         // WorldApi removed - scripts now use domain APIs directly via ScriptContext

@@ -8,6 +8,7 @@ using MonoBallFramework.Game.GameData.MapLoading.Tiled.Core;
 using MonoBallFramework.Game.GameData.MapLoading.Tiled.Processors;
 using MonoBallFramework.Game.GameData.PropertyMapping;
 using MonoBallFramework.Game.GameData.Services;
+using MonoBallFramework.Game.Scripting.Api;
 
 namespace MonoBallFramework.Game.GameData.Factories;
 
@@ -24,6 +25,7 @@ public class GraphicsServiceFactory : IGraphicsServiceFactory
     private readonly EntityPoolManager? _poolManager;
     private readonly PropertyMapperRegistry? _propertyMapperRegistry;
     private readonly SystemManager _systemManager;
+    private readonly IGameStateApi? _gameStateApi;
 
     /// <summary>
     ///     Initializes a new instance of the GraphicsServiceFactory.
@@ -34,13 +36,15 @@ public class GraphicsServiceFactory : IGraphicsServiceFactory
     /// <param name="propertyMapperRegistry">Optional property mapper registry for map loading.</param>
     /// <param name="npcDefinitionService">Optional NPC definition service for data-driven NPC loading.</param>
     /// <param name="mapDefinitionService">Optional map definition service for definition-based map loading.</param>
+    /// <param name="gameStateApi">Optional game state API for flag-based NPC visibility.</param>
     public GraphicsServiceFactory(
         ILoggerFactory loggerFactory,
         SystemManager systemManager,
         EntityPoolManager poolManager,
         PropertyMapperRegistry? propertyMapperRegistry = null,
         NpcDefinitionService? npcDefinitionService = null,
-        MapDefinitionService? mapDefinitionService = null
+        MapDefinitionService? mapDefinitionService = null,
+        IGameStateApi? gameStateApi = null
     )
     {
         _loggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
@@ -49,6 +53,7 @@ public class GraphicsServiceFactory : IGraphicsServiceFactory
         _propertyMapperRegistry = propertyMapperRegistry;
         _npcDefinitionService = npcDefinitionService;
         _mapDefinitionService = mapDefinitionService;
+        _gameStateApi = gameStateApi;
     }
 
     /// <inheritdoc />
@@ -101,6 +106,7 @@ public class GraphicsServiceFactory : IGraphicsServiceFactory
             entityFactory,
             _npcDefinitionService,
             _mapDefinitionService,
+            _gameStateApi,
             _loggerFactory.CreateLogger<MapLoader>()
         );
     }

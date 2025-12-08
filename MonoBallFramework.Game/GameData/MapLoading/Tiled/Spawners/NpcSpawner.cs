@@ -5,6 +5,7 @@ using Arch.Relationships;
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
 using MonoBallFramework.Game.Ecs.Components.Common;
+using MonoBallFramework.Game.Ecs.Components.GameState;
 using MonoBallFramework.Game.Ecs.Components.Movement;
 using MonoBallFramework.Game.Ecs.Components.NPCs;
 using MonoBallFramework.Game.Ecs.Components.Relationships;
@@ -32,6 +33,8 @@ namespace MonoBallFramework.Game.GameData.MapLoading.Tiled.Spawners;
 ///     - waypointWaitTime (float): Seconds to wait at waypoints
 ///     - trainerType (string): Trainer type if this is a trainer NPC
 ///     - sightRange (int): View range for trainers
+///     - visibilityFlag (string): Flag ID controlling visibility (e.g., "base:flag:hide/rival_oak_lab")
+///     - hideWhenFlagSet (bool): If true (default), hide NPC when flag is set (FLAG_HIDE_* pattern)
 /// </summary>
 public sealed class NpcSpawner : IEntitySpawner
 {
@@ -97,6 +100,38 @@ public sealed class NpcSpawner : IEntitySpawner
             _ => "face_south"
         };
 
+        // Parse optional visibility flag (FLAG_HIDE_* pattern from pokeemerald)
+        string? visibilityFlagStr = TiledPropertyParser.GetOptionalString(props, "visibilityFlag");
+        bool hideWhenFlagSet = TiledPropertyParser.GetBoolOrFalse(props, "hideWhenFlagSet", errorContext)
+                               || !TiledPropertyParser.HasProperty(props, "hideWhenFlagSet"); // Default to true
+
+        // Determine initial visibility based on flag state
+        bool shouldBeVisible = true;
+        GameFlagId? visibilityFlagId = null;
+
+        if (!string.IsNullOrWhiteSpace(visibilityFlagStr))
+        {
+            // Parse flag ID - support both full format and shorthand
+            if (visibilityFlagStr.Contains(':'))
+            {
+                visibilityFlagId = new GameFlagId(visibilityFlagStr);
+            }
+            else
+            {
+                // Shorthand format - add base:flag: prefix
+                visibilityFlagId = new GameFlagId($"base:flag:{visibilityFlagStr}");
+            }
+
+            // Check current flag state if GameStateApi is available
+            if (context.GameStateApi != null)
+            {
+                bool flagValue = context.GameStateApi.GetFlag(visibilityFlagId.Value);
+                // hideWhenFlagSet=true: flag=true -> hidden, flag=false -> visible
+                // hideWhenFlagSet=false: flag=true -> visible, flag=false -> hidden
+                shouldBeVisible = hideWhenFlagSet ? !flagValue : flagValue;
+            }
+        }
+
         // Create NPC entity with core components (same as npc/base + npc/generic templates)
         Entity npcEntity = context.World.Create(
             new Position(tileX, tileY, context.MapId, context.TileHeight),
@@ -106,9 +141,23 @@ public sealed class NpcSpawner : IEntitySpawner
             direction,
             new Animation(initialAnimation),
             new Collision(true),
-            new GridMovement(3.75f), // MOVE_SPEED_NORMAL
-            new Visible()
+            new GridMovement(3.75f) // MOVE_SPEED_NORMAL
         );
+
+        // Add Visible component only if entity should be visible
+        if (shouldBeVisible)
+        {
+            npcEntity.Add(new Visible());
+        }
+
+        // Add VisibilityFlag component if flag is specified (enables runtime toggling)
+        if (visibilityFlagId != null)
+        {
+            npcEntity.Add(new VisibilityFlag(visibilityFlagId, hideWhenFlagSet));
+            _logger?.LogDebug(
+                "NPC '{Name}' linked to visibility flag {FlagId} (hideWhenSet={Hide})",
+                obj.Name, visibilityFlagId.Value, hideWhenFlagSet);
+        }
 
         // Add behavior if specified
         string? behaviorId = TiledPropertyParser.GetOptionalString(props, "behaviorId");

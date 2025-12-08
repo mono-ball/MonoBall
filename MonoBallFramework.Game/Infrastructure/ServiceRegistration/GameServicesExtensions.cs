@@ -16,6 +16,7 @@ using MonoBallFramework.Game.GameSystems.Spatial;
 using MonoBallFramework.Game.Infrastructure.Diagnostics;
 using MonoBallFramework.Game.Initialization.Factories;
 using MonoBallFramework.Game.Input;
+using MonoBallFramework.Game.Scripting.Api;
 using MonoBallFramework.Game.Systems;
 
 namespace MonoBallFramework.Game.Infrastructure.ServiceRegistration;
@@ -48,6 +49,7 @@ public static class GameServicesExtensions
 
             NpcDefinitionService? npcDefinitionService = sp.GetService<NpcDefinitionService>();
             MapDefinitionService? mapDefinitionService = sp.GetService<MapDefinitionService>();
+            IGameStateApi? gameStateApi = sp.GetService<IGameStateApi>();
 
             return new GraphicsServiceFactory(
                 loggerFactory,
@@ -55,7 +57,8 @@ public static class GameServicesExtensions
                 poolManager,
                 propertyMapperRegistry,
                 npcDefinitionService,
-                mapDefinitionService
+                mapDefinitionService,
+                gameStateApi
             );
         });
 

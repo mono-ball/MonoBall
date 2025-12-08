@@ -1,6 +1,7 @@
 using Arch.Core;
 using MonoBallFramework.Game.Engine.Core.Types;
 using MonoBallFramework.Game.GameData.MapLoading.Tiled.Tmx;
+using MonoBallFramework.Game.Scripting.Api;
 
 namespace MonoBallFramework.Game.GameData.MapLoading.Tiled.Spawners;
 
@@ -47,6 +48,12 @@ public sealed class EntitySpawnContext
     ///     Spawners should add any sprite IDs they reference to this set.
     /// </summary>
     public HashSet<GameSpriteId>? RequiredSpriteIds { get; init; }
+
+    /// <summary>
+    ///     Game state API for checking flag values during spawn.
+    ///     Used for flag-based visibility control (e.g., FLAG_HIDE_* patterns).
+    /// </summary>
+    public IGameStateApi? GameStateApi { get; init; }
 
     /// <summary>
     ///     Gets the object's tile coordinates (converted from pixel position).
