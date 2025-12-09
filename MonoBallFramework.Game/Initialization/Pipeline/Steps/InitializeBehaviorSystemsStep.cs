@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MonoBallFramework.Game.Engine.Core.Events;
 using MonoBallFramework.Game.Engine.Scenes;
+using MonoBallFramework.Game.GameSystems.Movement;
 using MonoBallFramework.Game.Initialization.Behaviors;
 
 namespace MonoBallFramework.Game.Initialization.Pipeline.Steps;
@@ -92,13 +93,17 @@ public class InitializeBehaviorSystemsStep : InitializationStepBase
         // Wire up WarpExecutionSystem with its required services
         if (context.MapInitializer != null && context.GameInitializer.MapLifecycleManager != null)
         {
+            // Get MovementSystem for cache invalidation during warps
+            MovementSystem? movementSystem = context.SystemManager.GetSystem<MovementSystem>();
+
             context.GameInitializer.WarpExecutionSystem.SetServices(
                 context.MapInitializer,
                 context.GameInitializer.MapLifecycleManager,
-                eventBus
+                eventBus,
+                movementSystem
             );
             logger.LogInformation(
-                "WarpExecutionSystem wired to MapInitializer, MapLifecycleManager, and EventBus"
+                "WarpExecutionSystem wired to MapInitializer, MapLifecycleManager, EventBus, and MovementSystem"
             );
         }
         else

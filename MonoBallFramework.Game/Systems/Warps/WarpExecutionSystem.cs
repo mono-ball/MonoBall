@@ -16,6 +16,7 @@ using MonoBallFramework.Game.Ecs.Components.Player;
 using MonoBallFramework.Game.Ecs.Components.Rendering;
 using MonoBallFramework.Game.Ecs.Components.Warps;
 using MonoBallFramework.Game.Engine.Core.Systems.Base;
+using MonoBallFramework.Game.GameSystems.Movement;
 using MonoBallFramework.Game.Initialization.Initializers;
 
 namespace MonoBallFramework.Game.Systems.Warps;
@@ -58,6 +59,7 @@ public class WarpExecutionSystem : SystemBase, IUpdateSystem
     private IMapInitializer? _mapInitializer;
     private MapLifecycleManager? _mapLifecycleManager;
     private IEventBus? _eventBus;
+    private MovementSystem? _movementSystem;
 
     private QueryDescription _pendingWarpQuery;
 
@@ -150,16 +152,19 @@ public class WarpExecutionSystem : SystemBase, IUpdateSystem
     /// <param name="mapInitializer">Map initializer for loading maps.</param>
     /// <param name="mapLifecycleManager">Lifecycle manager for unloading maps.</param>
     /// <param name="eventBus">Event bus for publishing map transition events.</param>
+    /// <param name="movementSystem">Movement system for cache invalidation during warps.</param>
     public void SetServices(
         IMapInitializer mapInitializer,
         MapLifecycleManager mapLifecycleManager,
-        IEventBus? eventBus = null
+        IEventBus? eventBus = null,
+        MovementSystem? movementSystem = null
     )
     {
         _mapInitializer = mapInitializer ?? throw new ArgumentNullException(nameof(mapInitializer));
         _mapLifecycleManager =
             mapLifecycleManager ?? throw new ArgumentNullException(nameof(mapLifecycleManager));
         _eventBus = eventBus;
+        _movementSystem = movementSystem;
         _logger?.LogDebug("WarpExecutionSystem: Services configured");
     }
 
@@ -219,6 +224,11 @@ public class WarpExecutionSystem : SystemBase, IUpdateSystem
             // Unload all current maps before loading the target
             _logger?.LogDebug("Unloading all current maps before warp...");
             _mapLifecycleManager!.UnloadAllMaps();
+
+            // CRITICAL: Invalidate MovementSystem's cached map offsets to prevent stale data
+            // Without this, the MovementSystem may use cached offsets from old maps,
+            // causing incorrect pixel position calculations after warping
+            _movementSystem?.InvalidateMapWorldOffset();
 
             // Load the target map
             _logger?.LogDebug("Loading target map {MapName}...", request.TargetMap.Value);
