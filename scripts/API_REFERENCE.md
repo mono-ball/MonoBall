@@ -21,6 +21,8 @@ Map         // MapApiService - Map & teleportation
 GameState   // GameStateApiService - Flags & variables
 Dialogue    // DialogueApiService - Messages
 Effects     // EffectApiService - Visual effects
+Entity      // EntityApiService - Spawn/destroy entities at runtime
+Registry    // RegistryApiService - Query available sprites, behaviors, NPCs, etc.
 ```
 
 ## Player - Player Management
@@ -84,6 +86,63 @@ void ClearVariable(string key)              // Remove a variable
 void ShowMessage(string message)            // Show a dialogue box
 void QueueMessage(string message)           // Add to dialogue queue
 bool IsDialogueActive()                     // Check if dialogue is showing
+```
+
+## Entity - Runtime Entity Spawning
+
+```csharp
+// Fluent NPC builder
+INpcSpawnBuilder CreateNpc(int x, int y)    // Start fluent NPC builder
+    .WithSprite(GameSpriteId spriteId)      // Set NPC sprite
+    .WithBehavior(GameBehaviorId behaviorId)// Set NPC behavior
+    .WithDisplayName(string name)           // Set display name
+    .Visible()                              // Make NPC visible
+    .Spawn()                                // Create and return entity
+
+// Direct spawning
+Entity SpawnNpcAt(int x, int y, spriteId, behaviorId?, displayName?)
+
+// Lifecycle
+void DestroyEntity(Entity entity)           // Remove entity immediately
+void DestroyEntityDelayed(Entity e, float s)// Remove after delay
+bool IsAlive(Entity entity)                 // Check if entity exists
+
+// Queries
+Entity[] FindEntitiesAt(int x, int y)       // Get entities at position
+Entity[] FindNpcsInRadius(int x, int y, r)  // Find NPCs in radius
+Entity[] FindEntitiesByTag(string tag)      // Find by tag
+```
+
+## Registry - Query Game Definitions
+
+```csharp
+// Sprite registry
+IEnumerable<GameSpriteId> GetAllSpriteIds()
+IEnumerable<GameSpriteId> GetSpriteIdsByCategory(string category)
+bool SpriteExists(GameSpriteId spriteId)
+
+// Behavior registry
+IEnumerable<GameBehaviorId> GetAllBehaviorIds()
+IEnumerable<GameBehaviorId> GetBehaviorIdsByCategory(string category)
+bool BehaviorExists(GameBehaviorId behaviorId)
+
+// NPC registry
+IEnumerable<GameNpcId> GetAllNpcIds()
+IEnumerable<GameNpcId> GetNpcIdsByCategory(string category)
+bool NpcExists(GameNpcId npcId)
+
+// Trainer registry
+IEnumerable<GameTrainerId> GetAllTrainerIds()
+IEnumerable<GameTrainerId> GetTrainerIdsByCategory(string category)
+bool TrainerExists(GameTrainerId trainerId)
+
+// Map registry
+IEnumerable<GameMapId> GetAllMapIds()
+bool MapExists(GameMapId mapId)
+
+// Flag registry
+IEnumerable<GameFlagId> GetAllFlagIds()
+IEnumerable<GameFlagId> GetFlagIdsByCategory(string category)
 ```
 
 ## World - ECS World (Advanced)
@@ -177,6 +236,35 @@ Print($"Total entities: {entityCount}");
 // Use the high-level Player, Map, GameState, etc. methods when possible
 ```
 
+### Spawn NPCs Dynamically
+
+```csharp
+// Using fluent builder
+var npc = Entity.CreateNpc(10, 15)
+    .WithSprite(GameSpriteId.CreateNpc("boy"))
+    .WithBehavior(GameBehaviorId.CreateNpcBehavior("wander"))
+    .WithDisplayName("Wandering NPC")
+    .Visible()
+    .Spawn();
+Print($"Spawned NPC: Entity {npc.Id}");
+
+// Query available sprites
+var sprites = Registry.GetSpriteIdsByCategory("npcs").ToList();
+Print($"Available NPC sprites: {sprites.Count}");
+```
+
+### Destroy Entity
+
+```csharp
+// Find and destroy an NPC at a location
+var entities = Entity.FindEntitiesAt(10, 15);
+foreach (var e in entities)
+{
+    Entity.DestroyEntity(e);
+    Print($"Destroyed entity {e.Id}");
+}
+```
+
 ## Tips
 
 1. **Use Try-Catch**: Wrap API calls in try-catch for better error messages
@@ -218,6 +306,7 @@ catch (Exception ex)
 
 - `load example` - Example script with common patterns
 - `load debug-info` - Comprehensive system information
+- `load spawn-npcs [count]` - Spawn random NPCs with wandering behavior
 - `help` - Console commands
 - `/docs/CONSOLE_SCRIPT_LOADING.md` - Full script documentation
 

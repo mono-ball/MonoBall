@@ -1,3 +1,5 @@
+using MonoBallFramework.Game.Engine.Core.Types;
+
 namespace MonoBallFramework.Game.Engine.Core.Events.Flags;
 
 /// <summary>
@@ -18,7 +20,7 @@ public sealed class FlagChangedEvent : NotificationEventBase
     /// <summary>
     ///     The flag identifier that changed.
     /// </summary>
-    public string FlagId { get; set; } = string.Empty;
+    public GameFlagId? FlagId { get; set; }
 
     /// <summary>
     ///     The previous value of the flag.
@@ -34,7 +36,7 @@ public sealed class FlagChangedEvent : NotificationEventBase
     public override void Reset()
     {
         base.Reset();
-        FlagId = string.Empty;
+        FlagId = null;
         OldValue = false;
         NewValue = false;
     }

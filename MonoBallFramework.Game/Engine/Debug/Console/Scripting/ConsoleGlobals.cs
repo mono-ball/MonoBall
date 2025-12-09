@@ -6,7 +6,6 @@ using Microsoft.Xna.Framework.Graphics;
 using MonoBallFramework.Game.Ecs.Components.Player;
 using MonoBallFramework.Game.Engine.Systems.Management;
 using MonoBallFramework.Game.Scripting.Api;
-using MonoBallFramework.Game.Scripting.Services;
 
 namespace MonoBallFramework.Game.Engine.Debug.Console.Scripting;
 
@@ -76,22 +75,32 @@ public class ConsoleGlobals
     /// <summary>
     ///     Gets the Player API service - same pattern as ScriptContext.Player in NPC behaviors.
     /// </summary>
-    public PlayerApiService Player => _apis.Player;
+    public IPlayerApi Player => _apis.Player;
 
     /// <summary>
     ///     Gets the NPC API service - same pattern as ScriptContext.Npc in NPC behaviors.
     /// </summary>
-    public NpcApiService Npc => _apis.Npc;
+    public INpcApi Npc => _apis.Npc;
 
     /// <summary>
     ///     Gets the Map API service - same pattern as ScriptContext.Map in NPC behaviors.
     /// </summary>
-    public MapApiService Map => _apis.Map;
+    public IMapApi Map => _apis.Map;
 
     /// <summary>
     ///     Gets the Game State API service - same pattern as ScriptContext.GameState in NPC behaviors.
     /// </summary>
-    public GameStateApiService GameState => _apis.GameState;
+    public IGameStateApi GameState => _apis.GameState;
+
+    /// <summary>
+    ///     Gets the Entity API service for spawning and managing entities at runtime.
+    /// </summary>
+    public IEntityApi Entity => _apis.Entity;
+
+    /// <summary>
+    ///     Gets the Registry API service for querying available game definitions and IDs.
+    /// </summary>
+    public IRegistryApi Registry => _apis.Registry;
 
     #endregion
 

@@ -7,6 +7,7 @@ using MonoBallFramework.Game.Engine.Core.Events;
 using MonoBallFramework.Game.Engine.Core.Events.Flags;
 using MonoBallFramework.Game.Engine.Core.Systems;
 using MonoBallFramework.Game.Engine.Core.Systems.Base;
+using MonoBallFramework.Game.Engine.Core.Types;
 using MonoBallFramework.Game.Scripting.Api;
 
 namespace MonoBallFramework.Game.Engine.Systems.Flags;
@@ -72,12 +73,12 @@ public sealed class FlagVisibilitySystem : EventDrivenSystemBase, IDisposable
     /// </summary>
     private void OnFlagChanged(FlagChangedEvent evt)
     {
-        if (!Enabled)
+        if (!Enabled || evt.FlagId == null)
         {
             return;
         }
 
-        string changedFlagId = evt.FlagId;
+        GameFlagId changedFlagId = evt.FlagId;
         bool newValue = evt.NewValue;
 
         _logger?.LogTrace(
@@ -90,7 +91,7 @@ public sealed class FlagVisibilitySystem : EventDrivenSystemBase, IDisposable
         World.Query(in VisibilityFlagQuery, (Entity entity, ref VisibilityFlag visFlag) =>
         {
             // Check if this entity is controlled by the changed flag
-            if (visFlag.FlagId.Value != changedFlagId)
+            if (visFlag.FlagId.Value != changedFlagId.Value)
             {
                 return;
             }
@@ -138,7 +139,7 @@ public sealed class FlagVisibilitySystem : EventDrivenSystemBase, IDisposable
 
         World.Query(in VisibilityFlagQuery, (Entity entity, ref VisibilityFlag visFlag) =>
         {
-            bool flagValue = _gameStateApi.GetFlag(visFlag.FlagId.Value);
+            bool flagValue = _gameStateApi.GetFlag(visFlag.FlagId);
             bool shouldBeVisible = visFlag.ShouldBeVisible(flagValue);
             bool hasVisible = entity.Has<Visible>();
 

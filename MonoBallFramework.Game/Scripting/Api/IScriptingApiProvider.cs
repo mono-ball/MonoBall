@@ -1,5 +1,3 @@
-using MonoBallFramework.Game.Scripting.Services;
-
 namespace MonoBallFramework.Game.Scripting.Api;
 
 /// <summary>
@@ -9,33 +7,51 @@ namespace MonoBallFramework.Game.Scripting.Api;
 /// </summary>
 public interface IScriptingApiProvider
 {
-    /// <summary>
-    ///     Gets the Player API service for player-related operations.
-    /// </summary>
-    PlayerApiService Player { get; }
+    #region Core APIs
 
     /// <summary>
-    ///     Gets the NPC API service for NPC management operations.
+    ///     Gets the Player API for player-related operations.
     /// </summary>
-    NpcApiService Npc { get; }
+    IPlayerApi Player { get; }
 
     /// <summary>
-    ///     Gets the Map API service for map queries and transitions.
+    ///     Gets the NPC API for NPC management operations.
     /// </summary>
-    MapApiService Map { get; }
+    INpcApi Npc { get; }
 
     /// <summary>
-    ///     Gets the GameState API service for flag and variable management.
+    ///     Gets the Map API for map queries and transitions.
     /// </summary>
-    GameStateApiService GameState { get; }
+    IMapApi Map { get; }
 
     /// <summary>
-    ///     Gets the Dialogue API service for showing messages and dialogue.
+    ///     Gets the GameState API for flag and variable management.
     /// </summary>
-    DialogueApiService Dialogue { get; }
+    IGameStateApi GameState { get; }
 
     /// <summary>
-    ///     Gets the Effects API service for visual effect management.
+    ///     Gets the Dialogue API for showing messages and dialogue.
     /// </summary>
-    EffectApiService Effects { get; }
+    IDialogueApi Dialogue { get; }
+
+    /// <summary>
+    ///     Gets the Effects API for visual effect management.
+    /// </summary>
+    IEffectApi Effects { get; }
+
+    #endregion
+
+    #region Entity & Registry APIs
+
+    /// <summary>
+    ///     Gets the Entity API for spawning and managing entities at runtime.
+    /// </summary>
+    IEntityApi Entity { get; }
+
+    /// <summary>
+    ///     Gets the Registry API for querying game definitions and IDs.
+    /// </summary>
+    IRegistryApi Registry { get; }
+
+    #endregion
 }

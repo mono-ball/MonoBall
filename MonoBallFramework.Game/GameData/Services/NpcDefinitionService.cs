@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MonoBallFramework.Game.Engine.Common.Logging;
+using MonoBallFramework.Game.Engine.Core.Types;
 using MonoBallFramework.Game.GameData.Entities;
 
 namespace MonoBallFramework.Game.GameData.Services;
@@ -50,27 +51,26 @@ public class NpcDefinitionService
     /// <summary>
     ///     Get NPC definition by ID (O(1) cached).
     /// </summary>
-    public NpcDefinition? GetNpc(string npcId)
+    public NpcDefinition? GetNpc(GameNpcId npcId)
     {
-        if (string.IsNullOrWhiteSpace(npcId))
-        {
-            return null;
-        }
+        ArgumentNullException.ThrowIfNull(npcId);
+
+        string npcIdValue = npcId.Value;
 
         // Check cache first
-        if (_npcCache.TryGetValue(npcId, out NpcDefinition? cached))
+        if (_npcCache.TryGetValue(npcIdValue, out NpcDefinition? cached))
         {
             return cached;
         }
 
         // Query database
-        NpcDefinition? npc = _context.Npcs.Find(npcId);
+        NpcDefinition? npc = _context.Npcs.Find(npcIdValue);
 
         // Cache for next time
         if (npc != null)
         {
-            _npcCache[npcId] = npc;
-            _logger.LogNpcCached(npcId);
+            _npcCache[npcIdValue] = npc;
+            _logger.LogNpcCached(npcIdValue);
         }
 
         return npc;
@@ -97,7 +97,7 @@ public class NpcDefinitionService
     /// <summary>
     ///     Check if NPC definition exists.
     /// </summary>
-    public bool HasNpc(string npcId)
+    public bool HasNpc(GameNpcId npcId)
     {
         return GetNpc(npcId) != null;
     }
@@ -109,27 +109,26 @@ public class NpcDefinitionService
     /// <summary>
     ///     Get trainer definition by ID (O(1) cached).
     /// </summary>
-    public TrainerDefinition? GetTrainer(string trainerId)
+    public TrainerDefinition? GetTrainer(GameTrainerId trainerId)
     {
-        if (string.IsNullOrWhiteSpace(trainerId))
-        {
-            return null;
-        }
+        ArgumentNullException.ThrowIfNull(trainerId);
+
+        string trainerIdValue = trainerId.Value;
 
         // Check cache first
-        if (_trainerCache.TryGetValue(trainerId, out TrainerDefinition? cached))
+        if (_trainerCache.TryGetValue(trainerIdValue, out TrainerDefinition? cached))
         {
             return cached;
         }
 
         // Query database
-        TrainerDefinition? trainer = _context.Trainers.Find(trainerId);
+        TrainerDefinition? trainer = _context.Trainers.Find(trainerIdValue);
 
         // Cache for next time
         if (trainer != null)
         {
-            _trainerCache[trainerId] = trainer;
-            _logger.LogTrainerCached(trainerId);
+            _trainerCache[trainerIdValue] = trainer;
+            _logger.LogTrainerCached(trainerIdValue);
         }
 
         return trainer;
@@ -162,7 +161,7 @@ public class NpcDefinitionService
     /// <summary>
     ///     Check if trainer definition exists.
     /// </summary>
-    public bool HasTrainer(string trainerId)
+    public bool HasTrainer(GameTrainerId trainerId)
     {
         return GetTrainer(trainerId) != null;
     }

@@ -61,35 +61,25 @@ public sealed record GameMapSectionId : EntityId
 
     /// <summary>
     ///     Tries to create a GameMapSectionId from a string, returning null if invalid.
+    ///     Only accepts the full format: base:mapsec:{region}/{name}
     /// </summary>
     public static GameMapSectionId? TryCreate(string? value)
     {
         if (string.IsNullOrWhiteSpace(value))
             return null;
 
-        // If it's already in full format, parse it
-        if (IsValidFormat(value) && value.Contains($":{TypeName}:"))
-        {
-            try
-            {
-                return new GameMapSectionId(value);
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
-        // Legacy format: "MAPSEC_LITTLEROOT_TOWN" or "mapsec_littleroot_town"
-        var normalized = NormalizeComponent(value);
-        if (string.IsNullOrEmpty(normalized))
+        // Only accept full format
+        if (!IsValidFormat(value) || !value.Contains($":{TypeName}:"))
             return null;
 
-        // Remove mapsec_ prefix if present
-        if (normalized.StartsWith("mapsec_"))
-            normalized = normalized[7..];
-
-        return Create(normalized);
+        try
+        {
+            return new GameMapSectionId(value);
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     /// <summary>

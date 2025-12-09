@@ -33,6 +33,13 @@ public interface IConsoleScripts
     Task ExecuteScriptAsync(string scriptContent);
 
     /// <summary>
+    ///     Executes script code with command-line arguments.
+    /// </summary>
+    /// <param name="scriptContent">The script content to execute.</param>
+    /// <param name="args">Arguments to pass to the script (accessible via Args property).</param>
+    Task ExecuteScriptAsync(string scriptContent, string[] args);
+
+    /// <summary>
     ///     Resets the script evaluator state (clears variables).
     /// </summary>
     void ResetScriptState();

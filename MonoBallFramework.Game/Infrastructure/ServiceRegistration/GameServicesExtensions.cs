@@ -31,6 +31,9 @@ public static class GameServicesExtensions
     /// </summary>
     public static IServiceCollection AddGameRuntimeServices(this IServiceCollection services)
     {
+        // Game State Service - engine-level state management (service enable/disable flags)
+        services.AddSingleton<IGameStateService, GameStateService>();
+
         // Abstract Factory Pattern: Graphics services that depend on GraphicsDevice
         // The factory allows deferred creation of AssetManager and MapLoader until
         // GraphicsDevice is available at runtime (in MonoBallFrameworkGame.Initialize)
@@ -102,7 +105,8 @@ public static class GameServicesExtensions
 
             IEventBus eventBus = sp.GetRequiredService<IEventBus>();
             ILogger<CollisionService>? logger = sp.GetService<ILogger<CollisionService>>();
-            return new CollisionService(spatialQuery, eventBus, logger);
+            IGameStateService? gameStateService = sp.GetService<IGameStateService>();
+            return new CollisionService(spatialQuery, eventBus, logger, gameStateService);
         });
 
         // Game Initializers and Helpers

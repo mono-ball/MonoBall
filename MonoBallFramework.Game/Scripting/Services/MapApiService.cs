@@ -33,7 +33,7 @@ public class MapApiService(
             return true; // Default to walkable if system not ready
         }
 
-        IReadOnlyList<Entity> entities = _spatialQuery.GetEntitiesAt(mapId.Value, x, y);
+        IReadOnlyList<Entity> entities = _spatialQuery.GetEntitiesAt(mapId, x, y);
         foreach (Entity entity in entities)
         {
             if (_world.Has<Collision>(entity))
@@ -57,7 +57,7 @@ public class MapApiService(
             return [];
         }
 
-        return [.. _spatialQuery.GetEntitiesAt(mapId.Value, x, y)];
+        return [.. _spatialQuery.GetEntitiesAt(mapId, x, y)];
     }
 
     public GameMapId GetCurrentMapId()

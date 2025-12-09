@@ -62,39 +62,56 @@ public sealed record GameNpcId : EntityId
     }
 
     /// <summary>
+    ///     Creates a townfolk NPC ID.
+    /// </summary>
+    /// <param name="name">The NPC name (e.g., "prof_birch")</param>
+    /// <returns>A new GameNpcId with "townfolk" category</returns>
+    public static GameNpcId CreateTownfolk(string name)
+    {
+        return new GameNpcId("townfolk", name);
+    }
+
+    /// <summary>
+    ///     Creates a shopkeeper NPC ID.
+    /// </summary>
+    /// <param name="name">The NPC name (e.g., "pokemart_clerk")</param>
+    /// <returns>A new GameNpcId with "shopkeeper" category</returns>
+    public static GameNpcId CreateShopkeeper(string name)
+    {
+        return new GameNpcId("shopkeeper", name);
+    }
+
+    /// <summary>
+    ///     Creates a story NPC ID.
+    /// </summary>
+    /// <param name="name">The NPC name (e.g., "rival_may")</param>
+    /// <returns>A new GameNpcId with "story" category</returns>
+    public static GameNpcId CreateStory(string name)
+    {
+        return new GameNpcId("story", name);
+    }
+
+    /// <summary>
     ///     Tries to create a GameNpcId from a string, returning null if invalid.
+    ///     Only accepts the full format: base:npc:{category}/{name}
     /// </summary>
     public static GameNpcId? TryCreate(string? value)
     {
         if (string.IsNullOrWhiteSpace(value))
             return null;
 
-        // If it's already in full format, parse it
-        if (IsValidFormat(value) && value.Contains($":{TypeName}:"))
-        {
-            try
-            {
-                return new GameNpcId(value);
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
-        // Legacy format: could be "npc/name" or just "name"
-        var normalized = NormalizeComponent(value);
-        if (string.IsNullOrEmpty(normalized))
+        // Only accept full format
+        if (!IsValidFormat(value) || !value.Contains($":{TypeName}:"))
             return null;
 
-        // Check for legacy "category/name" format
-        if (normalized.Contains('/'))
+        try
         {
-            var parts = normalized.Split('/', 2);
-            return new GameNpcId(parts[0], parts[1]);
+            return new GameNpcId(value);
         }
-
-        return Create(normalized);
+        catch
+        {
+            return null;
+        }
     }
 
     /// <summary>

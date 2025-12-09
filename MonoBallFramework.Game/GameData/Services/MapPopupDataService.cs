@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MonoBallFramework.Game.Engine.Common.Logging;
+using MonoBallFramework.Game.Engine.Core.Types;
 using MonoBallFramework.Game.GameData.Entities;
 
 namespace MonoBallFramework.Game.GameData.Services;
@@ -89,9 +90,9 @@ public class MapPopupDataService : IMapPopupDataService
     ///     IMPORTANT: Requires PreloadAllAsync() to be called during initialization.
     ///     Returns null if theme not in cache (does NOT query database at runtime).
     /// </summary>
-    public PopupTheme? GetTheme(string themeId)
+    public PopupTheme? GetTheme(GameThemeId themeId)
     {
-        if (string.IsNullOrWhiteSpace(themeId))
+        if (string.IsNullOrWhiteSpace(themeId.Value))
         {
             return null;
         }
@@ -113,9 +114,9 @@ public class MapPopupDataService : IMapPopupDataService
     /// <summary>
     ///     Get popup theme by ID asynchronously.
     /// </summary>
-    public async Task<PopupTheme?> GetThemeAsync(string themeId, CancellationToken ct = default)
+    public async Task<PopupTheme?> GetThemeAsync(GameThemeId themeId, CancellationToken ct = default)
     {
-        if (string.IsNullOrWhiteSpace(themeId))
+        if (string.IsNullOrWhiteSpace(themeId.Value))
         {
             return null;
         }

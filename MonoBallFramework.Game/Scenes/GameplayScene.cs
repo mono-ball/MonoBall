@@ -145,7 +145,9 @@ public class GameplayScene : SceneBase
         }
 
         // Draw performance overlay on top (F3 to toggle)
-        _performanceOverlay.Draw();
+        // Pass camera and rendered tiles count for debug display
+        int? tilesRendered = _context.GameInitializer.RenderSystem?.LastRenderedTileCount;
+        _performanceOverlay.Draw(sceneCamera, tilesRendered);
 
         // Draw Event Inspector (F9 to toggle)
         _eventInspectorOverlay?.Draw(GraphicsDevice);

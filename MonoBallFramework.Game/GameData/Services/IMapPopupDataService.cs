@@ -1,3 +1,4 @@
+using MonoBallFramework.Game.Engine.Core.Types;
 using MonoBallFramework.Game.GameData.Entities;
 
 namespace MonoBallFramework.Game.GameData.Services;
@@ -11,12 +12,12 @@ public interface IMapPopupDataService
     /// <summary>
     ///     Get popup theme by ID (O(1) cached).
     /// </summary>
-    PopupTheme? GetTheme(string themeId);
+    PopupTheme? GetTheme(GameThemeId themeId);
 
     /// <summary>
     ///     Get popup theme by ID asynchronously.
     /// </summary>
-    Task<PopupTheme?> GetThemeAsync(string themeId, CancellationToken ct = default);
+    Task<PopupTheme?> GetThemeAsync(GameThemeId themeId, CancellationToken ct = default);
 
     /// <summary>
     ///     Get map section by ID (O(1) cached).

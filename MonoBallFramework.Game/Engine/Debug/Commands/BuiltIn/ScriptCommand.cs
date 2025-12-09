@@ -134,14 +134,16 @@ Examples:
 
         if (args.Length == 0)
         {
-            context.WriteLine("Usage: script load <filename>", theme.Warning);
+            context.WriteLine("Usage: script load <filename> [args...]", theme.Warning);
             context.WriteLine("Example: script load example", theme.TextSecondary);
+            context.WriteLine("Example: script load spawn-npcs 10", theme.TextSecondary);
             context.WriteLine("", theme.TextPrimary);
             context.WriteLine("Use 'script' to see all available scripts", theme.TextSecondary);
             return;
         }
 
         string filename = args[0];
+        string[] scriptArgs = args.Skip(1).ToArray();
 
         // Load the script content
         string? scriptContent = context.LoadScript(filename);
@@ -155,10 +157,14 @@ Examples:
 
         // Show what we're executing
         context.WriteLine($"Executing script: {filename}.csx", theme.Info);
+        if (scriptArgs.Length > 0)
+        {
+            context.WriteLine($"Arguments: {string.Join(", ", scriptArgs)}", theme.TextSecondary);
+        }
         context.WriteLine("", theme.TextPrimary);
 
-        // Execute the script using the evaluator
-        await context.ExecuteScriptAsync(scriptContent);
+        // Execute the script using the evaluator with arguments
+        await context.ExecuteScriptAsync(scriptContent, scriptArgs);
     }
 
     private void SaveScript(IConsoleContext context, string[] args)

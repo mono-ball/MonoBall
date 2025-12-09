@@ -10,6 +10,7 @@ using MonoBallFramework.Game.GameData;
 using MonoBallFramework.Game.GameData.Loading;
 using MonoBallFramework.Game.GameData.Services;
 using MonoBallFramework.Game.GameData.Sprites;
+using MonoBallFramework.Game.GameSystems.Services;
 using MonoBallFramework.Game.Infrastructure.Configuration;
 using MonoBallFramework.Game.Infrastructure.Services;
 using static MonoBallFramework.Game.Engine.Systems.Pooling.PoolNames;
@@ -139,6 +140,9 @@ public static class CoreServicesExtensions
 
         // Sprite Registry - for loading sprite definitions following the registry pattern
         services.AddSingleton<SpriteRegistry>();
+
+        // Map Registry - tracks loaded maps and provides map ID management
+        services.AddSingleton<MapRegistry>();
 
         return services;
     }

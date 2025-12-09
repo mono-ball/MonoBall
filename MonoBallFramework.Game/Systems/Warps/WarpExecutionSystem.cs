@@ -423,9 +423,9 @@ public class WarpExecutionSystem : SystemBase, IUpdateSystem
         // Publish the event
         _eventBus.PublishPooled<MapTransitionEvent>(evt =>
         {
-            evt.FromMapId = oldMapId?.Value;
+            evt.FromMapId = oldMapId;
             evt.FromMapName = oldMapName;
-            evt.ToMapId = newMapId.Value;
+            evt.ToMapId = newMapId;
             evt.ToMapName = mapName;
             evt.RegionName = regionSection;
         });

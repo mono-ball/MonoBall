@@ -666,10 +666,10 @@ public class MovementSystem : SystemBase, IUpdateSystem
             : Elevation.Default;
 
         // NEW: Check for forced movement from current tile (before calculating target)
-        if (_tileBehaviorSystem != null && _spatialQuery != null)
+        if (_tileBehaviorSystem != null && _spatialQuery != null && position.MapId != null)
         {
             IReadOnlyList<Entity> currentTileEntities = _spatialQuery.GetEntitiesAt(
-                position.MapId.Value,
+                position.MapId,
                 position.X,
                 position.Y
             );

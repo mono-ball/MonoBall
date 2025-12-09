@@ -6,6 +6,7 @@ using MonoBallFramework.Game.Ecs.Components.Rendering;
 using MonoBallFramework.Game.Ecs.Components.Tiles;
 using MonoBallFramework.Game.Components.Interfaces;
 using MonoBallFramework.Game.Engine.Core.Events;
+using MonoBallFramework.Game.Engine.Core.Services;
 using MonoBallFramework.Game.Engine.Core.Systems;
 using MonoBallFramework.Game.Engine.Core.Types;
 using MonoBallFramework.Game.GameSystems.Events;
@@ -37,6 +38,8 @@ public class CollisionService : ICollisionService
         EventPool<CollisionResolvedEvent>.Shared;
 
     private readonly IEventBus? _eventBus;
+    private readonly IGameStateService? _gameStateService;
+    private readonly IGameTimeService? _gameTimeService;
 
     private readonly ILogger<CollisionService>? _logger;
     private readonly ISpatialQuery _spatialQuery;
@@ -46,12 +49,16 @@ public class CollisionService : ICollisionService
     public CollisionService(
         ISpatialQuery spatialQuery,
         IEventBus? eventBus = null,
-        ILogger<CollisionService>? logger = null
+        ILogger<CollisionService>? logger = null,
+        IGameStateService? gameStateService = null,
+        IGameTimeService? gameTimeService = null
     )
     {
         _spatialQuery = spatialQuery ?? throw new ArgumentNullException(nameof(spatialQuery));
         _eventBus = eventBus;
         _logger = logger;
+        _gameStateService = gameStateService;
+        _gameTimeService = gameTimeService;
     }
 
     /// <summary>
@@ -79,6 +86,15 @@ public class CollisionService : ICollisionService
         byte entityElevation = Elevation.Default
     )
     {
+        // Early exit if collision service is disabled (debug/cheat mode)
+        if (_gameStateService != null)
+        {
+            if (!_gameStateService.CollisionServiceEnabled)
+            {
+                return true;
+            }
+        }
+
         // Return true if no map ID (entity not on any map)
         if (mapId == null)
         {
@@ -96,9 +112,9 @@ public class CollisionService : ICollisionService
             try
             {
                 checkEvent.TypeId = "collision.check";
-                checkEvent.Timestamp = 0f; // TODO: Get actual game time when available
+                checkEvent.Timestamp = _gameTimeService?.TotalSeconds ?? 0f;
                 checkEvent.Entity = Entity.Null; // Entity reference not available in service layer
-                checkEvent.MapId = mapId.Value.GetHashCode(); // TODO: Update event to use GameMapId
+                checkEvent.MapId = mapId;
                 checkEvent.TilePosition = (tileX, tileY);
                 checkEvent.FromDirection = fromDirection;
                 checkEvent.ToDirection = toDirection;
@@ -138,7 +154,7 @@ public class CollisionService : ICollisionService
         }
 
         // Get all entities at this position from spatial hash
-        IReadOnlyList<Entity> entities = _spatialQuery.GetEntitiesAt(mapId.Value, tileX, tileY);
+        IReadOnlyList<Entity> entities = _spatialQuery.GetEntitiesAt(mapId, tileX, tileY);
 
         foreach (Entity entity in entities)
         {
@@ -263,6 +279,12 @@ public class CollisionService : ICollisionService
         Direction fromDirection
     )
     {
+        // Early exit if collision service is disabled (debug/cheat mode)
+        if (_gameStateService is { CollisionServiceEnabled: false })
+        {
+            return (false, Direction.None, true);
+        }
+
         // Return safe defaults if no map ID
         if (mapId == null)
         {
@@ -280,9 +302,9 @@ public class CollisionService : ICollisionService
             try
             {
                 checkEvent.TypeId = "collision.check";
-                checkEvent.Timestamp = 0f;
+                checkEvent.Timestamp = _gameTimeService?.TotalSeconds ?? 0f;
                 checkEvent.Entity = Entity.Null;
-                checkEvent.MapId = mapId.Value.GetHashCode(); // TODO: Update event to use GameMapId
+                checkEvent.MapId = mapId;
                 checkEvent.TilePosition = (tileX, tileY);
                 checkEvent.FromDirection = fromDirection;
                 checkEvent.ToDirection = toDirection;
@@ -314,7 +336,7 @@ public class CollisionService : ICollisionService
         }
 
         // OPTIMIZATION: Single spatial query instead of 2-3 separate queries
-        IReadOnlyList<Entity> entities = _spatialQuery.GetEntitiesAt(mapId.Value, tileX, tileY);
+        IReadOnlyList<Entity> entities = _spatialQuery.GetEntitiesAt(mapId, tileX, tileY);
 
         bool isJumpTile = false;
         Direction allowedJumpDir = Direction.None;
@@ -445,10 +467,10 @@ public class CollisionService : ICollisionService
         try
         {
             detectedEvent.TypeId = "collision.detected";
-            detectedEvent.Timestamp = 0f; // TODO: Get actual game time when available
+            detectedEvent.Timestamp = _gameTimeService?.TotalSeconds ?? 0f;
             detectedEvent.Entity = entity;
             detectedEvent.CollidedWith = collidedWith;
-            detectedEvent.MapId = mapId.GetHashCode(); // TODO: Update event to use GameMapId
+            detectedEvent.MapId = mapId;
             detectedEvent.TilePosition = (tileX, tileY);
             detectedEvent.CollisionDirection = direction;
             detectedEvent.CollisionType = collisionType;
@@ -499,9 +521,9 @@ public class CollisionService : ICollisionService
         try
         {
             resolvedEvent.TypeId = "collision.resolved";
-            resolvedEvent.Timestamp = 0f; // TODO: Get actual game time when available
+            resolvedEvent.Timestamp = _gameTimeService?.TotalSeconds ?? 0f;
             resolvedEvent.Entity = entity;
-            resolvedEvent.MapId = mapId.GetHashCode(); // TODO: Update event to use GameMapId
+            resolvedEvent.MapId = mapId;
             resolvedEvent.OriginalTarget = originalTarget;
             resolvedEvent.FinalPosition = finalPosition;
             resolvedEvent.WasBlocked = wasBlocked;

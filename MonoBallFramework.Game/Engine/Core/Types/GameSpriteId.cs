@@ -68,42 +68,56 @@ public sealed record GameSpriteId : EntityId
     }
 
     /// <summary>
+    ///     Creates a player sprite ID.
+    /// </summary>
+    /// <param name="name">The sprite name (e.g., "may", "brendan")</param>
+    /// <returns>A new GameSpriteId with "players" category</returns>
+    public static GameSpriteId CreatePlayer(string name)
+    {
+        return new GameSpriteId("players", name);
+    }
+
+    /// <summary>
+    ///     Creates an NPC sprite ID.
+    /// </summary>
+    /// <param name="name">The sprite name (e.g., "boy_1", "girl_2")</param>
+    /// <returns>A new GameSpriteId with "npcs" category</returns>
+    public static GameSpriteId CreateNpc(string name)
+    {
+        return new GameSpriteId("npcs", name);
+    }
+
+    /// <summary>
+    ///     Creates a gym leader sprite ID.
+    /// </summary>
+    /// <param name="name">The sprite name (e.g., "roxanne", "brawly")</param>
+    /// <returns>A new GameSpriteId with "gym_leaders" category</returns>
+    public static GameSpriteId CreateGymLeader(string name)
+    {
+        return new GameSpriteId("gym_leaders", name);
+    }
+
+    /// <summary>
     ///     Tries to create a GameSpriteId from a string, returning null if invalid.
+    ///     Only accepts the full format: base:sprite:{category}/{name}
     /// </summary>
     public static GameSpriteId? TryCreate(string? value)
     {
         if (string.IsNullOrWhiteSpace(value))
             return null;
 
-        // If it's already in full format, parse it
-        if (IsValidFormat(value) && value.Contains($":{TypeName}:"))
-        {
-            try
-            {
-                return new GameSpriteId(value);
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
-        // Legacy format: could be "category/name" or just "name"
-        var normalized = NormalizeComponent(value);
-        if (string.IsNullOrEmpty(normalized))
+        // Only accept full format
+        if (!IsValidFormat(value) || !value.Contains($":{TypeName}:"))
             return null;
 
-        // Check for "category/name" format
-        if (value.Contains('/'))
+        try
         {
-            var parts = value.Split('/', 2);
-            var cat = NormalizeComponent(parts[0]);
-            var name = NormalizeComponent(parts[1]);
-            if (!string.IsNullOrEmpty(cat) && !string.IsNullOrEmpty(name))
-                return new GameSpriteId(cat, name);
+            return new GameSpriteId(value);
         }
-
-        return Create(normalized);
+        catch
+        {
+            return null;
+        }
     }
 
     /// <summary>

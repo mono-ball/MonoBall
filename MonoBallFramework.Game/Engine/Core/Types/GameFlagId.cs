@@ -104,41 +104,25 @@ public sealed record GameFlagId : EntityId
 
     /// <summary>
     ///     Tries to create a GameFlagId from a string, returning null if invalid.
+    ///     Only accepts the full format: base:flag:{category}/{name}
     /// </summary>
     public static GameFlagId? TryCreate(string? value)
     {
         if (string.IsNullOrWhiteSpace(value))
             return null;
 
-        // If it's already in full format, parse it
-        if (IsValidFormat(value) && value.Contains($":{TypeName}:"))
-        {
-            try
-            {
-                return new GameFlagId(value);
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
-        // Legacy format: could be "category/name" or just "name"
-        var normalized = NormalizeComponent(value);
-        if (string.IsNullOrEmpty(normalized))
+        // Only accept full format
+        if (!IsValidFormat(value) || !value.Contains($":{TypeName}:"))
             return null;
 
-        // Check for "category/name" format
-        if (value.Contains('/'))
+        try
         {
-            var parts = value.Split('/', 2);
-            var cat = NormalizeComponent(parts[0]);
-            var name = NormalizeComponent(parts[1]);
-            if (!string.IsNullOrEmpty(cat) && !string.IsNullOrEmpty(name))
-                return new GameFlagId(cat, name);
+            return new GameFlagId(value);
         }
-
-        return Create(normalized);
+        catch
+        {
+            return null;
+        }
     }
 
     /// <summary>

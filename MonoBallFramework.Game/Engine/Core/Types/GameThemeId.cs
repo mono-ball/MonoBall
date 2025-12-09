@@ -60,31 +60,25 @@ public sealed record GameThemeId : EntityId
 
     /// <summary>
     ///     Tries to create a GameThemeId from a string, returning null if invalid.
+    ///     Only accepts the full format: base:theme:{category}/{name}
     /// </summary>
     public static GameThemeId? TryCreate(string? value)
     {
         if (string.IsNullOrWhiteSpace(value))
             return null;
 
-        // If it's already in full format, parse it
-        if (IsValidFormat(value) && value.Contains($":{TypeName}:"))
-        {
-            try
-            {
-                return new GameThemeId(value);
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
-        // Legacy format: just "wood", "marble", etc.
-        var normalized = NormalizeComponent(value);
-        if (string.IsNullOrEmpty(normalized))
+        // Only accept full format
+        if (!IsValidFormat(value) || !value.Contains($":{TypeName}:"))
             return null;
 
-        return Create(normalized);
+        try
+        {
+            return new GameThemeId(value);
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     /// <summary>

@@ -2,6 +2,7 @@ using Arch.Core;
 using FontStashSharp;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using MonoBallFramework.Game.Engine.Rendering.Components;
 using MonoBallFramework.Game.Engine.Systems.Pooling;
 
 namespace MonoBallFramework.Game.Infrastructure.Diagnostics;
@@ -117,7 +118,9 @@ public class PerformanceOverlay : IDisposable
     /// <summary>
     ///     Draws the performance overlay if visible.
     /// </summary>
-    public void Draw()
+    /// <param name="camera">Optional camera to display information about.</param>
+    /// <param name="tilesRendered">Optional number of tiles rendered in the last frame.</param>
+    public void Draw(Camera? camera = null, int? tilesRendered = null)
     {
         if (!IsVisible || _font == null)
         {
@@ -125,6 +128,8 @@ public class PerformanceOverlay : IDisposable
         }
 
         PerformanceStats stats = GatherStats();
+        stats.Camera = camera;
+        stats.TilesRendered = tilesRendered;
         RenderOverlay(stats);
     }
 
@@ -164,16 +169,19 @@ public class PerformanceOverlay : IDisposable
         // Build text lines
         var lines = new List<(string text, Color color)>
         {
+            ("--- Performance ---", Color.Gray),
             ($"FPS: {stats.Fps:F1}", GetFpsColor(stats.Fps)),
             (
                 $"Frame: {stats.FrameTimeMs:F2}ms (min: {stats.MinFrameTimeMs:F2}, max: {stats.MaxFrameTimeMs:F2})",
                 Color.White
             ),
+            ("--- Memory ---", Color.Gray),
             ($"Memory: {stats.MemoryMb:F1} MB", GetMemoryColor(stats.MemoryMb)),
             (
                 $"GC: Gen0={stats.Gen0Collections}, Gen1={stats.Gen1Collections}, Gen2={stats.Gen2Collections}",
                 Color.White
             ),
+            ("--- Entities ---", Color.Gray),
             ($"Entities: {stats.EntityCount:N0}", Color.Cyan),
         };
 
@@ -187,7 +195,31 @@ public class PerformanceOverlay : IDisposable
             );
         }
 
+        // Add camera information if available
+        if (stats.Camera.HasValue)
+        {
+            Camera cam = stats.Camera.Value;
+            lines.Add(("--- Camera ---", Color.Gray));
+            lines.Add(($"Position: ({cam.Position.X:F1}, {cam.Position.Y:F1})", Color.White));
+            lines.Add(($"Zoom: {cam.Zoom:F2}x", Color.White));
+            lines.Add(
+                ($"Viewport: {cam.Viewport.Width}x{cam.Viewport.Height}",
+                    Color.White)
+            );
+        }
+
+        // Add rendered tiles count if available
+        if (stats.TilesRendered.HasValue)
+        {
+            lines.Add(("--- Rendering ---", Color.Gray));
+            lines.Add(
+                ($"Tiles Rendered: {stats.TilesRendered.Value:N0}",
+                    Color.LightGreen)
+            );
+        }
+
         // Add helpful tip
+        lines.Add(("", Color.White)); // Empty line for spacing
         lines.Add(("Press F3 to hide", Color.Gray));
 
         // Calculate background size
@@ -284,5 +316,7 @@ public class PerformanceOverlay : IDisposable
         public int EntityCount;
         public int PooledEntities;
         public int AvailablePooled;
+        public Camera? Camera;
+        public int? TilesRendered;
     }
 }

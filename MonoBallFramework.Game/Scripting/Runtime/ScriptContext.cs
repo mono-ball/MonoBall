@@ -5,7 +5,6 @@ using MonoBallFramework.Game.Engine.Core.Events;
 using MonoBallFramework.Game.Engine.Core.Events.Tile;
 using MonoBallFramework.Game.GameSystems.Events;
 using MonoBallFramework.Game.Scripting.Api;
-using MonoBallFramework.Game.Scripting.Services;
 
 namespace MonoBallFramework.Game.Scripting.Runtime;
 
@@ -139,7 +138,7 @@ public sealed class ScriptContext
     /// var facing = ctx.Player.GetPlayerFacing();
     /// </code>
     /// </example>
-    public PlayerApiService Player => _apis.Player;
+    public IPlayerApi Player => _apis.Player;
 
     /// <summary>
     ///     Gets the NPC API service for NPC-related operations.
@@ -151,10 +150,10 @@ public sealed class ScriptContext
     /// <example>
     ///     <code>
     /// ctx.Npc.FaceEntity(npcEntity, playerEntity);
-    /// ctx.Npc.MoveNPC(npcEntity, Direction.North);
+    /// ctx.Npc.MoveNpc(npcEntity, Direction.North);
     /// </code>
     /// </example>
-    public NpcApiService Npc => _apis.Npc;
+    public INpcApi Npc => _apis.Npc;
 
     /// <summary>
     ///     Gets the Map API service for map queries and transitions.
@@ -170,7 +169,7 @@ public sealed class ScriptContext
     /// ctx.Map.TransitionToMap(2, 10, 10);
     /// </code>
     /// </example>
-    public MapApiService Map => _apis.Map;
+    public IMapApi Map => _apis.Map;
 
     /// <summary>
     ///     Gets the Game State API service for managing flags and variables.
@@ -188,7 +187,7 @@ public sealed class ScriptContext
     /// }
     /// </code>
     /// </example>
-    public GameStateApiService GameState => _apis.GameState;
+    public IGameStateApi GameState => _apis.GameState;
 
     /// <summary>
     ///     Gets the Dialogue API service for displaying messages and text.
@@ -203,7 +202,7 @@ public sealed class ScriptContext
     /// ctx.Dialogue.ShowDialogue(npcEntity, "Welcome to my shop.");
     /// </code>
     /// </example>
-    public DialogueApiService Dialogue => _apis.Dialogue;
+    public IDialogueApi Dialogue => _apis.Dialogue;
 
     /// <summary>
     ///     Gets the Effects API service for spawning visual effects.
@@ -218,7 +217,7 @@ public sealed class ScriptContext
     /// ctx.Effects.PlayAnimation(entity, "hit");
     /// </code>
     /// </example>
-    public EffectApiService Effects => _apis.Effects;
+    public IEffectApi Effects => _apis.Effects;
 
     /// <summary>
     ///     Gets the Event Bus for subscribing to and publishing game events.

@@ -25,6 +25,7 @@ public class ConsoleContext : IConsoleContext
     private readonly ConsoleLoggingCallbacks _loggingCallbacks;
     private readonly IServiceProvider _serviceProvider;
     private readonly ConsoleServices _services;
+    private readonly Action<string, Color>? _persistentOutputAction;
 
     /// <summary>
     ///     Creates a new ConsoleContext with aggregated services.
@@ -36,13 +37,15 @@ public class ConsoleContext : IConsoleContext
     /// <param name="timeControl">Optional time control interface (null if unavailable).</param>
     /// <param name="services">Aggregated console services.</param>
     /// <param name="serviceProvider">Service provider for accessing game services like EventBus.</param>
+    /// <param name="persistentOutputAction">Optional action for persistent output (survives console close/open).</param>
     public ConsoleContext(
         ConsoleScene consoleScene,
         Action closeAction,
         ConsoleLoggingCallbacks loggingCallbacks,
         ITimeControl? timeControl,
         ConsoleServices services,
-        IServiceProvider serviceProvider
+        IServiceProvider serviceProvider,
+        Action<string, Color>? persistentOutputAction = null
     )
     {
         _consoleScene = consoleScene ?? throw new ArgumentNullException(nameof(consoleScene));
@@ -53,6 +56,7 @@ public class ConsoleContext : IConsoleContext
         _services = services ?? throw new ArgumentNullException(nameof(services));
         _serviceProvider =
             serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+        _persistentOutputAction = persistentOutputAction;
     }
 
     /// <summary>
@@ -63,9 +67,10 @@ public class ConsoleContext : IConsoleContext
         Action closeAction,
         ConsoleLoggingCallbacks loggingCallbacks,
         ConsoleServices services,
-        IServiceProvider serviceProvider
+        IServiceProvider serviceProvider,
+        Action<string, Color>? persistentOutputAction = null
     )
-        : this(consoleScene, closeAction, loggingCallbacks, null, services, serviceProvider) { }
+        : this(consoleScene, closeAction, loggingCallbacks, null, services, serviceProvider, persistentOutputAction) { }
 
     public bool EntityAutoRefresh
     {
@@ -122,12 +127,19 @@ public class ConsoleContext : IConsoleContext
 
     public void WriteLine(string text)
     {
-        _consoleScene.AppendOutput(text, Theme.TextPrimary);
+        WriteLine(text, Theme.TextPrimary);
     }
 
     public void WriteLine(string text, Color color)
     {
-        _consoleScene.AppendOutput(text, color);
+        if (_persistentOutputAction != null)
+        {
+            _persistentOutputAction(text, color);
+        }
+        else
+        {
+            _consoleScene.AppendOutput(text, color);
+        }
     }
 
     public void Clear()
@@ -235,6 +247,14 @@ public class ConsoleContext : IConsoleContext
 
     public async Task ExecuteScriptAsync(string scriptContent)
     {
+        await ExecuteScriptAsync(scriptContent, Array.Empty<string>());
+    }
+
+    public async Task ExecuteScriptAsync(string scriptContent, string[] args)
+    {
+        // Set script arguments before execution
+        _services.ScriptGlobals.Args = args ?? Array.Empty<string>();
+
         EvaluationResult result = await _services.ScriptEvaluator.EvaluateAsync(
             scriptContent,
             _services.ScriptGlobals
@@ -267,8 +287,8 @@ public class ConsoleContext : IConsoleContext
             return;
         }
 
-        // Display result if there is one
-        if (!string.IsNullOrWhiteSpace(result.Output))
+        // Display result if there is one (skip "null" which is just a void return)
+        if (!string.IsNullOrWhiteSpace(result.Output) && result.Output != "null")
         {
             WriteLine(result.Output, Theme.Success);
         }

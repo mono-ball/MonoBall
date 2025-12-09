@@ -37,11 +37,18 @@ public static class ScriptingServicesExtensions
             // It will be set via SetSpatialQuery method after initialization
             return new MapApiService(world, logger);
         });
+        services.AddSingleton<IMapApi>(sp => sp.GetRequiredService<MapApiService>());
         services.AddSingleton<GameStateApiService>();
         services.AddSingleton<IGameStateApi>(sp => sp.GetRequiredService<GameStateApiService>());
         services.AddSingleton<DialogueApiService>();
         services.AddSingleton<EffectApiService>();
         // WorldApi removed - scripts now use domain APIs directly via ScriptContext
+
+        // Entity API Service (for runtime entity spawning)
+        services.AddSingleton<EntityApiService>();
+
+        // Registry API Service (for querying game definitions)
+        services.AddSingleton<RegistryApiService>();
 
         // Scripting API Provider
         services.AddSingleton<IScriptingApiProvider, ScriptingApiProvider>();

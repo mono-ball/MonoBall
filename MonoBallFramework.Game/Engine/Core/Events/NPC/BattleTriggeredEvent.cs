@@ -1,4 +1,5 @@
 using Arch.Core;
+using MonoBallFramework.Game.Engine.Core.Types;
 
 namespace MonoBallFramework.Game.Engine.Core.Events.NPC;
 
@@ -85,9 +86,9 @@ public sealed class BattleTriggeredEvent : NotificationEventBase
     ///     Gets or sets the trainer identifier for trainer battles.
     /// </summary>
     /// <example>
-    ///     "TRAINER_RIVAL_1", "TRAINER_YOUNGSTER_JOEY"
+    ///     base:trainer:rival/may, base:trainer:youngster/joey
     /// </example>
-    public string? TrainerIdentifier { get; set; }
+    public GameTrainerId? TrainerId { get; set; }
 
     /// <inheritdoc />
     public override void Reset()
@@ -102,7 +103,7 @@ public sealed class BattleTriggeredEvent : NotificationEventBase
         WildPokemonSpecies = null;
         PokemonLevel = 5;
         CanFlee = true;
-        TrainerIdentifier = null;
+        TrainerId = null;
     }
 }
 

@@ -7,6 +7,7 @@ using MonoBallFramework.Game.Engine.Common.Logging;
 using MonoBallFramework.Game.Engine.Common.Utilities;
 using MonoBallFramework.Game.Engine.Core.Systems;
 using MonoBallFramework.Game.Engine.Core.Systems.Base;
+using MonoBallFramework.Game.Engine.Core.Types;
 using EcsQueries = MonoBallFramework.Game.Engine.Systems.Queries.Queries;
 
 namespace MonoBallFramework.Game.GameSystems.Spatial;
@@ -37,11 +38,11 @@ public class SpatialHashSystem(ILogger<SpatialHashSystem>? logger = null)
     /// <summary>
     ///     Gets all entities at the specified tile position.
     /// </summary>
-    /// <param name="mapId">The map identifier (GameMapId.Value string).</param>
+    /// <param name="mapId">The map identifier.</param>
     /// <param name="x">The X tile coordinate.</param>
     /// <param name="y">The Y tile coordinate.</param>
     /// <returns>Collection of entities at this position.</returns>
-    public IReadOnlyList<Entity> GetEntitiesAt(string mapId, int x, int y)
+    public IReadOnlyList<Entity> GetEntitiesAt(GameMapId mapId, int x, int y)
     {
         _queryResultBuffer.Clear();
 
@@ -63,10 +64,10 @@ public class SpatialHashSystem(ILogger<SpatialHashSystem>? logger = null)
     /// <summary>
     ///     Gets all entities within the specified bounds.
     /// </summary>
-    /// <param name="mapId">The map identifier (GameMapId.Value string).</param>
+    /// <param name="mapId">The map identifier.</param>
     /// <param name="bounds">The bounding rectangle in tile coordinates.</param>
     /// <returns>Collection of entities within the bounds.</returns>
-    public IReadOnlyList<Entity> GetEntitiesInBounds(string mapId, Rectangle bounds)
+    public IReadOnlyList<Entity> GetEntitiesInBounds(GameMapId mapId, Rectangle bounds)
     {
         _queryResultBuffer.Clear();
 
@@ -82,10 +83,10 @@ public class SpatialHashSystem(ILogger<SpatialHashSystem>? logger = null)
     ///     Does NOT include dynamic entities (NPCs, player, etc.).
     ///     Optimized for tile rendering - uses separate buffer to avoid conflicts.
     /// </summary>
-    /// <param name="mapId">The map identifier (GameMapId.Value string).</param>
+    /// <param name="mapId">The map identifier.</param>
     /// <param name="bounds">The bounding rectangle in local tile coordinates.</param>
     /// <returns>Collection of static tile entities within the bounds.</returns>
-    public IReadOnlyList<Entity> GetStaticEntitiesInBounds(string mapId, Rectangle bounds)
+    public IReadOnlyList<Entity> GetStaticEntitiesInBounds(GameMapId mapId, Rectangle bounds)
     {
         _staticQueryBuffer.Clear();
 
@@ -117,7 +118,7 @@ public class SpatialHashSystem(ILogger<SpatialHashSystem>? logger = null)
                     // Skip entities without a valid map ID
                     if (pos.MapId != null)
                     {
-                        _staticHash.Add(entity, pos.MapId.Value, pos.X, pos.Y);
+                        _staticHash.Add(entity, pos.MapId, pos.X, pos.Y);
                         staticTileCount++;
                     }
                 }
@@ -138,7 +139,7 @@ public class SpatialHashSystem(ILogger<SpatialHashSystem>? logger = null)
                 // Skip entities without a valid map ID
                 if (pos.MapId != null)
                 {
-                    _dynamicHash.Add(entity, pos.MapId.Value, pos.X, pos.Y);
+                    _dynamicHash.Add(entity, pos.MapId, pos.X, pos.Y);
                 }
             }
         );

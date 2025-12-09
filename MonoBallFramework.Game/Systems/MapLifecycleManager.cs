@@ -165,9 +165,9 @@ public class MapLifecycleManager(
         // Publish the event
         eventBus.PublishPooled<MapTransitionEvent>(evt =>
         {
-            evt.FromMapId = oldMapId?.Value;
+            evt.FromMapId = oldMapId;
             evt.FromMapName = oldMapName;
-            evt.ToMapId = newMapId.Value;
+            evt.ToMapId = newMapId;
             evt.ToMapName = displayName ?? newMapName ?? "Unknown Map";
             evt.RegionName = regionSection;
         });

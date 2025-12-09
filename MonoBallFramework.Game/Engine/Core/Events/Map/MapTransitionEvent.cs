@@ -1,3 +1,5 @@
+using MonoBallFramework.Game.Engine.Core.Types;
+
 namespace MonoBallFramework.Game.Engine.Core.Events.Map;
 
 /// <summary>
@@ -7,10 +9,10 @@ namespace MonoBallFramework.Game.Engine.Core.Events.Map;
 public sealed class MapTransitionEvent : NotificationEventBase
 {
     /// <summary>
-    ///     Gets or sets the ID of the map being transitioned from (GameMapId.Value string).
+    ///     Gets or sets the ID of the map being transitioned from.
     ///     Null if this is the initial map load.
     /// </summary>
-    public string? FromMapId { get; set; }
+    public GameMapId? FromMapId { get; set; }
 
     /// <summary>
     ///     Gets or sets the name of the map being transitioned from.
@@ -19,9 +21,9 @@ public sealed class MapTransitionEvent : NotificationEventBase
     public string? FromMapName { get; set; }
 
     /// <summary>
-    ///     Gets or sets the ID of the map being transitioned to (GameMapId.Value string).
+    ///     Gets or sets the ID of the map being transitioned to.
     /// </summary>
-    public string ToMapId { get; set; } = string.Empty;
+    public GameMapId? ToMapId { get; set; }
 
     /// <summary>
     ///     Gets or sets the name of the map being transitioned to.
@@ -45,7 +47,7 @@ public sealed class MapTransitionEvent : NotificationEventBase
         base.Reset();
         FromMapId = null;
         FromMapName = null;
-        ToMapId = string.Empty;
+        ToMapId = null;
         ToMapName = string.Empty;
         RegionName = null;
     }

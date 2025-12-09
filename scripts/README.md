@@ -30,6 +30,7 @@ save my-script.csx
 - **`debug-info.csx`** - Comprehensive system and player information
 - **`teleport-player.csx`** - Quick teleport template for testing
 - **`quick-test.csx`** - Template for rapid iteration on test code
+- **`spawn-npcs.csx`** - Spawn N random NPCs with wandering behavior (usage: `load spawn-npcs [count]`)
 
 ## Creating Your Own Scripts
 

@@ -137,7 +137,7 @@ public sealed class TemplateEntitySpawner : IEntitySpawner
         if (!string.IsNullOrWhiteSpace(npcIdStr) && _npcDefinitionService != null)
         {
             GameNpcId npcId = GameNpcId.Create(npcIdStr);
-            var npcDef = _npcDefinitionService.GetNpc(npcIdStr);
+            var npcDef = _npcDefinitionService.GetNpc(npcId);
 
             if (npcDef != null)
             {

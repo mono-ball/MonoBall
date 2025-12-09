@@ -672,9 +672,9 @@ public class MapStreamingSystem : SystemBase, IUpdateSystem
 
         _eventBus.PublishPooled<MapTransitionEvent>(evt =>
         {
-            evt.FromMapId = oldMapId?.Value;
+            evt.FromMapId = oldMapId;
             evt.FromMapName = oldMapName;
-            evt.ToMapId = newMapData.Info.MapId.Value;
+            evt.ToMapId = newMapData.Info.MapId;
             evt.ToMapName = displayName ?? newMapData.Info.MapName;
             evt.RegionName = regionSection;
         });

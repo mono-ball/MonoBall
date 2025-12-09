@@ -14,22 +14,10 @@ namespace MonoBallFramework.Game.GameData.MapLoading.Tiled.Processors;
 public static class ComponentFactory
 {
     /// <summary>
-    ///     Creates a Sprite component from a sprite ID string.
-    ///     Format: "npcs/generic_twin" or full "base:sprite:npcs/generic_twin"
+    ///     Creates a Sprite component from a GameSpriteId.
     /// </summary>
-    public static Sprite CreateSprite(string spriteIdStr, HashSet<GameSpriteId>? requiredSpriteIds = null)
+    public static Sprite CreateSprite(GameSpriteId spriteId, HashSet<GameSpriteId>? requiredSpriteIds = null)
     {
-        GameSpriteId spriteId;
-        if (spriteIdStr.Contains(':'))
-        {
-            // Full ID format
-            spriteId = new GameSpriteId(spriteIdStr);
-        }
-        else
-        {
-            // Path format - add base:sprite: prefix
-            spriteId = new GameSpriteId($"base:sprite:{spriteIdStr}");
-        }
         requiredSpriteIds?.Add(spriteId);
         return new Sprite(spriteId);
     }

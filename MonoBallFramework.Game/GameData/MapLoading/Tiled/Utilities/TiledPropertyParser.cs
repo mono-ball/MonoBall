@@ -670,6 +670,70 @@ public static class TiledPropertyParser
     }
 
     // ===================================================================
+    // Patrol Waypoint Generation
+    // ===================================================================
+
+    /// <summary>
+    ///     Gets patrol waypoints from Tiled properties.
+    ///     Supports explicit waypoints string OR axis-based generation.
+    ///     Returns null if no patrol configuration is found.
+    /// </summary>
+    /// <param name="properties">Tiled object properties.</param>
+    /// <param name="behaviorId">Behavior ID to check if it's a patrol behavior.</param>
+    /// <param name="originX">Origin tile X for generated waypoints.</param>
+    /// <param name="originY">Origin tile Y for generated waypoints.</param>
+    /// <param name="context">Error context string.</param>
+    /// <returns>Array of waypoints, or null if not a patrol behavior or no waypoints configured.</returns>
+    public static Point[]? GetPatrolWaypoints(
+        Dictionary<string, object> properties,
+        string? behaviorId,
+        int originX,
+        int originY,
+        string context)
+    {
+        // Only generate waypoints for patrol behaviors
+        if (string.IsNullOrEmpty(behaviorId) || !behaviorId.Contains("patrol"))
+        {
+            return null;
+        }
+
+        // Check for explicit waypoints first
+        if (HasProperty(properties, "waypoints"))
+        {
+            Point[] waypoints = GetOptionalWaypoints(properties, "waypoints", context);
+            return waypoints.Length > 0 ? waypoints : null;
+        }
+
+        // Generate waypoints from axis + range
+        string? axis = GetOptionalString(properties, "axis")?.ToLowerInvariant();
+        if (string.IsNullOrEmpty(axis))
+        {
+            return null;
+        }
+
+        // Get range - check axis-specific range first, then general range
+        int range;
+        if (axis == "horizontal" && HasProperty(properties, "rangeX"))
+        {
+            range = GetRequiredInt(properties, "rangeX", context);
+        }
+        else if (axis == "vertical" && HasProperty(properties, "rangeY"))
+        {
+            range = GetRequiredInt(properties, "rangeY", context);
+        }
+        else
+        {
+            range = GetOptionalInt(properties, "range", context) ?? 2;
+        }
+
+        range = Math.Max(1, range);
+
+        return axis == "horizontal"
+            ? [new Point(originX, originY), new Point(originX + range, originY)]
+            : [new Point(originX, originY), new Point(originX, originY + range)];
+    }
+
+    // ===================================================================
     // Utility Methods
     // ===================================================================
 

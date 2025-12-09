@@ -1,4 +1,5 @@
 using Arch.Core;
+using MonoBallFramework.Game.Engine.Core.Types;
 
 namespace MonoBallFramework.Game.Engine.Core.Events.NPC;
 
@@ -60,10 +61,10 @@ public sealed class NPCInteractionEvent : NotificationEventBase
     public NPCType NPCType { get; set; } = NPCType.Generic;
 
     /// <summary>
-    ///     Gets or sets the unique identifier for this NPC (script name, trainer ID, etc.).
+    ///     Gets or sets the unique identifier for this NPC.
     ///     Used to load NPC-specific data and behaviors.
     /// </summary>
-    public string? NPCIdentifier { get; set; }
+    public GameNpcId? NpcId { get; set; }
 
     /// <summary>
     ///     Gets or sets a value indicating whether this is the first time the player interacted with this NPC.
@@ -81,7 +82,7 @@ public sealed class NPCInteractionEvent : NotificationEventBase
         NPCY = 0;
         PlayerFacingDirection = 0;
         NPCType = NPCType.Generic;
-        NPCIdentifier = null;
+        NpcId = null;
         IsFirstInteraction = false;
     }
 }

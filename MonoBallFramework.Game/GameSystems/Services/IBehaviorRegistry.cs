@@ -29,28 +29,28 @@ public interface IBehaviorRegistry
     /// <exception cref="ArgumentException">
     ///     Thrown when a behavior with the same ID is already registered.
     /// </exception>
-    void RegisterBehavior(string behaviorId, BehaviorDefinition definition);
+    void RegisterBehavior(GameBehaviorId behaviorId, BehaviorDefinition definition);
 
     /// <summary>
     ///     Retrieve a behavior definition by its identifier.
     /// </summary>
     /// <param name="behaviorId">The behavior identifier to look up.</param>
     /// <returns>The behavior definition, or null if not found.</returns>
-    BehaviorDefinition? GetBehavior(string behaviorId);
+    BehaviorDefinition? GetBehavior(GameBehaviorId behaviorId);
 
     /// <summary>
     ///     Check if a behavior is registered.
     /// </summary>
     /// <param name="behaviorId">The behavior identifier to check.</param>
     /// <returns>True if the behavior exists, false otherwise.</returns>
-    bool HasBehavior(string behaviorId);
+    bool HasBehavior(GameBehaviorId behaviorId);
 
     /// <summary>
     ///     Remove a behavior from the registry.
     /// </summary>
     /// <param name="behaviorId">The behavior identifier to remove.</param>
     /// <returns>True if the behavior was removed, false if it didn't exist.</returns>
-    bool RemoveBehavior(string behaviorId);
+    bool RemoveBehavior(GameBehaviorId behaviorId);
 
     /// <summary>
     ///     Get all registered behavior identifiers.

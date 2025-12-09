@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using MonoBallFramework.Game.Engine.Scenes;
+using MonoBallFramework.Game.Scripting.Services;
 
 namespace MonoBallFramework.Game.Initialization.Pipeline.Steps;
 
@@ -35,7 +36,12 @@ public class SetupApiProvidersStep : InitializationStepBase
         ILogger<SetupApiProvidersStep> logger =
             context.LoggerFactory.CreateLogger<SetupApiProvidersStep>();
         // Set SpatialQuery on the MapApiService (used by ScriptService)
-        context.ApiProvider.Map.SetSpatialQuery(context.GameInitializer.SpatialHashSystem);
+        // Cast to concrete type since SetSpatialQuery is an internal initialization method
+        if (context.ApiProvider.Map is MapApiService mapService)
+        {
+            mapService.SetSpatialQuery(context.GameInitializer.SpatialHashSystem);
+        }
+
         logger.LogInformation("API providers configured successfully");
         return Task.CompletedTask;
     }

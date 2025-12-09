@@ -1,5 +1,6 @@
 using Arch.Core;
 using Microsoft.Xna.Framework;
+using MonoBallFramework.Game.Engine.Core.Types;
 
 namespace MonoBallFramework.Game.Engine.Common.Utilities;
 
@@ -42,10 +43,10 @@ public class SpatialHash
     ///     Adds an entity to the spatial hash at the specified position.
     /// </summary>
     /// <param name="entity">The entity to add.</param>
-    /// <param name="mapId">The map identifier (GameMapId.Value string).</param>
+    /// <param name="mapId">The map identifier.</param>
     /// <param name="x">The X tile coordinate.</param>
     /// <param name="y">The Y tile coordinate.</param>
-    public void Add(Entity entity, string mapId, int x, int y)
+    public void Add(Entity entity, GameMapId mapId, int x, int y)
     {
         // Ensure map exists
         if (!_grid.TryGetValue(mapId, out Dictionary<(int x, int y), List<Entity>>? mapGrid))
@@ -70,11 +71,11 @@ public class SpatialHash
     ///     Removes an entity from the spatial hash at the specified position.
     /// </summary>
     /// <param name="entity">The entity to remove.</param>
-    /// <param name="mapId">The map identifier (GameMapId.Value string).</param>
+    /// <param name="mapId">The map identifier.</param>
     /// <param name="x">The X tile coordinate.</param>
     /// <param name="y">The Y tile coordinate.</param>
     /// <returns>True if the entity was removed, false if not found.</returns>
-    public bool Remove(Entity entity, string mapId, int x, int y)
+    public bool Remove(Entity entity, GameMapId mapId, int x, int y)
     {
         if (!_grid.TryGetValue(mapId, out Dictionary<(int x, int y), List<Entity>>? mapGrid))
         {
@@ -93,11 +94,11 @@ public class SpatialHash
     /// <summary>
     ///     Gets all entities at the specified position.
     /// </summary>
-    /// <param name="mapId">The map identifier (GameMapId.Value string).</param>
+    /// <param name="mapId">The map identifier.</param>
     /// <param name="x">The X tile coordinate.</param>
     /// <param name="y">The Y tile coordinate.</param>
     /// <returns>Collection of entities at this position, or empty if none.</returns>
-    public IEnumerable<Entity> GetAt(string mapId, int x, int y)
+    public IEnumerable<Entity> GetAt(GameMapId mapId, int x, int y)
     {
         if (!_grid.TryGetValue(mapId, out Dictionary<(int x, int y), List<Entity>>? mapGrid))
         {
@@ -116,14 +117,14 @@ public class SpatialHash
     /// <summary>
     ///     Gets all entities within the specified bounds.
     /// </summary>
-    /// <param name="mapId">The map identifier (GameMapId.Value string).</param>
+    /// <param name="mapId">The map identifier.</param>
     /// <param name="bounds">The bounding rectangle in tile coordinates.</param>
     /// <param name="results">List to populate with results (caller provides to avoid allocation).</param>
     /// <remarks>
     ///     PERFORMANCE OPTIMIZATION: Uses caller-provided list to eliminate iterator state machine
     ///     allocation that occurs with yield return. This eliminates ~600-800μs overhead per call.
     /// </remarks>
-    public void GetInBounds(string mapId, Rectangle bounds, List<Entity> results)
+    public void GetInBounds(GameMapId mapId, Rectangle bounds, List<Entity> results)
     {
         if (!_grid.TryGetValue(mapId, out Dictionary<(int x, int y), List<Entity>>? mapGrid))
         {
@@ -146,15 +147,15 @@ public class SpatialHash
     /// <summary>
     ///     Gets all entities within the specified bounds (legacy iterator version).
     /// </summary>
-    /// <param name="mapId">The map identifier (GameMapId.Value string).</param>
+    /// <param name="mapId">The map identifier.</param>
     /// <param name="bounds">The bounding rectangle in tile coordinates.</param>
     /// <returns>Collection of entities within the bounds.</returns>
     /// <remarks>
     ///     DEPRECATED: Use the overload with List parameter for better performance.
     ///     This allocates an iterator state machine on every call.
     /// </remarks>
-    [Obsolete("Use GetInBounds(string, Rectangle, List<Entity>) to avoid iterator allocation")]
-    public IEnumerable<Entity> GetInBounds(string mapId, Rectangle bounds)
+    [Obsolete("Use GetInBounds(GameMapId, Rectangle, List<Entity>) to avoid iterator allocation")]
+    public IEnumerable<Entity> GetInBounds(GameMapId mapId, Rectangle bounds)
     {
         if (!_grid.TryGetValue(mapId, out Dictionary<(int x, int y), List<Entity>>? mapGrid))
         {

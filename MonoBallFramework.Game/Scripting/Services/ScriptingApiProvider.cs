@@ -12,28 +12,38 @@ public class ScriptingApiProvider(
     MapApiService mapApi,
     GameStateApiService gameStateApi,
     DialogueApiService dialogueApi,
-    EffectApiService effectApi
+    EffectApiService effectApi,
+    EntityApiService entityApi,
+    RegistryApiService registryApi
 ) : IScriptingApiProvider
 {
     /// <inheritdoc />
-    public PlayerApiService Player { get; } =
+    public IPlayerApi Player { get; } =
         playerApi ?? throw new ArgumentNullException(nameof(playerApi));
 
     /// <inheritdoc />
-    public NpcApiService Npc { get; } = npcApi ?? throw new ArgumentNullException(nameof(npcApi));
+    public INpcApi Npc { get; } = npcApi ?? throw new ArgumentNullException(nameof(npcApi));
 
     /// <inheritdoc />
-    public MapApiService Map { get; } = mapApi ?? throw new ArgumentNullException(nameof(mapApi));
+    public IMapApi Map { get; } = mapApi ?? throw new ArgumentNullException(nameof(mapApi));
 
     /// <inheritdoc />
-    public GameStateApiService GameState { get; } =
+    public IGameStateApi GameState { get; } =
         gameStateApi ?? throw new ArgumentNullException(nameof(gameStateApi));
 
     /// <inheritdoc />
-    public DialogueApiService Dialogue { get; } =
+    public IDialogueApi Dialogue { get; } =
         dialogueApi ?? throw new ArgumentNullException(nameof(dialogueApi));
 
     /// <inheritdoc />
-    public EffectApiService Effects { get; } =
+    public IEffectApi Effects { get; } =
         effectApi ?? throw new ArgumentNullException(nameof(effectApi));
+
+    /// <inheritdoc />
+    public IEntityApi Entity { get; } =
+        entityApi ?? throw new ArgumentNullException(nameof(entityApi));
+
+    /// <inheritdoc />
+    public IRegistryApi Registry { get; } =
+        registryApi ?? throw new ArgumentNullException(nameof(registryApi));
 }

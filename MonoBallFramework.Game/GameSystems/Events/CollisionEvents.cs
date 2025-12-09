@@ -1,5 +1,6 @@
 using Arch.Core;
 using MonoBallFramework.Game.Ecs.Components.Movement;
+using MonoBallFramework.Game.Engine.Core.Types;
 using MonoBallFramework.Game.Engine.Core.Types.Events;
 
 namespace MonoBallFramework.Game.GameSystems.Events;
@@ -23,7 +24,7 @@ public record CollisionCheckEvent : TypeEventBase, MonoBallFramework.Game.Engine
     /// <summary>
     ///     The map identifier where collision is being checked.
     /// </summary>
-    public int MapId { get; set; }
+    public GameMapId? MapId { get; set; }
 
     /// <summary>
     ///     The tile position being checked (X, Y in tile coordinates).
@@ -109,7 +110,7 @@ public record CollisionCheckEvent : TypeEventBase, MonoBallFramework.Game.Engine
     {
         base.Reset();
         Entity = default;
-        MapId = 0;
+        MapId = null;
         TilePosition = default;
         FromDirection = Direction.None;
         ToDirection = Direction.None;
@@ -141,7 +142,7 @@ public record CollisionDetectedEvent : TypeEventBase
     /// <summary>
     ///     Map identifier where collision occurred.
     /// </summary>
-    public int MapId { get; set; }
+    public GameMapId? MapId { get; set; }
 
     /// <summary>
     ///     Tile position where collision occurred.
@@ -186,7 +187,7 @@ public record CollisionResolvedEvent : TypeEventBase
     /// <summary>
     ///     Map identifier.
     /// </summary>
-    public int MapId { get; set; }
+    public GameMapId? MapId { get; set; }
 
     /// <summary>
     ///     Original target position that was blocked.

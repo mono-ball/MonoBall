@@ -62,39 +62,56 @@ public sealed record GameTrainerId : EntityId
     }
 
     /// <summary>
+    ///     Creates a gym leader trainer ID.
+    /// </summary>
+    /// <param name="name">The trainer name (e.g., "roxanne", "brawly")</param>
+    /// <returns>A new GameTrainerId with "gym_leader" class</returns>
+    public static GameTrainerId CreateGymLeader(string name)
+    {
+        return new GameTrainerId("gym_leader", name);
+    }
+
+    /// <summary>
+    ///     Creates an Elite Four trainer ID.
+    /// </summary>
+    /// <param name="name">The trainer name (e.g., "sidney", "phoebe")</param>
+    /// <returns>A new GameTrainerId with "elite_four" class</returns>
+    public static GameTrainerId CreateEliteFour(string name)
+    {
+        return new GameTrainerId("elite_four", name);
+    }
+
+    /// <summary>
+    ///     Creates a youngster trainer ID.
+    /// </summary>
+    /// <param name="name">The trainer name (e.g., "joey", "calvin")</param>
+    /// <returns>A new GameTrainerId with "youngster" class</returns>
+    public static GameTrainerId CreateYoungster(string name)
+    {
+        return new GameTrainerId("youngster", name);
+    }
+
+    /// <summary>
     ///     Tries to create a GameTrainerId from a string, returning null if invalid.
+    ///     Only accepts the full format: base:trainer:{class}/{name}
     /// </summary>
     public static GameTrainerId? TryCreate(string? value)
     {
         if (string.IsNullOrWhiteSpace(value))
             return null;
 
-        // If it's already in full format, parse it
-        if (IsValidFormat(value) && value.Contains($":{TypeName}:"))
-        {
-            try
-            {
-                return new GameTrainerId(value);
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
-        // Legacy format
-        var normalized = NormalizeComponent(value);
-        if (string.IsNullOrEmpty(normalized))
+        // Only accept full format
+        if (!IsValidFormat(value) || !value.Contains($":{TypeName}:"))
             return null;
 
-        // Check for "class/name" format
-        if (normalized.Contains('/'))
+        try
         {
-            var parts = normalized.Split('/', 2);
-            return new GameTrainerId(parts[0], parts[1]);
+            return new GameTrainerId(value);
         }
-
-        return Create(normalized);
+        catch
+        {
+            return null;
+        }
     }
 
     /// <summary>

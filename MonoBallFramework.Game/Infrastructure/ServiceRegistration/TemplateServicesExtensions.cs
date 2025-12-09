@@ -4,6 +4,7 @@ using MonoBallFramework.Game.Engine.Core.Templates;
 using MonoBallFramework.Game.Engine.Core.Templates.Loading;
 using MonoBallFramework.Game.Engine.Core.Types;
 using MonoBallFramework.Game.Engine.Systems.Factories;
+using MonoBallFramework.Game.GameSystems.Services;
 using MonoBallFramework.Game.Infrastructure.Services;
 using MonoBallFramework.Game.Initialization.Initializers;
 using MonoBallFramework.Game.Templates;
@@ -53,6 +54,14 @@ public static class TemplateServicesExtensions
             >();
             string behaviorsPath = pathResolver.ResolveData("Behaviors");
             return new TypeRegistry<BehaviorDefinition>(behaviorsPath, logger);
+        });
+
+        // IBehaviorRegistry - adapter over TypeRegistry<BehaviorDefinition> for scripting API
+        services.AddSingleton<IBehaviorRegistry>(sp =>
+        {
+            TypeRegistry<BehaviorDefinition> typeRegistry =
+                sp.GetRequiredService<TypeRegistry<BehaviorDefinition>>();
+            return new BehaviorRegistryAdapter(typeRegistry);
         });
 
         // Tile Behavior Registry - uses path resolver for correct path resolution

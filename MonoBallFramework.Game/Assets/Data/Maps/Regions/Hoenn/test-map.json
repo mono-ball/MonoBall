@@ -1,5 +1,5 @@
 {
-  "Id": "base:map:hoenn/test-map",
+  "Id": "base:map:hoenn/test_map",
   "DisplayName": "Test Map",
   "Type": "map",
   "Region": "hoenn",

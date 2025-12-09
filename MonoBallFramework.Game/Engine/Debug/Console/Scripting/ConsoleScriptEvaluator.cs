@@ -343,7 +343,7 @@ public class ConsoleScriptEvaluator
             typeof(Entity).Assembly, // Arch.Core
             typeof(Point).Assembly, // MonoGame.Framework
             typeof(Vector2).Assembly, // MonoGame.Framework
-            typeof(Direction).Assembly, // MonoBallFramework.Game.Components
+            typeof(Direction).Assembly, // MonoBallFramework.Game.Ecs.Components
             typeof(IScriptingApiProvider).Assembly, // MonoBallFramework.Game.Scripting
             typeof(ILogger).Assembly, // Microsoft.Extensions.Logging.Abstractions
         };
@@ -362,9 +362,9 @@ public class ConsoleScriptEvaluator
             "Arch.Core",
             "Microsoft.Xna.Framework",
             "Microsoft.Extensions.Logging",
-            "MonoBallFramework.Game.Components.Movement",
-            "MonoBallFramework.Game.Components.Player",
-            "MonoBallFramework.Game.Components.Rendering",
+            "MonoBallFramework.Game.Ecs.Components.Movement",
+            "MonoBallFramework.Game.Ecs.Components.Player",
+            "MonoBallFramework.Game.Ecs.Components.Rendering",
             "MonoBallFramework.Game.Scripting.Api",
         };
     }

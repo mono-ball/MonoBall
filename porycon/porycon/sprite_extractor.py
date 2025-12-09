@@ -224,15 +224,15 @@ class SpriteExtractor:
                 Path(valid_sources[img_idx].file_path).stem
             )
             
-            # Convert to RGBA
-            if img.mode != "RGBA":
-                rgba_img = img.convert("RGBA")
-            else:
-                rgba_img = img.copy()
+            # Convert to RGBA with proper transparency handling (palette mode, etc.)
+            rgba_img = self._convert_to_rgba_with_transparency(img)
             
-            # Apply transparency
+            # Apply additional mask color transparency if detected
             if mask_color:
                 self._apply_transparency(rgba_img, mask_color)
+            
+            # Also check for magenta (#FF00FF) as a common transparency mask
+            self._apply_magenta_transparency(rgba_img)
             
             combined.paste(rgba_img, (current_x, 0), rgba_img)
             
@@ -441,16 +441,16 @@ class SpriteExtractor:
         # Detect mask color
         mask_color = self._detect_mask_color(image)
 
-        # Convert to RGBA
-        if image.mode != "RGBA":
-            rgba_image = image.convert("RGBA")
-        else:
-            rgba_image = image.copy()
+        # Convert to RGBA with proper transparency handling (palette mode, etc.)
+        rgba_image = self._convert_to_rgba_with_transparency(image)
 
-        # Apply transparency
+        # Apply additional mask color transparency if detected
         if mask_color:
             logger.info(f"  Applying mask color {mask_color} for transparency")
             self._apply_transparency(rgba_image, mask_color)
+        
+        # Also check for magenta (#FF00FF) as a common transparency mask
+        self._apply_magenta_transparency(rgba_image)
 
         # Save as RGBA PNG
         rgba_image.save(graphics_path, "PNG")
@@ -669,6 +669,49 @@ class SpriteExtractor:
         
         return ''.join(result)
     
+    def _convert_to_rgba_with_transparency(self, image: Image.Image) -> Image.Image:
+        """
+        Convert image to RGBA with proper transparency handling.
+        
+        Handles:
+        - Palette mode (P): Palette index 0 is transparent (GBA convention)
+        - Other modes: Standard conversion
+        
+        Note: Magenta (#FF00FF) transparency is handled separately by _apply_magenta_transparency()
+        """
+        # Handle palette mode images (common in GBA graphics)
+        if image.mode == 'P':
+            # Get the original palette index data before conversion
+            original_data = list(image.getdata())
+            
+            # Set transparency info for palette index 0 (GBA convention)
+            if 'transparency' not in image.info:
+                image.info['transparency'] = 0
+            
+            # Convert to RGBA - PIL will honor the transparency index
+            rgba_image = image.convert('RGBA')
+            
+            # Manually make pixels that were palette index 0 transparent
+            pixels = list(rgba_image.getdata())
+            new_pixels = []
+            transparent_count = 0
+            
+            for orig_idx, pixel in zip(original_data, pixels):
+                if orig_idx == 0:  # Palette index 0 is transparent in GBA
+                    new_pixels.append((0, 0, 0, 0))
+                    transparent_count += 1
+                else:
+                    new_pixels.append(pixel)
+            
+            rgba_image.putdata(new_pixels)
+            if transparent_count > 0:
+                logger.debug(f"  Made {transparent_count} pixels transparent from palette index 0")
+            return rgba_image
+        elif image.mode != 'RGBA':
+            return image.convert('RGBA')
+        else:
+            return image.copy()
+    
     def _apply_transparency(self, image: Image.Image, mask_color_hex: str) -> None:
         """Apply transparency by replacing mask color with transparent pixels."""
         # Parse hex color
@@ -677,7 +720,7 @@ class SpriteExtractor:
         g = int(mask_color_hex[2:4], 16)
         b = int(mask_color_hex[4:6], 16)
         
-        # Convert to RGBA if not already
+        # Ensure image is RGBA
         if image.mode != "RGBA":
             rgba_image = image.convert("RGBA")
         else:
@@ -695,7 +738,26 @@ class SpriteExtractor:
                     pixels[x, y] = (0, 0, 0, 0)  # Fully transparent
                     transparent_count += 1
         
-        logger.debug(f"  Made {transparent_count} pixels transparent")
+        logger.debug(f"  Made {transparent_count} pixels transparent from mask color")
+    
+    def _apply_magenta_transparency(self, image: Image.Image) -> None:
+        """Apply transparency for magenta (#FF00FF) pixels, a common GBA transparency mask."""
+        if image.mode != "RGBA":
+            return
+        
+        pixels = image.load()
+        transparent_count = 0
+        
+        for y in range(image.height):
+            for x in range(image.width):
+                r, g, b, a = pixels[x, y]
+                # Magenta (#FF00FF) is commonly used as transparency mask in GBA graphics
+                if r == 255 and g == 0 and b == 255 and a > 0:
+                    pixels[x, y] = (0, 0, 0, 0)  # Fully transparent
+                    transparent_count += 1
+        
+        if transparent_count > 0:
+            logger.debug(f"  Made {transparent_count} magenta pixels transparent")
     
     def _detect_mask_color(self, image: Image.Image) -> Optional[str]:
         """

@@ -20,6 +20,7 @@ using MonoBallFramework.Game.Ecs.Components.Player;
 using MonoBallFramework.Game.Ecs.Components.Rendering;
 using MonoBallFramework.Game.Ecs.Components.Tiles;
 using MonoBallFramework.Game.Engine.Core.Systems.Base;
+using MonoBallFramework.Game.Engine.Core.Types;
 
 namespace MonoBallFramework.Game.Engine.Rendering.Systems;
 
@@ -178,6 +179,12 @@ public class ElevationRenderSystem(
     /// </summary>
     public AssetManager AssetManager { get; } =
         assetManager ?? throw new ArgumentNullException(nameof(assetManager));
+
+    /// <summary>
+    ///     Gets the number of tiles rendered in the last frame.
+    ///     This includes both regular tiles and border tiles.
+    /// </summary>
+    public int LastRenderedTileCount => _lastTileCount;
 
     /// <inheritdoc />
     public override int Priority => SystemPriority.Render;
@@ -543,21 +550,16 @@ public class ElevationRenderSystem(
 
         _cachedCameraTransform = camera.GetTransformMatrix();
 
-        // Calculate camera bounds for culling
-        int left =
-            (int)(camera.Position.X / TileSize)
-            - (camera.Viewport.Width / 2 / TileSize / (int)camera.Zoom)
-            - CameraConstants.ViewportMarginTiles;
-        int top =
-            (int)(camera.Position.Y / TileSize)
-            - (camera.Viewport.Height / 2 / TileSize / (int)camera.Zoom)
-            - CameraConstants.ViewportMarginTiles;
-        int width =
-            (camera.Viewport.Width / TileSize / (int)camera.Zoom)
-            + (CameraConstants.ViewportMarginTiles * 2);
-        int height =
-            (camera.Viewport.Height / TileSize / (int)camera.Zoom)
-            + (CameraConstants.ViewportMarginTiles * 2);
+        // Calculate camera bounds for culling using floating-point math
+        // When zoom < 1 (zoomed out), we see more tiles; when zoom > 1 (zoomed in), we see fewer
+        float effectiveZoom = Math.Max(0.01f, camera.Zoom); // prevent divide by zero
+        int halfWidthTiles = (int)Math.Ceiling(camera.Viewport.Width / 2f / TileSize / effectiveZoom);
+        int halfHeightTiles = (int)Math.Ceiling(camera.Viewport.Height / 2f / TileSize / effectiveZoom);
+
+        int left = (int)(camera.Position.X / TileSize) - halfWidthTiles - CameraConstants.ViewportMarginTiles;
+        int top = (int)(camera.Position.Y / TileSize) - halfHeightTiles - CameraConstants.ViewportMarginTiles;
+        int width = (halfWidthTiles * 2) + (CameraConstants.ViewportMarginTiles * 2);
+        int height = (halfHeightTiles * 2) + (CameraConstants.ViewportMarginTiles * 2);
 
         _cachedCameraBounds = new Rectangle(left, top, width, height);
 
@@ -614,7 +616,7 @@ public class ElevationRenderSystem(
                 _cachedMapBounds.Add(
                     new MapBoundsInfo
                     {
-                        MapIdValue = mapIdValue,
+                        MapId = mapInfo.MapId,
                         WorldOrigin = worldPos.WorldOrigin,
                         MapWidth = mapInfo.Width,
                         MapHeight = mapInfo.Height,
@@ -697,11 +699,11 @@ public class ElevationRenderSystem(
 
             // Get world origin for position calculation
             Vector2 worldOrigin = mapInfo.WorldOrigin;
-            int mapRenderOrder = GetMapRenderOrder(mapInfo.MapIdValue);
+            int mapRenderOrder = GetMapRenderOrder(mapInfo.MapId?.Value);
 
             // Query only visible tiles for this map
             IReadOnlyList<Entity> visibleTiles = _spatialQuery!.GetStaticEntitiesInBounds(
-                mapInfo.MapIdValue,
+                mapInfo.MapId,
                 localBounds
             );
 
@@ -1436,7 +1438,7 @@ public class ElevationRenderSystem(
     /// </summary>
     private struct MapBoundsInfo
     {
-        public string MapIdValue;
+        public GameMapId MapId;
         public Vector2 WorldOrigin;
         public int MapWidth;
         public int MapHeight;

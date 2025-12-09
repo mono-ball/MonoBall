@@ -276,7 +276,7 @@ public class PathfindingService
     {
         // Use the same collision detection as CollisionService
         // Check if position is walkable by querying spatial hash for collision components
-        IReadOnlyList<Entity> entities = spatialQuery.GetEntitiesAt(mapId.Value, position.X, position.Y);
+        IReadOnlyList<Entity> entities = spatialQuery.GetEntitiesAt(mapId, position.X, position.Y);
 
         foreach (Entity entity in entities)
         {

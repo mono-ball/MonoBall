@@ -5,6 +5,7 @@ using Arch.Core;
 using Arch.Relationships;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoBallFramework.Game.Ecs.Components.Relationships;
@@ -57,6 +58,12 @@ public class ConsoleSystem : IUpdateSystem
         string Category,
         DateTime Timestamp
     )> _persistentLogBuffer = new();
+
+    // Persistent output buffer - stores console output even when console is closed
+    // Must match ConsolePanelBuilder._maxOutputLines (5000)
+    private const int MaxPersistentOutput = 5000;
+    private readonly object _outputBufferLock = new();
+    private readonly List<(string Text, Color Color)> _persistentOutputBuffer = new();
 
     private readonly SceneManager _sceneManager;
     private readonly IServiceProvider _services;
@@ -313,9 +320,9 @@ public class ConsoleSystem : IUpdateSystem
                 _consoleScene.OnCloseRequested += OnConsoleClosed;
                 _consoleScene.OnReady += HandleConsoleReady;
 
-                // Wire up Print() output to the console
+                // Wire up Print() output to the console (with persistence)
                 _globals.OutputAction = text =>
-                    _consoleScene?.AppendOutput(text, Theme.TextPrimary);
+                    AppendPersistentOutput(text, Theme.TextPrimary);
 
                 // Set console height to 50% (medium size)
                 _consoleScene.SetHeightPercent(0.5f);
@@ -423,15 +430,30 @@ public class ConsoleSystem : IUpdateSystem
             );
         }
 
-        // Welcome message - use theme colors
-        UITheme theme = ThemeManager.Current;
-        _consoleScene?.AppendOutput("=== MonoBall Framework Debug Console ===", theme.ConsolePrimary);
-        _consoleScene?.AppendOutput("Type 'help' for available commands", theme.TextSecondary);
-        _consoleScene?.AppendOutput("Press ` or type 'exit' to close", theme.TextDim);
-        _consoleScene?.AppendOutput("", theme.TextPrimary);
+        // Replay buffered console output (persisted across open/close)
+        bool hasBufferedOutput;
+        lock (_outputBufferLock)
+        {
+            hasBufferedOutput = _persistentOutputBuffer.Count > 0;
+        }
 
-        // Execute startup script if it exists
-        ExecuteStartupScript();
+        if (hasBufferedOutput)
+        {
+            // Replay previous output
+            ReplayBufferedOutput();
+        }
+        else
+        {
+            // First open - show welcome message (and persist it)
+            UITheme theme = ThemeManager.Current;
+            AppendPersistentOutput("=== MonoBall Framework Debug Console ===", theme.ConsolePrimary);
+            AppendPersistentOutput("Type 'help' for available commands", theme.TextSecondary);
+            AppendPersistentOutput("Press ` or type 'exit' to close", theme.TextDim);
+            AppendPersistentOutput("", theme.TextPrimary);
+
+            // Execute startup script if it exists (only on first open)
+            ExecuteStartupScript();
+        }
     }
 
     /// <summary>
@@ -447,16 +469,16 @@ public class ConsoleSystem : IUpdateSystem
 
         // Display breakpoint hit message
         UITheme theme = ThemeManager.Current;
-        _consoleScene?.AppendOutput("", theme.TextPrimary);
-        _consoleScene?.AppendOutput($"⏸ BREAKPOINT #{breakpoint.Id} HIT", theme.Warning);
-        _consoleScene?.AppendOutput($"  Condition: {breakpoint.Description}", theme.TextSecondary);
-        _consoleScene?.AppendOutput($"  Hit count: {breakpoint.HitCount}", theme.TextSecondary);
-        _consoleScene?.AppendOutput("", theme.TextPrimary);
-        _consoleScene?.AppendOutput(
+        AppendPersistentOutput("", theme.TextPrimary);
+        AppendPersistentOutput($"⏸ BREAKPOINT #{breakpoint.Id} HIT", theme.Warning);
+        AppendPersistentOutput($"  Condition: {breakpoint.Description}", theme.TextSecondary);
+        AppendPersistentOutput($"  Hit count: {breakpoint.HitCount}", theme.TextSecondary);
+        AppendPersistentOutput("", theme.TextPrimary);
+        AppendPersistentOutput(
             "Game paused. Use 'resume' or 'step' to continue.",
             theme.TextDim
         );
-        _consoleScene?.AppendOutput("", theme.TextPrimary);
+        AppendPersistentOutput("", theme.TextPrimary);
     }
 
     /// <summary>
@@ -473,7 +495,7 @@ public class ConsoleSystem : IUpdateSystem
                 // Check for empty line to cancel multi-line mode
                 if (string.IsNullOrWhiteSpace(command))
                 {
-                    _consoleScene?.AppendOutput("Multi-line input cancelled.", Theme.TextSecondary);
+                    AppendPersistentOutput("Multi-line input cancelled.", Theme.TextSecondary);
                     _multiLineBuffer.Clear();
                     _isMultiLineMode = false;
                     _consoleScene?.SetPrompt("> ");
@@ -523,7 +545,7 @@ public class ConsoleSystem : IUpdateSystem
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error executing command from console: {Command}", command);
-            _consoleScene?.AppendOutput($"Error: {ex.Message}", Theme.Error);
+            AppendPersistentOutput($"Error: {ex.Message}", Theme.Error);
             _isMultiLineMode = false;
             _multiLineBuffer.Clear();
             _consoleScene?.SetPrompt("> ");
@@ -906,7 +928,7 @@ public class ConsoleSystem : IUpdateSystem
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error executing command in console");
-            _consoleScene?.AppendOutput($"Error: {ex.Message}", Theme.Error);
+            AppendPersistentOutput($"Error: {ex.Message}", Theme.Error);
         }
     }
 
@@ -1017,7 +1039,7 @@ public class ConsoleSystem : IUpdateSystem
                     command,
                     expandedCommand
                 );
-                _consoleScene?.AppendOutput($"[alias] {expandedCommand}", Theme.TextSecondary);
+                AppendPersistentOutput($"[alias] {expandedCommand}", Theme.TextSecondary);
                 command = expandedCommand;
 
                 // Check if expanded alias contains chained commands
@@ -1076,7 +1098,8 @@ public class ConsoleSystem : IUpdateSystem
                 loggingCallbacks,
                 timeControl,
                 services,
-                _services
+                _services,
+                AppendPersistentOutput
             );
 
             // Try to execute as built-in command first
@@ -1092,10 +1115,10 @@ public class ConsoleSystem : IUpdateSystem
                     // Handle compilation errors
                     if (result.IsCompilationError && result.Errors != null)
                     {
-                        _consoleScene?.AppendOutput("Compilation Error:", Theme.Error);
+                        AppendPersistentOutput("Compilation Error:", Theme.Error);
                         foreach (FormattedError error in result.Errors)
                         {
-                            _consoleScene?.AppendOutput($"  {error.Message}", Theme.Error);
+                            AppendPersistentOutput($"  {error.Message}", Theme.Error);
                         }
 
                         return;
@@ -1104,13 +1127,13 @@ public class ConsoleSystem : IUpdateSystem
                     // Handle runtime errors
                     if (result.IsRuntimeError)
                     {
-                        _consoleScene?.AppendOutput(
+                        AppendPersistentOutput(
                             $"Runtime Error: {result.RuntimeException?.Message ?? "Unknown error"}",
                             Theme.Error
                         );
                         if (result.RuntimeException != null)
                         {
-                            _consoleScene?.AppendOutput(
+                            AppendPersistentOutput(
                                 $"  {result.RuntimeException.GetType().Name}",
                                 Theme.TextSecondary
                             );
@@ -1125,7 +1148,7 @@ public class ConsoleSystem : IUpdateSystem
                         // Display output if available
                         if (!string.IsNullOrEmpty(result.Output) && result.Output != "null")
                         {
-                            _consoleScene?.AppendOutput(result.Output, Theme.Success);
+                            AppendPersistentOutput(result.Output, Theme.Success);
                         }
                         // If no output, that's fine (statement executed successfully but returned nothing)
 
@@ -1135,7 +1158,7 @@ public class ConsoleSystem : IUpdateSystem
                     else
                     {
                         // Fallback for unexpected state
-                        _consoleScene?.AppendOutput(
+                        AppendPersistentOutput(
                             "Command executed but status unclear",
                             Theme.TextSecondary
                         );
@@ -1149,15 +1172,15 @@ public class ConsoleSystem : IUpdateSystem
                         "Unexpected exception executing command: {Command}",
                         command
                     );
-                    _consoleScene?.AppendOutput($"Error: {ex.Message}", Theme.Error);
-                    _consoleScene?.AppendOutput($"Type: {ex.GetType().Name}", Theme.TextSecondary);
+                    AppendPersistentOutput($"Error: {ex.Message}", Theme.Error);
+                    AppendPersistentOutput($"Type: {ex.GetType().Name}", Theme.TextSecondary);
                 }
             }
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error executing command in console");
-            _consoleScene?.AppendOutput($"Error: {ex.Message}", Theme.Error);
+            AppendPersistentOutput($"Error: {ex.Message}", Theme.Error);
         }
     }
 
@@ -1206,7 +1229,7 @@ public class ConsoleSystem : IUpdateSystem
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error executing startup script");
-            _consoleScene?.AppendOutput($"Startup script error: {ex.Message}", Theme.Error);
+            AppendPersistentOutput($"Startup script error: {ex.Message}", Theme.Error);
         }
     }
 
@@ -1234,6 +1257,52 @@ public class ConsoleSystem : IUpdateSystem
         )
         {
             _consoleScene.AddLog(level, message, category, timestamp);
+        }
+    }
+
+    /// <summary>
+    ///     Appends output to the console and stores it in the persistent buffer.
+    /// </summary>
+    private void AppendPersistentOutput(string text, Color color)
+    {
+        // Store in persistent buffer
+        lock (_outputBufferLock)
+        {
+            _persistentOutputBuffer.Add((text, color));
+
+            // Trim if buffer is too large
+            while (_persistentOutputBuffer.Count > MaxPersistentOutput)
+            {
+                _persistentOutputBuffer.RemoveAt(0);
+            }
+        }
+
+        // Also append to console scene if it's open
+        _consoleScene?.AppendOutput(text, color);
+    }
+
+    /// <summary>
+    ///     Replays buffered output to the console when it's reopened.
+    /// </summary>
+    private void ReplayBufferedOutput()
+    {
+        if (_consoleScene == null)
+        {
+            return;
+        }
+
+        List<(string Text, Color Color)> outputToReplay;
+
+        lock (_outputBufferLock)
+        {
+            // Make a copy to avoid holding the lock while adding to the scene
+            outputToReplay = new List<(string, Color)>(_persistentOutputBuffer);
+        }
+
+        // Replay all buffered output
+        foreach ((string text, Color color) in outputToReplay)
+        {
+            _consoleScene.AppendOutput(text, color);
         }
     }
 

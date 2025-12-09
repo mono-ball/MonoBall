@@ -25,6 +25,7 @@ using MonoBallFramework.Game.Systems;
 using MonoBallFramework.Game.Systems.Rendering;
 using MonoBallFramework.Game.Systems.Warps;
 using MonoBallFramework.Game.Engine.Systems.Flags;
+using MonoBallFramework.Game.GameSystems.Services;
 
 namespace MonoBallFramework.Game.Initialization.Initializers;
 
@@ -42,7 +43,8 @@ public class GameInitializer(
     MapLoader mapLoader,
     MapDefinitionService mapDefinitionService,
     IEventBus eventBus,
-    IGameStateApi gameStateApi
+    IGameStateApi gameStateApi,
+    IGameStateService? gameStateService = null
 ) : IGameInitializer
 {
     // Store reference to MapStreamingSystem so we can wire up lifecycle manager later
@@ -151,7 +153,8 @@ public class GameInitializer(
         CollisionService = new CollisionService(
             SpatialHashSystem,
             eventBus,
-            collisionServiceLogger
+            collisionServiceLogger,
+            gameStateService
         );
         CollisionService.SetWorld(world);
 

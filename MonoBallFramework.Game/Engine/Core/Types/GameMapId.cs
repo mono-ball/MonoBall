@@ -64,35 +64,26 @@ public sealed record GameMapId : EntityId
 
     /// <summary>
     ///     Tries to parse a GameMapId from a string, returning null if invalid.
-    ///     Accepts both full format (base:map:hoenn/littleroot_town) and short name (littleroot_town).
+    ///     Only accepts the full format: base:map:{region}/{name}
     /// </summary>
     /// <param name="value">The ID string to parse</param>
-    /// <param name="defaultRegion">Region to use when parsing short names (defaults to "hoenn")</param>
-    public static GameMapId? TryCreate(string? value, string? defaultRegion = null)
+    public static GameMapId? TryCreate(string? value)
     {
         if (string.IsNullOrWhiteSpace(value))
             return null;
 
-        // If it's already in full format, parse it directly
-        if (IsValidFormat(value) && value.Contains($":{TypeName}:"))
-        {
-            try
-            {
-                return new GameMapId(value);
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
-        // Short name format: just the name (e.g., "littleroot_town")
-        // Construct from components
-        var normalized = NormalizeComponent(value);
-        if (string.IsNullOrEmpty(normalized))
+        // Only accept full format
+        if (!IsValidFormat(value) || !value.Contains($":{TypeName}:"))
             return null;
 
-        return new GameMapId(defaultRegion ?? DefaultRegion, normalized);
+        try
+        {
+            return new GameMapId(value);
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     /// <summary>

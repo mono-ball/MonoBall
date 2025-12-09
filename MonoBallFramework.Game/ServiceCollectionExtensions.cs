@@ -51,8 +51,8 @@ public static class ServiceCollectionExtensions
         services.AddDataServices();
         services.AddModdingServices();
         services.AddTemplateServices();
+        services.AddGameRuntimeServices(); // Must be before scripting (provides IGameStateService)
         services.AddScriptingServices();
-        services.AddGameRuntimeServices();
 
         // Debug Console Services (pass configuration for console settings)
         services.AddDebugConsole(configuration);

@@ -1,3 +1,5 @@
+using MonoBallFramework.Game.Engine.Core.Types;
+
 namespace MonoBallFramework.Game.Ecs.Components.GameState;
 
 /// <summary>
@@ -31,8 +33,9 @@ public struct GameFlags
     /// </summary>
     /// <param name="flagId">The flag identifier.</param>
     /// <returns>True if the flag is set, false otherwise.</returns>
-    public readonly bool GetFlag(string flagId)
+    public readonly bool GetFlag(GameFlagId flagId)
     {
+        // GameFlagId has implicit conversion to string
         return Flags.TryGetValue(flagId, out bool value) && value;
     }
 
@@ -41,8 +44,9 @@ public struct GameFlags
     /// </summary>
     /// <param name="flagId">The flag identifier.</param>
     /// <param name="value">The value to set.</param>
-    public void SetFlag(string flagId, bool value)
+    public void SetFlag(GameFlagId flagId, bool value)
     {
+        // GameFlagId has implicit conversion to string
         Flags[flagId] = value;
     }
 
@@ -51,8 +55,9 @@ public struct GameFlags
     /// </summary>
     /// <param name="flagId">The flag identifier.</param>
     /// <returns>True if the flag exists.</returns>
-    public readonly bool FlagExists(string flagId)
+    public readonly bool FlagExists(GameFlagId flagId)
     {
+        // GameFlagId has implicit conversion to string
         return Flags.ContainsKey(flagId);
     }
 
