@@ -861,23 +861,12 @@ public class ElevationRenderSystem(
             _reusablePosition.X = position.PixelX;
             _reusablePosition.Y = position.PixelY + TileSize;
 
-            // BEST PRACTICE FOR MOVING ENTITIES: Use TARGET position for depth sorting
-            // When moving/jumping, sort based on where the entity is going, not where they started.
-            // This prevents flickering and ensures entities sort correctly during movement.
-            // For example, when jumping over a fence, the player should sort as if they're
-            // already on the other side of the fence.
-            float groundY;
-            if (movement.IsMoving)
-            {
-                // Use target grid position for sorting
-                int targetGridY = (int)(movement.TargetPosition.Y / TileSize);
-                groundY = (targetGridY + 1) * TileSize; // +1 for bottom of tile
-            }
-            else
-            {
-                // Use current grid position
-                groundY = (position.Y + 1) * TileSize;
-            }
+            // BEST PRACTICE: Use position.Y (grid coordinate) for depth sorting.
+            // MovementSystem updates position.Y to the TARGET grid immediately when movement starts,
+            // so this naturally sorts by target position during movement.
+            // Using position.Y (local grid) instead of TargetPosition.Y (world pixels) ensures
+            // correct sorting in multi-map streaming scenarios where world offsets vary.
+            float groundY = (position.Y + 1) * TileSize; // +1 for bottom of tile
 
             int mapRenderOrder = GetMapRenderOrder(position.MapId?.Value);
             float layerDepth = CalculateElevationDepth(

@@ -5636,7 +5636,7 @@
               "value": "base:script:map/new_mauville_inside_event_script_item_ultra_ball"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/new_mauville_ultra_ball"
             }
@@ -5673,7 +5673,7 @@
               "value": "base:script:map/new_mauville_inside_event_script_item_escape_rope"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/new_mauville_escape_rope"
             }
@@ -5710,7 +5710,7 @@
               "value": "base:script:map/new_mauville_inside_event_script_item_thunder_stone"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/new_mauville_thunder_stone"
             }
@@ -5747,7 +5747,7 @@
               "value": "base:script:map/new_mauville_inside_event_script_item_full_heal"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/new_mauville_full_heal"
             }
@@ -5784,7 +5784,7 @@
               "value": "base:script:map/new_mauville_inside_event_script_item_paralyze_heal"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/new_mauville_paralyze_heal"
             }
@@ -5821,7 +5821,7 @@
               "value": "base:script:map/new_mauville_inside_event_script_voltorb1"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/new_mauville_voltorb_1"
             }
@@ -5858,7 +5858,7 @@
               "value": "base:script:map/new_mauville_inside_event_script_voltorb2"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/new_mauville_voltorb_2"
             }
@@ -5895,7 +5895,7 @@
               "value": "base:script:map/new_mauville_inside_event_script_voltorb3"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/new_mauville_voltorb_3"
             }

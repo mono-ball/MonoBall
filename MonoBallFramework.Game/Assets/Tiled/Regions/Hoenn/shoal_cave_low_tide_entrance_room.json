@@ -3872,7 +3872,7 @@
               "value": "base:script:map/shoal_cave_low_tide_entrance_room_event_script_item_big_pearl"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/shoal_cave_entrance_big_pearl"
             }

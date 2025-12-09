@@ -733,7 +733,7 @@
               "value": "base:script:map/fallarbor_town_battle_tent_lobby_event_script_scott"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/fallarbor_town_battle_tent_scott"
             }

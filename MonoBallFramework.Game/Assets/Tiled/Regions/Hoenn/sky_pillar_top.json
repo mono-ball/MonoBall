@@ -2100,7 +2100,7 @@
               "value": "down"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/sky_pillar_top_rayquaza"
             }
@@ -2142,7 +2142,7 @@
               "value": "base:script:map/sky_pillar_top_event_script_rayquaza"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/sky_pillar_top_rayquaza_still"
             }

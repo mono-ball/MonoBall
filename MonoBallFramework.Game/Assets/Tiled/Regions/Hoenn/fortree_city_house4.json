@@ -373,7 +373,7 @@
               "value": "base:script:map/fortree_city_house4_event_script_wingull"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/fortree_city_house_4_wingull"
             }

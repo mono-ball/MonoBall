@@ -2586,7 +2586,7 @@
               "value": "down"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/terra_cave_groudon"
             }

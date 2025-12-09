@@ -669,7 +669,7 @@
               "value": "base:script:map/union_room_event_script_player4"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/union_room_player_4"
             }
@@ -716,7 +716,7 @@
               "value": "base:script:map/union_room_event_script_player8"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/union_room_player_8"
             }
@@ -763,7 +763,7 @@
               "value": "base:script:map/union_room_event_script_player7"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/union_room_player_7"
             }
@@ -810,7 +810,7 @@
               "value": "base:script:map/union_room_event_script_player6"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/union_room_player_6"
             }
@@ -857,7 +857,7 @@
               "value": "base:script:map/union_room_event_script_player5"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/union_room_player_5"
             }
@@ -904,7 +904,7 @@
               "value": "base:script:map/union_room_event_script_player3"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/union_room_player_3"
             }
@@ -951,7 +951,7 @@
               "value": "base:script:map/union_room_event_script_player2"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/union_room_player_2"
             }
@@ -998,7 +998,7 @@
               "value": "base:script:map/union_room_event_script_player1"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/union_room_player_1"
             }

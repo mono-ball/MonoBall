@@ -10442,7 +10442,7 @@
               "value": "base:script:map/route115_event_script_item_super_potion"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_115_super_potion"
             }
@@ -10479,7 +10479,7 @@
               "value": "base:script:map/route115_event_script_item_tm_focus_punch"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_115_tm_focus_punch"
             }
@@ -10516,7 +10516,7 @@
               "value": "base:script:map/route115_event_script_item_iron"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_115_iron"
             }
@@ -10627,7 +10627,7 @@
               "value": "base:script:map/event_script_rock_smash"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/11"
             }
@@ -10664,7 +10664,7 @@
               "value": "base:script:map/route115_event_script_item_great_ball"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_115_great_ball"
             }
@@ -10936,7 +10936,7 @@
               "value": "base:script:map/route115_event_script_item_pp_up"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_115_pp_up"
             }
@@ -10973,7 +10973,7 @@
               "value": "base:script:map/route115_event_script_item_heal_powder"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_115_heal_powder"
             }

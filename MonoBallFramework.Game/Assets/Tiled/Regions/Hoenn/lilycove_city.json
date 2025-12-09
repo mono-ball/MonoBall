@@ -10723,7 +10723,7 @@
               "value": "base:script:map/lilycove_city_event_script_wailmer_trainer_grunt"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/lilycove_city_aqua_grunts"
             }
@@ -10760,7 +10760,7 @@
               "value": "base:script:map/lilycove_city_event_script_item_max_repel"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/lilycove_city_max_repel"
             }
@@ -10807,7 +10807,7 @@
               "value": "base:script:map/lilycove_city_event_script_aqua_grunt4"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/lilycove_city_aqua_grunts"
             }
@@ -10849,7 +10849,7 @@
               "value": "base:script:map/lilycove_city_event_script_aqua_grunt1"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/lilycove_city_aqua_grunts"
             }
@@ -10891,7 +10891,7 @@
               "value": "base:script:map/lilycove_city_event_script_aqua_grunt2"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/lilycove_city_aqua_grunts"
             }
@@ -10933,7 +10933,7 @@
               "value": "base:script:map/lilycove_city_event_script_aqua_grunt3"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/lilycove_city_aqua_grunts"
             }
@@ -11017,7 +11017,7 @@
               "value": "base:script:map/lilycove_city_event_script_rival"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/lilycove_city_rival"
             }

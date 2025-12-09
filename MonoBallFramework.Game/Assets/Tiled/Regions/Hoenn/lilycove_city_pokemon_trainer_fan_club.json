@@ -802,7 +802,7 @@
               "value": "base:script:map/lilycove_city_pokemon_trainer_fan_club_event_script_ninja_boy"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/fanclub_little_boy"
             }
@@ -844,7 +844,7 @@
               "value": "base:script:map/lilycove_city_pokemon_trainer_fan_club_event_script_boy"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/fanclub_boy"
             }
@@ -886,7 +886,7 @@
               "value": "base:script:map/lilycove_city_pokemon_trainer_fan_club_event_script_woman"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/fanclub_lady"
             }
@@ -928,7 +928,7 @@
               "value": "base:script:map/lilycove_city_pokemon_trainer_fan_club_event_script_expert_f"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/fanclub_old_lady"
             }
@@ -970,7 +970,7 @@
               "value": "base:script:map/lilycove_city_pokemon_trainer_fan_club_event_script_interviewer"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/lilycove_fan_club_interviewer"
             }

@@ -361,7 +361,7 @@
               "value": "base:script:map/abandoned_ship_room_b1f_event_script_item_tm_ice_beam"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/abandoned_ship_rooms_b1f_tm_ice_beam"
             }

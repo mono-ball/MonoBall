@@ -5082,7 +5082,7 @@
               "value": "base:script:map/safari_zone_south_event_script_construction_worker1"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/safari_zone_south_construction_workers"
             }
@@ -5124,7 +5124,7 @@
               "value": "base:script:map/safari_zone_south_event_script_construction_worker2"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/safari_zone_south_construction_workers"
             }

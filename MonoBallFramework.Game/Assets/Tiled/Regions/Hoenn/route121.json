@@ -5676,7 +5676,7 @@
               "value": "up"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_121_team_aqua_grunts"
             }
@@ -5713,7 +5713,7 @@
               "value": "right"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_121_team_aqua_grunts"
             }
@@ -5750,7 +5750,7 @@
               "value": "left"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_121_team_aqua_grunts"
             }
@@ -5787,7 +5787,7 @@
               "value": "base:script:map/event_script_cut_tree"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/11"
             }
@@ -5824,7 +5824,7 @@
               "value": "base:script:map/event_script_cut_tree"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/12"
             }
@@ -6049,7 +6049,7 @@
               "value": "base:script:map/route121_event_script_item_carbos"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_121_carbos"
             }
@@ -6086,7 +6086,7 @@
               "value": "base:script:map/event_script_cut_tree"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/13"
             }
@@ -6358,7 +6358,7 @@
               "value": "base:script:map/route121_event_script_item_revive"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_121_revive"
             }
@@ -6395,7 +6395,7 @@
               "value": "base:script:map/route121_event_script_item_zinc"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_121_zinc"
             }

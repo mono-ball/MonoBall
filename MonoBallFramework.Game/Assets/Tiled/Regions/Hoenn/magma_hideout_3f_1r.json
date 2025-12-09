@@ -2192,7 +2192,7 @@
               "value": "base:script:map/magma_hideout_3f_1r_event_script_grunt9"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/magma_hideout_grunts"
             },
@@ -2244,7 +2244,7 @@
               "value": "base:script:map/magma_hideout_3f_1r_event_script_grunt16"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/magma_hideout_grunts"
             },
@@ -2291,7 +2291,7 @@
               "value": "base:script:map/magma_hideout_3f_1r_event_script_item_nugget"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/magma_hideout_3f_1r_nugget"
             }

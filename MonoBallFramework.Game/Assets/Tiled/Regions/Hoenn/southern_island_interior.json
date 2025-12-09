@@ -2125,7 +2125,7 @@
               "value": "up"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/southern_island_eon_stone"
             }
@@ -2162,7 +2162,7 @@
               "value": "down"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/southern_island_unchosen_eon_duo_mon"
             }

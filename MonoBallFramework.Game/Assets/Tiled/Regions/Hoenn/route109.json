@@ -7858,7 +7858,7 @@
               "value": "up"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_109_mr_briney_boat"
             }
@@ -7900,7 +7900,7 @@
               "value": "base:script:map/route109_event_script_mr_briney"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_109_mr_briney"
             }
@@ -8256,7 +8256,7 @@
               "value": "base:script:map/route109_event_script_item_pp_up"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_109_pp_up"
             }
@@ -8797,7 +8797,7 @@
               "value": "base:script:map/route109_event_script_item_potion"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_109_potion"
             }

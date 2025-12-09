@@ -492,7 +492,7 @@
               "value": "base:script:map/route114_lanettes_house_event_script_lanette"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/lanettes_house_lanette"
             }

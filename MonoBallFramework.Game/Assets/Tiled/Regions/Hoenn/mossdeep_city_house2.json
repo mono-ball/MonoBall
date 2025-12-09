@@ -494,7 +494,7 @@
               "value": "base:script:map/mossdeep_city_house2_event_script_wingull"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mossdeep_city_house_2_wingull"
             }

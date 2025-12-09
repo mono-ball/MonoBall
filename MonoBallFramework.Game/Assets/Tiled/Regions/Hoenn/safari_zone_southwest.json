@@ -4991,7 +4991,7 @@
               "value": "base:script:map/safari_zone_southwest_event_script_item_max_revive"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/safari_zone_south_west_max_revive"
             }

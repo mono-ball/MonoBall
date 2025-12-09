@@ -4966,7 +4966,7 @@
               "value": "base:script:map/event_script_rock_smash"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/11"
             }
@@ -5003,7 +5003,7 @@
               "value": "base:script:map/event_script_rock_smash"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/12"
             }
@@ -5040,7 +5040,7 @@
               "value": "base:script:map/event_script_rock_smash"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/13"
             }
@@ -5077,7 +5077,7 @@
               "value": "base:script:map/event_script_rock_smash"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/14"
             }
@@ -5114,7 +5114,7 @@
               "value": "base:script:map/event_script_rock_smash"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/15"
             }
@@ -5151,7 +5151,7 @@
               "value": "base:script:map/event_script_rock_smash"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/16"
             }
@@ -5188,7 +5188,7 @@
               "value": "base:script:map/safari_zone_north_event_script_item_calcium"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/safari_zone_north_calcium"
             }

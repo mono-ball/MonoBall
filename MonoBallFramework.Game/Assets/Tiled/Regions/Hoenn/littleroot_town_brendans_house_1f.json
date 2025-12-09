@@ -588,7 +588,7 @@
               "value": "base:script:map/players_house_1f_event_script_mom"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/littleroot_town_brendans_house_mom"
             }
@@ -630,7 +630,7 @@
               "value": "base:script:map/players_house_1f_event_script_vigoroth2"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/littleroot_town_players_house_vigoroth_2"
             }
@@ -667,7 +667,7 @@
               "value": "base:script:map/players_house_1f_event_script_vigoroth1"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/littleroot_town_players_house_vigoroth_1"
             }
@@ -709,7 +709,7 @@
               "value": "base:script:map/rivals_house_1f_event_script_rival_mom"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/littleroot_town_brendans_house_rival_mom"
             }
@@ -746,7 +746,7 @@
               "value": "left"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/players_house_dad"
             }
@@ -793,7 +793,7 @@
               "value": "base:script:map/rivals_house_1f_event_script_rival_sibling"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/littleroot_town_brendans_house_rival_sibling"
             }
@@ -830,7 +830,7 @@
               "value": "up"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/littleroot_town_brendans_house_brendan"
             }

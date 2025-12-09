@@ -497,7 +497,7 @@
               "value": "base:script:map/underwater_seafloor_cavern_event_script_check_stolen_sub"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/underwater_sea_floor_cavern_stolen_submarine"
             }
@@ -534,7 +534,7 @@
               "value": "base:script:map/underwater_seafloor_cavern_event_script_check_stolen_sub"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/underwater_sea_floor_cavern_stolen_submarine"
             }
@@ -571,7 +571,7 @@
               "value": "base:script:map/underwater_seafloor_cavern_event_script_check_stolen_sub"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/underwater_sea_floor_cavern_stolen_submarine"
             }
@@ -608,7 +608,7 @@
               "value": "base:script:map/underwater_seafloor_cavern_event_script_check_stolen_sub"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/underwater_sea_floor_cavern_stolen_submarine"
             }

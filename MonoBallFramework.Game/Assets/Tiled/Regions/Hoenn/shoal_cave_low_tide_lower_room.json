@@ -1534,7 +1534,7 @@
               "value": "base:script:map/event_script_strength_boulder"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/11"
             }

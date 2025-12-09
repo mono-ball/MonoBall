@@ -1219,7 +1219,7 @@
               "value": "base:script:map/battle_frontier_battle_tower_lobby_event_script_reporter"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/battle_tower_reporter"
             }
@@ -1261,7 +1261,7 @@
               "value": "base:script:map/battle_frontier_battle_tower_lobby_event_script_apprentice"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/apprentice"
             }

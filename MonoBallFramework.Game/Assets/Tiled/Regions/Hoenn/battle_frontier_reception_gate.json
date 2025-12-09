@@ -634,7 +634,7 @@
               "value": "down"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/battle_frontier_reception_gate_scott"
             }

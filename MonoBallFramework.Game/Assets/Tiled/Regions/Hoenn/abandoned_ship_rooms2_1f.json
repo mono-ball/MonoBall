@@ -724,7 +724,7 @@
               "value": "base:script:map/abandoned_ship_rooms2_1f_event_script_item_revive"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/abandoned_ship_rooms_2_1f_revive"
             }

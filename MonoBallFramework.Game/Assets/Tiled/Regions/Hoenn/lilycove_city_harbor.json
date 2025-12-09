@@ -1230,7 +1230,7 @@
               "value": "base:script:map/lilycove_city_harbor_event_script_ferry_attendant"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/lilycove_harbor_ferry_attendant"
             }
@@ -1267,7 +1267,7 @@
               "value": "right"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/lilycove_harbor_sstidal"
             }
@@ -1346,7 +1346,7 @@
               "value": "down"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/lilycove_harbor_ferry_sailor"
             }
@@ -1383,7 +1383,7 @@
               "value": "down"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/lilycove_harbor_event_ticket_taker"
             }

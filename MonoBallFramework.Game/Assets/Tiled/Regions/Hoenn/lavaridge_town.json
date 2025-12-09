@@ -1916,7 +1916,7 @@
               "value": "left"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/lavaridge_town_rival_on_bike"
             }
@@ -1953,7 +1953,7 @@
               "value": "down"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/lavaridge_town_rival"
             }

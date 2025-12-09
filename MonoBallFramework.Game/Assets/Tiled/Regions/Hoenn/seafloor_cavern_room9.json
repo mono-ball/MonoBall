@@ -3882,7 +3882,7 @@
               "value": "down"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/seafloor_cavern_room_9_kyogre"
             }
@@ -3919,7 +3919,7 @@
               "value": "right"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/seafloor_cavern_room_9_archie"
             }
@@ -3956,7 +3956,7 @@
               "value": "right"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/seafloor_cavern_room_9_maxie"
             }
@@ -3993,7 +3993,7 @@
               "value": "right"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/seafloor_cavern_room_9_magma_grunts"
             }
@@ -4030,7 +4030,7 @@
               "value": "right"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/seafloor_cavern_room_9_magma_grunts"
             }
@@ -4067,7 +4067,7 @@
               "value": "base:script:map/seafloor_cavern_room9_event_script_item_tm_earthquake"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/seafloor_cavern_room_9_tm_earthquake"
             }
@@ -4104,7 +4104,7 @@
               "value": "down"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/seafloor_cavern_room_9_kyogre_asleep"
             }

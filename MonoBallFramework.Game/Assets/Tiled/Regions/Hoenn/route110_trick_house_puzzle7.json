@@ -1712,7 +1712,7 @@
               "value": "base:script:map/route110_trick_house_puzzle7_event_script_item_tropic_mail"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/trick_house_puzzle_7_tropic_mail"
             }

@@ -4420,7 +4420,7 @@
               "value": "base:script:map/aqua_hideout_b1f_event_script_grunt2"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/aqua_hideout_grunts"
             },
@@ -4472,7 +4472,7 @@
               "value": "base:script:map/aqua_hideout_b1f_event_script_grunt3"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/aqua_hideout_grunts"
             },
@@ -4519,7 +4519,7 @@
               "value": "base:script:map/aqua_hideout_b1f_event_script_item_max_elixir"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/aqua_hideout_b1f_max_elixir"
             }
@@ -4556,7 +4556,7 @@
               "value": "base:script:map/aqua_hideout_b1f_event_script_grunt5"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/aqua_hideout_grunts"
             },
@@ -4603,7 +4603,7 @@
               "value": "base:script:map/aqua_hideout_b1f_event_script_item_master_ball"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/aqua_hideout_b1f_master_ball"
             }
@@ -4640,7 +4640,7 @@
               "value": "base:script:map/aqua_hideout_b1f_event_script_electrode1"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/aqua_hideout_b1f_electrode_1"
             }
@@ -4677,7 +4677,7 @@
               "value": "base:script:map/aqua_hideout_b1f_event_script_item_nugget"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/aqua_hideout_b1f_nugget"
             }
@@ -4714,7 +4714,7 @@
               "value": "base:script:map/aqua_hideout_b1f_event_script_electrode2"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/aqua_hideout_b1f_electrode_2"
             }
@@ -4756,7 +4756,7 @@
               "value": "base:script:map/aqua_hideout_b1f_event_script_grunt7"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/aqua_hideout_grunts"
             },

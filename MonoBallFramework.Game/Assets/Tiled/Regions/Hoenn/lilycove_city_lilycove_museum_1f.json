@@ -1490,7 +1490,7 @@
               "value": "base:script:map/lilycove_city_lilycove_museum_1f_event_script_curator"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/lilycove_museum_curator"
             }
@@ -1690,7 +1690,7 @@
               "value": "base:script:map/lilycove_city_lilycove_museum_1f_event_script_woman2"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/lilycove_museum_patron_1"
             }
@@ -1732,7 +1732,7 @@
               "value": "base:script:map/lilycove_city_lilycove_museum_1f_event_script_artist2"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/lilycove_museum_patron_4"
             }
@@ -1779,7 +1779,7 @@
               "value": "base:script:map/lilycove_city_lilycove_museum_1f_event_script_fat_man"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/lilycove_museum_tourists"
             }
@@ -1826,7 +1826,7 @@
               "value": "base:script:map/lilycove_city_lilycove_museum_1f_event_script_psychic_m"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/lilycove_museum_patron_3"
             }

@@ -2082,7 +2082,7 @@
               "value": "base:script:map/sky_pillar_outside_event_script_wallace"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/sky_pillar_wallace"
             }

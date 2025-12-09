@@ -18,6 +18,7 @@ using MonoBallFramework.Game.Engine.Systems.Management;
 using MonoBallFramework.Game.GameData.Entities;
 using MonoBallFramework.Game.GameData.MapLoading.Tiled.Core;
 using MonoBallFramework.Game.GameData.Services;
+using MonoBallFramework.Game.GameSystems.Movement;
 
 namespace MonoBallFramework.Game.Systems;
 
@@ -56,6 +57,9 @@ public class MapStreamingSystem : SystemBase, IUpdateSystem
 
     // Optional lifecycle manager for proper entity cleanup (set after initialization)
     private MapLifecycleManager? _lifecycleManager;
+
+    // Optional movement system for cache invalidation during map transitions
+    private MovementSystem? _movementSystem;
     private QueryDescription _mapInfoQuery;
 
     // Cached queries for performance
@@ -133,6 +137,17 @@ public class MapStreamingSystem : SystemBase, IUpdateSystem
         _lifecycleManager =
             lifecycleManager ?? throw new ArgumentNullException(nameof(lifecycleManager));
         _logger?.LogDebug("MapStreamingSystem: MapLifecycleManager set for entity cleanup");
+    }
+
+    /// <summary>
+    ///     Sets the MovementSystem for cache invalidation during map transitions.
+    ///     Must be called after MovementSystem is created (delayed initialization).
+    /// </summary>
+    /// <param name="movementSystem">The movement system instance.</param>
+    public void SetMovementSystem(MovementSystem movementSystem)
+    {
+        _movementSystem = movementSystem ?? throw new ArgumentNullException(nameof(movementSystem));
+        _logger?.LogDebug("MapStreamingSystem: MovementSystem set for cache invalidation");
     }
 
     /// <summary>
@@ -338,6 +353,10 @@ public class MapStreamingSystem : SystemBase, IUpdateSystem
                     mapInfo.MapId.Value
                 );
             }
+
+            // Invalidate MovementSystem cache for the newly loaded map
+            // This ensures correct pixel position calculations for entities on the new map
+            _movementSystem?.InvalidateMapWorldOffset(connection.MapId);
 
             _logger?.LogInformation(
                 "Successfully loaded adjacent map: {MapId}",
@@ -808,6 +827,10 @@ public class MapStreamingSystem : SystemBase, IUpdateSystem
                         mapId.Value
                     );
                 }
+
+                // Invalidate MovementSystem cache for the unloaded map
+                // This prevents stale cached offsets from corrupting position calculations
+                _movementSystem?.InvalidateMapWorldOffset(mapId);
 
                 // Remove from streaming tracking
                 streaming.RemoveLoadedMap(mapId);

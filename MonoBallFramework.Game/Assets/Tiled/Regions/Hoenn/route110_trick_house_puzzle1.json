@@ -1337,7 +1337,7 @@
               "value": "base:script:map/event_script_cut_tree"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/13"
             }
@@ -1374,7 +1374,7 @@
               "value": "base:script:map/event_script_cut_tree"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/12"
             }
@@ -1411,7 +1411,7 @@
               "value": "base:script:map/event_script_cut_tree"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/14"
             }
@@ -1448,7 +1448,7 @@
               "value": "base:script:map/event_script_cut_tree"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/17"
             }
@@ -1485,7 +1485,7 @@
               "value": "base:script:map/event_script_cut_tree"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/16"
             }
@@ -1522,7 +1522,7 @@
               "value": "base:script:map/event_script_cut_tree"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/15"
             }
@@ -1559,7 +1559,7 @@
               "value": "base:script:map/event_script_cut_tree"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/19"
             }
@@ -1596,7 +1596,7 @@
               "value": "base:script:map/event_script_cut_tree"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/18"
             }
@@ -1633,7 +1633,7 @@
               "value": "base:script:map/event_script_cut_tree"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/1_b"
             }
@@ -1670,7 +1670,7 @@
               "value": "base:script:map/route110_trick_house_puzzle1_event_script_item_orange_mail"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/trick_house_puzzle_1_orange_mail"
             }
@@ -1707,7 +1707,7 @@
               "value": "base:script:map/event_script_cut_tree"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/1_c"
             }
@@ -1744,7 +1744,7 @@
               "value": "base:script:map/event_script_cut_tree"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/1_e"
             }

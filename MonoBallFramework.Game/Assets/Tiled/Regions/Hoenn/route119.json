@@ -18123,7 +18123,7 @@
               "value": "up"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_119_rival"
             }
@@ -18160,7 +18160,7 @@
               "value": "base:script:map/route119_event_script_item_super_repel"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_119_super_repel"
             }
@@ -18197,7 +18197,7 @@
               "value": "base:script:map/route119_event_script_item_zinc"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_119_zinc"
             }
@@ -18234,7 +18234,7 @@
               "value": "base:script:map/route119_event_script_item_elixir"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_119_elixir_1"
             }
@@ -18271,7 +18271,7 @@
               "value": "base:script:map/route119_event_script_item_leaf_stone"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_119_leaf_stone"
             }
@@ -18308,7 +18308,7 @@
               "value": "base:script:map/route119_event_script_item_rare_candy"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_119_rare_candy"
             }
@@ -18345,7 +18345,7 @@
               "value": "base:script:map/route119_event_script_item_hyper_potion"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_119_hyper_potion_1"
             }
@@ -18387,7 +18387,7 @@
               "value": "base:script:map/route119_event_script_bridge_aqua_grunt1"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_119_team_aqua"
             }
@@ -18429,7 +18429,7 @@
               "value": "base:script:map/route119_event_script_bridge_aqua_grunt2"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_119_team_aqua"
             }
@@ -18466,7 +18466,7 @@
               "value": "up"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_119_rival_on_bike"
             }
@@ -18730,7 +18730,7 @@
               "value": "base:script:map/route119_event_script_item_hyper_potion2"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_119_hyper_potion_2"
             }
@@ -18856,7 +18856,7 @@
               "value": "base:script:map/route119_event_script_kecleon1"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_119_kecleon_1"
             }
@@ -18893,7 +18893,7 @@
               "value": "base:script:map/route119_event_script_kecleon2"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_119_kecleon_2"
             }
@@ -19113,7 +19113,7 @@
               "value": "base:script:map/route119_event_script_item_nugget"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_119_nugget"
             }
@@ -19150,7 +19150,7 @@
               "value": "base:script:map/route119_event_script_item_elixir2"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_119_elixir_2"
             }
@@ -19187,7 +19187,7 @@
               "value": "down"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_119_scott"
             }

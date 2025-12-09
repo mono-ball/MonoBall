@@ -4,6 +4,7 @@ using Arch.Core.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
 using MonoBallFramework.Game.Ecs.Components;
+using MonoBallFramework.Game.Ecs.Components.Maps;
 using MonoBallFramework.Game.Ecs.Components.Movement;
 using MonoBallFramework.Game.Engine.Common.Logging;
 using MonoBallFramework.Game.Engine.Core.Types;
@@ -135,6 +136,48 @@ public class MapLoader(
     );
 
     /// <summary>
+    ///     Checks if a map with the given name is already loaded in the world.
+    ///     Prevents duplicate map loading which causes duplicate NPCs.
+    /// </summary>
+    /// <param name="world">The ECS world to check.</param>
+    /// <param name="mapName">The map name to check for.</param>
+    /// <returns>The existing MapInfo entity if found, null otherwise.</returns>
+    private Entity? FindExistingMapEntity(World world, string mapName)
+    {
+        Entity? existingEntity = null;
+        int mapCount = 0;
+        QueryDescription query = QueryCache.Get<MapInfo>();
+        world.Query(
+            in query,
+            (Entity entity, ref MapInfo info) =>
+            {
+                mapCount++;
+                _logger?.LogDebug(
+                    "FindExistingMapEntity: Checking entity {EntityId} with MapName='{LoadedMapName}' against requested='{RequestedMapName}'",
+                    entity.Id,
+                    info.MapName,
+                    mapName
+                );
+                if (info.MapName == mapName)
+                {
+                    existingEntity = entity;
+                    _logger?.LogInformation(
+                        "FindExistingMapEntity: FOUND existing map '{MapName}' at entity {EntityId}",
+                        mapName,
+                        entity.Id
+                    );
+                }
+            }
+        );
+        _logger?.LogDebug(
+            "FindExistingMapEntity: Checked {MapCount} maps, found existing: {Found}",
+            mapCount,
+            existingEntity.HasValue
+        );
+        return existingEntity;
+    }
+
+    /// <summary>
     ///     Loads a map from EF Core definition (NEW: Definition-based loading).
     ///     This is the preferred method - loads from MapDefinition stored in EF Core.
     /// </summary>
@@ -151,6 +194,17 @@ public class MapLoader(
                 "MapDefinitionService is required for definition-based map loading. "
                     + "Use LoadMapEntities(world, mapPath) for file-based loading."
             );
+        }
+
+        // Check if map is already loaded to prevent duplicate NPCs
+        Entity? existingMap = FindExistingMapEntity(world, mapId.MapName);
+        if (existingMap.HasValue)
+        {
+            _logger?.LogDebug(
+                "Map '{MapName}' already loaded, returning existing entity",
+                mapId.MapName
+            );
+            return existingMap.Value;
         }
 
         // Get map definition from EF Core
@@ -223,6 +277,19 @@ public class MapLoader(
                 "MapDefinitionService is required for definition-based map loading. "
                     + "Use LoadMapEntities(world, mapPath) for file-based loading."
             );
+        }
+
+        // Check if map is already loaded to prevent duplicate NPCs
+        Entity? existingMap = FindExistingMapEntity(world, mapId.MapName);
+        if (existingMap.HasValue)
+        {
+            _logger?.LogDebug(
+                "Map '{MapName}' already loaded at offset ({OffsetX}, {OffsetY}), returning existing entity",
+                mapId.MapName,
+                worldOffset.X,
+                worldOffset.Y
+            );
+            return existingMap.Value;
         }
 
         // Get map definition from EF Core

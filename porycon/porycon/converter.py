@@ -1954,13 +1954,13 @@ class MapConverter:
                     "value": script_id
                 })
 
-        # Add flag if present and not 0 (transform to unified format)
+        # Add visibility flag if present and not 0 (transform to unified format)
         flag = obj_event.get("flag", "0")
         if flag and flag != "0":
             # Transform visibility flag to unified ID format
             flag_id = IdTransformer.flag_id(flag)
             properties.append({
-                "name": "flag",
+                "name": "visibilityFlag",
                 "type": "string",
                 "value": flag_id if flag_id else flag
             })

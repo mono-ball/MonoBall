@@ -1019,7 +1019,7 @@
               "value": "base:script:map/scorched_slab_event_script_item_tm_sunny_day"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/scorched_slab_tm_sunny_day"
             }

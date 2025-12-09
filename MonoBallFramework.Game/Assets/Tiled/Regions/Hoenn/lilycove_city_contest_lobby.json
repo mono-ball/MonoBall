@@ -1718,7 +1718,7 @@
               "value": 0
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/lilycove_contest_hall_contest_attendant_1"
             }
@@ -1886,7 +1886,7 @@
               "value": "base:script:map/lilycove_city_contest_lobby_event_script_reporter"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/lilycove_contest_hall_reporter"
             }
@@ -1997,7 +1997,7 @@
               "value": "down"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/lilycove_contest_hall_contest_attendant_2"
             }
@@ -2197,7 +2197,7 @@
               "value": "base:script:map/berry_blender_event_script_blender1_expert_m"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/lilycove_contest_hall_blend_master_replacement"
             }
@@ -2276,7 +2276,7 @@
               "value": "base:script:map/lilycove_city_contest_lobby_event_script_blend_master_onlooker2"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/lilycove_contest_hall_blend_master"
             }
@@ -2318,7 +2318,7 @@
               "value": "base:script:map/lilycove_city_contest_lobby_event_script_blend_master_onlooker3"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/lilycove_contest_hall_blend_master"
             }
@@ -2360,7 +2360,7 @@
               "value": "base:script:map/lilycove_city_contest_lobby_event_script_blend_master_onlooker4"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/lilycove_contest_hall_blend_master"
             }
@@ -2402,7 +2402,7 @@
               "value": "base:script:map/lilycove_city_contest_lobby_event_script_blend_master_onlooker5"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/lilycove_contest_hall_blend_master"
             }
@@ -2444,7 +2444,7 @@
               "value": "base:script:map/lilycove_city_contest_lobby_event_script_blend_master_onlooker6"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/lilycove_contest_hall_blend_master"
             }
@@ -2486,7 +2486,7 @@
               "value": "base:script:map/lilycove_city_contest_lobby_event_script_blend_master_onlooker1"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/lilycove_contest_hall_blend_master"
             }
@@ -2528,7 +2528,7 @@
               "value": "base:script:map/lilycove_city_contest_lobby_event_script_blend_master"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/lilycove_contest_hall_blend_master"
             }

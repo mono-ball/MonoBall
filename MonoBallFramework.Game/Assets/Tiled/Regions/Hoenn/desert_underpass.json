@@ -9715,7 +9715,7 @@
               "value": "base:script:map/desert_underpass_event_script_fossil"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/desert_underpass_fossil"
             }

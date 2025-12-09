@@ -1942,7 +1942,7 @@
               "value": "base:script:map/ancient_tomb_event_script_registeel"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/registeel"
             }

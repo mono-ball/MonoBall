@@ -10416,7 +10416,7 @@
               "value": "up"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_104_mr_briney_boat"
             }
@@ -10453,7 +10453,7 @@
               "value": "right"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_104_mr_briney"
             }
@@ -10939,7 +10939,7 @@
               "value": "base:script:map/route104_event_script_item_pp_up"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_104_pp_up"
             }
@@ -10986,7 +10986,7 @@
               "value": "base:script:map/route104_event_script_white_herb_florist"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_104_white_herb_florist"
             }
@@ -11206,7 +11206,7 @@
               "value": "base:script:map/route104_event_script_item_poke_ball"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_104_poke_ball"
             }
@@ -11290,7 +11290,7 @@
               "value": "base:script:map/route104_event_script_item_x_accuracy"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_104_x_accuracy"
             }
@@ -11327,7 +11327,7 @@
               "value": "base:script:map/event_script_cut_tree"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/11"
             }
@@ -11364,7 +11364,7 @@
               "value": "base:script:map/route104_event_script_item_potion"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_104_potion"
             }
@@ -11475,7 +11475,7 @@
               "value": "base:script:map/route104_event_script_rival"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_104_rival"
             }

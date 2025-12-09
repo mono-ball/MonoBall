@@ -671,7 +671,7 @@
               "value": "base:script:map/abandoned_ship_rooms2_b1f_event_script_item_dive_ball"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/abandoned_ship_rooms_2_b1f_dive_ball"
             }

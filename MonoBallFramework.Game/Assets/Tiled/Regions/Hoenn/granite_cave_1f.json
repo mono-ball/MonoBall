@@ -2124,7 +2124,7 @@
               "value": "base:script:map/granite_cave_1f_event_script_item_escape_rope"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/granite_cave_1f_escape_rope"
             }

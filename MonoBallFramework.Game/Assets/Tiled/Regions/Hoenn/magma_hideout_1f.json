@@ -4420,7 +4420,7 @@
               "value": "base:script:map/magma_hideout_1f_event_script_grunt1"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/magma_hideout_grunts"
             },
@@ -4467,7 +4467,7 @@
               "value": "base:script:map/magma_hideout_1f_event_script_item_rare_candy"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/magma_hideout_1f_rare_candy"
             }
@@ -4509,7 +4509,7 @@
               "value": "base:script:map/magma_hideout_1f_event_script_grunt2"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/magma_hideout_grunts"
             },
@@ -4556,7 +4556,7 @@
               "value": "base:script:map/event_script_strength_boulder"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/11"
             }
@@ -4593,7 +4593,7 @@
               "value": "base:script:map/event_script_strength_boulder"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/12"
             }
@@ -4630,7 +4630,7 @@
               "value": "base:script:map/event_script_strength_boulder"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/13"
             }

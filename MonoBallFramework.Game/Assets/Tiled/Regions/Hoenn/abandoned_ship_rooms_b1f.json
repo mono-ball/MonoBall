@@ -856,7 +856,7 @@
               "value": "base:script:map/abandoned_ship_rooms_b1f_event_script_item_escape_rope"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/abandoned_ship_rooms_b1f_escape_rope"
             }

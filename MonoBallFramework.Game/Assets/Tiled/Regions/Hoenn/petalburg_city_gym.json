@@ -4459,7 +4459,7 @@
               "value": "base:script:map/petalburg_city_gym_event_script_norman"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/petalburg_gym_norman"
             }
@@ -4795,7 +4795,7 @@
               "value": "base:script:map/petalburg_city_gym_event_script_gym_guide"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/petalburg_gym_greeter"
             }
@@ -4832,7 +4832,7 @@
               "value": "up"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/petalburg_gym_wally"
             }
@@ -4869,7 +4869,7 @@
               "value": "up"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/petalburg_gym_wallys_dad"
             }

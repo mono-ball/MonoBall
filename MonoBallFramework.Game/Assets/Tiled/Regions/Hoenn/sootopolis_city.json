@@ -11432,7 +11432,7 @@
               "value": "base:script:map/sootopolis_city_event_script_woman2"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/sootopolis_city_residents"
             }
@@ -11590,7 +11590,7 @@
               "value": "base:script:map/sootopolis_city_event_script_man"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/sootopolis_city_man_1"
             }
@@ -11632,7 +11632,7 @@
               "value": "base:script:map/sootopolis_city_event_script_steven"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/sootopolis_city_steven"
             }
@@ -11711,7 +11711,7 @@
               "value": true
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/sootopolis_city_groudon"
             }
@@ -11748,7 +11748,7 @@
               "value": true
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/sootopolis_city_kyogre"
             }
@@ -11785,7 +11785,7 @@
               "value": "right"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/sootopolis_city_rayquaza"
             }
@@ -11827,7 +11827,7 @@
               "value": "base:script:map/sootopolis_city_event_script_maniac"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/sootopolis_city_residents"
             }
@@ -11869,7 +11869,7 @@
               "value": "base:script:map/sootopolis_city_event_script_girl"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/sootopolis_city_residents"
             }
@@ -11911,7 +11911,7 @@
               "value": "base:script:map/sootopolis_city_event_script_black_belt"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/sootopolis_city_residents"
             }
@@ -11953,7 +11953,7 @@
               "value": "base:script:map/sootopolis_city_event_script_boy2"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/sootopolis_city_residents"
             }
@@ -11995,7 +11995,7 @@
               "value": "base:script:map/sootopolis_city_event_script_maxie"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/sootopolis_city_maxie"
             }
@@ -12037,7 +12037,7 @@
               "value": "base:script:map/sootopolis_city_event_script_archie"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/sootopolis_city_archie"
             }
@@ -12079,7 +12079,7 @@
               "value": "base:script:map/sootopolis_city_event_script_wallace"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/sootopolis_city_wallace"
             }

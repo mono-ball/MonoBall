@@ -2824,7 +2824,7 @@
               "value": "base:script:map/birth_island_exterior_event_script_triangle"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/birth_island_deoxys_triangle"
             }
@@ -2861,7 +2861,7 @@
               "value": "down"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/deoxys"
             }

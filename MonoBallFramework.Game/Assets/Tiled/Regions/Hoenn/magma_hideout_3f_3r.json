@@ -2521,7 +2521,7 @@
               "value": "base:script:map/magma_hideout_3f_3r_event_script_item_escape_rope"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/magma_hideout_3f_3r_ecape_rope"
             }

@@ -3103,7 +3103,7 @@
               "value": "base:script:map/fortree_city_event_script_kecleon"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/fortree_city_kecleon"
             }

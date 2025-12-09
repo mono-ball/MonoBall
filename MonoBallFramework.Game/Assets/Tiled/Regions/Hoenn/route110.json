@@ -13653,7 +13653,7 @@
               "value": "base:script:map/route110_event_script_item_dire_hit"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_110_dire_hit"
             }
@@ -13690,7 +13690,7 @@
               "value": "base:script:map/route110_event_script_item_rare_candy"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_110_rare_candy"
             }
@@ -13769,7 +13769,7 @@
               "value": "base:script:map/route110_event_script_aqua_grunt1"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_110_team_aqua"
             }
@@ -13811,7 +13811,7 @@
               "value": "base:script:map/route110_event_script_aqua_grunt2"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_110_team_aqua"
             }
@@ -13853,7 +13853,7 @@
               "value": "base:script:map/route110_event_script_aqua_grunt3"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_110_team_aqua"
             }
@@ -13895,7 +13895,7 @@
               "value": "base:script:map/route110_event_script_aqua_grunt4"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_110_team_aqua"
             }
@@ -13932,7 +13932,7 @@
               "value": "down"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_110_team_aqua"
             }
@@ -14016,7 +14016,7 @@
               "value": "left,right"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_110_rival"
             }
@@ -14053,7 +14053,7 @@
               "value": "down"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_110_rival_on_bike"
             }
@@ -14320,7 +14320,7 @@
               "value": "base:script:map/route110_event_script_item_elixir"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_110_elixir"
             }
@@ -14352,7 +14352,7 @@
               "value": 3
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_110_birch"
             }

@@ -9776,7 +9776,7 @@
               "value": "base:script:map/route132_event_script_item_rare_candy"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_132_rare_candy"
             }
@@ -10095,7 +10095,7 @@
               "value": "base:script:map/route132_event_script_item_protein"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_132_protein"
             }

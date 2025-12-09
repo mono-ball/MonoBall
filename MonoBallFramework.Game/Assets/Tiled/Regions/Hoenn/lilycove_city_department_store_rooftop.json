@@ -910,7 +910,7 @@
               "value": "base:script:map/lilycove_city_department_store_rooftop_event_script_sale_woman"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/lilycove_department_store_rooftop_sale_woman"
             }

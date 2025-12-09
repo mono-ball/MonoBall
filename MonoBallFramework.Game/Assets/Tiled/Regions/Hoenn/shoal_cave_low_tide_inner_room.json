@@ -5700,7 +5700,7 @@
               "value": "base:script:map/shoal_cave_low_tide_inner_room_event_script_item_rare_candy"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/shoal_cave_inner_room_rare_candy"
             }

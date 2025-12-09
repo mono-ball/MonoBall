@@ -9781,7 +9781,7 @@
               "value": "base:script:map/berry_tree_script"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/hide_mirage_island_berry_tree"
             }

@@ -2727,7 +2727,7 @@
               "value": "base:script:map/ss_tidal_rooms_event_script_snatch_giver"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/ss_tidal_rooms_snatch_giver"
             }

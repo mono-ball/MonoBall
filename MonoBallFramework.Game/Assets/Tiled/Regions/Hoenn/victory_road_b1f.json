@@ -4553,7 +4553,7 @@
               "value": "base:script:map/event_script_strength_boulder"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/13"
             }
@@ -4590,7 +4590,7 @@
               "value": "base:script:map/event_script_strength_boulder"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/14"
             }
@@ -4627,7 +4627,7 @@
               "value": "base:script:map/event_script_strength_boulder"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/11"
             }
@@ -4664,7 +4664,7 @@
               "value": "base:script:map/event_script_strength_boulder"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/12"
             }
@@ -4701,7 +4701,7 @@
               "value": "base:script:map/event_script_strength_boulder"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/17"
             }
@@ -4738,7 +4738,7 @@
               "value": "base:script:map/event_script_strength_boulder"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/16"
             }
@@ -4775,7 +4775,7 @@
               "value": "base:script:map/event_script_strength_boulder"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/1_e"
             }
@@ -4812,7 +4812,7 @@
               "value": "base:script:map/event_script_rock_smash"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/19"
             }
@@ -4849,7 +4849,7 @@
               "value": "base:script:map/event_script_rock_smash"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/1_a"
             }
@@ -4886,7 +4886,7 @@
               "value": "base:script:map/event_script_rock_smash"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/1_b"
             }
@@ -4923,7 +4923,7 @@
               "value": "base:script:map/event_script_rock_smash"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/1_c"
             }
@@ -4960,7 +4960,7 @@
               "value": "base:script:map/event_script_rock_smash"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/1_d"
             }
@@ -4997,7 +4997,7 @@
               "value": "base:script:map/event_script_strength_boulder"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/1_f"
             }
@@ -5175,7 +5175,7 @@
               "value": "base:script:map/event_script_rock_smash"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/15"
             }
@@ -5212,7 +5212,7 @@
               "value": "base:script:map/victory_road_b1f_event_script_item_tm_psychic"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/victory_road_b1f_tm_psychic"
             }
@@ -5249,7 +5249,7 @@
               "value": "base:script:map/victory_road_b1f_event_script_item_full_restore"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/victory_road_b1f_full_restore"
             }

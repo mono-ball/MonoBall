@@ -702,7 +702,7 @@
               "value": "base:script:map/lilycove_city_pokemon_center_1f_event_script_contest_lady_mon"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/lilycove_pokemon_center_contest_lady_mon"
             }

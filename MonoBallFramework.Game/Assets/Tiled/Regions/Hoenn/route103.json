@@ -5476,7 +5476,7 @@
               "value": "base:script:map/route103_event_script_rival"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_103_rival"
             }
@@ -5864,7 +5864,7 @@
               "value": "base:script:map/prof_birch_event_script_rate_pokedex_or_register"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_103_birch"
             }
@@ -5948,7 +5948,7 @@
               "value": "base:script:map/route103_event_script_item_guard_spec"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_103_guard_spec"
             }
@@ -5985,7 +5985,7 @@
               "value": "base:script:map/event_script_cut_tree"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/12"
             }
@@ -6022,7 +6022,7 @@
               "value": "base:script:map/event_script_cut_tree"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/13"
             }
@@ -6247,7 +6247,7 @@
               "value": "base:script:map/route103_event_script_item_pp_up"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_103_pp_up"
             }

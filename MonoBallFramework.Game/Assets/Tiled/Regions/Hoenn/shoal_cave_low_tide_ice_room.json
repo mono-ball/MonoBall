@@ -1919,7 +1919,7 @@
               "value": "base:script:map/shoal_cave_low_tide_ice_room_event_script_item_tm_hail"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/shoal_cave_ice_room_tm_hail"
             }
@@ -1956,7 +1956,7 @@
               "value": "base:script:map/shoal_cave_low_tide_ice_room_event_script_item_never_melt_ice"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/shoal_cave_ice_room_never_melt_ice"
             }

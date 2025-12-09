@@ -371,7 +371,7 @@
               "value": "base:script:map/abandoned_ship_captains_office_event_script_item_storage_key"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/abandoned_ship_captains_office_storage_key"
             }

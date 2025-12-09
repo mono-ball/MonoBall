@@ -4266,7 +4266,7 @@
               "value": "base:script:map/magma_hideout_2f_2r_event_script_grunt8"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/magma_hideout_grunts"
             },
@@ -4318,7 +4318,7 @@
               "value": "base:script:map/magma_hideout_2f_2r_event_script_grunt7"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/magma_hideout_grunts"
             },
@@ -4365,7 +4365,7 @@
               "value": "base:script:map/magma_hideout_2f_2r_event_script_item_max_elixir"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/magma_hideout_2f_2r_max_elixir"
             }
@@ -4407,7 +4407,7 @@
               "value": "base:script:map/magma_hideout_2f_2r_event_script_grunt6"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/magma_hideout_grunts"
             },
@@ -4459,7 +4459,7 @@
               "value": "base:script:map/magma_hideout_2f_2r_event_script_grunt15"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/magma_hideout_grunts"
             },
@@ -4506,7 +4506,7 @@
               "value": "base:script:map/magma_hideout_2f_2r_event_script_item_full_restore"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/magma_hideout_2f_2r_full_restore"
             }

@@ -6628,7 +6628,7 @@
               "value": "base:script:map/event_script_cut_tree"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/11"
             }
@@ -6665,7 +6665,7 @@
               "value": "base:script:map/event_script_cut_tree"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/12"
             }
@@ -6744,7 +6744,7 @@
               "value": "base:script:map/route116_event_script_item_ether"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_116_ether"
             }
@@ -6781,7 +6781,7 @@
               "value": "base:script:map/route116_event_script_item_repel"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_116_repel"
             }
@@ -6892,7 +6892,7 @@
               "value": "base:script:map/route116_event_script_briney"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_116_mr_briney"
             }
@@ -6929,7 +6929,7 @@
               "value": "base:script:map/event_script_cut_tree"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/13"
             }
@@ -7013,7 +7013,7 @@
               "value": "base:script:map/event_script_cut_tree"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/14"
             }
@@ -7050,7 +7050,7 @@
               "value": "base:script:map/route116_event_script_item_hp_up"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_116_hp_up"
             }
@@ -7228,7 +7228,7 @@
               "value": "base:script:map/route116_event_script_devon_employee"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_116_devon_employee"
             }
@@ -7265,7 +7265,7 @@
               "value": "base:script:map/route116_event_script_item_x_special"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_116_x_special"
             }
@@ -7307,7 +7307,7 @@
               "value": "base:script:map/route116_event_script_wandas_boyfriend"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_116_wandas_boyfriend"
             }
@@ -7344,7 +7344,7 @@
               "value": "base:script:map/route116_event_script_glasses_man"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_116_dropped_glasses_man"
             }
@@ -7475,7 +7475,7 @@
               "value": "base:script:map/route116_event_script_item_potion"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_116_potion"
             }
@@ -7512,7 +7512,7 @@
               "value": "base:script:map/event_script_cut_tree"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/15"
             }

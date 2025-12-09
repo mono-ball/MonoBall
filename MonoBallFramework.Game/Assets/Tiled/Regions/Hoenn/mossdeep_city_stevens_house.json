@@ -521,7 +521,7 @@
               "value": "base:script:map/mossdeep_city_stevens_house_event_script_steven"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mossdeep_city_stevens_house_steven"
             }
@@ -558,7 +558,7 @@
               "value": "base:script:map/mossdeep_city_stevens_house_event_script_beldum_pokeball"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mossdeep_city_stevens_house_beldum_pokeball"
             }
@@ -595,7 +595,7 @@
               "value": "base:script:map/mossdeep_city_stevens_house_event_script_letter"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mossdeep_city_stevens_house_invisible_ninja_boy"
             }

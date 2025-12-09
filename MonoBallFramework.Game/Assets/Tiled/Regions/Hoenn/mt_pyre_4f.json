@@ -798,7 +798,7 @@
               "value": "base:script:map/mt_pyre_4f_event_script_item_sea_incense"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/mt_pyre_4f_sea_incense"
             }

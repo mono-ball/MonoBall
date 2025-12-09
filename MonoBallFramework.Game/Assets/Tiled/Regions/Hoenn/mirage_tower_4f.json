@@ -514,7 +514,7 @@
               "value": "base:script:map/mirage_tower_4f_event_script_root_fossil"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mirage_tower_root_fossil"
             }
@@ -556,7 +556,7 @@
               "value": "base:script:map/mirage_tower_4f_event_script_claw_fossil"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mirage_tower_claw_fossil"
             }
@@ -593,7 +593,7 @@
               "value": "base:script:map/event_script_rock_smash"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/11"
             }

@@ -10229,7 +10229,7 @@
               "value": "base:script:map/route125_event_script_item_big_pearl"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_125_big_pearl"
             }

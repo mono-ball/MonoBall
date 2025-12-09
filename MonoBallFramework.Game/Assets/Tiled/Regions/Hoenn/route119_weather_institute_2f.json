@@ -784,7 +784,7 @@
               "value": "base:script:map/route119_weather_institute_2f_event_script_grunt2"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_119_team_aqua"
             },
@@ -836,7 +836,7 @@
               "value": "base:script:map/route119_weather_institute_2f_event_script_grunt3"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_119_team_aqua"
             },
@@ -888,7 +888,7 @@
               "value": "base:script:map/route119_weather_institute_2f_event_script_shelly"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_119_team_aqua"
             },
@@ -930,7 +930,7 @@
               "value": "right"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/weather_institute_2f_workers"
             }
@@ -999,7 +999,7 @@
               "value": "right"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/weather_institute_2f_workers"
             }
@@ -1036,7 +1036,7 @@
               "value": "left"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/weather_institute_2f_aqua_grunt_m"
             }
@@ -1078,7 +1078,7 @@
               "value": "base:script:map/route119_weather_institute_2f_event_script_grunt5"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_119_team_aqua"
             },

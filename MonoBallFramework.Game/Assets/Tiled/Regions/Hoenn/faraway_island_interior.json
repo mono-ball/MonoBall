@@ -2417,7 +2417,7 @@
               "value": "base:script:map/faraway_island_interior_event_script_mew"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mew"
             }

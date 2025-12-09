@@ -9823,7 +9823,7 @@
               "value": "base:script:map/route133_event_script_item_big_pearl"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_133_big_pearl"
             }
@@ -9860,7 +9860,7 @@
               "value": "base:script:map/route133_event_script_item_star_piece"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_133_star_piece"
             }
@@ -10085,7 +10085,7 @@
               "value": "base:script:map/route133_event_script_item_max_revive"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_133_max_revive"
             }

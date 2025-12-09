@@ -2542,7 +2542,7 @@
               "value": "base:script:map/abandoned_ship_hidden_floor_rooms_event_script_item_luxury_ball"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/abandoned_ship_hidden_floor_room_6_luxury_ball"
             }
@@ -2579,7 +2579,7 @@
               "value": "base:script:map/abandoned_ship_hidden_floor_rooms_event_script_item_scanner"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/abandoned_ship_hidden_floor_room_2_scanner"
             }
@@ -2616,7 +2616,7 @@
               "value": "base:script:map/abandoned_ship_hidden_floor_rooms_event_script_item_tm_rain_dance"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/abandoned_ship_hidden_floor_room_1_tm_rain_dance"
             }
@@ -2653,7 +2653,7 @@
               "value": "base:script:map/abandoned_ship_hidden_floor_rooms_event_script_item_water_stone"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/abandoned_ship_hidden_floor_room_3_water_stone"
             }

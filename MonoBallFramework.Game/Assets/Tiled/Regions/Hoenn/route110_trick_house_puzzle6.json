@@ -1337,7 +1337,7 @@
               "value": "base:script:map/route110_trick_house_puzzle6_event_script_item_glitter_mail"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/trick_house_puzzle_6_glitter_mail"
             }

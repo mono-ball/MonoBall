@@ -1209,7 +1209,7 @@
               "value": "base:script:map/abandoned_ship_rooms_1f_event_script_item_harbor_mail"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/abandoned_ship_rooms_1f_harbor_mail"
             }

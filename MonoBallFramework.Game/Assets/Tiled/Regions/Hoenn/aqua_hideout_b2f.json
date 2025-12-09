@@ -2869,7 +2869,7 @@
               "value": "base:script:map/aqua_hideout_b2f_event_script_matt"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/aqua_hideout_grunts"
             }
@@ -2911,7 +2911,7 @@
               "value": "base:script:map/aqua_hideout_b2f_event_script_grunt4"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/aqua_hideout_grunts"
             },
@@ -2958,7 +2958,7 @@
               "value": "base:script:map/aqua_hideout_b2f_event_script_item_nest_ball"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/aqua_hideout_b2f_nest_ball"
             }
@@ -2995,7 +2995,7 @@
               "value": "left"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/aqua_hideout_b2f_submarine_shadow"
             }
@@ -3037,7 +3037,7 @@
               "value": "base:script:map/aqua_hideout_b2f_event_script_grunt6"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/aqua_hideout_grunts"
             },
@@ -3089,7 +3089,7 @@
               "value": "base:script:map/aqua_hideout_b2f_event_script_grunt8"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/aqua_hideout_grunts"
             },

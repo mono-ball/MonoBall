@@ -5391,7 +5391,7 @@
               "value": "base:script:map/gabby_and_ty_event_script_gabby_battle2"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_118_gabby_and_ty_1"
             }
@@ -5433,7 +5433,7 @@
               "value": "base:script:map/gabby_and_ty_event_script_ty_battle2"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_118_gabby_and_ty_1"
             }
@@ -5517,7 +5517,7 @@
               "value": "base:script:map/gabby_and_ty_event_script_gabby_battle5"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_118_gabby_and_ty_2"
             }
@@ -5559,7 +5559,7 @@
               "value": "base:script:map/gabby_and_ty_event_script_ty_battle5"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_118_gabby_and_ty_2"
             }
@@ -5601,7 +5601,7 @@
               "value": "base:script:map/gabby_and_ty_event_script_gabby_battle6"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_118_gabby_and_ty_3"
             }
@@ -5643,7 +5643,7 @@
               "value": "base:script:map/gabby_and_ty_event_script_ty_battle6"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_118_gabby_and_ty_3"
             }
@@ -5680,7 +5680,7 @@
               "value": "base:script:map/event_script_cut_tree"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/11"
             }
@@ -5979,7 +5979,7 @@
               "value": "down"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_118_steven"
             }
@@ -6016,7 +6016,7 @@
               "value": "base:script:map/route118_event_script_item_hyper_potion"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_118_hyper_potion"
             }

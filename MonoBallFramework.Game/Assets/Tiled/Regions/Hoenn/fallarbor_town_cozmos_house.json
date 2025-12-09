@@ -425,7 +425,7 @@
               "value": "base:script:map/fallarbor_town_cozmos_house_event_script_prof_cozmo"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/fallarbor_house_prof_cozmo"
             }

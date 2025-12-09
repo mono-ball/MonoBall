@@ -6787,7 +6787,7 @@
               "value": "base:script:map/event_script_cut_tree"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/11"
             }
@@ -6824,7 +6824,7 @@
               "value": "base:script:map/event_script_cut_tree"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/12"
             }
@@ -6861,7 +6861,7 @@
               "value": "right"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/petalburg_woods_aqua_grunt"
             }
@@ -6893,7 +6893,7 @@
               "value": 3
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/petalburg_woods_devon_employee"
             }
@@ -6935,7 +6935,7 @@
               "value": "base:script:map/petalburg_woods_event_script_item_great_ball"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/petalburg_woods_great_ball"
             }
@@ -6977,7 +6977,7 @@
               "value": "base:script:map/petalburg_woods_event_script_item_x_attack"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/petalburg_woods_x_attack"
             }
@@ -7014,7 +7014,7 @@
               "value": "base:script:map/petalburg_woods_event_script_item_ether"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/petalburg_woods_ether"
             }
@@ -7229,7 +7229,7 @@
               "value": "base:script:map/petalburg_woods_event_script_item_paralyze_heal"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/petalburg_woods_paralyze_heal"
             }

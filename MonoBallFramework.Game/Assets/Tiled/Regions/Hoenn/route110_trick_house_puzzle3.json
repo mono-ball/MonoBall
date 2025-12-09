@@ -1452,7 +1452,7 @@
               "value": "base:script:map/route110_trick_house_puzzle3_event_script_item_wood_mail"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/trick_house_puzzle_3_wood_mail"
             }
@@ -1489,7 +1489,7 @@
               "value": "base:script:map/route110_trick_house_puzzle3_event_script_item_shadow_mail"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/trick_house_puzzle_3_shadow_mail"
             }
@@ -1526,7 +1526,7 @@
               "value": "base:script:map/event_script_rock_smash"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/15"
             }
@@ -1563,7 +1563,7 @@
               "value": "base:script:map/event_script_rock_smash"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/16"
             }

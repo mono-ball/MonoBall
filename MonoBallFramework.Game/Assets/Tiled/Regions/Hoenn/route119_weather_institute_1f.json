@@ -1063,7 +1063,7 @@
               "value": "base:script:map/route119_weather_institute_1f_event_script_grunt1"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_119_team_aqua"
             },
@@ -1115,7 +1115,7 @@
               "value": "base:script:map/route119_weather_institute_1f_event_script_grunt4"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_119_team_aqua"
             },
@@ -1167,7 +1167,7 @@
               "value": "base:script:map/route119_weather_institute_1f_event_script_institute_worker2"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/weather_institute_1f_workers"
             }
@@ -1204,7 +1204,7 @@
               "value": "base:script:map/route119_weather_institute_1f_event_script_institute_worker1"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/weather_institute_1f_workers"
             }

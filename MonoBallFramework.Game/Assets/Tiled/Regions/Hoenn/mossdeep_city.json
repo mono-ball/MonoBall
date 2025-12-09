@@ -10636,7 +10636,7 @@
               "value": "base:script:map/mossdeep_city_event_script_item_net_ball"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/mossdeep_city_net_ball"
             }
@@ -10789,7 +10789,7 @@
               "value": "down"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mossdeep_city_team_magma"
             }
@@ -10826,7 +10826,7 @@
               "value": "up"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mossdeep_city_team_magma"
             }
@@ -10863,7 +10863,7 @@
               "value": "down"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mossdeep_city_team_magma"
             }
@@ -10900,7 +10900,7 @@
               "value": "up"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mossdeep_city_team_magma"
             }
@@ -10937,7 +10937,7 @@
               "value": "left"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mossdeep_city_team_magma"
             }
@@ -11011,7 +11011,7 @@
               "value": "base:script:map/mossdeep_city_event_script_scott"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mossdeep_city_scott"
             }

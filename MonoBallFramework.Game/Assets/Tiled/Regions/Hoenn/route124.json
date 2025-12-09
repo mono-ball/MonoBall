@@ -19574,7 +19574,7 @@
               "value": "base:script:map/route124_event_script_item_red_shard"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_124_red_shard"
             }
@@ -19611,7 +19611,7 @@
               "value": "base:script:map/route124_event_script_item_blue_shard"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_124_blue_shard"
             }
@@ -19648,7 +19648,7 @@
               "value": "base:script:map/route124_event_script_item_yellow_shard"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_124_yellow_shard"
             }

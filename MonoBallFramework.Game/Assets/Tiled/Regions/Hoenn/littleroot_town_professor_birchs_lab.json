@@ -1072,7 +1072,7 @@
               "value": "base:script:map/littleroot_town_professor_birchs_lab_event_script_birch"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/littleroot_town_birchs_lab_birch"
             }
@@ -1114,7 +1114,7 @@
               "value": "base:script:map/littleroot_town_professor_birchs_lab_event_script_rival"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/littleroot_town_birchs_lab_rival"
             }
@@ -1156,7 +1156,7 @@
               "value": "base:script:map/littleroot_town_professor_birchs_lab_event_script_cyndaquil"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/littleroot_town_birchs_lab_pokeball_cyndaquil"
             }
@@ -1198,7 +1198,7 @@
               "value": "base:script:map/littleroot_town_professor_birchs_lab_event_script_totodile"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/littleroot_town_birchs_lab_pokeball_totodile"
             }
@@ -1240,7 +1240,7 @@
               "value": "base:script:map/littleroot_town_professor_birchs_lab_event_script_chikorita"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/littleroot_town_birchs_lab_pokeball_chikorita"
             }

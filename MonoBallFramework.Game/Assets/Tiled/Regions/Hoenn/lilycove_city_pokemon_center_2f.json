@@ -707,7 +707,7 @@
               "value": "base:script:map/cable_club_event_script_mystery_gift_man"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/pokemon_center_2f_mystery_gift_man"
             }

@@ -13041,7 +13041,7 @@
               "value": "base:script:map/route120_event_script_item_nugget"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_120_nugget"
             }
@@ -13083,7 +13083,7 @@
               "value": "base:script:map/gabby_and_ty_event_script_ty_battle3"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_120_gabby_and_ty_1"
             }
@@ -13125,7 +13125,7 @@
               "value": "base:script:map/gabby_and_ty_event_script_gabby_battle3"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_120_gabby_and_ty_1"
             }
@@ -13167,7 +13167,7 @@
               "value": "base:script:map/gabby_and_ty_event_script_gabby_battle6"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_120_gabby_and_ty_2"
             }
@@ -13209,7 +13209,7 @@
               "value": "base:script:map/gabby_and_ty_event_script_ty_battle6"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_120_gabby_and_ty_2"
             }
@@ -13246,7 +13246,7 @@
               "value": "base:script:map/event_script_cut_tree"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/11"
             }
@@ -13283,7 +13283,7 @@
               "value": "base:script:map/route120_event_script_item_full_heal"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_120_full_heal"
             }
@@ -13545,7 +13545,7 @@
               "value": "base:script:map/route120_event_script_item_nest_ball"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_120_nest_ball"
             }
@@ -13582,7 +13582,7 @@
               "value": "base:script:map/route120_event_script_item_hyper_potion"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_120_hyper_potion"
             }
@@ -13619,7 +13619,7 @@
               "value": "base:script:map/route120_event_script_bridge_kecleon"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_120_kecleon_bridge"
             }
@@ -13661,7 +13661,7 @@
               "value": "base:script:map/route120_event_script_steven"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_120_steven"
             }
@@ -13698,7 +13698,7 @@
               "value": "base:script:map/event_script_cut_tree"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/14"
             }
@@ -13735,7 +13735,7 @@
               "value": "base:script:map/event_script_cut_tree"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/12"
             }
@@ -13866,7 +13866,7 @@
               "value": "down"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_120_kecleon_bridge_shadow"
             }
@@ -13903,7 +13903,7 @@
               "value": "base:script:map/route120_event_script_kecleon1"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_120_kecleon_1"
             }
@@ -13940,7 +13940,7 @@
               "value": "base:script:map/route120_event_script_kecleon2"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_120_kecleon_2"
             }
@@ -13977,7 +13977,7 @@
               "value": "base:script:map/route120_event_script_kecleon3"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_120_kecleon_3"
             }
@@ -14014,7 +14014,7 @@
               "value": "base:script:map/route120_event_script_kecleon5"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_120_kecleon_5"
             }
@@ -14051,7 +14051,7 @@
               "value": "base:script:map/route120_event_script_kecleon4"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_120_kecleon_4"
             }
@@ -14182,7 +14182,7 @@
               "value": "base:script:map/route120_event_script_item_revive"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_120_revive"
             }

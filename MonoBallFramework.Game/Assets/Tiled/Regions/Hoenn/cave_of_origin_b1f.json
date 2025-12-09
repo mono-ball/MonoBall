@@ -1207,7 +1207,7 @@
               "value": "base:script:map/cave_of_origin_b1f_event_script_wallace"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/cave_of_origin_b1f_wallace"
             }

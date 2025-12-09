@@ -4288,7 +4288,7 @@
               "value": "base:script:map/route117_event_script_item_great_ball"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_117_great_ball"
             }
@@ -4325,7 +4325,7 @@
               "value": "base:script:map/event_script_cut_tree"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/11"
             }
@@ -4362,7 +4362,7 @@
               "value": "base:script:map/route117_event_script_item_revive"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_117_revive"
             }

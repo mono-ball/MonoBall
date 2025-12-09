@@ -19465,7 +19465,7 @@
               "value": "base:script:map/route126_event_script_item_green_shard"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_126_green_shard"
             }

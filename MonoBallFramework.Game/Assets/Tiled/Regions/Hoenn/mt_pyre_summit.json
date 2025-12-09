@@ -5976,7 +5976,7 @@
               "value": "up"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mt_pyre_summit_archie"
             }
@@ -6055,7 +6055,7 @@
               "value": "base:script:map/mt_pyre_summit_event_script_grunt1"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mt_pyre_summit_team_aqua"
             },
@@ -6107,7 +6107,7 @@
               "value": "base:script:map/mt_pyre_summit_event_script_grunt2"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mt_pyre_summit_team_aqua"
             },
@@ -6159,7 +6159,7 @@
               "value": "base:script:map/mt_pyre_summit_event_script_grunt3"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mt_pyre_summit_team_aqua"
             },
@@ -6211,7 +6211,7 @@
               "value": "base:script:map/mt_pyre_summit_event_script_grunt4"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mt_pyre_summit_team_aqua"
             },
@@ -6258,7 +6258,7 @@
               "value": "up"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mt_pyre_summit_maxie"
             }

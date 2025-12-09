@@ -777,7 +777,7 @@
               "value": "base:script:map/mt_pyre_5f_event_script_item_lax_incense"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/mt_pyre_5f_lax_incense"
             }

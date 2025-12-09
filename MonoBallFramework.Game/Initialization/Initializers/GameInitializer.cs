@@ -196,6 +196,9 @@ public class GameInitializer(
         );
         systemManager.RegisterUpdateSystem(_mapStreamingSystem);
 
+        // Wire MovementSystem to MapStreamingSystem for cache invalidation during map transitions
+        _mapStreamingSystem.SetMovementSystem(movementSystem);
+
         // Register CameraViewportSystem (Priority: 820, event-driven for window resize)
         ILogger<CameraViewportSystem> cameraViewportLogger =
             loggerFactory.CreateLogger<CameraViewportSystem>();

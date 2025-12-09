@@ -3361,7 +3361,7 @@
               "value": "base:script:map/route102_event_script_item_potion"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_102_potion"
             }

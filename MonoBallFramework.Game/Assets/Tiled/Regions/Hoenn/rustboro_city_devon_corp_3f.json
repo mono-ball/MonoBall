@@ -733,7 +733,7 @@
               "value": "base:script:map/rustboro_city_devon_corp_3f_event_script_employee"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/rustboro_city_devon_corp_3f_employee"
             }

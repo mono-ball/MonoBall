@@ -1531,7 +1531,7 @@
               "value": "base:script:map/artisan_cave_1f_event_script_item_carbos"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/artisan_cave_1f_carbos"
             }

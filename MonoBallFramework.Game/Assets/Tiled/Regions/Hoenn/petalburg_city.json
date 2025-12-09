@@ -3381,7 +3381,7 @@
               "value": "base:script:map/petalburg_city_event_script_wallys_mom"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/petalburg_city_wallys_mom"
             }
@@ -3418,7 +3418,7 @@
               "value": "up"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/petalburg_city_wally"
             }
@@ -3534,7 +3534,7 @@
               "value": "up"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/petalburg_city_wallys_dad"
             }
@@ -3571,7 +3571,7 @@
               "value": "base:script:map/petalburg_city_event_script_item_max_revive"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/petalburg_city_max_revive"
             }
@@ -3608,7 +3608,7 @@
               "value": "base:script:map/petalburg_city_event_script_item_ether"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/petalburg_city_ether"
             }
@@ -3672,7 +3672,7 @@
               "value": 3
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/petalburg_city_scott"
             }

@@ -1179,7 +1179,7 @@
               "value": "base:script:map/slateport_city_oceanic_museum_2f_event_script_capt_stern"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/slateport_city_oceanic_museum_2f_captain_stern"
             }
@@ -1216,7 +1216,7 @@
               "value": "down"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/slateport_city_oceanic_museum_2f_archie"
             }
@@ -1253,7 +1253,7 @@
               "value": "down"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/slateport_city_oceanic_museum_2f_aqua_grunt_1"
             }
@@ -1290,7 +1290,7 @@
               "value": "down"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/slateport_city_oceanic_museum_2f_aqua_grunt_2"
             }
@@ -1332,7 +1332,7 @@
               "value": "base:script:map/slateport_city_oceanic_museum_2f_event_script_museum_patron1"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/slateport_museum_population"
             }
@@ -1369,7 +1369,7 @@
               "value": "base:script:map/slateport_city_oceanic_museum_2f_event_script_museum_patron2"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/slateport_museum_population"
             }
@@ -1411,7 +1411,7 @@
               "value": "base:script:map/slateport_city_oceanic_museum_2f_event_script_museum_patron3"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/slateport_museum_population"
             }

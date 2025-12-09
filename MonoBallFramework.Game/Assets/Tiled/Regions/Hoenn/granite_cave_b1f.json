@@ -2771,7 +2771,7 @@
               "value": "base:script:map/granite_cave_b1f_event_script_item_poke_ball"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/granite_cave_b1f_poke_ball"
             }

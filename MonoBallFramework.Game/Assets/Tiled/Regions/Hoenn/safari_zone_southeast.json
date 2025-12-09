@@ -5049,7 +5049,7 @@
               "value": "base:script:map/safari_zone_southeast_event_script_item_big_pearl"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/safari_zone_south_east_big_pearl"
             }
@@ -5091,7 +5091,7 @@
               "value": "base:script:map/safari_zone_southeast_event_script_expansion_zone_attendant"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/safari_zone_south_east_expansion"
             }

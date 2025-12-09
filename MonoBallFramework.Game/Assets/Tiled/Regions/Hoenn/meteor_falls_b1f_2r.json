@@ -713,7 +713,7 @@
               "value": "base:script:map/meteor_falls_b1f_2r_event_script_item_tm_dragon_claw"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/meteor_falls_b1f_2r_tm_dragon_claw"
             }

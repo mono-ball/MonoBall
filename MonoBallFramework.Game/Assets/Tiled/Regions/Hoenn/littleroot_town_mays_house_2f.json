@@ -447,7 +447,7 @@
               "value": "base:script:map/rivals_house_2f_event_script_rival"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/littleroot_town_mays_house_rival_bedroom"
             }
@@ -479,7 +479,7 @@
               "value": 0
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:decoration/1"
             }
@@ -511,7 +511,7 @@
               "value": 3
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:decoration/2"
             }
@@ -543,7 +543,7 @@
               "value": 0
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:decoration/3"
             }
@@ -575,7 +575,7 @@
               "value": 3
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:decoration/4"
             }
@@ -607,7 +607,7 @@
               "value": 3
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:decoration/5"
             }
@@ -639,7 +639,7 @@
               "value": 3
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:decoration/6"
             }
@@ -671,7 +671,7 @@
               "value": 3
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:decoration/7"
             }
@@ -703,7 +703,7 @@
               "value": 3
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:decoration/8"
             }
@@ -735,7 +735,7 @@
               "value": 3
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:decoration/9"
             }
@@ -767,7 +767,7 @@
               "value": 3
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:decoration/10"
             }
@@ -799,7 +799,7 @@
               "value": 3
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:decoration/11"
             }
@@ -831,7 +831,7 @@
               "value": 3
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:decoration/12"
             }
@@ -868,7 +868,7 @@
               "value": "down"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/littleroot_town_players_bedroom_mom"
             }
@@ -905,7 +905,7 @@
               "value": "down"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/littleroot_town_mays_house_2f_pichu_doll"
             }
@@ -942,7 +942,7 @@
               "value": "base:script:map/littleroot_town_mays_house_2f_event_script_rivals_poke_ball"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/littleroot_town_mays_house_2f_poke_ball"
             }

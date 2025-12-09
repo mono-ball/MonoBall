@@ -694,7 +694,7 @@
               "value": "base:script:map/mt_pyre_6f_event_script_item_tm_shadow_ball"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/mt_pyre_6f_tm_shadow_ball"
             }

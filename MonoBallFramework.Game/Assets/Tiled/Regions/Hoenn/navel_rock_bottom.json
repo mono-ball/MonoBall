@@ -1576,7 +1576,7 @@
               "value": "base:script:map/navel_rock_bottom_event_script_lugia"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/lugia"
             }

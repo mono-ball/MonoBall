@@ -3077,7 +3077,7 @@
               "value": "base:script:map/mauville_city_event_script_wally"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mauville_city_wally"
             }
@@ -3119,7 +3119,7 @@
               "value": "base:script:map/mauville_city_event_script_wallys_uncle"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mauville_city_wallys_uncle"
             }
@@ -3156,7 +3156,7 @@
               "value": "base:script:map/mauville_city_event_script_wattson"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mauville_city_wattson"
             }
@@ -3193,7 +3193,7 @@
               "value": "base:script:map/mauville_city_event_script_item_x_speed"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/mauville_city_x_speed"
             }
@@ -3267,7 +3267,7 @@
               "value": "up"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mauville_city_scott"
             }

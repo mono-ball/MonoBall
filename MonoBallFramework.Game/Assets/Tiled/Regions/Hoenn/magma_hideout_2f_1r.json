@@ -4037,7 +4037,7 @@
               "value": "base:script:map/magma_hideout_2f_1r_event_script_grunt4"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/magma_hideout_grunts"
             },
@@ -4089,7 +4089,7 @@
               "value": "base:script:map/magma_hideout_2f_1r_event_script_grunt5"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/magma_hideout_grunts"
             },
@@ -4141,7 +4141,7 @@
               "value": "base:script:map/magma_hideout_2f_1r_event_script_grunt14"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/magma_hideout_grunts"
             },
@@ -4193,7 +4193,7 @@
               "value": "base:script:map/magma_hideout_2f_1r_event_script_grunt3"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/magma_hideout_grunts"
             },

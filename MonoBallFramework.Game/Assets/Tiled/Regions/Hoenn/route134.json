@@ -10100,7 +10100,7 @@
               "value": "base:script:map/route134_event_script_item_carbos"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_134_carbos"
             }
@@ -10137,7 +10137,7 @@
               "value": "base:script:map/route134_event_script_item_star_piece"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_134_star_piece"
             }

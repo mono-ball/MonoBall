@@ -4135,7 +4135,7 @@
               "value": "base:script:map/fiery_path_event_script_item_tm_toxic"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/fiery_path_tm_toxic"
             }
@@ -4172,7 +4172,7 @@
               "value": "base:script:map/event_script_strength_boulder"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/11"
             }
@@ -4209,7 +4209,7 @@
               "value": "base:script:map/event_script_strength_boulder"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/12"
             }
@@ -4246,7 +4246,7 @@
               "value": "base:script:map/event_script_strength_boulder"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/13"
             }
@@ -4283,7 +4283,7 @@
               "value": "base:script:map/event_script_strength_boulder"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/14"
             }
@@ -4320,7 +4320,7 @@
               "value": "base:script:map/event_script_strength_boulder"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/15"
             }
@@ -4357,7 +4357,7 @@
               "value": "base:script:map/event_script_strength_boulder"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/16"
             }
@@ -4394,7 +4394,7 @@
               "value": "base:script:map/fiery_path_event_script_item_fire_stone"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/fiery_path_fire_stone"
             }

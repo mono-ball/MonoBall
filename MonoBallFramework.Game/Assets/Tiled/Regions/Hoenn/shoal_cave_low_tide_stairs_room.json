@@ -1125,7 +1125,7 @@
               "value": "base:script:map/shoal_cave_low_tide_stairs_room_event_script_item_ice_heal"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/shoal_cave_stairs_room_ice_heal"
             }

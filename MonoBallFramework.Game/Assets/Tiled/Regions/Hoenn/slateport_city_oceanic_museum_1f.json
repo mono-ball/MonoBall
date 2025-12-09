@@ -1139,7 +1139,7 @@
               "value": "base:script:map/slateport_city_oceanic_museum_1f_event_script_museum_grunt3"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/slateport_city_oceanic_museum_aqua_grunts"
             }
@@ -1181,7 +1181,7 @@
               "value": "base:script:map/slateport_city_oceanic_museum_1f_event_script_museum_grunt4"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/slateport_city_oceanic_museum_aqua_grunts"
             }
@@ -1223,7 +1223,7 @@
               "value": "base:script:map/slateport_city_oceanic_museum_1f_event_script_museum_grunt2"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/slateport_city_oceanic_museum_aqua_grunts"
             }
@@ -1265,7 +1265,7 @@
               "value": "base:script:map/slateport_city_oceanic_museum_1f_event_script_museum_grunt1"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/slateport_city_oceanic_museum_aqua_grunts"
             }
@@ -1307,7 +1307,7 @@
               "value": "base:script:map/slateport_city_oceanic_museum_1f_event_script_museum_grunt5"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/slateport_city_oceanic_museum_aqua_grunts"
             }
@@ -1386,7 +1386,7 @@
               "value": "base:script:map/slateport_city_oceanic_museum_1f_event_script_museum_grunt6"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/slateport_city_oceanic_museum_aqua_grunts"
             }
@@ -1423,7 +1423,7 @@
               "value": "base:script:map/slateport_city_oceanic_museum_1f_event_script_museum_patron1"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/slateport_museum_population"
             }
@@ -1465,7 +1465,7 @@
               "value": "base:script:map/slateport_city_oceanic_museum_1f_event_script_museum_patron2"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/slateport_museum_population"
             }
@@ -1507,7 +1507,7 @@
               "value": "base:script:map/slateport_city_oceanic_museum_1f_event_script_museum_patron3"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/slateport_museum_population"
             }
@@ -1549,7 +1549,7 @@
               "value": "base:script:map/slateport_city_oceanic_museum_1f_event_script_museum_patron4"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/slateport_museum_population"
             }
@@ -1591,7 +1591,7 @@
               "value": "base:script:map/slateport_city_oceanic_museum_1f_event_script_familiar_grunt"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/slateport_city_oceanic_museum_familiar_aqua_grunt"
             }
@@ -1628,7 +1628,7 @@
               "value": "base:script:map/slateport_city_oceanic_museum_1f_event_script_reporter"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/slateport_museum_population"
             }

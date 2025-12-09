@@ -9953,7 +9953,7 @@
               "value": "base:script:map/route105_event_script_item_iron"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_105_iron"
             }

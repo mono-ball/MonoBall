@@ -4027,7 +4027,7 @@
               "value": "base:script:map/route108_event_script_item_star_piece"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_108_star_piece"
             }

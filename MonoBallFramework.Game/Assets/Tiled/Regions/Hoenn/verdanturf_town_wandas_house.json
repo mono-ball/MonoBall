@@ -563,7 +563,7 @@
               "value": "base:script:map/verdanturf_town_wandas_house_event_script_wally"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/verdanturf_town_wandas_house_wally"
             }
@@ -605,7 +605,7 @@
               "value": "base:script:map/verdanturf_town_wandas_house_event_script_wandas_boyfriend"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/verdanturf_town_wandas_house_wandas_boyfriend"
             }
@@ -647,7 +647,7 @@
               "value": "base:script:map/verdanturf_town_wandas_house_event_script_wallys_uncle"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/verdanturf_town_wandas_house_wallys_uncle"
             }
@@ -726,7 +726,7 @@
               "value": "base:script:map/verdanturf_town_wandas_house_event_script_wanda"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/verdanturf_town_wandas_house_wanda"
             }

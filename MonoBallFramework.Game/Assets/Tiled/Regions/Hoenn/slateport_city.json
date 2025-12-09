@@ -8107,7 +8107,7 @@
               "value": "base:script:map/slateport_city_event_script_aqua_grunt1"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/slateport_city_team_aqua"
             }
@@ -8260,7 +8260,7 @@
               "value": "base:script:map/slateport_city_event_script_ty"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/slateport_city_gabby_and_ty"
             }
@@ -8302,7 +8302,7 @@
               "value": "base:script:map/slateport_city_event_script_gabby"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/slateport_city_gabby_and_ty"
             }
@@ -8344,7 +8344,7 @@
               "value": "base:script:map/slateport_city_event_script_capt_stern"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/slateport_city_captain_stern"
             }
@@ -8623,7 +8623,7 @@
               "value": "base:script:map/slateport_city_event_script_aqua_grunt2"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/slateport_city_team_aqua"
             }
@@ -8665,7 +8665,7 @@
               "value": "base:script:map/slateport_city_event_script_aqua_grunt3"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/slateport_city_team_aqua"
             }
@@ -8855,7 +8855,7 @@
               "value": "base:script:map/slateport_city_event_script_power_tm_clerk"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/slateport_city_tm_salesman"
             }
@@ -8934,7 +8934,7 @@
               "value": "base:script:map/slateport_city_event_script_aqua_grunt4"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/slateport_city_team_aqua"
             }
@@ -8976,7 +8976,7 @@
               "value": "base:script:map/slateport_city_event_script_aqua_grunt5"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/slateport_city_team_aqua"
             }
@@ -9018,7 +9018,7 @@
               "value": "base:script:map/slateport_city_event_script_aqua_grunt6"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/slateport_city_team_aqua"
             }
@@ -9060,7 +9060,7 @@
               "value": "base:script:map/slateport_city_event_script_aqua_grunt7"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/slateport_city_team_aqua"
             }
@@ -9102,7 +9102,7 @@
               "value": "base:script:map/slateport_city_event_script_aqua_grunt8"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/slateport_city_team_aqua"
             }
@@ -9144,7 +9144,7 @@
               "value": "base:script:map/slateport_city_event_script_aqua_grunt9"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/slateport_city_team_aqua"
             }
@@ -9186,7 +9186,7 @@
               "value": "base:script:map/slateport_city_event_script_aqua_grunt10"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/slateport_city_team_aqua"
             }
@@ -9228,7 +9228,7 @@
               "value": "base:script:map/slateport_city_event_script_aqua_grunt11"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/slateport_city_team_aqua"
             }
@@ -9302,7 +9302,7 @@
               "value": "down"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/slateport_city_scott"
             }

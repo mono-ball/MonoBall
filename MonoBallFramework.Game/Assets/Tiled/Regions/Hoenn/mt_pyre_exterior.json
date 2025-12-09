@@ -6177,7 +6177,7 @@
               "value": "base:script:map/mt_pyre_exterior_event_script_item_max_potion"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/mt_pyre_exterior_max_potion"
             }
@@ -6214,7 +6214,7 @@
               "value": "base:script:map/mt_pyre_exterior_event_script_item_tm_skill_swap"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/mt_pyre_exterior_tm_skill_swap"
             }

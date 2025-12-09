@@ -956,7 +956,7 @@
               "value": 3
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/contest_poke_ball"
             }

@@ -733,7 +733,7 @@
               "value": "base:script:map/verdanturf_town_battle_tent_lobby_event_script_scott"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/verdanturf_town_scott"
             }

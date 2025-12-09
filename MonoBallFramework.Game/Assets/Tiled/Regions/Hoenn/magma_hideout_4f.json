@@ -5101,7 +5101,7 @@
               "value": "down"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/magma_hideout_4f_groudon"
             }
@@ -5143,7 +5143,7 @@
               "value": "base:script:map/magma_hideout_4f_event_script_grunt11"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/magma_hideout_grunts"
             },
@@ -5195,7 +5195,7 @@
               "value": "base:script:map/magma_hideout_4f_event_script_grunt12"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/magma_hideout_grunts"
             },
@@ -5247,7 +5247,7 @@
               "value": "base:script:map/magma_hideout_4f_event_script_grunt13"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/magma_hideout_grunts"
             },
@@ -5299,7 +5299,7 @@
               "value": "base:script:map/magma_hideout_4f_event_script_tabitha"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/magma_hideout_grunts"
             },
@@ -5351,7 +5351,7 @@
               "value": "base:script:map/magma_hideout_4f_event_script_maxie"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/magma_hideout_grunts"
             }
@@ -5388,7 +5388,7 @@
               "value": "down"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/magma_hideout_4f_groudon_asleep"
             }
@@ -5425,7 +5425,7 @@
               "value": "base:script:map/magma_hideout_4f_event_script_item_max_revive"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/magma_hideout_4f_max_revive"
             }

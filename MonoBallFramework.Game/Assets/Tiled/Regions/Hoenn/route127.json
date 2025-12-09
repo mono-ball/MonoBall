@@ -19482,7 +19482,7 @@
               "value": "base:script:map/route127_event_script_item_zinc"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_127_zinc"
             }
@@ -19519,7 +19519,7 @@
               "value": "base:script:map/route127_event_script_item_carbos"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_127_carbos"
             }
@@ -19818,7 +19818,7 @@
               "value": "base:script:map/route127_event_script_item_rare_candy"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_127_rare_candy"
             }

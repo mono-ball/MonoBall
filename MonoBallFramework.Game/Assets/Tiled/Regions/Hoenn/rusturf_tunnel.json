@@ -2909,7 +2909,7 @@
               "value": "base:script:map/rusturf_tunnel_event_script_wandas_boyfriend"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/rusturf_tunnel_wandas_boyfriend"
             }
@@ -2946,7 +2946,7 @@
               "value": "base:script:map/event_script_rock_smash"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/rusturf_tunnel_rock_1"
             }
@@ -2983,7 +2983,7 @@
               "value": "base:script:map/rusturf_tunnel_event_script_item_poke_ball"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/rusturf_tunnel_poke_ball"
             }
@@ -3020,7 +3020,7 @@
               "value": "base:script:map/rusturf_tunnel_event_script_item_max_ether"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/rusturf_tunnel_max_ether"
             }
@@ -3057,7 +3057,7 @@
               "value": "right"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/rusturf_tunnel_briney"
             }
@@ -3099,7 +3099,7 @@
               "value": "base:script:map/rusturf_tunnel_event_script_grunt"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/rusturf_tunnel_aqua_grunt"
             }
@@ -3141,7 +3141,7 @@
               "value": "base:script:map/rusturf_tunnel_event_script_peeko"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/rusturf_tunnel_peeko"
             }
@@ -3183,7 +3183,7 @@
               "value": "base:script:map/event_script_rock_smash"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/rusturf_tunnel_rock_2"
             }
@@ -3272,7 +3272,7 @@
               "value": "base:script:map/rusturf_tunnel_event_script_wanda"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/rusturf_tunnel_wanda"
             }

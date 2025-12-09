@@ -850,7 +850,7 @@
               "value": "base:script:map/mt_pyre_3f_event_script_item_super_repel"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/mt_pyre_3f_super_repel"
             }

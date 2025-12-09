@@ -615,7 +615,7 @@
               "value": "base:script:map/route110_trick_house_entrance_event_script_trick_master"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/trick_house_entrance_man"
             }

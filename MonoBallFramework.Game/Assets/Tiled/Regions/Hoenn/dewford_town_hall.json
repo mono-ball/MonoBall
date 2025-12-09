@@ -974,7 +974,7 @@
               "value": "base:script:map/dewford_town_hall_event_script_sludge_bomb_man"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/dewford_hall_sludge_bomb_man"
             }

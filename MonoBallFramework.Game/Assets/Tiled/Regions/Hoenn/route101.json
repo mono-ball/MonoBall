@@ -1594,7 +1594,7 @@
               "value": true
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_101_birch_zigzagoon_battle"
             }
@@ -1631,7 +1631,7 @@
               "value": "base:script:map/route101_event_script_birchs_bag"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_101_birch_starters_bag"
             }
@@ -1668,7 +1668,7 @@
               "value": true
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_101_zigzagoon"
             }
@@ -1705,7 +1705,7 @@
               "value": "base:script:map/prof_birch_event_script_rate_pokedex_or_register"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_101_birch"
             }
@@ -1752,7 +1752,7 @@
               "value": "base:script:map/route101_event_script_boy"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_101_boy"
             }

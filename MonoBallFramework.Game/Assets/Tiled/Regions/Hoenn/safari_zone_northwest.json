@@ -4919,7 +4919,7 @@
               "value": "base:script:map/safari_zone_northwest_event_script_item_tm_solar_beam"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/safari_zone_north_west_tm_solar_beam"
             }

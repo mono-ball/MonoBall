@@ -5192,7 +5192,7 @@
               "value": "base:script:map/route106_event_script_item_protein"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_106_protein"
             }

@@ -846,7 +846,7 @@
               "value": "base:script:map/mossdeep_city_space_center_1f_event_script_grunt3"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mossdeep_city_space_center_1f_team_magma"
             },
@@ -898,7 +898,7 @@
               "value": "base:script:map/mossdeep_city_space_center_1f_event_script_grunt1"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mossdeep_city_space_center_1f_team_magma"
             },
@@ -950,7 +950,7 @@
               "value": "base:script:map/mossdeep_city_space_center_1f_event_script_grunt4"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mossdeep_city_space_center_1f_team_magma"
             },
@@ -1002,7 +1002,7 @@
               "value": "base:script:map/mossdeep_city_space_center_1f_event_script_grunt2"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mossdeep_city_space_center_1f_team_magma"
             },
@@ -1044,7 +1044,7 @@
               "value": "base:script:map/mossdeep_city_space_center_1f_event_script_magma_note"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mossdeep_city_space_center_magma_note"
             }
@@ -1086,7 +1086,7 @@
               "value": "base:script:map/mossdeep_city_space_center_1f_event_script_steven"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mossdeep_city_space_center_1f_steven"
             }

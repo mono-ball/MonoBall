@@ -665,7 +665,7 @@
               "value": "base:script:map/ever_grande_city_pokemon_center_1f_event_script_scott"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/ever_grande_pokemon_center_1f_scott"
             }

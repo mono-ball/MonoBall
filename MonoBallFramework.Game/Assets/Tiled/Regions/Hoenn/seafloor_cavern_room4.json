@@ -1228,7 +1228,7 @@
               "value": "base:script:map/seafloor_cavern_room4_event_script_grunt3"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/seafloor_cavern_aqua_grunts"
             },
@@ -1280,7 +1280,7 @@
               "value": "base:script:map/seafloor_cavern_room4_event_script_grunt4"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/seafloor_cavern_aqua_grunts"
             },

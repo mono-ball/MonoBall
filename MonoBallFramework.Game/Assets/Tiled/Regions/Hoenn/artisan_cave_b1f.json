@@ -7688,7 +7688,7 @@
               "value": "base:script:map/artisan_cave_b1f_event_script_item_hp_up"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/artisan_cave_b1f_hp_up"
             }

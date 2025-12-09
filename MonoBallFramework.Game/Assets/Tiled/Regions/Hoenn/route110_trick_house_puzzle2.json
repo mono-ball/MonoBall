@@ -1452,7 +1452,7 @@
               "value": "base:script:map/route110_trick_house_puzzle2_event_script_item_wave_mail"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/trick_house_puzzle_2_wave_mail"
             }
@@ -1489,7 +1489,7 @@
               "value": "base:script:map/route110_trick_house_puzzle2_event_script_item_harbor_mail"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/trick_house_puzzle_2_harbor_mail"
             }

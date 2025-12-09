@@ -5901,7 +5901,7 @@
               "value": "base:script:map/mt_chimney_event_script_archie"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mt_chimney_team_aqua"
             }
@@ -5943,7 +5943,7 @@
               "value": "base:script:map/mt_chimney_event_script_maxie"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mt_chimney_team_magma"
             }
@@ -5985,7 +5985,7 @@
               "value": "base:script:map/mt_chimney_event_script_tabitha"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mt_chimney_team_magma"
             },
@@ -6037,7 +6037,7 @@
               "value": "base:script:map/mt_chimney_event_script_busy_magma_grunt5"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mt_chimney_team_magma"
             }
@@ -6079,7 +6079,7 @@
               "value": "base:script:map/mt_chimney_event_script_busy_magma_grunt4"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mt_chimney_team_magma"
             }
@@ -6121,7 +6121,7 @@
               "value": "base:script:map/mt_chimney_event_script_busy_aqua_grunt2"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mt_chimney_team_aqua"
             }
@@ -6163,7 +6163,7 @@
               "value": "base:script:map/mt_chimney_event_script_busy_aqua_grunt1"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mt_chimney_team_aqua"
             }
@@ -6205,7 +6205,7 @@
               "value": "base:script:map/mt_chimney_event_script_busy_aqua_grunt3"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mt_chimney_team_aqua"
             }
@@ -6247,7 +6247,7 @@
               "value": "base:script:map/mt_chimney_event_script_lava_cookie_lady"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mt_chimney_lava_cookie_lady"
             }
@@ -6289,7 +6289,7 @@
               "value": "base:script:map/mt_chimney_event_script_busy_magma_grunt6"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mt_chimney_team_magma"
             }
@@ -6331,7 +6331,7 @@
               "value": "base:script:map/mt_chimney_event_script_aqua_poochyena"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mt_chimney_team_aqua"
             }
@@ -6368,7 +6368,7 @@
               "value": "base:script:map/mt_chimney_event_script_magma_poochyena"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mt_chimney_team_magma"
             }
@@ -6410,7 +6410,7 @@
               "value": "base:script:map/mt_chimney_event_script_busy_magma_grunt2"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mt_chimney_team_magma"
             }
@@ -6447,7 +6447,7 @@
               "value": "base:script:map/mt_chimney_event_script_magma_poochyena"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mt_chimney_team_magma"
             }
@@ -6484,7 +6484,7 @@
               "value": "base:script:map/mt_chimney_event_script_magma_poochyena"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mt_chimney_team_magma"
             }
@@ -6526,7 +6526,7 @@
               "value": "base:script:map/mt_chimney_event_script_busy_magma_grunt3"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mt_chimney_team_magma"
             }
@@ -6568,7 +6568,7 @@
               "value": "base:script:map/mt_chimney_event_script_busy_magma_grunt1"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mt_chimney_team_magma"
             }
@@ -6605,7 +6605,7 @@
               "value": "base:script:map/mt_chimney_event_script_aqua_poochyena"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mt_chimney_team_aqua"
             }
@@ -6642,7 +6642,7 @@
               "value": "base:script:map/mt_chimney_event_script_magma_poochyena"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mt_chimney_team_magma"
             }
@@ -6679,7 +6679,7 @@
               "value": "base:script:map/mt_chimney_event_script_aqua_poochyena"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mt_chimney_team_aqua"
             }
@@ -6716,7 +6716,7 @@
               "value": "base:script:map/mt_chimney_event_script_magma_poochyena"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mt_chimney_team_magma"
             }
@@ -6758,7 +6758,7 @@
               "value": "base:script:map/mt_chimney_event_script_grunt2"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mt_chimney_team_magma"
             },
@@ -6805,7 +6805,7 @@
               "value": "base:script:map/mt_chimney_event_script_aqua_poochyena"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mt_chimney_team_aqua"
             }
@@ -6842,7 +6842,7 @@
               "value": "base:script:map/mt_chimney_event_script_magma_poochyena"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mt_chimney_team_magma"
             }
@@ -6884,7 +6884,7 @@
               "value": "base:script:map/mt_chimney_event_script_shelby"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mt_chimney_trainers"
             },
@@ -6936,7 +6936,7 @@
               "value": "base:script:map/mt_chimney_event_script_melissa"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mt_chimney_trainers"
             },
@@ -6988,7 +6988,7 @@
               "value": "base:script:map/mt_chimney_event_script_sheila"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mt_chimney_trainers"
             },
@@ -7040,7 +7040,7 @@
               "value": "base:script:map/mt_chimney_event_script_shirley"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mt_chimney_trainers"
             },
@@ -7092,7 +7092,7 @@
               "value": "base:script:map/mt_chimney_event_script_grunt1"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mt_chimney_team_magma"
             },
@@ -7144,7 +7144,7 @@
               "value": "base:script:map/mt_chimney_event_script_sawyer"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mt_chimney_trainers"
             },

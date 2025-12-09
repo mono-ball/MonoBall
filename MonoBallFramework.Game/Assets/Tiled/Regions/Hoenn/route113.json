@@ -6577,7 +6577,7 @@
               "value": "base:script:map/route113_event_script_item_max_ether"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_113_max_ether"
             }
@@ -6614,7 +6614,7 @@
               "value": "base:script:map/route113_event_script_item_super_repel"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_113_super_repel"
             }
@@ -6839,7 +6839,7 @@
               "value": "base:script:map/route113_event_script_item_hyper_potion"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_113_hyper_potion"
             }

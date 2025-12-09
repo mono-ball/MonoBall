@@ -1763,7 +1763,7 @@
               "value": "base:script:map/oldale_town_event_script_rival"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/oldale_town_rival"
             }

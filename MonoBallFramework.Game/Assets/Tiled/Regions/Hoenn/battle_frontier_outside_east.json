@@ -16688,7 +16688,7 @@
               "value": "base:script:map/battle_frontier_outside_east_event_script_sudowoodo"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/battle_frontier_sudowoodo"
             }

@@ -1350,7 +1350,7 @@
               "value": "base:script:map/seafloor_cavern_entrance_event_script_grunt"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/seafloor_cavern_entrance_aqua_grunt"
             }

@@ -4649,7 +4649,7 @@
               "value": "base:script:map/jagged_pass_event_script_item_burn_heal"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/jagged_pass_burn_heal"
             }
@@ -4738,7 +4738,7 @@
               "value": "base:script:map/jagged_pass_event_script_magma_hideout_guard"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/jagged_pass_magma_guard"
             }

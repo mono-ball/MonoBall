@@ -6673,7 +6673,7 @@
               "value": "base:script:map/victory_road_1f_event_script_entrance_wally"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/victory_road_entrance_wally"
             }
@@ -6710,7 +6710,7 @@
               "value": "base:script:map/victory_road_1f_event_script_item_max_elixir"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/victory_road_1f_max_elixir"
             }
@@ -6747,7 +6747,7 @@
               "value": "base:script:map/victory_road_1f_event_script_item_pp_up"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/victory_road_1f_pp_up"
             }
@@ -6784,7 +6784,7 @@
               "value": "base:script:map/victory_road_1f_event_script_exit_wally"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/victory_road_exit_wally"
             }

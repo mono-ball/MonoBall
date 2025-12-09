@@ -7537,7 +7537,7 @@
               "value": "base:script:map/route112_event_script_magma_grunts"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_112_team_magma"
             }
@@ -7762,7 +7762,7 @@
               "value": "base:script:map/route112_event_script_magma_grunts"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/route_112_team_magma"
             }
@@ -7984,7 +7984,7 @@
               "value": "base:script:map/route112_event_script_item_nugget"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_112_nugget"
             }

@@ -749,7 +749,7 @@
               "value": "base:script:map/granite_cave_stevens_room_event_script_steven"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/granite_cave_steven"
             }

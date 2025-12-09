@@ -956,7 +956,7 @@
               "value": "base:script:map/mauville_city_gym_event_script_wattson"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/mauville_gym_wattson"
             }

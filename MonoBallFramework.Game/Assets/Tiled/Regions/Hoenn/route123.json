@@ -9403,7 +9403,7 @@
               "value": "base:script:map/event_script_cut_tree"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/11"
             }
@@ -9440,7 +9440,7 @@
               "value": "base:script:map/event_script_cut_tree"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/12"
             }
@@ -9477,7 +9477,7 @@
               "value": "base:script:map/event_script_cut_tree"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:temporary/13"
             }
@@ -9514,7 +9514,7 @@
               "value": "base:script:map/route123_event_script_item_calcium"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_123_calcium"
             }
@@ -9976,7 +9976,7 @@
               "value": "base:script:map/route123_event_script_item_ultra_ball"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_123_ultra_ball"
             }
@@ -10013,7 +10013,7 @@
               "value": "base:script:map/route123_event_script_item_elixir"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_123_elixir"
             }
@@ -10332,7 +10332,7 @@
               "value": "base:script:map/route123_event_script_item_pp_up"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_123_pp_up"
             }
@@ -10463,7 +10463,7 @@
               "value": "base:script:map/route123_event_script_item_revival_herb"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/route_123_revival_herb"
             }

@@ -1747,7 +1747,7 @@
               "value": "base:script:map/fallarbor_town_event_script_azurill"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/fallarbor_azurill"
             }

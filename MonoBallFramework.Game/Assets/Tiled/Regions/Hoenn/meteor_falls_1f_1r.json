@@ -4066,7 +4066,7 @@
               "value": "base:script:map/meteor_falls_1f_1r_event_script_item_tm_iron_tail"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/meteor_falls_1f_1r_tm_iron_tail"
             }
@@ -4103,7 +4103,7 @@
               "value": "base:script:map/meteor_falls_1f_1r_event_script_item_moon_stone"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/meteor_falls_1f_1r_moon_stone"
             }
@@ -4140,7 +4140,7 @@
               "value": "base:script:map/meteor_falls_1f_1r_event_script_item_full_heal"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/meteor_falls_1f_1r_full_heal"
             }
@@ -4177,7 +4177,7 @@
               "value": "base:script:map/meteor_falls_1f_1r_event_script_item_ppup"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:item/meteor_falls_1f_1r_pp_up"
             }
@@ -4214,7 +4214,7 @@
               "value": "down"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/meteor_falls_team_magma"
             }
@@ -4251,7 +4251,7 @@
               "value": "left"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/meteor_falls_team_magma"
             }
@@ -4288,7 +4288,7 @@
               "value": "right"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/meteor_falls_team_aqua"
             }
@@ -4325,7 +4325,7 @@
               "value": "right"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/meteor_falls_team_aqua"
             }
@@ -4357,7 +4357,7 @@
               "value": 3
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/meteor_falls_team_aqua"
             }
@@ -4399,7 +4399,7 @@
               "value": "base:script:map/meteor_falls_1f_1r_event_script_prof_cozmo"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/meteor_falls_1f_1r_cozmo"
             }

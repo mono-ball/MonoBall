@@ -1775,7 +1775,7 @@
               "value": "base:script:map/littleroot_town_event_script_fat_man"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/littleroot_town_fat_man"
             }
@@ -1859,7 +1859,7 @@
               "value": "base:script:map/littleroot_town_event_script_mom"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/littleroot_town_mom_outside"
             }
@@ -1896,7 +1896,7 @@
               "value": "right"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/littleroot_town_brendans_house_truck"
             }
@@ -1933,7 +1933,7 @@
               "value": "right"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/littleroot_town_mays_house_truck"
             }
@@ -1970,7 +1970,7 @@
               "value": "up"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/littleroot_town_rival"
             }
@@ -2007,7 +2007,7 @@
               "value": "up"
             },
             {
-              "name": "flag",
+              "name": "visibilityFlag",
               "type": "string",
               "value": "base:flag:visibility/littleroot_town_birch"
             }
