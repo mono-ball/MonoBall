@@ -197,12 +197,12 @@ public class MapLoader(
         }
 
         // Check if map is already loaded to prevent duplicate NPCs
-        Entity? existingMap = FindExistingMapEntity(world, mapId.MapName);
+        Entity? existingMap = FindExistingMapEntity(world, mapId.Name);
         if (existingMap.HasValue)
         {
             _logger?.LogDebug(
                 "Map '{MapName}' already loaded, returning existing entity",
-                mapId.MapName
+                mapId.Name
             );
             return existingMap.Value;
         }
@@ -280,12 +280,12 @@ public class MapLoader(
         }
 
         // Check if map is already loaded to prevent duplicate NPCs
-        Entity? existingMap = FindExistingMapEntity(world, mapId.MapName);
+        Entity? existingMap = FindExistingMapEntity(world, mapId.Name);
         if (existingMap.HasValue)
         {
             _logger?.LogDebug(
                 "Map '{MapName}' already loaded at offset ({OffsetX}, {OffsetY}), returning existing entity",
-                mapId.MapName,
+                mapId.Name,
                 worldOffset.X,
                 worldOffset.Y
             );
@@ -405,9 +405,9 @@ public class MapLoader(
     )
     {
         GameMapId mapId = mapDef.MapId;
-        // Use MapName (identifier like "oldale_town") NOT DisplayName ("Oldale Town")
-        // MapStreamingSystem compares MapInfo.MapName against GameMapId.MapName
-        string mapName = mapDef.MapId.MapName;
+        // Use Name (identifier like "oldale_town") NOT DisplayName ("Oldale Town")
+        // MapStreamingSystem compares MapInfo.MapName against GameMapId.Name
+        string mapName = mapDef.MapId.Name;
 
         // Resolve full path to Tiled file for tileset loading
         string assetRoot = _mapPathResolver.ResolveAssetRoot();

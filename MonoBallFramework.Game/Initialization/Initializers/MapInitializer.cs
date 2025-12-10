@@ -55,7 +55,7 @@ public class MapInitializer(
 
             // Get MapInfo to extract map ID and name for lifecycle tracking
             MapInfo mapInfo = mapInfoEntity.Get<MapInfo>();
-            string mapName = mapInfo.MapName ?? mapId.MapName;
+            string mapName = mapInfo.MapName ?? mapId.Name;
 
             // Complete post-loading steps (shared logic)
             await CompleteMapLoadingAsync(mapInfoEntity, mapInfo, mapName);

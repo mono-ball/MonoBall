@@ -37,10 +37,10 @@ public class MapMetadataFactory
     )
     {
         // Create MapInfo entity for map metadata with MapWarps spatial index
-        // Use GameMapId for unified identification and MapName (short name) for lookups
+        // Use GameMapId for unified identification and Name (short name) for lookups
         var mapInfo = new MapInfo(
             mapId,
-            mapDef.MapId.MapName,
+            mapDef.MapId.Name,
             tmxDoc.Width,
             tmxDoc.Height,
             tmxDoc.TileWidth

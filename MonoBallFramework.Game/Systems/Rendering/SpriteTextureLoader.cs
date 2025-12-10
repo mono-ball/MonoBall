@@ -84,15 +84,15 @@ public class SpriteTextureLoader
                 _logger?.LogSpriteLoadingProgress(
                     loadedCount + 1,
                     spriteIds.Count,
-                    spriteId.SpriteCategory,
-                    spriteId.SpriteName
+                    spriteId.Category,
+                    spriteId.Name
                 );
 
                 string spritesheetPath = _pathResolver.Resolve(definition.TexturePath);
 
                 if (string.IsNullOrEmpty(spritesheetPath) || !File.Exists(spritesheetPath))
                 {
-                    _logger?.LogSpriteSheetNotFound(spriteId.SpriteCategory, spriteId.SpriteName);
+                    _logger?.LogSpriteSheetNotFound(spriteId.Category, spriteId.Name);
                     failedCount++;
                     continue;
                 }
@@ -102,8 +102,8 @@ public class SpriteTextureLoader
                 var texture = Texture2D.FromStream(_graphicsDevice, fileStream);
 
                 _logger?.LogSpriteTextureWithDimensions(
-                    spriteId.SpriteCategory,
-                    spriteId.SpriteName,
+                    spriteId.Category,
+                    spriteId.Name,
                     texture.Format,
                     texture.Width,
                     texture.Height

@@ -44,16 +44,6 @@ public sealed record GameNpcId : EntityId
     }
 
     /// <summary>
-    ///     The NPC category (shortcut for Category).
-    /// </summary>
-    public string NpcCategory => Category;
-
-    /// <summary>
-    ///     The NPC name (shortcut for Name).
-    /// </summary>
-    public string NpcName => Name;
-
-    /// <summary>
     ///     Creates a GameNpcId from just a name, using defaults.
     /// </summary>
     /// <param name="npcName">The NPC name</param>

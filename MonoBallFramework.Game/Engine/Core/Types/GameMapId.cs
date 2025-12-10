@@ -42,16 +42,6 @@ public sealed record GameMapId : EntityId
     }
 
     /// <summary>
-    ///     The region this map belongs to (shortcut for Category).
-    /// </summary>
-    public string Region => Category;
-
-    /// <summary>
-    ///     The map name (shortcut for Name).
-    /// </summary>
-    public string MapName => Name;
-
-    /// <summary>
     ///     Constructs a GameMapId from map name and region components.
     ///     Use this when you have the individual components, not a formatted string.
     /// </summary>

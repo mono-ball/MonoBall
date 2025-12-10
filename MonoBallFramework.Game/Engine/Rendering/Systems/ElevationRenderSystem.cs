@@ -904,9 +904,9 @@ public class ElevationRenderSystem(
         {
             _logger?.LogError(
                 ex,
-                "    ERROR rendering moving sprite '{Category}/{SpriteName}' at position ({X}, {Y})",
+                "    ERROR rendering moving sprite '{Category}/{Name}' at position ({X}, {Y})",
                 sprite.SpriteId.Category,
-                sprite.SpriteId.SpriteName,
+                sprite.SpriteId.Name,
                 position.PixelX,
                 position.PixelY
             );
@@ -984,9 +984,9 @@ public class ElevationRenderSystem(
         {
             _logger?.LogError(
                 ex,
-                "    ERROR rendering sprite '{Category}/{SpriteName}' at position ({X}, {Y})",
+                "    ERROR rendering sprite '{Category}/{Name}' at position ({X}, {Y})",
                 sprite.SpriteId.Category,
-                sprite.SpriteId.SpriteName,
+                sprite.SpriteId.Name,
                 position.PixelX,
                 position.PixelY
             );
@@ -1029,10 +1029,10 @@ public class ElevationRenderSystem(
         if (_reportedMissingSpriteTextures.Add(textureKey))
         {
             _logger?.LogWarning(
-                "    WARNING: Texture '{TextureKey}' NOT FOUND - skipping sprite ({Category}/{SpriteName})",
+                "    WARNING: Texture '{TextureKey}' NOT FOUND - skipping sprite ({Category}/{Name})",
                 textureKey,
                 sprite.SpriteId.Category,
-                sprite.SpriteId.SpriteName
+                sprite.SpriteId.Name
             );
         }
         return null;

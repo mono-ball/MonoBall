@@ -42,16 +42,6 @@ public sealed record GameTrainerId : EntityId
     }
 
     /// <summary>
-    ///     The trainer class (shortcut for Category).
-    /// </summary>
-    public string TrainerClass => Category;
-
-    /// <summary>
-    ///     The trainer name (shortcut for Name).
-    /// </summary>
-    public string TrainerName => Name;
-
-    /// <summary>
     ///     Creates a GameTrainerId from just a name, using defaults.
     /// </summary>
     /// <param name="trainerName">The trainer name</param>

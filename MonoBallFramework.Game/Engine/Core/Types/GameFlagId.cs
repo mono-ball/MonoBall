@@ -53,16 +53,6 @@ public sealed record GameFlagId : EntityId
     }
 
     /// <summary>
-    ///     The flag category (shortcut for Category).
-    /// </summary>
-    public string FlagCategory => Category;
-
-    /// <summary>
-    ///     The flag name (shortcut for Name).
-    /// </summary>
-    public string FlagName => Name;
-
-    /// <summary>
     ///     Creates a GameFlagId from just a name, using defaults.
     /// </summary>
     /// <param name="flagName">The flag name</param>

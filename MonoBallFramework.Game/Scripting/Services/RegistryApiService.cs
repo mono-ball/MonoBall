@@ -169,7 +169,7 @@ public class RegistryApiService(
 
         // Filter sprites by category from the ID path
         // GameSpriteId format: "base:sprite:category/[subcategory/]name"
-        return GetAllSpriteIds().Where(s => s.SpriteCategory == category);
+        return GetAllSpriteIds().Where(s => s.Category == category);
     }
 
     /// <inheritdoc />
@@ -183,8 +183,8 @@ public class RegistryApiService(
         // Filter sprites by both category and subcategory
         // GameSpriteId format: "base:sprite:category/subcategory/name"
         return GetAllSpriteIds().Where(s =>
-            s.SpriteCategory == category &&
-            s.SpriteSubcategory == subcategory);
+            s.Category == category &&
+            s.Subcategory == subcategory);
     }
 
     /// <inheritdoc />
@@ -288,7 +288,7 @@ public class RegistryApiService(
 
         _logger.LogDebug("Getting behavior IDs by category: {Category}", category);
 
-        return GetAllBehaviorIds().Where(b => b.BehaviorCategory == category);
+        return GetAllBehaviorIds().Where(b => b.Category == category);
     }
 
     /// <inheritdoc />
@@ -327,7 +327,7 @@ public class RegistryApiService(
 
         // Filter loaded maps by category/region from the ID
         // GameMapId format: "base:map:region/mapname"
-        return GetAllMapIds().Where(m => m.Region == category);
+        return GetAllMapIds().Where(m => m.Category == category);
     }
 
     /// <inheritdoc />

@@ -45,21 +45,6 @@ public sealed record GameSpriteId : EntityId
     }
 
     /// <summary>
-    ///     The sprite category (shortcut for Category).
-    /// </summary>
-    public string SpriteCategory => Category;
-
-    /// <summary>
-    ///     The sprite subcategory (shortcut for Subcategory).
-    /// </summary>
-    public string? SpriteSubcategory => Subcategory;
-
-    /// <summary>
-    ///     The sprite name (shortcut for Name).
-    /// </summary>
-    public string SpriteName => Name;
-
-    /// <summary>
     ///     Gets the texture key for AssetManager lookup.
     ///     Format: "sprites/{category}/{name}" or "sprites/{category}/{subcategory}/{name}"
     /// </summary>

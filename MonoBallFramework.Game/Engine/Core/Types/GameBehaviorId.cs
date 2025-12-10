@@ -58,16 +58,6 @@ public sealed record GameBehaviorId : EntityId
     }
 
     /// <summary>
-    ///     The behavior category (shortcut for Category).
-    /// </summary>
-    public string BehaviorCategory => Category;
-
-    /// <summary>
-    ///     The behavior name (shortcut for Name).
-    /// </summary>
-    public string BehaviorName => Name;
-
-    /// <summary>
     ///     Whether this is an NPC behavior.
     /// </summary>
     public bool IsNpcBehavior => Category == "npc" || Category == "trainer";

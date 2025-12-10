@@ -280,7 +280,7 @@ public class GameDataLoader
                 var mapDef = new MapDefinition
                 {
                     MapId = gameMapId,
-                    DisplayName = dto.DisplayName ?? gameMapId.MapName,
+                    DisplayName = dto.DisplayName ?? gameMapId.Name,
                     Region = dto.Region ?? "hoenn",
                     MapType = dto.Type,
                     TiledDataPath = dto.TiledPath,

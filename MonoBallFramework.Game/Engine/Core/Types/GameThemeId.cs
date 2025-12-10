@@ -42,16 +42,6 @@ public sealed record GameThemeId : EntityId
     }
 
     /// <summary>
-    ///     The theme category (shortcut for Category).
-    /// </summary>
-    public string ThemeCategory => Category;
-
-    /// <summary>
-    ///     The theme name (shortcut for Name).
-    /// </summary>
-    public string ThemeName => Name;
-
-    /// <summary>
     ///     Creates a GameThemeId from just a name, using defaults.
     /// </summary>
     public static GameThemeId Create(string themeName, string? category = null)

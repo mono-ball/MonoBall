@@ -43,16 +43,6 @@ public sealed record GameMapSectionId : EntityId
     }
 
     /// <summary>
-    ///     The region (shortcut for Category).
-    /// </summary>
-    public string Region => Category;
-
-    /// <summary>
-    ///     The section name (shortcut for Name).
-    /// </summary>
-    public string SectionName => Name;
-
-    /// <summary>
     ///     Creates a GameMapSectionId from just a name, using defaults.
     /// </summary>
     public static GameMapSectionId Create(string sectionName, string? region = null)
