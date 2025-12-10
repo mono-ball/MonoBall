@@ -696,7 +696,14 @@ public class ElevationRenderSystem(
 
             // Get world origin for position calculation
             Vector2 worldOrigin = mapInfo.WorldOrigin;
-            int mapRenderOrder = GetMapRenderOrder(mapInfo.MapId?.Value);
+
+            // Skip if map ID is not set (shouldn't happen but defensive check)
+            if (mapInfo.MapId is null)
+            {
+                continue;
+            }
+
+            int mapRenderOrder = GetMapRenderOrder(mapInfo.MapId.Value);
 
             // Query only visible tiles for this map
             IReadOnlyList<Entity> visibleTiles = _spatialQuery!.GetStaticEntitiesInBounds(

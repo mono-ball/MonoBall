@@ -528,8 +528,11 @@ public class MovementSystem : SystemBase, IUpdateSystem
             return;
         }
 
+        // Cache the map ID since we've verified it's non-null
+        GameMapId currentMapId = position.MapId;
+
         // Get tile size for this map (cached for performance)
-        int tileSize = GetTileSize(world, new GameMapId(position.MapId.Value));
+        int tileSize = GetTileSize(world, currentMapId);
 
         // Calculate target grid position
         int targetX = position.X;
@@ -554,7 +557,7 @@ public class MovementSystem : SystemBase, IUpdateSystem
         }
 
         // Get map world offset for event publishing
-        Vector2 mapOffset = GetMapWorldOffset(world, new GameMapId(position.MapId.Value));
+        Vector2 mapOffset = GetMapWorldOffset(world, currentMapId);
         var targetPixels = new Vector2(
             (targetX * tileSize) + mapOffset.X,
             (targetY * tileSize) + mapOffset.Y
@@ -570,7 +573,7 @@ public class MovementSystem : SystemBase, IUpdateSystem
             // Copy ref parameter values before using in event
             float startPixelX = position.PixelX;
             float startPixelY = position.PixelY;
-            GameMapId mapId = new GameMapId(position.MapId.Value);
+            GameMapId mapId = currentMapId;
 
             // IMPORTANT: Use cached pool directly (eliminates dictionary lookup overhead)
             MovementStartedEvent startEvent = _startedEventPool.Rent();
@@ -627,15 +630,15 @@ public class MovementSystem : SystemBase, IUpdateSystem
         }
 
         // Check map boundaries
-        if (!IsWithinMapBounds(world, new GameMapId(position.MapId.Value), targetX, targetY))
+        if (!IsWithinMapBounds(world, currentMapId, targetX, targetY))
         {
-            _logger?.LogMovementBlocked(targetX, targetY, new GameMapId(position.MapId.Value));
+            _logger?.LogMovementBlocked(targetX, targetY, currentMapId);
 
             // Publish blocked event (using cached pool)
             if (_eventBus != null)
             {
                 // Copy ref parameter value
-                GameMapId mapId = new GameMapId(position.MapId.Value);
+                GameMapId mapId = currentMapId;
 
                 MovementBlockedEvent blockedEvent = _blockedEventPool.Rent();
                 try
@@ -705,7 +708,7 @@ public class MovementSystem : SystemBase, IUpdateSystem
                         }
 
                         // Recheck bounds
-                        if (!IsWithinMapBounds(world, new GameMapId(position.MapId.Value), targetX, targetY))
+                        if (!IsWithinMapBounds(world, currentMapId, targetX, targetY))
                         {
                             return;
                         }
@@ -722,7 +725,7 @@ public class MovementSystem : SystemBase, IUpdateSystem
         // After: GetTileCollisionInfo() = 1 query
         (bool isJumpTile, Direction allowedJumpDir, bool isTargetWalkable) =
             _collisionService.GetTileCollisionInfo(
-                new GameMapId(position.MapId.Value),
+                currentMapId,
                 targetX,
                 targetY,
                 entityElevation,
@@ -756,7 +759,7 @@ public class MovementSystem : SystemBase, IUpdateSystem
                 }
 
                 // Check if landing position is within bounds
-                if (!IsWithinMapBounds(world, new GameMapId(position.MapId.Value), jumpLandX, jumpLandY))
+                if (!IsWithinMapBounds(world, currentMapId, jumpLandX, jumpLandY))
                 {
                     _logger?.LogJumpBlocked(jumpLandX, jumpLandY);
                     return; // Can't jump outside map bounds
@@ -764,7 +767,7 @@ public class MovementSystem : SystemBase, IUpdateSystem
 
                 // OPTIMIZATION: Query landing position collision info once
                 (_, _, bool isLandingWalkable) = _collisionService.GetTileCollisionInfo(
-                    new GameMapId(position.MapId.Value),
+                    currentMapId,
                     jumpLandX,
                     jumpLandY,
                     entityElevation,
@@ -782,7 +785,7 @@ public class MovementSystem : SystemBase, IUpdateSystem
                 var jumpStart = new Vector2(position.PixelX, position.PixelY);
 
                 // Get map world offset for multi-map support
-                Vector2 jumpMapOffset = GetMapWorldOffset(world, new GameMapId(position.MapId.Value));
+                Vector2 jumpMapOffset = GetMapWorldOffset(world, currentMapId);
                 var jumpEnd = new Vector2(
                     (jumpLandX * tileSize) + jumpMapOffset.X,
                     (jumpLandY * tileSize) + jumpMapOffset.Y

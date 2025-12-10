@@ -87,8 +87,11 @@ public class MapPopupOrchestrator : IMapPopupOrchestrator
             return;
         }
 
-        // Delegate to shared display logic
-        ShowPopupForMap(evt.ToMapId, evt.ToMapName, evt.RegionName);
+        // Delegate to shared display logic (skip if no map ID)
+        if (evt.ToMapId is not null)
+        {
+            ShowPopupForMap(evt.ToMapId, evt.ToMapName, evt.RegionName);
+        }
     }
 
     /// <summary>

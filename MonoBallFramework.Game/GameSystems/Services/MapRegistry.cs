@@ -40,7 +40,7 @@ public class MapRegistry
     /// <returns>GameMapId if found, null if not registered.</returns>
     public GameMapId? GetMapId(string mapName)
     {
-        return _mapNameToId.TryGetValue(mapName, out GameMapId id) ? id : null;
+        return _mapNameToId.TryGetValue(mapName, out GameMapId? id) ? id : null;
     }
 
     /// <summary>

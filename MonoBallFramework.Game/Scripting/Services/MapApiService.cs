@@ -66,7 +66,10 @@ public class MapApiService(
         if (playerEntity.HasValue && _world.Has<Position>(playerEntity.Value))
         {
             ref Position position = ref _world.Get<Position>(playerEntity.Value);
-            return position.MapId;
+            if (position.MapId is not null)
+            {
+                return position.MapId;
+            }
         }
 
         return GameMapId.FromComponents("unknown");
