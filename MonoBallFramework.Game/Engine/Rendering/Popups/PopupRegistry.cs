@@ -147,7 +147,7 @@ public class PopupRegistry
             // Double-check after acquiring lock
             if (_isLoaded) return;
 
-            string dataPath = Path.Combine(AppContext.BaseDirectory, "Assets", "Data", "Maps", "Popups");
+            string dataPath = Path.Combine(AppContext.BaseDirectory, "Assets", "Definitions", "Maps", "Popups");
 
             if (!Directory.Exists(dataPath))
             {
@@ -239,7 +239,7 @@ public class PopupRegistry
         string dataPath = Path.Combine(
             AppContext.BaseDirectory,
             "Assets",
-            "Data",
+            "Definitions",
             "Maps",
             "Popups"
         );

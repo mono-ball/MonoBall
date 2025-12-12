@@ -62,10 +62,19 @@ public class MapMetadataFactory
             battleScene
         );
 
-        // Add optional string components
-        if (!string.IsNullOrEmpty(mapDef.MusicId))
+        // Add music component - prefer Tiled property, fall back to MapDefinition
+        GameAudioId? musicId = null;
+        if (tmxDoc.Properties != null && tmxDoc.Properties.TryGetValue("music", out object? musicValue))
         {
-            mapInfoEntity.Add(new Music(mapDef.MusicId));
+            musicId = GameAudioId.TryCreate(musicValue?.ToString());
+        }
+        if (musicId == null && mapDef.MusicId != null)
+        {
+            musicId = mapDef.MusicId;
+        }
+        if (musicId != null)
+        {
+            mapInfoEntity.Add(new Music(musicId));
         }
 
         if (!string.IsNullOrEmpty(mapDef.MapType))

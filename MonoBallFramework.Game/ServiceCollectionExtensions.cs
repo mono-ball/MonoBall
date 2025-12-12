@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MonoBallFramework.Game.Engine.Audio.Configuration;
 using MonoBallFramework.Game.Engine.Debug;
 using MonoBallFramework.Game.Infrastructure.Configuration;
 using MonoBallFramework.Game.Infrastructure.ServiceRegistration;
@@ -56,6 +57,12 @@ public static class ServiceCollectionExtensions
 
         // Debug Console Services (pass configuration for console settings)
         services.AddDebugConsole(configuration);
+
+        // Audio Services (background music, sound effects, Pokemon cries)
+        var audioConfig = environment == "Development"
+            ? AudioConfiguration.Development
+            : AudioConfiguration.Production;
+        services.AddAudioServices(audioConfig);
 
         return services;
     }

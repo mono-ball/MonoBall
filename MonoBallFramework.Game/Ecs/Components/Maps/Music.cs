@@ -1,3 +1,5 @@
+using MonoBallFramework.Game.Engine.Core.Types;
+
 namespace MonoBallFramework.Game.Ecs.Components.Maps;
 
 /// <summary>
@@ -5,10 +7,10 @@ namespace MonoBallFramework.Game.Ecs.Components.Maps;
 /// </summary>
 public struct Music
 {
-    public string Value { get; set; }
+    public GameAudioId AudioId { get; set; }
 
-    public Music(string value)
+    public Music(GameAudioId audioId)
     {
-        Value = value;
+        AudioId = audioId;
     }
 }

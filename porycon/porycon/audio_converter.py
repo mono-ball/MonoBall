@@ -3,16 +3,22 @@ Audio Converter - converts pokeemerald MIDI files to OGG format.
 
 Parses midi.cfg to extract track definitions, converts MIDI files to OGG,
 and generates audio definitions for PokeSharp.
+
+Handles GBA-style loop markers:
+- `[` MIDI marker = loop start point
+- `]` MIDI marker = loop end point
+- Audio is trimmed at loop end, metadata embedded for seamless looping
 """
 
 import os
 import re
 import json
+import struct
 import subprocess
 import shutil
 from pathlib import Path
 from typing import Dict, List, Any, Optional, Tuple, Set
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from .logging_config import get_logger
@@ -32,6 +38,189 @@ class AudioCategory(Enum):
     SFX_POKEMON = "SFX/Pokemon"
     FANFARE = "Music/Fanfares"
     PHONEME = "SFX/Phonemes"
+
+
+@dataclass
+class MidiLoopInfo:
+    """Loop information extracted from MIDI markers.
+
+    GBA music uses `[` and `]` MIDI marker events to define loop regions.
+    The music plays from start, and when reaching `]`, loops back to `[`.
+    """
+    loop_start_tick: Optional[int] = None  # Tick position of `[` marker
+    loop_end_tick: Optional[int] = None    # Tick position of `]` marker
+    loop_start_sec: Optional[float] = None # Time in seconds
+    loop_end_sec: Optional[float] = None   # Time in seconds
+    division: int = 24                     # Ticks per beat
+    tempo_bpm: float = 120.0               # BPM from tempo event
+
+    @property
+    def has_loop(self) -> bool:
+        """True if track has loop markers."""
+        return self.loop_start_tick is not None and self.loop_end_tick is not None
+
+    @property
+    def loop_duration_sec(self) -> Optional[float]:
+        """Duration of the loop section in seconds."""
+        if self.loop_start_sec is not None and self.loop_end_sec is not None:
+            return self.loop_end_sec - self.loop_start_sec
+        return None
+
+    def get_loop_start_samples(self, sample_rate: int = 44100) -> Optional[int]:
+        """Get loop start position in samples."""
+        if self.loop_start_sec is not None:
+            return int(self.loop_start_sec * sample_rate)
+        return None
+
+    def get_loop_length_samples(self, sample_rate: int = 44100) -> Optional[int]:
+        """Get loop length in samples (from start to end)."""
+        if self.loop_start_sec is not None and self.loop_end_sec is not None:
+            return int((self.loop_end_sec - self.loop_start_sec) * sample_rate)
+        return None
+
+
+class MidiLoopParser:
+    """Parser for extracting loop markers from MIDI files.
+
+    GBA Pokemon games use `[` and `]` MIDI marker events to define loop regions.
+    This parser extracts these markers and calculates their time positions.
+    """
+
+    @staticmethod
+    def parse(midi_path: Path) -> MidiLoopInfo:
+        """
+        Parse MIDI file and extract loop marker information.
+
+        Args:
+            midi_path: Path to MIDI file
+
+        Returns:
+            MidiLoopInfo with loop marker positions (if found)
+        """
+        info = MidiLoopInfo()
+
+        try:
+            with open(midi_path, 'rb') as f:
+                data = f.read()
+        except Exception as e:
+            logger.warning(f"Failed to read MIDI file {midi_path}: {e}")
+            return info
+
+        # Validate MIDI header
+        if data[:4] != b'MThd':
+            logger.warning(f"Invalid MIDI file: {midi_path}")
+            return info
+
+        try:
+            # Parse header
+            header_len = struct.unpack('>I', data[4:8])[0]
+            fmt, num_tracks, division = struct.unpack('>HHH', data[8:14])
+            info.division = division
+
+            pos = 14
+            tempo_us = 500000  # Default: 120 BPM
+
+            # Parse all tracks looking for markers and tempo
+            for track_num in range(num_tracks):
+                if pos >= len(data) or data[pos:pos+4] != b'MTrk':
+                    break
+
+                track_len = struct.unpack('>I', data[pos+4:pos+8])[0]
+                track_data = data[pos+8:pos+8+track_len]
+
+                track_pos = 0
+                tick = 0
+
+                while track_pos < len(track_data):
+                    # Read variable length delta time
+                    delta = 0
+                    while track_pos < len(track_data):
+                        b = track_data[track_pos]
+                        track_pos += 1
+                        delta = (delta << 7) | (b & 0x7F)
+                        if not (b & 0x80):
+                            break
+                    tick += delta
+
+                    if track_pos >= len(track_data):
+                        break
+
+                    # Read event
+                    status = track_data[track_pos]
+
+                    if status == 0xFF:  # Meta event
+                        track_pos += 1
+                        if track_pos >= len(track_data):
+                            break
+                        event_type = track_data[track_pos]
+                        track_pos += 1
+
+                        # Read variable length
+                        length = 0
+                        while track_pos < len(track_data):
+                            b = track_data[track_pos]
+                            track_pos += 1
+                            length = (length << 7) | (b & 0x7F)
+                            if not (b & 0x80):
+                                break
+
+                        if track_pos + length > len(track_data):
+                            break
+
+                        event_data = track_data[track_pos:track_pos+length]
+                        track_pos += length
+
+                        # Marker event (type 0x06)
+                        if event_type == 0x06 and event_data:
+                            try:
+                                text = event_data.decode('ascii', errors='ignore').strip()
+                                if text == '[':
+                                    info.loop_start_tick = tick
+                                elif text == ']':
+                                    info.loop_end_tick = tick
+                            except:
+                                pass
+
+                        # Tempo event (type 0x51)
+                        elif event_type == 0x51 and len(event_data) >= 3:
+                            tempo_us = (event_data[0] << 16) | (event_data[1] << 8) | event_data[2]
+
+                        # End of track
+                        elif event_type == 0x2F:
+                            break
+                    else:
+                        # Regular MIDI event - skip based on status
+                        if status >= 0xF0:
+                            track_pos += 1
+                        elif (status & 0xF0) in [0xC0, 0xD0]:
+                            track_pos += 2
+                        elif (status & 0xF0) in [0x80, 0x90, 0xA0, 0xB0, 0xE0]:
+                            track_pos += 3
+                        else:
+                            track_pos += 1
+
+                pos += 8 + track_len
+
+            # Calculate BPM and time positions
+            info.tempo_bpm = 60000000 / tempo_us
+
+            def tick_to_sec(t: Optional[int]) -> Optional[float]:
+                if t is None:
+                    return None
+                beats = t / info.division
+                time_us = beats * tempo_us
+                return time_us / 1000000
+
+            info.loop_start_sec = tick_to_sec(info.loop_start_tick)
+            info.loop_end_sec = tick_to_sec(info.loop_end_tick)
+
+            if info.has_loop:
+                logger.debug(f"{midi_path.name}: loop [{info.loop_start_sec:.2f}s - {info.loop_end_sec:.2f}s]")
+
+        except Exception as e:
+            logger.warning(f"Error parsing MIDI {midi_path}: {e}")
+
+        return info
 
 
 @dataclass
@@ -261,9 +450,9 @@ class MidiToOggConverter:
 
         return None
 
-    def convert(self, midi_path: Path, output_path: Path, track_info: Optional[MidiTrackInfo] = None) -> bool:
+    def convert(self, midi_path: Path, output_path: Path, track_info: Optional[MidiTrackInfo] = None) -> Tuple[bool, Optional[MidiLoopInfo]]:
         """
-        Convert a MIDI file to OGG format.
+        Convert a MIDI file to OGG format with loop marker support.
 
         Args:
             midi_path: Path to input MIDI file
@@ -271,11 +460,14 @@ class MidiToOggConverter:
             track_info: Optional track info for volume adjustment
 
         Returns:
-            True if conversion succeeded, False otherwise
+            Tuple of (success, loop_info) - loop_info contains extracted loop markers
         """
         if not midi_path.exists():
             logger.error(f"MIDI file not found: {midi_path}")
-            return False
+            return False, None
+
+        # Parse loop markers from MIDI
+        loop_info = MidiLoopParser.parse(midi_path)
 
         # Ensure output directory exists (handle race condition in parallel execution)
         try:
@@ -289,40 +481,41 @@ class MidiToOggConverter:
             fallback_path = output_path.with_suffix('.mid')
             shutil.copy2(midi_path, fallback_path)
             logger.warning(f"No converter available. Copied MIDI to {fallback_path}")
-            return False
+            return False, loop_info
 
         try:
+            success = False
             if self.converter == 'timidity':
-                return self._convert_with_timidity(midi_path, output_path, track_info)
+                success = self._convert_with_timidity(midi_path, output_path, track_info)
             elif self.converter == 'fluidsynth':
-                return self._convert_with_fluidsynth(midi_path, output_path, track_info)
+                success = self._convert_with_fluidsynth(midi_path, output_path, track_info)
             elif self.converter == 'ffmpeg':
-                return self._convert_with_ffmpeg(midi_path, output_path, track_info)
+                success = self._convert_with_ffmpeg(midi_path, output_path, track_info)
+
+            return success, loop_info
         except Exception as e:
             logger.error(f"Error converting {midi_path}: {e}")
-            return False
+            return False, loop_info
 
-        return False
+        return False, loop_info
 
     def _convert_with_timidity(self, midi_path: Path, output_path: Path,
                                 track_info: Optional[MidiTrackInfo]) -> bool:
-        """Convert using TiMidity++."""
-        # TiMidity outputs WAV, then we need to convert to OGG
-        wav_path = output_path.with_suffix('.wav')
-
+        """Convert using TiMidity++ with direct OGG Vorbis output for gapless looping."""
         # Volume scaling (timidity uses 0-800%, default 100%)
         volume_pct = 100
         if track_info:
             volume_pct = int((track_info.volume / 127.0) * 100)
 
-        # Convert MIDI to WAV (mono 44.1kHz 16-bit)
+        # Convert MIDI directly to OGG Vorbis (no WAV intermediate)
+        # This avoids encoder padding issues that cause gaps in looped playback
         # GBA had limited stereo and MIDI pan data causes imbalanced output
         # Using mono gives more faithful reproduction of original GBA audio
         cmd = [
             'timidity',
             str(midi_path),
-            '-Ow',  # Output WAV
-            '-o', str(wav_path),
+            '-Ov',  # Output OGG Vorbis directly
+            '-o', str(output_path),
             f'--volume={volume_pct}',
             '-s', '44100',  # Sample rate
             '--output-mono',  # Mono output (GBA had minimal stereo separation)
@@ -338,32 +531,11 @@ class MidiToOggConverter:
             logger.error(f"TiMidity failed: {result.stderr}")
             return False
 
-        # Convert WAV to OGG using ffmpeg or oggenc (preserve stereo)
-        if shutil.which('ffmpeg'):
-            ogg_cmd = [
-                'ffmpeg', '-y', '-i', str(wav_path),
-                '-c:a', 'libvorbis',
-                '-q:a', '6',
-                '-ac', '2',  # Force stereo (2 channels)
-                str(output_path)
-            ]
-        elif shutil.which('oggenc'):
-            ogg_cmd = ['oggenc', '-q', '6', '--downmix', '-o', str(output_path), str(wav_path)]
-        else:
-            logger.warning(f"No OGG encoder found. WAV file at {wav_path}")
-            return True  # WAV is usable, just not optimal
-
-        result = subprocess.run(ogg_cmd, capture_output=True, text=True)
-
-        # Clean up WAV
-        if result.returncode == 0 and wav_path.exists():
-            wav_path.unlink()
-
-        return result.returncode == 0
+        return True
 
     def _convert_with_fluidsynth(self, midi_path: Path, output_path: Path,
                                   track_info: Optional[MidiTrackInfo]) -> bool:
-        """Convert using FluidSynth."""
+        """Convert using FluidSynth (requires WAV intermediate, then oggenc)."""
         soundfont = self.soundfont_path or self._find_default_soundfont()
 
         if not soundfont:
@@ -395,25 +567,30 @@ class MidiToOggConverter:
             logger.error(f"FluidSynth failed: {result.stderr}")
             return False
 
-        # Convert to OGG (mono to stereo for consistency)
-        # GBA had limited stereo, so we downmix to mono then output as stereo
-        if shutil.which('ffmpeg'):
+        # Convert WAV to OGG using oggenc (preferred) or ffmpeg
+        # oggenc produces better loop-friendly output than ffmpeg
+        if shutil.which('oggenc'):
+            ogg_cmd = ['oggenc', '-q', '6', '--downmix', '-o', str(output_path), str(wav_path)]
+            result = subprocess.run(ogg_cmd, capture_output=True, text=True)
+        elif shutil.which('ffmpeg'):
             ogg_cmd = [
                 'ffmpeg', '-y', '-i', str(wav_path),
                 '-af', 'pan=mono|c0=0.5*c0+0.5*c1',  # Downmix to mono
                 '-c:a', 'libvorbis',
                 '-q:a', '6',
-                '-ac', '2',  # Output as stereo (duplicated mono)
+                '-ac', '1',  # Keep as mono
                 str(output_path)
             ]
             result = subprocess.run(ogg_cmd, capture_output=True, text=True)
+        else:
+            logger.warning(f"No OGG encoder found. WAV file at {wav_path}")
+            return True  # WAV is usable
 
-            if result.returncode == 0 and wav_path.exists():
-                wav_path.unlink()
+        # Clean up WAV
+        if result.returncode == 0 and wav_path.exists():
+            wav_path.unlink()
 
-            return result.returncode == 0
-
-        return True  # WAV is usable
+        return result.returncode == 0
 
     def _convert_with_ffmpeg(self, midi_path: Path, output_path: Path,
                               track_info: Optional[MidiTrackInfo]) -> bool:
@@ -447,7 +624,8 @@ class AudioDefinitionGenerator:
         self.output_dir = Path(output_dir)
         self.definitions_dir = self.output_dir / "Definitions" / "Audio"
 
-    def generate(self, tracks: Dict[str, MidiTrackInfo], audio_dir: Path) -> int:
+    def generate(self, tracks: Dict[str, MidiTrackInfo], audio_dir: Path,
+                 loop_info_cache: Optional[Dict[str, 'MidiLoopInfo']] = None) -> int:
         """
         Generate audio definitions from track info.
         Creates one JSON file per track, mirroring the Audio directory structure.
@@ -455,11 +633,13 @@ class AudioDefinitionGenerator:
         Args:
             tracks: Dict of track_id -> MidiTrackInfo
             audio_dir: Path to where audio files will be placed
+            loop_info_cache: Optional dict of track_id -> MidiLoopInfo for loop metadata
 
         Returns:
             Number of definitions generated
         """
         count = 0
+        loop_info_cache = loop_info_cache or {}
 
         for track_id, track_info in tracks.items():
             # Create definition file path mirroring audio structure
@@ -483,13 +663,20 @@ class AudioDefinitionGenerator:
             # Create human-readable name
             display_name = self._create_display_name(track_id)
 
+            # Get loop info if available
+            loop_info = loop_info_cache.get(track_id)
+            has_loop_markers = loop_info is not None and loop_info.has_loop
+
             # Determine if track should loop
-            should_loop = track_info.is_music and track_info.category not in [
-                AudioCategory.FANFARE,
-                AudioCategory.SFX_UI,
-                AudioCategory.SFX_BATTLE,
-                AudioCategory.SFX_ENVIRONMENT
-            ]
+            # Use MIDI loop markers as the source of truth, fall back to heuristics
+            should_loop = has_loop_markers or (
+                track_info.is_music and track_info.category not in [
+                    AudioCategory.FANFARE,
+                    AudioCategory.SFX_UI,
+                    AudioCategory.SFX_BATTLE,
+                    AudioCategory.SFX_ENVIRONMENT
+                ]
+            )
 
             # Audio file path relative to Assets
             audio_path = f"Audio/{category_path}/{track_id}.ogg"
@@ -504,6 +691,13 @@ class AudioDefinitionGenerator:
                 "fadeIn": 0.5 if track_info.is_music else 0.0,
                 "fadeOut": 0.5 if track_info.is_music else 0.0,
             }
+
+            # Add loop metadata if available (embedded in OGG, also stored in definition)
+            if has_loop_markers:
+                definition["loopStartSamples"] = loop_info.get_loop_start_samples(44100)
+                definition["loopLengthSamples"] = loop_info.get_loop_length_samples(44100)
+                definition["loopStartSec"] = round(loop_info.loop_start_sec, 3)
+                definition["loopEndSec"] = round(loop_info.loop_end_sec, 3)
 
             # Write individual definition file
             with open(def_path, 'w', encoding='utf-8') as f:
@@ -575,6 +769,9 @@ class AudioConverter:
             'skipped': 0
         }
 
+        # Cache loop info for generating audio definitions
+        self.loop_info_cache: Dict[str, MidiLoopInfo] = {}
+
     def convert_all(self,
                     include_music: bool = True,
                     include_sfx: bool = True,
@@ -623,10 +820,13 @@ class AudioConverter:
         else:
             self._convert_sequential(filtered_tracks)
 
-        # Generate definitions
+        # Generate definitions with loop info
         logger.info("Generating audio definitions...")
-        num_definitions = self.definition_generator.generate(filtered_tracks, self.audio_dir)
+        num_definitions = self.definition_generator.generate(
+            filtered_tracks, self.audio_dir, self.loop_info_cache
+        )
         logger.info(f"Generated {num_definitions} audio definitions")
+        logger.info(f"Tracks with loop markers: {len(self.loop_info_cache)}")
 
         # Summary
         logger.info(f"Conversion complete:")
@@ -660,7 +860,10 @@ class AudioConverter:
                 self.stats['skipped'] += 1
                 continue
 
-            success = self.converter.convert(midi_path, output_path, track_info)
+            success, loop_info = self.converter.convert(midi_path, output_path, track_info)
+            # Store loop info for audio definitions
+            if loop_info and loop_info.has_loop:
+                self.loop_info_cache[track_id] = loop_info
 
             if success:
                 self.stats['converted'] += 1
@@ -677,18 +880,21 @@ class AudioConverter:
             output_path = self.audio_dir / track_info.category.value / f"{track_id}.ogg"
 
             if not midi_path.exists():
-                return ('skipped', track_id)
+                return ('skipped', track_id, None)
 
-            success = self.converter.convert(midi_path, output_path, track_info)
-            return ('converted' if success else 'failed', track_id)
+            success, loop_info = self.converter.convert(midi_path, output_path, track_info)
+            return ('converted' if success else 'failed', track_id, loop_info)
 
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             futures = {executor.submit(convert_single, item): item[0]
                       for item in tracks.items()}
 
             for future in as_completed(futures):
-                status, track_id = future.result()
+                status, track_id, loop_info = future.result()
                 self.stats[status] += 1
+                # Store loop info for audio definitions
+                if loop_info and loop_info.has_loop:
+                    self.loop_info_cache[track_id] = loop_info
 
                 if self.stats['converted'] % 50 == 0:
                     logger.info(f"Progress: {self.stats['converted']}/{self.stats['total']} converted")

@@ -3,7 +3,11 @@
   "displayName": "Berry Blender",
   "audioPath": "Audio/SFX/Battle/se_berry_blender.ogg",
   "volume": 0.709,
-  "loop": false,
+  "loop": true,
   "fadeIn": 0.0,
-  "fadeOut": 0.0
+  "fadeOut": 0.0,
+  "loopStartSamples": 0,
+  "loopLengthSamples": 176400,
+  "loopStartSec": 0.0,
+  "loopEndSec": 4.0
 }

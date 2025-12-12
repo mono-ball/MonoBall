@@ -437,8 +437,9 @@ public class MonoBallFrameworkGame : Microsoft.Xna.Framework.Game, IAsyncDisposa
         pipeline.AddStep(new CreateMapInitializerStep());
         pipeline.AddStep(new InitializeBehaviorSystemsStep());
 
-        // Phase 5: Initialize map popup system (BEFORE loading initial map so it can catch the event)
+        // Phase 5: Initialize map popup and music systems (BEFORE loading initial map so they can catch events)
         pipeline.AddStep(new InitializeMapPopupStep());
+        pipeline.AddStep(new InitializeMapMusicStep());
 
         // Phase 6: Load map and create player
         pipeline.AddStep(new LoadInitialMapStep());

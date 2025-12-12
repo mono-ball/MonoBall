@@ -3,7 +3,11 @@
   "displayName": "Caught",
   "audioPath": "Audio/Music/Fanfares/mus_caught.ogg",
   "volume": 0.63,
-  "loop": false,
+  "loop": true,
   "fadeIn": 0.5,
-  "fadeOut": 0.5
+  "fadeOut": 0.5,
+  "loopStartSamples": 9449,
+  "loopLengthSamples": 604799,
+  "loopStartSec": 0.214,
+  "loopEndSec": 13.929
 }

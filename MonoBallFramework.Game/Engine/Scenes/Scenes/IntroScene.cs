@@ -1,7 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 
 namespace MonoBallFramework.Game.Engine.Scenes.Scenes;
 
@@ -33,10 +32,7 @@ public class IntroScene : SceneBase
     private readonly SceneManager _sceneManager;
 
     private float _elapsedTime;
-    private bool _isSkipping;
-    private KeyboardState _lastKeyboardState;
     private Texture2D? _logoTexture;
-    private MouseState _lastMouseState;
     private Texture2D? _pixel;
     private SpriteBatch? _spriteBatch;
     private bool _transitionStarted;
@@ -95,9 +91,6 @@ public class IntroScene : SceneBase
         {
             _logger.LogError(ex, "Failed to load logo texture");
         }
-
-        _lastKeyboardState = Keyboard.GetState();
-        _lastMouseState = Mouse.GetState();
     }
 
     /// <inheritdoc />
@@ -105,33 +98,8 @@ public class IntroScene : SceneBase
     {
         float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-        // Check for skip input (any key or mouse click)
-        KeyboardState currentKeyboard = Keyboard.GetState();
-        MouseState currentMouse = Mouse.GetState();
-
-        bool keyPressed = currentKeyboard.GetPressedKeyCount() > 0 && _lastKeyboardState.GetPressedKeyCount() == 0;
-        bool mouseClicked = (currentMouse.LeftButton == ButtonState.Pressed && _lastMouseState.LeftButton == ButtonState.Released) ||
-                            (currentMouse.RightButton == ButtonState.Pressed && _lastMouseState.RightButton == ButtonState.Released);
-
-        if ((keyPressed || mouseClicked) && !_isSkipping && _elapsedTime > 0.3f) // Small delay before allowing skip
-        {
-            _isSkipping = true;
-            _logger.LogDebug("Intro skip requested");
-        }
-
-        _lastKeyboardState = currentKeyboard;
-        _lastMouseState = currentMouse;
-
         // Update elapsed time
-        if (_isSkipping)
-        {
-            // Fast-forward to end when skipping
-            _elapsedTime = TotalDuration;
-        }
-        else
-        {
-            _elapsedTime += deltaTime;
-        }
+        _elapsedTime += deltaTime;
 
         // Check if intro is complete
         if (_elapsedTime >= TotalDuration && !_transitionStarted)

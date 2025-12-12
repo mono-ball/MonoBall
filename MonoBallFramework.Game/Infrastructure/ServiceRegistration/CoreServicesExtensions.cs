@@ -132,6 +132,14 @@ public static class CoreServicesExtensions
             ServiceLifetime.Singleton // In-Memory DB can be singleton
         );
 
+        // Register DbContextFactory for services that need to create contexts on-demand
+        // This is used by AudioRegistry (singleton) to avoid holding a scoped context
+        services.AddSingleton<IDbContextFactory<GameDataContext>>(sp =>
+        {
+            var options = sp.GetRequiredService<DbContextOptions<GameDataContext>>();
+            return new GameDataContextFactory(options);
+        });
+
         // Data loading and services
         services.AddSingleton<GameDataLoader>();
         services.AddSingleton<NpcDefinitionService>();

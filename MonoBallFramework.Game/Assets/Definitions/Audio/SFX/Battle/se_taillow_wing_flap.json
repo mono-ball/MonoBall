@@ -3,7 +3,11 @@
   "displayName": "Taillow Wing Flap",
   "audioPath": "Audio/SFX/Battle/se_taillow_wing_flap.ogg",
   "volume": 0.827,
-  "loop": false,
+  "loop": true,
   "fadeIn": 0.0,
-  "fadeOut": 0.0
+  "fadeOut": 0.0,
+  "loopStartSamples": 0,
+  "loopLengthSamples": 24054,
+  "loopStartSec": 0.0,
+  "loopEndSec": 0.545
 }

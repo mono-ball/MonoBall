@@ -117,6 +117,9 @@ public class GameplayScene : SceneBase
         // Update all systems using scaled delta time
         // When paused (TimeScale=0), DeltaTime will be 0 and systems won't advance
         _context.SystemManager.Update(_context.World, _context.GameTime.DeltaTime);
+
+        // Update audio system (handles crossfading, looping sound cleanup, etc.)
+        _context.AudioService?.Update(_context.GameTime.DeltaTime);
     }
 
     /// <summary>

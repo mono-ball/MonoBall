@@ -3,7 +3,11 @@
   "displayName": "M Gust",
   "audioPath": "Audio/SFX/Battle/se_m_gust.ogg",
   "volume": 0.866,
-  "loop": false,
+  "loop": true,
   "fadeIn": 0.0,
-  "fadeOut": 0.0
+  "fadeOut": 0.0,
+  "loopStartSamples": 17640,
+  "loopLengthSamples": 35280,
+  "loopStartSec": 0.4,
+  "loopEndSec": 1.2
 }

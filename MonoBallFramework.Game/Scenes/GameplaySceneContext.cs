@@ -1,4 +1,5 @@
 using Arch.Core;
+using MonoBallFramework.Game.Engine.Audio.Services;
 using MonoBallFramework.Game.Engine.Scenes;
 using MonoBallFramework.Game.Engine.Systems.Management;
 using MonoBallFramework.Game.GameSystems.Services;
@@ -39,6 +40,7 @@ public class GameplaySceneContext
         InputManager inputManager,
         PerformanceMonitor performanceMonitor,
         IGameTimeService gameTime,
+        IAudioService? audioService = null,
         SceneManager? sceneManager = null
     )
     {
@@ -49,6 +51,7 @@ public class GameplaySceneContext
         InputManager = inputManager ?? throw new ArgumentNullException(nameof(inputManager));
         PerformanceMonitor = performanceMonitor ?? throw new ArgumentNullException(nameof(performanceMonitor));
         GameTime = gameTime ?? throw new ArgumentNullException(nameof(gameTime));
+        AudioService = audioService;
         SceneManager = sceneManager;
     }
 
@@ -91,6 +94,11 @@ public class GameplaySceneContext
     ///     Gets the scene manager (optional, for scene stack management).
     /// </summary>
     public SceneManager? SceneManager { get; }
+
+    /// <summary>
+    ///     Gets the audio service for music and sound effects (optional).
+    /// </summary>
+    public IAudioService? AudioService { get; }
 }
 
 

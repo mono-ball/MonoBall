@@ -5,5 +5,9 @@
   "volume": 0.591,
   "loop": true,
   "fadeIn": 0.5,
-  "fadeOut": 0.5
+  "fadeOut": 0.5,
+  "loopStartSamples": 157970,
+  "loopLengthSamples": 315940,
+  "loopStartSec": 3.582,
+  "loopEndSec": 10.746
 }

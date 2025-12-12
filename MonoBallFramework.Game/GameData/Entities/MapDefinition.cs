@@ -47,10 +47,11 @@ public class MapDefinition
     public string TiledDataPath { get; set; } = string.Empty;
 
     /// <summary>
-    ///     Background music track ID.
+    ///     Background music track ID (e.g., "base:audio:music/towns/mus_littleroot").
     /// </summary>
     [MaxLength(100)]
-    public string? MusicId { get; set; }
+    [Column(TypeName = "nvarchar(100)")]
+    public GameAudioId? MusicId { get; set; }
 
     /// <summary>
     ///     Default weather (e.g., "clear", "rain", "sandstorm").

@@ -43,6 +43,9 @@
     <PackageReference Include="TextCopy" Version="6.2.1" />
     <!-- Compression -->
     <PackageReference Include="ZstdSharp.Port" Version="0.8.6" />
+    <!-- Audio - NAudio for OGG playback -->
+    <PackageReference Include="NAudio" Version="2.2.1" />
+    <PackageReference Include="NAudio.Vorbis" Version="1.5.0" />
   </ItemGroup>
   <ItemGroup>
     <!-- Copy all assets to the output directory -->

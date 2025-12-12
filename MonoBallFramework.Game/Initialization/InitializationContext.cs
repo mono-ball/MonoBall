@@ -140,6 +140,11 @@ public class InitializationContext
     public Engine.Scenes.Services.IMapPopupOrchestrator? MapPopupOrchestrator { get; set; }
 
     /// <summary>
+    ///     Gets or sets the map music orchestrator (created during map music initialization).
+    /// </summary>
+    public Engine.Audio.Services.MapMusicOrchestrator? MapMusicOrchestrator { get; set; }
+
+    /// <summary>
     ///     Gets or sets the rendering service (shared SpriteBatch, created in Phase 2).
     /// </summary>
     public IRenderingService? RenderingService { get; set; }

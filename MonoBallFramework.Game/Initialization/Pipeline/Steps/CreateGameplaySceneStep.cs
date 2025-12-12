@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using MonoBallFramework.Game.Engine.Audio.Services;
 using MonoBallFramework.Game.Engine.Core.Events;
 using MonoBallFramework.Game.Engine.Scenes;
 using MonoBallFramework.Game.Engine.Systems.Pooling;
@@ -48,6 +49,11 @@ public class CreateGameplaySceneStep : InitializationStepBase
         ILogger<GameplayScene> gameplaySceneLogger =
             context.LoggerFactory.CreateLogger<GameplayScene>();
 
+        // Get optional services for context and overlays
+        IAudioService? audioService = context.Services.GetService<IAudioService>();
+        EntityPoolManager? poolManager = context.Services.GetService<EntityPoolManager>();
+        IEventBus? eventBus = context.Services.GetService<IEventBus>();
+
         // Create context facade to group dependencies (reduces constructor params from 11 to 4)
         var sceneContext = new GameplaySceneContext(
             context.World,
@@ -57,12 +63,9 @@ public class CreateGameplaySceneStep : InitializationStepBase
             context.InputManager,
             context.PerformanceMonitor,
             context.GameTime,
+            audioService,
             context.SceneManager
         );
-
-        // Get optional services for overlays
-        EntityPoolManager? poolManager = context.Services.GetService<EntityPoolManager>();
-        IEventBus? eventBus = context.Services.GetService<IEventBus>();
 
         var gameplayScene = new GameplayScene(
             context.GraphicsDevice,

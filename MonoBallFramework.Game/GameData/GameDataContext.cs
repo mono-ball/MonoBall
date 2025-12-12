@@ -6,6 +6,26 @@ using MonoBallFramework.Game.GameData.ValueConverters;
 namespace MonoBallFramework.Game.GameData;
 
 /// <summary>
+///     Factory for creating GameDataContext instances on-demand.
+///     Used by singleton services (like AudioRegistry) that need database access
+///     without holding a context reference for their entire lifetime.
+/// </summary>
+public class GameDataContextFactory : IDbContextFactory<GameDataContext>
+{
+    private readonly DbContextOptions<GameDataContext> _options;
+
+    public GameDataContextFactory(DbContextOptions<GameDataContext> options)
+    {
+        _options = options;
+    }
+
+    public GameDataContext CreateDbContext()
+    {
+        return new GameDataContext(_options);
+    }
+}
+
+/// <summary>
 ///     EF Core DbContext for game data definitions (NPCs, trainers, maps, etc.).
 ///     Uses in-memory database for fast, read-only access.
 /// </summary>
@@ -27,6 +47,9 @@ public class GameDataContext : DbContext
     // Map entities
     public DbSet<MapDefinition> Maps { get; set; } = null!;
 
+    // Audio entities
+    public DbSet<AudioDefinition> AudioDefinitions { get; set; } = null!;
+
     // Popup entities
     public DbSet<PopupTheme> PopupThemes { get; set; } = null!;
     public DbSet<MapSection> MapSections { get; set; } = null!;
@@ -38,6 +61,7 @@ public class GameDataContext : DbContext
         ConfigureNpcDefinition(modelBuilder);
         ConfigureTrainerDefinition(modelBuilder);
         ConfigureMapDefinition(modelBuilder);
+        ConfigureAudioDefinition(modelBuilder);
         ConfigurePopupTheme(modelBuilder);
         ConfigureMapSection(modelBuilder);
     }
@@ -112,6 +136,9 @@ public class GameDataContext : DbContext
             // Value converter for RegionMapSection (GameMapSectionId)
             entity.Property(m => m.RegionMapSection).HasConversion(new NullableGameMapSectionIdValueConverter());
 
+            // Value converter for MusicId (GameAudioId)
+            entity.Property(m => m.MusicId).HasConversion(new NullableGameAudioIdValueConverter());
+
             // TiledDataJson stores complete Tiled map data
             // Will be deserialized on-demand by MapLoader
         });
@@ -140,6 +167,28 @@ public class GameDataContext : DbContext
                 .WithOne(s => s.Theme)
                 .HasForeignKey(s => s.ThemeId)
                 .OnDelete(DeleteBehavior.Restrict); // Prevent deleting themes with sections
+        });
+    }
+
+    /// <summary>
+    ///     Configure AudioDefinition entity.
+    /// </summary>
+    private void ConfigureAudioDefinition(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<AudioDefinition>(entity =>
+        {
+            entity.HasKey(a => a.AudioId);
+
+            // Value converter for GameAudioId
+            entity.Property(a => a.AudioId).HasConversion(new GameAudioIdValueConverter());
+
+            // Indexes for common queries
+            entity.HasIndex(a => a.Category);
+            entity.HasIndex(a => a.Subcategory);
+            entity.HasIndex(a => a.DisplayName);
+
+            // Composite index for category + subcategory lookups
+            entity.HasIndex(a => new { a.Category, a.Subcategory });
         });
     }
 

@@ -3,7 +3,11 @@
   "displayName": "Downpour",
   "audioPath": "Audio/SFX/Environment/se_downpour.ogg",
   "volume": 0.787,
-  "loop": false,
+  "loop": true,
   "fadeIn": 0.0,
-  "fadeOut": 0.0
+  "fadeOut": 0.0,
+  "loopStartSamples": 12027,
+  "loopLengthSamples": 18040,
+  "loopStartSec": 0.273,
+  "loopEndSec": 0.682
 }

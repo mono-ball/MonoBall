@@ -24,10 +24,10 @@ public class MapPathResolver
     {
         if (_assetProvider is AssetManager assetManager)
         {
-            return Path.Combine(assetManager.AssetRoot, "Data", "Maps");
+            return Path.Combine(assetManager.AssetRoot, "Definitions", "Maps");
         }
 
-        return Path.Combine(Directory.GetCurrentDirectory(), "Assets", "Data", "Maps");
+        return Path.Combine(Directory.GetCurrentDirectory(), "Assets", "Definitions", "Maps");
     }
 
     /// <summary>
