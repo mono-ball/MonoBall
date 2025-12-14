@@ -199,10 +199,12 @@ public static class CoreServicesExtensions
     /// </summary>
     public static IServiceCollection AddModdingServices(
         this IServiceCollection services,
-        string modsDirectory = "Mods"
+        string? gameBasePath = null
     )
     {
-        ModdingExtensions.AddModdingServices(services, modsDirectory);
+        // Use AppContext.BaseDirectory if no path provided (same as AssetPathResolver)
+        string basePath = gameBasePath ?? AppContext.BaseDirectory;
+        ModdingExtensions.AddModdingServices(services, basePath);
         return services;
     }
 }

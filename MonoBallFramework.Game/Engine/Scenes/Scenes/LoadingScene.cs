@@ -1,4 +1,3 @@
-using System.Reflection;
 using FontStashSharp;
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
@@ -76,82 +75,25 @@ public class LoadingScene : SceneBase
         _pixel = new Texture2D(GraphicsDevice, 1, 1);
         _pixel.SetData(new[] { Color.White });
 
-        // Initialize FontStashSharp with embedded font
+        // Initialize FontStashSharp with Pokemon font only - no system font fallback
         _fontSystem = new FontSystem();
-        bool fontLoaded = false;
+        const string pokemonFontPath = "Assets/Fonts/pokemon.ttf";
 
-        // Try to load embedded font, fall back to a basic approach
-        try
-        {
-            // Look for any TTF font in any loaded assembly
-            foreach (Assembly loadedAssembly in AppDomain.CurrentDomain.GetAssemblies())
-            {
-                try
-                {
-                    string[] names = loadedAssembly.GetManifestResourceNames();
-                    string? fontResource = names.FirstOrDefault(n =>
-                        n.EndsWith(".ttf", StringComparison.OrdinalIgnoreCase)
-                    );
-                    if (fontResource != null)
-                    {
-                        using Stream? stream = loadedAssembly.GetManifestResourceStream(
-                            fontResource
-                        );
-                        if (stream != null)
-                        {
-                            byte[] fontData = new byte[stream.Length];
-                            stream.ReadExactly(fontData, 0, fontData.Length);
-                            _fontSystem.AddFont(fontData);
-                            fontLoaded = true;
-                            Logger.LogDebug(
-                                "Loaded font from {Assembly}: {Resource}",
-                                loadedAssembly.GetName().Name,
-                                fontResource
-                            );
-                            break;
-                        }
-                    }
-                }
-                catch
-                {
-                    // Skip assemblies that can't be inspected
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            Logger.LogWarning(ex, "Failed to load embedded font, using system default");
-        }
-
-        // If no font was loaded, try system fonts
-        if (!fontLoaded)
+        if (File.Exists(pokemonFontPath))
         {
             try
             {
-                // Try common system font paths
-                string[] systemFontPaths = new[]
-                {
-                    "/System/Library/Fonts/Helvetica.ttc", // macOS
-                    "/System/Library/Fonts/SFNSText.ttf", // macOS
-                    "C:\\Windows\\Fonts\\segoeui.ttf", // Windows
-                    "C:\\Windows\\Fonts\\arial.ttf", // Windows
-                    "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", // Linux
-                };
-
-                foreach (string fontPath in systemFontPaths)
-                {
-                    if (File.Exists(fontPath))
-                    {
-                        _fontSystem.AddFont(File.ReadAllBytes(fontPath));
-                        Logger.LogDebug("Loaded system font: {FontPath}", fontPath);
-                        break;
-                    }
-                }
+                _fontSystem.AddFont(File.ReadAllBytes(pokemonFontPath));
+                Logger.LogDebug("Loaded Pokemon font from: {FontPath}", pokemonFontPath);
             }
             catch (Exception ex)
             {
-                Logger.LogWarning(ex, "Failed to load system font");
+                Logger.LogWarning(ex, "Failed to load Pokemon font");
             }
+        }
+        else
+        {
+            Logger.LogWarning("Pokemon font not found at: {FontPath}", pokemonFontPath);
         }
 
         _font = _fontSystem.GetFont(FontSize);

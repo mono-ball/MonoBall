@@ -87,7 +87,7 @@ public static class TiledMapLoader
     private static TmxDocument DeserializeAndValidate(string json, string mapPath)
     {
         TiledJsonMap tiledMap =
-            JsonSerializer.Deserialize<TiledJsonMap>(json, JsonOptions)
+            JsonSerializer.Deserialize(json, TiledJsonContext.Default.TiledJsonMap)
             ?? throw new JsonException($"Failed to deserialize Tiled map: {mapPath}");
 
         TmxDocument tmxDoc = ConvertToTmxDocument(tiledMap, mapPath);
@@ -209,9 +209,9 @@ public static class TiledMapLoader
         try
         {
             string json = File.ReadAllText(tilesetPath);
-            TiledJsonTileset? tiledTileset = JsonSerializer.Deserialize<TiledJsonTileset>(
+            TiledJsonTileset? tiledTileset = JsonSerializer.Deserialize(
                 json,
-                JsonOptions
+                TiledJsonContext.Default.TiledJsonTileset
             );
 
             if (tiledTileset != null)
@@ -538,14 +538,29 @@ public static class TiledMapLoader
 
         if (properties == null)
         {
+            _logger?.LogDebug("ConvertProperties: properties is null");
             return result;
         }
 
+        _logger?.LogDebug("ConvertProperties: Processing {Count} properties", properties.Count);
+
         foreach (TiledJsonProperty prop in properties)
         {
-            if (prop.Value != null)
+            // JsonElement with Undefined kind means it wasn't present in JSON
+            if (prop.Value.ValueKind != JsonValueKind.Undefined)
             {
                 result[prop.Name] = prop.Value;
+
+                // Log connection properties specifically for debugging
+                if (prop.Name.StartsWith("connection_"))
+                {
+                    _logger?.LogInformation(
+                        "ConvertProperties: Found connection property '{Name}' with type='{Type}', valueKind={ValueKind}",
+                        prop.Name,
+                        prop.Type,
+                        prop.Value.ValueKind
+                    );
+                }
             }
         }
 

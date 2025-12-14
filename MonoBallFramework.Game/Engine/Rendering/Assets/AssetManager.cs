@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Text.Json;
 using FontStashSharp;
@@ -34,6 +35,13 @@ public class AssetManager(
     private readonly Dictionary<string, FontSystem> _fontSystems = new();
     private readonly Dictionary<string, byte[]> _fontDataCache = new();
 
+    // Async texture preloading - file bytes ready for GPU upload
+    private readonly ConcurrentQueue<PendingTexture> _pendingTextures = new();
+    private readonly ConcurrentDictionary<string, Task> _loadingTextures = new();
+
+    // Maximum textures to upload to GPU per frame (prevents stutter)
+    private const int MaxTextureUploadsPerFrame = 2;
+
     private bool _disposed;
 
     /// <summary>
@@ -56,6 +64,7 @@ public class AssetManager(
 
     /// <summary>
     ///     Loads a texture from a PNG file and caches it.
+    ///     If the texture was preloaded asynchronously, uses the preloaded data instead of reading from disk.
     /// </summary>
     /// <param name="id">Unique identifier for the texture.</param>
     /// <param name="relativePath">Path relative to asset root.</param>
@@ -64,6 +73,37 @@ public class AssetManager(
         ArgumentException.ThrowIfNullOrEmpty(id);
         ArgumentException.ThrowIfNullOrEmpty(relativePath);
 
+        // Already loaded - skip
+        if (HasTexture(id))
+        {
+            return;
+        }
+
+        // Check if texture is being preloaded - wait for it to complete
+        if (_loadingTextures.TryGetValue(id, out Task? loadTask))
+        {
+            _logger?.LogDebug("Waiting for preloading texture: {Id}", id);
+            loadTask.Wait(TimeSpan.FromSeconds(5)); // Wait up to 5 seconds
+        }
+
+        // Check if preloaded data is available in the pending queue
+        // Drain matching entries from the queue
+        if (TryGetPreloadedTexture(id, out byte[]? preloadedData) && preloadedData != null)
+        {
+            var sw = Stopwatch.StartNew();
+
+            using var memoryStream = new MemoryStream(preloadedData);
+            var texture = Texture2D.FromStream(_graphicsDevice, memoryStream);
+
+            sw.Stop();
+            double elapsedMs = sw.Elapsed.TotalMilliseconds;
+
+            _textures.AddOrUpdate(id, texture);
+            _logger?.LogDebug("Used preloaded texture data: {Id} ({ElapsedMs:F1}ms GPU upload)", id, elapsedMs);
+            return;
+        }
+
+        // Fallback to synchronous file load
         string normalizedRelative = relativePath.Replace('/', Path.DirectorySeparatorChar);
         string fullPath = Path.Combine(AssetRoot, normalizedRelative);
 
@@ -86,24 +126,59 @@ public class AssetManager(
             }
         }
 
-        var sw = Stopwatch.StartNew();
+        var swSync = Stopwatch.StartNew();
 
         using FileStream fileStream = File.OpenRead(fullPath);
-        var texture = Texture2D.FromStream(_graphicsDevice, fileStream);
+        var textureSync = Texture2D.FromStream(_graphicsDevice, fileStream);
 
-        sw.Stop();
-        double elapsedMs = sw.Elapsed.TotalMilliseconds;
+        swSync.Stop();
+        double elapsedMsSync = swSync.Elapsed.TotalMilliseconds;
 
-        _textures.AddOrUpdate(id, texture); // LRU cache auto-evicts if needed
+        _textures.AddOrUpdate(id, textureSync); // LRU cache auto-evicts if needed
 
         // Log texture loading with timing
-        _logger?.LogTextureLoaded(id, elapsedMs, texture.Width, texture.Height);
+        _logger?.LogTextureLoaded(id, elapsedMsSync, textureSync.Width, textureSync.Height);
 
         // Warn about slow texture loads (>100ms)
-        if (elapsedMs > 100.0)
+        if (elapsedMsSync > 100.0)
         {
-            _logger?.LogSlowTextureLoad(id, elapsedMs);
+            _logger?.LogSlowTextureLoad(id, elapsedMsSync);
         }
+    }
+
+    /// <summary>
+    ///     Tries to find preloaded texture data in the pending queue.
+    ///     Removes the entry from the queue if found.
+    /// </summary>
+    private bool TryGetPreloadedTexture(string id, out byte[]? data)
+    {
+        data = null;
+
+        // We need to search through the queue - create a temporary list
+        var tempList = new List<PendingTexture>();
+        bool found = false;
+
+        while (_pendingTextures.TryDequeue(out PendingTexture pending))
+        {
+            if (pending.Id == id && !found)
+            {
+                data = pending.Data;
+                found = true;
+                // Don't re-queue this one
+            }
+            else
+            {
+                tempList.Add(pending);
+            }
+        }
+
+        // Re-queue items we didn't use
+        foreach (var item in tempList)
+        {
+            _pendingTextures.Enqueue(item);
+        }
+
+        return found;
     }
 
     /// <summary>
@@ -181,6 +256,118 @@ public class AssetManager(
     {
         ArgumentException.ThrowIfNullOrEmpty(id);
         return _fontSystems.ContainsKey(id);
+    }
+
+    /// <summary>
+    ///     Gets the number of textures waiting to be uploaded to GPU.
+    /// </summary>
+    public int PendingTextureCount => _pendingTextures.Count;
+
+    /// <summary>
+    ///     Checks if a texture is currently being preloaded asynchronously.
+    /// </summary>
+    public bool IsTextureLoading(string id)
+    {
+        return _loadingTextures.ContainsKey(id);
+    }
+
+    /// <summary>
+    ///     Preloads a texture asynchronously - reads file bytes on background thread.
+    ///     Call ProcessTextureQueue() from Update loop to upload to GPU incrementally.
+    /// </summary>
+    /// <param name="id">Unique identifier for the texture.</param>
+    /// <param name="relativePath">Path relative to asset root.</param>
+    public void PreloadTextureAsync(string id, string relativePath)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(id);
+        ArgumentException.ThrowIfNullOrEmpty(relativePath);
+
+        // Skip if already loaded, already loading, or already queued
+        if (HasTexture(id) || _loadingTextures.ContainsKey(id))
+        {
+            return;
+        }
+
+        string normalizedRelative = relativePath.Replace('/', Path.DirectorySeparatorChar);
+        string fullPath = Path.Combine(AssetRoot, normalizedRelative);
+
+        if (!File.Exists(fullPath))
+        {
+            string? fallbackPath = ResolveFallbackTexturePath(id, normalizedRelative);
+            if (fallbackPath is not null && File.Exists(fallbackPath))
+            {
+                fullPath = fallbackPath;
+            }
+            else
+            {
+                _logger?.LogWarning("Texture file not found for async preload: {Path}", fullPath);
+                return;
+            }
+        }
+
+        // Start async file read on background thread
+        string pathToLoad = fullPath;
+        var loadTask = Task.Run(async () =>
+        {
+            try
+            {
+                byte[] data = await File.ReadAllBytesAsync(pathToLoad);
+                _pendingTextures.Enqueue(new PendingTexture(id, data));
+                _logger?.LogDebug("Texture bytes loaded for preload: {Id} ({Size:N0} bytes)", id, data.Length);
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "Failed to preload texture bytes: {Id}", id);
+            }
+            finally
+            {
+                _loadingTextures.TryRemove(id, out _);
+            }
+        });
+
+        _loadingTextures.TryAdd(id, loadTask);
+    }
+
+    /// <summary>
+    ///     Processes pending textures by uploading them to GPU.
+    ///     Call this from the Update loop to incrementally upload textures.
+    ///     IMPORTANT: Must be called from the main thread (GPU operations).
+    /// </summary>
+    /// <returns>Number of textures uploaded this call.</returns>
+    public int ProcessTextureQueue()
+    {
+        int uploaded = 0;
+
+        while (uploaded < MaxTextureUploadsPerFrame && _pendingTextures.TryDequeue(out PendingTexture pending))
+        {
+            // Skip if texture was loaded synchronously while waiting
+            if (HasTexture(pending.Id))
+            {
+                continue;
+            }
+
+            try
+            {
+                var sw = Stopwatch.StartNew();
+
+                using var memoryStream = new MemoryStream(pending.Data);
+                var texture = Texture2D.FromStream(_graphicsDevice, memoryStream);
+
+                sw.Stop();
+                double elapsedMs = sw.Elapsed.TotalMilliseconds;
+
+                _textures.AddOrUpdate(pending.Id, texture);
+                uploaded++;
+
+                _logger?.LogTextureLoaded(pending.Id, elapsedMs, texture.Width, texture.Height);
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "Failed to upload preloaded texture to GPU: {Id}", pending.Id);
+            }
+        }
+
+        return uploaded;
     }
 
     /// <summary>
@@ -344,3 +531,10 @@ public class AssetManager(
         return removed;
     }
 }
+
+/// <summary>
+///     Represents a texture that has been loaded from disk and is waiting for GPU upload.
+/// </summary>
+/// <param name="Id">Texture identifier.</param>
+/// <param name="Data">Raw image bytes (PNG/etc.).</param>
+internal readonly record struct PendingTexture(string Id, byte[] Data);

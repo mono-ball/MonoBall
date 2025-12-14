@@ -1,0 +1,383 @@
+using Arch.Core;
+using Arch.Core.Extensions;
+using Microsoft.Extensions.Logging;
+using MonoBallFramework.Game.Ecs.Components;
+using MonoBallFramework.Game.Ecs.Components.Maps;
+using MonoBallFramework.Game.Ecs.Components.Rendering;
+using MonoBallFramework.Game.Ecs.Components.Tiles;
+using MonoBallFramework.Game.Engine.Rendering.Assets;
+using MonoBallFramework.Game.Engine.Systems.BulkOperations;
+using MonoBallFramework.Game.Engine.Systems.Management;
+using MonoBallFramework.Game.GameData.MapLoading.Tiled.Services;
+using MonoBallFramework.Game.GameSystems.Spatial;
+using MonoBallFramework.Game.Systems;
+
+namespace MonoBallFramework.Game.GameData.MapLoading.Tiled.Deferred;
+
+/// <summary>
+///     Applies prepared map data to create ECS entities on the main thread.
+///     This is the fast part - all heavy computation already done on background thread.
+/// </summary>
+public class MapEntityApplier
+{
+    private readonly ILogger<MapEntityApplier>? _logger;
+    private readonly SystemManager? _systemManager;
+    private readonly IAssetProvider? _assetProvider;
+    private readonly TilesetLoader? _tilesetLoader;
+    private readonly Lazy<MapLifecycleManager>? _lifecycleManager;
+
+    public MapEntityApplier(
+        SystemManager? systemManager = null,
+        Func<MapLifecycleManager>? lifecycleManagerFactory = null,
+        IAssetProvider? assetProvider = null,
+        TilesetLoader? tilesetLoader = null,
+        ILogger<MapEntityApplier>? logger = null)
+    {
+        _systemManager = systemManager;
+        _lifecycleManager = lifecycleManagerFactory != null
+            ? new Lazy<MapLifecycleManager>(lifecycleManagerFactory)
+            : null;
+        _assetProvider = assetProvider;
+        _tilesetLoader = tilesetLoader;
+        _logger = logger;
+    }
+
+    /// <summary>
+    ///     Applies prepared map data to create all entities.
+    ///     MUST be called on the main thread.
+    /// </summary>
+    /// <returns>The map info entity.</returns>
+    public Entity ApplyPreparedMap(World world, PreparedMapData data)
+    {
+        var sw = System.Diagnostics.Stopwatch.StartNew();
+
+        _logger?.LogDebug(
+            "ApplyPreparedMap: Applying map {MapId}, Tiles={TileCount}",
+            data.MapId.Value,
+            data.Tiles.Count
+        );
+
+        // 0. Ensure all tileset textures are loaded (CRITICAL for rendering!)
+        EnsureTexturesLoaded(data);
+
+        // 1. Create map info entity with MapWorldPosition (critical for streaming)
+        Entity mapInfoEntity = CreateMapInfoEntity(world, data);
+
+        // 2. Create TilesetInfo entities (CRITICAL - missing this breaks rendering!)
+        CreateTilesetInfoEntities(world, data);
+
+        // 3. Bulk create tile entities (the fast part!)
+        var tileEntities = CreateTileEntities(world, data);
+
+        // 3. Register with lifecycle manager for cleanup
+        _lifecycleManager?.Value.RegisterMapTiles(data.MapId, tileEntities);
+
+        // 4. Collect tileset texture IDs for lifecycle manager
+        var tilesetTextureIds = new HashSet<string>();
+        foreach (var tileset in data.Tilesets)
+        {
+            tilesetTextureIds.Add(tileset.TilesetId);
+        }
+
+        _lifecycleManager?.Value.RegisterMap(
+            data.MapId,
+            data.MapName,
+            tilesetTextureIds,
+            new HashSet<string>() // Sprite textures handled separately
+        );
+
+        // 5. Add tiles to spatial hash for rendering (avoids full rebuild)
+        if (_systemManager != null && tileEntities.Count > 0)
+        {
+            SpatialHashSystem? spatialHash = _systemManager.GetSystem<SpatialHashSystem>();
+            if (spatialHash != null)
+            {
+                spatialHash.AddMapTiles(data.MapId, tileEntities);
+                _logger?.LogDebug(
+                    "Added {TileCount} tiles to spatial hash for map {MapId}",
+                    tileEntities.Count,
+                    data.MapId.Value
+                );
+            }
+        }
+
+        sw.Stop();
+        _logger?.LogDebug(
+            "Applied prepared map {MapId}: {TileCount} tiles in {ElapsedMs:F2}ms",
+            data.MapId.Value,
+            tileEntities.Count,
+            sw.Elapsed.TotalMilliseconds);
+
+        return mapInfoEntity;
+    }
+
+    private Entity CreateMapInfoEntity(World world, PreparedMapData data)
+    {
+        // MapInfo constructor: (mapId, mapName, width, height, tileSize)
+        // TileWidth and TileHeight should be the same for now, use TileWidth
+        // Also add MapWarps spatial index for warp lookups (same as MapMetadataFactory)
+        Entity entity = world.Create(
+            new MapInfo(
+                data.MapId,
+                data.MapName,
+                data.MapWidth,
+                data.MapHeight,
+                data.TileWidth
+            ),
+            MapWarps.Create()
+        );
+
+        // CRITICAL: Add MapWorldPosition for streaming system to find and track this map
+        var mapWorldPos = new MapWorldPosition(
+            data.WorldOffset,
+            data.MapWidth,
+            data.MapHeight,
+            data.TileWidth
+        );
+        world.Add(entity, mapWorldPos);
+
+        // Add optional components
+        if (!string.IsNullOrEmpty(data.DisplayName))
+        {
+            world.Add(entity, new DisplayName(data.DisplayName));
+        }
+
+        if (!string.IsNullOrEmpty(data.RegionSection))
+        {
+            world.Add(entity, new RegionSection(data.RegionSection));
+        }
+
+        // CRITICAL: Add connection components for map streaming
+        if (data.Connections != null && data.Connections.Count > 0)
+        {
+            foreach (var conn in data.Connections)
+            {
+                switch (conn.Direction.ToLowerInvariant())
+                {
+                    case "north":
+                        world.Add(entity, new NorthConnection(conn.TargetMapId, conn.Offset));
+                        break;
+                    case "south":
+                        world.Add(entity, new SouthConnection(conn.TargetMapId, conn.Offset));
+                        break;
+                    case "east":
+                        world.Add(entity, new EastConnection(conn.TargetMapId, conn.Offset));
+                        break;
+                    case "west":
+                        world.Add(entity, new WestConnection(conn.TargetMapId, conn.Offset));
+                        break;
+                }
+            }
+
+            _logger?.LogDebug(
+                "Added {ConnectionCount} connections to map {MapId}",
+                data.Connections.Count,
+                data.MapId.Value
+            );
+        }
+
+        return entity;
+    }
+
+    /// <summary>
+    ///     Creates TilesetInfo entities for each tileset used by the map.
+    ///     Required for tile rendering to find tileset metadata.
+    /// </summary>
+    private void CreateTilesetInfoEntities(World world, PreparedMapData data)
+    {
+        foreach (var loadedTileset in data.Tilesets)
+        {
+            var tileset = loadedTileset.Tileset;
+
+            // Validate tileset data
+            if (tileset.FirstGid <= 0)
+            {
+                _logger?.LogWarning(
+                    "Skipping tileset '{TilesetId}' with invalid FirstGid {FirstGid}",
+                    loadedTileset.TilesetId,
+                    tileset.FirstGid
+                );
+                continue;
+            }
+
+            if (tileset.TileWidth <= 0 || tileset.TileHeight <= 0)
+            {
+                _logger?.LogWarning(
+                    "Skipping tileset '{TilesetId}' with invalid tile size {Width}x{Height}",
+                    loadedTileset.TilesetId,
+                    tileset.TileWidth,
+                    tileset.TileHeight
+                );
+                continue;
+            }
+
+            if (tileset.Image == null || tileset.Image.Width <= 0 || tileset.Image.Height <= 0)
+            {
+                _logger?.LogWarning(
+                    "Skipping tileset '{TilesetId}' with invalid image dimensions",
+                    loadedTileset.TilesetId
+                );
+                continue;
+            }
+
+            var tilesetInfo = new TilesetInfo(
+                loadedTileset.TilesetId,
+                tileset.FirstGid,
+                tileset.TileWidth,
+                tileset.TileHeight,
+                tileset.Image.Width,
+                tileset.Image.Height
+            );
+            world.Create(tilesetInfo);
+        }
+
+        _logger?.LogDebug(
+            "Created {Count} TilesetInfo entities for map {MapId}",
+            data.Tilesets.Count,
+            data.MapId.Value
+        );
+    }
+
+    private List<Entity> CreateTileEntities(World world, PreparedMapData data)
+    {
+        if (data.Tiles.Count == 0)
+        {
+            return new List<Entity>();
+        }
+
+        var bulkOps = new BulkEntityOperations(world);
+
+        // Bulk create with TilePosition and TileSprite (the two required components)
+        Entity[] entities = bulkOps.CreateEntities(
+            data.Tiles.Count,
+            i => new TilePosition(data.Tiles[i].X, data.Tiles[i].Y, data.Tiles[i].MapId),
+            i =>
+            {
+                var tile = data.Tiles[i];
+                return new TileSprite(
+                    tile.TilesetId,
+                    tile.TileGid,
+                    tile.SourceRect,
+                    tile.FlipH,
+                    tile.FlipV,
+                    tile.FlipD
+                );
+            }
+        );
+
+        // Add additional components (Elevation, LayerOffset, properties)
+        for (int i = 0; i < entities.Length; i++)
+        {
+            Entity entity = entities[i];
+            var tile = data.Tiles[i];
+
+            // Always add elevation
+            world.Add(entity, new Elevation(tile.Elevation));
+
+            // Add layer offset if needed
+            if (tile.LayerOffsetX != 0 || tile.LayerOffsetY != 0)
+            {
+                world.Add(entity, new LayerOffset((int)tile.LayerOffsetX, (int)tile.LayerOffsetY));
+            }
+
+            // Process tile properties (terrain, script, etc.)
+            if (tile.Properties != null)
+            {
+                ProcessTileProperties(world, entity, tile.Properties);
+            }
+        }
+
+        return entities.ToList();
+    }
+
+    private void ProcessTileProperties(World world, Entity entity, Dictionary<string, object> props)
+    {
+        // Add TerrainType if present
+        if (props.TryGetValue("terrain_type", out var terrainValue) && terrainValue is string terrainType)
+        {
+            string footstepSound = props.TryGetValue("footstep_sound", out var soundValue)
+                ? soundValue?.ToString() ?? ""
+                : "";
+            world.Add(entity, new TerrainType(terrainType, footstepSound));
+        }
+
+        // Add TileScript if present
+        if (props.TryGetValue("script", out var scriptValue) && scriptValue is string scriptPath)
+        {
+            world.Add(entity, new TileScript(scriptPath));
+        }
+    }
+
+    /// <summary>
+    ///     Ensures all tileset textures are loaded before creating entities.
+    ///     The async preload may have queued textures, but they need to be on GPU.
+    ///     Falls back to sync loading if textures aren't ready.
+    /// </summary>
+    private void EnsureTexturesLoaded(PreparedMapData data)
+    {
+        if (_assetProvider == null)
+        {
+            _logger?.LogWarning("AssetProvider not available - textures may not render");
+            return;
+        }
+
+        // First, process any pending async textures
+        if (_assetProvider is AssetManager assetManager)
+        {
+            // Process pending texture uploads to GPU
+            int uploaded = assetManager.ProcessTextureQueue();
+            if (uploaded > 0)
+            {
+                _logger?.LogDebug("Processed {Count} pending texture uploads for map {MapId}",
+                    uploaded, data.MapId.Value);
+            }
+        }
+
+        // Check each tileset and load synchronously if needed
+        int loadedCount = 0;
+        foreach (var loadedTileset in data.Tilesets)
+        {
+            string tilesetId = loadedTileset.TilesetId;
+
+            if (!_assetProvider.HasTexture(tilesetId))
+            {
+                // Texture not loaded - need to load it synchronously
+                var tileset = loadedTileset.Tileset;
+                if (tileset.Image != null && !string.IsNullOrEmpty(tileset.Image.Source))
+                {
+                    string mapDirectory = Path.GetDirectoryName(data.MapPath) ?? string.Empty;
+                    string imagePath = Path.Combine(mapDirectory, tileset.Image.Source);
+
+                    // Normalize path for asset manager
+                    if (_assetProvider is AssetManager am)
+                    {
+                        // Make path relative to asset root
+                        string assetRoot = am.AssetRoot;
+                        if (imagePath.StartsWith(assetRoot, StringComparison.OrdinalIgnoreCase))
+                        {
+                            imagePath = imagePath.Substring(assetRoot.Length).TrimStart(Path.DirectorySeparatorChar, '/');
+                        }
+                    }
+
+                    try
+                    {
+                        _assetProvider.LoadTexture(tilesetId, imagePath);
+                        loadedCount++;
+                        _logger?.LogDebug("Loaded tileset texture synchronously: {TilesetId}", tilesetId);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger?.LogError(ex, "Failed to load tileset texture: {TilesetId} from {Path}",
+                            tilesetId, imagePath);
+                    }
+                }
+            }
+        }
+
+        if (loadedCount > 0)
+        {
+            _logger?.LogInformation("Loaded {Count} tileset textures synchronously for map {MapId}",
+                loadedCount, data.MapId.Value);
+        }
+    }
+}

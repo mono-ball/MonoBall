@@ -71,38 +71,19 @@ public class PerformanceOverlay : IDisposable
     {
         _fontSystem = new FontSystem();
 
-        // Try to load common monospace fonts
-        string[] fontPaths =
-        [
-            // macOS
-            "/System/Library/Fonts/Monaco.ttf",
-            "/System/Library/Fonts/Menlo.ttc",
-            "/System/Library/Fonts/Courier New.ttf",
-            "/System/Library/Fonts/Supplemental/Courier New.ttf",
-            // Windows
-            "C:\\Windows\\Fonts\\consola.ttf",
-            "C:\\Windows\\Fonts\\cour.ttf",
-            "C:\\Windows\\Fonts\\arial.ttf",
-            // Linux
-            "/usr/share/fonts/truetype/liberation/LiberationMono-Regular.ttf",
-            "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf",
-            "/usr/share/fonts/TTF/DejaVuSansMono.ttf",
-        ];
+        // Load debug font (0xProtoNerdFontMono) - no system font fallback
+        const string debugFontPath = "Assets/Fonts/0xProtoNerdFontMono-Regular.ttf";
 
-        foreach (string path in fontPaths)
+        if (File.Exists(debugFontPath))
         {
-            if (File.Exists(path))
+            try
             {
-                try
-                {
-                    _fontSystem.AddFont(File.ReadAllBytes(path));
-                    _font = _fontSystem.GetFont(14);
-                    return;
-                }
-                catch
-                {
-                    // Try next font
-                }
+                _fontSystem.AddFont(File.ReadAllBytes(debugFontPath));
+                _font = _fontSystem.GetFont(14);
+            }
+            catch
+            {
+                // Font loading failed - _font will remain null
             }
         }
     }

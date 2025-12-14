@@ -37,6 +37,11 @@ public static class InitializationProgress
     public const float GameSystemsInitialized = 0.85f;
 
     /// <summary>
+    ///     Progress value after loading mods (87%).
+    /// </summary>
+    public const float ModsLoaded = 0.87f;
+
+    /// <summary>
     ///     Progress value after loading initial map (95%).
     /// </summary>
     public const float InitialMapLoaded = 0.95f;

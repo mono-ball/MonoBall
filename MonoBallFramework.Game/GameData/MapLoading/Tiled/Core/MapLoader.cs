@@ -1,4 +1,4 @@
-using System.Text.Json;
+using System.Collections.Concurrent;
 using Arch.Core;
 using Arch.Core.Extensions;
 using Microsoft.Extensions.Logging;
@@ -11,6 +11,7 @@ using MonoBallFramework.Game.Engine.Core.Types;
 using MonoBallFramework.Game.Engine.Rendering.Assets;
 using MonoBallFramework.Game.Engine.Systems.Management;
 using MonoBallFramework.Game.GameData.Entities;
+using MonoBallFramework.Game.GameData.MapLoading.Tiled.Deferred;
 using MonoBallFramework.Game.GameData.MapLoading.Tiled.Processors;
 using MonoBallFramework.Game.GameData.MapLoading.Tiled.Services;
 using MonoBallFramework.Game.GameData.MapLoading.Tiled.Spawners;
@@ -28,6 +29,7 @@ namespace MonoBallFramework.Game.GameData.MapLoading.Tiled.Core;
 ///     Loads Tiled maps and converts them to ECS components.
 ///     Uses PropertyMapperRegistry for extensible property-to-component mapping.
 ///     Uses MapEntityService for definition-based map loading.
+///     Implements ITmxDocumentProvider to provide TMX loading for MapPreparer.
 /// </summary>
 public class MapLoader(
     IAssetProvider assetManager,
@@ -39,8 +41,10 @@ public class MapLoader(
     MapEntityService? mapDefinitionService = null,
     IGameStateApi? gameStateApi = null,
     MapLifecycleManager? lifecycleManager = null,
+    MapPreparer? mapPreparer = null,
+    MapEntityApplier? mapEntityApplier = null,
     ILogger<MapLoader>? logger = null
-)
+) : ITmxDocumentProvider
 {
     // Tiled flip flags (stored in upper 3 bits of GID)
     private const uint FLIPPED_HORIZONTALLY_FLAG = 0x80000000;
@@ -74,8 +78,8 @@ public class MapLoader(
     // Initialize MapLoadLogger
     private readonly MapLoadLogger _mapLoadLogger = new(logger);
 
-    // Initialize MapMetadataFactory (logger handled by MapLoader, so pass null)
-    private readonly MapMetadataFactory _mapMetadataFactory = new();
+    // Initialize MapMetadataFactory with logger for connection debugging
+    private readonly MapMetadataFactory _mapMetadataFactory = new(logger);
 
     // Initialize EntitySpawnerRegistry with all available spawners
     private readonly EntitySpawnerRegistry _entitySpawnerRegistry = CreateSpawnerRegistry();
@@ -114,8 +118,11 @@ public class MapLoader(
 
     private readonly MapLifecycleManager? _lifecycleManager = lifecycleManager;
 
-    // Initialize TiledJsonParser (logger handled by MapLoader, so pass null)
-    private readonly TiledJsonParser _tiledJsonParser = new();
+    // Deferred loading services (optional - if not provided, falls back to async loading)
+    // These are NOT readonly to allow property injection after construction
+    // (breaks circular dependency: MapLoader -> MapPreparer -> MapLoader)
+    private MapPreparer? _mapPreparer = mapPreparer;
+    private MapEntityApplier? _mapEntityApplier = mapEntityApplier;
 
     // Initialize TilesetLoader (logger handled by MapLoader, so pass null)
     private readonly TilesetLoader _tilesetLoader = new(
@@ -125,13 +132,44 @@ public class MapLoader(
     // TMX Document cache to avoid redundant file reads and parsing
     private readonly Dictionary<string, TmxDocument> _tmxDocumentCache = new();
 
+    // Track in-progress async document loading (similar to AssetManager._loadingTextures pattern)
+    private readonly ConcurrentDictionary<string, Task<TmxDocument>> _loadingDocuments = new();
+
+    /// <summary>
+    ///     Gets the TilesetLoader instance for external access.
+    ///     Used by MapPreparer to load tilesets without circular dependency.
+    /// </summary>
+    public TilesetLoader TilesetLoader => _tilesetLoader;
+
+    /// <summary>
+    ///     Gets the MapEntityApplier instance for wiring lifecycle manager.
+    ///     Returns null if deferred loading is not configured.
+    /// </summary>
+    public MapEntityApplier? MapEntityApplier => _mapEntityApplier;
+
+    /// <summary>
+    ///     Sets the deferred loading services after construction.
+    ///     This breaks the circular dependency: MapLoader creates TilesetLoader,
+    ///     then MapPreparer is created with MapLoader, then this method wires them together.
+    /// </summary>
+    /// <param name="preparer">The MapPreparer for background data preparation.</param>
+    /// <param name="applier">The MapEntityApplier for fast entity creation.</param>
+    public void SetDeferredServices(MapPreparer preparer, MapEntityApplier applier)
+    {
+        _mapPreparer = preparer ?? throw new ArgumentNullException(nameof(preparer));
+        _mapEntityApplier = applier ?? throw new ArgumentNullException(nameof(applier));
+        _logger?.LogInformation(
+            "Deferred loading services configured - background map preparation enabled"
+        );
+    }
+
     /// <summary>
     ///     Gets a cached TMX document or loads and caches it if not already loaded.
     ///     This avoids redundant file reads and JSON parsing during map transitions.
     /// </summary>
     /// <param name="fullPath">The full path to the TMX JSON file.</param>
     /// <returns>The parsed TmxDocument (either from cache or freshly loaded).</returns>
-    private TmxDocument GetOrLoadTmxDocument(string fullPath)
+    public TmxDocument GetOrLoadTmxDocument(string fullPath)
     {
         // Check cache first
         if (_tmxDocumentCache.TryGetValue(fullPath, out TmxDocument? cachedDoc))
@@ -145,17 +183,93 @@ public class MapLoader(
         string tiledJson = File.ReadAllText(fullPath);
         TmxDocument tmxDoc = TiledMapLoader.LoadFromJson(tiledJson, fullPath);
 
-        // Parse mixed layer types from JSON (Tiled stores all layers in one array)
-        var jsonOptions = new JsonSerializerOptions
+        // Store in cache before returning
+        _tmxDocumentCache[fullPath] = tmxDoc;
+
+        return tmxDoc;
+    }
+
+    /// <summary>
+    ///     Gets a cached TMX document or loads and caches it asynchronously if not already loaded.
+    ///     Uses async file I/O and background thread for JSON parsing to avoid blocking the main thread.
+    /// </summary>
+    /// <param name="mapId">The map identifier to load.</param>
+    /// <returns>The parsed TmxDocument (either from cache or freshly loaded).</returns>
+    /// <exception cref="InvalidOperationException">If MapEntityService is not configured.</exception>
+    /// <exception cref="FileNotFoundException">If map definition or file is not found.</exception>
+    public async Task<TmxDocument> GetOrLoadTmxDocumentAsync(GameMapId mapId)
+    {
+        if (_mapDefinitionService == null)
         {
-            PropertyNameCaseInsensitive = true,
-            ReadCommentHandling = JsonCommentHandling.Skip,
-            AllowTrailingCommas = true,
-        };
-        _tiledJsonParser.ParseMixedLayers(tmxDoc, tiledJson, jsonOptions);
+            throw new InvalidOperationException(
+                "MapEntityService is required for TMX document loading."
+            );
+        }
+
+        MapEntity? mapDef = _mapDefinitionService.GetMap(mapId);
+        if (mapDef == null)
+        {
+            throw new FileNotFoundException($"Map definition not found: {mapId.Value}");
+        }
+
+        string assetRoot = _mapPathResolver.ResolveAssetRoot();
+        string fullPath = Path.Combine(assetRoot, mapDef.TiledDataPath);
+
+        // Fast path: already cached
+        if (_tmxDocumentCache.TryGetValue(fullPath, out TmxDocument? cachedDoc))
+        {
+            _logger?.LogDebug("TMX document cache hit (async): {Path}", fullPath);
+            return cachedDoc;
+        }
+
+        // Check if already loading - wait for existing task to complete
+        if (_loadingDocuments.TryGetValue(fullPath, out Task<TmxDocument>? existingTask))
+        {
+            _logger?.LogDebug("TMX document already loading (async), waiting: {Path}", fullPath);
+            return await existingTask;
+        }
+
+        // Start async load
+        var loadTask = LoadTmxDocumentAsync(fullPath);
+
+        // Track this task to avoid duplicate loads
+        _loadingDocuments.TryAdd(fullPath, loadTask);
+
+        try
+        {
+            TmxDocument tmxDoc = await loadTask;
+            return tmxDoc;
+        }
+        finally
+        {
+            // Remove from tracking when complete
+            _loadingDocuments.TryRemove(fullPath, out _);
+        }
+    }
+
+    /// <summary>
+    ///     Internal async method to load and parse a TMX document.
+    ///     Performs file I/O asynchronously and JSON parsing on background thread.
+    /// </summary>
+    private async Task<TmxDocument> LoadTmxDocumentAsync(string fullPath)
+    {
+        if (!File.Exists(fullPath))
+        {
+            throw new FileNotFoundException($"Map file not found: {fullPath}");
+        }
+
+        _logger?.LogDebug("TMX document cache miss (async): {Path}", fullPath);
+
+        // Async file I/O - non-blocking
+        string tiledJson = await File.ReadAllTextAsync(fullPath);
+
+        // CPU-bound JSON parsing on background thread
+        TmxDocument tmxDoc = await Task.Run(() => TiledMapLoader.LoadFromJson(tiledJson, fullPath));
 
         // Store in cache before returning
         _tmxDocumentCache[fullPath] = tmxDoc;
+
+        _logger?.LogDebug("TMX document loaded and cached (async): {Path}", fullPath);
 
         return tmxDoc;
     }
@@ -196,6 +310,54 @@ public class MapLoader(
         GetOrLoadTmxDocument(fullPath);
 
         _logger?.LogInformation("Preloaded TMX document for map '{MapId}'", mapId.Value);
+    }
+
+    /// <summary>
+    ///     Preloads a TMX document into the cache asynchronously for a specific map.
+    ///     Returns immediately if already cached or currently loading.
+    ///     Useful for predictive preloading of adjacent maps without blocking.
+    /// </summary>
+    /// <param name="mapId">The map identifier to preload.</param>
+    /// <exception cref="InvalidOperationException">If MapEntityService is not configured.</exception>
+    /// <exception cref="FileNotFoundException">If map definition or file is not found.</exception>
+    public async Task PreloadTmxDocumentAsync(GameMapId mapId)
+    {
+        if (_mapDefinitionService == null)
+        {
+            throw new InvalidOperationException(
+                "MapEntityService is required for TMX document preloading."
+            );
+        }
+
+        MapEntity? mapDef = _mapDefinitionService.GetMap(mapId);
+        if (mapDef == null)
+        {
+            throw new FileNotFoundException($"Map definition not found: {mapId.Value}");
+        }
+
+        string assetRoot = _mapPathResolver.ResolveAssetRoot();
+        string fullPath = Path.Combine(assetRoot, mapDef.TiledDataPath);
+
+        // Fast path: already cached - return immediately
+        if (_tmxDocumentCache.ContainsKey(fullPath))
+        {
+            _logger?.LogDebug("TMX document already cached, skipping preload: {MapId}", mapId.Value);
+            return;
+        }
+
+        // Check if already loading - wait for it to complete
+        if (_loadingDocuments.TryGetValue(fullPath, out Task<TmxDocument>? existingTask))
+        {
+            _logger?.LogDebug("TMX document already loading, waiting for completion: {MapId}", mapId.Value);
+            await existingTask;
+            return;
+        }
+
+        // Start async load in background
+        _logger?.LogInformation("Starting async preload for TMX document: {MapId}", mapId.Value);
+        await GetOrLoadTmxDocumentAsync(mapId);
+
+        _logger?.LogInformation("Preloaded TMX document (async) for map '{MapId}'", mapId.Value);
     }
 
     /// <summary>
@@ -252,6 +414,19 @@ public class MapLoader(
     }
 
     /// <summary>
+    ///     Checks if a map with the given GameMapId is already loaded in the world.
+    ///     Prevents duplicate map loading which causes duplicate NPCs.
+    /// </summary>
+    /// <param name="world">The ECS world to check.</param>
+    /// <param name="mapId">The GameMapId to check for.</param>
+    /// <returns>The existing MapInfo entity if found, null otherwise.</returns>
+    private Entity? FindExistingMapEntity(World world, GameMapId mapId)
+    {
+        // Use full ID (mapId.Value) to match MapInfo.MapName which stores the full ID
+        return FindExistingMapEntity(world, mapId.Value);
+    }
+
+    /// <summary>
     ///     Loads a map from EF Core definition (NEW: Definition-based loading).
     ///     This is the preferred method - loads from MapEntity stored in EF Core.
     /// </summary>
@@ -271,12 +446,13 @@ public class MapLoader(
         }
 
         // Check if map is already loaded to prevent duplicate NPCs
-        Entity? existingMap = FindExistingMapEntity(world, mapId.Name);
+        // Use full ID (mapId.Value) to match MapInfo.MapName which stores the full ID
+        Entity? existingMap = FindExistingMapEntity(world, mapId.Value);
         if (existingMap.HasValue)
         {
             _logger?.LogDebug(
-                "Map '{MapName}' already loaded, returning existing entity",
-                mapId.Name
+                "Map '{MapId}' already loaded, returning existing entity",
+                mapId.Value
             );
             return existingMap.Value;
         }
@@ -342,12 +518,13 @@ public class MapLoader(
         }
 
         // Check if map is already loaded to prevent duplicate NPCs
-        Entity? existingMap = FindExistingMapEntity(world, mapId.Name);
+        // Use full ID (mapId.Value) to match MapInfo.MapName which stores the full ID
+        Entity? existingMap = FindExistingMapEntity(world, mapId.Value);
         if (existingMap.HasValue)
         {
             _logger?.LogDebug(
-                "Map '{MapName}' already loaded at offset ({OffsetX}, {OffsetY}), returning existing entity",
-                mapId.Name,
+                "Map '{MapId}' already loaded at offset ({OffsetX}, {OffsetY}), returning existing entity",
+                mapId.Value,
                 worldOffset.X,
                 worldOffset.Y
             );
@@ -393,6 +570,95 @@ public class MapLoader(
         {
             return LoadMapFromDocument(world, tmxDoc, mapDef, worldOffset);
         }
+    }
+
+    /// <summary>
+    ///     Asynchronously loads a map at a specific world offset position (for multi-map streaming).
+    ///     Uses async file I/O and JSON parsing to avoid blocking the main thread.
+    ///     Entity creation still happens synchronously as it requires World access.
+    /// </summary>
+    /// <param name="world">The ECS world to create entities in.</param>
+    /// <param name="mapId">The map identifier (e.g., "littleroot_town").</param>
+    /// <param name="worldOffset">The world-space offset in pixels (e.g., Vector2(0, -320) for route north).</param>
+    /// <returns>Task containing the MapInfo entity with map metadata.</returns>
+    /// <exception cref="InvalidOperationException">If MapEntityService is not configured.</exception>
+    /// <exception cref="FileNotFoundException">If map definition is not found.</exception>
+    public async Task<Entity> LoadMapAtOffsetAsync(World world, GameMapId mapId, Vector2 worldOffset)
+    {
+        if (_mapDefinitionService == null)
+        {
+            throw new InvalidOperationException(
+                "MapEntityService is required for definition-based map loading. "
+                    + "Use LoadMapEntities(world, mapPath) for file-based loading."
+            );
+        }
+
+        // Check if map is already loaded to prevent duplicate NPCs
+        // Use full ID (mapId.Value) to match MapInfo.MapName which stores the full ID
+        Entity? existingMap = FindExistingMapEntity(world, mapId.Value);
+        if (existingMap.HasValue)
+        {
+            _logger?.LogDebug(
+                "Map '{MapId}' already loaded at offset ({OffsetX}, {OffsetY}), returning existing entity",
+                mapId.Value,
+                worldOffset.X,
+                worldOffset.Y
+            );
+            return existingMap.Value;
+        }
+
+        // Get map definition from EF Core
+        MapEntity? mapDef = _mapDefinitionService.GetMap(mapId);
+        if (mapDef == null)
+        {
+            throw new FileNotFoundException($"Map definition not found: {mapId.Value}");
+        }
+
+        _logger?.LogWorkflowStatus(
+            "Loading map at world offset (async)",
+            ("mapId", mapDef.MapId.Value),
+            ("displayName", mapDef.DisplayName),
+            ("offsetX", worldOffset.X),
+            ("offsetY", worldOffset.Y)
+        );
+
+        // Read Tiled JSON from file using stored path
+        string assetRoot = _mapPathResolver.ResolveAssetRoot();
+        string fullPath = Path.Combine(assetRoot, mapDef.TiledDataPath);
+
+        if (!File.Exists(fullPath))
+        {
+            throw new FileNotFoundException(
+                $"Map file not found: {fullPath} (relative: {mapDef.TiledDataPath})"
+            );
+        }
+
+        // Get TMX document from cache or load it asynchronously
+        TmxDocument tmxDoc = await GetOrLoadTmxDocumentAsync(mapId);
+
+        // Load external tileset files asynchronously (Tiled JSON format supports external tilesets)
+        await _tilesetLoader.LoadTilesetsAsync(tmxDoc, fullPath);
+
+        // Use scoped logging
+        using (_logger?.BeginScope($"LoadingAsync:{mapDef.MapId}"))
+        {
+            // Entity creation is synchronous (requires World access on main thread)
+            return LoadMapFromDocument(world, tmxDoc, mapDef, worldOffset);
+        }
+    }
+
+    /// <summary>
+    ///     Asynchronously loads a map at the origin position (0, 0).
+    ///     Uses async file I/O and JSON parsing to avoid blocking the main thread.
+    /// </summary>
+    /// <param name="world">The ECS world to create entities in.</param>
+    /// <param name="mapId">The map identifier (e.g., "littleroot_town").</param>
+    /// <returns>Task containing the MapInfo entity with map metadata.</returns>
+    /// <exception cref="InvalidOperationException">If MapEntityService is not configured.</exception>
+    /// <exception cref="FileNotFoundException">If map definition is not found.</exception>
+    public async Task<Entity> LoadMapAsync(World world, GameMapId mapId)
+    {
+        return await LoadMapAtOffsetAsync(world, mapId, Vector2.Zero);
     }
 
     /// <summary>
@@ -744,6 +1010,168 @@ public class MapLoader(
     public IReadOnlySet<GameSpriteId> GetRequiredSpriteIds()
     {
         return _requiredSpriteIds;
+    }
+
+    /// <summary>
+    ///     Preloads tileset textures asynchronously for an adjacent map.
+    ///     Call this before the player enters the map to reduce stutter during transitions.
+    ///     The textures are loaded on a background thread and queued for GPU upload.
+    ///     Call ProcessTextureQueue() from Update loop to upload textures incrementally.
+    /// </summary>
+    /// <param name="mapId">The map identifier to preload textures for.</param>
+    public void PreloadMapTexturesAsync(GameMapId mapId)
+    {
+        if (_mapDefinitionService == null)
+        {
+            _logger?.LogWarning("Cannot preload map textures - MapEntityService not configured");
+            return;
+        }
+
+        MapEntity? mapDef = _mapDefinitionService.GetMap(mapId);
+        if (mapDef == null)
+        {
+            _logger?.LogWarning("Cannot preload map textures - map definition not found: {MapId}", mapId.Value);
+            return;
+        }
+
+        string assetRoot = _mapPathResolver.ResolveAssetRoot();
+        string fullPath = Path.Combine(assetRoot, mapDef.TiledDataPath);
+
+        if (!File.Exists(fullPath))
+        {
+            _logger?.LogWarning("Cannot preload map textures - map file not found: {Path}", fullPath);
+            return;
+        }
+
+        _logger?.LogDebug("Starting async texture preload for map: {MapId}", mapId.Value);
+        _tilesetLoader.PreloadMapTexturesAsync(fullPath);
+    }
+
+    /// <summary>
+    ///     Loads a map using prepared data if available, otherwise falls back to synchronous loading.
+    ///     This is the preferred method for MapStreamingSystem:
+    ///     - If map was prepared in background, applies it instantly (minimal stutter)
+    ///     - If not prepared yet, falls back to synchronous loading (ensures seamless experience)
+    /// </summary>
+    /// <param name="world">The ECS world to create entities in.</param>
+    /// <param name="mapId">The map identifier (e.g., "littleroot_town").</param>
+    /// <param name="worldOffset">The world-space offset in pixels.</param>
+    /// <returns>The MapInfo entity containing map metadata.</returns>
+    public Entity LoadMapWithDeferredSupport(World world, GameMapId mapId, Vector2 worldOffset)
+    {
+        // Check for existing map
+        Entity? existing = FindExistingMapEntity(world, mapId);
+        if (existing.HasValue)
+        {
+            _logger?.LogDebug("Map already loaded: {MapId}", mapId.Value);
+            return existing.Value;
+        }
+
+        // Try deferred loading path first (uses pre-prepared data from background thread)
+        // Fixed: MapEntityApplier now creates TilesetInfo entities (was the missing piece)
+        if (_mapPreparer != null && _mapEntityApplier != null)
+        {
+            PreparedMapData? prepared = _mapPreparer.GetPrepared(mapId);
+            if (prepared != null)
+            {
+                _logger?.LogDebug(
+                    "Using deferred loading for map {MapId} (prepared data available)",
+                    mapId.Value
+                );
+                return _mapEntityApplier.ApplyPreparedMap(world, prepared);
+            }
+        }
+
+        // Fallback to sync loading if deferred not available or not prepared
+        return LoadMapAtOffset(world, mapId, worldOffset);
+    }
+
+    /// <summary>
+    ///     Loads a map using deferred entity creation for minimal main-thread blocking.
+    ///     Phase 1 (background): Prepares all data asynchronously
+    ///     Phase 2 (main thread): Fast entity creation from prepared data
+    /// </summary>
+    /// <param name="world">The ECS world to create entities in.</param>
+    /// <param name="mapId">The map identifier (e.g., "littleroot_town").</param>
+    /// <param name="worldOffset">The world-space offset in pixels (e.g., Vector2(0, -320) for route north).</param>
+    /// <returns>The MapInfo entity containing map metadata.</returns>
+    /// <exception cref="InvalidOperationException">If MapEntityService is not configured.</exception>
+    /// <exception cref="FileNotFoundException">If map definition is not found.</exception>
+    public async Task<Entity> LoadMapDeferredAsync(World world, GameMapId mapId, Vector2 worldOffset = default)
+    {
+        // Check for existing map
+        Entity? existing = FindExistingMapEntity(world, mapId);
+        if (existing.HasValue)
+        {
+            _logger?.LogDebug("Map already loaded (deferred): {MapId}", mapId.Value);
+            return existing.Value;
+        }
+
+        // Phase 1: Prepare on background thread (or get cached)
+        if (_mapPreparer == null || _mapEntityApplier == null)
+        {
+            // Fallback to regular async loading if deferred services not available
+            _logger?.LogDebug(
+                "Deferred loading services not available, falling back to async loading for {MapId}",
+                mapId.Value
+            );
+            return await LoadMapAtOffsetAsync(world, mapId, worldOffset);
+        }
+
+        _logger?.LogInformation(
+            "Starting deferred map load: {MapId} at offset ({OffsetX}, {OffsetY})",
+            mapId.Value,
+            worldOffset.X,
+            worldOffset.Y
+        );
+
+        PreparedMapData prepared = await _mapPreparer.PrepareMapAsync(mapId, worldOffset);
+
+        _logger?.LogDebug("Map data prepared, applying to world: {MapId}", mapId.Value);
+
+        // Phase 2: Apply on main thread (fast!)
+        Entity mapEntity = _mapEntityApplier.ApplyPreparedMap(world, prepared);
+
+        _logger?.LogInformation("Deferred map load complete: {MapId}", mapId.Value);
+
+        return mapEntity;
+    }
+
+    /// <summary>
+    ///     Prepares a map in the background for later instant application.
+    ///     Call this when player approaches a connection to pre-warm the cache.
+    /// </summary>
+    /// <param name="mapId">The map identifier to prepare.</param>
+    /// <param name="worldOffset">The world-space offset in pixels.</param>
+    public void PrepareMapInBackground(GameMapId mapId, Vector2 worldOffset = default)
+    {
+        if (_mapPreparer == null)
+        {
+            _logger?.LogDebug(
+                "Cannot prepare map in background - MapPreparer not available: {MapId}",
+                mapId.Value
+            );
+            return;
+        }
+
+        _logger?.LogDebug(
+            "Triggering background map preparation: {MapId} at offset ({OffsetX}, {OffsetY})",
+            mapId.Value,
+            worldOffset.X,
+            worldOffset.Y
+        );
+
+        _mapPreparer.PrepareMapInBackground(mapId, worldOffset);
+    }
+
+    /// <summary>
+    ///     Checks if a map is prepared and ready for instant application.
+    /// </summary>
+    /// <param name="mapId">The map identifier to check.</param>
+    /// <returns>True if the map is prepared in cache, false otherwise.</returns>
+    public bool IsMapPrepared(GameMapId mapId)
+    {
+        return _mapPreparer?.IsPrepared(mapId) ?? false;
     }
 
     /// <summary>

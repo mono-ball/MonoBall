@@ -1,12 +1,12 @@
 using System.Text.RegularExpressions;
 
-namespace MonoBallFramework.Game.Scripting.Modding;
+namespace MonoBallFramework.Game.Engine.Core.Modding;
 
 /// <summary>
 ///     Resolves mod dependencies and determines load order using topological sort.
-///     Handles semantic versioning and circular dependency detection.
+///     Handles semantic versioning, circular dependency detection, and LoadBefore/LoadAfter relationships.
 /// </summary>
-public class ModDependencyResolver
+public sealed class ModDependencyResolver
 {
     private static readonly Regex DependencyPattern = new(
         @"^(?<id>[\w-]+)\s*(?<operator>>=|==|>|<|<=)?\s*(?<version>[\d\.]+(?:-[\w\.]+)?)$",
@@ -27,7 +27,7 @@ public class ModDependencyResolver
         // Validate all dependencies exist and versions match
         ValidateDependencies(modList, modLookup);
 
-        // Build dependency graph
+        // Build dependency graph (includes Dependencies, LoadBefore, and LoadAfter)
         Dictionary<string, List<string>> dependencyGraph = BuildDependencyGraph(modList, modLookup);
 
         // Detect circular dependencies
@@ -94,6 +94,7 @@ public class ModDependencyResolver
 
     /// <summary>
     ///     Builds a dependency graph (mod ID -> list of dependency mod IDs).
+    ///     Includes hard dependencies, LoadBefore, and LoadAfter relationships.
     /// </summary>
     private Dictionary<string, List<string>> BuildDependencyGraph(
         List<ModManifest> mods,
@@ -106,6 +107,7 @@ public class ModDependencyResolver
         {
             graph[mod.Id] = new List<string>();
 
+            // Add hard dependencies
             foreach (string dependency in mod.Dependencies)
             {
                 if (
@@ -114,6 +116,31 @@ public class ModDependencyResolver
                 )
                 {
                     graph[mod.Id].Add(depId);
+                }
+            }
+
+            // Add LoadBefore relationships (this mod must load before these)
+            // This means those mods depend on this mod
+            foreach (string beforeId in mod.LoadBefore)
+            {
+                if (modLookup.ContainsKey(beforeId))
+                {
+                    if (!graph.ContainsKey(beforeId))
+                    {
+                        graph[beforeId] = new List<string>();
+                    }
+
+                    graph[beforeId].Add(mod.Id);
+                }
+            }
+
+            // Add LoadAfter relationships (this mod must load after these)
+            // This means this mod depends on those mods
+            foreach (string afterId in mod.LoadAfter)
+            {
+                if (modLookup.ContainsKey(afterId))
+                {
+                    graph[mod.Id].Add(afterId);
                 }
             }
         }
@@ -204,7 +231,10 @@ public class ModDependencyResolver
         {
             foreach (string depId in dependencies)
             {
-                inDegree[depId]++;
+                if (inDegree.ContainsKey(depId))
+                {
+                    inDegree[depId]++;
+                }
             }
         }
 
@@ -379,7 +409,7 @@ public class ModDependencyResolver
 /// <summary>
 ///     Exception thrown when mod dependencies cannot be resolved.
 /// </summary>
-public class ModDependencyException : Exception
+public sealed class ModDependencyException : Exception
 {
     public ModDependencyException(string message)
         : base(message) { }
@@ -387,3 +417,4 @@ public class ModDependencyException : Exception
     public ModDependencyException(string message, Exception innerException)
         : base(message, innerException) { }
 }
+

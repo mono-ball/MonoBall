@@ -9,6 +9,7 @@ using MonoBallFramework.Game.Engine.Rendering.Assets;
 using MonoBallFramework.Game.Engine.Rendering.Systems;
 using MonoBallFramework.Game.Engine.Systems.Management;
 using MonoBallFramework.Game.Engine.Systems.Pooling;
+using MonoBallFramework.Game.GameData.Factories;
 using MonoBallFramework.Game.GameData.MapLoading.Tiled.Core;
 using MonoBallFramework.Game.GameData.Services;
 using MonoBallFramework.Game.GameData.Sprites;
@@ -43,6 +44,7 @@ public class GameInitializer(
     MapEntityService mapDefinitionService,
     IEventBus eventBus,
     IGameStateApi gameStateApi,
+    GraphicsServiceFactory graphicsServiceFactory,
     IGameStateService? gameStateService = null
 ) : IGameInitializer
 {
@@ -286,5 +288,12 @@ public class GameInitializer(
                 "MapStreamingSystem not available - entity cleanup on map unload may not work"
             );
         }
+
+        // Set the MapLifecycleManager in GraphicsServiceFactory's holder so the factory delegate
+        // in MapEntityApplier can resolve it lazily when needed
+        graphicsServiceFactory.SetMapLifecycleManager(MapLifecycleManager);
+        logger.LogInformation(
+            "MapLifecycleManager set in GraphicsServiceFactory holder for factory delegate access"
+        );
     }
 }

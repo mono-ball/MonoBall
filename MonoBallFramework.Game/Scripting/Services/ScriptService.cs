@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using MonoBallFramework.Game.Engine.Common.Logging;
 using MonoBallFramework.Game.Engine.Core.Events;
 using MonoBallFramework.Game.Scripting.Api;
-using MonoBallFramework.Game.Scripting.Modding;
+using MonoBallFramework.Game.Engine.Core.Modding;
 using MonoBallFramework.Game.Scripting.Runtime;
 
 namespace MonoBallFramework.Game.Scripting.Services;
@@ -403,23 +403,12 @@ public class ScriptService : IAsyncDisposable
     /// <summary>
     ///     Load all mods from the /Mods/ directory.
     ///     Must be called AFTER core scripts are loaded.
+    ///     Note: ModLoader should be registered via DI and injected, not created here.
     /// </summary>
-    /// <param name="gameBasePath">Base path to the game directory containing /Mods/.</param>
-    public async Task LoadModsAsync(string gameBasePath)
+    /// <param name="modLoader">The mod loader instance (should be injected via DI).</param>
+    public async Task LoadModsAsync(ModLoader modLoader)
     {
-        if (_modLoader == null)
-        {
-            ILogger<ModLoader> modLoaderLogger = _loggerFactory.CreateLogger<ModLoader>();
-            _modLoader = new ModLoader(
-                this,
-                modLoaderLogger,
-                _world,
-                _eventBus,
-                _apis,
-                gameBasePath
-            );
-        }
-
+        _modLoader = modLoader ?? throw new ArgumentNullException(nameof(modLoader));
         await _modLoader.LoadModsAsync();
     }
 

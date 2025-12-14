@@ -627,6 +627,16 @@ public class ElevationRenderSystem(
                 );
             }
         );
+
+        // Log render cache count periodically for debugging multi-map rendering
+        if (_frameCounter % 300 == 0 && _cachedMapBounds.Count > 0)
+        {
+            _logger?.LogInformation(
+                "Render cache has {MapCount} maps: {MapIds}",
+                _cachedMapBounds.Count,
+                string.Join(", ", _cachedMapBounds.Select(m => m.MapId.Value))
+            );
+        }
     }
 
     /// <summary>

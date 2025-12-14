@@ -102,6 +102,11 @@ public class GameplayScene : SceneBase
         // Update performance monitoring (always use raw time for accurate metrics)
         _context.PerformanceMonitor.Update(frameTimeMs);
 
+        // Process pending texture uploads (async preloading for map transitions)
+        // This uploads textures that were loaded on background threads to the GPU incrementally.
+        // Must be called from main thread (GPU operations) before rendering.
+        _context.AssetProvider?.ProcessTextureQueue();
+
         // Handle input only if not blocked by a scene above (e.g., console with ExclusiveInput)
         // Use unscaled time so controls work when paused
         // Pass render system so InputManager can control profiling when P is pressed

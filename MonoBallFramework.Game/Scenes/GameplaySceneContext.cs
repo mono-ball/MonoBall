@@ -1,5 +1,6 @@
 using Arch.Core;
 using MonoBallFramework.Game.Engine.Audio.Services;
+using MonoBallFramework.Game.Engine.Rendering.Assets;
 using MonoBallFramework.Game.Engine.Scenes;
 using MonoBallFramework.Game.Engine.Systems.Management;
 using MonoBallFramework.Game.GameSystems.Services;
@@ -41,7 +42,8 @@ public class GameplaySceneContext
         PerformanceMonitor performanceMonitor,
         IGameTimeService gameTime,
         IAudioService? audioService = null,
-        SceneManager? sceneManager = null
+        SceneManager? sceneManager = null,
+        IAssetProvider? assetProvider = null
     )
     {
         World = world ?? throw new ArgumentNullException(nameof(world));
@@ -53,6 +55,7 @@ public class GameplaySceneContext
         GameTime = gameTime ?? throw new ArgumentNullException(nameof(gameTime));
         AudioService = audioService;
         SceneManager = sceneManager;
+        AssetProvider = assetProvider;
     }
 
     /// <summary>
@@ -99,6 +102,12 @@ public class GameplaySceneContext
     ///     Gets the audio service for music and sound effects (optional).
     /// </summary>
     public IAudioService? AudioService { get; }
+
+    /// <summary>
+    ///     Gets the asset provider for texture loading and management (optional).
+    ///     Used for async texture preloading during map transitions.
+    /// </summary>
+    public IAssetProvider? AssetProvider { get; }
 }
 
 

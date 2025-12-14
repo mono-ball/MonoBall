@@ -38,6 +38,24 @@ namespace MonoBallFramework.Game.Systems;
 ///         <strong>Priority:</strong> 100 (same as Movement) - executes early in update loop
 ///         to ensure maps are loaded before player needs them.
 ///     </para>
+///     <para>
+///         <strong>Async Preloading Architecture:</strong>
+///         When maps are loaded, we asynchronously preload their TMX documents and tilesets
+///         into the cache for future transitions. This reduces stutter when the player crosses
+///         map boundaries.
+///     </para>
+///     <para>
+///         1. <strong>Synchronous Phase:</strong> LoadAdjacentMap() creates ECS entities immediately
+///         2. <strong>Async Phase:</strong> PreloadAdjacentMapsAsync() warms caches in background
+///            - PreloadTmxDocumentAsync(): Loads/parses JSON on background thread
+///            - PreloadMapTexturesAsync(): Queues textures for GPU upload
+///         3. <strong>Next Transition:</strong> When player crosses boundary, assets are cached
+///     </para>
+///     <para>
+///         The preloading uses Task.WhenAll for parallel execution and tracks completed
+///         preloads to avoid redundant work. All errors are caught and logged without
+///         blocking the main thread.
+///     </para>
 /// </remarks>
 public class MapStreamingSystem : SystemBase, IUpdateSystem
 {
@@ -52,6 +70,9 @@ public class MapStreamingSystem : SystemBase, IUpdateSystem
     > _mapInfoCache = new(10);
 
     private readonly MapLoader _mapLoader;
+
+    // Track which maps have been preloaded to avoid redundant preloading
+    private readonly HashSet<string> _preloadedMaps = new();
 
     // Maximum number of maps to keep loaded simultaneously
     // Current + 4 directions + buffer for recently visited maps
@@ -228,8 +249,8 @@ public class MapStreamingSystem : SystemBase, IUpdateSystem
             return;
         }
 
-        // Load ALL connected maps immediately (Pokemon-style)
-        LoadAllConnections(world, ref streamingCopy, context.Value);
+        // Load connected maps directly
+        LoadConnectedMaps(world, ref streamingCopy, context.Value);
 
         // Update current map if player has crossed boundary
         UpdateCurrentMap(
@@ -263,63 +284,141 @@ public class MapStreamingSystem : SystemBase, IUpdateSystem
     {
         if (
             !_mapInfoCache.TryGetValue(
-                mapId.Name,
+                mapId.Value,
                 out (MapInfo Info, MapWorldPosition WorldPos, MapEntity? Definition) mapData
             )
         )
         {
+            _logger?.LogDebug("TryGetMapContext: Map {MapId} not in cache", mapId.Value);
             return null;
         }
 
-        // Find the map entity by its map name
+        // Find the map entity by its map name (full ID)
         Entity? foundEntity = null;
         QueryDescription query = QueryCache.Get<MapInfo>();
         World.Query(
             in query,
             (Entity entity, ref MapInfo info) =>
             {
-                if (info.MapName == mapId.Name)
+                if (info.MapName == mapId.Value)
                 {
                     foundEntity = entity;
                 }
             }
         );
 
-        return foundEntity.HasValue
-            ? new MapLoadContext(foundEntity.Value, mapData.Info, mapData.WorldPos)
-            : null;
+        if (!foundEntity.HasValue)
+        {
+            _logger?.LogWarning("TryGetMapContext: Entity not found for map {MapId}", mapId.Value);
+            return null;
+        }
+
+        return new MapLoadContext(foundEntity.Value, mapData.Info, mapData.WorldPos);
     }
 
     /// <summary>
-    ///     Loads all connected maps for the given context.
+    ///     Loads all connected maps that aren't already loaded.
+    ///     Uses deferred loading when prepared data is available.
     /// </summary>
-    private void LoadAllConnections(World world, ref MapStreaming streaming, MapLoadContext context)
+    private void LoadConnectedMaps(World world, ref MapStreaming streaming, MapLoadContext context)
     {
-        foreach (ConnectionInfo connection in context.GetAllConnections())
+        var connectionsToLoad = new List<ConnectionInfo>();
+        var allConnections = context.GetAllConnections().ToList();
+
+        foreach (ConnectionInfo connection in allConnections)
         {
-            LoadAdjacentMapIfNeeded(world, ref streaming, context, connection);
+            // Skip if already loaded
+            if (streaming.IsMapLoaded(connection.MapId))
+            {
+                continue;
+            }
+
+            connectionsToLoad.Add(connection);
+
+            // Start preparing the map in background (fire-and-forget)
+            // This way, if we have multiple maps to load, later ones might be ready
+            PrepareMapForLoading(context, connection);
+        }
+
+        // Only log when we're actually loading new maps
+        if (connectionsToLoad.Count > 0)
+        {
+            _logger?.LogInformation(
+                "LoadConnectedMaps: Map {MapId} loading {Count} new connections (total connections={TotalConn}, loaded={LoadedCount})",
+                context.Info.MapName,
+                connectionsToLoad.Count,
+                allConnections.Count,
+                streaming.LoadedMaps.Count
+            );
+
+            foreach (ConnectionInfo connection in connectionsToLoad)
+            {
+                _logger?.LogInformation(
+                    "LoadConnectedMaps: Loading {Direction} -> {TargetMapId}",
+                    connection.Direction,
+                    connection.MapId.Value
+                );
+            }
+        }
+
+        // Now load all the maps (they might be prepared by now)
+        foreach (ConnectionInfo connection in connectionsToLoad)
+        {
+            LoadAdjacentMap(world, ref streaming, context, connection);
         }
     }
 
     /// <summary>
-    ///     Loads an adjacent map if it's connected and not already loaded.
-    ///     Pokemon-style: all connections are preloaded immediately.
+    ///     Starts background preparation of a connected map.
+    ///     The map will be ready for instant loading when actually needed.
     /// </summary>
-    /// <param name="sourceContext">Context for the source map (dimensions, world position).</param>
-    /// <param name="connection">Connection info (map ID, offset, direction).</param>
-    private void LoadAdjacentMapIfNeeded(
+    private void PrepareMapForLoading(MapLoadContext sourceContext, ConnectionInfo connection)
+    {
+        // Skip if already prepared
+        if (_mapLoader.IsMapPrepared(connection.MapId))
+        {
+            return;
+        }
+
+        // Get dimensions to calculate offset
+        (int Width, int Height)? dimensions = GetAdjacentMapDimensions(connection.MapId, sourceContext.Info);
+        if (!dimensions.HasValue)
+        {
+            return;
+        }
+
+        // Calculate world offset
+        Vector2 adjacentOffset = CalculateMapOffset(
+            sourceContext.WorldPosition,
+            sourceContext.Info.Width,
+            sourceContext.Info.Height,
+            dimensions.Value.Width,
+            dimensions.Value.Height,
+            sourceContext.Info.TileSize,
+            connection.Direction,
+            connection.Offset
+        );
+
+        // Start background preparation
+        _mapLoader.PrepareMapInBackground(connection.MapId, adjacentOffset);
+        _logger?.LogDebug(
+            "Started background preparation for map: {MapId} at offset ({X}, {Y})",
+            connection.MapId.Value,
+            adjacentOffset.X,
+            adjacentOffset.Y
+        );
+    }
+
+    /// <summary>
+    ///     Loads an adjacent map based on a connection.
+    /// </summary>
+    private void LoadAdjacentMap(
         World world,
         ref MapStreaming streaming,
         MapLoadContext sourceContext,
         ConnectionInfo connection
     )
     {
-        // Already loaded
-        if (streaming.IsMapLoaded(connection.MapId))
-        {
-            return;
-        }
-
         _logger?.LogDebug(
             "Loading connected map in {Direction} direction: {MapId} (offset: {Offset} tiles)",
             connection.Direction,
@@ -360,8 +459,8 @@ public class MapStreamingSystem : SystemBase, IUpdateSystem
 
         try
         {
-            // Load the map at the calculated world offset
-            Entity mapInfoEntity = _mapLoader.LoadMapAtOffset(
+            // Load the map using deferred support (uses prepared data if available, else sync)
+            Entity mapInfoEntity = _mapLoader.LoadMapWithDeferredSupport(
                 world,
                 connection.MapId,
                 adjacentOffset
@@ -392,10 +491,7 @@ public class MapStreamingSystem : SystemBase, IUpdateSystem
             // Mark invalidation as needed - will be batched at end of ProcessMapStreaming
             _invalidationNeeded = true;
 
-            _logger?.LogInformation(
-                "Successfully loaded adjacent map: {MapId}",
-                connection.MapId.Value
-            );
+            _logger?.LogDebug("Loaded adjacent map: {MapId}", connection.MapId.Value);
         }
         catch (Exception ex)
         {
@@ -602,7 +698,7 @@ public class MapStreamingSystem : SystemBase, IUpdateSystem
             if (
                 !offset.HasValue
                 || !_mapInfoCache.TryGetValue(
-                    loadedMapId.Name,
+                    loadedMapId.Value,
                     out (MapInfo Info, MapWorldPosition WorldPos, MapEntity? Definition) mapData
                 )
             )
@@ -643,7 +739,7 @@ public class MapStreamingSystem : SystemBase, IUpdateSystem
 
         // Get old map name before updating
         string? oldMapName = null;
-        if (_mapInfoCache.TryGetValue(streaming.CurrentMapId.Name, out var oldMapData))
+        if (_mapInfoCache.TryGetValue(streaming.CurrentMapId.Value, out var oldMapData))
         {
             oldMapName = oldMapData.Info.MapName;
         }
@@ -651,7 +747,7 @@ public class MapStreamingSystem : SystemBase, IUpdateSystem
         // Update map reference
         if (
             _mapInfoCache.TryGetValue(
-                newMapId.Name,
+                newMapId.Value,
                 out (MapInfo Info, MapWorldPosition WorldPos, MapEntity? Definition) newMapData
             )
         )
@@ -771,7 +867,7 @@ public class MapStreamingSystem : SystemBase, IUpdateSystem
             in query,
             (Entity entity, ref MapInfo mapInfo) =>
             {
-                if (mapInfo.MapName == currentMapId.Name)
+                if (mapInfo.MapName == currentMapId.Value)
                 {
                     currentMapEntity = entity;
                 }
@@ -788,26 +884,26 @@ public class MapStreamingSystem : SystemBase, IUpdateSystem
         // Build set of maps that should stay loaded:
         // 1. Current map
         // 2. All maps directly connected to current map (using connection components)
-        var mapsToKeep = new HashSet<string> { currentMapId.Name };
+        var mapsToKeep = new HashSet<string> { currentMapId.Value };
 
         if (mapEntity.Has<NorthConnection>())
         {
-            mapsToKeep.Add(mapEntity.Get<NorthConnection>().MapId.Name);
+            mapsToKeep.Add(mapEntity.Get<NorthConnection>().MapId.Value);
         }
 
         if (mapEntity.Has<SouthConnection>())
         {
-            mapsToKeep.Add(mapEntity.Get<SouthConnection>().MapId.Name);
+            mapsToKeep.Add(mapEntity.Get<SouthConnection>().MapId.Value);
         }
 
         if (mapEntity.Has<EastConnection>())
         {
-            mapsToKeep.Add(mapEntity.Get<EastConnection>().MapId.Name);
+            mapsToKeep.Add(mapEntity.Get<EastConnection>().MapId.Value);
         }
 
         if (mapEntity.Has<WestConnection>())
         {
-            mapsToKeep.Add(mapEntity.Get<WestConnection>().MapId.Name);
+            mapsToKeep.Add(mapEntity.Get<WestConnection>().MapId.Value);
         }
 
         var mapsToUnload = new List<GameMapId>();
@@ -816,7 +912,7 @@ public class MapStreamingSystem : SystemBase, IUpdateSystem
         foreach (GameMapId loadedMapId in loadedMaps)
         {
             // Unload if not in the "keep" set
-            if (!mapsToKeep.Contains(loadedMapId.Name))
+            if (!mapsToKeep.Contains(loadedMapId.Value))
             {
                 mapsToUnload.Add(loadedMapId);
             }
@@ -833,10 +929,10 @@ public class MapStreamingSystem : SystemBase, IUpdateSystem
             try
             {
                 // Get the MapRuntimeId from our cache to cleanup entities
-                // NOTE: Cache is keyed by Name (e.g., "littleroot_town"), not full ID
+                // NOTE: Cache is keyed by full ID (e.g., "base:map/hoenn/littleroot_town")
                 if (
                     _mapInfoCache.TryGetValue(
-                        mapId.Name,
+                        mapId.Value,
                         out (
                             MapInfo Info,
                             MapWorldPosition WorldPos,

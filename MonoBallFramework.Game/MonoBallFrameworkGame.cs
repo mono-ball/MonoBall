@@ -406,6 +406,9 @@ public class MonoBallFrameworkGame : Microsoft.Xna.Framework.Game, IAsyncDisposa
         pipeline.AddStep(new InitializeGameSystemsStep());
         pipeline.AddStep(new SetupApiProvidersStep());
 
+        // Phase 3.5: Load mods (after API providers are set up, before behavior systems)
+        pipeline.AddStep(new LoadModsStep());
+
         // Phase 4: Initialize behavior systems
         pipeline.AddStep(new LoadSpriteTexturesStep());
         pipeline.AddStep(new CreateMapInitializerStep());

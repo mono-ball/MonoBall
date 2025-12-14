@@ -2,6 +2,7 @@ using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using MonoBallFramework.Game.Engine.Rendering.Assets;
 using MonoBallFramework.Game.GameData.MapLoading.Tiled.Tmx;
+using MonoBallFramework.Game.GameData.MapLoading.Tiled.TiledJson;
 
 namespace MonoBallFramework.Game.GameData.MapLoading.Tiled.Services;
 
@@ -18,6 +19,61 @@ public class TilesetLoader
     {
         _assetManager = assetManager ?? throw new ArgumentNullException(nameof(assetManager));
         _logger = logger;
+    }
+
+    /// <summary>
+    ///     Asynchronously loads all tilesets from a TmxDocument.
+    ///     First loads external tileset JSON files in parallel, then loads textures.
+    /// </summary>
+    public async Task<List<LoadedTileset>> LoadTilesetsAsync(TmxDocument tmxDoc, string mapPath, CancellationToken cancellationToken = default)
+    {
+        if (tmxDoc.Tilesets.Count == 0)
+        {
+            return new List<LoadedTileset>();
+        }
+
+        // First, load all external tileset files in parallel
+        string mapDirectory = Path.GetDirectoryName(mapPath) ?? string.Empty;
+        await LoadExternalTilesetsAsync(tmxDoc, mapDirectory, cancellationToken).ConfigureAwait(false);
+
+        // Then handle texture loading
+        var loadedTilesets = new List<LoadedTileset>(tmxDoc.Tilesets.Count);
+        var textureLoadTasks = new List<Task>();
+
+        foreach (TmxTileset tileset in tmxDoc.Tilesets)
+        {
+            string tilesetId = ExtractTilesetId(tileset, mapPath);
+            tileset.Name = tilesetId;
+
+            if (tileset.Image != null && !string.IsNullOrEmpty(tileset.Image.Source))
+            {
+                if (!_assetManager.HasTexture(tilesetId))
+                {
+                    string pathForLoader = GetTexturePathForLoader(tileset, mapPath);
+
+                    // Start async texture preload if available
+                    if (!_assetManager.IsTextureLoading(tilesetId))
+                    {
+                        var preloadTask = Task.Run(() =>
+                        {
+                            _assetManager.PreloadTextureAsync(tilesetId, pathForLoader);
+                        }, cancellationToken);
+                        textureLoadTasks.Add(preloadTask);
+                    }
+                }
+            }
+
+            loadedTilesets.Add(new LoadedTileset(tileset, tilesetId));
+        }
+
+        // Wait for all texture preloads to start
+        if (textureLoadTasks.Count > 0)
+        {
+            await Task.WhenAll(textureLoadTasks).ConfigureAwait(false);
+        }
+
+        loadedTilesets.Sort((a, b) => a.Tileset.FirstGid.CompareTo(b.Tileset.FirstGid));
+        return loadedTilesets;
     }
 
     /// <summary>
@@ -52,18 +108,105 @@ public class TilesetLoader
     }
 
     /// <summary>
+    ///     Asynchronously loads external tileset files referenced in the map JSON in parallel.
+    ///     Tiled JSON format can reference external tileset files via "source" field.
+    /// </summary>
+    public async Task LoadExternalTilesetsAsync(TmxDocument tmxDoc, string mapBasePath, CancellationToken cancellationToken = default)
+    {
+        // Identify all external tilesets
+        var externalTilesets = tmxDoc.Tilesets
+            .Where(t => !string.IsNullOrEmpty(t.Source) && t.TileWidth == 0)
+            .ToList();
+
+        if (externalTilesets.Count == 0)
+        {
+            return;
+        }
+
+        // Load all external tilesets in parallel
+        var loadTasks = externalTilesets.Select(async tileset =>
+        {
+            string tilesetPath = Path.Combine(mapBasePath, tileset.Source);
+
+            if (!File.Exists(tilesetPath))
+            {
+                throw new FileNotFoundException($"External tileset not found: {tilesetPath}");
+            }
+
+            try
+            {
+                // Use stream-based async deserialization with source-generated context
+                await using var stream = File.OpenRead(tilesetPath);
+                var tilesetData = await JsonSerializer.DeserializeAsync(stream, TiledJsonContext.Default.TiledJsonTileset, cancellationToken).ConfigureAwait(false);
+
+                if (tilesetData == null)
+                {
+                    throw new InvalidOperationException($"Failed to deserialize tileset from {tilesetPath}");
+                }
+
+                // Extract tileset properties from deserialized object
+                int originalFirstGid = tileset.FirstGid;
+                tileset.Name = tilesetData.Name ?? "";
+                tileset.TileWidth = tilesetData.TileWidth ?? 0;
+                tileset.TileHeight = tilesetData.TileHeight ?? 0;
+                tileset.TileCount = tilesetData.TileCount ?? 0;
+                tileset.Margin = tilesetData.Margin ?? 0;
+                tileset.Spacing = tilesetData.Spacing ?? 0;
+
+                // Image data is at top level in tileset JSON
+                if (!string.IsNullOrEmpty(tilesetData.Image))
+                {
+                    string imageValue = tilesetData.Image;
+                    string tilesetDir = Path.GetDirectoryName(tilesetPath) ?? string.Empty;
+                    string imageAbsolute = Path.GetFullPath(
+                        Path.Combine(tilesetDir, imageValue)
+                    );
+
+                    tileset.Image = new TmxImage
+                    {
+                        Source = imageAbsolute,
+                        Width = tilesetData.ImageWidth ?? 0,
+                        Height = tilesetData.ImageHeight ?? 0,
+                    };
+                }
+
+                tileset.FirstGid = originalFirstGid; // Preserve from map reference
+
+                // Parse tile animations from tiles array
+                if (tilesetData.Tiles != null && tilesetData.Tiles.Count > 0)
+                {
+                    ParseTilesetAnimationsFromData(tilesetData.Tiles, tileset);
+                }
+
+                _logger?.LogDebug(
+                    "Loaded external tileset: {Name} ({Width}x{Height}) with {AnimCount} animations from {Path}",
+                    tileset.Name,
+                    tileset.TileWidth,
+                    tileset.TileHeight,
+                    tileset.Animations.Count,
+                    tileset.Source
+                );
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(
+                    ex,
+                    "Failed to load external tileset from {Path}",
+                    tilesetPath
+                );
+                throw;
+            }
+        });
+
+        await Task.WhenAll(loadTasks).ConfigureAwait(false);
+    }
+
+    /// <summary>
     ///     Loads external tileset files referenced in the map JSON.
     ///     Tiled JSON format can reference external tileset files via "source" field.
     /// </summary>
     public void LoadExternalTilesets(TmxDocument tmxDoc, string mapBasePath)
     {
-        var jsonOptions = new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true,
-            ReadCommentHandling = JsonCommentHandling.Skip,
-            AllowTrailingCommas = true,
-        };
-
         foreach (TmxTileset tileset in tmxDoc.Tilesets)
         // Check if this is an external tileset reference (has "Source" but no tile data)
         {
@@ -76,40 +219,28 @@ public class TilesetLoader
                 {
                     try
                     {
+                        // Use source-generated context for deserialization
                         string tilesetJson = File.ReadAllText(tilesetPath);
-                        // Use dynamic object since tileset JSON format differs from map JSON
-                        using var jsonDoc = JsonDocument.Parse(tilesetJson);
-                        JsonElement root = jsonDoc.RootElement;
+                        var tilesetData = JsonSerializer.Deserialize(tilesetJson, TiledJsonContext.Default.TiledJsonTileset);
 
-                        // Extract tileset properties from JSON (flat structure)
+                        if (tilesetData == null)
+                        {
+                            throw new InvalidOperationException($"Failed to deserialize tileset from {tilesetPath}");
+                        }
+
+                        // Extract tileset properties from deserialized object
                         int originalFirstGid = tileset.FirstGid;
-                        tileset.Name = root.TryGetProperty("name", out JsonElement name)
-                            ? name.GetString() ?? ""
-                            : "";
-                        tileset.TileWidth = root.TryGetProperty("tilewidth", out JsonElement tw)
-                            ? tw.GetInt32()
-                            : 0;
-                        tileset.TileHeight = root.TryGetProperty("tileheight", out JsonElement th)
-                            ? th.GetInt32()
-                            : 0;
-                        tileset.TileCount = root.TryGetProperty("tilecount", out JsonElement tc)
-                            ? tc.GetInt32()
-                            : 0;
-                        tileset.Margin = root.TryGetProperty("margin", out JsonElement mg)
-                            ? mg.GetInt32()
-                            : 0;
-                        tileset.Spacing = root.TryGetProperty("spacing", out JsonElement sp)
-                            ? sp.GetInt32()
-                            : 0;
+                        tileset.Name = tilesetData.Name ?? "";
+                        tileset.TileWidth = tilesetData.TileWidth ?? 0;
+                        tileset.TileHeight = tilesetData.TileHeight ?? 0;
+                        tileset.TileCount = tilesetData.TileCount ?? 0;
+                        tileset.Margin = tilesetData.Margin ?? 0;
+                        tileset.Spacing = tilesetData.Spacing ?? 0;
 
                         // Image data is at top level in tileset JSON
-                        if (
-                            root.TryGetProperty("image", out JsonElement img)
-                            && root.TryGetProperty("imagewidth", out JsonElement iw)
-                            && root.TryGetProperty("imageheight", out JsonElement ih)
-                        )
+                        if (!string.IsNullOrEmpty(tilesetData.Image))
                         {
-                            string imageValue = img.GetString() ?? "";
+                            string imageValue = tilesetData.Image;
                             string tilesetDir = Path.GetDirectoryName(tilesetPath) ?? string.Empty;
                             string imageAbsolute = Path.GetFullPath(
                                 Path.Combine(tilesetDir, imageValue)
@@ -118,17 +249,17 @@ public class TilesetLoader
                             tileset.Image = new TmxImage
                             {
                                 Source = imageAbsolute,
-                                Width = iw.GetInt32(),
-                                Height = ih.GetInt32(),
+                                Width = tilesetData.ImageWidth ?? 0,
+                                Height = tilesetData.ImageHeight ?? 0,
                             };
                         }
 
                         tileset.FirstGid = originalFirstGid; // Preserve from map reference
 
-                        // Parse tile animations from "tiles" array
-                        if (root.TryGetProperty("tiles", out JsonElement tilesArray))
+                        // Parse tile animations from tiles array
+                        if (tilesetData.Tiles != null && tilesetData.Tiles.Count > 0)
                         {
-                            ParseTilesetAnimations(tilesArray, tileset);
+                            ParseTilesetAnimationsFromData(tilesetData.Tiles, tileset);
                         }
 
                         _logger?.LogDebug(
@@ -153,6 +284,60 @@ public class TilesetLoader
                 else
                 {
                     throw new FileNotFoundException($"External tileset not found: {tilesetPath}");
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    ///     Parses tile animations and properties from deserialized TiledJsonTileDefinition objects.
+    /// </summary>
+    private void ParseTilesetAnimationsFromData(List<TiledJsonTileDefinition> tiles, TmxTileset tileset)
+    {
+        foreach (var tile in tiles)
+        {
+            int tileId = tile.Id;
+
+            // Parse animation data
+            if (tile.Animation != null && tile.Animation.Count > 0)
+            {
+                var frameTileIds = new List<int>();
+                var frameDurations = new List<float>();
+
+                foreach (var frame in tile.Animation)
+                {
+                    frameTileIds.Add(frame.TileId);
+                    // Convert milliseconds to seconds
+                    frameDurations.Add(frame.Duration / 1000f);
+                }
+
+                if (frameTileIds.Count > 0)
+                {
+                    tileset.Animations[tileId] = new TmxTileAnimation
+                    {
+                        FrameTileIds = frameTileIds.ToArray(),
+                        FrameDurations = frameDurations.ToArray(),
+                    };
+                }
+            }
+
+            // Parse tile properties (collision, ledge, etc.)
+            if (tile.Properties != null && tile.Properties.Count > 0)
+            {
+                var properties = new Dictionary<string, object>();
+
+                foreach (var prop in tile.Properties)
+                {
+                    if (!string.IsNullOrEmpty(prop.Name) && prop.Value.ValueKind != JsonValueKind.Undefined)
+                    {
+                        // Store JsonElement directly - downstream code handles conversion
+                        properties[prop.Name] = prop.Value;
+                    }
+                }
+
+                if (properties.Count > 0)
+                {
+                    tileset.TileProperties[tileId] = properties;
                 }
             }
         }
@@ -251,23 +436,7 @@ public class TilesetLoader
             throw new InvalidOperationException("Tileset has no image source");
         }
 
-        string mapDirectory = Path.GetDirectoryName(mapPath) ?? string.Empty;
-
-        string tilesetImageAbsolutePath = Path.IsPathRooted(tileset.Image.Source)
-            ? tileset.Image.Source
-            : Path.GetFullPath(Path.Combine(mapDirectory, tileset.Image.Source));
-
-        // If using AssetManager, make path relative to Assets root
-        // Otherwise (e.g., in tests with stub), use the path directly
-        string pathForLoader;
-        if (_assetManager is AssetManager assetManager)
-        {
-            pathForLoader = Path.GetRelativePath(assetManager.AssetRoot, tilesetImageAbsolutePath);
-        }
-        else
-        {
-            pathForLoader = tilesetImageAbsolutePath;
-        }
+        string pathForLoader = GetTexturePathForLoader(tileset, mapPath);
 
         try
         {
@@ -289,6 +458,34 @@ public class TilesetLoader
                 pathForLoader
             );
             throw;
+        }
+    }
+
+    /// <summary>
+    ///     Gets the texture path for the asset loader, handling both AssetManager and test stubs.
+    /// </summary>
+    private string GetTexturePathForLoader(TmxTileset tileset, string mapPath)
+    {
+        if (tileset.Image == null || string.IsNullOrEmpty(tileset.Image.Source))
+        {
+            throw new InvalidOperationException("Tileset has no image source");
+        }
+
+        string mapDirectory = Path.GetDirectoryName(mapPath) ?? string.Empty;
+
+        string tilesetImageAbsolutePath = Path.IsPathRooted(tileset.Image.Source)
+            ? tileset.Image.Source
+            : Path.GetFullPath(Path.Combine(mapDirectory, tileset.Image.Source));
+
+        // If using AssetManager, make path relative to Assets root
+        // Otherwise (e.g., in tests with stub), use the path directly
+        if (_assetManager is AssetManager assetManager)
+        {
+            return Path.GetRelativePath(assetManager.AssetRoot, tilesetImageAbsolutePath);
+        }
+        else
+        {
+            return tilesetImageAbsolutePath;
         }
     }
 
@@ -316,6 +513,239 @@ public class TilesetLoader
         // Last resort: generate ID from map path
         string mapName = Path.GetFileNameWithoutExtension(mapPath);
         return !string.IsNullOrEmpty(mapName) ? mapName : "default-tileset";
+    }
+
+    /// <summary>
+    ///     Asynchronously preloads tileset JSON files and textures for a map.
+    ///     This is the async version for predictive loading during map transitions.
+    /// </summary>
+    /// <param name="mapPath">Full path to the map file.</param>
+    /// <param name="cancellationToken">Cancellation token to cancel the preload operation.</param>
+    public async Task PreloadMapTilesetsAsync(string mapPath, CancellationToken cancellationToken = default)
+    {
+        if (!File.Exists(mapPath))
+        {
+            _logger?.LogWarning("Cannot preload tilesets - map file not found: {MapPath}", mapPath);
+            return;
+        }
+
+        try
+        {
+            // Parse the map to find tileset references
+            string mapContent = await File.ReadAllTextAsync(mapPath, cancellationToken).ConfigureAwait(false);
+            string mapDirectory = Path.GetDirectoryName(mapPath) ?? string.Empty;
+
+            // Parse as JSON to get tileset info
+            using var jsonDoc = JsonDocument.Parse(mapContent);
+            var root = jsonDoc.RootElement;
+
+            if (!root.TryGetProperty("tilesets", out var tilesetsArray))
+            {
+                return;
+            }
+
+            // Load all external tileset JSON files in parallel
+            var tilesetLoadTasks = new List<Task>();
+
+            foreach (var tilesetElement in tilesetsArray.EnumerateArray())
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                // Check for external tileset reference
+                if (tilesetElement.TryGetProperty("source", out var sourceElement))
+                {
+                    string? source = sourceElement.GetString();
+                    if (!string.IsNullOrEmpty(source))
+                    {
+                        var loadTask = LoadAndPreloadExternalTilesetAsync(source, mapDirectory, cancellationToken);
+                        tilesetLoadTasks.Add(loadTask);
+                    }
+                }
+                else if (tilesetElement.TryGetProperty("image", out var imageElement))
+                {
+                    // Inline tileset - preload texture directly
+                    string? imagePath = imageElement.GetString();
+                    if (!string.IsNullOrEmpty(imagePath))
+                    {
+                        string tilesetId = Path.GetFileNameWithoutExtension(imagePath);
+                        string fullImagePath = Path.GetFullPath(Path.Combine(mapDirectory, imagePath));
+
+                        if (!_assetManager.HasTexture(tilesetId) && !_assetManager.IsTextureLoading(tilesetId))
+                        {
+                            string pathForLoader = GetPathForAssetManager(fullImagePath);
+                            var preloadTask = Task.Run(() =>
+                            {
+                                _assetManager.PreloadTextureAsync(tilesetId, pathForLoader);
+                            }, cancellationToken);
+                            tilesetLoadTasks.Add(preloadTask);
+                        }
+                    }
+                }
+            }
+
+            // Wait for all tileset loads to complete
+            if (tilesetLoadTasks.Count > 0)
+            {
+                await Task.WhenAll(tilesetLoadTasks).ConfigureAwait(false);
+                _logger?.LogDebug("Preloaded {Count} tilesets for map: {MapPath}", tilesetLoadTasks.Count, mapPath);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogWarning(ex, "Failed to preload map tilesets: {MapPath}", mapPath);
+        }
+    }
+
+    /// <summary>
+    ///     Loads an external tileset JSON file and preloads its texture asynchronously.
+    /// </summary>
+    private async Task LoadAndPreloadExternalTilesetAsync(string tilesetSource, string mapDirectory, CancellationToken cancellationToken)
+    {
+        string tilesetPath = Path.Combine(mapDirectory, tilesetSource);
+        if (!File.Exists(tilesetPath))
+        {
+            _logger?.LogWarning("External tileset not found for preload: {Path}", tilesetPath);
+            return;
+        }
+
+        try
+        {
+            // Use stream-based async deserialization with source-generated context
+            await using var stream = File.OpenRead(tilesetPath);
+            var tilesetData = await JsonSerializer.DeserializeAsync(stream, TiledJsonContext.Default.TiledJsonTileset, cancellationToken).ConfigureAwait(false);
+
+            if (tilesetData != null && !string.IsNullOrEmpty(tilesetData.Image))
+            {
+                string imagePath = tilesetData.Image;
+                string tilesetDir = Path.GetDirectoryName(tilesetPath) ?? string.Empty;
+                string absoluteImagePath = Path.GetFullPath(Path.Combine(tilesetDir, imagePath));
+                string tilesetId = Path.GetFileNameWithoutExtension(imagePath);
+
+                // Preload texture if not already loaded
+                if (!_assetManager.HasTexture(tilesetId) && !_assetManager.IsTextureLoading(tilesetId))
+                {
+                    string pathForLoader = GetPathForAssetManager(absoluteImagePath);
+                    _assetManager.PreloadTextureAsync(tilesetId, pathForLoader);
+                    _logger?.LogDebug("Started async preload for external tileset: {TilesetId}", tilesetId);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogWarning(ex, "Failed to preload external tileset: {Path}", tilesetPath);
+        }
+    }
+
+    /// <summary>
+    ///     Converts an absolute path to a path suitable for the asset manager.
+    /// </summary>
+    private string GetPathForAssetManager(string absolutePath)
+    {
+        if (_assetManager is AssetManager assetManager)
+        {
+            return Path.GetRelativePath(assetManager.AssetRoot, absolutePath);
+        }
+        else
+        {
+            return absolutePath;
+        }
+    }
+
+    /// <summary>
+    ///     Preloads tileset textures asynchronously for an adjacent map.
+    ///     Call this before the player enters the map to reduce stutter.
+    /// </summary>
+    /// <param name="mapPath">Full path to the map file.</param>
+    public void PreloadMapTexturesAsync(string mapPath)
+    {
+        if (!File.Exists(mapPath))
+        {
+            _logger?.LogWarning("Cannot preload textures - map file not found: {MapPath}", mapPath);
+            return;
+        }
+
+        try
+        {
+            // Parse the map to find tileset references
+            string mapContent = File.ReadAllText(mapPath);
+            string mapDirectory = Path.GetDirectoryName(mapPath) ?? string.Empty;
+
+            // Parse as JSON to get tileset info
+            using var jsonDoc = System.Text.Json.JsonDocument.Parse(mapContent);
+            var root = jsonDoc.RootElement;
+
+            if (!root.TryGetProperty("tilesets", out var tilesetsArray))
+            {
+                return;
+            }
+
+            foreach (var tilesetElement in tilesetsArray.EnumerateArray())
+            {
+                string? imagePath = null;
+                string? tilesetId = null;
+
+                // Get image path - either directly or from external tileset
+                if (tilesetElement.TryGetProperty("image", out var imageElement))
+                {
+                    imagePath = imageElement.GetString();
+                    tilesetId = Path.GetFileNameWithoutExtension(imagePath);
+                }
+                else if (tilesetElement.TryGetProperty("source", out var sourceElement))
+                {
+                    // External tileset - need to read it
+                    string? source = sourceElement.GetString();
+                    if (!string.IsNullOrEmpty(source))
+                    {
+                        string tilesetPath = Path.Combine(mapDirectory, source);
+                        if (File.Exists(tilesetPath))
+                        {
+                            try
+                            {
+                                // Use source-generated context for deserialization
+                                string tilesetJson = File.ReadAllText(tilesetPath);
+                                var tilesetData = JsonSerializer.Deserialize(tilesetJson, TiledJsonContext.Default.TiledJsonTileset);
+
+                                if (tilesetData != null && !string.IsNullOrEmpty(tilesetData.Image))
+                                {
+                                    imagePath = tilesetData.Image;
+                                    string tilesetDir = Path.GetDirectoryName(tilesetPath) ?? string.Empty;
+
+                                    // Make image path relative to map directory for asset manager
+                                    string absoluteImagePath = Path.GetFullPath(Path.Combine(tilesetDir, imagePath));
+                                    if (_assetManager is AssetManager assetManager)
+                                    {
+                                        imagePath = Path.GetRelativePath(assetManager.AssetRoot, absoluteImagePath);
+                                    }
+                                    else
+                                    {
+                                        imagePath = absoluteImagePath;
+                                    }
+                                    tilesetId = Path.GetFileNameWithoutExtension(imagePath);
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger?.LogWarning(ex, "Failed to read external tileset for preload: {Path}", tilesetPath);
+                            }
+                        }
+                    }
+                }
+
+                // Start async preload if we have both ID and path
+                if (!string.IsNullOrEmpty(tilesetId) && !string.IsNullOrEmpty(imagePath))
+                {
+                    if (!_assetManager.HasTexture(tilesetId) && !_assetManager.IsTextureLoading(tilesetId))
+                    {
+                        _assetManager.PreloadTextureAsync(tilesetId, imagePath);
+                        _logger?.LogDebug("Started async preload for tileset: {TilesetId}", tilesetId);
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogWarning(ex, "Failed to preload map textures: {MapPath}", mapPath);
+        }
     }
 }
 

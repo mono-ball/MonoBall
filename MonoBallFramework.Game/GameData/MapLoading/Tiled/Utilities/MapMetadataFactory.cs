@@ -17,9 +17,9 @@ namespace MonoBallFramework.Game.GameData.MapLoading.Tiled.Utilities;
 /// </summary>
 public class MapMetadataFactory
 {
-    private readonly ILogger<MapMetadataFactory>? _logger;
+    private readonly ILogger? _logger;
 
-    public MapMetadataFactory(ILogger<MapMetadataFactory>? logger = null)
+    public MapMetadataFactory(ILogger? logger = null)
     {
         _logger = logger;
     }
@@ -37,10 +37,10 @@ public class MapMetadataFactory
     )
     {
         // Create MapInfo entity for map metadata with MapWarps spatial index
-        // Use GameMapId for unified identification and Name (short name) for lookups
+        // Use GameMapId for unified identification and Value (full ID) for consistent lookups
         var mapInfo = new MapInfo(
             mapId,
-            mapDef.MapId.Name,
+            mapId.Value,
             tmxDoc.Width,
             tmxDoc.Height,
             tmxDoc.TileWidth
@@ -168,11 +168,33 @@ public class MapMetadataFactory
     ///     Adds connection components from Tiled properties (connection_north, etc.).
     ///     Falls back to MapEntity for statically-defined connections.
     /// </summary>
-    private static void AddConnectionsFromTiledProperties(
+    private void AddConnectionsFromTiledProperties(
         Entity mapInfoEntity,
         Dictionary<string, object> properties,
         MapEntity mapDef)
     {
+        _logger?.LogDebug(
+            "AddConnectionsFromTiledProperties: Processing map {MapId}, properties count={Count}",
+            mapDef.MapId.Value,
+            properties?.Count ?? 0
+        );
+
+        // Log all property keys for debugging
+        if (properties != null)
+        {
+            foreach (var key in properties.Keys)
+            {
+                if (key.StartsWith("connection_"))
+                {
+                    _logger?.LogInformation(
+                        "AddConnectionsFromTiledProperties: Found key '{Key}' with value type {ValueType}",
+                        key,
+                        properties[key]?.GetType().Name ?? "null"
+                    );
+                }
+            }
+        }
+
         // Try to get connections from Tiled properties first
         var (northId, northOffset) = ExtractConnectionFromProperty(properties, "connection_north");
         var (southId, southOffset) = ExtractConnectionFromProperty(properties, "connection_south");
@@ -202,36 +224,81 @@ public class MapMetadataFactory
         }
 
         // Add connection components
+        int connectionsAdded = 0;
         if (northId != null)
         {
             mapInfoEntity.Add(new NorthConnection(northId, northOffset));
+            connectionsAdded++;
+            _logger?.LogInformation(
+                "AddConnectionsFromTiledProperties: Added NORTH connection to {Target} (offset={Offset}) for map {MapId}",
+                northId.Value,
+                northOffset,
+                mapDef.MapId.Value
+            );
         }
         if (southId != null)
         {
             mapInfoEntity.Add(new SouthConnection(southId, southOffset));
+            connectionsAdded++;
+            _logger?.LogInformation(
+                "AddConnectionsFromTiledProperties: Added SOUTH connection to {Target} (offset={Offset}) for map {MapId}",
+                southId.Value,
+                southOffset,
+                mapDef.MapId.Value
+            );
         }
         if (eastId != null)
         {
             mapInfoEntity.Add(new EastConnection(eastId, eastOffset));
+            connectionsAdded++;
+            _logger?.LogInformation(
+                "AddConnectionsFromTiledProperties: Added EAST connection to {Target} (offset={Offset}) for map {MapId}",
+                eastId.Value,
+                eastOffset,
+                mapDef.MapId.Value
+            );
         }
         if (westId != null)
         {
             mapInfoEntity.Add(new WestConnection(westId, westOffset));
+            connectionsAdded++;
+            _logger?.LogInformation(
+                "AddConnectionsFromTiledProperties: Added WEST connection to {Target} (offset={Offset}) for map {MapId}",
+                westId.Value,
+                westOffset,
+                mapDef.MapId.Value
+            );
         }
+
+        _logger?.LogInformation(
+            "AddConnectionsFromTiledProperties: Added {Count} connection(s) for map {MapId}",
+            connectionsAdded,
+            mapDef.MapId.Value
+        );
     }
 
     /// <summary>
     ///     Extracts map ID and offset from a Tiled connection property.
     ///     Handles both JsonElement and Dictionary formats.
     /// </summary>
-    private static (GameMapId? MapId, int Offset) ExtractConnectionFromProperty(
+    private (GameMapId? MapId, int Offset) ExtractConnectionFromProperty(
         Dictionary<string, object> properties,
         string propertyName)
     {
-        if (!properties.TryGetValue(propertyName, out object? value) || value == null)
+        if (properties == null || !properties.TryGetValue(propertyName, out object? value) || value == null)
         {
+            _logger?.LogDebug(
+                "ExtractConnectionFromProperty: Property '{PropertyName}' not found or null",
+                propertyName
+            );
             return (null, 0);
         }
+
+        _logger?.LogDebug(
+            "ExtractConnectionFromProperty: Property '{PropertyName}' has type {ValueType}",
+            propertyName,
+            value.GetType().FullName
+        );
 
         string? mapIdStr = null;
         int offset = 0;
@@ -239,9 +306,26 @@ public class MapMetadataFactory
         // Handle JsonElement case (most common from Tiled JSON parsing)
         if (value is JsonElement je && je.ValueKind == JsonValueKind.Object)
         {
+            _logger?.LogDebug(
+                "ExtractConnectionFromProperty: Processing JsonElement for '{PropertyName}'",
+                propertyName
+            );
+
             if (je.TryGetProperty("map", out JsonElement mapProp))
             {
                 mapIdStr = mapProp.GetString();
+                _logger?.LogDebug(
+                    "ExtractConnectionFromProperty: Found 'map' property with value '{MapId}'",
+                    mapIdStr
+                );
+            }
+            else
+            {
+                _logger?.LogWarning(
+                    "ExtractConnectionFromProperty: JsonElement for '{PropertyName}' has no 'map' property. Raw: {Raw}",
+                    propertyName,
+                    je.GetRawText()
+                );
             }
             if (je.TryGetProperty("offset", out JsonElement offsetProp) &&
                 offsetProp.ValueKind == JsonValueKind.Number)
@@ -252,6 +336,11 @@ public class MapMetadataFactory
         // Handle Dictionary case (if pre-converted)
         else if (value is Dictionary<string, object> dict)
         {
+            _logger?.LogDebug(
+                "ExtractConnectionFromProperty: Processing Dictionary for '{PropertyName}'",
+                propertyName
+            );
+
             if (dict.TryGetValue("map", out object? mapValue))
             {
                 mapIdStr = mapValue?.ToString();
@@ -272,8 +361,22 @@ public class MapMetadataFactory
                 }
             }
         }
+        else
+        {
+            _logger?.LogWarning(
+                "ExtractConnectionFromProperty: Unknown value type {ValueType} for property '{PropertyName}'",
+                value.GetType().FullName,
+                propertyName
+            );
+        }
 
         GameMapId? mapId = GameMapId.TryCreate(mapIdStr);
+        _logger?.LogInformation(
+            "ExtractConnectionFromProperty: Result for '{PropertyName}': MapId={MapId}, Offset={Offset}",
+            propertyName,
+            mapId?.Value ?? "null",
+            offset
+        );
         return (mapId, offset);
     }
 }

@@ -42,6 +42,7 @@ public static class GameServicesExtensions
             ILoggerFactory loggerFactory = sp.GetRequiredService<ILoggerFactory>();
             SystemManager systemManager = sp.GetRequiredService<SystemManager>();
             EntityPoolManager poolManager = sp.GetRequiredService<EntityPoolManager>();
+            World world = sp.GetRequiredService<World>();
 
             // PropertyMapperRegistry is created lazily when needed
             ILogger<PropertyMapperRegistry> mapperLogger = sp.GetRequiredService<
@@ -57,6 +58,7 @@ public static class GameServicesExtensions
                 loggerFactory,
                 systemManager,
                 poolManager,
+                world,
                 propertyMapperRegistry,
                 mapDefinitionService,
                 gameStateApi
