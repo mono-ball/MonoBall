@@ -1,9 +1,8 @@
 using System.Collections.Concurrent;
 using Microsoft.Extensions.Logging;
+using MonoBallFramework.Game.Engine.Audio.Core;
 using MonoBallFramework.Game.Engine.Content;
 using MonoBallFramework.Game.GameData.Entities;
-using NAudio.Vorbis;
-using NAudio.Wave;
 
 namespace MonoBallFramework.Game.Engine.Audio.Services;
 
@@ -18,8 +17,8 @@ public class CachedTrack : IDisposable
     /// <summary>Cached audio data (samples)</summary>
     public required CachedAudioData AudioData { get; init; }
 
-    /// <summary>Wave format of the audio</summary>
-    public required WaveFormat WaveFormat { get; init; }
+    /// <summary>Audio format of the track</summary>
+    public required AudioFormat AudioFormat { get; init; }
 
     /// <summary>Loop start position in samples (per channel). Null = loop from beginning.</summary>
     public int? LoopStartSamples { get; init; }
@@ -35,12 +34,12 @@ public class CachedTrack : IDisposable
     {
         get
         {
-            if (AudioData?.Samples == null || WaveFormat == null)
+            if (AudioData?.Samples == null || AudioFormat == null)
                 return TimeSpan.Zero;
 
             int totalSamples = AudioData.Samples.Length;
-            int channels = WaveFormat.Channels;
-            int sampleRate = WaveFormat.SampleRate;
+            int channels = AudioFormat.Channels;
+            int sampleRate = AudioFormat.SampleRate;
 
             if (channels == 0 || sampleRate == 0)
                 return TimeSpan.Zero;
@@ -65,7 +64,7 @@ public class CachedTrack : IDisposable
 /// </summary>
 public class CachedAudioData
 {
-    public required WaveFormat WaveFormat { get; init; }
+    public required AudioFormat AudioFormat { get; init; }
     public required float[] Samples { get; init; }
 }
 
@@ -200,7 +199,7 @@ public class TrackCache : ITrackCache
                 {
                     TrackId = trackId,
                     AudioData = audioData,
-                    WaveFormat = audioData.WaveFormat,
+                    AudioFormat = audioData.AudioFormat,
                     LoopStartSamples = definition.LoopStartSamples,
                     LoopLengthSamples = definition.LoopLengthSamples,
                     LastAccessed = DateTime.UtcNow
@@ -311,29 +310,26 @@ public class TrackCache : ITrackCache
     }
 
     /// <summary>
-    /// Loads an audio file from disk into memory
+    /// Loads an audio file from disk into memory using NVorbis
     /// </summary>
     private CachedAudioData? LoadAudioFile(string filePath)
     {
         try
         {
-            using var reader = new VorbisWaveReader(filePath);
+            using var reader = new VorbisReader(filePath);
 
-            var format = reader.WaveFormat;
+            var format = reader.Format;
 
-            // Calculate total samples first to pre-allocate array
-            var sampleProvider = reader.ToSampleProvider();
-            long totalBytes = reader.Length;
-            int bytesPerSample = reader.WaveFormat.BitsPerSample / 8;
-            long totalSamples = totalBytes / bytesPerSample;
+            // Calculate total samples to pre-allocate array
+            long totalSamples = reader.TotalSamples;
 
             // Pre-allocate exact size needed - eliminates 3x memory allocations
             var samples = new float[totalSamples];
-            var buffer = new float[reader.WaveFormat.SampleRate * reader.WaveFormat.Channels];
+            var buffer = new float[format.SampleRate * format.Channels];
             int offset = 0;
             int samplesRead;
 
-            while ((samplesRead = sampleProvider.Read(buffer, 0, buffer.Length)) > 0)
+            while ((samplesRead = reader.Read(buffer, 0, buffer.Length)) > 0)
             {
                 // Direct array copy instead of individual Add() calls
                 Buffer.BlockCopy(buffer, 0, samples, offset * sizeof(float), samplesRead * sizeof(float));
@@ -342,7 +338,7 @@ public class TrackCache : ITrackCache
 
             return new CachedAudioData
             {
-                WaveFormat = format,
+                AudioFormat = format,
                 Samples = samples
             };
         }

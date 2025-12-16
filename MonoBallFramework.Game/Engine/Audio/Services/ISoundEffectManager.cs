@@ -1,11 +1,11 @@
 namespace MonoBallFramework.Game.Engine.Audio.Services;
 
 /// <summary>
-///     Interface for NAudio-based sound effect management.
+///     Interface for sound effect management.
 ///     Provides OGG file playback with advanced control over volume, pitch, and pan.
 ///     Supports concurrent playback with automatic cleanup and resource management.
 /// </summary>
-public interface INAudioSoundEffectManager : IDisposable
+public interface ISoundEffectManager : IDisposable
 {
     /// <summary>
     ///     Gets or sets the master volume for all sound effects (0.0 to 1.0).
@@ -84,7 +84,7 @@ public interface INAudioSoundEffectManager : IDisposable
 
     /// <summary>
     ///     Preloads audio files into cache for faster playback.
-    ///     Note: NAudio implementation uses streaming, so this may have minimal effect.
+    ///     Note: Streaming implementations may not benefit from preloading.
     /// </summary>
     /// <param name="trackIds">Track IDs to preload from AudioRegistry.</param>
     void Preload(params string[] trackIds);
@@ -136,3 +136,4 @@ public interface ILoopingSoundHandle : IDisposable
     /// </summary>
     void Resume();
 }
+

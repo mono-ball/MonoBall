@@ -1,12 +1,12 @@
+using MonoBallFramework.Game.Engine.Audio.Core;
 using MonoBallFramework.Game.Engine.Audio.Services.Streaming;
-using NAudio.Wave.SampleProviders;
 
 namespace MonoBallFramework.Game.Engine.Audio.Services;
 
 /// <summary>
 ///     Centralized fade state management for music players.
 ///     Handles all fade types: FadeIn, FadeOut, FadeOutThenPlay, FadeOutThenFadeIn, and Crossfading.
-///     Eliminates ~70% code duplication between NAudioMusicPlayer and NAudioStreamingMusicPlayer.
+///     Eliminates ~70% code duplication between music player implementations.
 /// </summary>
 public class FadeController
 {
@@ -237,7 +237,7 @@ public class FadeController
     ///     Applies the current fade volume to a volume provider.
     ///     Call this after Update() to sync the audio volume.
     /// </summary>
-    /// <param name="volumeProvider">The NAudio volume provider to update.</param>
+    /// <param name="volumeProvider">The volume provider to update.</param>
     public void ApplyToVolumeProvider(VolumeSampleProvider? volumeProvider)
     {
         if (volumeProvider != null)
@@ -271,5 +271,3 @@ public class FadeController
     /// </summary>
     public bool IsComplete => Progress >= 1.0f;
 }
-
-// Note: FadeState enum is defined in MonoBallFramework.Game.Engine.Audio.Services.Streaming.StreamingPlaybackState

@@ -16,7 +16,8 @@ namespace MonoBallFramework.Game.Infrastructure.ServiceRegistration;
 public static class AudioServicesExtensions
 {
     /// <summary>
-    /// Registers NAudio-based audio services with the DI container.
+    /// Registers PortAudio-based audio services with the DI container.
+    /// Cross-platform audio implementation using PortAudioSharp2 and NVorbis.
     /// </summary>
     public static IServiceCollection AddAudioServices(
         this IServiceCollection services,
@@ -38,40 +39,40 @@ public static class AudioServicesExtensions
             return registry;
         });
 
-        // Register NAudio-based sound effect manager
-        services.AddSingleton<INAudioSoundEffectManager>(sp =>
+        // Register PortAudio-based sound effect manager
+        services.AddSingleton<ISoundEffectManager>(sp =>
         {
             var audioRegistry = sp.GetRequiredService<AudioRegistry>();
             var audioConfig = sp.GetRequiredService<AudioConfiguration>();
-            var logger = sp.GetService<ILogger<NAudioSoundEffectManager>>();
+            var logger = sp.GetService<ILogger<PortAudioSoundEffectManager>>();
 
-            return new NAudioSoundEffectManager(
+            return new PortAudioSoundEffectManager(
                 audioRegistry,
                 audioConfig.MaxConcurrentSounds,
                 logger);
         });
 
-        // Register NAudio-based streaming music player
+        // Register PortAudio-based streaming music player
         // Streams audio on-demand (~64KB per stream vs ~32MB per cached track)
         services.AddSingleton<IMusicPlayer>(sp =>
         {
             var audioRegistry = sp.GetRequiredService<AudioRegistry>();
             var contentProvider = sp.GetRequiredService<IContentProvider>();
-            var logger = sp.GetService<ILogger<NAudioStreamingMusicPlayer>>();
-            return new NAudioStreamingMusicPlayer(audioRegistry, contentProvider, logger);
+            var logger = sp.GetService<ILogger<PortAudioStreamingMusicPlayer>>();
+            return new PortAudioStreamingMusicPlayer(audioRegistry, contentProvider, logger);
         });
 
-        // Register NAudio-based audio service
+        // Register audio service
         services.AddSingleton<IAudioService>(sp =>
         {
             var audioRegistry = sp.GetRequiredService<AudioRegistry>();
-            var soundEffectManager = sp.GetRequiredService<INAudioSoundEffectManager>();
+            var soundEffectManager = sp.GetRequiredService<ISoundEffectManager>();
             var musicPlayer = sp.GetRequiredService<IMusicPlayer>();
             var eventBus = sp.GetRequiredService<IEventBus>();
             var audioConfig = sp.GetRequiredService<AudioConfiguration>();
-            var logger = sp.GetService<ILogger<NAudioService>>();
+            var logger = sp.GetService<ILogger<AudioService>>();
 
-            var service = new NAudioService(
+            var service = new AudioService(
                 audioRegistry,
                 soundEffectManager,
                 musicPlayer,

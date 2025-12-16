@@ -1,15 +1,13 @@
 using System.Collections.Concurrent;
 using Microsoft.Extensions.Logging;
+using MonoBallFramework.Game.Engine.Audio.Core;
 using MonoBallFramework.Game.Engine.Content;
 using MonoBallFramework.Game.GameData.Entities;
-using NAudio.Vorbis;
-using NAudio.Wave;
-using NAudio.Wave.SampleProviders;
 
 namespace MonoBallFramework.Game.Engine.Audio.Services.Streaming;
 
 /// <summary>
-/// Helper class for integrating streaming audio into NAudioMusicPlayer.
+/// Helper class for integrating streaming audio into music players.
 /// Provides methods for creating streaming providers and managing track metadata.
 /// Thread-safe for concurrent access.
 /// </summary>
@@ -69,18 +67,18 @@ public class StreamingMusicPlayerHelper
                 throw new FileNotFoundException($"Audio file not found: {definition.AudioPath}");
             }
 
-            // Briefly open the file to read metadata (wave format)
-            WaveFormat waveFormat;
-            using (var reader = new VorbisWaveReader(fullPath))
+            // Briefly open the file to read metadata (audio format)
+            AudioFormat audioFormat;
+            using (var reader = new VorbisReader(fullPath))
             {
-                waveFormat = reader.WaveFormat;
+                audioFormat = reader.Format;
             }
 
             var trackData = new StreamingTrackData
             {
                 TrackName = trackName,
                 FilePath = fullPath,
-                WaveFormat = waveFormat,
+                AudioFormat = audioFormat,
                 LoopStartSamples = definition.LoopStartSamples,
                 LoopLengthSamples = definition.LoopLengthSamples
             };

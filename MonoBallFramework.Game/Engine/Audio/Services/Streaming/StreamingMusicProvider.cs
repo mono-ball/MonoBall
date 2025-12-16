@@ -1,17 +1,15 @@
-using NAudio.Vorbis;
-using NAudio.Wave;
+using MonoBallFramework.Game.Engine.Audio.Core;
 
 namespace MonoBallFramework.Game.Engine.Audio.Services.Streaming;
 
 /// <summary>
-/// Sample provider that streams audio data on-demand from a VorbisWaveReader.
+/// Sample provider that streams audio data on-demand from a Vorbis file.
 /// This avoids loading entire audio files into memory, suitable for large music tracks.
 /// Thread-safe for concurrent Read() calls from the audio thread.
 /// </summary>
-public class StreamingMusicProvider : ISampleProvider, IDisposable
+public class StreamingMusicProvider : ISeekableSampleProvider, IDisposable
 {
-    private readonly VorbisWaveReader _reader;
-    private readonly ISampleProvider _sampleProvider;
+    private readonly VorbisReader _reader;
     private readonly object _readLock = new();
     private bool _disposed;
 
@@ -27,27 +25,25 @@ public class StreamingMusicProvider : ISampleProvider, IDisposable
         if (!File.Exists(filePath))
             throw new FileNotFoundException($"Audio file not found: {filePath}", filePath);
 
-        _reader = new VorbisWaveReader(filePath);
-        _sampleProvider = _reader.ToSampleProvider();
+        _reader = new VorbisReader(filePath);
     }
 
     /// <summary>
-    /// Creates a new streaming music provider from an existing VorbisWaveReader.
+    /// Creates a new streaming music provider from an existing VorbisReader.
     /// Takes ownership of the reader and will dispose it.
     /// </summary>
-    /// <param name="reader">The VorbisWaveReader to stream from.</param>
-    internal StreamingMusicProvider(VorbisWaveReader reader)
+    /// <param name="reader">The VorbisReader to stream from.</param>
+    internal StreamingMusicProvider(VorbisReader reader)
     {
         _reader = reader ?? throw new ArgumentNullException(nameof(reader));
-        _sampleProvider = _reader.ToSampleProvider();
     }
 
-    public WaveFormat WaveFormat => _sampleProvider.WaveFormat;
+    public AudioFormat Format => _reader.Format;
 
     /// <summary>
     /// Gets the total length in samples (interleaved).
     /// </summary>
-    public long TotalSamples => _reader.Length / (_reader.WaveFormat.BitsPerSample / 8);
+    public long TotalSamples => _reader.TotalSamples;
 
     /// <summary>
     /// Gets the current position in samples (interleaved).
@@ -59,7 +55,7 @@ public class StreamingMusicProvider : ISampleProvider, IDisposable
             lock (_readLock)
             {
                 if (_disposed) return 0;
-                return _reader.Position / (_reader.WaveFormat.BitsPerSample / 8);
+                return _reader.Position;
             }
         }
     }
@@ -80,7 +76,7 @@ public class StreamingMusicProvider : ISampleProvider, IDisposable
 
             try
             {
-                return _sampleProvider.Read(buffer, offset, count);
+                return _reader.Read(buffer, offset, count);
             }
             catch (ObjectDisposedException)
             {
@@ -101,31 +97,20 @@ public class StreamingMusicProvider : ISampleProvider, IDisposable
             if (_disposed)
                 return;
 
-            // Convert sample position to byte position
-            // VorbisWaveReader.Position is in bytes
-            long bytePosition = samplePosition * (_reader.WaveFormat.BitsPerSample / 8);
-
-            // Clamp to valid range
-            bytePosition = Math.Max(0, Math.Min(bytePosition, _reader.Length));
-
-            _reader.Position = bytePosition;
+            _reader.SeekToSample(samplePosition);
         }
     }
 
     /// <summary>
     /// Resets the stream to the beginning. Thread-safe.
     /// </summary>
-    /// <remarks>
-    /// This method is kept for API compatibility but is not currently used internally.
-    /// Consider using SeekToSample(0) directly if you need to reset playback position.
-    /// </remarks>
     public void Reset()
     {
         SeekToSample(0);
     }
 
     /// <summary>
-    /// Disposes the underlying VorbisWaveReader and releases resources.
+    /// Disposes the underlying VorbisReader and releases resources.
     /// </summary>
     public void Dispose()
     {

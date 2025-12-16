@@ -1,18 +1,15 @@
-using System.Collections.Concurrent;
 using Microsoft.Extensions.Logging;
 using MonoBallFramework.Game.Engine.Audio.Configuration;
+using MonoBallFramework.Game.Engine.Audio.Core;
 using MonoBallFramework.Game.Engine.Audio.Services.Streaming;
 using MonoBallFramework.Game.Engine.Content;
 using MonoBallFramework.Game.GameData.Entities;
-using NAudio.Wave;
-using NAudio.Wave.SampleProviders;
 
 namespace MonoBallFramework.Game.Engine.Audio.Services;
 
 /// <summary>
-///     NAudio-based music player with TRUE STREAMING support for OGG Vorbis files.
-///     Unlike NAudioMusicPlayer which loads entire files into memory, this implementation
-///     streams audio data on-demand from disk, using only ~64KB per active stream instead
+///     PortAudio-based music player with TRUE STREAMING support for OGG Vorbis files.
+///     Streams audio data on-demand from disk, using only ~64KB per active stream instead
 ///     of ~32MB per cached track.
 ///
 ///     Features:
@@ -21,20 +18,21 @@ namespace MonoBallFramework.Game.Engine.Audio.Services;
 ///     - Full crossfading support with two simultaneous streams
 ///     - Custom loop points for intro+loop patterns
 ///     - Thread-safe implementation
+///     - Cross-platform support via PortAudio
 /// </summary>
-public class NAudioStreamingMusicPlayer : IMusicPlayer
+public class PortAudioStreamingMusicPlayer : IMusicPlayer
 {
     private readonly AudioRegistry _audioRegistry;
-    private readonly ILogger<NAudioStreamingMusicPlayer>? _logger;
+    private readonly ILogger<PortAudioStreamingMusicPlayer>? _logger;
     private readonly StreamingMusicPlayerHelper _helper;
     private readonly object _lock = new();
 
     // Main playback channel
-    private IWavePlayer? _waveOut;
+    private PortAudioOutput? _audioOutput;
     private StreamingPlaybackState? _currentPlayback;
 
     // Crossfade channel
-    private IWavePlayer? _crossfadeWaveOut;
+    private PortAudioOutput? _crossfadeOutput;
     private StreamingPlaybackState? _crossfadePlayback;
 
     // Pending track info (for sequential fade-out-then-play like pokeemerald)
@@ -50,10 +48,10 @@ public class NAudioStreamingMusicPlayer : IMusicPlayer
     private CancellationTokenSource? _backgroundTaskCts;
     private bool _disposed;
 
-    public NAudioStreamingMusicPlayer(
+    public PortAudioStreamingMusicPlayer(
         AudioRegistry audioRegistry,
         IContentProvider contentProvider,
-        ILogger<NAudioStreamingMusicPlayer>? logger = null)
+        ILogger<PortAudioStreamingMusicPlayer>? logger = null)
     {
         _audioRegistry = audioRegistry ?? throw new ArgumentNullException(nameof(audioRegistry));
         _logger = logger;
@@ -105,8 +103,8 @@ public class NAudioStreamingMusicPlayer : IMusicPlayer
         get
         {
             if (_disposed) return false;
-            var waveOut = _waveOut;
-            return waveOut?.PlaybackState == PlaybackState.Playing;
+            var output = _audioOutput;
+            return output?.PlaybackState == PlaybackState.Playing;
         }
     }
 
@@ -115,8 +113,8 @@ public class NAudioStreamingMusicPlayer : IMusicPlayer
         get
         {
             if (_disposed) return false;
-            var waveOut = _waveOut;
-            return waveOut?.PlaybackState == PlaybackState.Paused;
+            var output = _audioOutput;
+            return output?.PlaybackState == PlaybackState.Paused;
         }
     }
 
@@ -187,11 +185,10 @@ public class NAudioStreamingMusicPlayer : IMusicPlayer
                 // Stop current playback (and dispose streaming provider)
                 StopInternal(0f);
 
-                // Initialize wave output with the streaming provider
-                _waveOut = new WaveOutEvent();
-                _waveOut.PlaybackStopped += OnPlaybackStopped;
-                _waveOut.Init(playbackState.VolumeProvider);
-                _waveOut.Play();
+                // Initialize audio output with the streaming provider
+                _audioOutput = new PortAudioOutput(playbackState.VolumeProvider!);
+                _audioOutput.PlaybackStopped += OnPlaybackStopped;
+                _audioOutput.Play();
 
                 _currentPlayback = playbackState;
 
@@ -217,12 +214,12 @@ public class NAudioStreamingMusicPlayer : IMusicPlayer
     {
         lock (_lock)
         {
-            if (_disposed || _waveOut?.PlaybackState != PlaybackState.Playing)
+            if (_disposed || _audioOutput?.PlaybackState != PlaybackState.Playing)
                 return;
 
             try
             {
-                _waveOut.Pause();
+                _audioOutput.Pause();
                 _logger?.LogDebug("Paused streaming playback");
             }
             catch (Exception ex)
@@ -236,12 +233,12 @@ public class NAudioStreamingMusicPlayer : IMusicPlayer
     {
         lock (_lock)
         {
-            if (_disposed || _waveOut?.PlaybackState != PlaybackState.Paused)
+            if (_disposed || _audioOutput?.PlaybackState != PlaybackState.Paused)
                 return;
 
             try
             {
-                _waveOut.Play();
+                _audioOutput.Play();
                 _logger?.LogDebug("Resumed streaming playback");
             }
             catch (Exception ex)
@@ -258,7 +255,7 @@ public class NAudioStreamingMusicPlayer : IMusicPlayer
             if (_disposed || string.IsNullOrEmpty(newTrackName))
                 return;
 
-            if (_currentPlayback == null || _waveOut?.PlaybackState != PlaybackState.Playing)
+            if (_currentPlayback == null || _audioOutput?.PlaybackState != PlaybackState.Playing)
             {
                 Play(newTrackName, loop);
                 return;
@@ -319,7 +316,7 @@ public class NAudioStreamingMusicPlayer : IMusicPlayer
                 ? newDefinition.FadeIn
                 : AudioConstants.DefaultFallbackFadeDuration;
 
-            if (_currentPlayback == null || _waveOut?.PlaybackState != PlaybackState.Playing)
+            if (_currentPlayback == null || _audioOutput?.PlaybackState != PlaybackState.Playing)
             {
                 Play(newTrackName, loop, fadeInDuration);
                 return;
@@ -373,7 +370,7 @@ public class NAudioStreamingMusicPlayer : IMusicPlayer
         bool needsCrossfade;
         lock (_lock)
         {
-            needsCrossfade = _currentPlayback != null && _waveOut?.PlaybackState == PlaybackState.Playing;
+            needsCrossfade = _currentPlayback != null && _audioOutput?.PlaybackState == PlaybackState.Playing;
         }
 
         if (!needsCrossfade)
@@ -426,7 +423,7 @@ public class NAudioStreamingMusicPlayer : IMusicPlayer
                     return;
                 }
 
-                if (_currentPlayback == null || _waveOut?.PlaybackState != PlaybackState.Playing)
+                if (_currentPlayback == null || _audioOutput?.PlaybackState != PlaybackState.Playing)
                 {
                     Play(newTrackName, loop, crossfadeDuration);
                     newPlaybackState.Dispose();
@@ -443,9 +440,8 @@ public class NAudioStreamingMusicPlayer : IMusicPlayer
                 _currentPlayback.CrossfadeStartVolume = _currentPlayback.CurrentVolume;
 
                 // Initialize crossfade output
-                _crossfadeWaveOut = new WaveOutEvent();
-                _crossfadeWaveOut.Init(newPlaybackState.VolumeProvider);
-                _crossfadeWaveOut.Play();
+                _crossfadeOutput = new PortAudioOutput(newPlaybackState.VolumeProvider!);
+                _crossfadeOutput.Play();
 
                 _crossfadePlayback = newPlaybackState;
 
@@ -553,8 +549,8 @@ public class NAudioStreamingMusicPlayer : IMusicPlayer
             _backgroundTaskCts?.Cancel();
 
             // Stop and dispose playback
-            StopWaveOut(ref _waveOut);
-            StopWaveOut(ref _crossfadeWaveOut);
+            StopAudioOutput(ref _audioOutput);
+            StopAudioOutput(ref _crossfadeOutput);
 
             // Dispose streaming providers
             _currentPlayback?.Dispose();
@@ -570,7 +566,7 @@ public class NAudioStreamingMusicPlayer : IMusicPlayer
             _backgroundTaskCts?.Dispose();
             _backgroundTaskCts = null;
 
-            _logger?.LogDebug("NAudioStreamingMusicPlayer disposed");
+            _logger?.LogDebug("PortAudioStreamingMusicPlayer disposed");
         }
 
         GC.SuppressFinalize(this);
@@ -578,10 +574,10 @@ public class NAudioStreamingMusicPlayer : IMusicPlayer
 
     private void StopInternal(float fadeOutDuration)
     {
-        if (_currentPlayback == null || _waveOut == null)
+        if (_currentPlayback == null || _audioOutput == null)
             return;
 
-        if (fadeOutDuration > 0f && _waveOut.PlaybackState == PlaybackState.Playing)
+        if (fadeOutDuration > 0f && _audioOutput.PlaybackState == PlaybackState.Playing)
         {
             _currentPlayback.FadeState = FadeState.FadingOut;
             _currentPlayback.FadeDuration = fadeOutDuration;
@@ -589,7 +585,7 @@ public class NAudioStreamingMusicPlayer : IMusicPlayer
         }
         else
         {
-            StopWaveOut(ref _waveOut);
+            StopAudioOutput(ref _audioOutput);
             _currentPlayback.Dispose();
             _currentPlayback = null;
         }
@@ -605,7 +601,7 @@ public class NAudioStreamingMusicPlayer : IMusicPlayer
             case FadeManager.FadeUpdateResult.FadeOutComplete:
                 if (playback == _currentPlayback)
                 {
-                    StopWaveOut(ref _waveOut);
+                    StopAudioOutput(ref _audioOutput);
                     _currentPlayback?.Dispose();
                     _currentPlayback = null;
                 }
@@ -616,7 +612,7 @@ public class NAudioStreamingMusicPlayer : IMusicPlayer
                 {
                     _logger?.LogInformation("Sequential fade complete: stopping {OldTrack}, starting {NewTrack}",
                         playback.TrackName, _pendingTrackName);
-                    StopWaveOut(ref _waveOut);
+                    StopAudioOutput(ref _audioOutput);
                     _currentPlayback?.Dispose();
                     _currentPlayback = null;
 
@@ -629,7 +625,7 @@ public class NAudioStreamingMusicPlayer : IMusicPlayer
                 {
                     _logger?.LogDebug("Fade out complete, now fading in: {TrackName} ({FadeIn}s)",
                         _pendingTrackName, _pendingFadeInDuration);
-                    StopWaveOut(ref _waveOut);
+                    StopAudioOutput(ref _audioOutput);
                     _currentPlayback?.Dispose();
                     _currentPlayback = null;
 
@@ -674,28 +670,44 @@ public class NAudioStreamingMusicPlayer : IMusicPlayer
 
     private void CompleteCrossfade()
     {
-        if (_crossfadePlayback == null || _crossfadeWaveOut == null)
+        if (_crossfadePlayback == null || _crossfadeOutput == null)
             return;
 
-        StopWaveOut(ref _waveOut);
+        StopAudioOutput(ref _audioOutput);
         _currentPlayback?.Dispose();
         _currentPlayback = null;
 
-        _waveOut = _crossfadeWaveOut;
+        _audioOutput = _crossfadeOutput;
         _currentPlayback = _crossfadePlayback;
 
-        _crossfadeWaveOut = null;
+        _crossfadeOutput = null;
         _crossfadePlayback = null;
 
         _logger?.LogDebug("Crossfade completed to track: {TrackName}", _currentPlayback.TrackName);
     }
 
-    private void StopWaveOut(ref IWavePlayer? waveOut)
+    private void StopAudioOutput(ref PortAudioOutput? output)
     {
-        WavePlayerExtensions.SafeStop(ref waveOut, OnPlaybackStopped, _logger);
+        if (output == null)
+            return;
+
+        try
+        {
+            output.PlaybackStopped -= OnPlaybackStopped;
+            output.Stop();
+            output.Dispose();
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError(ex, "Error stopping audio output");
+        }
+        finally
+        {
+            output = null;
+        }
     }
 
-    private void OnPlaybackStopped(object? sender, StoppedEventArgs e)
+    private void OnPlaybackStopped(object? sender, PlaybackStoppedEventArgs e)
     {
         if (e.Exception != null)
         {
@@ -703,3 +715,4 @@ public class NAudioStreamingMusicPlayer : IMusicPlayer
         }
     }
 }
+

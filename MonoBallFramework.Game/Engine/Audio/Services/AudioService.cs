@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Logging;
-using Microsoft.Xna.Framework.Audio;
 using MonoBallFramework.Game.Engine.Audio.Configuration;
 using MonoBallFramework.Game.Engine.Audio.Events;
 using MonoBallFramework.Game.Engine.Core.Events;
@@ -8,17 +7,16 @@ using MonoBallFramework.Game.GameData.Entities;
 namespace MonoBallFramework.Game.Engine.Audio.Services;
 
 /// <summary>
-///     NAudio-based audio service implementation.
-///     Manages sound effects and music playback using NAudio for OGG file support.
-///     Removes dependency on MonoGame's ContentManager.
+///     Cross-platform audio service implementation.
+///     Manages sound effects and music playback using PortAudio for cross-platform support.
 /// </summary>
-public class NAudioService : IAudioService
+public class AudioService : IAudioService
 {
     private readonly AudioRegistry _audioRegistry;
-    private readonly INAudioSoundEffectManager _soundEffectManager;
+    private readonly ISoundEffectManager _soundEffectManager;
     private readonly IMusicPlayer _musicPlayer;
     private readonly IEventBus _eventBus;
-    private readonly ILogger<NAudioService>? _logger;
+    private readonly ILogger<AudioService>? _logger;
     private readonly AudioConfiguration _config;
 
     private readonly List<IDisposable> _subscriptions;
@@ -32,21 +30,21 @@ public class NAudioService : IAudioService
     private bool _disposed;
 
     /// <summary>
-    ///     Initializes a new instance of the <see cref="NAudioService"/> class.
+    ///     Initializes a new instance of the <see cref="AudioService"/> class.
     /// </summary>
     /// <param name="audioRegistry">Audio registry for track/sound lookup.</param>
-    /// <param name="soundEffectManager">NAudio-based sound effect manager.</param>
-    /// <param name="musicPlayer">NAudio-based music player.</param>
+    /// <param name="soundEffectManager">Sound effect manager.</param>
+    /// <param name="musicPlayer">Music player.</param>
     /// <param name="eventBus">Event bus for subscribing to audio events.</param>
     /// <param name="config">Audio configuration settings (optional, uses default if null).</param>
     /// <param name="logger">Logger for diagnostic output (optional).</param>
-    public NAudioService(
+    public AudioService(
         AudioRegistry audioRegistry,
-        INAudioSoundEffectManager soundEffectManager,
+        ISoundEffectManager soundEffectManager,
         IMusicPlayer musicPlayer,
         IEventBus eventBus,
         AudioConfiguration? config = null,
-        ILogger<NAudioService>? logger = null)
+        ILogger<AudioService>? logger = null)
     {
         _audioRegistry = audioRegistry ?? throw new ArgumentNullException(nameof(audioRegistry));
         _soundEffectManager = soundEffectManager ?? throw new ArgumentNullException(nameof(soundEffectManager));
@@ -64,7 +62,7 @@ public class NAudioService : IAudioService
         _musicVolume = _config.DefaultMusicVolume;
 
         _logger?.LogInformation(
-            "NAudioService created with master volume: {MasterVolume}, SFX: {SfxVolume}, Music: {MusicVolume}",
+            "AudioService created with master volume: {MasterVolume}, SFX: {SfxVolume}, Music: {MusicVolume}",
             _masterVolume, _soundEffectVolume, _musicVolume);
     }
 
@@ -147,7 +145,7 @@ public class NAudioService : IAudioService
     {
         if (_isInitialized)
         {
-            _logger?.LogWarning("NAudioService already initialized");
+            _logger?.LogWarning("AudioService already initialized");
             return;
         }
 
@@ -158,7 +156,7 @@ public class NAudioService : IAudioService
         UpdateVolumes();
 
         _isInitialized = true;
-        _logger?.LogInformation("NAudioService initialized successfully");
+        _logger?.LogInformation("AudioService initialized successfully");
     }
 
     /// <summary>
@@ -190,7 +188,7 @@ public class NAudioService : IAudioService
     {
         if (!_isInitialized || _disposed)
         {
-            _logger?.LogWarning("Cannot play sound: NAudioService not initialized or disposed");
+            _logger?.LogWarning("Cannot play sound: AudioService not initialized or disposed");
             return false;
         }
 
@@ -232,7 +230,7 @@ public class NAudioService : IAudioService
     {
         if (!_isInitialized || _disposed)
         {
-            _logger?.LogWarning("Cannot play looping sound: NAudioService not initialized or disposed");
+            _logger?.LogWarning("Cannot play looping sound: AudioService not initialized or disposed");
             return null;
         }
 
@@ -318,7 +316,7 @@ public class NAudioService : IAudioService
     {
         if (!_isInitialized || _disposed)
         {
-            _logger?.LogWarning("Cannot play music: NAudioService not initialized or disposed");
+            _logger?.LogWarning("Cannot play music: AudioService not initialized or disposed");
             return;
         }
 
@@ -462,9 +460,9 @@ public class NAudioService : IAudioService
         if (_disposed)
             return;
 
-        // NAudio implementations don't use traditional caching
+        // PortAudio implementations use streaming
         // This is kept for interface compatibility
-        _logger?.LogInformation("ClearCache called (NAudio implementation uses streaming)");
+        _logger?.LogInformation("ClearCache called (streaming implementation)");
     }
 
     /// <summary>
@@ -490,7 +488,7 @@ public class NAudioService : IAudioService
         _musicPlayer.Dispose();
 
         _disposed = true;
-        _logger?.LogInformation("NAudioService disposed");
+        _logger?.LogInformation("AudioService disposed");
 
         GC.SuppressFinalize(this);
     }
@@ -527,9 +525,6 @@ public class NAudioService : IAudioService
         _logger?.LogDebug("Subscribed to audio events");
     }
 
-    /// <summary>
-    ///     Event handler for PlaySoundEvent.
-    /// </summary>
     private void OnPlaySoundEvent(PlaySoundEvent evt)
     {
         if (string.IsNullOrEmpty(evt.SoundName))
@@ -541,9 +536,6 @@ public class NAudioService : IAudioService
         PlaySound(evt.SoundName, evt.Volume, evt.Pitch, evt.Pan);
     }
 
-    /// <summary>
-    ///     Event handler for PlayMusicEvent.
-    /// </summary>
     private void OnPlayMusicEvent(PlayMusicEvent evt)
     {
         if (string.IsNullOrEmpty(evt.MusicName))
@@ -555,33 +547,21 @@ public class NAudioService : IAudioService
         PlayMusic(evt.MusicName, evt.Loop, evt.FadeDuration);
     }
 
-    /// <summary>
-    ///     Event handler for StopMusicEvent.
-    /// </summary>
     private void OnStopMusicEvent(StopMusicEvent evt)
     {
         StopMusic(evt.FadeDuration);
     }
 
-    /// <summary>
-    ///     Event handler for PauseMusicEvent.
-    /// </summary>
     private void OnPauseMusicEvent(PauseMusicEvent evt)
     {
         PauseMusic();
     }
 
-    /// <summary>
-    ///     Event handler for ResumeMusicEvent.
-    /// </summary>
     private void OnResumeMusicEvent(ResumeMusicEvent evt)
     {
         ResumeMusic();
     }
 
-    /// <summary>
-    ///     Event handler for StopAllSoundsEvent.
-    /// </summary>
     private void OnStopAllSoundsEvent(StopAllSoundsEvent evt)
     {
         StopAllSounds();
@@ -628,3 +608,4 @@ public class NAudioService : IAudioService
         }
     }
 }
+

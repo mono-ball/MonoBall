@@ -1,4 +1,4 @@
-using NAudio.Wave.SampleProviders;
+using MonoBallFramework.Game.Engine.Audio.Core;
 
 namespace MonoBallFramework.Game.Engine.Audio.Services.Streaming;
 
@@ -76,7 +76,7 @@ public class StreamingPlaybackState : IDisposable, IFadingPlayback
 
         _disposed = true;
 
-        // Dispose the streaming provider (which also disposes the underlying VorbisWaveReader)
+        // Dispose the streaming provider (which also disposes the underlying VorbisReader)
         StreamingProvider?.Dispose();
         StreamingProvider = null;
 

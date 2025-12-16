@@ -1,4 +1,4 @@
-using NAudio.Wave;
+using MonoBallFramework.Game.Engine.Audio.Core;
 
 namespace MonoBallFramework.Game.Engine.Audio.Services.Streaming;
 
@@ -37,7 +37,7 @@ public class StreamingLoopProvider : ISampleProvider, IDisposable
         _source = source ?? throw new ArgumentNullException(nameof(source));
         _enableLooping = enableLooping;
 
-        int channels = source.WaveFormat.Channels;
+        int channels = source.Format.Channels;
 
         // Convert per-channel samples to total samples (interleaved format)
         if (loopStartSamples.HasValue)
@@ -72,7 +72,7 @@ public class StreamingLoopProvider : ISampleProvider, IDisposable
         }
     }
 
-    public WaveFormat WaveFormat => _source.WaveFormat;
+    public AudioFormat Format => _source.Format;
 
     /// <summary>
     /// Gets the current position in the source stream.

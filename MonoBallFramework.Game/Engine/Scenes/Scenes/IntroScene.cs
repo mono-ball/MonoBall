@@ -1,8 +1,8 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using MonoBallFramework.Game.Engine.Audio.Core;
 using MonoBallFramework.Game.Engine.Content;
-using NAudio.Wave;
 
 namespace MonoBallFramework.Game.Engine.Scenes.Scenes;
 
@@ -40,9 +40,9 @@ public class IntroScene : SceneBase
     private SpriteBatch? _spriteBatch;
     private bool _transitionStarted;
 
-    // Audio playback
-    private WaveOutEvent? _waveOut;
-    private AudioFileReader? _audioReader;
+    // Audio playback using PortAudio
+    private PortAudioOutput? _audioOutput;
+    private IDisposable? _audioReader;
 
     /// <summary>
     ///     Initializes a new instance of the IntroScene class.
@@ -111,15 +111,39 @@ public class IntroScene : SceneBase
 
         try
         {
-            _audioReader = new AudioFileReader(audioPath);
-            _waveOut = new WaveOutEvent();
-            _waveOut.Init(_audioReader);
-            _waveOut.Play();
+            ISampleProvider audioProvider;
+            string extension = Path.GetExtension(audioPath).ToLowerInvariant();
+
+            if (extension == ".wav")
+            {
+                // Use WAV reader for WAV files
+                var wavReader = new WavReader(audioPath);
+                _audioReader = wavReader;
+                audioProvider = wavReader;
+                _logger.LogInformation("Loading intro audio as WAV from {Path}", audioPath);
+            }
+            else if (extension == ".ogg")
+            {
+                // Use Vorbis reader for OGG files
+                var vorbisReader = new VorbisReader(audioPath);
+                _audioReader = vorbisReader;
+                audioProvider = vorbisReader;
+                _logger.LogInformation("Loading intro audio as OGG from {Path}", audioPath);
+            }
+            else
+            {
+                _logger.LogWarning("Unsupported audio format: {Extension}. Supported formats: .wav, .ogg", extension);
+                return;
+            }
+
+            _audioOutput = new PortAudioOutput(audioProvider);
+            _audioOutput.Play();
             _logger.LogInformation("Intro audio playing from {Path}", audioPath);
         }
         catch (Exception ex)
         {
-            throw new InvalidOperationException($"Failed to load or play intro audio from {audioPath}", ex);
+            _logger.LogWarning(ex, "Failed to load or play intro audio from {Path} - continuing without audio", audioPath);
+            // Don't throw - audio failure shouldn't prevent the intro from playing
         }
     }
 
@@ -362,8 +386,8 @@ public class IntroScene : SceneBase
             _logoTexture?.Dispose();
 
             // Clean up audio resources
-            _waveOut?.Stop();
-            _waveOut?.Dispose();
+            _audioOutput?.Stop();
+            _audioOutput?.Dispose();
             _audioReader?.Dispose();
         }
 

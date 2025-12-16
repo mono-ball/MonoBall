@@ -1,38 +1,36 @@
 using System.Collections.Concurrent;
-using NAudio.Vorbis;
-using NAudio.Wave;
-using NAudio.Wave.SampleProviders;
 using Microsoft.Extensions.Logging;
 using MonoBallFramework.Game.Engine.Audio.Configuration;
+using MonoBallFramework.Game.Engine.Audio.Core;
 using MonoBallFramework.Game.GameData.Entities;
 
 namespace MonoBallFramework.Game.Engine.Audio.Services;
 
 /// <summary>
-///     NAudio-based sound effect manager for playing OGG sound effects.
+///     PortAudio-based sound effect manager for playing OGG sound effects.
 ///     Supports concurrent playback, looping, and advanced audio control.
+///     Cross-platform implementation using PortAudioSharp2 and NVorbis.
 /// </summary>
-public class NAudioSoundEffectManager : INAudioSoundEffectManager
+public class PortAudioSoundEffectManager : ISoundEffectManager
 {
     private readonly AudioRegistry _audioRegistry;
-    private readonly ILogger<NAudioSoundEffectManager>? _logger;
+    private readonly ILogger<PortAudioSoundEffectManager>? _logger;
     private readonly int _maxConcurrentSounds;
     private readonly ConcurrentDictionary<Guid, SoundInstance> _activeSounds;
-    private readonly ConcurrentDictionary<Guid, VorbisWaveReader> _activeReaders = new();
     private readonly object _lock = new();
     private float _masterVolume = AudioConstants.DefaultMasterVolume;
     private bool _disposed;
 
     /// <summary>
-    ///     Initializes a new instance of the <see cref="NAudioSoundEffectManager"/> class.
+    ///     Initializes a new instance of the <see cref="PortAudioSoundEffectManager"/> class.
     /// </summary>
     /// <param name="audioRegistry">The audio registry for looking up sound definitions.</param>
     /// <param name="maxConcurrentSounds">Maximum number of concurrent sounds (uses AudioConstants.MaxConcurrentSounds if not specified).</param>
     /// <param name="logger">Optional logger for diagnostics.</param>
-    public NAudioSoundEffectManager(
+    public PortAudioSoundEffectManager(
         AudioRegistry audioRegistry,
         int maxConcurrentSounds = AudioConstants.MaxConcurrentSounds,
-        ILogger<NAudioSoundEffectManager>? logger = null)
+        ILogger<PortAudioSoundEffectManager>? logger = null)
     {
         _audioRegistry = audioRegistry ?? throw new ArgumentNullException(nameof(audioRegistry));
         _logger = logger;
@@ -220,7 +218,7 @@ public class NAudioSoundEffectManager : INAudioSoundEffectManager
         if (_disposed || trackIds == null)
             return;
 
-        // NAudio doesn't require preloading as files are streamed
+        // PortAudio doesn't require preloading as files are streamed
         // This method is provided for interface compatibility
         foreach (var trackId in trackIds)
         {
@@ -253,20 +251,6 @@ public class NAudioSoundEffectManager : INAudioSoundEffectManager
                 sound.Dispose();
             }
             _activeSounds.Clear();
-
-            // Clean up any remaining readers
-            foreach (var reader in _activeReaders.Values)
-            {
-                try
-                {
-                    reader.Dispose();
-                }
-                catch (Exception ex)
-                {
-                    _logger?.LogWarning(ex, "Error disposing VorbisWaveReader during cleanup");
-                }
-            }
-            _activeReaders.Clear();
         }
 
         _disposed = true;
@@ -335,17 +319,16 @@ public class NAudioSoundEffectManager : INAudioSoundEffectManager
     }
 
     /// <summary>
-    ///     Represents a single playing sound instance using NAudio.
+    ///     Represents a single playing sound instance using PortAudio.
     /// </summary>
     private class SoundInstance : IDisposable
     {
-        private readonly WaveOutEvent _outputDevice;
-        private readonly IWaveProvider _waveProvider;
+        private readonly PortAudioOutput _outputDevice;
+        private readonly VorbisReader _reader;
         private readonly VolumeSampleProvider _volumeProvider;
-        private readonly PanningSampleProvider _panningProvider;
+        private readonly PanningSampleProvider? _panningProvider;
         private readonly ILogger? _logger;
-        private readonly Guid _readerId;
-        private readonly NAudioSoundEffectManager _manager;
+        private readonly PortAudioSoundEffectManager _manager;
         private bool _disposed;
 
         public Guid Id { get; } = Guid.NewGuid();
@@ -379,8 +362,12 @@ public class NAudioSoundEffectManager : INAudioSoundEffectManager
 
         public float Pan
         {
-            get => _panningProvider.Pan;
-            set => _panningProvider.Pan = Math.Clamp(value, AudioConstants.MinPan, AudioConstants.MaxPan);
+            get => _panningProvider?.Pan ?? 0f;
+            set
+            {
+                if (_panningProvider != null)
+                    _panningProvider.Pan = Math.Clamp(value, AudioConstants.MinPan, AudioConstants.MaxPan);
+            }
         }
 
         public SoundInstance(
@@ -391,90 +378,77 @@ public class NAudioSoundEffectManager : INAudioSoundEffectManager
             float pan,
             SoundPriority priority,
             ILogger? logger,
-            NAudioSoundEffectManager manager)
+            PortAudioSoundEffectManager manager)
         {
             _logger = logger;
             _manager = manager;
             IsLooping = isLooping;
             Priority = priority;
-            _readerId = Guid.NewGuid();
 
             try
             {
                 // Create the audio reader for OGG files
-                var reader = new VorbisWaveReader(filePath);
+                _reader = new VorbisReader(filePath);
 
-                // Track the reader for proper disposal
-                _manager._activeReaders.TryAdd(_readerId, reader);
+                // Build sample provider chain
+                ISampleProvider sampleProvider;
 
-                // Convert to sample provider for effects
-                var sampleProvider = reader.ToSampleProvider();
+                if (isLooping)
+                {
+                    // For looping, we need a custom looping provider
+                    sampleProvider = new LoopingSampleProvider(_reader);
+                }
+                else
+                {
+                    sampleProvider = _reader;
+                }
 
-                // Apply pitch if needed (requires resampling - simplified for now)
-                ISampleProvider processedSample = sampleProvider;
+                // Apply pitch if needed (requires resampling - not implemented)
                 if (Math.Abs(pitch) > 0.001f)
                 {
                     // Note: Pitch shifting is complex and requires additional libraries
-                    // For now, we'll skip pitch or use a simple resampling approach
-                    // A proper implementation would use SoundTouch or similar
-                    _logger?.LogWarning("Pitch adjustment not fully implemented in NAudio version");
+                    _logger?.LogWarning("Pitch adjustment not fully implemented in PortAudio version");
                 }
 
                 // Apply volume control
-                _volumeProvider = new VolumeSampleProvider(processedSample)
+                _volumeProvider = new VolumeSampleProvider(sampleProvider)
                 {
                     Volume = Math.Clamp(volume, AudioConstants.MinVolume, AudioConstants.MaxVolume)
                 };
 
-                // Apply panning
-                _panningProvider = new PanningSampleProvider(_volumeProvider)
+                // Apply panning if stereo
+                ISampleProvider finalProvider;
+                if (_reader.Format.Channels == 2)
                 {
-                    Pan = Math.Clamp(pan, AudioConstants.MinPan, AudioConstants.MaxPan)
-                };
+                    _panningProvider = new PanningSampleProvider(_volumeProvider)
+                    {
+                        Pan = Math.Clamp(pan, AudioConstants.MinPan, AudioConstants.MaxPan)
+                    };
+                    finalProvider = _panningProvider;
+                }
+                else
+                {
+                    finalProvider = _volumeProvider;
+                }
 
-                // Handle looping
-                ISampleProvider finalProvider = isLooping
-                    ? new LoopingSampleProvider(_panningProvider)
-                    : _panningProvider;
-
-                // Convert back to wave provider
-                _waveProvider = finalProvider.ToWaveProvider();
-
-                // Create output device
-                _outputDevice = new WaveOutEvent();
-
-                // Register playback stopped handler to clean up reader
+                // Create output device and start playback
+                _outputDevice = new PortAudioOutput(finalProvider);
                 _outputDevice.PlaybackStopped += OnPlaybackStopped;
-
-                _outputDevice.Init(_waveProvider);
                 _outputDevice.Play();
             }
             catch (Exception ex)
             {
-                // Clean up reader on failure
-                if (_manager._activeReaders.TryRemove(_readerId, out var failedReader))
-                {
-                    failedReader.Dispose();
-                }
-
+                _reader?.Dispose();
                 _logger?.LogError(ex, "Failed to initialize sound instance for: {FilePath}", filePath);
                 throw;
             }
         }
 
-        private void OnPlaybackStopped(object? sender, StoppedEventArgs e)
+        private void OnPlaybackStopped(object? sender, PlaybackStoppedEventArgs e)
         {
-            // Clean up the reader when playback stops
-            if (_manager._activeReaders.TryRemove(_readerId, out var reader))
+            if (e.Exception != null)
             {
-                try
-                {
-                    reader.Dispose();
-                }
-                catch (Exception ex)
-                {
-                    _logger?.LogWarning(ex, "Error disposing VorbisWaveReader on playback stop");
-                }
+                _logger?.LogWarning(e.Exception, "Sound playback stopped with error");
             }
         }
 
@@ -530,26 +504,14 @@ public class NAudioSoundEffectManager : INAudioSoundEffectManager
 
             try
             {
-                _outputDevice.Stop();
                 _outputDevice.PlaybackStopped -= OnPlaybackStopped;
+                _outputDevice.Stop();
                 _outputDevice.Dispose();
+                _reader.Dispose();
             }
             catch (Exception ex)
             {
                 _logger?.LogWarning(ex, "Error disposing sound instance");
-            }
-
-            // Clean up the reader if it's still active
-            if (_manager._activeReaders.TryRemove(_readerId, out var reader))
-            {
-                try
-                {
-                    reader.Dispose();
-                }
-                catch (Exception ex)
-                {
-                    _logger?.LogWarning(ex, "Error disposing VorbisWaveReader in Dispose");
-                }
             }
 
             _disposed = true;
@@ -561,15 +523,14 @@ public class NAudioSoundEffectManager : INAudioSoundEffectManager
     /// </summary>
     private class LoopingSampleProvider : ISampleProvider
     {
-        private readonly ISampleProvider _source;
-        private long _position;
+        private readonly VorbisReader _source;
 
-        public LoopingSampleProvider(ISampleProvider source)
+        public LoopingSampleProvider(VorbisReader source)
         {
             _source = source;
         }
 
-        public WaveFormat WaveFormat => _source.WaveFormat;
+        public AudioFormat Format => _source.Format;
 
         public int Read(float[] buffer, int offset, int count)
         {
@@ -582,21 +543,11 @@ public class NAudioSoundEffectManager : INAudioSoundEffectManager
                 if (read == 0)
                 {
                     // End of stream, reset to beginning
-                    if (_source is WaveStream waveStream)
-                    {
-                        waveStream.Position = 0;
-                        _position = 0;
-                    }
-                    else
-                    {
-                        // Can't reset, stop looping
-                        break;
-                    }
+                    _source.Reset();
                 }
                 else
                 {
                     totalRead += read;
-                    _position += read;
                 }
             }
 
@@ -610,10 +561,10 @@ public class NAudioSoundEffectManager : INAudioSoundEffectManager
     private class LoopingSoundHandle : ILoopingSoundHandle
     {
         private readonly SoundInstance _instance;
-        private readonly NAudioSoundEffectManager _manager;
+        private readonly PortAudioSoundEffectManager _manager;
         private bool _disposed;
 
-        public LoopingSoundHandle(SoundInstance instance, NAudioSoundEffectManager manager)
+        public LoopingSoundHandle(SoundInstance instance, PortAudioSoundEffectManager manager)
         {
             _instance = instance;
             _manager = manager;
@@ -672,3 +623,4 @@ public class NAudioSoundEffectManager : INAudioSoundEffectManager
         }
     }
 }
+

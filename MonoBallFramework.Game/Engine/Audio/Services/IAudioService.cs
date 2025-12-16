@@ -134,7 +134,7 @@ public interface IAudioService : IDisposable
 
     /// <summary>
     ///     Clears all cached audio assets from memory.
-    ///     Note: NAudio implementation uses streaming, so this may have minimal effect.
+    ///     Note: PortAudio implementation uses streaming, so this may have minimal effect.
     /// </summary>
     void ClearCache();
 }

@@ -1,4 +1,4 @@
-using NAudio.Wave;
+using MonoBallFramework.Game.Engine.Audio.Core;
 
 namespace MonoBallFramework.Game.Engine.Audio.Services.Streaming;
 
@@ -21,9 +21,9 @@ public class StreamingTrackData : IDisposable
     public required string FilePath { get; init; }
 
     /// <summary>
-    /// Gets the audio wave format.
+    /// Gets the audio format.
     /// </summary>
-    public required WaveFormat WaveFormat { get; init; }
+    public required AudioFormat AudioFormat { get; init; }
 
     /// <summary>
     /// Gets the loop start position in samples (per channel). Null = loop from beginning.
