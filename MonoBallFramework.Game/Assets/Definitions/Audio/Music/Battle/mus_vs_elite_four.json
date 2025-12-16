@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/battle/mus_vs_elite_four",
-  "displayName": "VS Elite Four",
+  "name": "VS Elite Four",
   "audioPath": "Audio/Music/Battle/mus_vs_elite_four.ogg",
   "volume": 0.63,
   "loop": true,

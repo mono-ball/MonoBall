@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/record_corner",
-  "DisplayName": "RecordCorner",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/record_corner.json"
+  "id": "base:map:hoenn/record_corner",
+  "name": "RecordCorner",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/record_corner.json"
 }

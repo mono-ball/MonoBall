@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_contest_icon_change",
-  "displayName": "Contest Icon Change",
+  "name": "Contest Icon Change",
   "audioPath": "Audio/SFX/Battle/se_contest_icon_change.ogg",
   "volume": 0.866,
   "loop": false,

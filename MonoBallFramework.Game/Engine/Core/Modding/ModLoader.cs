@@ -621,9 +621,9 @@ public sealed class ModLoader : IModLoader
 
                 var definition = new CustomTypes.CustomTypeDefinition
                 {
-                    Id = fullId,
+                    DefinitionId = fullId,
                     Category = category,
-                    DisplayName = displayName,
+                    Name = displayName,
                     Description = description,
                     SourceMod = modId,
                     Version = version,

@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/ui/se_pc_off",
-  "displayName": "PC Off",
+  "name": "PC Off",
   "audioPath": "Audio/SFX/UI/se_pc_off.ogg",
   "volume": 0.787,
   "loop": false,

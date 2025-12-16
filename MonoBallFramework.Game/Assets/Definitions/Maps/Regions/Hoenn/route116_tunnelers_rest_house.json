@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/route116_tunnelers_rest_house",
-  "DisplayName": "Route116_TunnelersRestHouse",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/route116_tunnelers_rest_house.json"
+  "id": "base:map:hoenn/route116_tunnelers_rest_house",
+  "name": "Route116_TunnelersRestHouse",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/route116_tunnelers_rest_house.json"
 }

@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/special/mus_c_comm_center",
-  "displayName": "C Comm Center",
+  "name": "C Comm Center",
   "audioPath": "Audio/Music/Special/mus_c_comm_center.ogg",
   "volume": 0.63,
   "loop": true,

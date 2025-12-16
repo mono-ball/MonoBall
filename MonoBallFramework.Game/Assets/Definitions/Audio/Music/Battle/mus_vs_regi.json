@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/battle/mus_vs_regi",
-  "displayName": "VS Regi",
+  "name": "VS Regi",
   "audioPath": "Audio/Music/Battle/mus_vs_regi.ogg",
   "volume": 0.63,
   "loop": true,

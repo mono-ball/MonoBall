@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/special/mus_weather_groudon",
-  "displayName": "Weather Groudon",
+  "name": "Weather Groudon",
   "audioPath": "Audio/Music/Special/mus_weather_groudon.ogg",
   "volume": 0.394,
   "loop": true,

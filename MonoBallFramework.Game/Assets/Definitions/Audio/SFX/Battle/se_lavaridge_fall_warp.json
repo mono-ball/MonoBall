@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_lavaridge_fall_warp",
-  "displayName": "Lavaridge Fall Warp",
+  "name": "Lavaridge Fall Warp",
   "audioPath": "Audio/SFX/Battle/se_lavaridge_fall_warp.ogg",
   "volume": 0.63,
   "loop": false,

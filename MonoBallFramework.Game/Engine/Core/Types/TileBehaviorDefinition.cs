@@ -20,12 +20,13 @@ public record TileBehaviorDefinition : IScriptedType
     /// </summary>
     [JsonPropertyName("id")]
     [JsonRequired]
-    public required string Id { get; init; }
+    public required string DefinitionId { get; init; }
 
     /// <summary>
-    ///     Display name for this behavior.
+    ///     Name for this behavior.
     /// </summary>
-    public required string DisplayName { get; init; }
+    [JsonPropertyName("name")]
+    public required string Name { get; init; }
 
     /// <summary>
     ///     Description of what this behavior does.

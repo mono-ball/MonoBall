@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_ball_tray_enter",
-  "displayName": "Ball Tray Enter",
+  "name": "Ball Tray Enter",
   "audioPath": "Audio/SFX/Battle/se_ball_tray_enter.ogg",
   "volume": 0.866,
   "loop": false,

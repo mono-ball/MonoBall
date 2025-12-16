@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_intro_blast",
-  "displayName": "Intro Blast",
+  "name": "Intro Blast",
   "audioPath": "Audio/SFX/Battle/se_intro_blast.ogg",
   "volume": 0.787,
   "loop": false,

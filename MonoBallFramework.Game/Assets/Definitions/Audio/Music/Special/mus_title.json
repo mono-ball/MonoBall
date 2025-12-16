@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/special/mus_title",
-  "displayName": "Title",
+  "name": "Title",
   "audioPath": "Audio/Music/Special/mus_title.ogg",
   "volume": 0.709,
   "loop": true,

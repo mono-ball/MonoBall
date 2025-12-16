@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/special/mus_b_dome_lobby",
-  "displayName": "Battle Dome Lobby",
+  "name": "Battle Dome Lobby",
   "audioPath": "Audio/Music/Special/mus_b_dome_lobby.ogg",
   "volume": 0.441,
   "loop": true,

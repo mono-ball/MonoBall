@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/battle/mus_vs_frontier_brain",
-  "displayName": "VS Frontier Brain",
+  "name": "VS Frontier Brain",
   "audioPath": "Audio/Music/Battle/mus_vs_frontier_brain.ogg",
   "volume": 0.709,
   "loop": true,

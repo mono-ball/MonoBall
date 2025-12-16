@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/seafloor_cavern_room4",
-  "DisplayName": "SeafloorCavern_Room4",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/seafloor_cavern_room4.json"
+  "id": "base:map:hoenn/seafloor_cavern_room4",
+  "name": "SeafloorCavern_Room4",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/seafloor_cavern_room4.json"
 }

@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/slateport_city_pokemon_fan_club",
-  "DisplayName": "SlateportCity_PokemonFanClub",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/slateport_city_pokemon_fan_club.json"
+  "id": "base:map:hoenn/slateport_city_pokemon_fan_club",
+  "name": "SlateportCity_PokemonFanClub",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/slateport_city_pokemon_fan_club.json"
 }

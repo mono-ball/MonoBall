@@ -181,13 +181,13 @@ class PopupExtractor:
         # Create JSON definition for background bitmap with unified ID
         unified_id = IdTransformer.create_id("popup", "background", style_name)
         json_def = {
-            "Id": unified_id,
-            "DisplayName": style_name.replace("_", " ").title(),
-            "Type": "Bitmap",
-            "TexturePath": f"Graphics/Maps/Popups/Backgrounds/{style_name}.png",
-            "Width": 80,
-            "Height": 24,
-            "Description": "Background bitmap for map popup"
+            "id": unified_id,
+            "name": style_name.replace("_", " ").title(),
+            "type": "Bitmap",
+            "texturePath": f"Graphics/Maps/Popups/Backgrounds/{style_name}.png",
+            "width": 80,
+            "height": 24,
+            "description": "Background bitmap for map popup"
         }
         
         dest_json = self.output_data_bg / f"{style_name}.json"
@@ -261,31 +261,31 @@ class PopupExtractor:
             row = tile_idx // 10
             col = tile_idx % 10
             tiles.append({
-                "Index": tile_idx,
-                "X": col * 8,
-                "Y": row * 8,
-                "Width": 8,
-                "Height": 8
+                "index": tile_idx,
+                "x": col * 8,
+                "y": row * 8,
+                "width": 8,
+                "height": 8
             })
         
         # Create JSON definition with unified ID
         unified_id = IdTransformer.create_id("popup", "outline", f"{style_name}_outline")
         json_def = {
-            "Id": unified_id,
-            "DisplayName": f"{style_name.replace('_', ' ').title()} Outline",
-            "Type": "TileSheet",
-            "TexturePath": f"Graphics/Maps/Popups/Outlines/{style_name}_outline.png",
-            "TileWidth": 8,
-            "TileHeight": 8,
-            "TileCount": 30,
-            "Tiles": tiles,
-            "TileUsage": {
-                "TopEdge": list(range(0, 12)),
-                "LeftEdge": [12, 14, 16],
-                "RightEdge": [13, 15, 17],
-                "BottomEdge": list(range(18, 30))
+            "id": unified_id,
+            "name": f"{style_name.replace('_', ' ').title()} Outline",
+            "type": "TileSheet",
+            "texturePath": f"Graphics/Maps/Popups/Outlines/{style_name}_outline.png",
+            "tileWidth": 8,
+            "tileHeight": 8,
+            "tileCount": 30,
+            "tiles": tiles,
+            "tileUsage": {
+                "topEdge": list(range(0, 12)),
+                "leftEdge": [12, 14, 16],
+                "rightEdge": [13, 15, 17],
+                "bottomEdge": list(range(18, 30))
             },
-            "Description": "9-patch frame tile sheet for map popup (GBA tile-based rendering)"
+            "description": "9-patch frame tile sheet for map popup (GBA tile-based rendering)"
         }
         
         dest_json = self.output_data_outline / f"{style_name}_outline.json"

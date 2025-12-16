@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/battle/mus_encounter_female",
-  "displayName": "Encounter Female",
+  "name": "Encounter Female",
   "audioPath": "Audio/Music/Battle/mus_encounter_female.ogg",
   "volume": 0.567,
   "loop": true,

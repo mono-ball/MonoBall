@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/lilycove_city",
-  "DisplayName": "LilycoveCity",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/lilycove_city.json"
+  "id": "base:map:hoenn/lilycove_city",
+  "name": "LilycoveCity",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/lilycove_city.json"
 }

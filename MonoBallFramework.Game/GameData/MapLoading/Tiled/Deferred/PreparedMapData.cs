@@ -31,7 +31,7 @@ public class PreparedMapData
     public required Dictionary<string, object> Properties { get; init; }
 
     // Optional components
-    public string? DisplayName { get; init; }
+    public string? Name { get; init; }
     public string? RegionSection { get; init; }
     public string? MusicTrack { get; init; }
 

@@ -1,6 +1,6 @@
 {
   "id": "base:behavior:movement/rotate_clockwise",
-  "displayName": "Rotate Clockwise Behavior",
+  "name": "Rotate Clockwise Behavior",
   "description": "NPC rotates facing direction clockwise periodically",
   "behaviorScript": "Behaviors/rotate_behavior.csx",
   "defaultSpeed": 0.0,

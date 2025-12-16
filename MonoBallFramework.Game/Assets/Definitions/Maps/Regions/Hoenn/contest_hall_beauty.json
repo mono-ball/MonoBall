@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/contest_hall_beauty",
-  "DisplayName": "ContestHallBeauty",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/contest_hall_beauty.json"
+  "id": "base:map:hoenn/contest_hall_beauty",
+  "name": "ContestHallBeauty",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/contest_hall_beauty.json"
 }

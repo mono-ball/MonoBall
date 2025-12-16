@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/special/mus_rg_mt_moon",
-  "displayName": "RG Mt. Moon",
+  "name": "RG Mt. Moon",
   "audioPath": "Audio/Music/Special/mus_rg_mt_moon.ogg",
   "volume": 0.709,
   "loop": true,

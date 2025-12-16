@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/ui/se_pokenav_on",
-  "displayName": "Pokenav On",
+  "name": "Pokenav On",
   "audioPath": "Audio/SFX/UI/se_pokenav_on.ogg",
   "volume": 0.787,
   "loop": false,

@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/special/mus_aqua_magma_hideout",
-  "displayName": "Aqua Magma Hideout",
+  "name": "Aqua Magma Hideout",
   "audioPath": "Audio/Music/Special/mus_aqua_magma_hideout.ogg",
   "volume": 0.661,
   "loop": true,

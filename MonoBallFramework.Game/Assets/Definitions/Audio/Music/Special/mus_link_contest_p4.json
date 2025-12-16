@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/special/mus_link_contest_p4",
-  "displayName": "Link Contest P4",
+  "name": "Link Contest P4",
   "audioPath": "Audio/Music/Special/mus_link_contest_p4.ogg",
   "volume": 0.709,
   "loop": true,

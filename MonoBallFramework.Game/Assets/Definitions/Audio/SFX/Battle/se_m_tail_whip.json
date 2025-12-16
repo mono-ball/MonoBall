@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_m_tail_whip",
-  "displayName": "M Tail Whip",
+  "name": "M Tail Whip",
   "audioPath": "Audio/SFX/Battle/se_m_tail_whip.ogg",
   "volume": 0.866,
   "loop": false,

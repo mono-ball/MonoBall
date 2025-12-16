@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/slateport_city_mart",
-  "DisplayName": "SlateportCity_Mart",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/slateport_city_mart.json"
+  "id": "base:map:hoenn/slateport_city_mart",
+  "name": "SlateportCity_Mart",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/slateport_city_mart.json"
 }

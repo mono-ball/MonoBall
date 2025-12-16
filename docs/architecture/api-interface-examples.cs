@@ -32,10 +32,10 @@ public interface ICustomTypeDefinition : ITypeDefinition
     string Category { get; }
 
     /// <summary>
-    /// Schema version for compatibility checks and migration.
+    /// Version for compatibility checks and migration.
     /// Increment when breaking changes are made to the type structure.
     /// </summary>
-    int SchemaVersion { get; }
+    string Version { get; }
 
     /// <summary>
     /// Source mod identifier (set by mod loader during registration).
@@ -325,15 +325,15 @@ public class QuestDefinition : ICustomTypeDefinition
 {
     // ITypeDefinition (required by framework)
     public required string Id { get; set; }
+    public required string Name { get; set; }
     public string? Description { get; set; }
 
     // ICustomTypeDefinition (custom type metadata)
     public string Category => "quest";
-    public int SchemaVersion => 1;
+    public string Version => "1.0.0";
     public string SourceMod { get; set; } = "quest-system";
 
     // Quest-specific properties
-    public required string DisplayName { get; set; }
     public required string Objective { get; set; }
     public required int RewardMoney { get; set; }
     public required int RewardExp { get; set; }
@@ -380,7 +380,7 @@ public class QuestTrackerScript : ScriptBase
         {
             Context.Logger.LogInformation(
                 "Quest available: {Name} ({Type}, {Difficulty})",
-                quest.DisplayName,
+                quest.Name,
                 quest.Type,
                 quest.Difficulty
             );
@@ -398,7 +398,7 @@ public class QuestTrackerScript : ScriptBase
             Context.Logger.LogInformation(
                 "Quest {Action}: {Name} (Type: {Type})",
                 evt.IsHotReload ? "reloaded" : "loaded",
-                evt.Definition.DisplayName,
+                evt.Definition.Name,
                 evt.Definition.Type
             );
 
@@ -425,7 +425,7 @@ public class QuestTrackerScript : ScriptBase
         // React to quest hot-reload
         ctx.CustomTypes.OnTypeReloaded<QuestDefinition>(evt =>
         {
-            Context.Logger.LogInformation("Quest reloaded: {Name}", evt.Definition.DisplayName);
+            Context.Logger.LogInformation("Quest reloaded: {Name}", evt.Definition.Name);
 
             // Refresh active quest data
             if (_activeQuests.Contains(evt.TypeId))
@@ -462,7 +462,7 @@ public class QuestTrackerScript : ScriptBase
 
         if (!canStart)
         {
-            Context.Dialogue.ShowMessage($"Prerequisites not met for {quest.DisplayName}");
+            Context.Dialogue.ShowMessage($"Prerequisites not met for {quest.Name}");
             Context.Logger.LogWarning("Cannot start quest {Id}: prerequisites not met", questId);
             return;
         }
@@ -471,7 +471,7 @@ public class QuestTrackerScript : ScriptBase
         if (quest.Difficulty == QuestDifficulty.Expert)
         {
             // Could check player level here
-            Context.Dialogue.ShowMessage($"Warning: {quest.DisplayName} is an expert-level quest!");
+            Context.Dialogue.ShowMessage($"Warning: {quest.Name} is an expert-level quest!");
         }
 
         // Start quest
@@ -485,9 +485,9 @@ public class QuestTrackerScript : ScriptBase
             _objectiveProgress[objectiveKey] = 0;
         }
 
-        Context.Dialogue.ShowMessage($"Quest started: {quest.DisplayName}\n{quest.Objective}");
+        Context.Dialogue.ShowMessage($"Quest started: {quest.Name}\n{quest.Objective}");
         Context.Logger.LogInformation("Started quest: {Quest} (Reward: {Money} money, {Exp} exp)",
-            quest.DisplayName, quest.RewardMoney, quest.RewardExp);
+            quest.Name, quest.RewardMoney, quest.RewardExp);
     }
 
     private void CheckLocationObjectives(int x, int y)
@@ -525,7 +525,7 @@ public class QuestTrackerScript : ScriptBase
 
         Context.Dialogue.ShowMessage($"Objective complete: {objective.Description}");
         Context.Logger.LogInformation("Completed objective: {Objective} for quest {Quest}",
-            objective.Description, quest.DisplayName);
+            objective.Description, quest.Name);
 
         // Check if all objectives are complete
         bool allComplete = quest.Objectives.All(obj =>
@@ -551,13 +551,13 @@ public class QuestTrackerScript : ScriptBase
         // Context.Player.GiveExp(quest.RewardExp); // Hypothetical
 
         Context.Dialogue.ShowMessage(
-            $"Quest Complete!\n{quest.DisplayName}\n\n" +
+            $"Quest Complete!\n{quest.Name}\n\n" +
             $"Rewards:\n" +
             $"  Money: {quest.RewardMoney}\n" +
             $"  Exp: {quest.RewardExp}"
         );
 
-        Context.Logger.LogInformation("Completed quest: {Quest}", quest.DisplayName);
+        Context.Logger.LogInformation("Completed quest: {Quest}", quest.Name);
 
         // Publish custom event for other mods to react
         Context.Events.Publish(new QuestCompletedEvent
@@ -565,7 +565,7 @@ public class QuestTrackerScript : ScriptBase
             EventId = Guid.NewGuid(),
             Timestamp = DateTime.UtcNow,
             QuestId = quest.Id,
-            QuestName = quest.DisplayName,
+            QuestName = quest.Name,
             RewardMoney = quest.RewardMoney,
             RewardExp = quest.RewardExp
         });
@@ -603,7 +603,7 @@ public class QuestTrackerScript : ScriptBase
         foreach (QuestDefinition quest in quests)
         {
             Context.Dialogue.ShowMessage(
-                $"[{quest.Type}] {quest.DisplayName}\n" +
+                $"[{quest.Type}] {quest.Name}\n" +
                 $"{quest.Objective}\n" +
                 $"Difficulty: {quest.Difficulty}"
             );
@@ -631,7 +631,7 @@ public class QuestTrackerScript : ScriptBase
         foreach (QuestDefinition quest in available)
         {
             Context.Dialogue.ShowMessage(
-                $"{quest.DisplayName}\n" +
+                $"{quest.Name}\n" +
                 $"{quest.Objective}\n" +
                 $"Reward: {quest.RewardMoney} money"
             );
@@ -688,7 +688,7 @@ public class DynamicTypeExplorerScript : ScriptBase
                 type.Category,
                 type.Id,
                 type.SourceMod,
-                type.SchemaVersion
+                type.Version
             );
 
             // Use reflection or dynamic to access type-specific properties
@@ -724,7 +724,6 @@ namespace QuestSystem.Contracts;
 /// </summary>
 public interface IQuestDefinition : ICustomTypeDefinition
 {
-    string DisplayName { get; }
     string Objective { get; }
     int RewardMoney { get; }
     int RewardExp { get; }
@@ -748,7 +747,7 @@ public class ContractBasedQuestTrackerScript : ScriptBase
             // Compile-time type safety via interface
             Context.Logger.LogInformation(
                 "Quest: {Name} (Reward: {Money})",
-                quest.DisplayName,
+                quest.Name,
                 quest.RewardMoney
             );
         }

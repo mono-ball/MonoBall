@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/battle/mus_victory_league",
-  "displayName": "Victory League",
+  "name": "Victory League",
   "audioPath": "Audio/Music/Battle/mus_victory_league.ogg",
   "volume": 0.63,
   "loop": true,

@@ -1,6 +1,6 @@
 {
   "id": "base:tile_behavior:terrain/impassable_north",
-  "displayName": "Impassable North",
+  "name": "Impassable North",
   "description": "Blocks movement from north",
   "behaviorScript": "TileBehaviors/impassable_north.csx",
   "flags": "BlocksMovement"

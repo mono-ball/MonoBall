@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_bike_bell",
-  "displayName": "Bike Bell",
+  "name": "Bike Bell",
   "audioPath": "Audio/SFX/Battle/se_bike_bell.ogg",
   "volume": 0.709,
   "loop": false,

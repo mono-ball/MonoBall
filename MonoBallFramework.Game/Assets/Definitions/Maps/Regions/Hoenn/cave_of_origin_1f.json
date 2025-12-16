@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/cave_of_origin_1f",
-  "DisplayName": "CaveOfOrigin_1F",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/cave_of_origin_1f.json"
+  "id": "base:map:hoenn/cave_of_origin_1f",
+  "name": "CaveOfOrigin_1F",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/cave_of_origin_1f.json"
 }

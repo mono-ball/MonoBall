@@ -1,0 +1,2 @@
+﻿MonoBallFramework.Game/Assets/Definitions/Maps/Regions/Hoenn/test-map.json
+MonoBallFramework.Game/Assets/Tiled/test-map.json

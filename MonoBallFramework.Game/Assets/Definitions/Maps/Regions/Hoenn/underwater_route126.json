@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/underwater_route126",
-  "DisplayName": "Underwater_Route126",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/underwater_route126.json"
+  "id": "base:map:hoenn/underwater_route126",
+  "name": "Underwater_Route126",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/underwater_route126.json"
 }

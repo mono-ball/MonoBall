@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_ding_dong",
-  "displayName": "Ding Dong",
+  "name": "Ding Dong",
   "audioPath": "Audio/SFX/Battle/se_ding_dong.ogg",
   "volume": 0.709,
   "loop": false,

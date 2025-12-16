@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/petalburg_city_pokemon_center_1f",
-  "DisplayName": "PetalburgCity_PokemonCenter_1F",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/petalburg_city_pokemon_center_1f.json"
+  "id": "base:map:hoenn/petalburg_city_pokemon_center_1f",
+  "name": "PetalburgCity_PokemonCenter_1F",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/petalburg_city_pokemon_center_1f.json"
 }

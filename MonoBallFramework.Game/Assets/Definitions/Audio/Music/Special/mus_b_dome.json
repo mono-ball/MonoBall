@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/special/mus_b_dome",
-  "displayName": "Battle Dome",
+  "name": "Battle Dome",
   "audioPath": "Audio/Music/Special/mus_b_dome.ogg",
   "volume": 0.709,
   "loop": true,

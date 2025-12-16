@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/fortree_city_house4",
-  "DisplayName": "FortreeCity_House4",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/fortree_city_house4.json"
+  "id": "base:map:hoenn/fortree_city_house4",
+  "name": "FortreeCity_House4",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/fortree_city_house4.json"
 }

@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/sootopolis_city_gym_b1f",
-  "DisplayName": "SootopolisCity_Gym_B1F",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/sootopolis_city_gym_b1f.json"
+  "id": "base:map:hoenn/sootopolis_city_gym_b1f",
+  "name": "SootopolisCity_Gym_B1F",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/sootopolis_city_gym_b1f.json"
 }

@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/special/mus_b_tower_rs",
-  "displayName": "Battle Tower Rs",
+  "name": "Battle Tower Rs",
   "audioPath": "Audio/Music/Special/mus_b_tower_rs.ogg",
   "volume": 0.63,
   "loop": true,

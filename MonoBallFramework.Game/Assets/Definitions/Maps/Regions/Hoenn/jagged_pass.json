@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/jagged_pass",
-  "DisplayName": "JaggedPass",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/jagged_pass.json"
+  "id": "base:map:hoenn/jagged_pass",
+  "name": "JaggedPass",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/jagged_pass.json"
 }

@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_contest_mons_turn",
-  "displayName": "Contest Mons Turn",
+  "name": "Contest Mons Turn",
   "audioPath": "Audio/SFX/Battle/se_contest_mons_turn.ogg",
   "volume": 0.709,
   "loop": false,

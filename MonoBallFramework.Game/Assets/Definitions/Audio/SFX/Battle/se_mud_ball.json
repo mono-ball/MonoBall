@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_mud_ball",
-  "displayName": "Mud Ball",
+  "name": "Mud Ball",
   "audioPath": "Audio/SFX/Battle/se_mud_ball.ogg",
   "volume": 0.866,
   "loop": false,

@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_m_take_down",
-  "displayName": "M Take Down",
+  "name": "M Take Down",
   "audioPath": "Audio/SFX/Battle/se_m_take_down.ogg",
   "volume": 0.827,
   "loop": false,

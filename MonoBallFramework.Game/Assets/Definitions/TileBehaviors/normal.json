@@ -1,6 +1,6 @@
 {
   "id": "base:tile_behavior:movement/normal",
-  "displayName": "Normal Tile",
+  "name": "Normal Tile",
   "description": "Default walkable tile with no special behavior",
   "behaviorScript": "TileBehaviors/normal.csx",
   "flags": "None"

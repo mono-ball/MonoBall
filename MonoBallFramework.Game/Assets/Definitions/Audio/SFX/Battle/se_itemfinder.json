@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_itemfinder",
-  "displayName": "Itemfinder",
+  "name": "Itemfinder",
   "audioPath": "Audio/SFX/Battle/se_itemfinder.ogg",
   "volume": 0.709,
   "loop": false,

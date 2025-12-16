@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/petalburg_city_gym",
-  "DisplayName": "PetalburgCity_Gym",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/petalburg_city_gym.json"
+  "id": "base:map:hoenn/petalburg_city_gym",
+  "name": "PetalburgCity_Gym",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/petalburg_city_gym.json"
 }

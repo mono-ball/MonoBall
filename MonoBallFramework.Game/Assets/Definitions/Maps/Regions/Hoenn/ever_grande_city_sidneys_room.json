@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/ever_grande_city_sidneys_room",
-  "DisplayName": "EverGrandeCity_SidneysRoom",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/ever_grande_city_sidneys_room.json"
+  "id": "base:map:hoenn/ever_grande_city_sidneys_room",
+  "name": "EverGrandeCity_SidneysRoom",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/ever_grande_city_sidneys_room.json"
 }

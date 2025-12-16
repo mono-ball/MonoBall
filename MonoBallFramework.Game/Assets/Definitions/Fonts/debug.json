@@ -1,6 +1,6 @@
 {
   "id": "base:font:debug/mono",
-  "displayName": "Debug Font",
+  "name": "Debug Font",
   "description": "Monospace font for debug overlays and developer tools",
   "fontPath": "0xProtoNerdFontMono-Regular.ttf",
   "category": "debug",

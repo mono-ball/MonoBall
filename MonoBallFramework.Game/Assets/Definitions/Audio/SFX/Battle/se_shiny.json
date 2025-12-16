@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_shiny",
-  "displayName": "Shiny",
+  "name": "Shiny",
   "audioPath": "Audio/SFX/Battle/se_shiny.ogg",
   "volume": 0.748,
   "loop": false,

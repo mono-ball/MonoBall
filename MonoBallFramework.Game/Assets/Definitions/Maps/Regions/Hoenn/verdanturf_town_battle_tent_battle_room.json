@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/verdanturf_town_battle_tent_battle_room",
-  "DisplayName": "VerdanturfTown_BattleTentBattleRoom",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/verdanturf_town_battle_tent_battle_room.json"
+  "id": "base:map:hoenn/verdanturf_town_battle_tent_battle_room",
+  "name": "VerdanturfTown_BattleTentBattleRoom",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/verdanturf_town_battle_tent_battle_room.json"
 }

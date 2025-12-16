@@ -1,0 +1,17 @@
+{
+  "id": "base:pokedex_entry:hoenn/treecko",
+  "pokedexId": "base:pokedex:hoenn",
+  "speciesId": "base:pokemon:treecko",
+  "entryNumber": 1,
+  "category": "Wood Gecko Pokémon",
+  "height": 5,
+  "weight": 50,
+  "description": "TREECKO has small hooks on the bottom of its feet that enable it to scale vertical walls. This POKéMON attacks by slamming foes with its thick tail.",
+  "pokemonScale": 256,
+  "pokemonOffset": 0,
+  "trainerScale": 256,
+  "trainerOffset": 0,
+  "sourceMod": "base",
+  "version": "1.0.0"
+}
+

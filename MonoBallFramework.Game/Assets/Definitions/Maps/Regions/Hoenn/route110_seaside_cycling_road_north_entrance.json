@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/route110_seaside_cycling_road_north_entrance",
-  "DisplayName": "Route110_SeasideCyclingRoadNorthEntrance",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/route110_seaside_cycling_road_north_entrance.json"
+  "id": "base:map:hoenn/route110_seaside_cycling_road_north_entrance",
+  "name": "Route110_SeasideCyclingRoadNorthEntrance",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/route110_seaside_cycling_road_north_entrance.json"
 }

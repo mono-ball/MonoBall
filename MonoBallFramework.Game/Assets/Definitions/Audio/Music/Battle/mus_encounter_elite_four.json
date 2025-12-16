@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/battle/mus_encounter_elite_four",
-  "displayName": "Encounter Elite Four",
+  "name": "Encounter Elite Four",
   "audioPath": "Audio/Music/Battle/mus_encounter_elite_four.ogg",
   "volume": 0.614,
   "loop": true,

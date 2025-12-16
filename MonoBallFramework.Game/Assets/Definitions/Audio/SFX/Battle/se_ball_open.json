@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_ball_open",
-  "displayName": "Ball Open",
+  "name": "Ball Open",
   "audioPath": "Audio/SFX/Battle/se_ball_open.ogg",
   "volume": 0.787,
   "loop": false,

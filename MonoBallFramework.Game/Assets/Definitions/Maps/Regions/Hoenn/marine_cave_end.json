@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/marine_cave_end",
-  "DisplayName": "MarineCave_End",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/marine_cave_end.json"
+  "id": "base:map:hoenn/marine_cave_end",
+  "name": "MarineCave_End",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/marine_cave_end.json"
 }

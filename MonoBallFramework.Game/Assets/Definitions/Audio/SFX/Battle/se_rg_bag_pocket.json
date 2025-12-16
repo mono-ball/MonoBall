@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_rg_bag_pocket",
-  "displayName": "RG Bag Pocket",
+  "name": "RG Bag Pocket",
   "audioPath": "Audio/SFX/Battle/se_rg_bag_pocket.ogg",
   "volume": 0.63,
   "loop": false,

@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/magma_hideout_2f_3r",
-  "DisplayName": "MagmaHideout_2F_3R",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/magma_hideout_2f_3r.json"
+  "id": "base:map:hoenn/magma_hideout_2f_3r",
+  "name": "MagmaHideout_2F_3R",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/magma_hideout_2f_3r.json"
 }

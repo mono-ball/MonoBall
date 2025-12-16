@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/birth_island_harbor",
-  "DisplayName": "BirthIsland_Harbor",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/birth_island_harbor.json"
+  "id": "base:map:hoenn/birth_island_harbor",
+  "name": "BirthIsland_Harbor",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/birth_island_harbor.json"
 }

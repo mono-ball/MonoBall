@@ -26,7 +26,7 @@ public class FontEntity
     /// </summary>
     [Required]
     [MaxLength(100)]
-    public string DisplayName { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
 
     /// <summary>
     ///     Optional description of the font.

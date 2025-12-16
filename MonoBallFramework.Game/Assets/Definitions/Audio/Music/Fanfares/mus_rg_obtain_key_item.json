@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/fanfares/mus_rg_obtain_key_item",
-  "displayName": "RG Obtain Key Item",
+  "name": "RG Obtain Key Item",
   "audioPath": "Audio/Music/Fanfares/mus_rg_obtain_key_item.ogg",
   "volume": 0.606,
   "loop": false,

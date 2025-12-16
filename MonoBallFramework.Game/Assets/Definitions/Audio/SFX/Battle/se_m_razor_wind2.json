@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_m_razor_wind2",
-  "displayName": "M Razor Wind2",
+  "name": "M Razor Wind2",
   "audioPath": "Audio/SFX/Battle/se_m_razor_wind2.ogg",
   "volume": 0.709,
   "loop": false,

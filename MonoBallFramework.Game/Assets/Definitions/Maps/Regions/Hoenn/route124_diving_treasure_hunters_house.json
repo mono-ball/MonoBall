@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/route124_diving_treasure_hunters_house",
-  "DisplayName": "Route124_DivingTreasureHuntersHouse",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/route124_diving_treasure_hunters_house.json"
+  "id": "base:map:hoenn/route124_diving_treasure_hunters_house",
+  "name": "Route124_DivingTreasureHuntersHouse",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/route124_diving_treasure_hunters_house.json"
 }

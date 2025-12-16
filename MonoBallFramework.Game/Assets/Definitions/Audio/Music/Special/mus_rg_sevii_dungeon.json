@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/special/mus_rg_sevii_dungeon",
-  "displayName": "RG Sevii Dungeon",
+  "name": "RG Sevii Dungeon",
   "audioPath": "Audio/Music/Special/mus_rg_sevii_dungeon.ogg",
   "volume": 0.709,
   "loop": true,

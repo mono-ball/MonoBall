@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/special/mus_contest_lobby",
-  "displayName": "Contest Lobby",
+  "name": "Contest Lobby",
   "audioPath": "Audio/Music/Special/mus_contest_lobby.ogg",
   "volume": 0.472,
   "loop": true,

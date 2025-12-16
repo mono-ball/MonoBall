@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/lilycove_city_cove_lily_motel_2f",
-  "DisplayName": "LilycoveCity_CoveLilyMotel_2F",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/lilycove_city_cove_lily_motel_2f.json"
+  "id": "base:map:hoenn/lilycove_city_cove_lily_motel_2f",
+  "name": "LilycoveCity_CoveLilyMotel_2F",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/lilycove_city_cove_lily_motel_2f.json"
 }

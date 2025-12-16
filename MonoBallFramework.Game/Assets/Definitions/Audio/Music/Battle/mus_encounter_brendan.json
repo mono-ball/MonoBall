@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/battle/mus_encounter_brendan",
-  "displayName": "Encounter Brendan",
+  "name": "Encounter Brendan",
   "audioPath": "Audio/Music/Battle/mus_encounter_brendan.ogg",
   "volume": 0.614,
   "loop": true,

@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/routes/mus_rg_sevii_route",
-  "displayName": "RG Sevii Route",
+  "name": "RG Sevii Route",
   "audioPath": "Audio/Music/Routes/mus_rg_sevii_route.ogg",
   "volume": 0.63,
   "loop": true,

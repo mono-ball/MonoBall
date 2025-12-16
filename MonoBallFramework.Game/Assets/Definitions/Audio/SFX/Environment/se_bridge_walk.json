@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/environment/se_bridge_walk",
-  "displayName": "Bridge Walk",
+  "name": "Bridge Walk",
   "audioPath": "Audio/SFX/Environment/se_bridge_walk.ogg",
   "volume": 0.748,
   "loop": false,

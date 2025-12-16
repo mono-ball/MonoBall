@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/route114_fossil_maniacs_tunnel",
-  "DisplayName": "Route114_FossilManiacsTunnel",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/route114_fossil_maniacs_tunnel.json"
+  "id": "base:map:hoenn/route114_fossil_maniacs_tunnel",
+  "name": "Route114_FossilManiacsTunnel",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/route114_fossil_maniacs_tunnel.json"
 }

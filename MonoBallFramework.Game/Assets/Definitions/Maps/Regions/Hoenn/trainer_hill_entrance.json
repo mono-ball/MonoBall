@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/trainer_hill_entrance",
-  "DisplayName": "TrainerHill_Entrance",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/trainer_hill_entrance.json"
+  "id": "base:map:hoenn/trainer_hill_entrance",
+  "name": "TrainerHill_Entrance",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/trainer_hill_entrance.json"
 }

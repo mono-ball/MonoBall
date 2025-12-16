@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/ever_grande_city_glacias_room",
-  "DisplayName": "EverGrandeCity_GlaciasRoom",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/ever_grande_city_glacias_room.json"
+  "id": "base:map:hoenn/ever_grande_city_glacias_room",
+  "name": "EverGrandeCity_GlaciasRoom",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/ever_grande_city_glacias_room.json"
 }

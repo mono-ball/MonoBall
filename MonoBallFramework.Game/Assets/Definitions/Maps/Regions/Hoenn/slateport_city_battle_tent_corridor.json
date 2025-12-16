@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/slateport_city_battle_tent_corridor",
-  "DisplayName": "SlateportCity_BattleTentCorridor",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/slateport_city_battle_tent_corridor.json"
+  "id": "base:map:hoenn/slateport_city_battle_tent_corridor",
+  "name": "SlateportCity_BattleTentCorridor",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/slateport_city_battle_tent_corridor.json"
 }

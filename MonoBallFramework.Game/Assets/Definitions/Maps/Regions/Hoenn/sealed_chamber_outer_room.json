@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/sealed_chamber_outer_room",
-  "DisplayName": "SealedChamber_OuterRoom",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/sealed_chamber_outer_room.json"
+  "id": "base:map:hoenn/sealed_chamber_outer_room",
+  "name": "SealedChamber_OuterRoom",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/sealed_chamber_outer_room.json"
 }

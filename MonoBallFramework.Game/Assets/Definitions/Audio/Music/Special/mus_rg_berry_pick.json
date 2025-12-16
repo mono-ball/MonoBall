@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/special/mus_rg_berry_pick",
-  "displayName": "RG Berry Pick",
+  "name": "RG Berry Pick",
   "audioPath": "Audio/Music/Special/mus_rg_berry_pick.ogg",
   "volume": 0.709,
   "loop": true,

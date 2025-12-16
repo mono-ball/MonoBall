@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/fortree_city",
-  "DisplayName": "FortreeCity",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/fortree_city.json"
+  "id": "base:map:hoenn/fortree_city",
+  "name": "FortreeCity",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/fortree_city.json"
 }

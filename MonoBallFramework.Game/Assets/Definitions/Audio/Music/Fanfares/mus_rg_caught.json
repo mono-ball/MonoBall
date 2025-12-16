@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/fanfares/mus_rg_caught",
-  "displayName": "RG Caught",
+  "name": "RG Caught",
   "audioPath": "Audio/Music/Fanfares/mus_rg_caught.ogg",
   "volume": 0.787,
   "loop": true,

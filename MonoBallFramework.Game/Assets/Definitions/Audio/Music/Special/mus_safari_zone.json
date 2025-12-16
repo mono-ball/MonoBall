@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/special/mus_safari_zone",
-  "displayName": "Safari Zone",
+  "name": "Safari Zone",
   "audioPath": "Audio/Music/Special/mus_safari_zone.ogg",
   "volume": 0.646,
   "loop": true,

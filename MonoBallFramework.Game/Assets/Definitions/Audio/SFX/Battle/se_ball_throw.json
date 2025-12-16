@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_ball_throw",
-  "displayName": "Ball Throw",
+  "name": "Ball Throw",
   "audioPath": "Audio/SFX/Battle/se_ball_throw.ogg",
   "volume": 0.945,
   "loop": false,

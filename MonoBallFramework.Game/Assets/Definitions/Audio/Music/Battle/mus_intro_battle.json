@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/battle/mus_intro_battle",
-  "displayName": "Intro Battle",
+  "name": "Intro Battle",
   "audioPath": "Audio/Music/Battle/mus_intro_battle.ogg",
   "volume": 0.693,
   "loop": true,

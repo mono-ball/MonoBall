@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/sky_pillar_outside",
-  "DisplayName": "SkyPillar_Outside",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/sky_pillar_outside.json"
+  "id": "base:map:hoenn/sky_pillar_outside",
+  "name": "SkyPillar_Outside",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/sky_pillar_outside.json"
 }

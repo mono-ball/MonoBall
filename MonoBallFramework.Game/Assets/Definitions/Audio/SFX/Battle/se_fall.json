@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_fall",
-  "displayName": "Fall",
+  "name": "Fall",
   "audioPath": "Audio/SFX/Battle/se_fall.ogg",
   "volume": 0.866,
   "loop": false,

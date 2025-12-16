@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/pacifidlog_town_pokemon_center_2f",
-  "DisplayName": "PacifidlogTown_PokemonCenter_2F",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/pacifidlog_town_pokemon_center_2f.json"
+  "id": "base:map:hoenn/pacifidlog_town_pokemon_center_2f",
+  "name": "PacifidlogTown_PokemonCenter_2F",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/pacifidlog_town_pokemon_center_2f.json"
 }

@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_rg_bag_cursor",
-  "displayName": "RG Bag Cursor",
+  "name": "RG Bag Cursor",
   "audioPath": "Audio/SFX/Battle/se_rg_bag_cursor.ogg",
   "volume": 0.63,
   "loop": false,

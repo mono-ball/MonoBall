@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/underwater_sootopolis_city",
-  "DisplayName": "Underwater_SootopolisCity",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/underwater_sootopolis_city.json"
+  "id": "base:map:hoenn/underwater_sootopolis_city",
+  "name": "Underwater_SootopolisCity",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/underwater_sootopolis_city.json"
 }

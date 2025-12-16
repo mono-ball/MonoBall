@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/aqua_hideout_unused_ruby_map1",
-  "DisplayName": "AquaHideout_UnusedRubyMap1",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/aqua_hideout_unused_ruby_map1.json"
+  "id": "base:map:hoenn/aqua_hideout_unused_ruby_map1",
+  "name": "AquaHideout_UnusedRubyMap1",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/aqua_hideout_unused_ruby_map1.json"
 }

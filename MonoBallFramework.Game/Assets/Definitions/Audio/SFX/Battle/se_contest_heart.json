@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_contest_heart",
-  "displayName": "Contest Heart",
+  "name": "Contest Heart",
   "audioPath": "Audio/SFX/Battle/se_contest_heart.ogg",
   "volume": 0.709,
   "loop": false,

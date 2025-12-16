@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/lilycove_city_department_store_4f",
-  "DisplayName": "LilycoveCity_DepartmentStore_4F",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/lilycove_city_department_store_4f.json"
+  "id": "base:map:hoenn/lilycove_city_department_store_4f",
+  "name": "LilycoveCity_DepartmentStore_4F",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/lilycove_city_department_store_4f.json"
 }

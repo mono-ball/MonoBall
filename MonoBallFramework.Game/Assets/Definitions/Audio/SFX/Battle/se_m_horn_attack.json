@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_m_horn_attack",
-  "displayName": "M Horn Attack",
+  "name": "M Horn Attack",
   "audioPath": "Audio/SFX/Battle/se_m_horn_attack.ogg",
   "volume": 0.866,
   "loop": false,

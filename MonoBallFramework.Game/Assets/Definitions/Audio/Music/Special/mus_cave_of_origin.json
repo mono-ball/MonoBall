@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/special/mus_cave_of_origin",
-  "displayName": "Cave Of Origin",
+  "name": "Cave Of Origin",
   "audioPath": "Audio/Music/Special/mus_cave_of_origin.ogg",
   "volume": 0.63,
   "loop": true,

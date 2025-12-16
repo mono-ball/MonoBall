@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/special/mus_rg_follow_me",
-  "displayName": "RG Follow Me",
+  "name": "RG Follow Me",
   "audioPath": "Audio/Music/Special/mus_rg_follow_me.ogg",
   "volume": 0.535,
   "loop": true,

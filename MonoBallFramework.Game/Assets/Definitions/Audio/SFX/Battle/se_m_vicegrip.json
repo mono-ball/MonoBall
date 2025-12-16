@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_m_vicegrip",
-  "displayName": "M Vicegrip",
+  "name": "M Vicegrip",
   "audioPath": "Audio/SFX/Battle/se_m_vicegrip.ogg",
   "volume": 0.866,
   "loop": false,

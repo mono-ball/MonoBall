@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/granite_cave_b2f",
-  "DisplayName": "GraniteCave_B2F",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/granite_cave_b2f.json"
+  "id": "base:map:hoenn/granite_cave_b2f",
+  "name": "GraniteCave_B2F",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/granite_cave_b2f.json"
 }

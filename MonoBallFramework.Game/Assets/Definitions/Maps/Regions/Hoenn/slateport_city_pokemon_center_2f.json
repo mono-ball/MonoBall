@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/slateport_city_pokemon_center_2f",
-  "DisplayName": "SlateportCity_PokemonCenter_2F",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/slateport_city_pokemon_center_2f.json"
+  "id": "base:map:hoenn/slateport_city_pokemon_center_2f",
+  "name": "SlateportCity_PokemonCenter_2F",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/slateport_city_pokemon_center_2f.json"
 }

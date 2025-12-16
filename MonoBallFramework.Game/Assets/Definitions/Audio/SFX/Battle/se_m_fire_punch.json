@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_m_fire_punch",
-  "displayName": "M Fire Punch",
+  "name": "M Fire Punch",
   "audioPath": "Audio/SFX/Battle/se_m_fire_punch.ogg",
   "volume": 0.866,
   "loop": false,

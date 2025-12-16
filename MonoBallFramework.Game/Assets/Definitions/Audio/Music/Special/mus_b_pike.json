@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/special/mus_b_pike",
-  "displayName": "Battle Pike",
+  "name": "Battle Pike",
   "audioPath": "Audio/Music/Special/mus_b_pike.ogg",
   "volume": 0.724,
   "loop": true,

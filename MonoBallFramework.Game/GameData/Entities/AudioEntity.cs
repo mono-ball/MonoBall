@@ -26,7 +26,7 @@ public class AudioEntity
     /// </summary>
     [Required]
     [MaxLength(100)]
-    public string DisplayName { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
 
     /// <summary>
     ///     Path to the audio file relative to Assets folder.

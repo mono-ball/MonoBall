@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/unused_contest_hall2",
-  "DisplayName": "UnusedContestHall2",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/unused_contest_hall2.json"
+  "id": "base:map:hoenn/unused_contest_hall2",
+  "name": "UnusedContestHall2",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/unused_contest_hall2.json"
 }

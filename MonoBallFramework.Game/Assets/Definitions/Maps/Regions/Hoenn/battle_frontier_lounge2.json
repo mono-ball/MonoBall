@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/battle_frontier_lounge2",
-  "DisplayName": "BattleFrontier_Lounge2",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/battle_frontier_lounge2.json"
+  "id": "base:map:hoenn/battle_frontier_lounge2",
+  "name": "BattleFrontier_Lounge2",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/battle_frontier_lounge2.json"
 }

@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/route111_winstrate_familys_house",
-  "DisplayName": "Route111_WinstrateFamilysHouse",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/route111_winstrate_familys_house.json"
+  "id": "base:map:hoenn/route111_winstrate_familys_house",
+  "name": "Route111_WinstrateFamilysHouse",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/route111_winstrate_familys_house.json"
 }

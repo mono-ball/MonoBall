@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/contest_hall_tough",
-  "DisplayName": "ContestHallTough",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/contest_hall_tough.json"
+  "id": "base:map:hoenn/contest_hall_tough",
+  "name": "ContestHallTough",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/contest_hall_tough.json"
 }

@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/special/mus_rg_dex_rating",
-  "displayName": "RG Dex Rating",
+  "name": "RG Dex Rating",
   "audioPath": "Audio/Music/Special/mus_rg_dex_rating.ogg",
   "volume": 0.551,
   "loop": true,

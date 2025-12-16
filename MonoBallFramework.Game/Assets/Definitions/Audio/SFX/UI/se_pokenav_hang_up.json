@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/ui/se_pokenav_hang_up",
-  "displayName": "Pokenav Hang Up",
+  "name": "Pokenav Hang Up",
   "audioPath": "Audio/SFX/UI/se_pokenav_hang_up.ogg",
   "volume": 0.866,
   "loop": false,

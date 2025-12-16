@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/special/mus_rg_union_room",
-  "displayName": "RG Union Room",
+  "name": "RG Union Room",
   "audioPath": "Audio/Music/Special/mus_rg_union_room.ogg",
   "volume": 0.709,
   "loop": true,

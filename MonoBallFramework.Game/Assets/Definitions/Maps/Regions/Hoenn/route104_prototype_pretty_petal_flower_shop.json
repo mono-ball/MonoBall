@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/route104_prototype_pretty_petal_flower_shop",
-  "DisplayName": "Route104_PrototypePrettyPetalFlowerShop",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/route104_prototype_pretty_petal_flower_shop.json"
+  "id": "base:map:hoenn/route104_prototype_pretty_petal_flower_shop",
+  "name": "Route104_PrototypePrettyPetalFlowerShop",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/route104_prototype_pretty_petal_flower_shop.json"
 }

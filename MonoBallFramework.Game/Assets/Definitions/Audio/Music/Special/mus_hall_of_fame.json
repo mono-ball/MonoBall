@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/special/mus_hall_of_fame",
-  "displayName": "Hall Of Fame",
+  "name": "Hall Of Fame",
   "audioPath": "Audio/Music/Special/mus_hall_of_fame.ogg",
   "volume": 0.614,
   "loop": true,

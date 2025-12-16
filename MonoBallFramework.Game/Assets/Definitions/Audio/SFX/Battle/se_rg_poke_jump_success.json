@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_rg_poke_jump_success",
-  "displayName": "RG Poke Jump Success",
+  "name": "RG Poke Jump Success",
   "audioPath": "Audio/SFX/Battle/se_rg_poke_jump_success.ogg",
   "volume": 0.866,
   "loop": false,

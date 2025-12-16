@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_balloon_red",
-  "displayName": "Balloon Red",
+  "name": "Balloon Red",
   "audioPath": "Audio/SFX/Battle/se_balloon_red.ogg",
   "volume": 0.827,
   "loop": false,

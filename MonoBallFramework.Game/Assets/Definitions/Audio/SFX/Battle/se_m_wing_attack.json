@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_m_wing_attack",
-  "displayName": "M Wing Attack",
+  "name": "M Wing Attack",
   "audioPath": "Audio/SFX/Battle/se_m_wing_attack.ogg",
   "volume": 0.827,
   "loop": false,

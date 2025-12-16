@@ -9,13 +9,13 @@ namespace MonoBallFramework.Game.Engine.Core.Modding.CustomTypes;
 public sealed record CustomTypeDefinition : ICustomTypeDefinition
 {
     [JsonPropertyName("id")]
-    public required string Id { get; init; }
+    public required string DefinitionId { get; init; }
 
     [JsonPropertyName("category")]
     public required string Category { get; init; }
 
-    [JsonPropertyName("displayName")]
-    public string DisplayName { get; init; } = "";
+    [JsonPropertyName("name")]
+    public string Name { get; init; } = "";
 
     [JsonPropertyName("description")]
     public string? Description { get; init; }

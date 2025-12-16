@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/battle_frontier_reception_gate",
-  "DisplayName": "BattleFrontier_ReceptionGate",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/battle_frontier_reception_gate.json"
+  "id": "base:map:hoenn/battle_frontier_reception_gate",
+  "name": "BattleFrontier_ReceptionGate",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/battle_frontier_reception_gate.json"
 }

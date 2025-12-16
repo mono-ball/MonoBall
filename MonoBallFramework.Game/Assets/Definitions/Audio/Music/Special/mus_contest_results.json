@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/special/mus_contest_results",
-  "displayName": "Contest Results",
+  "name": "Contest Results",
   "audioPath": "Audio/Music/Special/mus_contest_results.ogg",
   "volume": 0.63,
   "loop": true,

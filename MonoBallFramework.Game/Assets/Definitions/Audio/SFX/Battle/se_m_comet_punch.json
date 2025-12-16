@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_m_comet_punch",
-  "displayName": "M Comet Punch",
+  "name": "M Comet Punch",
   "audioPath": "Audio/SFX/Battle/se_m_comet_punch.ogg",
   "volume": 0.945,
   "loop": false,

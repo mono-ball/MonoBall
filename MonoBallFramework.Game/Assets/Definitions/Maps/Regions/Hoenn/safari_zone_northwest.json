@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/safari_zone_northwest",
-  "DisplayName": "SafariZone_Northwest",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/safari_zone_northwest.json"
+  "id": "base:map:hoenn/safari_zone_northwest",
+  "name": "SafariZone_Northwest",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/safari_zone_northwest.json"
 }

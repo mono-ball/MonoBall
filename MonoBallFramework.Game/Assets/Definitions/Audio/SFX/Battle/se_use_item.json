@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_use_item",
-  "displayName": "Use Item",
+  "name": "Use Item",
   "audioPath": "Audio/SFX/Battle/se_use_item.ogg",
   "volume": 0.787,
   "loop": false,

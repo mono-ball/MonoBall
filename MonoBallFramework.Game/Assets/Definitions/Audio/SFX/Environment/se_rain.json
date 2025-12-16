@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/environment/se_rain",
-  "displayName": "Rain",
+  "name": "Rain",
   "audioPath": "Audio/SFX/Environment/se_rain.ogg",
   "volume": 0.63,
   "loop": true,

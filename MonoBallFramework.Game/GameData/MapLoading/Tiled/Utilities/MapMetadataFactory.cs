@@ -47,7 +47,7 @@ public class MapMetadataFactory
         );
 
         // Create map property components from MapEntity
-        var displayName = new DisplayName(mapDef.DisplayName);
+        var displayName = new DisplayName(mapDef.Name);
         var region = new Region(mapDef.Region);
         var weather = new Weather(mapDef.Weather);
         var battleScene = new BattleScene(mapDef.BattleScene);

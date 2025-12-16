@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/fortree_city_decoration_shop",
-  "DisplayName": "FortreeCity_DecorationShop",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/fortree_city_decoration_shop.json"
+  "id": "base:map:hoenn/fortree_city_decoration_shop",
+  "name": "FortreeCity_DecorationShop",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/fortree_city_decoration_shop.json"
 }

@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_balloon_yellow",
-  "displayName": "Balloon Yellow",
+  "name": "Balloon Yellow",
   "audioPath": "Audio/SFX/Battle/se_balloon_yellow.ogg",
   "volume": 0.827,
   "loop": false,

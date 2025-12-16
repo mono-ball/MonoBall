@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/ui/se_rg_shop",
-  "displayName": "RG Shop",
+  "name": "RG Shop",
   "audioPath": "Audio/SFX/UI/se_rg_shop.ogg",
   "volume": 0.63,
   "loop": false,

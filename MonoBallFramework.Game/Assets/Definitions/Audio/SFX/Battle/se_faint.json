@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_faint",
-  "displayName": "Faint",
+  "name": "Faint",
   "audioPath": "Audio/SFX/Battle/se_faint.ogg",
   "volume": 0.866,
   "loop": false,

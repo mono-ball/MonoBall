@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/special/mus_sealed_chamber",
-  "displayName": "Sealed Chamber",
+  "name": "Sealed Chamber",
   "audioPath": "Audio/Music/Special/mus_sealed_chamber.ogg",
   "volume": 0.787,
   "loop": true,

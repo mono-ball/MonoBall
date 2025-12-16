@@ -67,7 +67,7 @@ public class MapPopupDataService : IMapPopupDataService
             var themes = await _context.PopupThemes.Take(3).ToListAsync();
             _logger.LogDebug(
                 "Sample themes: {Themes}",
-                string.Join(", ", themes.Select(t => $"{t.Id} ({t.Name})"))
+                string.Join(", ", themes.Select(t => $"{t.ThemeId} ({t.Name})"))
             );
         }
 
@@ -76,7 +76,7 @@ public class MapPopupDataService : IMapPopupDataService
             var sections = await _context.MapSections.Take(3).ToListAsync();
             _logger.LogDebug(
                 "Sample sections: {Sections}",
-                string.Join(", ", sections.Select(s => $"{s.Id} ({s.Name})"))
+                string.Join(", ", sections.Select(s => $"{s.MapSectionId} ({s.Name})"))
             );
         }
     }
@@ -129,7 +129,7 @@ public class MapPopupDataService : IMapPopupDataService
 
         // Query database and cache result
         PopupTheme? theme = await _context
-            .PopupThemes.FirstOrDefaultAsync(t => t.Id == themeId, ct);
+            .PopupThemes.FirstOrDefaultAsync(t => t.ThemeId == themeId, ct);
         if (theme != null)
         {
             _themeCache[themeId] = theme;
@@ -154,7 +154,7 @@ public class MapPopupDataService : IMapPopupDataService
         List<PopupTheme> themes = await _context.PopupThemes.ToListAsync(ct);
         foreach (PopupTheme theme in themes)
         {
-            _themeCache[theme.Id] = theme;
+            _themeCache[theme.ThemeId] = theme;
         }
 
         _logger.LogDebug($"Preloaded {themes.Count} popup themes into cache");
@@ -212,7 +212,7 @@ public class MapPopupDataService : IMapPopupDataService
         // Query database with Theme navigation property and cache result
         MapSection? section = await _context
             .MapSections.Include(s => s.Theme)
-            .FirstOrDefaultAsync(s => s.Id == sectionId, ct);
+            .FirstOrDefaultAsync(s => s.MapSectionId == sectionId, ct);
 
         if (section != null)
         {
@@ -257,7 +257,7 @@ public class MapPopupDataService : IMapPopupDataService
             .ToListAsync(ct);
         foreach (MapSection section in sections)
         {
-            _sectionCache[section.Id] = section;
+            _sectionCache[section.MapSectionId] = section;
         }
 
         _logger.LogDebug($"Preloaded {sections.Count} map sections into cache");
@@ -326,7 +326,7 @@ public class MapPopupDataService : IMapPopupDataService
 
         _logger.LogDebug(
             "Found MapSection: Id='{Id}', Name='{Name}', ThemeId='{ThemeId}'",
-            section.Id,
+            section.MapSectionId,
             section.Name,
             section.ThemeId
         );
@@ -345,7 +345,7 @@ public class MapPopupDataService : IMapPopupDataService
 
         _logger.LogDebug(
             "Found PopupTheme: Id='{Id}', Name='{Name}', Background='{Background}', Outline='{Outline}'",
-            theme.Id,
+            theme.ThemeId,
             theme.Name,
             theme.Background,
             theme.Outline
@@ -356,8 +356,8 @@ public class MapPopupDataService : IMapPopupDataService
             SectionName = section.Name,
             BackgroundAssetId = theme.Background,
             OutlineAssetId = theme.Outline,
-            ThemeId = theme.Id,
-            SectionId = section.Id
+            ThemeId = theme.ThemeId,
+            SectionId = section.MapSectionId
         };
 
         _logger.LogDebug(
@@ -394,8 +394,8 @@ public class MapPopupDataService : IMapPopupDataService
             SectionName = section.Name,
             BackgroundAssetId = theme.Background,
             OutlineAssetId = theme.Outline,
-            ThemeId = theme.Id,
-            SectionId = section.Id
+            ThemeId = theme.ThemeId,
+            SectionId = section.MapSectionId
         };
     }
 

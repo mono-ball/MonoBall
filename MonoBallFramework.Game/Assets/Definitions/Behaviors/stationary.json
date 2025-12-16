@@ -1,6 +1,6 @@
 {
   "id": "base:behavior:movement/stationary",
-  "displayName": "Stationary Behavior",
+  "name": "Stationary Behavior",
   "description": "NPC stays in one place, does not move",
   "behaviorScript": "Behaviors/stationary_behavior.csx",
   "defaultSpeed": 0.0,

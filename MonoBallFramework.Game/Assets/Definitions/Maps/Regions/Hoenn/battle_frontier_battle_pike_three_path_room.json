@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/battle_frontier_battle_pike_three_path_room",
-  "DisplayName": "BattleFrontier_BattlePikeThreePathRoom",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/battle_frontier_battle_pike_three_path_room.json"
+  "id": "base:map:hoenn/battle_frontier_battle_pike_three_path_room",
+  "name": "BattleFrontier_BattlePikeThreePathRoom",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/battle_frontier_battle_pike_three_path_room.json"
 }

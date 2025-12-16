@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/faraway_island_entrance",
-  "DisplayName": "FarawayIsland_Entrance",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/faraway_island_entrance.json"
+  "id": "base:map:hoenn/faraway_island_entrance",
+  "name": "FarawayIsland_Entrance",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/faraway_island_entrance.json"
 }

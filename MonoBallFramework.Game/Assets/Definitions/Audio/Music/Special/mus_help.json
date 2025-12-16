@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/special/mus_help",
-  "displayName": "Help",
+  "name": "Help",
   "audioPath": "Audio/Music/Special/mus_help.ogg",
   "volume": 0.614,
   "loop": true,

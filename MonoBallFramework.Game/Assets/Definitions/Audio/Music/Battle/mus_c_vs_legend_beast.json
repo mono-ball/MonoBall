@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/battle/mus_c_vs_legend_beast",
-  "displayName": "C VS Legend Beast",
+  "name": "C VS Legend Beast",
   "audioPath": "Audio/Music/Battle/mus_c_vs_legend_beast.ogg",
   "volume": 0.63,
   "loop": true,

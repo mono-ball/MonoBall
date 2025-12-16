@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/dewford_town_gym",
-  "DisplayName": "DewfordTown_Gym",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/dewford_town_gym.json"
+  "id": "base:map:hoenn/dewford_town_gym",
+  "name": "DewfordTown_Gym",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/dewford_town_gym.json"
 }

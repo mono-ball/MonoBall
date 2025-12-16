@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_m_leer",
-  "displayName": "M Leer",
+  "name": "M Leer",
   "audioPath": "Audio/SFX/Battle/se_m_leer.ogg",
   "volume": 0.866,
   "loop": false,

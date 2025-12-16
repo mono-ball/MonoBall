@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_warp_out",
-  "displayName": "Warp Out",
+  "name": "Warp Out",
   "audioPath": "Audio/SFX/Battle/se_warp_out.ogg",
   "volume": 0.709,
   "loop": false,

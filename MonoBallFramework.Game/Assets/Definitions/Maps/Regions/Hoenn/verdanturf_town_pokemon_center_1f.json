@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/verdanturf_town_pokemon_center_1f",
-  "DisplayName": "VerdanturfTown_PokemonCenter_1F",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/verdanturf_town_pokemon_center_1f.json"
+  "id": "base:map:hoenn/verdanturf_town_pokemon_center_1f",
+  "name": "VerdanturfTown_PokemonCenter_1F",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/verdanturf_town_pokemon_center_1f.json"
 }

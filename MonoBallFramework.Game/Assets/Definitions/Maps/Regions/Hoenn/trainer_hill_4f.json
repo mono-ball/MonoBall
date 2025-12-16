@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/trainer_hill_4f",
-  "DisplayName": "TrainerHill_4F",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/trainer_hill_4f.json"
+  "id": "base:map:hoenn/trainer_hill_4f",
+  "name": "TrainerHill_4F",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/trainer_hill_4f.json"
 }

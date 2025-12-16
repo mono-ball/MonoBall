@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/special/mus_rg_sevii_cave",
-  "displayName": "RG Sevii Cave",
+  "name": "RG Sevii Cave",
   "audioPath": "Audio/Music/Special/mus_rg_sevii_cave.ogg",
   "volume": 0.709,
   "loop": true,

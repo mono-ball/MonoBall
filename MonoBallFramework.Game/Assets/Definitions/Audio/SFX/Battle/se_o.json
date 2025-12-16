@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_o",
-  "displayName": "O",
+  "name": "O",
   "audioPath": "Audio/SFX/Battle/se_o.ogg",
   "volume": 0.945,
   "loop": false,

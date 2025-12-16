@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/oldale_town_pokemon_center_1f",
-  "DisplayName": "OldaleTown_PokemonCenter_1F",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/oldale_town_pokemon_center_1f.json"
+  "id": "base:map:hoenn/oldale_town_pokemon_center_1f",
+  "name": "OldaleTown_PokemonCenter_1F",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/oldale_town_pokemon_center_1f.json"
 }

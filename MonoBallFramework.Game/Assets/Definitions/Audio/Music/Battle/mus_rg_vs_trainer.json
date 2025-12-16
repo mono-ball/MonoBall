@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/battle/mus_rg_vs_trainer",
-  "displayName": "RG VS Trainer",
+  "name": "RG VS Trainer",
   "audioPath": "Audio/Music/Battle/mus_rg_vs_trainer.ogg",
   "volume": 0.709,
   "loop": true,

@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/granite_cave_stevens_room",
-  "DisplayName": "GraniteCave_StevensRoom",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/granite_cave_stevens_room.json"
+  "id": "base:map:hoenn/granite_cave_stevens_room",
+  "name": "GraniteCave_StevensRoom",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/granite_cave_stevens_room.json"
 }

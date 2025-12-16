@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/battle_frontier_battle_arena_lobby",
-  "DisplayName": "BattleFrontier_BattleArenaLobby",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/battle_frontier_battle_arena_lobby.json"
+  "id": "base:map:hoenn/battle_frontier_battle_arena_lobby",
+  "name": "BattleFrontier_BattleArenaLobby",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/battle_frontier_battle_arena_lobby.json"
 }

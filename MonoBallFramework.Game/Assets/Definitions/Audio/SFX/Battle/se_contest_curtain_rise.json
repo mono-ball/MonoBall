@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_contest_curtain_rise",
-  "displayName": "Contest Curtain Rise",
+  "name": "Contest Curtain Rise",
   "audioPath": "Audio/SFX/Battle/se_contest_curtain_rise.ogg",
   "volume": 0.551,
   "loop": false,

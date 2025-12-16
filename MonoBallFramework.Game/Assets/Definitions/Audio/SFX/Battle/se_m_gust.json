@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_m_gust",
-  "displayName": "M Gust",
+  "name": "M Gust",
   "audioPath": "Audio/SFX/Battle/se_m_gust.ogg",
   "volume": 0.866,
   "loop": true,

@@ -1,0 +1,134 @@
+{
+  "speciesId": 327,
+  "id": "base:pokemon:spinda",
+  "name": "Spinda",
+  "description": "No two SPINDA have the same pattern of spots. Its tottering step fouls the aim of foes.",
+
+  "baseStats": {
+    "hp": 60,
+    "attack": 60,
+    "defense": 60,
+    "speed": 60,
+    "spAttack": 60,
+    "spDefense": 60
+  },
+
+  "types": ["base:type:normal"],
+
+  "catchRate": 255,
+  "expYield": 126,
+
+  "evYield": {
+    "hp": 0,
+    "attack": 0,
+    "defense": 0,
+    "speed": 1,
+    "spAttack": 0,
+    "spDefense": 0
+  },
+
+  "itemCommon": null,
+  "itemRare": null,
+
+  "genderRatio": 127,
+  "eggCycles": 15,
+  "eggGroups": ["base:egg_group:field", "base:egg_group:human_like"],
+
+  "friendship": 70,
+  "growthRate": "base:growth_rate:fast",
+
+  "abilities": ["base:ability:own_tempo", "base:ability:tangled_feet"],
+
+  "safariZoneFleeRate": 0,
+  "bodyColor": "base:body_color:brown",
+  "noFlip": false,
+
+  "forms": null,
+  "proceduralAppearance": {
+    "type": "base:procedural_type:spinda_spots",
+    "description": "Spinda's spot pattern is procedurally generated from its personality value. Each Spinda has 4 spots, each with a unique position determined by 8 bits of the personality value (4 bits for X offset, 4 bits for Y offset). This creates 4,294,967,296 unique combinations.",
+    "spotCount": 4,
+    "spotSize": {
+      "width": 16,
+      "height": 16
+    },
+    "offsetRange": {
+      "min": -8,
+      "max": 7
+    },
+    "basePositions": [
+      { "x": 16, "y": 7 },
+      { "x": 40, "y": 8 },
+      { "x": 22, "y": 25 },
+      { "x": 34, "y": 26 }
+    ],
+    "spotImages": [
+      "base:sprite:pokemon/spinda/spots/spot_0",
+      "base:sprite:pokemon/spinda/spots/spot_1",
+      "base:sprite:pokemon/spinda/spots/spot_2",
+      "base:sprite:pokemon/spinda/spots/spot_3"
+    ]
+  },
+
+  "evolutions": [],
+
+  "levelUpMoves": [
+    { "level": 1, "moveId": "base:move:tackle" },
+    { "level": 5, "moveId": "base:move:uproar" },
+    { "level": 12, "moveId": "base:move:faint_attack" },
+    { "level": 16, "moveId": "base:move:psybeam" },
+    { "level": 23, "moveId": "base:move:hypnosis" },
+    { "level": 27, "moveId": "base:move:dizzy_punch" },
+    { "level": 34, "moveId": "base:move:psych_up" },
+    { "level": 38, "moveId": "base:move:double_edge" },
+    { "level": 45, "moveId": "base:move:flail" },
+    { "level": 50, "moveId": "base:move:thrash" }
+  ],
+
+  "eggMoves": [
+    "base:move:baton_pass",
+    "base:move:disable",
+    "base:move:encore",
+    "base:move:fake_out",
+    "base:move:rapid_spin",
+    "base:move:rock_slide",
+    "base:move:smelling_salts",
+    "base:move:substitute",
+    "base:move:trick",
+    "base:move:water_pulse",
+    "base:move:wish"
+  ],
+
+  "tmMoves": [
+    "base:move:focus_punch",
+    "base:move:water_pulse",
+    "base:move:calm_mind",
+    "base:move:hidden_power",
+    "base:move:sunny_day",
+    "base:move:protect",
+    "base:move:rain_dance",
+    "base:move:frustration",
+    "base:move:return",
+    "base:move:shadow_ball",
+    "base:move:brick_break",
+    "base:move:shock_wave",
+    "base:move:facade",
+    "base:move:secret_power",
+    "base:move:rest",
+    "base:move:attract",
+    "base:move:skill_swap",
+    "base:move:snatch",
+    "base:move:strength"
+  ],
+
+  "hmMoves": [
+    "base:move:rock_smash",
+    "base:move:flash"
+  ],
+
+  "cryId": "base:audio:sfx/pokemon/spinda",
+
+  "sourceMod": "base",
+  "version": "1.0.0"
+}
+

@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_failure",
-  "displayName": "Failure",
+  "name": "Failure",
   "audioPath": "Audio/SFX/Battle/se_failure.ogg",
   "volume": 0.945,
   "loop": false,

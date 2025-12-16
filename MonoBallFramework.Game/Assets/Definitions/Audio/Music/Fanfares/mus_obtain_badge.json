@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/fanfares/mus_obtain_badge",
-  "displayName": "Obtain Badge",
+  "name": "Obtain Badge",
   "audioPath": "Audio/Music/Fanfares/mus_obtain_badge.ogg",
   "volume": 0.709,
   "loop": false,

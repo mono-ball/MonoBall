@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/desert_underpass",
-  "DisplayName": "DesertUnderpass",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/desert_underpass.json"
+  "id": "base:map:hoenn/desert_underpass",
+  "name": "DesertUnderpass",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/desert_underpass.json"
 }

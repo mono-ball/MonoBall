@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/route109_seashore_house",
-  "DisplayName": "Route109_SeashoreHouse",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/route109_seashore_house.json"
+  "id": "base:map:hoenn/route109_seashore_house",
+  "name": "Route109_SeashoreHouse",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/route109_seashore_house.json"
 }

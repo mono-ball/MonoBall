@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/mossdeep_city_mart",
-  "DisplayName": "MossdeepCity_Mart",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/mossdeep_city_mart.json"
+  "id": "base:map:hoenn/mossdeep_city_mart",
+  "name": "MossdeepCity_Mart",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/mossdeep_city_mart.json"
 }

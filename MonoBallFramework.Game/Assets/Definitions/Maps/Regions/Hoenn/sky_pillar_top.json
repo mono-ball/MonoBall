@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/sky_pillar_top",
-  "DisplayName": "SkyPillar_Top",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/sky_pillar_top.json"
+  "id": "base:map:hoenn/sky_pillar_top",
+  "name": "SkyPillar_Top",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/sky_pillar_top.json"
 }

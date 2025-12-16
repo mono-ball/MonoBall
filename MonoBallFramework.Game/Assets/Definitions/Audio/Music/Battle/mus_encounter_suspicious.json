@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/battle/mus_encounter_suspicious",
-  "displayName": "Encounter Suspicious",
+  "name": "Encounter Suspicious",
   "audioPath": "Audio/Music/Battle/mus_encounter_suspicious.ogg",
   "volume": 0.614,
   "loop": true,

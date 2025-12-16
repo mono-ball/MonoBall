@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/battle_pyramid_square09",
-  "DisplayName": "BattlePyramidSquare09",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/battle_pyramid_square09.json"
+  "id": "base:map:hoenn/battle_pyramid_square09",
+  "name": "BattlePyramidSquare09",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/battle_pyramid_square09.json"
 }

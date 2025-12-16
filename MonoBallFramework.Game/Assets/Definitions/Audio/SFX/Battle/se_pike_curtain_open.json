@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_pike_curtain_open",
-  "displayName": "Pike Curtain Open",
+  "name": "Pike Curtain Open",
   "audioPath": "Audio/SFX/Battle/se_pike_curtain_open.ogg",
   "volume": 0.63,
   "loop": false,

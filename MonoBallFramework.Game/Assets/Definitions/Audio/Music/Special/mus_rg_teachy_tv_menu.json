@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/special/mus_rg_teachy_tv_menu",
-  "displayName": "RG Teachy Tv Menu",
+  "name": "RG Teachy Tv Menu",
   "audioPath": "Audio/Music/Special/mus_rg_teachy_tv_menu.ogg",
   "volume": 0.465,
   "loop": true,

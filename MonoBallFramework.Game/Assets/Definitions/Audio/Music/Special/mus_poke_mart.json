@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/special/mus_poke_mart",
-  "displayName": "Poke Mart",
+  "name": "Poke Mart",
   "audioPath": "Audio/Music/Special/mus_poke_mart.ogg",
   "volume": 0.669,
   "loop": true,

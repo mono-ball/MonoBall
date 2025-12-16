@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/cave_of_origin_entrance",
-  "DisplayName": "CaveOfOrigin_Entrance",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/cave_of_origin_entrance.json"
+  "id": "base:map:hoenn/cave_of_origin_entrance",
+  "name": "CaveOfOrigin_Entrance",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/cave_of_origin_entrance.json"
 }

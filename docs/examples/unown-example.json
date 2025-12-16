@@ -1,0 +1,84 @@
+{
+  "speciesId": 201,
+  "id": "base:pokemon:unown",
+  "name": "Unown",
+  "description": "This POKéMON is shaped like ancient writing. It is a mystery as to which came first, the ancient writings or the various UNOWN. Research into this topic is ongoing.",
+
+  "baseStats": {
+    "hp": 48,
+    "attack": 72,
+    "defense": 48,
+    "speed": 48,
+    "spAttack": 72,
+    "spDefense": 48
+  },
+
+  "types": ["base:type:psychic"],
+
+  "catchRate": 225,
+  "expYield": 118,
+
+  "evYield": {
+    "hp": 0,
+    "attack": 1,
+    "defense": 0,
+    "speed": 0,
+    "spAttack": 1,
+    "spDefense": 0
+  },
+
+  "itemCommon": null,
+  "itemRare": null,
+
+  "genderRatio": 255,
+  "eggCycles": 40,
+  "eggGroups": ["base:egg_group:no_eggs_discovered", "base:egg_group:no_eggs_discovered"],
+
+  "friendship": 70,
+  "growthRate": "base:growth_rate:medium_fast",
+
+  "abilities": ["base:ability:levitate", null],
+
+  "safariZoneFleeRate": 0,
+  "bodyColor": "base:body_color:black",
+  "noFlip": false,
+
+  "forms": [
+    {
+      "id": "base:pokemon_form:unown/a",
+      "name": "Unown (A)",
+      "formKey": "a",
+      "spriteId": "base:sprite:pokemon/unown_a",
+      "condition": "base:form_condition:personality_letter_a",
+      "sourceMod": "base",
+      "version": "1.0.0"
+    },
+    {
+      "id": "base:pokemon_form:unown/b",
+      "name": "Unown (B)",
+      "formKey": "b",
+      "spriteId": "base:sprite:pokemon/unown_b",
+      "condition": "base:form_condition:personality_letter_b",
+      "sourceMod": "base",
+      "version": "1.0.0"
+    }
+  ],
+
+  "evolutions": [],
+
+  "levelUpMoves": [
+    { "level": 1, "moveId": "base:move:hidden_power" }
+  ],
+
+  "eggMoves": [],
+
+  "tmMoves": [],
+
+  "hmMoves": [],
+
+  "cryId": "base:audio:sfx/pokemon/unown",
+
+  "sourceMod": "base",
+  "version": "1.0.0"
+}
+

@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/environment/se_rain_stop",
-  "displayName": "Rain Stop",
+  "name": "Rain Stop",
   "audioPath": "Audio/SFX/Environment/se_rain_stop.ogg",
   "volume": 0.63,
   "loop": false,

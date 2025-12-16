@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/southern_island_interior",
-  "DisplayName": "SouthernIsland_Interior",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/southern_island_interior.json"
+  "id": "base:map:hoenn/southern_island_interior",
+  "name": "SouthernIsland_Interior",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/southern_island_interior.json"
 }

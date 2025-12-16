@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_puddle",
-  "displayName": "Puddle",
+  "name": "Puddle",
   "audioPath": "Audio/SFX/Battle/se_puddle.ogg",
   "volume": 0.157,
   "loop": false,

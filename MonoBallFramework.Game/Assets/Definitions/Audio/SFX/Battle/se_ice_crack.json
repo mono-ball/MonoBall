@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_ice_crack",
-  "displayName": "Ice Crack",
+  "name": "Ice Crack",
   "audioPath": "Audio/SFX/Battle/se_ice_crack.ogg",
   "volume": 0.787,
   "loop": false,

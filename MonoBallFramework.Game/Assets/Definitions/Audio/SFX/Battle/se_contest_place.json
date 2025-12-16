@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_contest_place",
-  "displayName": "Contest Place",
+  "name": "Contest Place",
   "audioPath": "Audio/SFX/Battle/se_contest_place.ogg",
   "volume": 0.866,
   "loop": false,

@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/meteor_falls_b1f_2r",
-  "DisplayName": "MeteorFalls_B1F_2R",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/meteor_falls_b1f_2r.json"
+  "id": "base:map:hoenn/meteor_falls_b1f_2r",
+  "name": "MeteorFalls_B1F_2R",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/meteor_falls_b1f_2r.json"
 }

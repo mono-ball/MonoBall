@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/battle/mus_encounter_interviewer",
-  "displayName": "Encounter Interviewer",
+  "name": "Encounter Interviewer",
   "audioPath": "Audio/Music/Battle/mus_encounter_interviewer.ogg",
   "volume": 0.488,
   "loop": true,

@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/ui/se_sliding_door",
-  "displayName": "Sliding Door",
+  "name": "Sliding Door",
   "audioPath": "Audio/SFX/UI/se_sliding_door.ogg",
   "volume": 0.748,
   "loop": false,

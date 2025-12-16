@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/routes/mus_rg_surf",
-  "displayName": "RG Surf",
+  "name": "RG Surf",
   "audioPath": "Audio/Music/Routes/mus_rg_surf.ogg",
   "volume": 0.559,
   "loop": true,

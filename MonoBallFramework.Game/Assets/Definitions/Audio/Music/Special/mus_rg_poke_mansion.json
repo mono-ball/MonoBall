@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/special/mus_rg_poke_mansion",
-  "displayName": "RG Poke Mansion",
+  "name": "RG Poke Mansion",
   "audioPath": "Audio/Music/Special/mus_rg_poke_mansion.ogg",
   "volume": 0.709,
   "loop": true,

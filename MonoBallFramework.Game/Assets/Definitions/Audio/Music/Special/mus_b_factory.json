@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/special/mus_b_factory",
-  "displayName": "Battle Factory",
+  "name": "Battle Factory",
   "audioPath": "Audio/Music/Special/mus_b_factory.ogg",
   "volume": 0.787,
   "loop": true,

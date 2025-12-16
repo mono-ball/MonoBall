@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/lavaridge_town_gym_b1f",
-  "DisplayName": "LavaridgeTown_Gym_B1F",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/lavaridge_town_gym_b1f.json"
+  "id": "base:map:hoenn/lavaridge_town_gym_b1f",
+  "name": "LavaridgeTown_Gym_B1F",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/lavaridge_town_gym_b1f.json"
 }

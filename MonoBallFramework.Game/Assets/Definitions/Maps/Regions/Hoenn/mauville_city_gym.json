@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/mauville_city_gym",
-  "DisplayName": "MauvilleCity_Gym",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/mauville_city_gym.json"
+  "id": "base:map:hoenn/mauville_city_gym",
+  "name": "MauvilleCity_Gym",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/mauville_city_gym.json"
 }

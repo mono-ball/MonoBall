@@ -91,7 +91,7 @@ public class MapEntityService
         return await _context
             .Maps.AsNoTracking()
             .Where(m => m.Region == region)
-            .OrderBy(m => m.DisplayName)
+            .OrderBy(m => m.Name)
             .ToListAsync();
     }
 
@@ -113,7 +113,7 @@ public class MapEntityService
         return await _context
             .Maps.AsNoTracking()
             .Where(m => m.CanFly)
-            .OrderBy(m => m.DisplayName)
+            .OrderBy(m => m.Name)
             .ToListAsync();
     }
 

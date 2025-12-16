@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/special/mus_mt_pyre",
-  "displayName": "Mt. Pyre",
+  "name": "Mt. Pyre",
   "audioPath": "Audio/Music/Special/mus_mt_pyre.ogg",
   "volume": 0.693,
   "loop": true,

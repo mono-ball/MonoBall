@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/battle/mus_victory_aqua_magma",
-  "displayName": "Victory Aqua Magma",
+  "name": "Victory Aqua Magma",
   "audioPath": "Audio/Music/Battle/mus_victory_aqua_magma.ogg",
   "volume": 0.693,
   "loop": true,

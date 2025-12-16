@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/special/mus_birch_lab",
-  "displayName": "Birch Lab",
+  "name": "Birch Lab",
   "audioPath": "Audio/Music/Special/mus_birch_lab.ogg",
   "volume": 0.63,
   "loop": true,

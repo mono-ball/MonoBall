@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/lilycove_city_pokemon_trainer_fan_club",
-  "DisplayName": "LilycoveCity_PokemonTrainerFanClub",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/lilycove_city_pokemon_trainer_fan_club.json"
+  "id": "base:map:hoenn/lilycove_city_pokemon_trainer_fan_club",
+  "name": "LilycoveCity_PokemonTrainerFanClub",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/lilycove_city_pokemon_trainer_fan_club.json"
 }

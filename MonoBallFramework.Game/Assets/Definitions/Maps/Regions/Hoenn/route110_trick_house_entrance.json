@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/route110_trick_house_entrance",
-  "DisplayName": "Route110_TrickHouseEntrance",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/route110_trick_house_entrance.json"
+  "id": "base:map:hoenn/route110_trick_house_entrance",
+  "name": "Route110_TrickHouseEntrance",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/route110_trick_house_entrance.json"
 }

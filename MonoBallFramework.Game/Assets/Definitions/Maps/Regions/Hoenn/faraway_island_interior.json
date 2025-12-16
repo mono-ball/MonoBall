@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/faraway_island_interior",
-  "DisplayName": "FarawayIsland_Interior",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/faraway_island_interior.json"
+  "id": "base:map:hoenn/faraway_island_interior",
+  "name": "FarawayIsland_Interior",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/faraway_island_interior.json"
 }

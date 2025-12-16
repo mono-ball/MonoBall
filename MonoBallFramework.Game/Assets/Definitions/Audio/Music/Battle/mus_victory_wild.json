@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/battle/mus_victory_wild",
-  "displayName": "Victory Wild",
+  "name": "Victory Wild",
   "audioPath": "Audio/Music/Battle/mus_victory_wild.ogg",
   "volume": 0.63,
   "loop": true,

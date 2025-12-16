@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/route123_berry_masters_house",
-  "DisplayName": "Route123_BerryMastersHouse",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/route123_berry_masters_house.json"
+  "id": "base:map:hoenn/route123_berry_masters_house",
+  "name": "Route123_BerryMastersHouse",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/route123_berry_masters_house.json"
 }

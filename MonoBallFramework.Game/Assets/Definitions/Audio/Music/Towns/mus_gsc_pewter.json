@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/towns/mus_gsc_pewter",
-  "displayName": "Gsc Pewter",
+  "name": "Gsc Pewter",
   "audioPath": "Audio/Music/Towns/mus_gsc_pewter.ogg",
   "volume": 0.63,
   "loop": true,

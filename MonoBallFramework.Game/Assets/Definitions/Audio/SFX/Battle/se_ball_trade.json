@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_ball_trade",
-  "displayName": "Ball Trade",
+  "name": "Ball Trade",
   "audioPath": "Audio/SFX/Battle/se_ball_trade.ogg",
   "volume": 0.787,
   "loop": false,

@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/special/mus_rg_oak",
-  "displayName": "RG Oak",
+  "name": "RG Oak",
   "audioPath": "Audio/Music/Special/mus_rg_oak.ogg",
   "volume": 0.677,
   "loop": true,

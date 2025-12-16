@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/route114_lanettes_house",
-  "DisplayName": "Route114_LanettesHouse",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/route114_lanettes_house.json"
+  "id": "base:map:hoenn/route114_lanettes_house",
+  "name": "Route114_LanettesHouse",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/route114_lanettes_house.json"
 }

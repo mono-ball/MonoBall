@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/underwater_marine_cave",
-  "DisplayName": "Underwater_MarineCave",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/underwater_marine_cave.json"
+  "id": "base:map:hoenn/underwater_marine_cave",
+  "name": "Underwater_MarineCave",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/underwater_marine_cave.json"
 }

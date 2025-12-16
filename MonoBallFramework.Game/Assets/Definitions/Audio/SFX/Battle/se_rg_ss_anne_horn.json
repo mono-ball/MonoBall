@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_rg_ss_anne_horn",
-  "displayName": "RG Ss Anne Horn",
+  "name": "RG Ss Anne Horn",
   "audioPath": "Audio/SFX/Battle/se_rg_ss_anne_horn.ogg",
   "volume": 0.756,
   "loop": false,

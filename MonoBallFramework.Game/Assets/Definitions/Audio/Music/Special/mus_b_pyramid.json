@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/special/mus_b_pyramid",
-  "displayName": "Battle Pyramid",
+  "name": "Battle Pyramid",
   "audioPath": "Audio/Music/Special/mus_b_pyramid.ogg",
   "volume": 0.622,
   "loop": true,

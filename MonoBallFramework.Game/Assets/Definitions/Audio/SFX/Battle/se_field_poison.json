@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_field_poison",
-  "displayName": "Field Poison",
+  "name": "Field Poison",
   "audioPath": "Audio/SFX/Battle/se_field_poison.ogg",
   "volume": 0.866,
   "loop": false,

@@ -26,7 +26,7 @@ public class PopupOutlineEntity
     /// </summary>
     [Required]
     [MaxLength(100)]
-    public string DisplayName { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
 
     /// <summary>
     ///     Type of rendering: "TileSheet" for GBA-accurate, "9Slice" for legacy.

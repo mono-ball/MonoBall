@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/battle/mus_encounter_intense",
-  "displayName": "Encounter Intense",
+  "name": "Encounter Intense",
   "audioPath": "Audio/Music/Battle/mus_encounter_intense.ogg",
   "volume": 0.614,
   "loop": true,

@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_escalator",
-  "displayName": "Escalator",
+  "name": "Escalator",
   "audioPath": "Audio/SFX/Battle/se_escalator.ogg",
   "volume": 0.787,
   "loop": false,

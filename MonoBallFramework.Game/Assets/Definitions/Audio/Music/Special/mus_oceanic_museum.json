@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/special/mus_oceanic_museum",
-  "displayName": "Oceanic Museum",
+  "name": "Oceanic Museum",
   "audioPath": "Audio/Music/Special/mus_oceanic_museum.ogg",
   "volume": 0.63,
   "loop": true,

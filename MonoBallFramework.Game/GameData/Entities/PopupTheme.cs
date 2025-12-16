@@ -17,7 +17,7 @@ public class PopupTheme
     [Key]
     [MaxLength(100)]
     [Column(TypeName = "nvarchar(100)")]
-    public GameThemeId Id { get; set; } = null!;
+    public GameThemeId ThemeId { get; set; } = null!;
 
     /// <summary>
     ///     Display name (e.g., "Wood", "Marble", "Stone").

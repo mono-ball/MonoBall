@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/battle/mus_vs_aqua_magma_leader",
-  "displayName": "VS Aqua Magma Leader",
+  "name": "VS Aqua Magma Leader",
   "audioPath": "Audio/Music/Battle/mus_vs_aqua_magma_leader.ogg",
   "volume": 0.63,
   "loop": true,

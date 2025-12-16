@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/abandoned_ship_rooms2_b1f",
-  "DisplayName": "AbandonedShip_Rooms2_B1F",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/abandoned_ship_rooms2_b1f.json"
+  "id": "base:map:hoenn/abandoned_ship_rooms2_b1f",
+  "name": "AbandonedShip_Rooms2_B1F",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/abandoned_ship_rooms2_b1f.json"
 }

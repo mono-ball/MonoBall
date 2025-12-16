@@ -162,7 +162,7 @@ public class GameDataLoader
                 var mapDef = new MapEntity
                 {
                     MapId = gameMapId,
-                    DisplayName = dto.DisplayName ?? gameMapId.Name,
+                    Name = dto.Name ?? gameMapId.Name,
                     Region = dto.Region ?? "hoenn",
                     MapType = dto.Type,
                     TiledDataPath = dto.TiledPath,
@@ -175,7 +175,7 @@ public class GameDataLoader
                 {
                     _context.Maps.Attach(existing);
                     _context.Entry(existing).CurrentValues.SetValues(mapDef);
-                    _logger.LogMapOverridden(mapDef.MapId, mapDef.DisplayName);
+                    _logger.LogMapOverridden(mapDef.MapId, mapDef.Name);
                 }
                 else
                 {
@@ -486,7 +486,7 @@ public class GameDataLoader
                 // Use TryCreate first for full ID format, fall back to Create for simple names
                 var theme = new PopupTheme
                 {
-                    Id = GameThemeId.TryCreate(dto.Id) ?? GameThemeId.Create(dto.Id),
+                    ThemeId = GameThemeId.TryCreate(dto.Id) ?? GameThemeId.Create(dto.Id),
                     Name = dto.Name ?? dto.Id,
                     Description = dto.Description,
                     Background = dto.Background ?? dto.Id,
@@ -499,7 +499,7 @@ public class GameDataLoader
                 _context.PopupThemes.Add(theme);
                 count++;
 
-                _logger.LogPopupThemeLoaded(theme.Id, theme.Name);
+                _logger.LogPopupThemeLoaded(theme.ThemeId, theme.Name);
             }
             catch (Exception ex)
             {
@@ -567,7 +567,7 @@ public class GameDataLoader
                 // Use TryCreate first for full ID format, fall back to Create for simple names
                 var section = new MapSection
                 {
-                    Id = GameMapSectionId.TryCreate(dto.Id) ?? GameMapSectionId.Create(dto.Id),
+                    MapSectionId = GameMapSectionId.TryCreate(dto.Id) ?? GameMapSectionId.Create(dto.Id),
                     Name = dto.Name ?? dto.Id,
                     ThemeId = GameThemeId.TryCreate(dto.Theme) ?? GameThemeId.Create(dto.Theme),
                     X = dto.X,
@@ -581,7 +581,7 @@ public class GameDataLoader
                 _context.MapSections.Add(section);
                 count++;
 
-                _logger.LogMapSectionLoaded(section.Id, section.Name);
+                _logger.LogMapSectionLoaded(section.MapSectionId, section.Name);
             }
             catch (Exception ex)
             {
@@ -662,7 +662,7 @@ public class GameDataLoader
                 var audioDef = new AudioEntity
                 {
                     AudioId = audioId,
-                    DisplayName = dto.DisplayName ?? audioId.Name,
+                    Name = dto.Name ?? audioId.Name,
                     AudioPath = dto.AudioPath,
                     Category = category,
                     Subcategory = subcategory,
@@ -762,7 +762,7 @@ public class GameDataLoader
                 var spriteDef = new SpriteEntity
                 {
                     SpriteId = spriteId,
-                    DisplayName = dto.DisplayName ?? spriteId.Name,
+                    Name = dto.Name ?? spriteId.Name,
                     Type = dto.Type ?? "Sprite",
                     TexturePath = dto.TexturePath,
                     FrameWidth = dto.FrameWidth ?? 16,
@@ -862,7 +862,7 @@ public class GameDataLoader
                 var backgroundDef = new PopupBackgroundEntity
                 {
                     BackgroundId = GamePopupBackgroundId.TryCreate(dto.Id) ?? GamePopupBackgroundId.Create(dto.Id),
-                    DisplayName = dto.DisplayName ?? Path.GetFileNameWithoutExtension(file),
+                    Name = dto.Name ?? Path.GetFileNameWithoutExtension(file),
                     Type = dto.Type ?? "Bitmap",
                     TexturePath = dto.TexturePath,
                     Width = dto.Width ?? 80,
@@ -945,7 +945,7 @@ public class GameDataLoader
                 var outlineDef = new PopupOutlineEntity
                 {
                     OutlineId = GamePopupOutlineId.TryCreate(dto.Id) ?? GamePopupOutlineId.Create(dto.Id),
-                    DisplayName = dto.DisplayName ?? Path.GetFileNameWithoutExtension(file),
+                    Name = dto.Name ?? Path.GetFileNameWithoutExtension(file),
                     Type = dto.Type ?? "TileSheet",
                     TexturePath = dto.TexturePath,
                     TileWidth = dto.TileWidth ?? 8,
@@ -1054,7 +1054,7 @@ public class GameDataLoader
                 var behaviorDef = new BehaviorEntity
                 {
                     BehaviorId = GameBehaviorId.TryCreate(dto.Id) ?? GameBehaviorId.Create(dto.Id),
-                    DisplayName = dto.DisplayName ?? dto.Id,
+                    Name = dto.Name ?? dto.Id,
                     Description = dto.Description,
                     DefaultSpeed = dto.DefaultSpeed ?? 4.0f,
                     PauseAtWaypoint = dto.PauseAtWaypoint ?? 1.0f,
@@ -1161,7 +1161,7 @@ public class GameDataLoader
                 var tileBehaviorDef = new TileBehaviorEntity
                 {
                     TileBehaviorId = GameTileBehaviorId.TryCreate(dto.Id) ?? GameTileBehaviorId.Create(dto.Id),
-                    DisplayName = dto.DisplayName ?? dto.Id,
+                    Name = dto.Name ?? dto.Id,
                     Description = dto.Description,
                     Flags = flags,
                     BehaviorScript = dto.BehaviorScript,
@@ -1270,7 +1270,7 @@ public class GameDataLoader
                 var fontDef = new FontEntity
                 {
                     FontId = fontId,
-                    DisplayName = dto.DisplayName ?? dto.Id,
+                    Name = dto.Name ?? dto.Id,
                     Description = dto.Description,
                     FontPath = dto.FontPath,
                     Category = dto.Category ?? "game",
@@ -1407,14 +1407,14 @@ internal record TiledPropertyDto
 /// </summary>
 internal record PopupThemeDto
 {
-    public string? Id { get; init; }
-    public string? Name { get; init; }
-    public string? Description { get; init; }
-    public string? Background { get; init; }
-    public string? Outline { get; init; }
-    public int? UsageCount { get; init; }
-    public string? SourceMod { get; init; }
-    public string? Version { get; init; }
+    [JsonPropertyName("id")] public string? Id { get; init; }
+    [JsonPropertyName("name")] public string? Name { get; init; }
+    [JsonPropertyName("description")] public string? Description { get; init; }
+    [JsonPropertyName("background")] public string? Background { get; init; }
+    [JsonPropertyName("outline")] public string? Outline { get; init; }
+    [JsonPropertyName("usageCount")] public int? UsageCount { get; init; }
+    [JsonPropertyName("sourceMod")] public string? SourceMod { get; init; }
+    [JsonPropertyName("version")] public string? Version { get; init; }
 }
 
 /// <summary>
@@ -1422,31 +1422,31 @@ internal record PopupThemeDto
 /// </summary>
 internal record MapSectionDto
 {
-    public string? Id { get; init; }
-    public string? Name { get; init; }
-    public string? Theme { get; init; }
-    public int? X { get; init; }
-    public int? Y { get; init; }
-    public int? Width { get; init; }
-    public int? Height { get; init; }
-    public string? SourceMod { get; init; }
-    public string? Version { get; init; }
+    [JsonPropertyName("id")] public string? Id { get; init; }
+    [JsonPropertyName("name")] public string? Name { get; init; }
+    [JsonPropertyName("theme")] public string? Theme { get; init; }
+    [JsonPropertyName("x")] public int? X { get; init; }
+    [JsonPropertyName("y")] public int? Y { get; init; }
+    [JsonPropertyName("width")] public int? Width { get; init; }
+    [JsonPropertyName("height")] public int? Height { get; init; }
+    [JsonPropertyName("sourceMod")] public string? SourceMod { get; init; }
+    [JsonPropertyName("version")] public string? Version { get; init; }
 }
 
 /// <summary>
 ///     DTO for deserializing MapEntity JSON files.
-///     Simple schema: Id, DisplayName, Type, Region, Description, TiledPath
+///     Simple schema: Id, Name, Type, Region, Description, TiledPath
 /// </summary>
 internal record MapEntityDto
 {
-    public string? Id { get; init; }
-    public string? DisplayName { get; init; }
-    public string? Type { get; init; }
-    public string? Region { get; init; }
-    public string? Description { get; init; }
-    public string? TiledPath { get; init; }
-    public string? SourceMod { get; init; }
-    public string? Version { get; init; }
+    [JsonPropertyName("id")] public string? Id { get; init; }
+    [JsonPropertyName("name")] public string? Name { get; init; }
+    [JsonPropertyName("type")] public string? Type { get; init; }
+    [JsonPropertyName("region")] public string? Region { get; init; }
+    [JsonPropertyName("description")] public string? Description { get; init; }
+    [JsonPropertyName("tiledPath")] public string? TiledPath { get; init; }
+    [JsonPropertyName("sourceMod")] public string? SourceMod { get; init; }
+    [JsonPropertyName("version")] public string? Version { get; init; }
 }
 
 /// <summary>
@@ -1455,19 +1455,19 @@ internal record MapEntityDto
 /// </summary>
 internal record AudioEntityDto
 {
-    public string? Id { get; init; }
-    public string? DisplayName { get; init; }
-    public string? AudioPath { get; init; }
-    public float? Volume { get; init; }
-    public bool? Loop { get; init; }
-    public float? FadeIn { get; init; }
-    public float? FadeOut { get; init; }
-    public int? LoopStartSamples { get; init; }
-    public int? LoopLengthSamples { get; init; }
-    public float? LoopStartSec { get; init; }
-    public float? LoopEndSec { get; init; }
-    public string? SourceMod { get; init; }
-    public string? Version { get; init; }
+    [JsonPropertyName("id")] public string? Id { get; init; }
+    [JsonPropertyName("name")] public string? Name { get; init; }
+    [JsonPropertyName("audioPath")] public string? AudioPath { get; init; }
+    [JsonPropertyName("volume")] public float? Volume { get; init; }
+    [JsonPropertyName("loop")] public bool? Loop { get; init; }
+    [JsonPropertyName("fadeIn")] public float? FadeIn { get; init; }
+    [JsonPropertyName("fadeOut")] public float? FadeOut { get; init; }
+    [JsonPropertyName("loopStartSamples")] public int? LoopStartSamples { get; init; }
+    [JsonPropertyName("loopLengthSamples")] public int? LoopLengthSamples { get; init; }
+    [JsonPropertyName("loopStartSec")] public float? LoopStartSec { get; init; }
+    [JsonPropertyName("loopEndSec")] public float? LoopEndSec { get; init; }
+    [JsonPropertyName("sourceMod")] public string? SourceMod { get; init; }
+    [JsonPropertyName("version")] public string? Version { get; init; }
 }
 
 /// <summary>
@@ -1475,17 +1475,17 @@ internal record AudioEntityDto
 /// </summary>
 internal record SpriteDefinitionDto
 {
-    public string? Id { get; init; }
-    public string? DisplayName { get; init; }
-    public string? Type { get; init; }
-    public string? TexturePath { get; init; }
-    public int? FrameWidth { get; init; }
-    public int? FrameHeight { get; init; }
-    public int? FrameCount { get; init; }
-    public List<SpriteFrameDto>? Frames { get; init; }
-    public List<SpriteAnimationDto>? Animations { get; init; }
-    public string? SourceMod { get; init; }
-    public string? Version { get; init; }
+    [JsonPropertyName("id")] public string? Id { get; init; }
+    [JsonPropertyName("name")] public string? Name { get; init; }
+    [JsonPropertyName("type")] public string? Type { get; init; }
+    [JsonPropertyName("texturePath")] public string? TexturePath { get; init; }
+    [JsonPropertyName("frameWidth")] public int? FrameWidth { get; init; }
+    [JsonPropertyName("frameHeight")] public int? FrameHeight { get; init; }
+    [JsonPropertyName("frameCount")] public int? FrameCount { get; init; }
+    [JsonPropertyName("frames")] public List<SpriteFrameDto>? Frames { get; init; }
+    [JsonPropertyName("animations")] public List<SpriteAnimationDto>? Animations { get; init; }
+    [JsonPropertyName("sourceMod")] public string? SourceMod { get; init; }
+    [JsonPropertyName("version")] public string? Version { get; init; }
 }
 
 /// <summary>
@@ -1493,11 +1493,11 @@ internal record SpriteDefinitionDto
 /// </summary>
 internal record SpriteFrameDto
 {
-    public int Index { get; init; }
-    public int X { get; init; }
-    public int Y { get; init; }
-    public int Width { get; init; }
-    public int Height { get; init; }
+    [JsonPropertyName("index")] public int Index { get; init; }
+    [JsonPropertyName("x")] public int X { get; init; }
+    [JsonPropertyName("y")] public int Y { get; init; }
+    [JsonPropertyName("width")] public int Width { get; init; }
+    [JsonPropertyName("height")] public int Height { get; init; }
 }
 
 /// <summary>
@@ -1505,11 +1505,11 @@ internal record SpriteFrameDto
 /// </summary>
 internal record SpriteAnimationDto
 {
-    public string? Name { get; init; }
-    public bool Loop { get; init; }
-    public List<int>? FrameIndices { get; init; }
-    public List<double>? FrameDurations { get; init; }
-    public bool FlipHorizontal { get; init; }
+    [JsonPropertyName("name")] public string? Name { get; init; }
+    [JsonPropertyName("loop")] public bool Loop { get; init; }
+    [JsonPropertyName("frameIndices")] public List<int>? FrameIndices { get; init; }
+    [JsonPropertyName("frameDurations")] public List<double>? FrameDurations { get; init; }
+    [JsonPropertyName("flipHorizontal")] public bool FlipHorizontal { get; init; }
 }
 
 /// <summary>
@@ -1517,15 +1517,15 @@ internal record SpriteAnimationDto
 /// </summary>
 internal record PopupBackgroundDto
 {
-    public string? Id { get; init; }
-    public string? DisplayName { get; init; }
-    public string? Type { get; init; }
-    public string? TexturePath { get; init; }
-    public int? Width { get; init; }
-    public int? Height { get; init; }
-    public string? Description { get; init; }
-    public string? SourceMod { get; init; }
-    public string? Version { get; init; }
+    [JsonPropertyName("id")] public string? Id { get; init; }
+    [JsonPropertyName("name")] public string? Name { get; init; }
+    [JsonPropertyName("type")] public string? Type { get; init; }
+    [JsonPropertyName("texturePath")] public string? TexturePath { get; init; }
+    [JsonPropertyName("width")] public int? Width { get; init; }
+    [JsonPropertyName("height")] public int? Height { get; init; }
+    [JsonPropertyName("description")] public string? Description { get; init; }
+    [JsonPropertyName("sourceMod")] public string? SourceMod { get; init; }
+    [JsonPropertyName("version")] public string? Version { get; init; }
 }
 
 /// <summary>
@@ -1533,22 +1533,22 @@ internal record PopupBackgroundDto
 /// </summary>
 internal record PopupOutlineDto
 {
-    public string? Id { get; init; }
-    public string? DisplayName { get; init; }
-    public string? Type { get; init; }
-    public string? TexturePath { get; init; }
-    public int? TileWidth { get; init; }
-    public int? TileHeight { get; init; }
-    public int? TileCount { get; init; }
-    public List<OutlineTileDto>? Tiles { get; init; }
-    public OutlineTileUsageDto? TileUsage { get; init; }
-    public int? CornerWidth { get; init; }
-    public int? CornerHeight { get; init; }
-    public int? BorderWidth { get; init; }
-    public int? BorderHeight { get; init; }
-    public string? Description { get; init; }
-    public string? SourceMod { get; init; }
-    public string? Version { get; init; }
+    [JsonPropertyName("id")] public string? Id { get; init; }
+    [JsonPropertyName("name")] public string? Name { get; init; }
+    [JsonPropertyName("type")] public string? Type { get; init; }
+    [JsonPropertyName("texturePath")] public string? TexturePath { get; init; }
+    [JsonPropertyName("tileWidth")] public int? TileWidth { get; init; }
+    [JsonPropertyName("tileHeight")] public int? TileHeight { get; init; }
+    [JsonPropertyName("tileCount")] public int? TileCount { get; init; }
+    [JsonPropertyName("tiles")] public List<OutlineTileDto>? Tiles { get; init; }
+    [JsonPropertyName("tileUsage")] public OutlineTileUsageDto? TileUsage { get; init; }
+    [JsonPropertyName("cornerWidth")] public int? CornerWidth { get; init; }
+    [JsonPropertyName("cornerHeight")] public int? CornerHeight { get; init; }
+    [JsonPropertyName("borderWidth")] public int? BorderWidth { get; init; }
+    [JsonPropertyName("borderHeight")] public int? BorderHeight { get; init; }
+    [JsonPropertyName("description")] public string? Description { get; init; }
+    [JsonPropertyName("sourceMod")] public string? SourceMod { get; init; }
+    [JsonPropertyName("version")] public string? Version { get; init; }
 }
 
 /// <summary>
@@ -1556,11 +1556,11 @@ internal record PopupOutlineDto
 /// </summary>
 internal record OutlineTileDto
 {
-    public int Index { get; init; }
-    public int X { get; init; }
-    public int Y { get; init; }
-    public int Width { get; init; }
-    public int Height { get; init; }
+    [JsonPropertyName("index")] public int Index { get; init; }
+    [JsonPropertyName("x")] public int X { get; init; }
+    [JsonPropertyName("y")] public int Y { get; init; }
+    [JsonPropertyName("width")] public int Width { get; init; }
+    [JsonPropertyName("height")] public int Height { get; init; }
 }
 
 /// <summary>
@@ -1568,10 +1568,10 @@ internal record OutlineTileDto
 /// </summary>
 internal record OutlineTileUsageDto
 {
-    public List<int>? TopEdge { get; init; }
-    public List<int>? LeftEdge { get; init; }
-    public List<int>? RightEdge { get; init; }
-    public List<int>? BottomEdge { get; init; }
+    [JsonPropertyName("topEdge")] public List<int>? TopEdge { get; init; }
+    [JsonPropertyName("leftEdge")] public List<int>? LeftEdge { get; init; }
+    [JsonPropertyName("rightEdge")] public List<int>? RightEdge { get; init; }
+    [JsonPropertyName("bottomEdge")] public List<int>? BottomEdge { get; init; }
 }
 
 /// <summary>
@@ -1579,15 +1579,15 @@ internal record OutlineTileUsageDto
 /// </summary>
 internal record BehaviorDefinitionDto
 {
-    public string? Id { get; init; }
-    public string? DisplayName { get; init; }
-    public string? Description { get; init; }
-    public string? BehaviorScript { get; init; }
-    public float? DefaultSpeed { get; init; }
-    public float? PauseAtWaypoint { get; init; }
-    public bool? AllowInteractionWhileMoving { get; init; }
-    public string? SourceMod { get; init; }
-    public string? Version { get; init; }
+    [JsonPropertyName("id")] public string? Id { get; init; }
+    [JsonPropertyName("name")] public string? Name { get; init; }
+    [JsonPropertyName("description")] public string? Description { get; init; }
+    [JsonPropertyName("behaviorScript")] public string? BehaviorScript { get; init; }
+    [JsonPropertyName("defaultSpeed")] public float? DefaultSpeed { get; init; }
+    [JsonPropertyName("pauseAtWaypoint")] public float? PauseAtWaypoint { get; init; }
+    [JsonPropertyName("allowInteractionWhileMoving")] public bool? AllowInteractionWhileMoving { get; init; }
+    [JsonPropertyName("sourceMod")] public string? SourceMod { get; init; }
+    [JsonPropertyName("version")] public string? Version { get; init; }
 }
 
 /// <summary>
@@ -1596,13 +1596,13 @@ internal record BehaviorDefinitionDto
 /// </summary>
 internal record TileBehaviorDefinitionDto
 {
-    public string? Id { get; init; }
-    public string? DisplayName { get; init; }
-    public string? Description { get; init; }
-    public string? BehaviorScript { get; init; }
-    public string? Flags { get; init; }
-    public string? SourceMod { get; init; }
-    public string? Version { get; init; }
+    [JsonPropertyName("id")] public string? Id { get; init; }
+    [JsonPropertyName("name")] public string? Name { get; init; }
+    [JsonPropertyName("description")] public string? Description { get; init; }
+    [JsonPropertyName("behaviorScript")] public string? BehaviorScript { get; init; }
+    [JsonPropertyName("flags")] public string? Flags { get; init; }
+    [JsonPropertyName("sourceMod")] public string? SourceMod { get; init; }
+    [JsonPropertyName("version")] public string? Version { get; init; }
 
     /// <summary>
     ///     Captures any additional properties from mods (e.g., testProperty, modded).
@@ -1617,18 +1617,18 @@ internal record TileBehaviorDefinitionDto
 /// </summary>
 internal record FontDefinitionDto
 {
-    public string? Id { get; init; }
-    public string? DisplayName { get; init; }
-    public string? Description { get; init; }
-    public string? FontPath { get; init; }
-    public string? Category { get; init; }
-    public int? DefaultSize { get; init; }
-    public float? LineSpacing { get; init; }
-    public float? CharacterSpacing { get; init; }
-    public bool? SupportsUnicode { get; init; }
-    public bool? IsMonospace { get; init; }
-    public string? SourceMod { get; init; }
-    public string? Version { get; init; }
+    [JsonPropertyName("id")] public string? Id { get; init; }
+    [JsonPropertyName("name")] public string? Name { get; init; }
+    [JsonPropertyName("description")] public string? Description { get; init; }
+    [JsonPropertyName("fontPath")] public string? FontPath { get; init; }
+    [JsonPropertyName("category")] public string? Category { get; init; }
+    [JsonPropertyName("defaultSize")] public int? DefaultSize { get; init; }
+    [JsonPropertyName("lineSpacing")] public float? LineSpacing { get; init; }
+    [JsonPropertyName("characterSpacing")] public float? CharacterSpacing { get; init; }
+    [JsonPropertyName("supportsUnicode")] public bool? SupportsUnicode { get; init; }
+    [JsonPropertyName("isMonospace")] public bool? IsMonospace { get; init; }
+    [JsonPropertyName("sourceMod")] public string? SourceMod { get; init; }
+    [JsonPropertyName("version")] public string? Version { get; init; }
 }
 
 #endregion

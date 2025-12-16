@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/fallarbor_town_mart",
-  "DisplayName": "FallarborTown_Mart",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/fallarbor_town_mart.json"
+  "id": "base:map:hoenn/fallarbor_town_mart",
+  "name": "FallarborTown_Mart",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/fallarbor_town_mart.json"
 }

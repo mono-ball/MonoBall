@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/littleroot_town_professor_birchs_lab",
-  "DisplayName": "LittlerootTown_ProfessorBirchsLab",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/littleroot_town_professor_birchs_lab.json"
+  "id": "base:map:hoenn/littleroot_town_professor_birchs_lab",
+  "name": "LittlerootTown_ProfessorBirchsLab",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/littleroot_town_professor_birchs_lab.json"
 }

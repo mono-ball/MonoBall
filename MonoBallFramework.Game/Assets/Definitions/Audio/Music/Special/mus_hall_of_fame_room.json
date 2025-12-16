@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/special/mus_hall_of_fame_room",
-  "displayName": "Hall Of Fame Room",
+  "name": "Hall Of Fame Room",
   "audioPath": "Audio/Music/Special/mus_hall_of_fame_room.ogg",
   "volume": 0.63,
   "loop": true,

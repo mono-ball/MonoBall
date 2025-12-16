@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/petalburg_woods",
-  "DisplayName": "PetalburgWoods",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/petalburg_woods.json"
+  "id": "base:map:hoenn/petalburg_woods",
+  "name": "PetalburgWoods",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/petalburg_woods.json"
 }

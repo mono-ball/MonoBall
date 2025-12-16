@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/routes/mus_rg_route24",
-  "displayName": "RG Route24",
+  "name": "RG Route24",
   "audioPath": "Audio/Music/Routes/mus_rg_route24.ogg",
   "volume": 0.677,
   "loop": true,

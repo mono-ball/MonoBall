@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/ever_grande_city_hall_of_fame",
-  "DisplayName": "EverGrandeCity_HallOfFame",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/ever_grande_city_hall_of_fame.json"
+  "id": "base:map:hoenn/ever_grande_city_hall_of_fame",
+  "name": "EverGrandeCity_HallOfFame",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/ever_grande_city_hall_of_fame.json"
 }

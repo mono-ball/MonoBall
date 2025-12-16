@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/ancient_tomb",
-  "DisplayName": "AncientTomb",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/ancient_tomb.json"
+  "id": "base:map:hoenn/ancient_tomb",
+  "name": "AncientTomb",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/ancient_tomb.json"
 }

@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/towns/mus_lilycove_museum",
-  "displayName": "Lilycove Museum",
+  "name": "Lilycove Museum",
   "audioPath": "Audio/Music/Towns/mus_lilycove_museum.ogg",
   "volume": 0.63,
   "loop": true,

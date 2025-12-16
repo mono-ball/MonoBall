@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/navel_rock_down07",
-  "DisplayName": "NavelRock_Down07",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/navel_rock_down07.json"
+  "id": "base:map:hoenn/navel_rock_down07",
+  "name": "NavelRock_Down07",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/navel_rock_down07.json"
 }

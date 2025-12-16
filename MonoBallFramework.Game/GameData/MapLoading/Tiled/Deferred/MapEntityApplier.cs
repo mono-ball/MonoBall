@@ -141,9 +141,9 @@ public class MapEntityApplier
         world.Add(entity, mapWorldPos);
 
         // Add optional components
-        if (!string.IsNullOrEmpty(data.DisplayName))
+        if (!string.IsNullOrEmpty(data.Name))
         {
-            world.Add(entity, new DisplayName(data.DisplayName));
+            world.Add(entity, new DisplayName(data.Name));
         }
 
         if (!string.IsNullOrEmpty(data.RegionSection))

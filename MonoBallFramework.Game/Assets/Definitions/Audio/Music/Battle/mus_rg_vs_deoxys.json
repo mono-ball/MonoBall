@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/battle/mus_rg_vs_deoxys",
-  "displayName": "RG VS Deoxys",
+  "name": "RG VS Deoxys",
   "audioPath": "Audio/Music/Battle/mus_rg_vs_deoxys.ogg",
   "volume": 0.63,
   "loop": true,

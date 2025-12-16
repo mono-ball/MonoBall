@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/environment/se_downpour",
-  "displayName": "Downpour",
+  "name": "Downpour",
   "audioPath": "Audio/SFX/Environment/se_downpour.ogg",
   "volume": 0.787,
   "loop": true,

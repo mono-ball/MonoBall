@@ -25,7 +25,7 @@ public class PopupBackgroundEntity
     /// </summary>
     [Required]
     [MaxLength(100)]
-    public string DisplayName { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
 
     /// <summary>
     ///     Type of rendering (always "Bitmap" for backgrounds).

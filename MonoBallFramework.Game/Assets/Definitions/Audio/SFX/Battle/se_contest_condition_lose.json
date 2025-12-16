@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_contest_condition_lose",
-  "displayName": "Contest Condition Lose",
+  "name": "Contest Condition Lose",
   "audioPath": "Audio/SFX/Battle/se_contest_condition_lose.ogg",
   "volume": 0.866,
   "loop": false,

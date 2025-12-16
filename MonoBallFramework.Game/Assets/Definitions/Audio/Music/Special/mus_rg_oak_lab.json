@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/special/mus_rg_oak_lab",
-  "displayName": "RG Oak Lab",
+  "name": "RG Oak Lab",
   "audioPath": "Audio/Music/Special/mus_rg_oak_lab.ogg",
   "volume": 0.591,
   "loop": true,

@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/verdanturf_town_friendship_raters_house",
-  "DisplayName": "VerdanturfTown_FriendshipRatersHouse",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/verdanturf_town_friendship_raters_house.json"
+  "id": "base:map:hoenn/verdanturf_town_friendship_raters_house",
+  "name": "VerdanturfTown_FriendshipRatersHouse",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/verdanturf_town_friendship_raters_house.json"
 }

@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/battle_frontier_scotts_house",
-  "DisplayName": "BattleFrontier_ScottsHouse",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/battle_frontier_scotts_house.json"
+  "id": "base:map:hoenn/battle_frontier_scotts_house",
+  "name": "BattleFrontier_ScottsHouse",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/battle_frontier_scotts_house.json"
 }

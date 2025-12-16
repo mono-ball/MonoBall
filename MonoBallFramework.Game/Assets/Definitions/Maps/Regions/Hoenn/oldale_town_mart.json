@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/oldale_town_mart",
-  "DisplayName": "OldaleTown_Mart",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/oldale_town_mart.json"
+  "id": "base:map:hoenn/oldale_town_mart",
+  "name": "OldaleTown_Mart",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/oldale_town_mart.json"
 }

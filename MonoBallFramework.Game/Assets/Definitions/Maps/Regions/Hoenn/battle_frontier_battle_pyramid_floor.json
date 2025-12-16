@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/battle_frontier_battle_pyramid_floor",
-  "DisplayName": "BattleFrontier_BattlePyramidFloor",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/battle_frontier_battle_pyramid_floor.json"
+  "id": "base:map:hoenn/battle_frontier_battle_pyramid_floor",
+  "name": "BattleFrontier_BattlePyramidFloor",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/battle_frontier_battle_pyramid_floor.json"
 }

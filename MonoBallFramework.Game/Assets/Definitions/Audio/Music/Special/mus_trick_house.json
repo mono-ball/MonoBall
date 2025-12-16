@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/special/mus_trick_house",
-  "displayName": "Trick House",
+  "name": "Trick House",
   "audioPath": "Audio/Music/Special/mus_trick_house.ogg",
   "volume": 0.551,
   "loop": true,

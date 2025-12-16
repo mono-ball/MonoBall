@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/towns/mus_petalburg",
-  "displayName": "Petalburg",
+  "name": "Petalburg",
   "audioPath": "Audio/Music/Towns/mus_petalburg.ogg",
   "volume": 0.63,
   "loop": true,

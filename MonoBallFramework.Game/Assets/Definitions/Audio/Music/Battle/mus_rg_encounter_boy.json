@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/battle/mus_rg_encounter_boy",
-  "displayName": "RG Encounter Boy",
+  "name": "RG Encounter Boy",
   "audioPath": "Audio/Music/Battle/mus_rg_encounter_boy.ogg",
   "volume": 0.709,
   "loop": true,

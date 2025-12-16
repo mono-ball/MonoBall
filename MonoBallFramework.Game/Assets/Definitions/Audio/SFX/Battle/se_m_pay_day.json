@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_m_pay_day",
-  "displayName": "M Pay Day",
+  "name": "M Pay Day",
   "audioPath": "Audio/SFX/Battle/se_m_pay_day.ogg",
   "volume": 0.748,
   "loop": false,

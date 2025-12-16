@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/littleroot_town_mays_house_1f",
-  "DisplayName": "LittlerootTown_MaysHouse_1F",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/littleroot_town_mays_house_1f.json"
+  "id": "base:map:hoenn/littleroot_town_mays_house_1f",
+  "name": "LittlerootTown_MaysHouse_1F",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/littleroot_town_mays_house_1f.json"
 }

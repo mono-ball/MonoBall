@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/special/mus_rg_new_game_exit",
-  "displayName": "RG New Game Exit",
+  "name": "RG New Game Exit",
   "audioPath": "Audio/Music/Special/mus_rg_new_game_exit.ogg",
   "volume": 0.693,
   "loop": true,

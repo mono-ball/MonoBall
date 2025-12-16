@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/abandoned_ship_hidden_floor_rooms",
-  "DisplayName": "AbandonedShip_HiddenFloorRooms",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/abandoned_ship_hidden_floor_rooms.json"
+  "id": "base:map:hoenn/abandoned_ship_hidden_floor_rooms",
+  "name": "AbandonedShip_HiddenFloorRooms",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/abandoned_ship_hidden_floor_rooms.json"
 }

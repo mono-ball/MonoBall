@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_rg_help_open",
-  "displayName": "RG Help Open",
+  "name": "RG Help Open",
   "audioPath": "Audio/SFX/Battle/se_rg_help_open.ogg",
   "volume": 0.756,
   "loop": false,

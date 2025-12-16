@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/battle/mus_encounter_aqua",
-  "displayName": "Encounter Aqua",
+  "name": "Encounter Aqua",
   "audioPath": "Audio/Music/Battle/mus_encounter_aqua.ogg",
   "volume": 0.677,
   "loop": true,

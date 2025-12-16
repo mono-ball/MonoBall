@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/ui/se_pc_login",
-  "displayName": "PC Login",
+  "name": "PC Login",
   "audioPath": "Audio/SFX/UI/se_pc_login.ogg",
   "volume": 0.787,
   "loop": false,

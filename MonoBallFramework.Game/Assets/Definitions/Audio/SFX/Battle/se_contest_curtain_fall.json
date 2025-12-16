@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_contest_curtain_fall",
-  "displayName": "Contest Curtain Fall",
+  "name": "Contest Curtain Fall",
   "audioPath": "Audio/SFX/Battle/se_contest_curtain_fall.ogg",
   "volume": 0.551,
   "loop": false,

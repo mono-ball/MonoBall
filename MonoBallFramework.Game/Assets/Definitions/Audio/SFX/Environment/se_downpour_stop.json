@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/environment/se_downpour_stop",
-  "displayName": "Downpour Stop",
+  "name": "Downpour Stop",
   "audioPath": "Audio/SFX/Environment/se_downpour_stop.ogg",
   "volume": 0.787,
   "loop": false,

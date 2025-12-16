@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/battle_frontier_battle_tower_corridor",
-  "DisplayName": "BattleFrontier_BattleTowerCorridor",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/battle_frontier_battle_tower_corridor.json"
+  "id": "base:map:hoenn/battle_frontier_battle_tower_corridor",
+  "name": "BattleFrontier_BattleTowerCorridor",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/battle_frontier_battle_tower_corridor.json"
 }

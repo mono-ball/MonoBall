@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/battle/mus_encounter_rich",
-  "displayName": "Encounter Rich",
+  "name": "Encounter Rich",
   "audioPath": "Audio/Music/Battle/mus_encounter_rich.ogg",
   "volume": 0.74,
   "loop": true,

@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/special/mus_gym",
-  "displayName": "Gym",
+  "name": "Gym",
   "audioPath": "Audio/Music/Special/mus_gym.ogg",
   "volume": 0.63,
   "loop": true,

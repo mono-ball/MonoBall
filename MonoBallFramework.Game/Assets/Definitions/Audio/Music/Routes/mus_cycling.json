@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/routes/mus_cycling",
-  "displayName": "Cycling",
+  "name": "Cycling",
   "audioPath": "Audio/Music/Routes/mus_cycling.ogg",
   "volume": 0.654,
   "loop": true,

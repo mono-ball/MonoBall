@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/battle/mus_encounter_magma",
-  "displayName": "Encounter Magma",
+  "name": "Encounter Magma",
   "audioPath": "Audio/Music/Battle/mus_encounter_magma.ogg",
   "volume": 0.567,
   "loop": true,

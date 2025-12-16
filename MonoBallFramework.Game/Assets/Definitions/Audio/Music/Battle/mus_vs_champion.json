@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/battle/mus_vs_champion",
-  "displayName": "VS Champion",
+  "name": "VS Champion",
   "audioPath": "Audio/Music/Battle/mus_vs_champion.ogg",
   "volume": 0.63,
   "loop": true,

@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/battle/mus_victory_road",
-  "displayName": "Victory Road",
+  "name": "Victory Road",
   "audioPath": "Audio/Music/Battle/mus_victory_road.ogg",
   "volume": 0.598,
   "loop": true,

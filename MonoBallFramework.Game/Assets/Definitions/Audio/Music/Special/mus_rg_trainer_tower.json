@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/special/mus_rg_trainer_tower",
-  "displayName": "RG Trainer Tower",
+  "name": "RG Trainer Tower",
   "audioPath": "Audio/Music/Special/mus_rg_trainer_tower.ogg",
   "volume": 0.709,
   "loop": true,

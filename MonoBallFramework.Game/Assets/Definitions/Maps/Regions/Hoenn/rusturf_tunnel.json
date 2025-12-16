@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/rusturf_tunnel",
-  "DisplayName": "RusturfTunnel",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/rusturf_tunnel.json"
+  "id": "base:map:hoenn/rusturf_tunnel",
+  "name": "RusturfTunnel",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/rusturf_tunnel.json"
 }

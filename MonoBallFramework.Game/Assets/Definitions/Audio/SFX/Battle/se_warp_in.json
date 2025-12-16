@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_warp_in",
-  "displayName": "Warp In",
+  "name": "Warp In",
   "audioPath": "Audio/SFX/Battle/se_warp_in.ogg",
   "volume": 0.709,
   "loop": false,

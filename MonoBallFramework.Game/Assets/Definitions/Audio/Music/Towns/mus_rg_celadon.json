@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/towns/mus_rg_celadon",
-  "displayName": "RG Celadon",
+  "name": "RG Celadon",
   "audioPath": "Audio/Music/Towns/mus_rg_celadon.ogg",
   "volume": 0.551,
   "loop": true,

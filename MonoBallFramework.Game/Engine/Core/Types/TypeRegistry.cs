@@ -152,16 +152,16 @@ public class TypeRegistry<T>(string dataPath, ILogger logger) : IAsyncDisposable
         }
 
         // Validate required properties
-        if (string.IsNullOrWhiteSpace(definition.Id))
+        if (string.IsNullOrWhiteSpace(definition.DefinitionId))
         {
             throw new InvalidOperationException(
-                $"Type definition in {jsonPath} has null or empty TypeId"
+                $"Type definition in {jsonPath} has null or empty DefinitionId"
             );
         }
 
         // Register the data definition
-        _definitions[definition.Id] = definition;
-        _logger.LogDebug("Registered type: {TypeId} from {Path}", definition.Id, jsonPath);
+        _definitions[definition.DefinitionId] = definition;
+        _logger.LogDebug("Registered type: {DefinitionId} from {Path}", definition.DefinitionId, jsonPath);
 
         // Note: Scripts are loaded separately after TypeRegistry initialization
         // See RegisterScript() method
@@ -178,13 +178,13 @@ public class TypeRegistry<T>(string dataPath, ILogger logger) : IAsyncDisposable
             throw new ArgumentNullException(nameof(definition));
         }
 
-        if (string.IsNullOrWhiteSpace(definition.Id))
+        if (string.IsNullOrWhiteSpace(definition.DefinitionId))
         {
-            throw new ArgumentException("TypeId cannot be null or empty", nameof(definition));
+            throw new ArgumentException("DefinitionId cannot be null or empty", nameof(definition));
         }
 
-        _definitions[definition.Id] = definition;
-        _logger.LogDebug("Registered type: {TypeId}", definition.Id);
+        _definitions[definition.DefinitionId] = definition;
+        _logger.LogDebug("Registered type: {DefinitionId}", definition.DefinitionId);
     }
 
     /// <summary>

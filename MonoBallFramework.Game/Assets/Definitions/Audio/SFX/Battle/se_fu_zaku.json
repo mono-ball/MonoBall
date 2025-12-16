@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_fu_zaku",
-  "displayName": "Fu Zaku",
+  "name": "Fu Zaku",
   "audioPath": "Audio/SFX/Battle/se_fu_zaku.ogg",
   "volume": 0.945,
   "loop": false,

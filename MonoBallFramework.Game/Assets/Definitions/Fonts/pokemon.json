@@ -1,6 +1,6 @@
 {
   "id": "base:font:game/pokemon",
-  "displayName": "Pokemon Font",
+  "name": "Pokemon Font",
   "description": "Main game font for dialogue and menus",
   "fontPath": "pokemon.ttf",
   "category": "game",

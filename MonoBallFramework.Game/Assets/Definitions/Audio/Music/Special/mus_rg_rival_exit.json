@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/special/mus_rg_rival_exit",
-  "displayName": "RG Rival Exit",
+  "name": "RG Rival Exit",
   "audioPath": "Audio/Music/Special/mus_rg_rival_exit.ogg",
   "volume": 0.622,
   "loop": true,

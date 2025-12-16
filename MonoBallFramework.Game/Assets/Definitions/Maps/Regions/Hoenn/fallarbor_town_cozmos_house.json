@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/fallarbor_town_cozmos_house",
-  "DisplayName": "FallarborTown_CozmosHouse",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/fallarbor_town_cozmos_house.json"
+  "id": "base:map:hoenn/fallarbor_town_cozmos_house",
+  "name": "FallarborTown_CozmosHouse",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/fallarbor_town_cozmos_house.json"
 }

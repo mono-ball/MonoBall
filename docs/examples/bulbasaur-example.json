@@ -1,0 +1,110 @@
+{
+  "speciesId": 1,
+  "id": "base:pokemon:bulbasaur",
+  "name": "Bulbasaur",
+  "description": "A strange seed was planted on its back at birth. The plant sprouts and grows with this Pokémon.",
+
+  "baseStats": {
+    "hp": 45,
+    "attack": 49,
+    "defense": 49,
+    "speed": 45,
+    "spAttack": 65,
+    "spDefense": 65
+  },
+
+  "types": ["base:type:grass", "base:type:poison"],
+
+  "catchRate": 45,
+  "expYield": 64,
+
+  "evYield": {
+    "hp": 0,
+    "attack": 0,
+    "defense": 0,
+    "speed": 0,
+    "spAttack": 1,
+    "spDefense": 0
+  },
+
+  "itemCommon": null,
+  "itemRare": null,
+
+  "genderRatio": 31,
+  "eggCycles": 20,
+  "eggGroups": ["base:egg_group:monster", "base:egg_group:grass"],
+
+  "friendship": 70,
+  "growthRate": "base:growth_rate:medium_slow",
+
+  "abilities": ["base:ability:overgrow", null],
+
+  "safariZoneFleeRate": 0,
+  "bodyColor": "base:body_color:green",
+  "noFlip": false,
+
+  "evolutions": [
+    {
+      "method": "base:evolution_method:level",
+      "parameter": 16,
+      "targetSpeciesId": "base:pokemon:ivysaur"
+    }
+  ],
+
+  "levelUpMoves": [
+    { "level": 1, "moveId": "base:move:tackle" },
+    { "level": 4, "moveId": "base:move:growl" },
+    { "level": 7, "moveId": "base:move:leech_seed" },
+    { "level": 10, "moveId": "base:move:vine_whip" },
+    { "level": 15, "moveId": "base:move:poison_powder" },
+    { "level": 15, "moveId": "base:move:sleep_powder" },
+    { "level": 20, "moveId": "base:move:razor_leaf" },
+    { "level": 25, "moveId": "base:move:sweet_scent" },
+    { "level": 32, "moveId": "base:move:growth" },
+    { "level": 39, "moveId": "base:move:synthesis" },
+    { "level": 46, "moveId": "base:move:solar_beam" }
+  ],
+
+  "eggMoves": [
+    "base:move:light_screen",
+    "base:move:skull_bash",
+    "base:move:safeguard",
+    "base:move:charm",
+    "base:move:petal_dance",
+    "base:move:magical_leaf",
+    "base:move:grass_whistle",
+    "base:move:curse"
+  ],
+
+  "tmMoves": [
+    "base:move:toxic",
+    "base:move:bullet_seed",
+    "base:move:hidden_power",
+    "base:move:sunny_day",
+    "base:move:protect",
+    "base:move:giga_drain",
+    "base:move:frustration",
+    "base:move:solar_beam",
+    "base:move:return",
+    "base:move:double_team",
+    "base:move:sludge_bomb",
+    "base:move:facade",
+    "base:move:secret_power",
+    "base:move:rest",
+    "base:move:attract"
+  ],
+
+  "hmMoves": [
+    "base:move:cut",
+    "base:move:strength",
+    "base:move:flash",
+    "base:move:rock_smash"
+  ],
+
+
+  "cryId": "base:audio:sfx/pokemon/bulbasaur",
+
+  "sourceMod": "base",
+  "version": "1.0.0"
+}
+

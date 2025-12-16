@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/battle/mus_encounter_hiker",
-  "displayName": "Encounter Hiker",
+  "name": "Encounter Hiker",
   "audioPath": "Audio/Music/Battle/mus_encounter_hiker.ogg",
   "volume": 0.598,
   "loop": true,

@@ -492,7 +492,7 @@ public class MapLoader(
         _logger?.LogWorkflowStatus(
             "Loading map from definition",
             ("mapId", mapDef.MapId.Value),
-            ("displayName", mapDef.DisplayName)
+            ("name", mapDef.Name)
         );
 
         // Read Tiled JSON from file using stored path
@@ -568,7 +568,7 @@ public class MapLoader(
         _logger?.LogWorkflowStatus(
             "Loading map at world offset",
             ("mapId", mapDef.MapId.Value),
-            ("displayName", mapDef.DisplayName),
+            ("name", mapDef.Name),
             ("offsetX", worldOffset.X),
             ("offsetY", worldOffset.Y)
         );
@@ -646,7 +646,7 @@ public class MapLoader(
         _logger?.LogWorkflowStatus(
             "Loading map at world offset (async)",
             ("mapId", mapDef.MapId.Value),
-            ("displayName", mapDef.DisplayName),
+            ("name", mapDef.Name),
             ("offsetX", worldOffset.X),
             ("offsetY", worldOffset.Y)
         );

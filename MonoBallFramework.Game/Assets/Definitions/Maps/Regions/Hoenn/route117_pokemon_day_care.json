@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/route117_pokemon_day_care",
-  "DisplayName": "Route117_PokemonDayCare",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/route117_pokemon_day_care.json"
+  "id": "base:map:hoenn/route117_pokemon_day_care",
+  "name": "Route117_PokemonDayCare",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/route117_pokemon_day_care.json"
 }

@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/rustboro_city_flat2_2f",
-  "DisplayName": "RustboroCity_Flat2_2F",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/rustboro_city_flat2_2f.json"
+  "id": "base:map:hoenn/rustboro_city_flat2_2f",
+  "name": "RustboroCity_Flat2_2F",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/rustboro_city_flat2_2f.json"
 }

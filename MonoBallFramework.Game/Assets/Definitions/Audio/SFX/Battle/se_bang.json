@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_bang",
-  "displayName": "Bang",
+  "name": "Bang",
   "audioPath": "Audio/SFX/Battle/se_bang.ogg",
   "volume": 0.866,
   "loop": false,

@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/battle/mus_rg_encounter_girl",
-  "displayName": "RG Encounter Girl",
+  "name": "RG Encounter Girl",
   "audioPath": "Audio/Music/Battle/mus_rg_encounter_girl.ogg",
   "volume": 0.402,
   "loop": true,

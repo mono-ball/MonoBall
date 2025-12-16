@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/union_room",
-  "DisplayName": "UnionRoom",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/union_room.json"
+  "id": "base:map:hoenn/union_room",
+  "name": "UnionRoom",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/union_room.json"
 }

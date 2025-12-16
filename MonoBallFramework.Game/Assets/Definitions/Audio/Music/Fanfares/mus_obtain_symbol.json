@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/fanfares/mus_obtain_symbol",
-  "displayName": "Obtain Symbol",
+  "name": "Obtain Symbol",
   "audioPath": "Audio/Music/Fanfares/mus_obtain_symbol.ogg",
   "volume": 0.787,
   "loop": false,

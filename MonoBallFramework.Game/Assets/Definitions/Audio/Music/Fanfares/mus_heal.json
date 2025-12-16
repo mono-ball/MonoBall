@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/fanfares/mus_heal",
-  "displayName": "Heal",
+  "name": "Heal",
   "audioPath": "Audio/Music/Fanfares/mus_heal.ogg",
   "volume": 0.709,
   "loop": false,

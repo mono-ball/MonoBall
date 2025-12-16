@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/battle_frontier_mart",
-  "DisplayName": "BattleFrontier_Mart",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/battle_frontier_mart.json"
+  "id": "base:map:hoenn/battle_frontier_mart",
+  "name": "BattleFrontier_Mart",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/battle_frontier_mart.json"
 }

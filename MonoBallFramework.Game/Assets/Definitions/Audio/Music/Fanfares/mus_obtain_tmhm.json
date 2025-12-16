@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/fanfares/mus_obtain_tmhm",
-  "displayName": "Obtain TMhm",
+  "name": "Obtain TMhm",
   "audioPath": "Audio/Music/Fanfares/mus_obtain_tmhm.ogg",
   "volume": 0.709,
   "loop": false,

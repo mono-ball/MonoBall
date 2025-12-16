@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/fallarbor_town_move_relearners_house",
-  "DisplayName": "FallarborTown_MoveRelearnersHouse",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/fallarbor_town_move_relearners_house.json"
+  "id": "base:map:hoenn/fallarbor_town_move_relearners_house",
+  "name": "FallarborTown_MoveRelearnersHouse",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/fallarbor_town_move_relearners_house.json"
 }

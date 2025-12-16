@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/special/mus_rg_jigglypuff",
-  "displayName": "RG Jigglypuff",
+  "name": "RG Jigglypuff",
   "audioPath": "Audio/Music/Special/mus_rg_jigglypuff.ogg",
   "volume": 0.535,
   "loop": true,

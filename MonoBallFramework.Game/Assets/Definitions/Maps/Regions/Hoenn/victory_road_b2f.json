@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/victory_road_b2f",
-  "DisplayName": "VictoryRoad_B2F",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/victory_road_b2f.json"
+  "id": "base:map:hoenn/victory_road_b2f",
+  "name": "VictoryRoad_B2F",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/victory_road_b2f.json"
 }

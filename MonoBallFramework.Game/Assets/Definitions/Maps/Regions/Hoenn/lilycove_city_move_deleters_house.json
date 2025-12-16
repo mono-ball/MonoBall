@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/lilycove_city_move_deleters_house",
-  "DisplayName": "LilycoveCity_MoveDeletersHouse",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/lilycove_city_move_deleters_house.json"
+  "id": "base:map:hoenn/lilycove_city_move_deleters_house",
+  "name": "LilycoveCity_MoveDeletersHouse",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/lilycove_city_move_deleters_house.json"
 }

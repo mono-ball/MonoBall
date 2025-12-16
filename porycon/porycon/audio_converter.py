@@ -689,7 +689,7 @@ class AudioDefinitionGenerator:
             # Build definition matching PokeSharp format
             definition = {
                 "id": asset_id,
-                "displayName": display_name,
+                "name": display_name,
                 "audioPath": audio_path,
                 "volume": round(track_info.volume / 127.0, 3),
                 "loop": should_loop,

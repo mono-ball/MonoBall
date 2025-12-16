@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/fanfares/mus_evolved",
-  "displayName": "Evolved",
+  "name": "Evolved",
   "audioPath": "Audio/Music/Fanfares/mus_evolved.ogg",
   "volume": 0.709,
   "loop": false,

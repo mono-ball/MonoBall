@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_m_jump_kick",
-  "displayName": "M Jump Kick",
+  "name": "M Jump Kick",
   "audioPath": "Audio/SFX/Battle/se_m_jump_kick.ogg",
   "volume": 0.866,
   "loop": false,

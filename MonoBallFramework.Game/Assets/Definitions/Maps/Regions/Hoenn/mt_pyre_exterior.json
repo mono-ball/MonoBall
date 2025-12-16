@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/mt_pyre_exterior",
-  "DisplayName": "MtPyre_Exterior",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/mt_pyre_exterior.json"
+  "id": "base:map:hoenn/mt_pyre_exterior",
+  "name": "MtPyre_Exterior",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/mt_pyre_exterior.json"
 }

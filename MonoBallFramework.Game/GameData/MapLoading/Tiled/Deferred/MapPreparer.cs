@@ -226,7 +226,7 @@ public class MapPreparer
             Tiles = tiles,
             Tilesets = tilesets,
             Properties = properties,
-            DisplayName = properties.TryGetValue("display_name", out var dn) ? dn?.ToString() : null,
+            Name = properties.TryGetValue("displayName", out var dn) ? dn?.ToString() : null,
             RegionSection = properties.TryGetValue("region_section", out var rs) ? rs?.ToString() : null,
             MusicTrack = properties.TryGetValue("music", out var mt) ? mt?.ToString() : null,
             ImageLayers = imageLayers,

@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/mossdeep_city_house1",
-  "DisplayName": "MossdeepCity_House1",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/mossdeep_city_house1.json"
+  "id": "base:map:hoenn/mossdeep_city_house1",
+  "name": "MossdeepCity_House1",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/mossdeep_city_house1.json"
 }

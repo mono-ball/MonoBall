@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/route110_trick_house_puzzle4",
-  "DisplayName": "Route110_TrickHousePuzzle4",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/route110_trick_house_puzzle4.json"
+  "id": "base:map:hoenn/route110_trick_house_puzzle4",
+  "name": "Route110_TrickHousePuzzle4",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/route110_trick_house_puzzle4.json"
 }

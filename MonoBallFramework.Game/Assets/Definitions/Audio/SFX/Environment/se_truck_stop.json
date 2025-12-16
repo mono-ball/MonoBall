@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/environment/se_truck_stop",
-  "displayName": "Truck Stop",
+  "name": "Truck Stop",
   "audioPath": "Audio/SFX/Environment/se_truck_stop.ogg",
   "volume": 0.63,
   "loop": false,

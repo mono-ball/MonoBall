@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/mt_pyre_4f",
-  "DisplayName": "MtPyre_4F",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/mt_pyre_4f.json"
+  "id": "base:map:hoenn/mt_pyre_4f",
+  "name": "MtPyre_4F",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/mt_pyre_4f.json"
 }

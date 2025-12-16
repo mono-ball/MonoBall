@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/mt_chimney_cable_car_station",
-  "DisplayName": "MtChimney_CableCarStation",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/mt_chimney_cable_car_station.json"
+  "id": "base:map:hoenn/mt_chimney_cable_car_station",
+  "name": "MtChimney_CableCarStation",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/mt_chimney_cable_car_station.json"
 }

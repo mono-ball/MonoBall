@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/mossdeep_city_space_center_2f",
-  "DisplayName": "MossdeepCity_SpaceCenter_2F",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/mossdeep_city_space_center_2f.json"
+  "id": "base:map:hoenn/mossdeep_city_space_center_2f",
+  "name": "MossdeepCity_SpaceCenter_2F",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/mossdeep_city_space_center_2f.json"
 }

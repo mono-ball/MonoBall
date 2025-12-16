@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_note_d",
-  "displayName": "Note D",
+  "name": "Note D",
   "audioPath": "Audio/SFX/Battle/se_note_d.ogg",
   "volume": 0.866,
   "loop": false,

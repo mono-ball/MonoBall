@@ -1,0 +1,17 @@
+{
+  "id": "base:pokedex_entry:national/bulbasaur",
+  "pokedexId": "base:pokedex:national",
+  "speciesId": "base:pokemon:bulbasaur",
+  "entryNumber": 1,
+  "category": "Seed Pokémon",
+  "height": 7,
+  "weight": 69,
+  "description": "A strange seed was planted on its back at birth. The plant sprouts and grows with this Pokémon.",
+  "pokemonScale": 356,
+  "pokemonOffset": 17,
+  "trainerScale": 256,
+  "trainerOffset": 0,
+  "sourceMod": "base",
+  "version": "1.0.0"
+}
+

@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/cave_of_origin_unused_ruby_sapphire_map1",
-  "DisplayName": "CaveOfOrigin_UnusedRubySapphireMap1",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/cave_of_origin_unused_ruby_sapphire_map1.json"
+  "id": "base:map:hoenn/cave_of_origin_unused_ruby_sapphire_map1",
+  "name": "CaveOfOrigin_UnusedRubySapphireMap1",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/cave_of_origin_unused_ruby_sapphire_map1.json"
 }

@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/fiery_path",
-  "DisplayName": "FieryPath",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/fiery_path.json"
+  "id": "base:map:hoenn/fiery_path",
+  "name": "FieryPath",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/fiery_path.json"
 }

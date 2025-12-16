@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_arena_timeup1",
-  "displayName": "Arena Timeup1",
+  "name": "Arena Timeup1",
   "audioPath": "Audio/SFX/Battle/se_arena_timeup1.ogg",
   "volume": 0.63,
   "loop": false,

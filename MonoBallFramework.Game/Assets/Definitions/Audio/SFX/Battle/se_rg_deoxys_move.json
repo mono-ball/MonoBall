@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_rg_deoxys_move",
-  "displayName": "RG Deoxys Move",
+  "name": "RG Deoxys Move",
   "audioPath": "Audio/SFX/Battle/se_rg_deoxys_move.ogg",
   "volume": 0.63,
   "loop": false,

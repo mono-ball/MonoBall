@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_m_headbutt",
-  "displayName": "M Headbutt",
+  "name": "M Headbutt",
   "audioPath": "Audio/SFX/Battle/se_m_headbutt.ogg",
   "volume": 0.866,
   "loop": false,

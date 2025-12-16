@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/routes/mus_sailing",
-  "displayName": "Sailing",
+  "name": "Sailing",
   "audioPath": "Audio/Music/Routes/mus_sailing.ogg",
   "volume": 0.677,
   "loop": true,

@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_repel",
-  "displayName": "Repel",
+  "name": "Repel",
   "audioPath": "Audio/SFX/Battle/se_repel.ogg",
   "volume": 0.709,
   "loop": false,

@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/special/mus_rg_new_game_instruct",
-  "displayName": "RG New Game Instruct",
+  "name": "RG New Game Instruct",
   "audioPath": "Audio/Music/Special/mus_rg_new_game_instruct.ogg",
   "volume": 0.669,
   "loop": true,

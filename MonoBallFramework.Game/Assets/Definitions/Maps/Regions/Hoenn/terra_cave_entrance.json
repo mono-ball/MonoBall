@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/terra_cave_entrance",
-  "DisplayName": "TerraCave_Entrance",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/terra_cave_entrance.json"
+  "id": "base:map:hoenn/terra_cave_entrance",
+  "name": "TerraCave_Entrance",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/terra_cave_entrance.json"
 }

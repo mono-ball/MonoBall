@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/ui/se_rg_card_flipping",
-  "displayName": "RG Card Flipping",
+  "name": "RG Card Flipping",
   "audioPath": "Audio/SFX/UI/se_rg_card_flipping.ogg",
   "volume": 0.63,
   "loop": false,

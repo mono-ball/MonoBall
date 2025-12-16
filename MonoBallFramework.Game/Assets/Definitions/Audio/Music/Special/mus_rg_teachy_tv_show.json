@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/special/mus_rg_teachy_tv_show",
-  "displayName": "RG Teachy Tv Show",
+  "name": "RG Teachy Tv Show",
   "audioPath": "Audio/Music/Special/mus_rg_teachy_tv_show.ogg",
   "volume": 0.535,
   "loop": true,

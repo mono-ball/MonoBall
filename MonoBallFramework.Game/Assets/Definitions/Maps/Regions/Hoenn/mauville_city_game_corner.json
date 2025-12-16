@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/mauville_city_game_corner",
-  "DisplayName": "MauvilleCity_GameCorner",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/mauville_city_game_corner.json"
+  "id": "base:map:hoenn/mauville_city_game_corner",
+  "name": "MauvilleCity_GameCorner",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/mauville_city_game_corner.json"
 }

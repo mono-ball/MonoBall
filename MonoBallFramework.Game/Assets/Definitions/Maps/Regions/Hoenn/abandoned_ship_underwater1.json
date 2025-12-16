@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/abandoned_ship_underwater1",
-  "DisplayName": "AbandonedShip_Underwater1",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/abandoned_ship_underwater1.json"
+  "id": "base:map:hoenn/abandoned_ship_underwater1",
+  "name": "AbandonedShip_Underwater1",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/abandoned_ship_underwater1.json"
 }

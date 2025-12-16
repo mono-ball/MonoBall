@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/battle_frontier_outside_west",
-  "DisplayName": "BattleFrontier_OutsideWest",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/battle_frontier_outside_west.json"
+  "id": "base:map:hoenn/battle_frontier_outside_west",
+  "name": "BattleFrontier_OutsideWest",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/battle_frontier_outside_west.json"
 }

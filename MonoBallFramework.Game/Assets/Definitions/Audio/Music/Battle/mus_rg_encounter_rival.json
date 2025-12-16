@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/battle/mus_rg_encounter_rival",
-  "displayName": "RG Encounter Rival",
+  "name": "RG Encounter Rival",
   "audioPath": "Audio/Music/Battle/mus_rg_encounter_rival.ogg",
   "volume": 0.622,
   "loop": true,

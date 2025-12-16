@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_pin",
-  "displayName": "Pin",
+  "name": "Pin",
   "audioPath": "Audio/SFX/Battle/se_pin.ogg",
   "volume": 0.472,
   "loop": false,

@@ -372,7 +372,7 @@ public class EntityFrameworkPanel : DebugPanelBase
                 if (isCustomType)
                 {
                     var customDef = (ICustomTypeDefinition)entity;
-                    entityKey = customDef.Id;
+                    entityKey = customDef.DefinitionId;
                     typeName = customDef.Category;
                 }
                 else
@@ -1032,7 +1032,7 @@ public class EntityFrameworkPanel : DebugPanelBase
     /// </summary>
     private string FormatCustomTypeDefinitionSummary(ICustomTypeDefinition definition)
     {
-        return $"{definition.Category}: {definition.Id}";
+        return $"{definition.Category}: {definition.DefinitionId}";
     }
 
     /// <summary>

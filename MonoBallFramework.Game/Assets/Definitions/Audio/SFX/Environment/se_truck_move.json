@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/environment/se_truck_move",
-  "displayName": "Truck Move",
+  "name": "Truck Move",
   "audioPath": "Audio/SFX/Environment/se_truck_move.ogg",
   "volume": 0.63,
   "loop": true,

@@ -17,7 +17,7 @@ public class MapSection
     [Key]
     [MaxLength(100)]
     [Column(TypeName = "nvarchar(100)")]
-    public GameMapSectionId Id { get; set; } = null!;
+    public GameMapSectionId MapSectionId { get; set; } = null!;
 
     /// <summary>
     ///     Display name for region map (e.g., "LITTLEROOT TOWN").

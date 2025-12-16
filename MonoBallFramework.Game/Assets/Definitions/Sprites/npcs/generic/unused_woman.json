@@ -1,75 +1,75 @@
 {
-  "Id": "base:sprite:npcs/generic/unused_woman",
-  "DisplayName": "Unused Woman",
-  "Type": "Sprite",
-  "TexturePath": "Graphics/Sprites/npcs/generic/unused_woman.png",
-  "FrameWidth": 16,
-  "FrameHeight": 32,
-  "FrameCount": 9,
-  "Frames": [
+  "id": "base:sprite:npcs/generic/unused_woman",
+  "name": "Unused Woman",
+  "type": "Sprite",
+  "texturePath": "Graphics/Sprites/npcs/generic/unused_woman.png",
+  "frameWidth": 16,
+  "frameHeight": 32,
+  "frameCount": 9,
+  "frames": [
     {
-      "Index": 0,
-      "X": 0,
-      "Y": 0,
-      "Width": 16,
-      "Height": 32
+      "index": 0,
+      "x": 0,
+      "y": 0,
+      "width": 16,
+      "height": 32
     },
     {
-      "Index": 1,
-      "X": 16,
-      "Y": 0,
-      "Width": 16,
-      "Height": 32
+      "index": 1,
+      "x": 16,
+      "y": 0,
+      "width": 16,
+      "height": 32
     },
     {
-      "Index": 2,
-      "X": 32,
-      "Y": 0,
-      "Width": 16,
-      "Height": 32
+      "index": 2,
+      "x": 32,
+      "y": 0,
+      "width": 16,
+      "height": 32
     },
     {
-      "Index": 3,
-      "X": 48,
-      "Y": 0,
-      "Width": 16,
-      "Height": 32
+      "index": 3,
+      "x": 48,
+      "y": 0,
+      "width": 16,
+      "height": 32
     },
     {
-      "Index": 4,
-      "X": 64,
-      "Y": 0,
-      "Width": 16,
-      "Height": 32
+      "index": 4,
+      "x": 64,
+      "y": 0,
+      "width": 16,
+      "height": 32
     },
     {
-      "Index": 5,
-      "X": 80,
-      "Y": 0,
-      "Width": 16,
-      "Height": 32
+      "index": 5,
+      "x": 80,
+      "y": 0,
+      "width": 16,
+      "height": 32
     },
     {
-      "Index": 6,
-      "X": 96,
-      "Y": 0,
-      "Width": 16,
-      "Height": 32
+      "index": 6,
+      "x": 96,
+      "y": 0,
+      "width": 16,
+      "height": 32
     },
     {
-      "Index": 7,
-      "X": 112,
-      "Y": 0,
-      "Width": 16,
-      "Height": 32
+      "index": 7,
+      "x": 112,
+      "y": 0,
+      "width": 16,
+      "height": 32
     },
     {
-      "Index": 8,
-      "X": 128,
-      "Y": 0,
-      "Width": 16,
-      "Height": 32
+      "index": 8,
+      "x": 128,
+      "y": 0,
+      "width": 16,
+      "height": 32
     }
   ],
-  "Animations": []
+  "animations": []
 }

@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/ever_grande_city_pokemon_league_2f",
-  "DisplayName": "EverGrandeCity_PokemonLeague_2F",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/ever_grande_city_pokemon_league_2f.json"
+  "id": "base:map:hoenn/ever_grande_city_pokemon_league_2f",
+  "name": "EverGrandeCity_PokemonLeague_2F",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/ever_grande_city_pokemon_league_2f.json"
 }

@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/seafloor_cavern_entrance",
-  "DisplayName": "SeafloorCavern_Entrance",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/seafloor_cavern_entrance.json"
+  "id": "base:map:hoenn/seafloor_cavern_entrance",
+  "name": "SeafloorCavern_Entrance",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/seafloor_cavern_entrance.json"
 }

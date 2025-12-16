@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/special/mus_rg_title",
-  "displayName": "RG Title",
+  "name": "RG Title",
   "audioPath": "Audio/Music/Special/mus_rg_title.ogg",
   "volume": 0.709,
   "loop": true,

@@ -880,7 +880,7 @@ class MapConverter:
         # Add properties
         if "name" in map_data:
             tiled_map["properties"].append({
-                "name": "display_name",
+                "name": "displayName",
                 "type": "string",
                 "value": map_data["name"]
             })

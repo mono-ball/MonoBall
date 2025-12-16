@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/slateport_city_name_raters_house",
-  "DisplayName": "SlateportCity_NameRatersHouse",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/slateport_city_name_raters_house.json"
+  "id": "base:map:hoenn/slateport_city_name_raters_house",
+  "name": "SlateportCity_NameRatersHouse",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/slateport_city_name_raters_house.json"
 }

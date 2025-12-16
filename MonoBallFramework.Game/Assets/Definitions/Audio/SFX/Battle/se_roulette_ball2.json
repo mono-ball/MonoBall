@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_roulette_ball2",
-  "displayName": "Roulette Ball2",
+  "name": "Roulette Ball2",
   "audioPath": "Audio/SFX/Battle/se_roulette_ball2.ogg",
   "volume": 0.866,
   "loop": false,

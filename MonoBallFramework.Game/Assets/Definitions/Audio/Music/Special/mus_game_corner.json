@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/special/mus_game_corner",
-  "displayName": "Game Corner",
+  "name": "Game Corner",
   "audioPath": "Audio/Music/Special/mus_game_corner.ogg",
   "volume": 0.567,
   "loop": true,

@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_vend",
-  "displayName": "Vend",
+  "name": "Vend",
   "audioPath": "Audio/SFX/Battle/se_vend.ogg",
   "volume": 0.866,
   "loop": false,

@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_mugshot",
-  "displayName": "Mugshot",
+  "name": "Mugshot",
   "audioPath": "Audio/SFX/Battle/se_mugshot.ogg",
   "volume": 0.709,
   "loop": false,

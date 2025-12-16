@@ -96,7 +96,7 @@ public class GameDataContext : DbContext
             // Indexes for common queries
             entity.HasIndex(m => m.Region);
             entity.HasIndex(m => m.MapType);
-            entity.HasIndex(m => m.DisplayName);
+            entity.HasIndex(m => m.Name);
 
             // Value converters for GameMapId (unified format)
             var mapIdConverter = new GameMapIdValueConverter();
@@ -125,10 +125,10 @@ public class GameDataContext : DbContext
     {
         modelBuilder.Entity<PopupTheme>(entity =>
         {
-            entity.HasKey(t => t.Id);
+            entity.HasKey(t => t.ThemeId);
 
             // Value converter for GameThemeId
-            entity.Property(t => t.Id).HasConversion(new GameThemeIdValueConverter());
+            entity.Property(t => t.ThemeId).HasConversion(new GameThemeIdValueConverter());
 
             // Indexes for common queries
             entity.HasIndex(t => t.Name);
@@ -159,7 +159,7 @@ public class GameDataContext : DbContext
             // Indexes for common queries
             entity.HasIndex(a => a.Category);
             entity.HasIndex(a => a.Subcategory);
-            entity.HasIndex(a => a.DisplayName);
+            entity.HasIndex(a => a.Name);
 
             // Composite index for category + subcategory lookups
             entity.HasIndex(a => new { a.Category, a.Subcategory });
@@ -173,10 +173,10 @@ public class GameDataContext : DbContext
     {
         modelBuilder.Entity<MapSection>(entity =>
         {
-            entity.HasKey(s => s.Id);
+            entity.HasKey(s => s.MapSectionId);
 
             // Value converters for unified ID types
-            entity.Property(s => s.Id).HasConversion(new GameMapSectionIdValueConverter());
+            entity.Property(s => s.MapSectionId).HasConversion(new GameMapSectionIdValueConverter());
             entity.Property(s => s.ThemeId).HasConversion(new GameThemeIdValueConverter());
 
             // Indexes for common queries
@@ -206,7 +206,7 @@ public class GameDataContext : DbContext
             entity.Property(s => s.SpriteId).HasConversion(new GameSpriteIdNonNullableValueConverter());
 
             // Indexes for common queries
-            entity.HasIndex(s => s.DisplayName);
+            entity.HasIndex(s => s.Name);
             entity.HasIndex(s => s.Type);
             entity.HasIndex(s => s.TexturePath);
 
@@ -243,7 +243,7 @@ public class GameDataContext : DbContext
             entity.Property(b => b.BackgroundId).HasConversion(new GamePopupBackgroundIdValueConverter());
 
             // Indexes for common queries
-            entity.HasIndex(b => b.DisplayName);
+            entity.HasIndex(b => b.Name);
             entity.HasIndex(b => b.Type);
         });
     }
@@ -262,7 +262,7 @@ public class GameDataContext : DbContext
             entity.Property(o => o.OutlineId).HasConversion(new GamePopupOutlineIdValueConverter());
 
             // Indexes for common queries
-            entity.HasIndex(o => o.DisplayName);
+            entity.HasIndex(o => o.Name);
             entity.HasIndex(o => o.Type);
 
             // Configure Tiles as owned collection
@@ -291,7 +291,7 @@ public class GameDataContext : DbContext
             entity.Property(b => b.BehaviorId).HasConversion(new GameBehaviorIdValueConverter());
 
             // Indexes for common queries
-            entity.HasIndex(b => b.DisplayName);
+            entity.HasIndex(b => b.Name);
         });
     }
 
@@ -308,7 +308,7 @@ public class GameDataContext : DbContext
             entity.Property(t => t.TileBehaviorId).HasConversion(new GameTileBehaviorIdValueConverter());
 
             // Indexes for common queries
-            entity.HasIndex(t => t.DisplayName);
+            entity.HasIndex(t => t.Name);
             entity.HasIndex(t => t.Flags);
         });
     }
@@ -326,7 +326,7 @@ public class GameDataContext : DbContext
             entity.Property(f => f.FontId).HasConversion(new GameFontIdValueConverter());
 
             // Indexes for common queries
-            entity.HasIndex(f => f.DisplayName);
+            entity.HasIndex(f => f.Name);
             entity.HasIndex(f => f.Category);
             entity.HasIndex(f => f.FontPath);
         });

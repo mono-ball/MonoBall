@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/ui/se_rg_door",
-  "displayName": "RG Door",
+  "name": "RG Door",
   "audioPath": "Audio/SFX/UI/se_rg_door.ogg",
   "volume": 0.787,
   "loop": false,

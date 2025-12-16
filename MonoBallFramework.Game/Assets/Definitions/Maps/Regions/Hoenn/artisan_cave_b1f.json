@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/artisan_cave_b1f",
-  "DisplayName": "ArtisanCave_B1F",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/artisan_cave_b1f.json"
+  "id": "base:map:hoenn/artisan_cave_b1f",
+  "name": "ArtisanCave_B1F",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/artisan_cave_b1f.json"
 }

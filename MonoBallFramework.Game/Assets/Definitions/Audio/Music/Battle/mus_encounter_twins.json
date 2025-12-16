@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/battle/mus_encounter_twins",
-  "displayName": "Encounter Twins",
+  "name": "Encounter Twins",
   "audioPath": "Audio/Music/Battle/mus_encounter_twins.ogg",
   "volume": 0.591,
   "loop": true,

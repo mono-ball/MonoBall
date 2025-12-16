@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/special/mus_rg_gym",
-  "displayName": "RG Gym",
+  "name": "RG Gym",
   "audioPath": "Audio/Music/Special/mus_rg_gym.ogg",
   "volume": 0.709,
   "loop": true,

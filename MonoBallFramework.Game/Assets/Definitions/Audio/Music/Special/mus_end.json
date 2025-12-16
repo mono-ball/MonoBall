@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/special/mus_end",
-  "displayName": "End",
+  "name": "End",
   "audioPath": "Audio/Music/Special/mus_end.ogg",
   "volume": 0.283,
   "loop": true,

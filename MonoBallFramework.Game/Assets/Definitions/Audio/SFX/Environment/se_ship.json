@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/environment/se_ship",
-  "displayName": "Ship",
+  "name": "Ship",
   "audioPath": "Audio/SFX/Environment/se_ship.ogg",
   "volume": 0.591,
   "loop": false,

@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/trainer_hill_elevator",
-  "DisplayName": "TrainerHill_Elevator",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/trainer_hill_elevator.json"
+  "id": "base:map:hoenn/trainer_hill_elevator",
+  "name": "TrainerHill_Elevator",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/trainer_hill_elevator.json"
 }

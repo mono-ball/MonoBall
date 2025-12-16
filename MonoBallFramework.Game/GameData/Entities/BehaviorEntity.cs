@@ -27,7 +27,7 @@ public class BehaviorEntity
     /// </summary>
     [Required]
     [MaxLength(100)]
-    public string DisplayName { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
 
     /// <summary>
     ///     Description of what this behavior does.

@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_m_mega_kick2",
-  "displayName": "M Mega Kick2",
+  "name": "M Mega Kick2",
   "audioPath": "Audio/SFX/Battle/se_m_mega_kick2.ogg",
   "volume": 0.866,
   "loop": false,

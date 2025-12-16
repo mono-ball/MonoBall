@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/verdanturf_town_house",
-  "DisplayName": "VerdanturfTown_House",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/verdanturf_town_house.json"
+  "id": "base:map:hoenn/verdanturf_town_house",
+  "name": "VerdanturfTown_House",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/verdanturf_town_house.json"
 }

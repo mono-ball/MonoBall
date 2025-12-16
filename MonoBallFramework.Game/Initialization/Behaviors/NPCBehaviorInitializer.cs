@@ -170,8 +170,8 @@ public class NPCBehaviorInitializer(
                     // Create BehaviorDefinition from EF Core entity
                     var definition = new BehaviorDefinition
                     {
-                        Id = typeId,
-                        DisplayName = modBehavior.DisplayName,
+                        DefinitionId = typeId,
+                        Name = modBehavior.Name,
                         Description = modBehavior.Description,
                         BehaviorScript = modBehavior.BehaviorScript,
                         DefaultSpeed = modBehavior.DefaultSpeed,

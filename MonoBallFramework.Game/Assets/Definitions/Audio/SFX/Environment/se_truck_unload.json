@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/environment/se_truck_unload",
-  "displayName": "Truck Unload",
+  "name": "Truck Unload",
   "audioPath": "Audio/SFX/Environment/se_truck_unload.ogg",
   "volume": 0.63,
   "loop": false,

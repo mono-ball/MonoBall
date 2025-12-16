@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/trade_center",
-  "DisplayName": "TradeCenter",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/trade_center.json"
+  "id": "base:map:hoenn/trade_center",
+  "name": "TradeCenter",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/trade_center.json"
 }

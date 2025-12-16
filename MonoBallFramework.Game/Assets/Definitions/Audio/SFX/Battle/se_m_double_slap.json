@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_m_double_slap",
-  "displayName": "M Double Slap",
+  "name": "M Double Slap",
   "audioPath": "Audio/SFX/Battle/se_m_double_slap.ogg",
   "volume": 0.866,
   "loop": false,

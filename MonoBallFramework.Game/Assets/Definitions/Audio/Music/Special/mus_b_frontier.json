@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/special/mus_b_frontier",
-  "displayName": "Battle Frontier",
+  "name": "Battle Frontier",
   "audioPath": "Audio/Music/Special/mus_b_frontier.ogg",
   "volume": 0.74,
   "loop": true,

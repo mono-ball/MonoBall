@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_egg_hatch",
-  "displayName": "Egg Hatch",
+  "name": "Egg Hatch",
   "audioPath": "Audio/SFX/Battle/se_egg_hatch.ogg",
   "volume": 0.945,
   "loop": false,

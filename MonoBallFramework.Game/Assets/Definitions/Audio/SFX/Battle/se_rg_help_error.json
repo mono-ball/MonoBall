@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_rg_help_error",
-  "displayName": "RG Help Error",
+  "name": "RG Help Error",
   "audioPath": "Audio/SFX/Battle/se_rg_help_error.ogg",
   "volume": 0.984,
   "loop": false,

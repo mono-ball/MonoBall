@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/fortree_city_pokemon_center_1f",
-  "DisplayName": "FortreeCity_PokemonCenter_1F",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/fortree_city_pokemon_center_1f.json"
+  "id": "base:map:hoenn/fortree_city_pokemon_center_1f",
+  "name": "FortreeCity_PokemonCenter_1F",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/fortree_city_pokemon_center_1f.json"
 }

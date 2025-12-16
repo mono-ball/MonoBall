@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/route112_cable_car_station",
-  "DisplayName": "Route112_CableCarStation",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/route112_cable_car_station.json"
+  "id": "base:map:hoenn/route112_cable_car_station",
+  "name": "Route112_CableCarStation",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/route112_cable_car_station.json"
 }

@@ -224,7 +224,7 @@ public sealed class FontLoader
         _logger.LogDebug(
             "Loaded font {FontId} ({DisplayName}) from {Path}",
             fontEntity.FontId,
-            fontEntity.DisplayName,
+            fontEntity.Name,
             fontPath);
 
         return fontSystem;

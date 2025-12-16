@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/route104_mr_brineys_house",
-  "DisplayName": "Route104_MrBrineysHouse",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/route104_mr_brineys_house.json"
+  "id": "base:map:hoenn/route104_mr_brineys_house",
+  "name": "Route104_MrBrineysHouse",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/route104_mr_brineys_house.json"
 }

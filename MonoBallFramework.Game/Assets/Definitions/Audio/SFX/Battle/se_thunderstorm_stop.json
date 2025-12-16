@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_thunderstorm_stop",
-  "displayName": "Thunderstorm Stop",
+  "name": "Thunderstorm Stop",
   "audioPath": "Audio/SFX/Battle/se_thunderstorm_stop.ogg",
   "volume": 0.63,
   "loop": false,

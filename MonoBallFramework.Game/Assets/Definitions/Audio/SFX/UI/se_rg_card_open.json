@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/ui/se_rg_card_open",
-  "displayName": "RG Card Open",
+  "name": "RG Card Open",
   "audioPath": "Audio/SFX/UI/se_rg_card_open.ogg",
   "volume": 0.882,
   "loop": false,

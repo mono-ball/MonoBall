@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/slateport_city_oceanic_museum_1f",
-  "DisplayName": "SlateportCity_OceanicMuseum_1F",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/slateport_city_oceanic_museum_1f.json"
+  "id": "base:map:hoenn/slateport_city_oceanic_museum_1f",
+  "name": "SlateportCity_OceanicMuseum_1F",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/slateport_city_oceanic_museum_1f.json"
 }

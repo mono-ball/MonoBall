@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/routes/mus_surf",
-  "displayName": "Surf",
+  "name": "Surf",
   "audioPath": "Audio/Music/Routes/mus_surf.ogg",
   "volume": 0.63,
   "loop": true,

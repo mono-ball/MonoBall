@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_ball_bounce_4",
-  "displayName": "Ball Bounce 4",
+  "name": "Ball Bounce 4",
   "audioPath": "Audio/SFX/Battle/se_ball_bounce_4.ogg",
   "volume": 0.787,
   "loop": false,

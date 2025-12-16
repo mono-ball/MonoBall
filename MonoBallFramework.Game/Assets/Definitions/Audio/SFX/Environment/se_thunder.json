@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/environment/se_thunder",
-  "displayName": "Thunder",
+  "name": "Thunder",
   "audioPath": "Audio/SFX/Environment/se_thunder.ogg",
   "volume": 0.866,
   "loop": false,

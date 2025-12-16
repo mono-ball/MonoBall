@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/southern_island_exterior",
-  "DisplayName": "SouthernIsland_Exterior",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/southern_island_exterior.json"
+  "id": "base:map:hoenn/southern_island_exterior",
+  "name": "SouthernIsland_Exterior",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/southern_island_exterior.json"
 }

@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_m_sand_attack",
-  "displayName": "M Sand Attack",
+  "name": "M Sand Attack",
   "audioPath": "Audio/SFX/Battle/se_m_sand_attack.ogg",
   "volume": 0.866,
   "loop": false,

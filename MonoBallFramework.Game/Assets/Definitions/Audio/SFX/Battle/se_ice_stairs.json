@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_ice_stairs",
-  "displayName": "Ice Stairs",
+  "name": "Ice Stairs",
   "audioPath": "Audio/SFX/Battle/se_ice_stairs.ogg",
   "volume": 0.709,
   "loop": false,

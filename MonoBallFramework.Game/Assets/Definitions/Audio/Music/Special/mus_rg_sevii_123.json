@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/special/mus_rg_sevii_123",
-  "displayName": "RG Sevii 123",
+  "name": "RG Sevii 123",
   "audioPath": "Audio/Music/Special/mus_rg_sevii_123.ogg",
   "volume": 0.661,
   "loop": true,

@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/pacifidlog_town_house5",
-  "DisplayName": "PacifidlogTown_House5",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/pacifidlog_town_house5.json"
+  "id": "base:map:hoenn/pacifidlog_town_house5",
+  "name": "PacifidlogTown_House5",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/pacifidlog_town_house5.json"
 }

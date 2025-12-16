@@ -26,7 +26,7 @@ public class SpriteEntity
     /// </summary>
     [Required]
     [MaxLength(100)]
-    public string DisplayName { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
 
     /// <summary>
     ///     Asset type - always "Sprite" for sprite definitions.

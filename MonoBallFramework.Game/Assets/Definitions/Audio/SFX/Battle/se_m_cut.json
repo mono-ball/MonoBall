@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_m_cut",
-  "displayName": "M Cut",
+  "name": "M Cut",
   "audioPath": "Audio/SFX/Battle/se_m_cut.ogg",
   "volume": 0.945,
   "loop": false,

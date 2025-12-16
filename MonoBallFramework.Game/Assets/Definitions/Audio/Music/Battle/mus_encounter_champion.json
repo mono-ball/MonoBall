@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/battle/mus_encounter_champion",
-  "displayName": "Encounter Champion",
+  "name": "Encounter Champion",
   "audioPath": "Audio/Music/Battle/mus_encounter_champion.ogg",
   "volume": 0.598,
   "loop": true,

@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_m_fly",
-  "displayName": "M Fly",
+  "name": "M Fly",
   "audioPath": "Audio/SFX/Battle/se_m_fly.ogg",
   "volume": 0.866,
   "loop": false,

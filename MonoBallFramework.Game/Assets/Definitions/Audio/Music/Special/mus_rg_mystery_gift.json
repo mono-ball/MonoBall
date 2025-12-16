@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/special/mus_rg_mystery_gift",
-  "displayName": "RG Mystery Gift",
+  "name": "RG Mystery Gift",
   "audioPath": "Audio/Music/Special/mus_rg_mystery_gift.ogg",
   "volume": 0.787,
   "loop": true,

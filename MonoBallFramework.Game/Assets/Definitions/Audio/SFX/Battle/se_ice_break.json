@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_ice_break",
-  "displayName": "Ice Break",
+  "name": "Ice Break",
   "audioPath": "Audio/SFX/Battle/se_ice_break.ogg",
   "volume": 0.787,
   "loop": false,

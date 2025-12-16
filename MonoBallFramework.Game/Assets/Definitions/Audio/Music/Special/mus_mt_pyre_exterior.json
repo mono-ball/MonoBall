@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/special/mus_mt_pyre_exterior",
-  "displayName": "Mt. Pyre Exterior",
+  "name": "Mt. Pyre Exterior",
   "audioPath": "Audio/Music/Special/mus_mt_pyre_exterior.ogg",
   "volume": 0.63,
   "loop": true,

@@ -1,0 +1,21 @@
+{
+  "id": "base:pokedex:national",
+  "name": "National Pokédex",
+  "type": "national",
+  "speciesOrder": [
+    "base:pokemon:bulbasaur",
+    "base:pokemon:ivysaur",
+    "base:pokemon:venusaur",
+    "base:pokemon:charmander",
+    "base:pokemon:charmeleon",
+    "base:pokemon:charizard",
+    "base:pokemon:squirtle",
+    "base:pokemon:wartortle",
+    "base:pokemon:blastoise"
+  ],
+  "totalCount": 386,
+  "description": "The complete National Pokédex containing all known Pokémon species.",
+  "sourceMod": "base",
+  "version": "1.0.0"
+}
+

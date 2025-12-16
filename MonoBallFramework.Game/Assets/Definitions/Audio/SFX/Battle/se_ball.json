@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_ball",
-  "displayName": "Ball",
+  "name": "Ball",
   "audioPath": "Audio/SFX/Battle/se_ball.ogg",
   "volume": 0.551,
   "loop": false,

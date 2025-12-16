@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/trainer_hill_roof",
-  "DisplayName": "TrainerHill_Roof",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/trainer_hill_roof.json"
+  "id": "base:map:hoenn/trainer_hill_roof",
+  "name": "TrainerHill_Roof",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/trainer_hill_roof.json"
 }

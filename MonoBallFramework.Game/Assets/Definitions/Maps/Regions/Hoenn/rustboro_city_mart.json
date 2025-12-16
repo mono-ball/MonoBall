@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/rustboro_city_mart",
-  "DisplayName": "RustboroCity_Mart",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/rustboro_city_mart.json"
+  "id": "base:map:hoenn/rustboro_city_mart",
+  "name": "RustboroCity_Mart",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/rustboro_city_mart.json"
 }

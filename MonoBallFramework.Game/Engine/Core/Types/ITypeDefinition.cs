@@ -11,15 +11,15 @@ namespace MonoBallFramework.Game.Engine.Core.Types;
 public interface ITypeDefinition
 {
     /// <summary>
-    ///     Unique identifier for this type (e.g., "rain", "lava", "warp_pad", "patrol").
+    ///     Unique identifier for this type definition (e.g., "rain", "lava", "warp_pad", "patrol").
     ///     Used as the key in TypeRegistry lookups.
     /// </summary>
-    string Id { get; }
+    string DefinitionId { get; }
 
     /// <summary>
-    ///     Display name shown to players and in editor tools.
+    ///     Name shown to players and in editor tools.
     /// </summary>
-    string DisplayName { get; }
+    string Name { get; }
 
     /// <summary>
     ///     Optional description for documentation, tooltips, and modder reference.

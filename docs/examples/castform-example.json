@@ -1,0 +1,129 @@
+{
+  "speciesId": 385,
+  "id": "base:pokemon:castform",
+  "name": "Castform",
+  "description": "CASTFORM's appearance changes with the weather. This POKéMON gained the ability to use the vast power of nature to protect its tiny body.",
+
+  "baseStats": {
+    "hp": 70,
+    "attack": 70,
+    "defense": 70,
+    "speed": 70,
+    "spAttack": 70,
+    "spDefense": 70
+  },
+
+  "types": ["base:type:normal"],
+
+  "catchRate": 45,
+  "expYield": 145,
+
+  "evYield": {
+    "hp": 0,
+    "attack": 0,
+    "defense": 0,
+    "speed": 0,
+    "spAttack": 1,
+    "spDefense": 0
+  },
+
+  "itemCommon": null,
+  "itemRare": null,
+
+  "genderRatio": 127,
+  "eggCycles": 25,
+  "eggGroups": ["base:egg_group:fairy", "base:egg_group:amorphous"],
+
+  "friendship": 70,
+  "growthRate": "base:growth_rate:medium_fast",
+
+  "abilities": ["base:ability:forecast", null],
+
+  "safariZoneFleeRate": 0,
+  "bodyColor": "base:body_color:white",
+  "noFlip": false,
+
+  "forms": [
+    {
+      "id": "base:pokemon_form:castform/normal",
+      "name": "Normal Form",
+      "formKey": "normal",
+      "types": ["base:type:normal"],
+      "condition": "base:form_condition:weather_none",
+      "sourceMod": "base",
+      "version": "1.0.0"
+    },
+    {
+      "id": "base:pokemon_form:castform/fire",
+      "name": "Sunny Form",
+      "formKey": "fire",
+      "types": ["base:type:fire"],
+      "condition": "base:form_condition:weather_sunny",
+      "sourceMod": "base",
+      "version": "1.0.0"
+    },
+    {
+      "id": "base:pokemon_form:castform/water",
+      "name": "Rainy Form",
+      "formKey": "water",
+      "types": ["base:type:water"],
+      "condition": "base:form_condition:weather_rain",
+      "sourceMod": "base",
+      "version": "1.0.0"
+    },
+    {
+      "id": "base:pokemon_form:castform/ice",
+      "name": "Snowy Form",
+      "formKey": "ice",
+      "types": ["base:type:ice"],
+      "condition": "base:form_condition:weather_hail",
+      "sourceMod": "base",
+      "version": "1.0.0"
+    }
+  ],
+
+  "evolutions": [],
+
+  "levelUpMoves": [
+    { "level": 1, "moveId": "base:move:tackle" },
+    { "level": 10, "moveId": "base:move:water_gun" },
+    { "level": 10, "moveId": "base:move:ember" },
+    { "level": 10, "moveId": "base:move:powder_snow" },
+    { "level": 20, "moveId": "base:move:rain_dance" },
+    { "level": 30, "moveId": "base:move:sunny_day" },
+    { "level": 40, "moveId": "base:move:hail" },
+    { "level": 50, "moveId": "base:move:weather_ball" }
+  ],
+
+  "eggMoves": [],
+
+  "tmMoves": [
+    "base:move:water_pulse",
+    "base:move:hail",
+    "base:move:hidden_power",
+    "base:move:sunny_day",
+    "base:move:ice_beam",
+    "base:move:blizzard",
+    "base:move:protect",
+    "base:move:rain_dance",
+    "base:move:frustration",
+    "base:move:solar_beam",
+    "base:move:thunderbolt",
+    "base:move:thunder",
+    "base:move:return",
+    "base:move:shadow_ball",
+    "base:move:shock_wave",
+    "base:move:facade",
+    "base:move:secret_power",
+    "base:move:rest",
+    "base:move:attract"
+  ],
+
+  "hmMoves": [],
+
+  "cryId": "base:audio:sfx/pokemon/castform",
+
+  "sourceMod": "base",
+  "version": "1.0.0"
+}
+

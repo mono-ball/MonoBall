@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/sootopolis_city_house7",
-  "DisplayName": "SootopolisCity_House7",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/sootopolis_city_house7.json"
+  "id": "base:map:hoenn/sootopolis_city_house7",
+  "name": "SootopolisCity_House7",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/sootopolis_city_house7.json"
 }

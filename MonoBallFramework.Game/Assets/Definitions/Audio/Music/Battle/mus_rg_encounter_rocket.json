@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/battle/mus_rg_encounter_rocket",
-  "displayName": "RG Encounter Rocket",
+  "name": "RG Encounter Rocket",
   "audioPath": "Audio/Music/Battle/mus_rg_encounter_rocket.ogg",
   "volume": 0.756,
   "loop": true,

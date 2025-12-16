@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/battle/mus_rg_vs_mewtwo",
-  "displayName": "RG VS Mewtwo",
+  "name": "RG VS Mewtwo",
   "audioPath": "Audio/Music/Battle/mus_rg_vs_mewtwo.ogg",
   "volume": 0.709,
   "loop": true,

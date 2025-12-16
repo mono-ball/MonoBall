@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/lavaridge_town_pokemon_center_2f",
-  "DisplayName": "LavaridgeTown_PokemonCenter_2F",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/lavaridge_town_pokemon_center_2f.json"
+  "id": "base:map:hoenn/lavaridge_town_pokemon_center_2f",
+  "name": "LavaridgeTown_PokemonCenter_2F",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/lavaridge_town_pokemon_center_2f.json"
 }

@@ -36,13 +36,13 @@ public sealed class CustomTypesApiService : ICustomTypesApi
         var categoryDict = _definitions.GetOrAdd(definition.Category, _ => new ConcurrentDictionary<string, ICustomTypeDefinition>());
 
         // Extract local ID from full ID (e.g., "weather:effect:rain" -> "rain")
-        string localId = ExtractLocalId(definition.Id);
+        string localId = ExtractLocalId(definition.DefinitionId);
 
         // Register in both dictionaries
         categoryDict[localId] = definition;
-        _definitionsByFullId[definition.Id] = definition;
+        _definitionsByFullId[definition.DefinitionId] = definition;
 
-        _logger.LogDebug("Registered custom type: {Id} in category {Category}", definition.Id, definition.Category);
+        _logger.LogDebug("Registered custom type: {DefinitionId} in category {Category}", definition.DefinitionId, definition.Category);
     }
 
     /// <summary>

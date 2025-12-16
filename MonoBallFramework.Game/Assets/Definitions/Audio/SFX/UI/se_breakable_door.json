@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/ui/se_breakable_door",
-  "displayName": "Breakable Door",
+  "name": "Breakable Door",
   "audioPath": "Audio/SFX/UI/se_breakable_door.ogg",
   "volume": 0.866,
   "loop": false,

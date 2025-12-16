@@ -1,6 +1,6 @@
 {
   "id": "base:behavior:movement/wander_vertical",
-  "displayName": "Wander Vertical Behavior",
+  "name": "Wander Vertical Behavior",
   "description": "NPC wanders up and down within a specified range",
   "behaviorScript": "Behaviors/wander_behavior.csx",
   "defaultSpeed": 1.5,

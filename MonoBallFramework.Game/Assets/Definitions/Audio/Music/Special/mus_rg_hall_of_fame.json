@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/special/mus_rg_hall_of_fame",
-  "displayName": "RG Hall Of Fame",
+  "name": "RG Hall Of Fame",
   "audioPath": "Audio/Music/Special/mus_rg_hall_of_fame.ogg",
   "volume": 0.622,
   "loop": true,

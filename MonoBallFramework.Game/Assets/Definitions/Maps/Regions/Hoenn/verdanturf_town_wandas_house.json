@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/verdanturf_town_wandas_house",
-  "DisplayName": "VerdanturfTown_WandasHouse",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/verdanturf_town_wandas_house.json"
+  "id": "base:map:hoenn/verdanturf_town_wandas_house",
+  "name": "VerdanturfTown_WandasHouse",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/verdanturf_town_wandas_house.json"
 }

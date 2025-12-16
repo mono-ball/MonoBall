@@ -1,9 +1,9 @@
 {
-  "Id": "base:map:hoenn/test_map",
-  "DisplayName": "Test Map",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/test-map.json"
+  "id": "base:map:hoenn/test_map",
+  "name": "Test Map",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/test-map.json"
 }
 

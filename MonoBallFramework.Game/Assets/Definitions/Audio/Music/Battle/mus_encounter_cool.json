@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/battle/mus_encounter_cool",
-  "displayName": "Encounter Cool",
+  "name": "Encounter Cool",
   "audioPath": "Audio/Music/Battle/mus_encounter_cool.ogg",
   "volume": 0.677,
   "loop": true,

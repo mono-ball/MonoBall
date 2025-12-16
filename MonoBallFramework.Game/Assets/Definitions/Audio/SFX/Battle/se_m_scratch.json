@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_m_scratch",
-  "displayName": "M Scratch",
+  "name": "M Scratch",
   "audioPath": "Audio/SFX/Battle/se_m_scratch.ogg",
   "volume": 0.866,
   "loop": false,

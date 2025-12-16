@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/special/mus_rg_new_game_intro",
-  "displayName": "RG New Game Intro",
+  "name": "RG New Game Intro",
   "audioPath": "Audio/Music/Special/mus_rg_new_game_intro.ogg",
   "volume": 0.693,
   "loop": true,

@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/ever_grande_city_hall1",
-  "DisplayName": "EverGrandeCity_Hall1",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/ever_grande_city_hall1.json"
+  "id": "base:map:hoenn/ever_grande_city_hall1",
+  "name": "EverGrandeCity_Hall1",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/ever_grande_city_hall1.json"
 }

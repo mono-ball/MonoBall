@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/special/mus_rg_ss_anne",
-  "displayName": "RG Ss Anne",
+  "name": "RG Ss Anne",
   "audioPath": "Audio/Music/Special/mus_rg_ss_anne.ogg",
   "volume": 0.709,
   "loop": true,

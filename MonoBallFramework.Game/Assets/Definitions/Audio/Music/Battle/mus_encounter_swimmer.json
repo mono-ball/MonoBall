@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/battle/mus_encounter_swimmer",
-  "displayName": "Encounter Swimmer",
+  "name": "Encounter Swimmer",
   "audioPath": "Audio/Music/Battle/mus_encounter_swimmer.ogg",
   "volume": 0.63,
   "loop": true,

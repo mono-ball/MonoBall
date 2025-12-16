@@ -176,8 +176,8 @@ public class TileBehaviorInitializer(
                     // Create TileBehaviorDefinition from EF Core entity
                     var definition = new TileBehaviorDefinition
                     {
-                        Id = typeId,
-                        DisplayName = modBehavior.DisplayName,
+                        DefinitionId = typeId,
+                        Name = modBehavior.Name,
                         Description = modBehavior.Description,
                         BehaviorScript = modBehavior.BehaviorScript,
                         Flags = (TileBehaviorFlags)modBehavior.Flags

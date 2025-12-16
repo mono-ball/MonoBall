@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/special/mus_abnormal_weather",
-  "displayName": "Abnormal Weather",
+  "name": "Abnormal Weather",
   "audioPath": "Audio/Music/Special/mus_abnormal_weather.ogg",
   "volume": 0.63,
   "loop": true,

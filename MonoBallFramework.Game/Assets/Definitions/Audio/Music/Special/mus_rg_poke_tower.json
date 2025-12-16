@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/special/mus_rg_poke_tower",
-  "displayName": "RG Poke Tower",
+  "name": "RG Poke Tower",
   "audioPath": "Audio/Music/Special/mus_rg_poke_tower.ogg",
   "volume": 0.709,
   "loop": true,

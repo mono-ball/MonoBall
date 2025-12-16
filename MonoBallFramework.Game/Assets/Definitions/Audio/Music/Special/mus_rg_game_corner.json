@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/special/mus_rg_game_corner",
-  "displayName": "RG Game Corner",
+  "name": "RG Game Corner",
   "audioPath": "Audio/Music/Special/mus_rg_game_corner.ogg",
   "volume": 0.709,
   "loop": true,

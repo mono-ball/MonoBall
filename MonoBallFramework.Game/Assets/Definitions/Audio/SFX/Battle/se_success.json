@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_success",
-  "displayName": "Success",
+  "name": "Success",
   "audioPath": "Audio/SFX/Battle/se_success.ogg",
   "volume": 0.63,
   "loop": false,

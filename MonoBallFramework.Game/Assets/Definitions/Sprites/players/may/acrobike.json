@@ -1,794 +1,794 @@
 {
-  "Id": "base:sprite:players/may/acrobike",
-  "DisplayName": "Acrobike",
-  "Type": "Sprite",
-  "TexturePath": "Graphics/Sprites/players/may/acrobike.png",
-  "FrameWidth": 16,
-  "FrameHeight": 32,
-  "FrameCount": 27,
-  "Frames": [
+  "id": "base:sprite:players/may/acrobike",
+  "name": "Acrobike",
+  "type": "Sprite",
+  "texturePath": "Graphics/Sprites/players/may/acrobike.png",
+  "frameWidth": 16,
+  "frameHeight": 32,
+  "frameCount": 27,
+  "frames": [
     {
-      "Index": 0,
-      "X": 0,
-      "Y": 0,
-      "Width": 16,
-      "Height": 32
+      "index": 0,
+      "x": 0,
+      "y": 0,
+      "width": 16,
+      "height": 32
     },
     {
-      "Index": 1,
-      "X": 16,
-      "Y": 0,
-      "Width": 16,
-      "Height": 32
+      "index": 1,
+      "x": 16,
+      "y": 0,
+      "width": 16,
+      "height": 32
     },
     {
-      "Index": 2,
-      "X": 32,
-      "Y": 0,
-      "Width": 16,
-      "Height": 32
+      "index": 2,
+      "x": 32,
+      "y": 0,
+      "width": 16,
+      "height": 32
     },
     {
-      "Index": 3,
-      "X": 48,
-      "Y": 0,
-      "Width": 16,
-      "Height": 32
+      "index": 3,
+      "x": 48,
+      "y": 0,
+      "width": 16,
+      "height": 32
     },
     {
-      "Index": 4,
-      "X": 64,
-      "Y": 0,
-      "Width": 16,
-      "Height": 32
+      "index": 4,
+      "x": 64,
+      "y": 0,
+      "width": 16,
+      "height": 32
     },
     {
-      "Index": 5,
-      "X": 80,
-      "Y": 0,
-      "Width": 16,
-      "Height": 32
+      "index": 5,
+      "x": 80,
+      "y": 0,
+      "width": 16,
+      "height": 32
     },
     {
-      "Index": 6,
-      "X": 96,
-      "Y": 0,
-      "Width": 16,
-      "Height": 32
+      "index": 6,
+      "x": 96,
+      "y": 0,
+      "width": 16,
+      "height": 32
     },
     {
-      "Index": 7,
-      "X": 112,
-      "Y": 0,
-      "Width": 16,
-      "Height": 32
+      "index": 7,
+      "x": 112,
+      "y": 0,
+      "width": 16,
+      "height": 32
     },
     {
-      "Index": 8,
-      "X": 128,
-      "Y": 0,
-      "Width": 16,
-      "Height": 32
+      "index": 8,
+      "x": 128,
+      "y": 0,
+      "width": 16,
+      "height": 32
     },
     {
-      "Index": 9,
-      "X": 144,
-      "Y": 0,
-      "Width": 16,
-      "Height": 32
+      "index": 9,
+      "x": 144,
+      "y": 0,
+      "width": 16,
+      "height": 32
     },
     {
-      "Index": 10,
-      "X": 160,
-      "Y": 0,
-      "Width": 16,
-      "Height": 32
+      "index": 10,
+      "x": 160,
+      "y": 0,
+      "width": 16,
+      "height": 32
     },
     {
-      "Index": 11,
-      "X": 176,
-      "Y": 0,
-      "Width": 16,
-      "Height": 32
+      "index": 11,
+      "x": 176,
+      "y": 0,
+      "width": 16,
+      "height": 32
     },
     {
-      "Index": 12,
-      "X": 192,
-      "Y": 0,
-      "Width": 16,
-      "Height": 32
+      "index": 12,
+      "x": 192,
+      "y": 0,
+      "width": 16,
+      "height": 32
     },
     {
-      "Index": 13,
-      "X": 208,
-      "Y": 0,
-      "Width": 16,
-      "Height": 32
+      "index": 13,
+      "x": 208,
+      "y": 0,
+      "width": 16,
+      "height": 32
     },
     {
-      "Index": 14,
-      "X": 224,
-      "Y": 0,
-      "Width": 16,
-      "Height": 32
+      "index": 14,
+      "x": 224,
+      "y": 0,
+      "width": 16,
+      "height": 32
     },
     {
-      "Index": 15,
-      "X": 240,
-      "Y": 0,
-      "Width": 16,
-      "Height": 32
+      "index": 15,
+      "x": 240,
+      "y": 0,
+      "width": 16,
+      "height": 32
     },
     {
-      "Index": 16,
-      "X": 256,
-      "Y": 0,
-      "Width": 16,
-      "Height": 32
+      "index": 16,
+      "x": 256,
+      "y": 0,
+      "width": 16,
+      "height": 32
     },
     {
-      "Index": 17,
-      "X": 272,
-      "Y": 0,
-      "Width": 16,
-      "Height": 32
+      "index": 17,
+      "x": 272,
+      "y": 0,
+      "width": 16,
+      "height": 32
     },
     {
-      "Index": 18,
-      "X": 288,
-      "Y": 0,
-      "Width": 16,
-      "Height": 32
+      "index": 18,
+      "x": 288,
+      "y": 0,
+      "width": 16,
+      "height": 32
     },
     {
-      "Index": 19,
-      "X": 304,
-      "Y": 0,
-      "Width": 16,
-      "Height": 32
+      "index": 19,
+      "x": 304,
+      "y": 0,
+      "width": 16,
+      "height": 32
     },
     {
-      "Index": 20,
-      "X": 320,
-      "Y": 0,
-      "Width": 16,
-      "Height": 32
+      "index": 20,
+      "x": 320,
+      "y": 0,
+      "width": 16,
+      "height": 32
     },
     {
-      "Index": 21,
-      "X": 336,
-      "Y": 0,
-      "Width": 16,
-      "Height": 32
+      "index": 21,
+      "x": 336,
+      "y": 0,
+      "width": 16,
+      "height": 32
     },
     {
-      "Index": 22,
-      "X": 352,
-      "Y": 0,
-      "Width": 16,
-      "Height": 32
+      "index": 22,
+      "x": 352,
+      "y": 0,
+      "width": 16,
+      "height": 32
     },
     {
-      "Index": 23,
-      "X": 368,
-      "Y": 0,
-      "Width": 16,
-      "Height": 32
+      "index": 23,
+      "x": 368,
+      "y": 0,
+      "width": 16,
+      "height": 32
     },
     {
-      "Index": 24,
-      "X": 384,
-      "Y": 0,
-      "Width": 16,
-      "Height": 32
+      "index": 24,
+      "x": 384,
+      "y": 0,
+      "width": 16,
+      "height": 32
     },
     {
-      "Index": 25,
-      "X": 400,
-      "Y": 0,
-      "Width": 16,
-      "Height": 32
+      "index": 25,
+      "x": 400,
+      "y": 0,
+      "width": 16,
+      "height": 32
     },
     {
-      "Index": 26,
-      "X": 416,
-      "Y": 0,
-      "Width": 16,
-      "Height": 32
+      "index": 26,
+      "x": 416,
+      "y": 0,
+      "width": 16,
+      "height": 32
     }
   ],
-  "Animations": [
+  "animations": [
     {
-      "Name": "face_south",
-      "Loop": true,
-      "FrameIndices": [
+      "name": "face_south",
+      "loop": true,
+      "frameIndices": [
         0
       ],
-      "FrameDurations": [
+      "frameDurations": [
         0.26666666666666666
       ],
-      "FlipHorizontal": false
+      "flipHorizontal": false
     },
     {
-      "Name": "face_north",
-      "Loop": true,
-      "FrameIndices": [
+      "name": "face_north",
+      "loop": true,
+      "frameIndices": [
         1
       ],
-      "FrameDurations": [
+      "frameDurations": [
         0.26666666666666666
       ],
-      "FlipHorizontal": false
+      "flipHorizontal": false
     },
     {
-      "Name": "face_west",
-      "Loop": true,
-      "FrameIndices": [
+      "name": "face_west",
+      "loop": true,
+      "frameIndices": [
         2
       ],
-      "FrameDurations": [
+      "frameDurations": [
         0.26666666666666666
       ],
-      "FlipHorizontal": false
+      "flipHorizontal": false
     },
     {
-      "Name": "face_east",
-      "Loop": true,
-      "FrameIndices": [
+      "name": "face_east",
+      "loop": true,
+      "frameIndices": [
         2
       ],
-      "FrameDurations": [
+      "frameDurations": [
         0.26666666666666666
       ],
-      "FlipHorizontal": true
+      "flipHorizontal": true
     },
     {
-      "Name": "go_south",
-      "Loop": true,
-      "FrameIndices": [
+      "name": "go_south",
+      "loop": true,
+      "frameIndices": [
         3,
         0,
         4,
         0
       ],
-      "FrameDurations": [
+      "frameDurations": [
         0.13333333333333333,
         0.13333333333333333,
         0.13333333333333333,
         0.13333333333333333
       ],
-      "FlipHorizontal": false
+      "flipHorizontal": false
     },
     {
-      "Name": "go_north",
-      "Loop": true,
-      "FrameIndices": [
+      "name": "go_north",
+      "loop": true,
+      "frameIndices": [
         5,
         1,
         6,
         1
       ],
-      "FrameDurations": [
+      "frameDurations": [
         0.13333333333333333,
         0.13333333333333333,
         0.13333333333333333,
         0.13333333333333333
       ],
-      "FlipHorizontal": false
+      "flipHorizontal": false
     },
     {
-      "Name": "go_west",
-      "Loop": true,
-      "FrameIndices": [
+      "name": "go_west",
+      "loop": true,
+      "frameIndices": [
         7,
         2,
         8,
         2
       ],
-      "FrameDurations": [
+      "frameDurations": [
         0.13333333333333333,
         0.13333333333333333,
         0.13333333333333333,
         0.13333333333333333
       ],
-      "FlipHorizontal": false
+      "flipHorizontal": false
     },
     {
-      "Name": "go_east",
-      "Loop": true,
-      "FrameIndices": [
+      "name": "go_east",
+      "loop": true,
+      "frameIndices": [
         7,
         2,
         8,
         2
       ],
-      "FrameDurations": [
+      "frameDurations": [
         0.13333333333333333,
         0.13333333333333333,
         0.13333333333333333,
         0.13333333333333333
       ],
-      "FlipHorizontal": true
+      "flipHorizontal": true
     },
     {
-      "Name": "go_fast_south",
-      "Loop": true,
-      "FrameIndices": [
+      "name": "go_fast_south",
+      "loop": true,
+      "frameIndices": [
         3,
         0,
         4,
         0
       ],
-      "FrameDurations": [
+      "frameDurations": [
         0.06666666666666667,
         0.06666666666666667,
         0.06666666666666667,
         0.06666666666666667
       ],
-      "FlipHorizontal": false
+      "flipHorizontal": false
     },
     {
-      "Name": "go_fast_north",
-      "Loop": true,
-      "FrameIndices": [
+      "name": "go_fast_north",
+      "loop": true,
+      "frameIndices": [
         5,
         1,
         6,
         1
       ],
-      "FrameDurations": [
+      "frameDurations": [
         0.06666666666666667,
         0.06666666666666667,
         0.06666666666666667,
         0.06666666666666667
       ],
-      "FlipHorizontal": false
+      "flipHorizontal": false
     },
     {
-      "Name": "go_fast_west",
-      "Loop": true,
-      "FrameIndices": [
+      "name": "go_fast_west",
+      "loop": true,
+      "frameIndices": [
         7,
         2,
         8,
         2
       ],
-      "FrameDurations": [
+      "frameDurations": [
         0.06666666666666667,
         0.06666666666666667,
         0.06666666666666667,
         0.06666666666666667
       ],
-      "FlipHorizontal": false
+      "flipHorizontal": false
     },
     {
-      "Name": "go_fast_east",
-      "Loop": true,
-      "FrameIndices": [
+      "name": "go_fast_east",
+      "loop": true,
+      "frameIndices": [
         7,
         2,
         8,
         2
       ],
-      "FrameDurations": [
+      "frameDurations": [
         0.06666666666666667,
         0.06666666666666667,
         0.06666666666666667,
         0.06666666666666667
       ],
-      "FlipHorizontal": true
+      "flipHorizontal": true
     },
     {
-      "Name": "go_faster_south",
-      "Loop": true,
-      "FrameIndices": [
+      "name": "go_faster_south",
+      "loop": true,
+      "frameIndices": [
         3,
         0,
         4,
         0
       ],
-      "FrameDurations": [
+      "frameDurations": [
         0.03333333333333333,
         0.03333333333333333,
         0.03333333333333333,
         0.03333333333333333
       ],
-      "FlipHorizontal": false
+      "flipHorizontal": false
     },
     {
-      "Name": "go_faster_north",
-      "Loop": true,
-      "FrameIndices": [
+      "name": "go_faster_north",
+      "loop": true,
+      "frameIndices": [
         5,
         1,
         6,
         1
       ],
-      "FrameDurations": [
+      "frameDurations": [
         0.03333333333333333,
         0.03333333333333333,
         0.03333333333333333,
         0.03333333333333333
       ],
-      "FlipHorizontal": false
+      "flipHorizontal": false
     },
     {
-      "Name": "go_faster_west",
-      "Loop": true,
-      "FrameIndices": [
+      "name": "go_faster_west",
+      "loop": true,
+      "frameIndices": [
         7,
         2,
         8,
         2
       ],
-      "FrameDurations": [
+      "frameDurations": [
         0.03333333333333333,
         0.03333333333333333,
         0.03333333333333333,
         0.03333333333333333
       ],
-      "FlipHorizontal": false
+      "flipHorizontal": false
     },
     {
-      "Name": "go_faster_east",
-      "Loop": true,
-      "FrameIndices": [
+      "name": "go_faster_east",
+      "loop": true,
+      "frameIndices": [
         7,
         2,
         8,
         2
       ],
-      "FrameDurations": [
+      "frameDurations": [
         0.03333333333333333,
         0.03333333333333333,
         0.03333333333333333,
         0.03333333333333333
       ],
-      "FlipHorizontal": true
+      "flipHorizontal": true
     },
     {
-      "Name": "go_fastest_south",
-      "Loop": true,
-      "FrameIndices": [
+      "name": "go_fastest_south",
+      "loop": true,
+      "frameIndices": [
         3,
         0,
         4,
         0
       ],
-      "FrameDurations": [
+      "frameDurations": [
         0.016666666666666666,
         0.016666666666666666,
         0.016666666666666666,
         0.016666666666666666
       ],
-      "FlipHorizontal": false
+      "flipHorizontal": false
     },
     {
-      "Name": "go_fastest_north",
-      "Loop": true,
-      "FrameIndices": [
+      "name": "go_fastest_north",
+      "loop": true,
+      "frameIndices": [
         5,
         1,
         6,
         1
       ],
-      "FrameDurations": [
+      "frameDurations": [
         0.016666666666666666,
         0.016666666666666666,
         0.016666666666666666,
         0.016666666666666666
       ],
-      "FlipHorizontal": false
+      "flipHorizontal": false
     },
     {
-      "Name": "go_fastest_west",
-      "Loop": true,
-      "FrameIndices": [
+      "name": "go_fastest_west",
+      "loop": true,
+      "frameIndices": [
         7,
         2,
         8,
         2
       ],
-      "FrameDurations": [
+      "frameDurations": [
         0.016666666666666666,
         0.016666666666666666,
         0.016666666666666666,
         0.016666666666666666
       ],
-      "FlipHorizontal": false
+      "flipHorizontal": false
     },
     {
-      "Name": "go_fastest_east",
-      "Loop": true,
-      "FrameIndices": [
+      "name": "go_fastest_east",
+      "loop": true,
+      "frameIndices": [
         7,
         2,
         8,
         2
       ],
-      "FrameDurations": [
+      "frameDurations": [
         0.016666666666666666,
         0.016666666666666666,
         0.016666666666666666,
         0.016666666666666666
       ],
-      "FlipHorizontal": true
+      "flipHorizontal": true
     },
     {
-      "Name": "bunny_hop_back_wheel_south",
-      "Loop": true,
-      "FrameIndices": [
+      "name": "bunny_hop_back_wheel_south",
+      "loop": true,
+      "frameIndices": [
         9,
         10
       ],
-      "FrameDurations": [
+      "frameDurations": [
         0.06666666666666667,
         0.06666666666666667
       ],
-      "FlipHorizontal": false
+      "flipHorizontal": false
     },
     {
-      "Name": "bunny_hop_back_wheel_north",
-      "Loop": true,
-      "FrameIndices": [
+      "name": "bunny_hop_back_wheel_north",
+      "loop": true,
+      "frameIndices": [
         13,
         14
       ],
-      "FrameDurations": [
+      "frameDurations": [
         0.06666666666666667,
         0.06666666666666667
       ],
-      "FlipHorizontal": false
+      "flipHorizontal": false
     },
     {
-      "Name": "bunny_hop_back_wheel_west",
-      "Loop": true,
-      "FrameIndices": [
+      "name": "bunny_hop_back_wheel_west",
+      "loop": true,
+      "frameIndices": [
         17,
         18
       ],
-      "FrameDurations": [
+      "frameDurations": [
         0.06666666666666667,
         0.06666666666666667
       ],
-      "FlipHorizontal": false
+      "flipHorizontal": false
     },
     {
-      "Name": "bunny_hop_back_wheel_east",
-      "Loop": true,
-      "FrameIndices": [
+      "name": "bunny_hop_back_wheel_east",
+      "loop": true,
+      "frameIndices": [
         17,
         18
       ],
-      "FrameDurations": [
+      "frameDurations": [
         0.06666666666666667,
         0.06666666666666667
       ],
-      "FlipHorizontal": true
+      "flipHorizontal": true
     },
     {
-      "Name": "bunny_hop_front_wheel_south",
-      "Loop": true,
-      "FrameIndices": [
+      "name": "bunny_hop_front_wheel_south",
+      "loop": true,
+      "frameIndices": [
         11,
         12
       ],
-      "FrameDurations": [
+      "frameDurations": [
         0.06666666666666667,
         0.06666666666666667
       ],
-      "FlipHorizontal": false
+      "flipHorizontal": false
     },
     {
-      "Name": "bunny_hop_front_wheel_north",
-      "Loop": true,
-      "FrameIndices": [
+      "name": "bunny_hop_front_wheel_north",
+      "loop": true,
+      "frameIndices": [
         15,
         16
       ],
-      "FrameDurations": [
+      "frameDurations": [
         0.06666666666666667,
         0.06666666666666667
       ],
-      "FlipHorizontal": false
+      "flipHorizontal": false
     },
     {
-      "Name": "bunny_hop_front_wheel_west",
-      "Loop": true,
-      "FrameIndices": [
+      "name": "bunny_hop_front_wheel_west",
+      "loop": true,
+      "frameIndices": [
         19,
         20
       ],
-      "FrameDurations": [
+      "frameDurations": [
         0.06666666666666667,
         0.06666666666666667
       ],
-      "FlipHorizontal": false
+      "flipHorizontal": false
     },
     {
-      "Name": "bunny_hop_front_wheel_east",
-      "Loop": true,
-      "FrameIndices": [
+      "name": "bunny_hop_front_wheel_east",
+      "loop": true,
+      "frameIndices": [
         19,
         20
       ],
-      "FrameDurations": [
+      "frameDurations": [
         0.06666666666666667,
         0.06666666666666667
       ],
-      "FlipHorizontal": true
+      "flipHorizontal": true
     },
     {
-      "Name": "standing_wheelie_back_wheel_south",
-      "Loop": true,
-      "FrameIndices": [
+      "name": "standing_wheelie_back_wheel_south",
+      "loop": true,
+      "frameIndices": [
         9,
         0
       ],
-      "FrameDurations": [
+      "frameDurations": [
         0.06666666666666667,
         0.06666666666666667
       ],
-      "FlipHorizontal": false
+      "flipHorizontal": false
     },
     {
-      "Name": "standing_wheelie_back_wheel_north",
-      "Loop": true,
-      "FrameIndices": [
+      "name": "standing_wheelie_back_wheel_north",
+      "loop": true,
+      "frameIndices": [
         13,
         1
       ],
-      "FrameDurations": [
+      "frameDurations": [
         0.06666666666666667,
         0.06666666666666667
       ],
-      "FlipHorizontal": false
+      "flipHorizontal": false
     },
     {
-      "Name": "standing_wheelie_back_wheel_west",
-      "Loop": true,
-      "FrameIndices": [
+      "name": "standing_wheelie_back_wheel_west",
+      "loop": true,
+      "frameIndices": [
         17,
         2
       ],
-      "FrameDurations": [
+      "frameDurations": [
         0.06666666666666667,
         0.06666666666666667
       ],
-      "FlipHorizontal": false
+      "flipHorizontal": false
     },
     {
-      "Name": "standing_wheelie_back_wheel_east",
-      "Loop": true,
-      "FrameIndices": [
+      "name": "standing_wheelie_back_wheel_east",
+      "loop": true,
+      "frameIndices": [
         17,
         2
       ],
-      "FrameDurations": [
+      "frameDurations": [
         0.06666666666666667,
         0.06666666666666667
       ],
-      "FlipHorizontal": true
+      "flipHorizontal": true
     },
     {
-      "Name": "standing_wheelie_front_wheel_south",
-      "Loop": true,
-      "FrameIndices": [
+      "name": "standing_wheelie_front_wheel_south",
+      "loop": true,
+      "frameIndices": [
         11,
         0
       ],
-      "FrameDurations": [
+      "frameDurations": [
         0.06666666666666667,
         0.06666666666666667
       ],
-      "FlipHorizontal": false
+      "flipHorizontal": false
     },
     {
-      "Name": "standing_wheelie_front_wheel_north",
-      "Loop": true,
-      "FrameIndices": [
+      "name": "standing_wheelie_front_wheel_north",
+      "loop": true,
+      "frameIndices": [
         15,
         1
       ],
-      "FrameDurations": [
+      "frameDurations": [
         0.06666666666666667,
         0.06666666666666667
       ],
-      "FlipHorizontal": false
+      "flipHorizontal": false
     },
     {
-      "Name": "standing_wheelie_front_wheel_west",
-      "Loop": true,
-      "FrameIndices": [
+      "name": "standing_wheelie_front_wheel_west",
+      "loop": true,
+      "frameIndices": [
         19,
         2
       ],
-      "FrameDurations": [
+      "frameDurations": [
         0.06666666666666667,
         0.06666666666666667
       ],
-      "FlipHorizontal": false
+      "flipHorizontal": false
     },
     {
-      "Name": "standing_wheelie_front_wheel_east",
-      "Loop": true,
-      "FrameIndices": [
+      "name": "standing_wheelie_front_wheel_east",
+      "loop": true,
+      "frameIndices": [
         19,
         2
       ],
-      "FrameDurations": [
+      "frameDurations": [
         0.06666666666666667,
         0.06666666666666667
       ],
-      "FlipHorizontal": true
+      "flipHorizontal": true
     },
     {
-      "Name": "moving_wheelie_south",
-      "Loop": true,
-      "FrameIndices": [
+      "name": "moving_wheelie_south",
+      "loop": true,
+      "frameIndices": [
         21,
         10,
         22,
         10
       ],
-      "FrameDurations": [
+      "frameDurations": [
         0.06666666666666667,
         0.06666666666666667,
         0.06666666666666667,
         0.06666666666666667
       ],
-      "FlipHorizontal": false
+      "flipHorizontal": false
     },
     {
-      "Name": "moving_wheelie_north",
-      "Loop": true,
-      "FrameIndices": [
+      "name": "moving_wheelie_north",
+      "loop": true,
+      "frameIndices": [
         23,
         14,
         24,
         14
       ],
-      "FrameDurations": [
+      "frameDurations": [
         0.06666666666666667,
         0.06666666666666667,
         0.06666666666666667,
         0.06666666666666667
       ],
-      "FlipHorizontal": false
+      "flipHorizontal": false
     },
     {
-      "Name": "moving_wheelie_west",
-      "Loop": true,
-      "FrameIndices": [
+      "name": "moving_wheelie_west",
+      "loop": true,
+      "frameIndices": [
         25,
         18,
         26,
         18
       ],
-      "FrameDurations": [
+      "frameDurations": [
         0.06666666666666667,
         0.06666666666666667,
         0.06666666666666667,
         0.06666666666666667
       ],
-      "FlipHorizontal": false
+      "flipHorizontal": false
     },
     {
-      "Name": "moving_wheelie_east",
-      "Loop": true,
-      "FrameIndices": [
+      "name": "moving_wheelie_east",
+      "loop": true,
+      "frameIndices": [
         25,
         18,
         26,
         18
       ],
-      "FrameDurations": [
+      "frameDurations": [
         0.06666666666666667,
         0.06666666666666667,
         0.06666666666666667,
         0.06666666666666667
       ],
-      "FlipHorizontal": true
+      "flipHorizontal": true
     }
   ]
 }

@@ -1,225 +1,225 @@
 {
-  "Id": "base:popup:outline/wood_outline",
-  "DisplayName": "Wood Outline",
-  "Type": "TileSheet",
-  "TexturePath": "Graphics/Maps/Popups/Outlines/wood_outline.png",
-  "TileWidth": 8,
-  "TileHeight": 8,
-  "TileCount": 30,
-  "Tiles": [
+  "id": "base:popup:outline/wood_outline",
+  "name": "Wood Outline",
+  "type": "TileSheet",
+  "texturePath": "Graphics/Maps/Popups/Outlines/wood_outline.png",
+  "tileWidth": 8,
+  "tileHeight": 8,
+  "tileCount": 30,
+  "tiles": [
     {
-      "Index": 0,
-      "X": 0,
-      "Y": 0,
-      "Width": 8,
-      "Height": 8
+      "index": 0,
+      "x": 0,
+      "y": 0,
+      "width": 8,
+      "height": 8
     },
     {
-      "Index": 1,
-      "X": 8,
-      "Y": 0,
-      "Width": 8,
-      "Height": 8
+      "index": 1,
+      "x": 8,
+      "y": 0,
+      "width": 8,
+      "height": 8
     },
     {
-      "Index": 2,
-      "X": 16,
-      "Y": 0,
-      "Width": 8,
-      "Height": 8
+      "index": 2,
+      "x": 16,
+      "y": 0,
+      "width": 8,
+      "height": 8
     },
     {
-      "Index": 3,
-      "X": 24,
-      "Y": 0,
-      "Width": 8,
-      "Height": 8
+      "index": 3,
+      "x": 24,
+      "y": 0,
+      "width": 8,
+      "height": 8
     },
     {
-      "Index": 4,
-      "X": 32,
-      "Y": 0,
-      "Width": 8,
-      "Height": 8
+      "index": 4,
+      "x": 32,
+      "y": 0,
+      "width": 8,
+      "height": 8
     },
     {
-      "Index": 5,
-      "X": 40,
-      "Y": 0,
-      "Width": 8,
-      "Height": 8
+      "index": 5,
+      "x": 40,
+      "y": 0,
+      "width": 8,
+      "height": 8
     },
     {
-      "Index": 6,
-      "X": 48,
-      "Y": 0,
-      "Width": 8,
-      "Height": 8
+      "index": 6,
+      "x": 48,
+      "y": 0,
+      "width": 8,
+      "height": 8
     },
     {
-      "Index": 7,
-      "X": 56,
-      "Y": 0,
-      "Width": 8,
-      "Height": 8
+      "index": 7,
+      "x": 56,
+      "y": 0,
+      "width": 8,
+      "height": 8
     },
     {
-      "Index": 8,
-      "X": 64,
-      "Y": 0,
-      "Width": 8,
-      "Height": 8
+      "index": 8,
+      "x": 64,
+      "y": 0,
+      "width": 8,
+      "height": 8
     },
     {
-      "Index": 9,
-      "X": 72,
-      "Y": 0,
-      "Width": 8,
-      "Height": 8
+      "index": 9,
+      "x": 72,
+      "y": 0,
+      "width": 8,
+      "height": 8
     },
     {
-      "Index": 10,
-      "X": 0,
-      "Y": 8,
-      "Width": 8,
-      "Height": 8
+      "index": 10,
+      "x": 0,
+      "y": 8,
+      "width": 8,
+      "height": 8
     },
     {
-      "Index": 11,
-      "X": 8,
-      "Y": 8,
-      "Width": 8,
-      "Height": 8
+      "index": 11,
+      "x": 8,
+      "y": 8,
+      "width": 8,
+      "height": 8
     },
     {
-      "Index": 12,
-      "X": 16,
-      "Y": 8,
-      "Width": 8,
-      "Height": 8
+      "index": 12,
+      "x": 16,
+      "y": 8,
+      "width": 8,
+      "height": 8
     },
     {
-      "Index": 13,
-      "X": 24,
-      "Y": 8,
-      "Width": 8,
-      "Height": 8
+      "index": 13,
+      "x": 24,
+      "y": 8,
+      "width": 8,
+      "height": 8
     },
     {
-      "Index": 14,
-      "X": 32,
-      "Y": 8,
-      "Width": 8,
-      "Height": 8
+      "index": 14,
+      "x": 32,
+      "y": 8,
+      "width": 8,
+      "height": 8
     },
     {
-      "Index": 15,
-      "X": 40,
-      "Y": 8,
-      "Width": 8,
-      "Height": 8
+      "index": 15,
+      "x": 40,
+      "y": 8,
+      "width": 8,
+      "height": 8
     },
     {
-      "Index": 16,
-      "X": 48,
-      "Y": 8,
-      "Width": 8,
-      "Height": 8
+      "index": 16,
+      "x": 48,
+      "y": 8,
+      "width": 8,
+      "height": 8
     },
     {
-      "Index": 17,
-      "X": 56,
-      "Y": 8,
-      "Width": 8,
-      "Height": 8
+      "index": 17,
+      "x": 56,
+      "y": 8,
+      "width": 8,
+      "height": 8
     },
     {
-      "Index": 18,
-      "X": 64,
-      "Y": 8,
-      "Width": 8,
-      "Height": 8
+      "index": 18,
+      "x": 64,
+      "y": 8,
+      "width": 8,
+      "height": 8
     },
     {
-      "Index": 19,
-      "X": 72,
-      "Y": 8,
-      "Width": 8,
-      "Height": 8
+      "index": 19,
+      "x": 72,
+      "y": 8,
+      "width": 8,
+      "height": 8
     },
     {
-      "Index": 20,
-      "X": 0,
-      "Y": 16,
-      "Width": 8,
-      "Height": 8
+      "index": 20,
+      "x": 0,
+      "y": 16,
+      "width": 8,
+      "height": 8
     },
     {
-      "Index": 21,
-      "X": 8,
-      "Y": 16,
-      "Width": 8,
-      "Height": 8
+      "index": 21,
+      "x": 8,
+      "y": 16,
+      "width": 8,
+      "height": 8
     },
     {
-      "Index": 22,
-      "X": 16,
-      "Y": 16,
-      "Width": 8,
-      "Height": 8
+      "index": 22,
+      "x": 16,
+      "y": 16,
+      "width": 8,
+      "height": 8
     },
     {
-      "Index": 23,
-      "X": 24,
-      "Y": 16,
-      "Width": 8,
-      "Height": 8
+      "index": 23,
+      "x": 24,
+      "y": 16,
+      "width": 8,
+      "height": 8
     },
     {
-      "Index": 24,
-      "X": 32,
-      "Y": 16,
-      "Width": 8,
-      "Height": 8
+      "index": 24,
+      "x": 32,
+      "y": 16,
+      "width": 8,
+      "height": 8
     },
     {
-      "Index": 25,
-      "X": 40,
-      "Y": 16,
-      "Width": 8,
-      "Height": 8
+      "index": 25,
+      "x": 40,
+      "y": 16,
+      "width": 8,
+      "height": 8
     },
     {
-      "Index": 26,
-      "X": 48,
-      "Y": 16,
-      "Width": 8,
-      "Height": 8
+      "index": 26,
+      "x": 48,
+      "y": 16,
+      "width": 8,
+      "height": 8
     },
     {
-      "Index": 27,
-      "X": 56,
-      "Y": 16,
-      "Width": 8,
-      "Height": 8
+      "index": 27,
+      "x": 56,
+      "y": 16,
+      "width": 8,
+      "height": 8
     },
     {
-      "Index": 28,
-      "X": 64,
-      "Y": 16,
-      "Width": 8,
-      "Height": 8
+      "index": 28,
+      "x": 64,
+      "y": 16,
+      "width": 8,
+      "height": 8
     },
     {
-      "Index": 29,
-      "X": 72,
-      "Y": 16,
-      "Width": 8,
-      "Height": 8
+      "index": 29,
+      "x": 72,
+      "y": 16,
+      "width": 8,
+      "height": 8
     }
   ],
-  "TileUsage": {
-    "TopEdge": [
+  "tileUsage": {
+    "topEdge": [
       0,
       1,
       2,
@@ -233,17 +233,17 @@
       10,
       11
     ],
-    "LeftEdge": [
+    "leftEdge": [
       12,
       14,
       16
     ],
-    "RightEdge": [
+    "rightEdge": [
       13,
       15,
       17
     ],
-    "BottomEdge": [
+    "bottomEdge": [
       18,
       19,
       20,
@@ -258,5 +258,5 @@
       29
     ]
   },
-  "Description": "9-patch frame tile sheet for map popup (GBA tile-based rendering)"
+  "description": "9-patch frame tile sheet for map popup (GBA tile-based rendering)"
 }

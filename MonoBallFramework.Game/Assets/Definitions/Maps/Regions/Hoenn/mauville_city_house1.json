@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/mauville_city_house1",
-  "DisplayName": "MauvilleCity_House1",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/mauville_city_house1.json"
+  "id": "base:map:hoenn/mauville_city_house1",
+  "name": "MauvilleCity_House1",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/mauville_city_house1.json"
 }

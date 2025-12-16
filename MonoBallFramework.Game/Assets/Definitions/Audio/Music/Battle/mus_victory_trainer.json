@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/battle/mus_victory_trainer",
-  "displayName": "Victory Trainer",
+  "name": "Victory Trainer",
   "audioPath": "Audio/Music/Battle/mus_victory_trainer.ogg",
   "volume": 0.717,
   "loop": true,

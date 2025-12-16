@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/ui/se_click",
-  "displayName": "Click",
+  "name": "Click",
   "audioPath": "Audio/SFX/UI/se_click.ogg",
   "volume": 0.866,
   "loop": false,

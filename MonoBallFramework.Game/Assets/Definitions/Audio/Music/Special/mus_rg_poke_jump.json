@@ -1,6 +1,6 @@
 {
   "id": "base:audio:music/special/mus_rg_poke_jump",
-  "displayName": "RG Poke Jump",
+  "name": "RG Poke Jump",
   "audioPath": "Audio/Music/Special/mus_rg_poke_jump.ogg",
   "volume": 0.709,
   "loop": true,

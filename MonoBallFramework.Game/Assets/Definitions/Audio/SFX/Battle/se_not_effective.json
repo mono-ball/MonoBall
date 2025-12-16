@@ -1,6 +1,6 @@
 {
   "id": "base:audio:sfx/battle/se_not_effective",
-  "displayName": "Not Effective",
+  "name": "Not Effective",
   "audioPath": "Audio/SFX/Battle/se_not_effective.ogg",
   "volume": 0.866,
   "loop": false,

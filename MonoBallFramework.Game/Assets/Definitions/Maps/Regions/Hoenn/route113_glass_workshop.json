@@ -1,8 +1,8 @@
 {
-  "Id": "base:map:hoenn/route113_glass_workshop",
-  "DisplayName": "Route113_GlassWorkshop",
-  "Type": "map",
-  "Region": "hoenn",
-  "Description": "",
-  "TiledPath": "Tiled/Regions/Hoenn/route113_glass_workshop.json"
+  "id": "base:map:hoenn/route113_glass_workshop",
+  "name": "Route113_GlassWorkshop",
+  "type": "map",
+  "region": "hoenn",
+  "description": "",
+  "tiledPath": "Tiled/Regions/Hoenn/route113_glass_workshop.json"
 }
