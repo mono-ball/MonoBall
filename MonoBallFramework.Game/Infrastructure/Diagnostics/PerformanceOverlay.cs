@@ -3,8 +3,9 @@ using Arch.Core;
 using FontStashSharp;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using MonoBallFramework.Game.Engine.Content;
 using MonoBallFramework.Game.Engine.Rendering.Components;
+using MonoBallFramework.Game.Engine.UI.Utilities;
+using MonoBallFramework.Game.GameData.Entities;
 
 namespace MonoBallFramework.Game.Infrastructure.Diagnostics;
 
@@ -15,7 +16,7 @@ namespace MonoBallFramework.Game.Infrastructure.Diagnostics;
 public class PerformanceOverlay : IDisposable
 {
     private readonly Texture2D _backgroundTexture;
-    private readonly IContentProvider _contentProvider;
+    private readonly FontLoader _fontLoader;
     private readonly GraphicsDevice _graphicsDevice;
     private readonly PerformanceMonitor _performanceMonitor;
     private readonly SpriteBatch _spriteBatch;
@@ -32,23 +33,38 @@ public class PerformanceOverlay : IDisposable
         GraphicsDevice graphicsDevice,
         PerformanceMonitor performanceMonitor,
         World world,
-        IContentProvider contentProvider
+        FontLoader fontLoader
     )
     {
-        ArgumentNullException.ThrowIfNull(contentProvider);
+        ArgumentNullException.ThrowIfNull(graphicsDevice);
+        ArgumentNullException.ThrowIfNull(performanceMonitor);
+        ArgumentNullException.ThrowIfNull(world);
+        ArgumentNullException.ThrowIfNull(fontLoader);
 
         _graphicsDevice = graphicsDevice;
-        _spriteBatch = new SpriteBatch(graphicsDevice);
         _performanceMonitor = performanceMonitor;
         _world = world;
-        _contentProvider = contentProvider;
+        _fontLoader = fontLoader;
 
-        // Create a 1x1 white texture for backgrounds
-        _backgroundTexture = new Texture2D(graphicsDevice, 1, 1);
-        _backgroundTexture.SetData(new[] { Color.White });
+        try
+        {
+            _spriteBatch = new SpriteBatch(graphicsDevice);
 
-        // Try to load system font
-        LoadFont();
+            // Create a 1x1 white texture for backgrounds
+            _backgroundTexture = new Texture2D(graphicsDevice, 1, 1);
+            _backgroundTexture.SetData(new[] { Color.White });
+
+            // Load debug font from database
+            LoadFont();
+        }
+        catch
+        {
+            // Cleanup partially created resources on failure
+            _spriteBatch?.Dispose();
+            _backgroundTexture?.Dispose();
+            _fontSystem?.Dispose();
+            throw;
+        }
     }
 
     /// <summary>
@@ -68,28 +84,25 @@ public class PerformanceOverlay : IDisposable
         _spriteBatch.Dispose();
         _backgroundTexture.Dispose();
         _fontSystem?.Dispose();
+        _font = null;
     }
 
     private void LoadFont()
     {
-        _fontSystem = new FontSystem();
-
-        // Load debug font (0xProtoNerdFontMono) using content provider
-        string? debugFontPath = _contentProvider.ResolveContentPath("Fonts", "0xProtoNerdFontMono-Regular.ttf");
-
-        if (debugFontPath == null)
-        {
-            throw new FileNotFoundException("Debug font not found: Fonts/0xProtoNerdFontMono-Regular.ttf");
-        }
-
         try
         {
-            _fontSystem.AddFont(File.ReadAllBytes(debugFontPath));
-            _font = _fontSystem.GetFont(14);
+            // Load debug font from database using FontLoader
+            // This ensures the font definition comes from the DTO system
+            FontEntity fontEntity = _fontLoader.GetFontByCategory("debug");
+            _fontSystem = _fontLoader.LoadFont(fontEntity);
+            _font = _fontSystem.GetFont(fontEntity.DefaultSize);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            throw new InvalidOperationException($"Failed to load debug font from {debugFontPath}", ex);
+            // Font loading failed - overlay will gracefully degrade
+            // The Draw method already checks _font == null and skips rendering
+            _font = null;
+            _fontSystem = null;
         }
     }
 

@@ -63,6 +63,9 @@ public class GameDataContext : DbContext
     public DbSet<BehaviorEntity> Behaviors { get; set; } = null!;
     public DbSet<TileBehaviorEntity> TileBehaviors { get; set; } = null!;
 
+    // Font entities
+    public DbSet<FontEntity> Fonts { get; set; } = null!;
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -78,6 +81,7 @@ public class GameDataContext : DbContext
         ConfigurePopupOutline(modelBuilder);
         ConfigureBehaviorDefinition(modelBuilder);
         ConfigureTileBehaviorDefinition(modelBuilder);
+        ConfigureFontDefinition(modelBuilder);
     }
 
     /// <summary>
@@ -306,6 +310,25 @@ public class GameDataContext : DbContext
             // Indexes for common queries
             entity.HasIndex(t => t.DisplayName);
             entity.HasIndex(t => t.Flags);
+        });
+    }
+
+    /// <summary>
+    ///     Configure FontEntity.
+    /// </summary>
+    private void ConfigureFontDefinition(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<FontEntity>(entity =>
+        {
+            entity.HasKey(f => f.FontId);
+
+            // Value converter for GameFontId
+            entity.Property(f => f.FontId).HasConversion(new GameFontIdValueConverter());
+
+            // Indexes for common queries
+            entity.HasIndex(f => f.DisplayName);
+            entity.HasIndex(f => f.Category);
+            entity.HasIndex(f => f.FontPath);
         });
     }
 }

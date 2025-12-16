@@ -85,6 +85,10 @@ public class GameDataLoader
         string tileBehaviorsPath = Path.Combine(dataPath, "TileBehaviors");
         loadedCounts["TileBehaviors"] = await LoadTileBehaviorDefinitionsAsync(tileBehaviorsPath, ct);
 
+        // Load Font Definitions (replaces FontLoader hardcoded constants)
+        string fontsPath = Path.Combine(dataPath, "Fonts");
+        loadedCounts["Fonts"] = await LoadFontDefinitionsAsync(fontsPath, ct);
+
         // Log summary
         _logger.LogGameDataLoaded(loadedCounts);
     }
@@ -1194,6 +1198,121 @@ public class GameDataLoader
     }
 
     /// <summary>
+    ///     Load font definitions from JSON files into EF Core.
+    ///     Replaces FontLoader hardcoded constants.
+    ///     Uses ContentProvider for mod-aware loading when available.
+    /// </summary>
+    private async Task<int> LoadFontDefinitionsAsync(string path, CancellationToken ct)
+    {
+        // Use ContentProvider for mod-aware loading (handles mod overrides)
+        IEnumerable<string> files;
+        if (_contentProvider != null)
+        {
+            // GetAllContentPaths returns files from mods (by priority) then base game
+            // Files with same relative path are deduplicated (mod wins over base)
+            // NOTE: Uses "FontDefinitions" (Definitions/Fonts) not "Fonts" (Assets/Fonts where TTF files are)
+            files = _contentProvider.GetAllContentPaths("FontDefinitions", "*.json");
+            _logger.LogDebug("Using ContentProvider for FontDefinitions - found {Count} files", files.Count());
+        }
+        else
+        {
+            // Fallback: direct file system access (no mod support)
+            if (!Directory.Exists(path))
+            {
+                _logger.LogDirectoryNotFound("FontDefinitions", path);
+                return 0;
+            }
+            files = Directory.GetFiles(path, "*.json", SearchOption.AllDirectories)
+                .Where(f => !IsHiddenOrSystemDirectory(f));
+        }
+
+        int count = 0;
+
+        // OPTIMIZATION: Load all existing fonts once to avoid N+1 queries and support overrides
+        Dictionary<GameFontId, FontEntity> existingFonts = await _context
+            .Fonts.AsNoTracking()
+            .ToDictionaryAsync(f => f.FontId, ct);
+
+        foreach (string file in files)
+        {
+            ct.ThrowIfCancellationRequested();
+
+            try
+            {
+                string json = await File.ReadAllTextAsync(file, ct);
+                FontDefinitionDto? dto = JsonSerializer.Deserialize<FontDefinitionDto>(json, _jsonOptions);
+
+                if (dto == null)
+                {
+                    _logger.LogWarning("Failed to deserialize font definition: {File}", file);
+                    continue;
+                }
+
+                // Validate required fields
+                if (string.IsNullOrWhiteSpace(dto.Id) || string.IsNullOrWhiteSpace(dto.FontPath))
+                {
+                    _logger.LogWarning("Font definition missing required fields: {File}", file);
+                    continue;
+                }
+
+                // Parse and validate GameFontId from the Id field
+                GameFontId? fontId = GameFontId.TryCreate(dto.Id);
+                if (fontId == null)
+                {
+                    _logger.LogWarning("Invalid font ID format in: {File}", file);
+                    continue;
+                }
+
+                // Detect source mod from file path (if file is under Mods/ directory)
+                string? sourceMod = dto.SourceMod ?? DetectSourceModFromPath(file);
+
+                // Convert DTO to entity
+                var fontDef = new FontEntity
+                {
+                    FontId = fontId,
+                    DisplayName = dto.DisplayName ?? dto.Id,
+                    Description = dto.Description,
+                    FontPath = dto.FontPath,
+                    Category = dto.Category ?? "game",
+                    DefaultSize = dto.DefaultSize ?? 16,
+                    LineSpacing = dto.LineSpacing ?? 1.0f,
+                    CharacterSpacing = dto.CharacterSpacing ?? 0.0f,
+                    SupportsUnicode = dto.SupportsUnicode ?? true,
+                    IsMonospace = dto.IsMonospace ?? false,
+                    SourceMod = sourceMod,
+                    Version = dto.Version ?? "1.0.0"
+                };
+
+                // Support mod overrides - if font already exists, update it
+                if (existingFonts.TryGetValue(fontDef.FontId, out FontEntity? existing))
+                {
+                    _context.Fonts.Attach(existing);
+                    _context.Entry(existing).CurrentValues.SetValues(fontDef);
+                    _logger.LogDebug("Font overridden: {FontId} by {Source}", fontDef.FontId, sourceMod ?? "base");
+                }
+                else
+                {
+                    _context.Fonts.Add(fontDef);
+                }
+
+                count++;
+
+                _logger.LogDebug("Loaded font definition: {FontId}", fontDef.FontId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to load font definition: {File}", file);
+            }
+        }
+
+        // Save to in-memory database
+        await _context.SaveChangesAsync(ct);
+
+        _logger.LogInformation("Loaded {Count} font definitions", count);
+        return count;
+    }
+
+    /// <summary>
     ///     Parses TileBehaviorFlags from a comma-separated string.
     /// </summary>
     private static int ParseTileBehaviorFlags(string flagsString)
@@ -1491,6 +1610,25 @@ internal record TileBehaviorDefinitionDto
     /// </summary>
     [JsonExtensionData]
     public Dictionary<string, JsonElement>? ExtensionData { get; init; }
+}
+
+/// <summary>
+///     DTO for deserializing FontDefinition JSON files.
+/// </summary>
+internal record FontDefinitionDto
+{
+    public string? Id { get; init; }
+    public string? DisplayName { get; init; }
+    public string? Description { get; init; }
+    public string? FontPath { get; init; }
+    public string? Category { get; init; }
+    public int? DefaultSize { get; init; }
+    public float? LineSpacing { get; init; }
+    public float? CharacterSpacing { get; init; }
+    public bool? SupportsUnicode { get; init; }
+    public bool? IsMonospace { get; init; }
+    public string? SourceMod { get; init; }
+    public string? Version { get; init; }
 }
 
 #endregion

@@ -48,6 +48,7 @@ public class ContentProviderOptions
         ["TileBehaviors"] = "Definitions/TileBehaviors",
         ["Behaviors"] = "Definitions/Behaviors",
         ["Sprites"] = "Definitions/Sprites",
+        ["FontDefinitions"] = "Definitions/Fonts",
         ["MapDefinitions"] = "Definitions/Maps/Regions",
         ["AudioDefinitions"] = "Definitions/Audio",
         ["PopupBackgrounds"] = "Definitions/Maps/Popups/Backgrounds",

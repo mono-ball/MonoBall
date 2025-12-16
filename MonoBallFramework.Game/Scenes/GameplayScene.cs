@@ -6,7 +6,6 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoBallFramework.Game.Ecs.Components.Maps;
 using MonoBallFramework.Game.Ecs.Components.Player;
-using MonoBallFramework.Game.Engine.Content;
 using MonoBallFramework.Game.Engine.Core.Events;
 using MonoBallFramework.Game.Engine.Core.Events.Map;
 using MonoBallFramework.Game.Engine.UI.Core;
@@ -15,6 +14,7 @@ using MonoBallFramework.Game.Engine.Rendering.Components;
 using MonoBallFramework.Game.Engine.Rendering.Context;
 using MonoBallFramework.Game.Engine.Scenes;
 using MonoBallFramework.Game.Engine.Systems.Management;
+using MonoBallFramework.Game.Engine.UI.Utilities;
 using MonoBallFramework.Game.GameSystems.Services;
 using MonoBallFramework.Game.Infrastructure.Diagnostics;
 using MonoBallFramework.Game.Initialization.Initializers;
@@ -43,30 +43,30 @@ public class GameplayScene : SceneBase
     /// <param name="graphicsDevice">The graphics device.</param>
     /// <param name="logger">The logger.</param>
     /// <param name="context">The gameplay scene context containing all dependencies.</param>
-    /// <param name="contentProvider">The content provider for resolving asset paths.</param>
+    /// <param name="fontLoader">The font loader for loading fonts from database definitions.</param>
     /// <param name="eventBus">Optional event bus for event inspector overlay.</param>
     /// <param name="eventMetrics">Optional shared event metrics (from DI) for consistent tracking.</param>
     public GameplayScene(
         GraphicsDevice graphicsDevice,
         ILogger<GameplayScene> logger,
         GameplaySceneContext context,
-        IContentProvider contentProvider,
+        FontLoader fontLoader,
         IEventBus? eventBus = null,
         EventMetrics? eventMetrics = null
     )
         : base(graphicsDevice, logger)
     {
         ArgumentNullException.ThrowIfNull(context);
-        ArgumentNullException.ThrowIfNull(contentProvider);
+        ArgumentNullException.ThrowIfNull(fontLoader);
 
         _context = context;
 
-        // Create performance overlay
+        // Create performance overlay with FontLoader for debug font
         _performanceOverlay = new PerformanceOverlay(
             graphicsDevice,
             context.PerformanceMonitor,
             context.World,
-            contentProvider
+            fontLoader
         );
 
         // Create Event Inspector if EventBus is available

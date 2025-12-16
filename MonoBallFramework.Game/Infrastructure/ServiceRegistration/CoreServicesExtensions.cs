@@ -188,12 +188,13 @@ public static class CoreServicesExtensions
             options.ThrowOnPathTraversal = true;
         });
 
-        // Step 3: Register FontLoader - depends on IContentProvider (non-optional)
+        // Step 3: Register FontLoader - depends on IContentProvider and IDbContextFactory (non-optional)
         services.AddSingleton<FontLoader>(sp =>
         {
             IContentProvider contentProvider = sp.GetRequiredService<IContentProvider>();
+            IDbContextFactory<GameDataContext> contextFactory = sp.GetRequiredService<IDbContextFactory<GameDataContext>>();
             ILogger<FontLoader> logger = sp.GetRequiredService<ILogger<FontLoader>>();
-            return new FontLoader(contentProvider, logger);
+            return new FontLoader(contentProvider, contextFactory, logger);
         });
 
         return services;
