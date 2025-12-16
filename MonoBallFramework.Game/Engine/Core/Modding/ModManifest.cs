@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
+using MonoBallFramework.Game.Engine.Core.Modding.CustomTypes;
 
 namespace MonoBallFramework.Game.Engine.Core.Modding;
 
@@ -94,6 +95,14 @@ public sealed class ModManifest
     /// </summary>
     [JsonPropertyName("contentFolders")]
     public Dictionary<string, string> ContentFolders { get; init; } = new();
+
+    /// <summary>
+    ///     Custom content type declarations for this mod.
+    ///     Key is the content type name (e.g., "WeatherEffects"), value is the schema.
+    ///     Other mods can then provide content for these custom types.
+    /// </summary>
+    [JsonPropertyName("customTypes")]
+    public Dictionary<string, CustomTypeSchema> CustomTypes { get; init; } = new();
 
     /// <summary>
     ///     Directory path where the mod is located (set by ModLoader).

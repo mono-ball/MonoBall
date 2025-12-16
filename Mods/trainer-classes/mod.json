@@ -1,0 +1,22 @@
+{
+  "id": "pokesharp.trainer-classes",
+  "name": "Trainer Classes",
+  "author": "PokeSharp Team",
+  "version": "1.0.0",
+  "description": "Defines trainer class types (Youngster, Bug Catcher, etc.) with battle rewards and dialogue",
+  "priority": 50,
+  "customTypes": {
+    "TrainerClasses": {
+      "key": "TrainerClasses",
+      "folder": "content/TrainerClasses",
+      "pattern": "*.json",
+      "schema": "content/TrainerClasses/schema.json"
+    }
+  },
+  "contentFolders": {
+    "TrainerClasses": "content/TrainerClasses"
+  },
+  "scripts": [],
+  "patches": [],
+  "dependencies": []
+}

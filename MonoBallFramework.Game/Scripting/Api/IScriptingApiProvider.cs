@@ -53,5 +53,10 @@ public interface IScriptingApiProvider
     /// </summary>
     IRegistryApi Registry { get; }
 
+    /// <summary>
+    ///     Gets the Custom Types API for accessing mod-defined custom content types.
+    /// </summary>
+    ICustomTypesApi CustomTypes { get; }
+
     #endregion
 }

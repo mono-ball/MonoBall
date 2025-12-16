@@ -1,5 +1,8 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using MonoBallFramework.Game.Engine.Core.Modding.CustomTypes;
+using MonoBallFramework.Game.Scripting.Api;
+using MonoBallFramework.Game.Scripting.Services;
 
 namespace MonoBallFramework.Game.Engine.Core.Modding;
 
@@ -20,15 +23,27 @@ public static class ModdingExtensions
     {
         services.AddSingleton<PatchApplicator>();
         services.AddSingleton<PatchFileLoader>();
+
+        // Register CustomTypesApiService for mods to declare custom content types
+        services.AddSingleton<CustomTypesApiService>();
+
+        // Register ICustomTypesApi interface pointing to the same CustomTypesApiService singleton
+        services.AddSingleton<ICustomTypesApi>(sp => sp.GetRequiredService<CustomTypesApiService>());
+
+        // Register CustomTypeSchemaValidator for validating custom type definitions
+        services.AddSingleton<CustomTypeSchemaValidator>();
+
         services.AddSingleton<ModLoader>(sp =>
         {
             ILogger<ModLoader> logger = sp.GetRequiredService<ILogger<ModLoader>>();
-            Scripting.Services.ScriptService scriptService = sp.GetRequiredService<Scripting.Services.ScriptService>();
+            ScriptService scriptService = sp.GetRequiredService<ScriptService>();
             Arch.Core.World world = sp.GetRequiredService<Arch.Core.World>();
             Engine.Core.Events.IEventBus eventBus = sp.GetRequiredService<Engine.Core.Events.IEventBus>();
             Scripting.Api.IScriptingApiProvider apis = sp.GetRequiredService<Scripting.Api.IScriptingApiProvider>();
             PatchApplicator patchApplicator = sp.GetRequiredService<PatchApplicator>();
             PatchFileLoader patchFileLoader = sp.GetRequiredService<PatchFileLoader>();
+            CustomTypesApiService customTypesService = sp.GetRequiredService<CustomTypesApiService>();
+            CustomTypeSchemaValidator schemaValidator = sp.GetRequiredService<CustomTypeSchemaValidator>();
             return new ModLoader(
                 scriptService,
                 logger,
@@ -37,7 +52,9 @@ public static class ModdingExtensions
                 apis,
                 patchApplicator,
                 patchFileLoader,
-                gameBasePath
+                gameBasePath,
+                customTypesService,
+                schemaValidator
             );
         });
 

@@ -57,6 +57,13 @@ public class ContentProviderOptions
     };
 
     /// <summary>
+    /// Custom content types registered by mods.
+    /// These are added dynamically when mods declare custom types in their manifests.
+    /// Key is the content type name (e.g., "WeatherEffects"), value is the folder path.
+    /// </summary>
+    public Dictionary<string, string> CustomContentTypes { get; } = new();
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="ContentProviderOptions"/> class with default values.
     /// </summary>
     public ContentProviderOptions()
@@ -70,9 +77,44 @@ public class ContentProviderOptions
     /// <returns>The folder name for the content type, or the content type itself if not found in the mapping.</returns>
     public string GetContentFolder(string contentType)
     {
-        return BaseContentFolders.TryGetValue(contentType, out var folder)
-            ? folder
-            : contentType;
+        // Check base content folders first
+        if (BaseContentFolders.TryGetValue(contentType, out var folder))
+            return folder;
+
+        // Check custom content types
+        if (CustomContentTypes.TryGetValue(contentType, out var customFolder))
+            return customFolder;
+
+        // Fall back to the content type itself
+        return contentType;
+    }
+
+    /// <summary>
+    /// Adds a custom content type (called by ModLoader during mod discovery).
+    /// </summary>
+    /// <param name="contentType">The content type key.</param>
+    /// <param name="folderPath">The folder path within the mod.</param>
+    public void AddCustomContentType(string contentType, string folderPath)
+    {
+        if (string.IsNullOrWhiteSpace(contentType))
+            throw new ArgumentException("Content type cannot be null or whitespace.", nameof(contentType));
+
+        if (string.IsNullOrWhiteSpace(folderPath))
+            throw new ArgumentException("Folder path cannot be null or whitespace.", nameof(folderPath));
+
+        // Reject path traversal attempts
+        if (folderPath.Contains(".."))
+            throw new ArgumentException("Folder path cannot contain path traversal sequences.", nameof(folderPath));
+
+        CustomContentTypes[contentType] = folderPath;
+    }
+
+    /// <summary>
+    /// Checks if a content type is known (either base or custom).
+    /// </summary>
+    public bool IsKnownContentType(string contentType)
+    {
+        return BaseContentFolders.ContainsKey(contentType) || CustomContentTypes.ContainsKey(contentType);
     }
 
     /// <summary>
@@ -107,6 +149,23 @@ public class ContentProviderOptions
             if (kvp.Key != "Root" && string.IsNullOrWhiteSpace(kvp.Value))
             {
                 throw new ArgumentException($"BaseContentFolders value for '{kvp.Key}' cannot be null or empty.", nameof(BaseContentFolders));
+            }
+        }
+
+        // Validate CustomContentTypes entries
+        foreach (var kvp in CustomContentTypes)
+        {
+            if (string.IsNullOrWhiteSpace(kvp.Key))
+            {
+                throw new ArgumentException("CustomContentTypes key cannot be null or empty.", nameof(CustomContentTypes));
+            }
+            if (string.IsNullOrWhiteSpace(kvp.Value))
+            {
+                throw new ArgumentException($"CustomContentTypes value for '{kvp.Key}' cannot be null or empty.", nameof(CustomContentTypes));
+            }
+            if (kvp.Value.Contains(".."))
+            {
+                throw new ArgumentException($"CustomContentTypes path for '{kvp.Key}' cannot contain path traversal sequences.", nameof(CustomContentTypes));
             }
         }
     }

@@ -283,22 +283,25 @@ public class ConsoleSystem : IUpdateSystem
             // Close console - pop the scene
             if (_consoleScene != null)
             {
-                _sceneManager.PopScene();
+                // Unsubscribe event handlers first to prevent leaks if PopScene throws
                 _consoleScene.OnCommandSubmitted -= HandleConsoleCommand;
                 _consoleScene.OnRequestCompletions -= HandleConsoleCompletions;
                 _consoleScene.OnRequestParameterHints -= HandleConsoleParameterHints;
                 _consoleScene.OnRequestDocumentation -= HandleConsoleDocumentation;
                 _consoleScene.OnCloseRequested -= OnConsoleClosed;
                 _consoleScene.OnReady -= HandleConsoleReady;
-                _consoleScene = null;
 
-                // Cancel any pending completion requests
+                // Cancel and dispose any pending completion requests
                 _completionCts?.Cancel();
                 _completionCts?.Dispose();
                 _completionCts = null;
 
                 // Clear Print() output action
                 _globals.OutputAction = null;
+
+                // Pop the scene (may throw)
+                _sceneManager.PopScene();
+                _consoleScene = null;
             }
 
             _isConsoleOpen = false;
@@ -430,6 +433,17 @@ public class ConsoleSystem : IUpdateSystem
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "Failed to set EntityFramework context factory");
+        }
+
+        // Set up Custom Types API for the EntityFramework panel (shows mod-defined content types)
+        try
+        {
+            ICustomTypesApi? customTypesApi = _services.GetService<ICustomTypesApi>();
+            _consoleScene?.SetCustomTypesApi(customTypesApi);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to set Custom Types API");
         }
 
         // Set up Event Inspector provider for the Events panel
@@ -719,8 +733,9 @@ public class ConsoleSystem : IUpdateSystem
     /// </summary>
     private void HandleConsoleCompletions(string partialCommand)
     {
-        // Cancel any pending completion request
+        // Cancel and dispose any pending completion request
         _completionCts?.Cancel();
+        _completionCts?.Dispose();
         _completionCts = new CancellationTokenSource();
 
         // Fire and forget with proper error handling (not async void)

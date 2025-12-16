@@ -1,0 +1,132 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://pokesharp.dev/schemas/trainer-class.json",
+  "title": "Trainer Class Definition",
+  "description": "Schema for validating trainer class definitions in PokeSharp",
+  "type": "object",
+  "required": ["id", "name", "basePrizeMoney"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for the trainer class",
+      "pattern": "^[a-z0-9_-]+$",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "name": {
+      "type": "string",
+      "description": "Display name of the trainer class",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "description": {
+      "type": "string",
+      "description": "Optional description of the trainer class"
+    },
+    "version": {
+      "type": "string",
+      "description": "Version of the trainer class definition",
+      "default": "1.0.0",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "basePrizeMoney": {
+      "type": "integer",
+      "description": "Base prize money awarded when defeating this trainer class",
+      "minimum": 0
+    },
+    "prizeMoneyMultiplier": {
+      "type": "number",
+      "description": "Multiplier applied to prize money calculation",
+      "default": 1.0,
+      "minimum": 0
+    },
+    "battleIntroDialogue": {
+      "type": "array",
+      "description": "Dialogue lines shown when battle starts",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "battleDefeatDialogue": {
+      "type": "array",
+      "description": "Dialogue lines shown when trainer is defeated",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "battleVictoryDialogue": {
+      "type": "array",
+      "description": "Dialogue lines shown when trainer wins",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "preferredTypes": {
+      "type": "array",
+      "description": "Pokemon types this trainer class prefers to use",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "levelRange": {
+      "type": "object",
+      "description": "Level range for Pokemon used by this trainer class",
+      "required": ["min", "max"],
+      "properties": {
+        "min": {
+          "type": "integer",
+          "description": "Minimum Pokemon level",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "max": {
+          "type": "integer",
+          "description": "Maximum Pokemon level",
+          "minimum": 1,
+          "maximum": 100
+        }
+      },
+      "additionalProperties": false
+    },
+    "teamSize": {
+      "type": "object",
+      "description": "Team size range for this trainer class",
+      "required": ["min", "max"],
+      "properties": {
+        "min": {
+          "type": "integer",
+          "description": "Minimum team size",
+          "minimum": 1,
+          "maximum": 6
+        },
+        "max": {
+          "type": "integer",
+          "description": "Maximum team size",
+          "minimum": 1,
+          "maximum": 6
+        }
+      },
+      "additionalProperties": false
+    },
+    "usesItems": {
+      "type": "boolean",
+      "description": "Whether trainers of this class use items in battle",
+      "default": false
+    },
+    "aiDifficulty": {
+      "type": "string",
+      "description": "AI difficulty level for this trainer class",
+      "enum": ["easy", "normal", "hard"],
+      "default": "normal"
+    }
+  },
+  "additionalProperties": false
+}

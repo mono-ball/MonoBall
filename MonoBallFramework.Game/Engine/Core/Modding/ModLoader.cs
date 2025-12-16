@@ -1,8 +1,11 @@
+using System.Collections.Concurrent;
+using System.Security;
 using System.Text.Json;
 using Arch.Core;
 using Microsoft.Extensions.Logging;
 using MonoBallFramework.Game.Engine.Common.Logging;
 using MonoBallFramework.Game.Engine.Core.Events;
+using MonoBallFramework.Game.Engine.Core.Modding.CustomTypes;
 using MonoBallFramework.Game.Scripting.Api;
 using MonoBallFramework.Game.Scripting.Runtime;
 using MonoBallFramework.Game.Scripting.Services;
@@ -18,18 +21,27 @@ public sealed class ModLoader : IModLoader
     private const string ModManifestFileName = "mod.json";
     private const string ModsDirectoryName = "Mods";
 
+    private static readonly HashSet<string> BuiltInContentTypes = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "Root", "Definitions", "Graphics", "Audio", "Scripts", "Fonts", "Tiled", "Tilesets",
+        "TileBehaviors", "Behaviors", "Sprites", "MapDefinitions", "AudioDefinitions",
+        "PopupBackgrounds", "PopupOutlines", "PopupThemes", "MapSections"
+    };
+
     private readonly IScriptingApiProvider _apis;
     private readonly ModDependencyResolver _dependencyResolver;
     private readonly IEventBus _eventBus;
-    private readonly Dictionary<string, ModManifest> _loadedMods = new();
+    private readonly ConcurrentDictionary<string, ModManifest> _loadedMods = new();
     private readonly ILogger<ModLoader> _logger;
     private readonly string _modsBasePath;
-    private readonly Dictionary<string, List<object>> _modScriptInstances = new();
-    private readonly Dictionary<string, List<ModPatch>> _modPatches = new();
+    private readonly ConcurrentDictionary<string, List<object>> _modScriptInstances = new();
+    private readonly ConcurrentDictionary<string, List<ModPatch>> _modPatches = new();
     private readonly PatchApplicator _patchApplicator;
     private readonly PatchFileLoader _patchFileLoader;
     private readonly ScriptService _scriptService;
     private readonly World _world;
+    private readonly CustomTypesApiService? _customTypesService;
+    private readonly CustomTypeSchemaValidator? _schemaValidator;
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="ModLoader" /> class.
@@ -42,7 +54,9 @@ public sealed class ModLoader : IModLoader
         IScriptingApiProvider apis,
         PatchApplicator patchApplicator,
         PatchFileLoader patchFileLoader,
-        string gameBasePath
+        string gameBasePath,
+        CustomTypesApiService? customTypesService = null,
+        CustomTypeSchemaValidator? schemaValidator = null
     )
     {
         _scriptService = scriptService ?? throw new ArgumentNullException(nameof(scriptService));
@@ -52,6 +66,8 @@ public sealed class ModLoader : IModLoader
         _apis = apis ?? throw new ArgumentNullException(nameof(apis));
         _patchApplicator = patchApplicator ?? throw new ArgumentNullException(nameof(patchApplicator));
         _patchFileLoader = patchFileLoader ?? throw new ArgumentNullException(nameof(patchFileLoader));
+        _customTypesService = customTypesService;
+        _schemaValidator = schemaValidator;
 
         _modsBasePath = Path.Combine(gameBasePath, ModsDirectoryName);
         _dependencyResolver = new ModDependencyResolver();
@@ -85,12 +101,12 @@ public sealed class ModLoader : IModLoader
     /// </summary>
     public async Task DiscoverModsAsync()
     {
-        _logger.LogInformation("🔍 Discovering mods in: {Path}", _modsBasePath);
+        _logger.LogInformation("Discovering mods in: {Path}", _modsBasePath);
 
         if (!Directory.Exists(_modsBasePath))
         {
             _logger.LogWarning(
-                "⚠️  Mods directory not found: {Path}. Creating it...",
+                "Mods directory not found: {Path}. Creating it...",
                 _modsBasePath
             );
             Directory.CreateDirectory(_modsBasePath);
@@ -104,11 +120,11 @@ public sealed class ModLoader : IModLoader
 
             if (manifests.Count == 0)
             {
-                _logger.LogInformation("ℹ️  No mods found in {Path}", _modsBasePath);
+                _logger.LogInformation("No mods found in {Path}", _modsBasePath);
                 return;
             }
 
-            _logger.LogInformation("📦 Found {Count} mod(s)", manifests.Count);
+            _logger.LogInformation("Found {Count} mod(s)", manifests.Count);
 
             // Resolve dependencies and determine load order
             List<ModManifest> orderedManifests;
@@ -118,26 +134,28 @@ public sealed class ModLoader : IModLoader
             }
             catch (ModDependencyException ex)
             {
-                _logger.LogError(ex, "❌ Failed to resolve mod dependencies: {Message}", ex.Message);
+                _logger.LogError(ex, "Failed to resolve mod dependencies: {Message}", ex.Message);
                 throw;
             }
 
             // Register manifests (content folders become available to ContentProvider)
             foreach (ModManifest manifest in orderedManifests)
             {
-                if (_loadedMods.ContainsKey(manifest.Id))
+                if (!_loadedMods.TryAdd(manifest.Id, manifest))
                 {
-                    _logger.LogWarning("⚠️  Mod '{Id}' already registered. Skipping.", manifest.Id);
+                    _logger.LogWarning("Mod '{Id}' already registered. Skipping.", manifest.Id);
                     continue;
                 }
 
-                _loadedMods[manifest.Id] = manifest;
+                // Register custom type categories from this mod
+                RegisterCustomTypes(manifest);
+
                 _logger.LogInformation(
-                    "📁 Registered mod: {Name} v{Version} (priority {Priority}, {ContentCount} content folders)",
+                    "Registered mod: {Name} v{Version} (priority {Priority}, {ContentCount} content folders)",
                     manifest.Name, manifest.Version, manifest.Priority, manifest.ContentFolders.Count);
             }
 
-            _logger.LogInformation("✅ Discovered and registered {Count} mod(s)", _loadedMods.Count);
+            _logger.LogInformation("Discovered and registered {Count} mod(s)", _loadedMods.Count);
         }
         catch (ModDependencyException)
         {
@@ -145,7 +163,7 @@ public sealed class ModLoader : IModLoader
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "❌ Unexpected error during mod discovery");
+            _logger.LogError(ex, "Unexpected error during mod discovery");
             throw;
         }
 
@@ -158,14 +176,14 @@ public sealed class ModLoader : IModLoader
     /// </summary>
     public async Task LoadModScriptsAsync()
     {
-        _logger.LogInformation("⚙️  Loading mod scripts and patches for {Count} mod(s)", _loadedMods.Count);
+        _logger.LogInformation("Loading mod scripts and patches for {Count} mod(s)", _loadedMods.Count);
 
         foreach (var manifest in _loadedMods.Values.OrderByDescending(m => m.Priority))
         {
             await LoadModScriptsAndPatchesAsync(manifest);
         }
 
-        _logger.LogInformation("✅ Loaded scripts and patches for {Count} mod(s)", _loadedMods.Count);
+        _logger.LogInformation("Loaded scripts and patches for {Count} mod(s)", _loadedMods.Count);
     }
 
     /// <summary>
@@ -184,8 +202,8 @@ public sealed class ModLoader : IModLoader
             if (manifest.Patches.Count > 0)
             {
                 patches = _patchFileLoader.LoadModPatches(loadedMod);
-                _modPatches[manifest.Id] = patches;
-                _logger.LogInformation("📝 Loaded {Count} patch(es) for mod '{Id}'", patches.Count, manifest.Id);
+                _modPatches.AddOrUpdate(manifest.Id, patches, (key, oldValue) => patches);
+                _logger.LogInformation("Loaded {Count} patch(es) for mod '{Id}'", patches.Count, manifest.Id);
             }
 
             // Load scripts
@@ -193,11 +211,18 @@ public sealed class ModLoader : IModLoader
             {
                 foreach (string scriptFile in manifest.Scripts)
                 {
-                    string scriptPath = Path.Combine(manifest.DirectoryPath, scriptFile);
+                    // Validate script path for security
+                    if (!IsPathSafe(manifest.DirectoryPath, scriptFile, out string scriptPath))
+                    {
+                        _logger.LogWarning(
+                            "Security: Rejected script path '{ScriptFile}' for mod '{Id}' (path traversal attempt)",
+                            scriptFile, manifest.Id);
+                        continue;
+                    }
 
                     if (!File.Exists(scriptPath))
                     {
-                        _logger.LogError("❌ Script file not found for mod '{Id}': {Path}", manifest.Id, scriptPath);
+                        _logger.LogError("Script file not found for mod '{Id}': {Path}", manifest.Id, scriptPath);
                         continue;
                     }
 
@@ -206,18 +231,18 @@ public sealed class ModLoader : IModLoader
 
                     if (instance == null)
                     {
-                        _logger.LogError("❌ Failed to load script '{Script}' for mod '{Id}'", scriptFile, manifest.Id);
+                        _logger.LogError("Failed to load script '{Script}' for mod '{Id}'", scriptFile, manifest.Id);
                         continue;
                     }
 
                     if (instance is ScriptBase scriptBase)
                     {
                         _scriptService.InitializeScript(scriptBase, _world, null, _logger);
-                        _logger.LogDebug("✅ Loaded and initialized script: {Script} ({Type})", scriptFile, instance.GetType().Name);
+                        _logger.LogDebug("Loaded and initialized script: {Script} ({Type})", scriptFile, instance.GetType().Name);
                     }
                     else
                     {
-                        _logger.LogWarning("⚠️  Script '{Script}' is not a ScriptBase. Loaded but not initialized.", scriptFile);
+                        _logger.LogWarning("Script '{Script}' is not a ScriptBase. Loaded but not initialized.", scriptFile);
                     }
 
                     scriptInstances.Add(instance);
@@ -226,7 +251,7 @@ public sealed class ModLoader : IModLoader
 
             if (scriptInstances.Count > 0)
             {
-                _modScriptInstances[manifest.Id] = scriptInstances;
+                _modScriptInstances.AddOrUpdate(manifest.Id, scriptInstances, (key, oldValue) => scriptInstances);
             }
 
             _logger.LogDebug("Mod '{Id}' scripts loaded: {Scripts} script(s), {Patches} patch(es)",
@@ -234,7 +259,42 @@ public sealed class ModLoader : IModLoader
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "❌ Failed to load scripts for mod '{Id}'", manifest.Id);
+            _logger.LogError(ex, "Failed to load scripts for mod '{Id}'", manifest.Id);
+        }
+    }
+
+    /// <summary>
+    /// Validates that a resolved path stays within the allowed base directory.
+    /// Prevents path traversal attacks using ".." or absolute paths.
+    /// </summary>
+    private static bool IsPathSafe(string basePath, string userPath, out string resolvedPath)
+    {
+        resolvedPath = string.Empty;
+
+        // Reject null/empty paths
+        if (string.IsNullOrWhiteSpace(userPath))
+            return false;
+
+        // Reject absolute paths in user input
+        if (Path.IsPathRooted(userPath))
+            return false;
+
+        // Reject obvious traversal attempts
+        if (userPath.Contains(".."))
+            return false;
+
+        try
+        {
+            // Resolve to full path
+            resolvedPath = Path.GetFullPath(Path.Combine(basePath, userPath));
+            string baseFullPath = Path.GetFullPath(basePath);
+
+            // Ensure resolved path is within base directory
+            return resolvedPath.StartsWith(baseFullPath, StringComparison.OrdinalIgnoreCase);
+        }
+        catch
+        {
+            return false;
         }
     }
 
@@ -271,7 +331,7 @@ public sealed class ModLoader : IModLoader
             {
                 _logger.LogError(
                     ex,
-                    "❌ Failed to parse manifest at {Path}: {Message}",
+                    "Failed to parse manifest at {Path}: {Message}",
                     manifestPath,
                     ex.Message
                 );
@@ -296,7 +356,7 @@ public sealed class ModLoader : IModLoader
 
         if (manifest == null)
         {
-            _logger.LogError("❌ Failed to deserialize manifest: {Path}", manifestPath);
+            _logger.LogError("Failed to deserialize manifest: {Path}", manifestPath);
             return null;
         }
 
@@ -308,14 +368,14 @@ public sealed class ModLoader : IModLoader
         }
         catch (Exception ex)
         {
-            _logger.LogError("❌ Invalid manifest at {Path}: {Error}", manifestPath, ex.Message);
+            _logger.LogError("Invalid manifest at {Path}: {Error}", manifestPath, ex.Message);
             return null;
         }
 
         // Validate content folder keys against known content types
         ValidateContentFolderKeys(manifest, manifestPath);
 
-        _logger.LogDebug("✅ Parsed manifest: {Mod}", manifest);
+        _logger.LogDebug("Parsed manifest: {Mod}", manifest);
         return manifest;
     }
 
@@ -325,20 +385,36 @@ public sealed class ModLoader : IModLoader
     /// </summary>
     private void ValidateContentFolderKeys(ModManifest manifest, string manifestPath)
     {
-        // Known content type keys from ContentProviderOptions
-        var validContentTypes = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        // Start with built-in content types
+        var validContentTypes = new HashSet<string>(BuiltInContentTypes, StringComparer.OrdinalIgnoreCase);
+
+        // Collect all custom types first (thread-safe)
+        var customTypes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        // Add custom types from all loaded mods (allows mod B to use mod A's custom types)
+        foreach (var loadedMod in _loadedMods.Values)
         {
-            "Root", "Definitions", "Graphics", "Audio", "Scripts", "Fonts", "Tiled", "Tilesets",
-            "TileBehaviors", "Behaviors", "Sprites", "MapDefinitions", "AudioDefinitions",
-            "PopupBackgrounds", "PopupOutlines", "PopupThemes", "MapSections"
-        };
+            foreach (var customType in loadedMod.CustomTypes.Keys)
+            {
+                customTypes.Add(customType);
+            }
+        }
+
+        // Also add this mod's own custom types
+        foreach (var customType in manifest.CustomTypes.Keys)
+        {
+            customTypes.Add(customType);
+        }
+
+        // Add all collected custom types to valid types
+        validContentTypes.UnionWith(customTypes);
 
         foreach (string key in manifest.ContentFolders.Keys)
         {
             if (!validContentTypes.Contains(key))
             {
                 _logger.LogWarning(
-                    "⚠️  Unknown content folder key '{Key}' in mod '{Id}' ({Path}). " +
+                    "Unknown content folder key '{Key}' in mod '{Id}' ({Path}). " +
                     "Valid keys: {ValidKeys}. This content type will be ignored.",
                     key, manifest.Id, manifestPath,
                     string.Join(", ", validContentTypes.OrderBy(k => k)));
@@ -347,17 +423,267 @@ public sealed class ModLoader : IModLoader
     }
 
     /// <summary>
+    /// Registers custom type categories declared by a mod.
+    /// Called during mod discovery to enable ContentProvider to resolve custom content.
+    /// </summary>
+    private void RegisterCustomTypes(ModManifest manifest)
+    {
+        if (manifest.CustomTypes.Count == 0)
+            return;
+
+        if (_customTypesService == null)
+        {
+            _logger.LogWarning(
+                "Mod '{ModId}' declares custom types but CustomTypesApiService is not available. Custom types will be ignored.",
+                manifest.Id);
+            return;
+        }
+
+        foreach (var (typeName, schema) in manifest.CustomTypes)
+        {
+            // Register the category in the custom types service
+            _customTypesService.RegisterCategory(typeName);
+
+            _logger.LogInformation(
+                "Registered custom type '{TypeName}' from mod '{ModId}' (folder: {Folder})",
+                typeName, manifest.Id, schema.Folder);
+        }
+    }
+
+    /// <summary>
+    /// Loads custom type definitions from all mods.
+    /// Should be called after mod discovery and before scripts need access to custom types.
+    /// </summary>
+    public Task LoadCustomTypeDefinitions()
+    {
+        if (_customTypesService == null)
+        {
+            _logger.LogDebug("CustomTypesApiService not available, skipping custom type definition loading");
+            return Task.CompletedTask;
+        }
+
+        int totalLoaded = 0;
+
+        // Process all loaded mods in priority order (highest first)
+        foreach (var manifest in _loadedMods.Values.OrderByDescending(m => m.Priority))
+        {
+            // Load definitions for custom types declared by this mod
+            foreach (var (typeName, schema) in manifest.CustomTypes)
+            {
+                int loaded = LoadCustomTypeDefinitionsForCategory(manifest, typeName, schema);
+                totalLoaded += loaded;
+            }
+
+            // Also load definitions for custom types declared by OTHER mods (cross-mod content)
+            // Find content folders that match custom type categories from other mods
+            foreach (var (contentType, folderPath) in manifest.ContentFolders)
+            {
+                // Skip built-in content types
+                if (IsBuiltInContentType(contentType))
+                    continue;
+
+                // Check if any mod has declared this as a custom type
+                CustomTypes.CustomTypeSchema? schema = FindCustomTypeSchema(contentType);
+                if (schema != null)
+                {
+                    // Validate content folder path for security
+                    if (!IsPathSafe(manifest.DirectoryPath, folderPath, out string fullPath))
+                    {
+                        _logger.LogWarning(
+                            "Security: Rejected content folder '{FolderPath}' for mod '{Id}' (path traversal attempt)",
+                            folderPath, manifest.Id);
+                        continue;
+                    }
+
+                    if (Directory.Exists(fullPath))
+                    {
+                        int loaded = LoadDefinitionsFromFolder(manifest.Id, contentType, fullPath, schema.Pattern);
+                        totalLoaded += loaded;
+                    }
+                }
+            }
+        }
+
+        _logger.LogInformation("Loaded {Count} custom type definition(s)", totalLoaded);
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Loads custom type definitions for a specific category from a mod.
+    /// </summary>
+    private int LoadCustomTypeDefinitionsForCategory(ModManifest manifest, string typeName, CustomTypes.CustomTypeSchema schema)
+    {
+        // Validate folder path for security
+        if (!IsPathSafe(manifest.DirectoryPath, schema.Folder, out string folderPath))
+        {
+            _logger.LogWarning(
+                "Security: Rejected custom type folder '{Folder}' for mod '{Id}' (path traversal attempt)",
+                schema.Folder, manifest.Id);
+            return 0;
+        }
+
+        if (!Directory.Exists(folderPath))
+        {
+            _logger.LogDebug("Custom type folder does not exist: {Path}", folderPath);
+            return 0;
+        }
+
+        // Resolve schema path to absolute path if provided
+        string? schemaPath = null;
+        if (!string.IsNullOrEmpty(schema.SchemaPath))
+        {
+            // Reject absolute paths in schema path (security)
+            if (Path.IsPathRooted(schema.SchemaPath))
+            {
+                _logger.LogWarning(
+                    "Security: Rejected absolute schema path '{SchemaPath}' for mod '{Id}'",
+                    schema.SchemaPath, manifest.Id);
+                return 0;
+            }
+
+            // Validate schema path for security
+            if (!IsPathSafe(manifest.DirectoryPath, schema.SchemaPath, out schemaPath))
+            {
+                _logger.LogWarning(
+                    "Security: Rejected schema path '{SchemaPath}' for mod '{Id}' (path traversal attempt)",
+                    schema.SchemaPath, manifest.Id);
+                return 0;
+            }
+        }
+
+        return LoadDefinitionsFromFolder(manifest.Id, typeName, folderPath, schema.Pattern, schemaPath);
+    }
+
+    /// <summary>
+    /// Loads definitions from a folder and registers them with CustomTypesApiService.
+    /// </summary>
+    private int LoadDefinitionsFromFolder(string modId, string category, string folderPath, string pattern, string? schemaPath = null)
+    {
+        int count = 0;
+        string[] files = Directory.GetFiles(folderPath, pattern, SearchOption.AllDirectories);
+
+        foreach (string file in files)
+        {
+            // Skip schema files by matching against the defined schema path
+            if (!string.IsNullOrEmpty(schemaPath) &&
+                Path.GetFullPath(file).Equals(Path.GetFullPath(schemaPath), StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            // Fallback: also skip files named "schema.json" for backward compatibility
+            string fileName = Path.GetFileName(file);
+            if (fileName.Equals("schema.json", StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            try
+            {
+                // Validate against schema if provided
+                if (!string.IsNullOrEmpty(schemaPath) && _schemaValidator != null)
+                {
+                    var validationResult = _schemaValidator.ValidateFile(schemaPath, file);
+                    if (!validationResult.IsValid)
+                    {
+                        _logger.LogWarning(
+                            "Skipping {File} - schema validation failed:\n{Errors}",
+                            file,
+                            validationResult.FormatErrors());
+                        continue;
+                    }
+                }
+
+                string json = File.ReadAllText(file);
+                using JsonDocument doc = JsonDocument.Parse(json);
+
+                // Extract ID from JSON or derive from filename
+                string localId = Path.GetFileNameWithoutExtension(file);
+                if (doc.RootElement.TryGetProperty("id", out JsonElement idElement))
+                {
+                    localId = idElement.GetString() ?? localId;
+                }
+
+                // Extract optional properties
+                string displayName = localId;
+                string? description = null;
+                string version = "1.0.0";
+
+                if (doc.RootElement.TryGetProperty("name", out JsonElement nameElement))
+                    displayName = nameElement.GetString() ?? displayName;
+                if (doc.RootElement.TryGetProperty("displayName", out JsonElement dnElement))
+                    displayName = dnElement.GetString() ?? displayName;
+                if (doc.RootElement.TryGetProperty("description", out JsonElement descElement))
+                    description = descElement.GetString();
+                if (doc.RootElement.TryGetProperty("version", out JsonElement verElement))
+                    version = verElement.GetString() ?? version;
+
+                // Create full ID: "mod:category:localid"
+                string fullId = $"{modId}:{category}:{localId}";
+
+                var definition = new CustomTypes.CustomTypeDefinition
+                {
+                    Id = fullId,
+                    Category = category,
+                    DisplayName = displayName,
+                    Description = description,
+                    SourceMod = modId,
+                    Version = version,
+                    RawData = doc.RootElement.Clone()
+                };
+
+                _customTypesService!.RegisterDefinition(definition);
+                count++;
+
+                _logger.LogDebug("Loaded custom type definition: {Id} from {File}", fullId, file);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to load custom type definition from {File}", file);
+            }
+        }
+
+        if (count > 0)
+        {
+            _logger.LogInformation(
+                "Loaded {Count} {Category} definition(s) from mod '{ModId}'",
+                count, category, modId);
+        }
+
+        return count;
+    }
+
+    /// <summary>
+    /// Checks if a content type is a built-in type.
+    /// </summary>
+    private static bool IsBuiltInContentType(string contentType)
+    {
+        return BuiltInContentTypes.Contains(contentType);
+    }
+
+    /// <summary>
+    /// Finds a custom type schema by name from any loaded mod.
+    /// </summary>
+    private CustomTypes.CustomTypeSchema? FindCustomTypeSchema(string typeName)
+    {
+        foreach (var manifest in _loadedMods.Values)
+        {
+            if (manifest.CustomTypes.TryGetValue(typeName, out var schema))
+                return schema;
+        }
+        return null;
+    }
+
+    /// <summary>
     ///     Loads a single mod: patches, content folders, scripts, and code mods.
     /// </summary>
     private async Task LoadModAsync(ModManifest manifest)
     {
-        _logger.LogInformation("⚙️  Loading mod: {Mod}", manifest);
+        _logger.LogInformation("Loading mod: {Mod}", manifest);
 
         // Check for conflicts
         if (_loadedMods.ContainsKey(manifest.Id))
         {
             _logger.LogWarning(
-                "⚠️  Mod '{Id}' is already loaded. Skipping duplicate.",
+                "Mod '{Id}' is already loaded. Skipping duplicate.",
                 manifest.Id
             );
             return;
@@ -374,10 +700,10 @@ public sealed class ModLoader : IModLoader
             if (manifest.Patches.Count > 0)
             {
                 patches = _patchFileLoader.LoadModPatches(loadedMod);
-                _modPatches[manifest.Id] = patches;
+                _modPatches.AddOrUpdate(manifest.Id, patches, (key, oldValue) => patches);
 
                 _logger.LogInformation(
-                    "📝 Loaded {Count} patch(es) for mod '{Id}'",
+                    "Loaded {Count} patch(es) for mod '{Id}'",
                     patches.Count,
                     manifest.Id
                 );
@@ -388,7 +714,7 @@ public sealed class ModLoader : IModLoader
             if (manifest.ContentFolders.Count > 0)
             {
                 _logger.LogInformation(
-                    "📁 Registered {Count} content folder(s) for mod '{Id}'",
+                    "Registered {Count} content folder(s) for mod '{Id}'",
                     manifest.ContentFolders.Count,
                     manifest.Id
                 );
@@ -399,12 +725,19 @@ public sealed class ModLoader : IModLoader
             {
                 foreach (string scriptFile in manifest.Scripts)
                 {
-                    string scriptPath = Path.Combine(manifest.DirectoryPath, scriptFile);
+                    // Validate script path for security
+                    if (!IsPathSafe(manifest.DirectoryPath, scriptFile, out string scriptPath))
+                    {
+                        _logger.LogWarning(
+                            "Security: Rejected script path '{ScriptFile}' for mod '{Id}' (path traversal attempt)",
+                            scriptFile, manifest.Id);
+                        continue;
+                    }
 
                     if (!File.Exists(scriptPath))
                     {
                         _logger.LogError(
-                            "❌ Script file not found for mod '{Id}': {Path}",
+                            "Script file not found for mod '{Id}': {Path}",
                             manifest.Id,
                             scriptPath
                         );
@@ -417,7 +750,7 @@ public sealed class ModLoader : IModLoader
                     if (instance == null)
                     {
                         _logger.LogError(
-                            "❌ Failed to load script '{Script}' for mod '{Id}'",
+                            "Failed to load script '{Script}' for mod '{Id}'",
                             scriptFile,
                             manifest.Id
                         );
@@ -430,7 +763,7 @@ public sealed class ModLoader : IModLoader
                         _scriptService.InitializeScript(scriptBase, _world, null, _logger);
 
                         _logger.LogDebug(
-                            "✅ Loaded and initialized script: {Script} ({Type})",
+                            "Loaded and initialized script: {Script} ({Type})",
                             scriptFile,
                             instance.GetType().Name
                         );
@@ -438,7 +771,7 @@ public sealed class ModLoader : IModLoader
                     else
                     {
                         _logger.LogWarning(
-                            "⚠️  Script '{Script}' is not a ScriptBase. Loaded but not initialized.",
+                            "Script '{Script}' is not a ScriptBase. Loaded but not initialized.",
                             scriptFile
                         );
                     }
@@ -452,10 +785,10 @@ public sealed class ModLoader : IModLoader
             // For now, this is a placeholder for future compiled mod support
 
             // Mark mod as loaded
-            _loadedMods[manifest.Id] = manifest;
+            _loadedMods.AddOrUpdate(manifest.Id, manifest, (key, oldValue) => manifest);
             if (scriptInstances.Count > 0)
             {
-                _modScriptInstances[manifest.Id] = scriptInstances;
+                _modScriptInstances.AddOrUpdate(manifest.Id, scriptInstances, (key, oldValue) => scriptInstances);
             }
 
             _logger.LogWorkflowStatus(
@@ -469,7 +802,7 @@ public sealed class ModLoader : IModLoader
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "❌ Failed to load mod '{Id}': {Message}", manifest.Id, ex.Message);
+            _logger.LogError(ex, "Failed to load mod '{Id}': {Message}", manifest.Id, ex.Message);
 
             // Cleanup partially loaded mod
             await UnloadModAsync(manifest.Id);
@@ -484,11 +817,11 @@ public sealed class ModLoader : IModLoader
     {
         if (!_loadedMods.ContainsKey(modId))
         {
-            _logger.LogWarning("⚠️  Mod '{Id}' is not loaded", modId);
+            _logger.LogWarning("Mod '{Id}' is not loaded", modId);
             return;
         }
 
-        _logger.LogInformation("🔄 Unloading mod: {Id}", modId);
+        _logger.LogInformation("Unloading mod: {Id}", modId);
 
         // Dispose all script instances
         if (_modScriptInstances.TryGetValue(modId, out List<object>? instances))
@@ -517,18 +850,18 @@ public sealed class ModLoader : IModLoader
                 {
                     _logger.LogWarning(
                         ex,
-                        "⚠️  Error disposing script instance for mod '{Id}'",
+                        "Error disposing script instance for mod '{Id}'",
                         modId
                     );
                 }
             }
 
-            _modScriptInstances.Remove(modId);
+            _modScriptInstances.TryRemove(modId, out _);
         }
 
-        _modPatches.Remove(modId);
-        _loadedMods.Remove(modId);
-        _logger.LogInformation("✅ Mod '{Id}' unloaded", modId);
+        _modPatches.TryRemove(modId, out _);
+        _loadedMods.TryRemove(modId, out _);
+        _logger.LogInformation("Mod '{Id}' unloaded", modId);
     }
 
     /// <summary>
@@ -538,11 +871,11 @@ public sealed class ModLoader : IModLoader
     {
         if (!_loadedMods.TryGetValue(modId, out ModManifest? manifest))
         {
-            _logger.LogWarning("⚠️  Cannot reload mod '{Id}': not loaded", modId);
+            _logger.LogWarning("Cannot reload mod '{Id}': not loaded", modId);
             return;
         }
 
-        _logger.LogInformation("🔄 Reloading mod: {Id}", modId);
+        _logger.LogInformation("Reloading mod: {Id}", modId);
 
         await UnloadModAsync(modId);
         await LoadModAsync(manifest);
@@ -567,7 +900,7 @@ public sealed class ModLoader : IModLoader
     /// <summary>
     ///     Gets all patches for a loaded mod.
     /// </summary>
-    public List<ModPatch> GetModPatches(string modId)
+    public IReadOnlyList<ModPatch> GetModPatches(string modId)
     {
         return _modPatches.TryGetValue(modId, out List<ModPatch>? patches) ? patches : new List<ModPatch>();
     }
@@ -587,13 +920,22 @@ public sealed class ModLoader : IModLoader
             return null;
         }
 
-        return Path.Combine(manifest.DirectoryPath, relativePath);
+        // Validate content folder path for security
+        if (!IsPathSafe(manifest.DirectoryPath, relativePath, out string fullPath))
+        {
+            _logger.LogWarning(
+                "Security: Rejected content folder '{RelativePath}' for mod '{Id}' (path traversal attempt)",
+                relativePath, modId);
+            return null;
+        }
+
+        return fullPath;
     }
 
     /// <summary>
     ///     Gets all content folder paths for a mod.
     /// </summary>
-    public Dictionary<string, string> GetContentFolders(string modId)
+    public IReadOnlyDictionary<string, string> GetContentFolders(string modId)
     {
         if (!_loadedMods.TryGetValue(modId, out ModManifest? manifest))
         {
@@ -603,7 +945,16 @@ public sealed class ModLoader : IModLoader
         var result = new Dictionary<string, string>();
         foreach (var kvp in manifest.ContentFolders)
         {
-            result[kvp.Key] = Path.Combine(manifest.DirectoryPath, kvp.Value);
+            // Validate content folder path for security
+            if (!IsPathSafe(manifest.DirectoryPath, kvp.Value, out string fullPath))
+            {
+                _logger.LogWarning(
+                    "Security: Rejected content folder '{RelativePath}' for mod '{Id}' (path traversal attempt)",
+                    kvp.Value, modId);
+                continue;
+            }
+
+            result[kvp.Key] = fullPath;
         }
 
         return result;
@@ -629,7 +980,7 @@ public sealed class ModLoader : IModLoader
         if (manifest != null)
         {
             // Base game should have high priority but allow mods to override
-            _loadedMods[manifest.Id] = manifest;
+            _loadedMods.AddOrUpdate(manifest.Id, manifest, (key, oldValue) => manifest);
             _logger.LogInformation(
                 "Loaded base game: {Name} v{Version} (priority {Priority})",
                 manifest.Name, manifest.Version, manifest.Priority);
@@ -689,10 +1040,43 @@ public sealed class LoadedMod
 
     /// <summary>
     ///     Resolves a relative path within this mod's directory.
+    ///     Validates the path to prevent path traversal attacks.
     /// </summary>
+    /// <exception cref="SecurityException">Thrown when path traversal is detected.</exception>
     public string ResolvePath(string relativePath)
     {
-        return Path.Combine(RootPath, relativePath);
+        // Reject null/empty paths
+        if (string.IsNullOrWhiteSpace(relativePath))
+            throw new SecurityException("Path cannot be null or empty");
+
+        // Reject absolute paths in user input
+        if (Path.IsPathRooted(relativePath))
+            throw new SecurityException($"Absolute paths are not allowed: {relativePath}");
+
+        // Reject obvious traversal attempts
+        if (relativePath.Contains(".."))
+            throw new SecurityException($"Path traversal detected: {relativePath}");
+
+        try
+        {
+            // Resolve to full path
+            string resolvedPath = Path.GetFullPath(Path.Combine(RootPath, relativePath));
+            string baseFullPath = Path.GetFullPath(RootPath);
+
+            // Ensure resolved path is within base directory
+            if (!resolvedPath.StartsWith(baseFullPath, StringComparison.OrdinalIgnoreCase))
+                throw new SecurityException($"Path escapes mod directory: {relativePath}");
+
+            return resolvedPath;
+        }
+        catch (SecurityException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            throw new SecurityException($"Invalid path: {relativePath}", ex);
+        }
     }
 
     public override string ToString()

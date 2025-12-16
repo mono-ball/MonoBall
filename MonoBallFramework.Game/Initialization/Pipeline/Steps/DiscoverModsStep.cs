@@ -52,6 +52,10 @@ public class DiscoverModsStep : InitializationStepBase
                 "Discovered {Count} mod(s) - content folders now available for game data loading",
                 modLoader.LoadedMods.Count
             );
+
+            // Phase 1b: Load custom type definitions from discovered mods
+            // This makes custom types available to scripts and content systems
+            await modLoader.LoadCustomTypeDefinitions();
         }
         catch (Exception ex)
         {

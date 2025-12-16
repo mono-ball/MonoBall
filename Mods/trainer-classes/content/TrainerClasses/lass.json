@@ -1,0 +1,31 @@
+{
+  "id": "lass",
+  "name": "Lass",
+  "description": "A young female trainer with a varied team",
+  "version": "1.0.0",
+  "basePrizeMoney": 16,
+  "prizeMoneyMultiplier": 1.0,
+  "battleIntroDialogue": [
+    "Let's have a Pokemon battle!",
+    "My Pokemon and I are a great team!",
+    "Don't underestimate me!"
+  ],
+  "battleDefeatDialogue": [
+    "You're pretty good!",
+    "I had fun battling you.",
+    "Good game!"
+  ],
+  "battleVictoryDialogue": [
+    "Yay! We won!",
+    "That was exciting!"
+  ],
+  "preferredTypes": ["normal", "fairy", "grass"],
+  "levelRange": {
+    "min": 4,
+    "max": 20
+  },
+  "teamSize": {
+    "min": 1,
+    "max": 3
+  }
+}

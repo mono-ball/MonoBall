@@ -1,0 +1,31 @@
+{
+  "id": "bug_catcher",
+  "name": "Bug Catcher",
+  "description": "A trainer who specializes in Bug-type Pokemon",
+  "version": "1.0.0",
+  "basePrizeMoney": 12,
+  "prizeMoneyMultiplier": 1.0,
+  "battleIntroDialogue": [
+    "I caught some amazing bugs!",
+    "Bug Pokemon are the coolest!",
+    "Want to see my collection?"
+  ],
+  "battleDefeatDialogue": [
+    "My bugs...",
+    "I'll catch stronger bugs!",
+    "Back to the forest for me."
+  ],
+  "battleVictoryDialogue": [
+    "Bug Pokemon rule!",
+    "See how strong bugs can be?"
+  ],
+  "preferredTypes": ["bug"],
+  "levelRange": {
+    "min": 3,
+    "max": 18
+  },
+  "teamSize": {
+    "min": 2,
+    "max": 4
+  }
+}

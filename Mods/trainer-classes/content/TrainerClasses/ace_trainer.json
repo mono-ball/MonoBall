@@ -1,0 +1,33 @@
+{
+  "id": "ace_trainer",
+  "name": "Ace Trainer",
+  "description": "An experienced trainer with a well-balanced team",
+  "version": "1.0.0",
+  "basePrizeMoney": 48,
+  "prizeMoneyMultiplier": 1.5,
+  "battleIntroDialogue": [
+    "I've trained hard for this!",
+    "Show me what you've got!",
+    "A true test of skill awaits!"
+  ],
+  "battleDefeatDialogue": [
+    "Impressive strategy!",
+    "I see I still have much to learn.",
+    "You've earned this victory."
+  ],
+  "battleVictoryDialogue": [
+    "Training always pays off!",
+    "Victory through preparation!"
+  ],
+  "preferredTypes": [],
+  "levelRange": {
+    "min": 25,
+    "max": 50
+  },
+  "teamSize": {
+    "min": 3,
+    "max": 6
+  },
+  "usesItems": true,
+  "aiDifficulty": "hard"
+}

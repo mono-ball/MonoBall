@@ -2,6 +2,7 @@ using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using MonoBallFramework.Game.Engine.Core.Modding.CustomTypes;
 using MonoBallFramework.Game.Engine.UI.Components.Base;
 using MonoBallFramework.Game.Engine.UI.Components.Controls;
 using MonoBallFramework.Game.Engine.UI.Components.Layout;
@@ -9,6 +10,7 @@ using MonoBallFramework.Game.Engine.UI.Core;
 using MonoBallFramework.Game.Engine.UI.Input;
 using MonoBallFramework.Game.Engine.UI.Layout;
 using MonoBallFramework.Game.GameData;
+using MonoBallFramework.Game.Scripting.Api;
 
 namespace MonoBallFramework.Game.Engine.UI.Components.Debug;
 
@@ -32,6 +34,7 @@ public class EntityFrameworkPanel : DebugPanelBase
 
     private readonly Dictionary<int, string> _lineToEntity = new(); // Line number -> Entity path
     private IDbContextFactory<GameDataContext>? _contextFactory;
+    private ICustomTypesApi? _customTypesApi;
     private string _dbSetFilter = "";
     private string _searchFilter = "";
     private string? _selectedEntityPath;
@@ -121,6 +124,15 @@ public class EntityFrameworkPanel : DebugPanelBase
     }
 
     /// <summary>
+    ///     Sets the custom types API for accessing mod-defined content types.
+    /// </summary>
+    public void SetCustomTypesApi(ICustomTypesApi? customTypesApi)
+    {
+        _customTypesApi = customTypesApi;
+        UpdateDisplay();
+    }
+
+    /// <summary>
     ///     Sets the DbSet filter.
     /// </summary>
     public void SetDbSetFilter(string dbSetName)
@@ -166,10 +178,10 @@ public class EntityFrameworkPanel : DebugPanelBase
         _detailBuffer.ClearPreservingScroll(); // Preserve detail scroll position
         _lineToEntity.Clear();
 
-        if (_contextFactory == null)
+        if (_contextFactory == null && _customTypesApi == null)
         {
             _listBuffer.AppendLine(
-                "  No DbContext factory set. Use SetContextFactory() to provide access to Entity Framework data.",
+                "  No data sources configured.",
                 ThemeManager.Current.TextDim
             );
             UpdateStatusBar();
@@ -178,85 +190,154 @@ public class EntityFrameworkPanel : DebugPanelBase
 
         try
         {
-            using GameDataContext context = _contextFactory.CreateDbContext();
-            PropertyInfo[] dbSetProperties = GetDbSetProperties(context);
+            // Collect all filter tags (DbSets + Custom Type categories)
+            var allFilterTags = new List<string>();
 
-            if (dbSetProperties.Length == 0)
+            // Get DbSet properties if context factory is available
+            PropertyInfo[] dbSetProperties = Array.Empty<PropertyInfo>();
+            GameDataContext? context = null;
+
+            if (_contextFactory != null)
+            {
+                context = _contextFactory.CreateDbContext();
+                dbSetProperties = GetDbSetProperties(context);
+                allFilterTags.AddRange(dbSetProperties.Select(p => p.Name));
+            }
+
+            // Get custom type categories
+            IReadOnlyCollection<string> customTypeCategories = _customTypesApi?.GetCategories() ?? Array.Empty<string>();
+            foreach (string category in customTypeCategories)
+            {
+                // Prefix custom types with icon to distinguish from DbSets
+                allFilterTags.Add($"⚡{category}");
+            }
+
+            if (dbSetProperties.Length == 0 && customTypeCategories.Count == 0)
             {
                 _listBuffer.AppendLine(
-                    "  No DbSets found in GameDataContext.",
+                    "  No DbSets or custom types found.",
                     ThemeManager.Current.TextDim
                 );
+                context?.Dispose();
                 UpdateStatusBar();
                 return;
             }
 
-            // Update filter bar with available DbSets
-            List<string> dbSetNames = dbSetProperties.Select(p => p.Name).OrderBy(n => n).ToList();
-            _filterBar.SetTags(dbSetNames);
+            // Update filter bar with all available sources
+            _filterBar.SetTags(allFilterTags.OrderBy(n => n).ToList());
             _filterBar.SetComponents(new List<string>()); // No component filter for EF
 
-            // Collect all entities from all DbSets into a flat list
-            var allEntities = new List<(string DbSetName, int Index, object Entity, Type? EntityType)>();
+            // Collect all entities from all sources into a flat list
+            var allEntities = new List<(string SourceName, int Index, object Entity, Type? EntityType, bool IsCustomType)>();
 
-            foreach (PropertyInfo prop in dbSetProperties)
+            // Collect from DbSets
+            if (context != null)
             {
-                string dbSetName = prop.Name;
-
-                // Apply DbSet filter
-                if (!string.IsNullOrEmpty(_dbSetFilter) && dbSetName != _dbSetFilter)
+                foreach (PropertyInfo prop in dbSetProperties)
                 {
-                    continue;
-                }
+                    string dbSetName = prop.Name;
 
-                try
-                {
-                    // Get the DbSet value
-                    object? dbSetValue = prop.GetValue(context);
-                    if (dbSetValue == null)
+                    // Apply filter (check without prefix for DbSets)
+                    if (!string.IsNullOrEmpty(_dbSetFilter) && _dbSetFilter != dbSetName && !_dbSetFilter.StartsWith("⚡"))
+                    {
+                        continue;
+                    }
+                    // Skip DbSets if filtering by custom type
+                    if (!string.IsNullOrEmpty(_dbSetFilter) && _dbSetFilter.StartsWith("⚡"))
                     {
                         continue;
                     }
 
-                    // Get the generic type argument (entity type)
-                    Type? entityType = GetEntityType(prop.PropertyType);
-
-                    // Try to get items
-                    IEnumerable<object>? items = null;
-
-                    if (dbSetValue is IQueryable<object> queryable)
+                    try
                     {
-                        items = queryable.Take(MaxItemsPerSet).ToList();
-                    }
-                    else if (dbSetValue is IEnumerable<object> enumerable)
-                    {
-                        items = enumerable.Take(MaxItemsPerSet).ToList();
-                    }
+                        object? dbSetValue = prop.GetValue(context);
+                        if (dbSetValue == null) continue;
 
-                    if (items != null)
-                    {
-                        int index = 0;
-                        foreach (object item in items)
+                        Type? entityType = GetEntityType(prop.PropertyType);
+                        IEnumerable<object>? items = null;
+
+                        if (dbSetValue is IQueryable<object> queryable)
                         {
-                            allEntities.Add((dbSetName, index, item, entityType));
+                            items = queryable.Take(MaxItemsPerSet).ToList();
+                        }
+                        else if (dbSetValue is IEnumerable<object> enumerable)
+                        {
+                            items = enumerable.Take(MaxItemsPerSet).ToList();
+                        }
+
+                        if (items != null)
+                        {
+                            int index = 0;
+                            foreach (object item in items)
+                            {
+                                allEntities.Add((dbSetName, index, item, entityType, false));
+                                index++;
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _listBuffer.AppendLine(
+                            $"  [Error loading {dbSetName}: {ex.Message}]",
+                            ThemeManager.Current.Error
+                        );
+                    }
+                }
+
+                // Dispose context using 'using' pattern for proper cleanup
+                if (context != null)
+                {
+                    context.Dispose();
+                }
+            }
+
+            // Collect from custom types
+            if (_customTypesApi != null)
+            {
+                foreach (string category in customTypeCategories)
+                {
+                    string prefixedCategory = $"⚡{category}";
+
+                    // Apply filter (check with prefix for custom types)
+                    // Skip categories that don't match the current filter
+                    if (!string.IsNullOrEmpty(_dbSetFilter) && _dbSetFilter != prefixedCategory)
+                    {
+                        // If filter is set to a DbSet name (no ⚡ prefix), skip all custom types
+                        if (!_dbSetFilter.StartsWith("⚡"))
+                        {
+                            continue;
+                        }
+                        // If filtering for a specific custom type category, skip non-matching custom types
+                        if (_dbSetFilter.StartsWith("⚡") && prefixedCategory.StartsWith("⚡"))
+                        {
+                            continue;
+                        }
+                    }
+
+                    try
+                    {
+                        var definitions = _customTypesApi.GetAllDefinitions(category).ToList();
+                        int index = 0;
+                        foreach (ICustomTypeDefinition def in definitions)
+                        {
+                            allEntities.Add((prefixedCategory, index, def, typeof(ICustomTypeDefinition), true));
                             index++;
                         }
                     }
-                }
-                catch (Exception ex)
-                {
-                    // Log error but continue with other DbSets
-                    _listBuffer.AppendLine(
-                        $"  [Error loading {dbSetName}: {ex.Message}]",
-                        ThemeManager.Current.Error
-                    );
+                    catch (Exception ex)
+                    {
+                        _listBuffer.AppendLine(
+                            $"  [Error loading {category}: {ex.Message}]",
+                            ThemeManager.Current.Error
+                        );
+                    }
                 }
             }
 
             if (allEntities.Count == 0)
             {
                 _listBuffer.AppendLine(
-                    "  No entities found in any DbSet.",
+                    "  No entities found.",
                     ThemeManager.Current.TextDim
                 );
                 UpdateStatusBar();
@@ -264,15 +345,17 @@ public class EntityFrameworkPanel : DebugPanelBase
             }
 
             // Display all entities in a flat list
-            foreach (var (dbSetName, index, entity, entityType) in allEntities)
+            foreach (var (sourceName, index, entity, entityType, isCustomType) in allEntities)
             {
-                string entityPath = $"{dbSetName}[{index}]";
+                string entityPath = $"{sourceName}[{index}]";
                 bool entitySelected = _selectedEntityPath == entityPath;
 
                 // Apply search filter to entity
                 if (!string.IsNullOrEmpty(_searchFilter))
                 {
-                    string entityStr = FormatEntitySummary(entity, entityType);
+                    string entityStr = isCustomType
+                        ? FormatCustomTypeDefinitionSummary((ICustomTypeDefinition)entity)
+                        : FormatEntitySummary(entity, entityType);
                     if (!entityStr.Contains(_searchFilter, StringComparison.OrdinalIgnoreCase))
                     {
                         continue;
@@ -282,8 +365,21 @@ public class EntityFrameworkPanel : DebugPanelBase
                 // Display entity (track line number before appending)
                 int entityLine = _listBuffer.TotalLines;
                 string entitySelectionIcon = entitySelected ? NerdFontIcons.SelectedWithSpace : NerdFontIcons.UnselectedSpace;
-                string entityKey = GetEntityKeyDisplay(entity, entityType);
-                string typeName = CleanTypeName(entityType?.Name ?? entity.GetType().Name);
+
+                string entityKey;
+                string typeName;
+
+                if (isCustomType)
+                {
+                    var customDef = (ICustomTypeDefinition)entity;
+                    entityKey = customDef.Id;
+                    typeName = customDef.Category;
+                }
+                else
+                {
+                    entityKey = GetEntityKeyDisplay(entity, entityType);
+                    typeName = CleanTypeName(entityType?.Name ?? entity.GetType().Name);
+                }
 
                 // Get type-based color, with selection override
                 Color entityColor = entitySelected
@@ -365,15 +461,30 @@ public class EntityFrameworkPanel : DebugPanelBase
 
         if (_selectedEntity != null && _selectedEntityPath != null)
         {
+            // Check if this is a custom type definition
+            bool isCustomType = _selectedEntity is ICustomTypeDefinition;
             Type entityType = _selectedEntity.GetType();
-            string cleanTypeName = CleanTypeName(entityType.Name);
+            string cleanTypeName;
+            string headerIcon;
+
+            if (isCustomType)
+            {
+                var customDef = (ICustomTypeDefinition)_selectedEntity;
+                cleanTypeName = customDef.Category;
+                headerIcon = "⚡"; // Custom type icon
+            }
+            else
+            {
+                cleanTypeName = CleanTypeName(entityType.Name);
+                headerIcon = NerdFontIcons.Database;
+            }
 
             // Get type color for header using hash-based color
             Color headerColor = GetEntityTypeColor(cleanTypeName);
 
             // Display entity header with type-specific color
             _detailBuffer.AppendLine(
-                $"  {NerdFontIcons.Database} {cleanTypeName} Details",
+                $"  {headerIcon} {cleanTypeName} Details",
                 headerColor
             );
             _detailBuffer.AppendLine("", ThemeManager.Current.TextDim);
@@ -388,6 +499,7 @@ public class EntityFrameworkPanel : DebugPanelBase
             var collectionProps = new List<PropertyInfo>();
             var complexProps = new List<PropertyInfo>();
             PropertyInfo? extensionDataProp = null;
+            PropertyInfo? rawDataProp = null;
 
             foreach (PropertyInfo prop in properties.OrderBy(p => p.Name))
             {
@@ -395,6 +507,11 @@ public class EntityFrameworkPanel : DebugPanelBase
                 if (prop.Name == "ExtensionData" && prop.PropertyType == typeof(string))
                 {
                     extensionDataProp = prop;
+                }
+                // Special handling for RawData in custom type definitions
+                else if (prop.Name == "RawData" && isCustomType)
+                {
+                    rawDataProp = prop;
                 }
                 else if (prop.GetCustomAttribute<System.ComponentModel.DataAnnotations.KeyAttribute>() != null ||
                     prop.Name.EndsWith("Id", StringComparison.OrdinalIgnoreCase))
@@ -451,6 +568,12 @@ public class EntityFrameworkPanel : DebugPanelBase
             if (extensionDataProp != null)
             {
                 FormatExtensionDataToBuffer(extensionDataProp, "  ");
+            }
+
+            // Display raw data from custom type definitions (magenta)
+            if (rawDataProp != null)
+            {
+                FormatRawDataToBuffer(rawDataProp, "  ");
             }
         }
         else
@@ -644,6 +767,180 @@ public class EntityFrameworkPanel : DebugPanelBase
     }
 
     /// <summary>
+    ///     Formats RawData (custom type definition properties) with parsed display.
+    /// </summary>
+    private void FormatRawDataToBuffer(PropertyInfo prop, string indent)
+    {
+        try
+        {
+            object? value = prop.GetValue(_selectedEntity);
+            if (value == null)
+            {
+                return; // No raw data to display
+            }
+
+            // Handle JsonElement type (from ICustomTypeDefinition.RawData)
+            if (value is System.Text.Json.JsonElement jsonElement)
+            {
+                if (jsonElement.ValueKind != System.Text.Json.JsonValueKind.Object)
+                {
+                    return; // Only display object types
+                }
+
+                // Count properties
+                int propCount = 0;
+                foreach (var _ in jsonElement.EnumerateObject())
+                {
+                    propCount++;
+                }
+
+                if (propCount == 0)
+                {
+                    return;
+                }
+
+                _detailBuffer.AppendLine("", ThemeManager.Current.TextDim);
+                _detailBuffer.AppendLine(
+                    $"{indent}⚡ Definition Data [{propCount} properties]",
+                    new Color(200, 120, 200) // Magenta for mod data
+                );
+
+                string itemIndent = indent + "    ";
+                foreach (System.Text.Json.JsonProperty jsonProp in jsonElement.EnumerateObject().OrderBy(p => p.Name))
+                {
+                    string valueStr = FormatJsonElement(jsonProp.Value);
+                    _detailBuffer.AppendLine(
+                        $"{itemIndent}{jsonProp.Name}: {valueStr}",
+                        new Color(180, 140, 200) // Lighter magenta for values
+                    );
+
+                    // For nested objects/arrays, show expanded content
+                    if (jsonProp.Value.ValueKind == System.Text.Json.JsonValueKind.Object)
+                    {
+                        FormatNestedJsonObject(jsonProp.Value, itemIndent + "    ");
+                    }
+                    else if (jsonProp.Value.ValueKind == System.Text.Json.JsonValueKind.Array)
+                    {
+                        FormatNestedJsonArray(jsonProp.Value, itemIndent + "    ");
+                    }
+                }
+            }
+            // Legacy support for Dictionary<string, object?>
+            else if (value is Dictionary<string, object?> rawData && rawData.Count > 0)
+            {
+                _detailBuffer.AppendLine("", ThemeManager.Current.TextDim);
+                _detailBuffer.AppendLine(
+                    $"{indent}⚡ Definition Data [{rawData.Count} properties]",
+                    new Color(200, 120, 200) // Magenta for mod data
+                );
+
+                string itemIndent = indent + "    ";
+                foreach (var kvp in rawData.OrderBy(k => k.Key))
+                {
+                    string valueStr = FormatRawDataValue(kvp.Value);
+                    _detailBuffer.AppendLine(
+                        $"{itemIndent}{kvp.Key}: {valueStr}",
+                        new Color(180, 140, 200) // Lighter magenta for values
+                    );
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _detailBuffer.AppendLine(
+                $"{indent}RawData: [Error: {ex.Message}]",
+                ThemeManager.Current.Error
+            );
+        }
+    }
+
+    /// <summary>
+    ///     Formats nested JSON object properties with indentation.
+    /// </summary>
+    private void FormatNestedJsonObject(System.Text.Json.JsonElement element, string indent, int depth = 0)
+    {
+        if (depth > 3) // Limit recursion depth
+        {
+            return;
+        }
+
+        foreach (System.Text.Json.JsonProperty prop in element.EnumerateObject().OrderBy(p => p.Name).Take(10))
+        {
+            string valueStr = FormatJsonElement(prop.Value);
+            _detailBuffer.AppendLine(
+                $"{indent}{prop.Name}: {valueStr}",
+                new Color(160, 120, 180) // Even lighter magenta for nested
+            );
+
+            if (prop.Value.ValueKind == System.Text.Json.JsonValueKind.Object)
+            {
+                FormatNestedJsonObject(prop.Value, indent + "    ", depth + 1);
+            }
+            else if (prop.Value.ValueKind == System.Text.Json.JsonValueKind.Array)
+            {
+                FormatNestedJsonArray(prop.Value, indent + "    ", depth + 1);
+            }
+        }
+    }
+
+    /// <summary>
+    ///     Formats nested JSON array elements with indentation.
+    /// </summary>
+    private void FormatNestedJsonArray(System.Text.Json.JsonElement element, string indent, int depth = 0)
+    {
+        if (depth > 3) // Limit recursion depth
+        {
+            return;
+        }
+
+        int index = 0;
+        foreach (System.Text.Json.JsonElement item in element.EnumerateArray().Take(5))
+        {
+            string valueStr = FormatJsonElement(item);
+            _detailBuffer.AppendLine(
+                $"{indent}[{index}]: {valueStr}",
+                new Color(160, 120, 180) // Even lighter magenta for nested
+            );
+
+            if (item.ValueKind == System.Text.Json.JsonValueKind.Object)
+            {
+                FormatNestedJsonObject(item, indent + "    ", depth + 1);
+            }
+            index++;
+        }
+
+        int totalCount = element.GetArrayLength();
+        if (totalCount > 5)
+        {
+            _detailBuffer.AppendLine(
+                $"{indent}... and {totalCount - 5} more items",
+                ThemeManager.Current.TextDim
+            );
+        }
+    }
+
+    /// <summary>
+    ///     Formats a raw data value for display.
+    /// </summary>
+    private string FormatRawDataValue(object? value)
+    {
+        if (value == null)
+        {
+            return "[null]";
+        }
+
+        return value switch
+        {
+            string s => $"\"{s}\"",
+            bool b => b ? "true" : "false",
+            System.Text.Json.JsonElement element => FormatJsonElement(element),
+            System.Collections.IList list => $"[array: {list.Count} items]",
+            System.Collections.IDictionary dict => $"[object: {dict.Count} properties]",
+            _ => value.ToString() ?? "[null]"
+        };
+    }
+
+    /// <summary>
     ///     Formats a JsonElement for display.
     /// </summary>
     private string FormatJsonElement(System.Text.Json.JsonElement element)
@@ -688,10 +985,11 @@ public class EntityFrameworkPanel : DebugPanelBase
                 if (propValue != null)
                 {
                     string valueStr = FormatValue(propValue, prop.PropertyType, 2);
-                    // Truncate long values
+                    // Truncate long values with bounds check
                     if (valueStr.Length > 30)
                     {
-                        valueStr = valueStr.Substring(0, 27) + "...";
+                        int substringLength = Math.Min(27, valueStr.Length);
+                        valueStr = valueStr.Substring(0, substringLength) + "...";
                     }
                     parts.Add($"{prop.Name}={valueStr}");
                 }
@@ -727,6 +1025,14 @@ public class EntityFrameworkPanel : DebugPanelBase
         Type type = entityType ?? entity.GetType();
         // Clean up type name (remove common suffixes/prefixes)
         return CleanTypeName(type.Name);
+    }
+
+    /// <summary>
+    ///     Formats a custom type definition summary for the list view.
+    /// </summary>
+    private string FormatCustomTypeDefinitionSummary(ICustomTypeDefinition definition)
+    {
+        return $"{definition.Category}: {definition.Id}";
     }
 
     /// <summary>
@@ -782,14 +1088,24 @@ public class EntityFrameworkPanel : DebugPanelBase
                 if (innerValue != null)
                 {
                     string result = innerValue.ToString() ?? string.Empty;
-                    // Truncate if too long
-                    return result.Length > 60 ? result.Substring(0, 57) + "..." : result;
+                    // Truncate if too long with bounds check
+                    if (result.Length > 60)
+                    {
+                        int substringLength = Math.Min(57, result.Length);
+                        return result.Substring(0, substringLength) + "...";
+                    }
+                    return result;
                 }
             }
 
             // Use ToString directly
             string str = value.ToString() ?? string.Empty;
-            return str.Length > 60 ? str.Substring(0, 57) + "..." : str;
+            if (str.Length > 60)
+            {
+                int substringLength = Math.Min(57, str.Length);
+                return str.Substring(0, substringLength) + "...";
+            }
+            return str;
         }
         catch
         {
@@ -802,16 +1118,16 @@ public class EntityFrameworkPanel : DebugPanelBase
     /// </summary>
     private string CleanTypeName(string typeName)
     {
-        // Remove common suffixes
-        if (typeName.EndsWith("Entity"))
+        // Remove common suffixes with bounds checking
+        if (typeName.EndsWith("Entity") && typeName.Length > 6)
         {
             return typeName.Substring(0, typeName.Length - 6);
         }
-        if (typeName.EndsWith("Model"))
+        if (typeName.EndsWith("Model") && typeName.Length > 5)
         {
             return typeName.Substring(0, typeName.Length - 5);
         }
-        if (typeName.EndsWith("Data"))
+        if (typeName.EndsWith("Data") && typeName.Length > 4)
         {
             return typeName.Substring(0, typeName.Length - 4);
         }
@@ -898,7 +1214,9 @@ public class EntityFrameworkPanel : DebugPanelBase
             string str = (string)value;
             if (str.Length > 50)
             {
-                return $"\"{str.Substring(0, 47)}...\"";
+                // Bounds check before substring
+                int substringLength = Math.Min(47, str.Length);
+                return $"\"{str.Substring(0, substringLength)}...\"";
             }
             return $"\"{str}\"";
         }
@@ -951,7 +1269,9 @@ public class EntityFrameworkPanel : DebugPanelBase
                 // ToString() is meaningful, use it
                 if (toStringResult.Length > 100)
                 {
-                    return toStringResult.Substring(0, 97) + "...";
+                    // Bounds check before substring
+                    int substringLength = Math.Min(97, toStringResult.Length);
+                    return toStringResult.Substring(0, substringLength) + "...";
                 }
                 return toStringResult;
             }
@@ -1034,10 +1354,11 @@ public class EntityFrameworkPanel : DebugPanelBase
                 if (propValue != null)
                 {
                     string valueStr = FormatValue(propValue, prop.PropertyType, depth + 1);
-                    // Truncate long values
+                    // Truncate long values with bounds check
                     if (valueStr.Length > 20)
                     {
-                        valueStr = valueStr.Substring(0, 17) + "...";
+                        int substringLength = Math.Min(17, valueStr.Length);
+                        valueStr = valueStr.Substring(0, substringLength) + "...";
                     }
                     parts.Add($"{prop.Name}={valueStr}");
                 }
@@ -1353,55 +1674,89 @@ public class EntityFrameworkPanel : DebugPanelBase
         _selectedEntityPath = entityPath;
         _selectedEntity = null;
 
-        if (_contextFactory == null)
-        {
-            return;
-        }
-
-        // Parse entity path: "DbSetName[index]"
+        // Parse entity path: "SourceName[index]"
         int bracketIndex = entityPath.IndexOf('[');
-        if (bracketIndex < 0)
+        int closeBracketIndex = entityPath.IndexOf(']');
+
+        // Validate format
+        if (bracketIndex < 0 || closeBracketIndex < 0 || closeBracketIndex <= bracketIndex + 1)
         {
-            return;
+            return; // Invalid format
         }
 
-        string dbSetName = entityPath.Substring(0, bracketIndex);
-        string indexStr = entityPath.Substring(bracketIndex + 1, entityPath.Length - bracketIndex - 2);
+        string sourceName = entityPath.Substring(0, bracketIndex);
+        string indexStr = entityPath.Substring(bracketIndex + 1, closeBracketIndex - bracketIndex - 1);
         if (!int.TryParse(indexStr, out int index))
         {
             return;
         }
 
-        try
+        // Check if this is a custom type (prefixed with ⚡)
+        if (sourceName.StartsWith("⚡"))
         {
-            using GameDataContext context = _contextFactory.CreateDbContext();
-            PropertyInfo? prop = context.GetType().GetProperty(dbSetName);
-            if (prop == null)
+            if (_customTypesApi == null)
             {
                 return;
             }
 
-            object? dbSetValue = prop.GetValue(context);
-            if (dbSetValue == null)
+            // Remove ⚡ prefix with bounds check
+            if (sourceName.Length <= 1)
             {
-                return;
+                return; // Invalid format
             }
-
-            IEnumerable<object>? items = null;
-            if (dbSetValue is IQueryable<object> queryable)
+            string category = sourceName.Substring(1);
+            try
             {
-                items = queryable.Skip(index).Take(1).ToList();
+                var definitions = _customTypesApi.GetAllDefinitions(category).ToList();
+                if (index >= 0 && index < definitions.Count)
+                {
+                    _selectedEntity = definitions[index];
+                }
             }
-            else if (dbSetValue is IEnumerable<object> enumerable)
+            catch
             {
-                items = enumerable.Skip(index).Take(1).ToList();
+                // Ignore errors
             }
-
-            _selectedEntity = items?.FirstOrDefault();
         }
-        catch
+        else
         {
-            // Ignore errors
+            // DbSet entity
+            if (_contextFactory == null)
+            {
+                return;
+            }
+
+            try
+            {
+                using GameDataContext context = _contextFactory.CreateDbContext();
+                PropertyInfo? prop = context.GetType().GetProperty(sourceName);
+                if (prop == null)
+                {
+                    return;
+                }
+
+                object? dbSetValue = prop.GetValue(context);
+                if (dbSetValue == null)
+                {
+                    return;
+                }
+
+                IEnumerable<object>? items = null;
+                if (dbSetValue is IQueryable<object> queryable)
+                {
+                    items = queryable.Skip(index).Take(1).ToList();
+                }
+                else if (dbSetValue is IEnumerable<object> enumerable)
+                {
+                    items = enumerable.Skip(index).Take(1).ToList();
+                }
+
+                _selectedEntity = items?.FirstOrDefault();
+            }
+            catch
+            {
+                // Ignore errors
+            }
         }
     }
 

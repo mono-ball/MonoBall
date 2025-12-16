@@ -309,6 +309,14 @@ public class ConsoleScene : SceneBase
     }
 
     /// <summary>
+    ///     Sets the custom types API for the EntityFramework panel.
+    /// </summary>
+    public void SetCustomTypesApi(Scripting.Api.ICustomTypesApi? customTypesApi)
+    {
+        _entityFrameworkPanel?.SetCustomTypesApi(customTypesApi);
+    }
+
+    /// <summary>
     ///     Sets the active tab by index.
     /// </summary>
     public void SetActiveTab(int index)

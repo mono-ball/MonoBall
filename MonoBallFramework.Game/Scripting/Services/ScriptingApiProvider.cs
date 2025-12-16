@@ -12,9 +12,9 @@ public class ScriptingApiProvider(
     MapApiService mapApi,
     GameStateApiService gameStateApi,
     DialogueApiService dialogueApi,
-    
     EntityApiService entityApi,
-    RegistryApiService registryApi
+    RegistryApiService registryApi,
+    CustomTypesApiService customTypesApi
 ) : IScriptingApiProvider
 {
     /// <inheritdoc />
@@ -36,14 +36,14 @@ public class ScriptingApiProvider(
         dialogueApi ?? throw new ArgumentNullException(nameof(dialogueApi));
 
     /// <inheritdoc />
-    
-        
-
-    /// <inheritdoc />
     public IEntityApi Entity { get; } =
         entityApi ?? throw new ArgumentNullException(nameof(entityApi));
 
     /// <inheritdoc />
     public IRegistryApi Registry { get; } =
         registryApi ?? throw new ArgumentNullException(nameof(registryApi));
+
+    /// <inheritdoc />
+    public ICustomTypesApi CustomTypes { get; } =
+        customTypesApi ?? throw new ArgumentNullException(nameof(customTypesApi));
 }
