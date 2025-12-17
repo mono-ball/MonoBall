@@ -30,6 +30,8 @@ public static class HistoryPersistence
     /// <param name="maxEntries">Maximum number of entries to save (default 1000).</param>
     public static void SaveHistory(IEnumerable<string> commands, int maxEntries = 1000)
     {
+        // CA1031: File I/O can throw many exception types; silently failing is intentional for non-critical persistence
+#pragma warning disable CA1031
         try
         {
             // Take only the most recent entries
@@ -46,6 +48,7 @@ public static class HistoryPersistence
         {
             // Silently fail - don't crash the game over history persistence
         }
+#pragma warning restore CA1031
     }
 
     /// <summary>
@@ -54,6 +57,8 @@ public static class HistoryPersistence
     /// <returns>List of commands, or empty list if unable to load.</returns>
     public static List<string> LoadHistory()
     {
+        // CA1031: File I/O and JSON parsing can throw many exception types; silently failing is intentional
+#pragma warning disable CA1031
         try
         {
             if (!File.Exists(HistoryFilePath))
@@ -71,6 +76,7 @@ public static class HistoryPersistence
             // Silently fail - return empty history
             return new List<string>();
         }
+#pragma warning restore CA1031
     }
 
     /// <summary>
@@ -78,6 +84,8 @@ public static class HistoryPersistence
     /// </summary>
     public static void ClearHistory()
     {
+        // CA1031: File I/O can throw many exception types; silently failing is intentional
+#pragma warning disable CA1031
         try
         {
             if (File.Exists(HistoryFilePath))
@@ -89,6 +97,7 @@ public static class HistoryPersistence
         {
             // Silently fail
         }
+#pragma warning restore CA1031
     }
 
     /// <summary>

@@ -142,6 +142,8 @@ public sealed class FileLogger<T> : ILogger<T>, IDisposable
 
     private void WriteToFile(string logEntry)
     {
+        // CA1031: File I/O can throw many exception types; silently failing is intentional for logging
+#pragma warning disable CA1031
         try
         {
             // Check if we need to rotate the file
@@ -164,6 +166,7 @@ public sealed class FileLogger<T> : ILogger<T>, IDisposable
         {
             // Silently fail - don't crash the application due to logging issues
         }
+#pragma warning restore CA1031
     }
 
     private void RotateLogFile()
@@ -189,6 +192,9 @@ public sealed class FileLogger<T> : ILogger<T>, IDisposable
 
     private void CleanupOldLogs()
     {
+        // CA1031: File I/O operations can throw many exception types; silently failing is intentional
+        // for non-critical log cleanup operations
+#pragma warning disable CA1031
         try
         {
             var logFiles = Directory
@@ -213,6 +219,7 @@ public sealed class FileLogger<T> : ILogger<T>, IDisposable
         {
             // Ignore errors during cleanup
         }
+#pragma warning restore CA1031
     }
 
     private static string GetLogLevelString(LogLevel logLevel)

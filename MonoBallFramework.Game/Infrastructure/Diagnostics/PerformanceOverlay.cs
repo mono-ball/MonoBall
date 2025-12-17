@@ -88,6 +88,9 @@ public class PerformanceOverlay : IDisposable
 
     private void LoadFont()
     {
+        // CA1031: Font loading can fail for many reasons (missing file, corrupt font, etc.);
+        // silently degrading is intentional for non-critical debug overlay
+#pragma warning disable CA1031
         try
         {
             // Load debug font from database using FontLoader
@@ -103,6 +106,7 @@ public class PerformanceOverlay : IDisposable
             _font = null;
             _fontSystem = null;
         }
+#pragma warning restore CA1031
     }
 
     /// <summary>

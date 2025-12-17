@@ -58,10 +58,12 @@ public class ConsoleLoggerProvider : ILoggerProvider
     private void FlushPendingLogs()
     {
         List<(LogLevel, string, string)> logsToFlush;
+        Action<LogLevel, string, string>? logHandler;
 
         lock (_pendingLogsLock)
         {
-            if (_pendingLogs.Count == 0 || _addLogEntry == null)
+            logHandler = _addLogEntry;
+            if (_pendingLogs.Count == 0 || logHandler == null)
             {
                 return;
             }
@@ -71,10 +73,10 @@ public class ConsoleLoggerProvider : ILoggerProvider
             _handlersConfigured = true;
         }
 
-        // Flush outside of lock
+        // Flush outside of lock using captured handler
         foreach ((LogLevel level, string message, string category) in logsToFlush)
         {
-            _addLogEntry(level, message, category);
+            logHandler(level, message, category);
         }
     }
 
@@ -89,9 +91,11 @@ public class ConsoleLoggerProvider : ILoggerProvider
 
     private void AddLogEntry(LogLevel level, string message, string category)
     {
-        if (_addLogEntry != null)
+        // Capture delegate to avoid race condition with null check
+        Action<LogLevel, string, string>? handler = _addLogEntry;
+        if (handler != null)
         {
-            _addLogEntry(level, message, category);
+            handler(level, message, category);
         }
         else
         {

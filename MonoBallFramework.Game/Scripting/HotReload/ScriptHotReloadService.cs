@@ -245,7 +245,12 @@ public class ScriptHotReloadService : IDisposable
     ///     - Only when the timer expires without interruption does compilation begin
     ///     This approach reduces compilation events by 70-90% during typical editing sessions.
     /// </remarks>
+    /// <remarks>
+    ///     Note: async void is required for event handlers. Exceptions are properly caught within the method.
+    /// </remarks>
+#pragma warning disable VSTHRD100 // Avoid async void methods (required for event handler)
     private async void OnScriptChanged(object? sender, ScriptChangedEventArgs e)
+#pragma warning restore VSTHRD100
     {
         // Cancel any existing debouncer for this file (per-file debouncing)
         if (_debouncers.TryRemove(e.FilePath, out CancellationTokenSource? oldCts))

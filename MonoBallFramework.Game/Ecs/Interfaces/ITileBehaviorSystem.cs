@@ -1,7 +1,7 @@
 using Arch.Core;
 using MonoBallFramework.Game.Ecs.Components.Movement;
 
-namespace MonoBallFramework.Game.Components.Interfaces;
+namespace MonoBallFramework.Game.Ecs.Interfaces;
 
 /// <summary>
 ///     Interface for tile behavior system to break circular dependencies.

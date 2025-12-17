@@ -98,6 +98,8 @@ public class WatchEvaluator : IDisposable
     {
         while (!_cts.Token.IsCancellationRequested)
         {
+            // CA1031: Worker thread must not crash; catching general Exception is intentional
+#pragma warning disable CA1031
             try
             {
                 // Wait for work or cancellation
@@ -119,6 +121,7 @@ public class WatchEvaluator : IDisposable
             {
                 // Don't let exceptions crash the worker thread
             }
+#pragma warning restore CA1031
         }
     }
 

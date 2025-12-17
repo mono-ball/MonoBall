@@ -243,6 +243,9 @@ public class PortAudioOutput : IDisposable
         StreamCallbackFlags statusFlags,
         IntPtr userData)
     {
+        // CA1031: Audio callbacks can throw many exception types; recovering gracefully is critical
+        // to avoid crashing the audio thread
+#pragma warning disable CA1031
         try
         {
             // Check for device issues via status flags
@@ -302,6 +305,7 @@ public class PortAudioOutput : IDisposable
             DeviceError?.Invoke(this, new DeviceErrorEventArgs(DeviceErrorType.Unknown, _deviceErrorCount));
             return StreamCallbackResult.Abort;
         }
+#pragma warning restore CA1031
     }
 
     /// <summary>

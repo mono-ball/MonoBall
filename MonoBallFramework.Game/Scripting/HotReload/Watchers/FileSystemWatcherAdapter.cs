@@ -147,9 +147,10 @@ public class FileSystemWatcherAdapter : IScriptWatcher
         var cts = new CancellationTokenSource();
         _debounceTimers[e.FullPath] = cts;
 
-        _ = Task.Delay(_debounceDelay, cts.Token)
+        // Fire-and-forget task for debounced file change handling
+        Task.Delay(_debounceDelay, cts.Token)
             .ContinueWith(
-                async _ =>
+                async task =>
                 {
                     try
                     {
