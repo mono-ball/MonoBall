@@ -441,12 +441,7 @@ public class NpcApiService(World world, ILogger<NpcApiService> logger) : INpcApi
     /// <inheritdoc />
     public bool IsNpcVisible(Entity npc)
     {
-        if (!_world.IsAlive(npc))
-        {
-            return false;
-        }
-
-        return _world.Has<Visible>(npc);
+        return _world.IsAlive(npc) && _world.Has<Visible>(npc);
     }
 
     #endregion

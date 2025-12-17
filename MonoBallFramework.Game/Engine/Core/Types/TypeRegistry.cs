@@ -23,6 +23,13 @@ namespace MonoBallFramework.Game.Engine.Core.Types;
 public class TypeRegistry<T> : IAsyncDisposable
     where T : ITypeDefinition
 {
+    private static readonly JsonSerializerOptions s_jsonOptions = new()
+    {
+        PropertyNameCaseInsensitive = true,
+        ReadCommentHandling = JsonCommentHandling.Skip,
+        AllowTrailingCommas = true
+    };
+
     private readonly string _contentType;
     private readonly string _dataPath;
     private readonly ConcurrentDictionary<string, T> _definitions = new();
@@ -143,10 +150,7 @@ public class TypeRegistry<T> : IAsyncDisposable
             throw new ArgumentException("TypeId cannot be null or empty", nameof(typeId));
         }
 
-        if (scriptInstance == null)
-        {
-            throw new ArgumentNullException(nameof(scriptInstance));
-        }
+        ArgumentNullException.ThrowIfNull(scriptInstance);
 
         _scripts[typeId] = scriptInstance;
         _logger.LogDebug("Registered script for {TypeId}", typeId);
@@ -223,14 +227,8 @@ public class TypeRegistry<T> : IAsyncDisposable
     public async Task RegisterFromJsonAsync(string jsonPath)
     {
         string json = await File.ReadAllTextAsync(jsonPath);
-        var options = new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true,
-            ReadCommentHandling = JsonCommentHandling.Skip,
-            AllowTrailingCommas = true
-        };
 
-        T? definition = JsonSerializer.Deserialize<T>(json, options);
+        T? definition = JsonSerializer.Deserialize<T>(json, s_jsonOptions);
         if (definition == null)
         {
             throw new InvalidOperationException(
@@ -319,10 +317,7 @@ public class TypeRegistry<T> : IAsyncDisposable
             throw new ArgumentException("TypeId cannot be null or empty", nameof(typeId));
         }
 
-        if (scriptInstance == null)
-        {
-            throw new ArgumentNullException(nameof(scriptInstance));
-        }
+        ArgumentNullException.ThrowIfNull(scriptInstance);
 
         _scripts[typeId] = scriptInstance;
         _logger.LogInformation("Updated script for {TypeId}", typeId);
@@ -353,12 +348,7 @@ public class TypeRegistry<T> : IAsyncDisposable
     /// <returns>True if the type is registered, false otherwise.</returns>
     public bool Contains(string typeId)
     {
-        if (string.IsNullOrWhiteSpace(typeId))
-        {
-            return false;
-        }
-
-        return _definitions.ContainsKey(typeId);
+        return !string.IsNullOrWhiteSpace(typeId) && _definitions.ContainsKey(typeId);
     }
 
     /// <summary>
@@ -400,11 +390,6 @@ public class TypeRegistry<T> : IAsyncDisposable
     /// <returns>True if a script is registered, false otherwise.</returns>
     public bool HasScript(string typeId)
     {
-        if (string.IsNullOrWhiteSpace(typeId))
-        {
-            return false;
-        }
-
-        return _scripts.ContainsKey(typeId);
+        return !string.IsNullOrWhiteSpace(typeId) && _scripts.ContainsKey(typeId);
     }
 }

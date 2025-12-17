@@ -84,7 +84,7 @@ public class HistoryCommand : IConsoleCommand
 
             // Truncate long commands
             string displayCommand =
-                command.Length > 80 ? command.Substring(0, 77) + "..." : command;
+                command.Length > 80 ? command[..77] + "..." : command;
 
             context.WriteLine($"  {index,3}. {displayCommand}", theme.TextPrimary);
         }

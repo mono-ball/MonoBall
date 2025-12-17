@@ -18,7 +18,7 @@ public class VersionedScriptCache
     public const int MaxHistoryDepth = 3;
 
     private readonly ConcurrentDictionary<string, ScriptCacheEntry> _cache = new();
-    private readonly object _versionLock = new();
+    private readonly Lock _versionLock = new();
     private int _currentVersion;
 
     /// <summary>
@@ -54,10 +54,7 @@ public class VersionedScriptCache
             throw new ArgumentNullException(nameof(typeId));
         }
 
-        if (newType == null)
-        {
-            throw new ArgumentNullException(nameof(newType));
-        }
+        ArgumentNullException.ThrowIfNull(newType);
 
         lock (_versionLock)
         {
@@ -100,10 +97,7 @@ public class VersionedScriptCache
             throw new ArgumentNullException(nameof(typeId));
         }
 
-        if (type == null)
-        {
-            throw new ArgumentNullException(nameof(type));
-        }
+        ArgumentNullException.ThrowIfNull(type);
 
         _cache.AddOrUpdate(
             typeId,
@@ -150,12 +144,9 @@ public class VersionedScriptCache
             throw new ArgumentNullException(nameof(typeId));
         }
 
-        if (!_cache.TryGetValue(typeId, out ScriptCacheEntry? entry))
-        {
-            return (-1, null);
-        }
-
-        return (entry.Version, entry.Instance);
+        return _cache.TryGetValue(typeId, out ScriptCacheEntry? entry)
+            ? (entry.Version, entry.Instance)
+            : (-1, null);
     }
 
     /// <summary>
@@ -170,12 +161,7 @@ public class VersionedScriptCache
             throw new ArgumentNullException(nameof(typeId));
         }
 
-        if (!_cache.TryGetValue(typeId, out ScriptCacheEntry? entry))
-        {
-            return -1;
-        }
-
-        return entry.Version;
+        return _cache.TryGetValue(typeId, out ScriptCacheEntry? entry) ? entry.Version : -1;
     }
 
     /// <summary>
@@ -190,12 +176,7 @@ public class VersionedScriptCache
             throw new ArgumentNullException(nameof(typeId));
         }
 
-        if (!_cache.TryGetValue(typeId, out ScriptCacheEntry? entry))
-        {
-            return null;
-        }
-
-        return entry.ScriptType;
+        return _cache.TryGetValue(typeId, out ScriptCacheEntry? entry) ? entry.ScriptType : null;
     }
 
     /// <summary>
@@ -234,12 +215,7 @@ public class VersionedScriptCache
     /// <returns>True if exists, false otherwise</returns>
     public bool Contains(string typeId)
     {
-        if (string.IsNullOrEmpty(typeId))
-        {
-            return false;
-        }
-
-        return _cache.ContainsKey(typeId);
+        return !string.IsNullOrEmpty(typeId) && _cache.ContainsKey(typeId);
     }
 
     /// <summary>

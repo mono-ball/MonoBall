@@ -32,7 +32,7 @@ public class SpriteAnimationSystem : SystemBase, IUpdateSystem
     private readonly ILogger<SpriteAnimationSystem>? _logger;
 
     // Track missing sprites to avoid repeated lookup attempts and log spam
-    private readonly HashSet<string> _missingSprites = new();
+    private readonly HashSet<string> _missingSprites = [];
 
     private readonly SpriteRegistry _spriteRegistry;
 

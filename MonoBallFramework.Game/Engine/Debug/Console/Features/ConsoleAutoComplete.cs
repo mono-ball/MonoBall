@@ -18,17 +18,16 @@ namespace MonoBallFramework.Game.Engine.Debug.Console.Features;
 ///     - Member cache is not protected by locks; concurrent access will result in undefined behavior.
 ///     - Script state and globals instance should only be updated from the main thread.
 /// </summary>
-public class ConsoleAutoComplete
+public partial class ConsoleAutoComplete
 {
     private const int MaxCacheSize = 100; // Limit cache to prevent unbounded growth
 
     // Compiled regex patterns for better performance
-    private static readonly Regex MemberAccessRegex = new(@"(\w+)\.$", RegexOptions.Compiled);
+    [GeneratedRegex(@"(\w+)\.$")]
+    private static partial Regex MemberAccessRegex();
 
-    private static readonly Regex PartialMemberAccessRegex = new(
-        @"(\w+)\.(\w*)$",
-        RegexOptions.Compiled
-    );
+    [GeneratedRegex(@"(\w+)\.(\w*)$")]
+    private static partial Regex PartialMemberAccessRegex();
 
     private readonly ILogger? _logger;
 
@@ -72,7 +71,7 @@ public class ConsoleAutoComplete
         _scriptState = state;
         if (state != null)
         {
-            int varCount = state.Variables.Count();
+            int varCount = state.Variables.Length;
             _logger?.LogAutoCompleteScriptStateUpdated(varCount);
         }
     }
@@ -170,10 +169,10 @@ public class ConsoleAutoComplete
             }
 
             // Get text up to cursor for pattern matching
-            string textUpToCursor = code.Substring(0, cursorPosition);
+            string textUpToCursor = code[..cursorPosition];
 
             // Check for member access using compiled regex (e.g., "player." or "World.")
-            Match memberAccessMatch = MemberAccessRegex.Match(textUpToCursor);
+            Match memberAccessMatch = MemberAccessRegex().Match(textUpToCursor);
             if (memberAccessMatch.Success)
             {
                 string memberName = memberAccessMatch.Groups[1].Value;
@@ -185,7 +184,7 @@ public class ConsoleAutoComplete
             }
 
             // Check for partial member access using compiled regex (e.g., "player.Na" - user typing after the dot)
-            Match partialMemberMatch = PartialMemberAccessRegex.Match(textUpToCursor);
+            Match partialMemberMatch = PartialMemberAccessRegex().Match(textUpToCursor);
             if (partialMemberMatch.Success)
             {
                 string objectName = partialMemberMatch.Groups[1].Value;
@@ -198,7 +197,7 @@ public class ConsoleAutoComplete
 
                 List<CompletionItem> members = GetMembersForObject(objectName);
                 var filtered = members
-                    .Where(m => m.DisplayText.ToLower().StartsWith(partial))
+                    .Where(m => m.DisplayText.StartsWith(partial, StringComparison.OrdinalIgnoreCase))
                     .ToList();
                 _logger?.LogAutoCompleteMembersFound(filtered.Count, objectName);
                 return filtered;
@@ -254,7 +253,7 @@ public class ConsoleAutoComplete
             return message;
         }
 
-        return message.Substring(0, maxLength - 3) + "...";
+        return message[..(maxLength - 3)] + "...";
     }
 
     /// <summary>
@@ -290,7 +289,7 @@ public class ConsoleAutoComplete
                     _logger?.LogInformation(
                         "Object '{ObjectName}' not found in ScriptState ({VarCount} variables available)",
                         objectName,
-                        _scriptState.Variables.Count()
+                        _scriptState.Variables.Length
                     );
                 }
             }
@@ -501,7 +500,7 @@ public class ConsoleAutoComplete
         // Properties - highest priority (most commonly accessed)
         IOrderedEnumerable<PropertyInfo> propMembers = targetType
             .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-            .Where(p => !p.GetIndexParameters().Any()) // Exclude indexers
+            .Where(p => p.GetIndexParameters().Length == 0) // Exclude indexers
             .OrderBy(p => p.Name);
         foreach (PropertyInfo prop in propMembers)
         {
@@ -837,7 +836,7 @@ public class ConsoleAutoComplete
             IOrderedEnumerable<PropertyInfo> staticProps = type.GetProperties(
                     BindingFlags.Public | BindingFlags.Static
                 )
-                .Where(p => !p.GetIndexParameters().Any())
+                .Where(p => p.GetIndexParameters().Length == 0)
                 .OrderBy(p => p.Name);
 
             foreach (PropertyInfo prop in staticProps)
@@ -980,7 +979,7 @@ public class ConsoleAutoComplete
         {
             Type genericType = type.GetGenericTypeDefinition();
             Type[] genericArgs = type.GetGenericArguments();
-            string genericTypeName = genericType.Name.Substring(0, genericType.Name.IndexOf('`'));
+            string genericTypeName = genericType.Name[..genericType.Name.IndexOf('`')];
             string genericArgsNames = string.Join(
                 ", ",
                 genericArgs.Select(arg => GetFriendlyTypeName(arg, depth + 1))

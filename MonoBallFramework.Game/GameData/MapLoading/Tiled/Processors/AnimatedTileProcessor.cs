@@ -102,11 +102,8 @@ public class AnimatedTileProcessor : IAnimatedTileProcessor
         // Reduces complexity from O(animations × tiles) to O(tiles + animations)
         var animationsByTileId = new Dictionary<int, AnimatedTile>(tileset.Animations.Count);
 
-        foreach (KeyValuePair<int, TmxTileAnimation> kvp in tileset.Animations)
+        foreach (var (localTileId, animation) in tileset.Animations)
         {
-            int localTileId = kvp.Key;
-            TmxTileAnimation animation = kvp.Value;
-
             // Convert local tile ID to global tile ID
             int globalTileId = tileset.FirstGid + localTileId;
 

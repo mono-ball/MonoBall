@@ -50,7 +50,7 @@ namespace MonoBallFramework.Game.Scripting.Runtime;
 ///             }
 ///         });
 ///     }
-/// 
+///
 ///     private void TriggerRandomEncounter()
 ///     {
 ///         var encounterRate = Get&lt;float&gt;("encounter_rate", 0.1f);
@@ -71,7 +71,7 @@ namespace MonoBallFramework.Game.Scripting.Runtime;
 ///     public override void RegisterEventHandlers(ScriptContext ctx)
 ///     {
 ///         var playerEntity = ctx.Player.GetPlayerEntity();
-/// 
+///
 ///         // Only receive movement events for the player
 ///         OnEntity&lt;MovementCompletedEvent&gt;(playerEntity, evt =>
 ///         {
@@ -85,7 +85,7 @@ namespace MonoBallFramework.Game.Scripting.Runtime;
 public abstract class ScriptBase
 {
     // Track event subscriptions for automatic cleanup
-    private readonly List<IDisposable> subscriptions = new();
+    private readonly List<IDisposable> subscriptions = [];
 
     /// <summary>
     ///     Gets the script execution context providing access to World, Entity, Logger, Events, and APIs.
@@ -124,10 +124,10 @@ public abstract class ScriptBase
     /// public override void Initialize(ScriptContext ctx)
     /// {
     ///     base.Initialize(ctx);
-    /// 
+    ///
     ///     // Initialize state
     ///     Set("counter", 0);
-    /// 
+    ///
     ///     // Log initialization
     ///     Context.Logger.LogInformation("Script initialized for entity {EntityId}",
     ///         ctx.Entity?.Id ?? 0);
@@ -170,7 +170,7 @@ public abstract class ScriptBase
     ///             evt.PreventDefault("Movement blocked by script");
     ///         }
     ///     }, priority: 1000);
-    /// 
+    ///
     ///     // Subscribe to tile events at specific position
     ///     OnTile&lt;TileSteppedOnEvent&gt;(new Vector2(10, 15), evt =>
     ///     {
@@ -210,7 +210,7 @@ public abstract class ScriptBase
     /// {
     ///     // Clean up custom resources
     ///     _customResource?.Dispose();
-    /// 
+    ///
     ///     // Base class handles event subscription cleanup
     ///     base.OnUnload();
     /// }
@@ -264,7 +264,7 @@ public abstract class ScriptBase
     ///     Context.Logger.LogInformation("Entity {Id} moving to ({X}, {Y})",
     ///         evt.Entity.Id, evt.ToX, evt.ToY);
     /// });
-    /// 
+    ///
     /// // Subscribe with high priority to validate movement
     /// On&lt;MovementStartedEvent&gt;(evt =>
     /// {
@@ -278,10 +278,7 @@ public abstract class ScriptBase
     protected void On<TEvent>(Action<TEvent> handler, int priority = 500)
         where TEvent : class
     {
-        if (handler == null)
-        {
-            throw new ArgumentNullException(nameof(handler));
-        }
+        ArgumentNullException.ThrowIfNull(handler);
 
         if (Context?.Events == null)
         {
@@ -331,7 +328,7 @@ public abstract class ScriptBase
     /// public override void RegisterEventHandlers(ScriptContext ctx)
     /// {
     ///     var playerEntity = ctx.Player.GetPlayerEntity();
-    /// 
+    ///
     ///     // Only receive movement events for the player
     ///     OnEntity&lt;MovementCompletedEvent&gt;(playerEntity, evt =>
     ///     {
@@ -344,10 +341,7 @@ public abstract class ScriptBase
     protected void OnEntity<TEvent>(Entity entity, Action<TEvent> handler, int priority = 500)
         where TEvent : class, IEntityEvent
     {
-        if (handler == null)
-        {
-            throw new ArgumentNullException(nameof(handler));
-        }
+        ArgumentNullException.ThrowIfNull(handler);
 
         // Wrap handler with entity filter
         On<TEvent>(
@@ -397,7 +391,7 @@ public abstract class ScriptBase
     /// public override void RegisterEventHandlers(ScriptContext ctx)
     /// {
     ///     var warpTilePos = new Vector2(10, 15);
-    /// 
+    ///
     ///     // Only receive step events at this specific tile
     ///     OnTile&lt;TileSteppedOnEvent&gt;(warpTilePos, evt =>
     ///     {
@@ -410,10 +404,7 @@ public abstract class ScriptBase
     protected void OnTile<TEvent>(Vector2 tilePos, Action<TEvent> handler, int priority = 500)
         where TEvent : class, ITileEvent
     {
-        if (handler == null)
-        {
-            throw new ArgumentNullException(nameof(handler));
-        }
+        ArgumentNullException.ThrowIfNull(handler);
 
         // Wrap handler with tile position filter
         On<TEvent>(
@@ -464,7 +455,7 @@ public abstract class ScriptBase
     ///     <code>
     /// // Get movement speed, default to 1.0 if not set
     /// var speed = Get&lt;MovementSpeed&gt;("speed", new MovementSpeed { Value = 1.0f });
-    /// 
+    ///
     /// // Get counter, default to 0
     /// var counter = Get&lt;int&gt;("counter", 0);
     /// </code>
@@ -504,7 +495,7 @@ public abstract class ScriptBase
     ///     <code>
     /// // Set movement speed
     /// Set("speed", new MovementSpeed { Value = 2.0f });
-    /// 
+    ///
     /// // Increment counter
     /// var counter = Get&lt;int&gt;("counter", 0);
     /// Set("counter", counter + 1);
@@ -564,7 +555,7 @@ public abstract class ScriptBase
     ///     public string PokemonSpecies { get; init; }
     ///     public int Level { get; init; }
     /// }
-    /// 
+    ///
     /// // Publish custom event
     /// Publish(new WildEncounterEvent
     /// {
@@ -577,10 +568,7 @@ public abstract class ScriptBase
     protected void Publish<TEvent>(TEvent evt)
         where TEvent : class
     {
-        if (evt == null)
-        {
-            throw new ArgumentNullException(nameof(evt));
-        }
+        ArgumentNullException.ThrowIfNull(evt);
 
         Context?.Events?.Publish(evt);
 

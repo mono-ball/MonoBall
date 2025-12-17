@@ -23,7 +23,7 @@ public class MethodSig
 {
     public string MethodName { get; set; } = "";
     public string ReturnType { get; set; } = "";
-    public List<ParamInfo> Parameters { get; set; } = new();
+    public List<ParamInfo> Parameters { get; set; } = [];
 }
 
 /// <summary>
@@ -32,7 +32,7 @@ public class MethodSig
 public class ParamHints
 {
     public string MethodName { get; set; } = "";
-    public List<MethodSig> Overloads { get; set; } = new();
+    public List<MethodSig> Overloads { get; set; } = [];
     public int CurrentOverloadIndex { get; set; }
 }
 
@@ -225,7 +225,7 @@ public class ParameterHintTooltip : UIComponent
         if (currentSignature.Parameters.Count == 0)
         {
             xPos += renderer.MeasureText(methodText).X;
-            string closingText = ")";
+            const string closingText = ")";
             renderer.DrawText(closingText, new Vector2(xPos, yPos), MethodNameColor);
             xPos += renderer.MeasureText(closingText).X;
 
@@ -281,7 +281,7 @@ public class ParameterHintTooltip : UIComponent
                 // Comma separator (except for last param)
                 if (i < currentSignature.Parameters.Count - 1)
                 {
-                    string commaText = ",";
+                    const string commaText = ",";
                     renderer.DrawText(commaText, new Vector2(xPos, yPos), ParameterColor);
                 }
 
@@ -290,9 +290,9 @@ public class ParameterHintTooltip : UIComponent
 
             // Closing parenthesis
             xPos = resolvedRect.X + Padding;
-            string closingText = ")";
-            renderer.DrawText(closingText, new Vector2(xPos, yPos), MethodNameColor);
-            xPos += renderer.MeasureText(closingText).X;
+            const string closingParenText = ")";
+            renderer.DrawText(closingParenText, new Vector2(xPos, yPos), MethodNameColor);
+            xPos += renderer.MeasureText(closingParenText).X;
 
             // Return type
             if (!string.IsNullOrEmpty(currentSignature.ReturnType))

@@ -102,7 +102,7 @@ public class ElevationRenderSystem(
     private readonly QueryDescription _playerPositionQuery = QueryCache.Get<Player, Position>();
 
     // Track missing sprite textures to avoid repeated log warnings (prevents log spam)
-    private readonly HashSet<string> _reportedMissingSpriteTextures = new();
+    private readonly HashSet<string> _reportedMissingSpriteTextures = [];
 
     // Spatial query for efficient tile lookups (only visible tiles)
     private readonly ISpatialQuery
@@ -510,7 +510,7 @@ public class ElevationRenderSystem(
                 {
                     // Extract full sprite path from texture key (handles subcategories)
                     // Format: sprites/{category}/{name} OR sprites/{category}/{subcategory}/{name}
-                    string spritePath = textureId.Substring("sprites/".Length);
+                    string spritePath = textureId["sprites/".Length..];
                     TryLazyLoadSprite(spritePath, textureId);
                 }
             }
@@ -579,12 +579,9 @@ public class ElevationRenderSystem(
     /// </summary>
     private Rectangle GetCameraVirtualViewport(Camera camera)
     {
-        if (camera.VirtualViewport != Rectangle.Empty)
-        {
-            return camera.VirtualViewport;
-        }
-
-        return graphicsDevice.Viewport.Bounds;
+        return camera.VirtualViewport != Rectangle.Empty
+            ? camera.VirtualViewport
+            : graphicsDevice.Viewport.Bounds;
     }
 
     /// <summary>

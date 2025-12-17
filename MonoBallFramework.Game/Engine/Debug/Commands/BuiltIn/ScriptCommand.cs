@@ -101,7 +101,7 @@ Examples:
             .ToList();
         var userScripts = scripts.Except(exampleScripts).ToList();
 
-        if (exampleScripts.Any())
+        if (exampleScripts.Count > 0)
         {
             context.WriteLine("  EXAMPLE SCRIPTS:", theme.BorderFocus);
             foreach (string script in exampleScripts)
@@ -113,7 +113,7 @@ Examples:
             context.WriteLine("");
         }
 
-        if (userScripts.Any())
+        if (userScripts.Count > 0)
         {
             context.WriteLine("  USER SCRIPTS:", theme.BorderFocus);
             foreach (string script in userScripts)

@@ -13,7 +13,7 @@ namespace MonoBallFramework.Game.Engine.Audio.Services.Streaming;
 public class StreamingLoopProvider : ISampleProvider, IDisposable
 {
     private readonly bool _enableLooping;
-    private readonly object _loopLock = new();
+    private readonly Lock _loopLock = new();
     private readonly StreamingMusicProvider _source;
     private bool _disposed;
 

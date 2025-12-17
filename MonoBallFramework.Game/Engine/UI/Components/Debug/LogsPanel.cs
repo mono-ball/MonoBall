@@ -16,8 +16,8 @@ namespace MonoBallFramework.Game.Engine.UI.Components.Debug;
 /// </summary>
 public class LogsPanel : Panel, ILogOperations
 {
-    private readonly List<LogEntry> _allLogs = new();
-    private readonly HashSet<string> _enabledCategories = new(); // Empty = show all
+    private readonly List<LogEntry> _allLogs = [];
+    private readonly HashSet<string> _enabledCategories = []; // Empty = show all
     private readonly TextBuffer _logBuffer;
     private readonly int _maxLogs;
     private readonly StatusBar _statusBar;
@@ -295,15 +295,8 @@ public class LogsPanel : Panel, ILogOperations
         }
 
         // Check text search filter
-        if (
-            _searchFilter != null
-            && !entry.Message.Contains(_searchFilter, StringComparison.OrdinalIgnoreCase)
-        )
-        {
-            return false;
-        }
-
-        return true;
+        return _searchFilter == null
+            || entry.Message.Contains(_searchFilter, StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>

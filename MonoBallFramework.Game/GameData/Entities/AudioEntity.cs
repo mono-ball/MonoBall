@@ -55,12 +55,12 @@ public class AudioEntity : BaseEntity
     /// <summary>
     ///     Default fade-in duration in seconds.
     /// </summary>
-    public float FadeIn { get; set; } = 0.0f;
+    public float FadeIn { get; set; }
 
     /// <summary>
     ///     Default fade-out duration in seconds.
     /// </summary>
-    public float FadeOut { get; set; } = 0.0f;
+    public float FadeOut { get; set; }
 
     /// <summary>
     ///     Loop start position in samples (at 44100 Hz).

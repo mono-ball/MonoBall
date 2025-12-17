@@ -117,7 +117,7 @@ public class HistorySuggestionProvider
 
         // Check if previous character is a word boundary (space, dot, parenthesis, etc.)
         char prevChar = command[index - 1];
-        return prevChar == ' ' || prevChar == '.' || prevChar == '(' || prevChar == ')';
+        return prevChar is ' ' or '.' or '(' or ')';
     }
 
     /// <summary>
@@ -179,9 +179,9 @@ public class HistorySuggestionProvider
         var frequency = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
         foreach (string command in history)
         {
-            if (frequency.ContainsKey(command))
+            if (frequency.TryGetValue(command, out int count))
             {
-                frequency[command]++;
+                frequency[command] = count + 1;
             }
             else
             {

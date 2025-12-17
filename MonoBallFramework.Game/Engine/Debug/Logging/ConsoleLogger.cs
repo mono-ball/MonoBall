@@ -6,8 +6,11 @@ namespace MonoBallFramework.Game.Engine.Debug.Logging;
 /// <summary>
 ///     Custom logger that writes log messages to the debug console.
 /// </summary>
-public class ConsoleLogger : ILogger
+public partial class ConsoleLogger : ILogger
 {
+    [GeneratedRegex(@"\[/?[a-z0-9_ ]*\]", RegexOptions.IgnoreCase)]
+    private static partial Regex MarkupTagsRegex();
+
     private readonly Action<LogLevel, string, string> _addLogEntry;
     private readonly string _categoryName;
     private readonly Func<LogLevel, bool> _isEnabled;
@@ -70,7 +73,7 @@ public class ConsoleLogger : ILogger
         int lastDot = category.LastIndexOf('.');
         if (lastDot >= 0 && lastDot < category.Length - 1)
         {
-            return category.Substring(lastDot + 1);
+            return category[(lastDot + 1)..];
         }
 
         return category;
@@ -94,6 +97,6 @@ public class ConsoleLogger : ILogger
         // - [color modifier] - color with modifier (e.g., "cyan bold")
         // - [color1] - numbered colors
         // This is more permissive to catch all Spectre.Console markup
-        return Regex.Replace(message, @"\[/?[a-z0-9_ ]*\]", "", RegexOptions.IgnoreCase);
+        return MarkupTagsRegex().Replace(message, "");
     }
 }

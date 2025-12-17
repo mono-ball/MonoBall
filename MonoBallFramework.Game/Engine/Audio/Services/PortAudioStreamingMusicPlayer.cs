@@ -27,7 +27,7 @@ public class PortAudioStreamingMusicPlayer : IMusicPlayer
     private readonly StreamingMusicPlayerHelper _helper;
     private readonly object _lock = new();
     private readonly ILogger<PortAudioStreamingMusicPlayer>? _logger;
-    private readonly object _volumeLock = new();
+    private readonly Lock _volumeLock = new();
 
     // Background task cancellation support
     private CancellationTokenSource? _backgroundTaskCts;

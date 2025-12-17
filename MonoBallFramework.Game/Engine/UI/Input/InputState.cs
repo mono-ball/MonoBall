@@ -20,8 +20,8 @@ public enum MouseButton
 public class InputState
 {
     // Input consumption tracking - prevents child components from processing already-handled input
-    private readonly HashSet<Keys> _consumedKeys = new();
-    private readonly HashSet<MouseButton> _consumedMouseButtons = new();
+    private readonly HashSet<Keys> _consumedKeys = [];
+    private readonly HashSet<MouseButton> _consumedMouseButtons = [];
 
     // Key repeat tracking - provides smooth key repeat for held keys
     private readonly Dictionary<Keys, KeyRepeatState> _keyRepeatStates = new();
@@ -108,11 +108,8 @@ public class InputState
         float deltaTime = (float)GameTime.ElapsedGameTime.TotalSeconds;
         var keysToRemove = new List<Keys>();
 
-        foreach (KeyValuePair<Keys, KeyRepeatState> kvp in _keyRepeatStates)
+        foreach (var (key, state) in _keyRepeatStates)
         {
-            Keys key = kvp.Key;
-            KeyRepeatState state = kvp.Value;
-
             // If key is no longer held, mark for removal
             if (!_currentKeyboard.IsKeyDown(key))
             {

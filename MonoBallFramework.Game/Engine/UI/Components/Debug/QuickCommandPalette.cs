@@ -24,7 +24,7 @@ public class QuickCommandPalette : Panel
     /// <summary>
     ///     Available commands
     /// </summary>
-    public List<DebugCommand> Commands { get; set; } = new();
+    public List<DebugCommand> Commands { get; set; } = [];
 
     /// <summary>
     ///     Search/filter text
@@ -122,7 +122,7 @@ public class QuickCommandPalette : Panel
 
         // Create buttons for filtered commands
         float yOffset = 105;
-        int maxVisible = 8;
+        const int maxVisible = 8;
 
         for (int i = 0; i < Math.Min(filteredCommands.Count, maxVisible); i++)
         {

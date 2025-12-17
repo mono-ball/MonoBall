@@ -7,9 +7,9 @@ namespace MonoBallFramework.Game.Engine.Audio.Core;
 /// </summary>
 public class DuckingController
 {
-    private readonly object _lock = new();
+    private readonly Lock _lock = new();
 
-    private readonly float _normalVolume = 1.0f;
+    private const float _normalVolume = 1.0f;
     private float _currentVolume = 1.0f;
     private float _duckDuration;
     private float _duckVolume;

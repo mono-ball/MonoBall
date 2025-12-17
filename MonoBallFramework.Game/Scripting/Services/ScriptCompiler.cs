@@ -66,12 +66,7 @@ public class ScriptCompiler
                 }
             }
 
-            if (hasErrors)
-            {
-                return null;
-            }
-
-            return script;
+            return hasErrors ? null : script;
         }
         catch (CompilationErrorException ex)
         {

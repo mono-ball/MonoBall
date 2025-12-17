@@ -33,7 +33,7 @@ public class MapPreparer
     private readonly LruCache<string, PreparedMapData> _preparedMaps = new(MaxPreparedMapsCache);
 
     // Lock for thread-safe task creation
-    private readonly object _prepareLock = new();
+    private readonly Lock _prepareLock = new();
 
     // Track in-progress preparations to avoid duplicates
     private readonly ConcurrentDictionary<string, Task<PreparedMapData>> _preparingMaps = new();
@@ -821,7 +821,7 @@ public class MapPreparer
 internal sealed class LruCache<TKey, TValue> where TKey : notnull
 {
     private readonly ConcurrentDictionary<TKey, CacheEntry> _cache = new();
-    private readonly object _evictionLock = new();
+    private readonly Lock _evictionLock = new();
     private readonly int _maxCapacity;
 
     public LruCache(int maxCapacity)
@@ -917,7 +917,7 @@ internal sealed class LruCache<TKey, TValue> where TKey : notnull
         KeyValuePair<TKey, CacheEntry>? oldestEntry = null;
         DateTime oldestTime = DateTime.MaxValue;
 
-        foreach (KeyValuePair<TKey, CacheEntry> kvp in _cache)
+        foreach (var kvp in _cache)
         {
             if (kvp.Value.LastAccessTime < oldestTime)
             {

@@ -18,7 +18,7 @@ public record HistoryEntry
 public class ConsoleCommandHistory
 {
     private const int MaxHistorySize = 100; // Maximum command history entries
-    private readonly List<HistoryEntry> _history = new();
+    private readonly List<HistoryEntry> _history = [];
     private int _currentIndex = -1;
 
     /// <summary>
@@ -108,12 +108,7 @@ public class ConsoleCommandHistory
         _currentIndex = Math.Min(_history.Count, _currentIndex + 1);
 
         // Return empty string if we're past the last command
-        if (_currentIndex >= _history.Count)
-        {
-            return string.Empty;
-        }
-
-        return _history[_currentIndex].Command;
+        return _currentIndex >= _history.Count ? string.Empty : _history[_currentIndex].Command;
     }
 
     /// <summary>

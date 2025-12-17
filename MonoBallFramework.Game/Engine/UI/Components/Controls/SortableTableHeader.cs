@@ -23,7 +23,7 @@ public class SortableTableHeader<TSort>
     }
 
     private readonly Dictionary<TSort, LayoutRect> _clickRegions = new();
-    private readonly List<Column> _columns = new();
+    private readonly List<Column> _columns = [];
 
     /// <summary>
     ///     Initializes a new sortable table header.
@@ -226,7 +226,7 @@ public class SortableTableHeader<TSort>
         public float? MaxWidth { get; init; }
 
         /// <summary>Whether to show ascending (↑) or descending (↓) indicator.</summary>
-        public bool Ascending { get; init; } = false;
+        public bool Ascending { get; init; }
 
         /// <summary>Custom sort indicator icon (overrides Ascending).</summary>
         public string? CustomIcon { get; init; }

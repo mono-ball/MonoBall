@@ -108,7 +108,7 @@ public class WatcherFactory
                 return false;
             }
 
-            var drive = new DriveInfo(path.Substring(0, 2));
+            var drive = new DriveInfo(path[..2]);
             return drive.DriveType == DriveType.Network;
         }
         catch

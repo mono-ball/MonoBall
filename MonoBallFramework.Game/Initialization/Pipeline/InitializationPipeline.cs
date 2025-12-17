@@ -10,7 +10,7 @@ namespace MonoBallFramework.Game.Initialization.Pipeline;
 public class InitializationPipeline
 {
     private readonly ILogger<InitializationPipeline> _logger;
-    private readonly List<IInitializationStep> _steps = new();
+    private readonly List<IInitializationStep> _steps = [];
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="InitializationPipeline" /> class.
@@ -29,10 +29,7 @@ public class InitializationPipeline
     /// <returns>This pipeline instance for method chaining.</returns>
     public InitializationPipeline AddStep(IInitializationStep step)
     {
-        if (step == null)
-        {
-            throw new ArgumentNullException(nameof(step));
-        }
+        ArgumentNullException.ThrowIfNull(step);
 
         _steps.Add(step);
         _logger.LogDebug("Added initialization step: {StepName}", step.Name);
@@ -52,15 +49,8 @@ public class InitializationPipeline
         CancellationToken cancellationToken = default
     )
     {
-        if (context == null)
-        {
-            throw new ArgumentNullException(nameof(context));
-        }
-
-        if (progress == null)
-        {
-            throw new ArgumentNullException(nameof(progress));
-        }
+        ArgumentNullException.ThrowIfNull(context);
+        ArgumentNullException.ThrowIfNull(progress);
 
         _logger.LogInformation(
             "Starting initialization pipeline with {StepCount} steps",

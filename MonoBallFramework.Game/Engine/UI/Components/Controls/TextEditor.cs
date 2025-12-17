@@ -57,8 +57,8 @@ public class TextEditor : UIComponent, ITextInput
     };
 
     // Command history
-    private readonly List<string> _history = new();
-    private readonly int _maxHistory = 100;
+    private readonly List<string> _history = [];
+    private const int _maxHistory = 100;
 
     // Undo/Redo
     private readonly TextEditorUndoRedo _undoRedo = new();
@@ -504,8 +504,8 @@ public class TextEditor : UIComponent, ITextInput
         }
 
         string currentLine = _lines[_cursorLine];
-        string textAfterCursor = currentLine.Substring(_cursorColumn);
-        string textBeforeCursor = currentLine.Substring(0, _cursorColumn);
+        string textAfterCursor = currentLine[_cursorColumn..];
+        string textBeforeCursor = currentLine[.._cursorColumn];
 
         // Calculate indentation for the new line
         string indent = "";
@@ -523,7 +523,7 @@ public class TextEditor : UIComponent, ITextInput
 
             // Handle case where cursor is between { and }
             string trimmedAfter = textAfterCursor.TrimStart();
-            if (trimmedAfter.StartsWith("}") && trimmedBefore.TrimEnd().EndsWith("{"))
+            if (trimmedAfter.StartsWith('}') && trimmedBefore.TrimEnd().EndsWith('{'))
             {
                 // Insert two new lines: one for content, one for closing brace
                 _lines[_cursorLine] = textBeforeCursor;
@@ -575,7 +575,7 @@ public class TextEditor : UIComponent, ITextInput
             string trimmed = line.Trim();
 
             // Decrease indent for lines starting with closing braces
-            if (trimmed.StartsWith("}") || trimmed.StartsWith(")") || trimmed.StartsWith("]"))
+            if (trimmed.StartsWith('}') || trimmed.StartsWith(')') || trimmed.StartsWith(']'))
             {
                 indentLevel = Math.Max(0, indentLevel - 1);
             }
@@ -592,25 +592,25 @@ public class TextEditor : UIComponent, ITextInput
             }
 
             // Increase indent for lines ending with opening braces
-            if (trimmed.EndsWith("{") || trimmed.EndsWith("(") || trimmed.EndsWith("["))
+            if (trimmed.EndsWith('{') || trimmed.EndsWith('(') || trimmed.EndsWith('['))
             {
                 indentLevel++;
             }
             // Also handle cases like "} else {" or "} catch {"
-            else if (trimmed.Contains("{") && !trimmed.Contains("}"))
+            else if (trimmed.Contains('{') && !trimmed.Contains('}'))
             {
                 indentLevel++;
             }
             // Handle "{ }" on same line - don't change indent
-            else if (trimmed.Contains("{") && trimmed.Contains("}"))
+            else if (trimmed.Contains('{') && trimmed.Contains('}'))
             {
                 // No change
             }
             // Decrease for closing braces at end (already handled at start for next line)
-            else if (trimmed.EndsWith("}") || trimmed.EndsWith(")") || trimmed.EndsWith("]"))
+            else if (trimmed.EndsWith('}') || trimmed.EndsWith(')') || trimmed.EndsWith(']'))
             {
                 // Handle "} else {" - we already incremented, so decrement
-                if (!trimmed.Contains("{"))
+                if (!trimmed.Contains('{'))
                 {
                     // Already decremented at start of loop for this line
                 }
@@ -634,7 +634,7 @@ public class TextEditor : UIComponent, ITextInput
         int count = 0;
         foreach (char ch in line)
         {
-            if (ch == ' ' || ch == '\t')
+            if (ch is ' ' or '\t')
             {
                 count++;
             }
@@ -644,7 +644,7 @@ public class TextEditor : UIComponent, ITextInput
             }
         }
 
-        return line.Substring(0, count);
+        return line[..count];
     }
 
     /// <summary>
@@ -679,7 +679,7 @@ public class TextEditor : UIComponent, ITextInput
             return false; // No word before cursor
         }
 
-        string word = currentLine.Substring(wordStart, _cursorColumn - wordStart);
+        string word = currentLine[wordStart.._cursorColumn];
 
         // Check if this word is a snippet trigger
         if (!Snippets.TryGetValue(word, out string? snippetTemplate))
@@ -701,8 +701,8 @@ public class TextEditor : UIComponent, ITextInput
         );
 
         // Delete the trigger word and insert expanded text
-        string beforeWord = currentLine.Substring(0, wordStart);
-        string afterWord = currentLine.Substring(_cursorColumn);
+        string beforeWord = currentLine[..wordStart];
+        string afterWord = currentLine[_cursorColumn..];
 
         // Split expanded text into lines
         string[] expansionLines = expandedText.Split('\n');
@@ -797,7 +797,7 @@ public class TextEditor : UIComponent, ITextInput
                         int closeIndex = template.IndexOf('}', i + 2);
                         if (closeIndex > i + 2)
                         {
-                            string content = template.Substring(i + 2, closeIndex - i - 2);
+                            string content = template[(i + 2)..closeIndex];
                             int colonIndex = content.IndexOf(':');
 
                             int tabIndex;
@@ -805,8 +805,8 @@ public class TextEditor : UIComponent, ITextInput
 
                             if (colonIndex > 0)
                             {
-                                tabIndex = int.Parse(content.Substring(0, colonIndex));
-                                defaultValue = content.Substring(colonIndex + 1);
+                                tabIndex = int.Parse(content[..colonIndex]);
+                                defaultValue = content[(colonIndex + 1)..];
                             }
                             else
                             {
@@ -841,7 +841,7 @@ public class TextEditor : UIComponent, ITextInput
                             numEnd++;
                         }
 
-                        int tabIndex = int.Parse(template.Substring(numStart, numEnd - numStart));
+                        int tabIndex = int.Parse(template[numStart..numEnd]);
 
                         // For simple $n references (not first occurrence), find the default value from existing tabstops
                         SnippetSession.TabStop? existingTs = tabStops.FirstOrDefault(t =>
@@ -978,7 +978,7 @@ public class TextEditor : UIComponent, ITextInput
     /// </summary>
     private void MoveToPreviousTabStop()
     {
-        if (_activeSnippet == null || _activeSnippet.CurrentTabStopIndex <= 0)
+        if (_activeSnippet is not { CurrentTabStopIndex: > 0 })
         {
             return;
         }
@@ -1131,8 +1131,8 @@ public class TextEditor : UIComponent, ITextInput
         else
         {
             // Multi-line selection
-            string firstLine = _lines[startLine].Substring(0, startCol);
-            string lastLine = _lines[endLine].Substring(endCol);
+            string firstLine = _lines[startLine][..startCol];
+            string lastLine = _lines[endLine][endCol..];
 
             // Remove lines in between
             for (int i = endLine; i >= startLine; i--)
@@ -1206,14 +1206,14 @@ public class TextEditor : UIComponent, ITextInput
         if (startLine == endLine)
         {
             // Single line selection
-            return _lines[startLine].Substring(startCol, endCol - startCol);
+            return _lines[startLine][startCol..endCol];
         }
 
         // Multi-line selection
         var result = new StringBuilder();
 
         // First line
-        result.Append(_lines[startLine].Substring(startCol));
+        result.Append(_lines[startLine][startCol..]);
         result.Append('\n');
 
         // Middle lines
@@ -1224,25 +1224,15 @@ public class TextEditor : UIComponent, ITextInput
         }
 
         // Last line
-        result.Append(_lines[endLine].Substring(0, endCol));
+        result.Append(_lines[endLine][..endCol]);
 
         return result.ToString();
     }
 
     private void CopyToClipboard()
     {
-        string textToCopy;
-
-        if (HasSelection)
-        {
-            // Copy selection
-            textToCopy = GetSelectedText();
-        }
-        else
-        {
-            // No selection - copy current line
-            textToCopy = _lines[_cursorLine];
-        }
+        // Copy selection or current line
+        string textToCopy = HasSelection ? GetSelectedText() : _lines[_cursorLine];
 
         if (!string.IsNullOrEmpty(textToCopy))
         {
@@ -1303,8 +1293,8 @@ public class TextEditor : UIComponent, ITextInput
         {
             // Multi-line paste
             string currentLine = _lines[_cursorLine];
-            string textAfterCursor = currentLine.Substring(_cursorColumn);
-            string textBeforeCursor = currentLine.Substring(0, _cursorColumn);
+            string textAfterCursor = currentLine[_cursorColumn..];
+            string textBeforeCursor = currentLine[.._cursorColumn];
 
             // First line: append to current cursor position
             _lines[_cursorLine] = textBeforeCursor + lines[0];
@@ -1624,7 +1614,7 @@ public class TextEditor : UIComponent, ITextInput
                 while (left < right)
                 {
                     int mid = (left + right) / 2;
-                    string substring = lineText.Substring(0, mid);
+                    string substring = lineText[..mid];
                     float widthAtMid = renderer.MeasureText(substring).X;
 
                     if (widthAtMid < relativeX)
@@ -1640,8 +1630,8 @@ public class TextEditor : UIComponent, ITextInput
                 // Check midpoint for rounding
                 if (left > 0)
                 {
-                    float widthAtLeft = renderer.MeasureText(lineText.Substring(0, left)).X;
-                    float widthAtPrev = renderer.MeasureText(lineText.Substring(0, left - 1)).X;
+                    float widthAtLeft = renderer.MeasureText(lineText[..left]).X;
+                    float widthAtPrev = renderer.MeasureText(lineText[..(left - 1)]).X;
                     float midPoint = (widthAtPrev + widthAtLeft) / 2;
 
                     if (relativeX < midPoint)
@@ -1718,7 +1708,7 @@ public class TextEditor : UIComponent, ITextInput
         float lineX = textStartX + leftMarginWidth;
 
         // Calculate X position of the bracket
-        string textBeforeBracket = _lines[line].Substring(0, column);
+        string textBeforeBracket = _lines[line][..column];
         float bracketX = lineX + renderer.MeasureText(textBeforeBracket).X;
 
         // Get bracket width
@@ -1809,17 +1799,8 @@ public class TextEditor : UIComponent, ITextInput
             }
         }
 
-        // Set text
-        if (_historyIndex == -1)
-        {
-            // Restore temporary input (current/new input)
-            SetText(_temporaryInput);
-        }
-        else
-        {
-            // Show history item (history is stored oldest to newest)
-            SetText(_history[_historyIndex]);
-        }
+        // Set text - restore temporary input or show history item
+        SetText(_historyIndex == -1 ? _temporaryInput : _history[_historyIndex]);
 
         // Move cursor to end
         _cursorLine = _lines.Count - 1;
@@ -1935,7 +1916,7 @@ public class TextEditor : UIComponent, ITextInput
                 float cursorY = textStartY + ((_cursorLine - _scrollOffsetY) * lineHeight);
                 if (_cursorLine >= _scrollOffsetY && _cursorLine < _scrollOffsetY + visibleLines)
                 {
-                    string textBeforeCursor = _lines[_cursorLine].Substring(0, _cursorColumn);
+                    string textBeforeCursor = _lines[_cursorLine][.._cursorColumn];
                     float cursorX =
                         textStartX + leftMarginWidth + renderer.MeasureText(textBeforeCursor).X;
 
@@ -2015,9 +1996,9 @@ public class TextEditor : UIComponent, ITextInput
                 selEnd = 0;
             }
 
-            string beforeSelection = _lines[line].Substring(0, selStart);
+            string beforeSelection = _lines[line][..selStart];
             string selection =
-                selEnd > selStart ? _lines[line].Substring(selStart, selEnd - selStart) : "";
+                selEnd > selStart ? _lines[line][selStart..selEnd] : "";
 
             float beforeWidth = renderer.MeasureText(beforeSelection).X;
             float selectionWidth = renderer.MeasureText(selection).X;
@@ -2563,7 +2544,7 @@ public class TextEditor : UIComponent, ITextInput
         if (AutoClosePairs.TryGetValue(ch, out char closingChar))
         {
             // For quotes, check if we're already inside a string (simple heuristic)
-            if (ch == '"' || ch == '\'')
+            if (ch is '"' or '\'')
             {
                 // If the next character is the same quote, just move past it (skip closing)
                 string currentLine = _lines[_cursorLine];
@@ -2639,7 +2620,7 @@ public class TextEditor : UIComponent, ITextInput
     /// </summary>
     private class SnippetSession
     {
-        public List<TabStop> TabStops { get; } = new();
+        public List<TabStop> TabStops { get; } = [];
         public int CurrentTabStopIndex { get; set; }
         public int StartLine { get; set; }
         public int StartColumn { get; set; }

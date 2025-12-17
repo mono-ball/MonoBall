@@ -122,6 +122,7 @@ public class FileSystemWatcherAdapter : IScriptWatcher
     /// </summary>
     public void Dispose()
     {
+        GC.SuppressFinalize(this);
         StopAsync().GetAwaiter().GetResult();
     }
 

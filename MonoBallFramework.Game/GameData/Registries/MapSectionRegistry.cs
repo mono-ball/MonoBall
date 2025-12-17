@@ -47,12 +47,13 @@ public class MapSectionEntityRegistry : EfCoreRegistry<MapSectionEntity, GameMap
     protected override void OnEntityCached(GameMapSectionId key, MapSectionEntity entity)
     {
         // Cache by theme ID for fast lookups by theme
-        if (!_themeCache.ContainsKey(entity.ThemeId))
+        if (!_themeCache.TryGetValue(entity.ThemeId, out var themeList))
         {
-            _themeCache[entity.ThemeId] = new List<MapSectionEntity>();
+            themeList = [];
+            _themeCache[entity.ThemeId] = themeList;
         }
 
-        _themeCache[entity.ThemeId].Add(entity);
+        themeList.Add(entity);
     }
 
     /// <summary>
@@ -100,12 +101,9 @@ public class MapSectionEntityRegistry : EfCoreRegistry<MapSectionEntity, GameMap
     /// <param name="themeId">The theme ID (e.g., "base:theme:popup/wood").</param>
     public IEnumerable<MapSectionEntity> GetByTheme(GameThemeId themeId)
     {
-        if (_themeCache.TryGetValue(themeId, out List<MapSectionEntity>? cached))
-        {
-            return cached;
-        }
-
-        return GetAll().Where(ms => ms.ThemeId == themeId);
+        return _themeCache.TryGetValue(themeId, out List<MapSectionEntity>? cached)
+            ? cached
+            : GetAll().Where(ms => ms.ThemeId == themeId);
     }
 
     /// <summary>

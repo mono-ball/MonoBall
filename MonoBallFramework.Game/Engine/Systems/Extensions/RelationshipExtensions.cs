@@ -136,7 +136,7 @@ public static class RelationshipExtensions
     {
         if (!world.IsAlive(parent) || !parent.HasRelationship<ParentOf>())
         {
-            return Enumerable.Empty<Entity>();
+            return [];
         }
 
         // Use Arch.Relationships API to iterate children
@@ -287,7 +287,7 @@ public static class RelationshipExtensions
     {
         if (!world.IsAlive(owner) || !owner.HasRelationship<OwnerOf>())
         {
-            return Enumerable.Empty<Entity>();
+            return [];
         }
 
         // Use Arch.Relationships API to iterate owned entities

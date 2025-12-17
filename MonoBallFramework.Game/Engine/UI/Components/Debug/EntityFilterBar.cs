@@ -41,7 +41,7 @@ public class EntityFilterBar : UIComponent
     private bool _componentDropdownOpen;
     private LayoutRect _componentDropdownRect;
     private float _componentDropdownWidth = MinDropdownWidth;
-    private List<string> _components = new();
+    private List<string> _components = [];
     private int _componentScrollOffset;
     private double _cursorBlinkTimer;
     private bool _dropdownWidthsCalculated;
@@ -66,7 +66,7 @@ public class EntityFilterBar : UIComponent
     private float _tagDropdownWidth = MinDropdownWidth;
 
     // Available options
-    private List<string> _tags = new();
+    private List<string> _tags = [];
     private int _tagScrollOffset;
 
     /// <summary>
@@ -888,7 +888,7 @@ public class EntityFilterBar : UIComponent
             // Draw cursor if focused (use a thin rectangle instead of DrawLine)
             if (IsSearchFocused && _cursorBlinkTimer < CursorBlinkVisibleDuration)
             {
-                string textBeforeCursor = _searchText.Substring(0, Math.Min(_searchCursorPos, _searchText.Length));
+                string textBeforeCursor = _searchText[..Math.Min(_searchCursorPos, _searchText.Length)];
                 float cursorX = textX + renderer.MeasureText(textBeforeCursor).X;
                 var cursorRect = new LayoutRect(cursorX, rect.Y + 4, CursorWidth, rect.Height - 8);
                 renderer.DrawRectangle(cursorRect, theme.InputCursor);
@@ -1132,7 +1132,7 @@ public class EntityFilterBar : UIComponent
             while (left <= right)
             {
                 int mid = (left + right) / 2;
-                string testText = text.Substring(0, mid) + "...";
+                string testText = text[..mid] + "...";
                 if (renderer.MeasureText(testText).X <= maxWidth)
                 {
                     bestFit = mid;
@@ -1146,7 +1146,7 @@ public class EntityFilterBar : UIComponent
 
             if (bestFit > 0)
             {
-                renderer.DrawText(text.Substring(0, bestFit) + "...", position, color);
+                renderer.DrawText(text[..bestFit] + "...", position, color);
             }
         }
     }
@@ -1160,13 +1160,13 @@ public class EntityFilterBar : UIComponent
 
         for (int i = 0; i <= text.Length; i++)
         {
-            float width = renderer.MeasureText(text.Substring(0, i)).X;
+            float width = renderer.MeasureText(text[..i]).X;
             if (width >= x)
             {
                 // Check if closer to this char or previous
                 if (i > 0)
                 {
-                    float prevWidth = renderer.MeasureText(text.Substring(0, i - 1)).X;
+                    float prevWidth = renderer.MeasureText(text[..(i - 1)]).X;
                     if (x - prevWidth < width - x)
                     {
                         return i - 1;

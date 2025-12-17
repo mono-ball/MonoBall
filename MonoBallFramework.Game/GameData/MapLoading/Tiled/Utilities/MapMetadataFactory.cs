@@ -159,7 +159,7 @@ public class MapMetadataFactory
                 );
             }
 
-            if (tileset.Image == null || tileset.Image.Width <= 0 || tileset.Image.Height <= 0)
+            if (tileset.Image is not { Width: > 0, Height: > 0 })
             {
                 throw new InvalidOperationException(
                     $"Tileset '{tileset.Name ?? loadedTileset.TilesetId}' in map '{mapDef.MapId}' is missing valid image dimensions."

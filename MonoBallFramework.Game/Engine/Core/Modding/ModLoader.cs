@@ -21,6 +21,16 @@ public sealed class ModLoader : IModLoader
     private const string ModManifestFileName = "mod.json";
     private const string ModsDirectoryName = "Mods";
 
+    private static readonly JsonSerializerOptions s_readJsonOptions = new()
+    {
+        PropertyNameCaseInsensitive = true
+    };
+
+    private static readonly JsonSerializerOptions s_writeJsonOptions = new()
+    {
+        WriteIndented = true
+    };
+
     private static readonly HashSet<string> BuiltInContentTypes = new(StringComparer.OrdinalIgnoreCase)
     {
         "Root",
@@ -610,10 +620,7 @@ public sealed class ModLoader : IModLoader
     {
         string json = File.ReadAllText(manifestPath);
 
-        ModManifest? manifest = JsonSerializer.Deserialize<ModManifest>(
-            json,
-            new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
-        );
+        ModManifest? manifest = JsonSerializer.Deserialize<ModManifest>(json, s_readJsonOptions);
 
         if (manifest == null)
         {
@@ -1074,7 +1081,7 @@ public sealed class ModLoader : IModLoader
             dependencies = Array.Empty<string>()
         };
 
-        string json = JsonSerializer.Serialize(manifest, new JsonSerializerOptions { WriteIndented = true });
+        string json = JsonSerializer.Serialize(manifest, s_writeJsonOptions);
         await File.WriteAllTextAsync(path, json);
         _logger.LogInformation("Created default base game manifest at {Path}", path);
     }

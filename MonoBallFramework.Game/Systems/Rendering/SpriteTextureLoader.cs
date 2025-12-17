@@ -24,10 +24,10 @@ public class SpriteTextureLoader
 
     // Persistent sprites that should never be unloaded (e.g., UI elements)
     // Player sprites load on-demand from entity templates
-    private readonly HashSet<string> _persistentSprites = new();
+    private readonly HashSet<string> _persistentSprites = [];
 
     // Track missing sprites to avoid repeated log warnings (prevents log spam)
-    private readonly HashSet<string> _reportedMissingSprites = new();
+    private readonly HashSet<string> _reportedMissingSprites = [];
     private readonly Dictionary<string, int> _spriteReferenceCount = new();
     private readonly SpriteRegistry _spriteRegistry;
 
@@ -287,9 +287,9 @@ public class SpriteTextureLoader
     /// </summary>
     private void IncrementReferenceCount(string textureKey)
     {
-        if (_spriteReferenceCount.ContainsKey(textureKey))
+        if (_spriteReferenceCount.TryGetValue(textureKey, out int count))
         {
-            _spriteReferenceCount[textureKey]++;
+            _spriteReferenceCount[textureKey] = count + 1;
         }
         else
         {
@@ -303,19 +303,20 @@ public class SpriteTextureLoader
     /// </summary>
     private bool DecrementReferenceCount(string textureKey)
     {
-        if (!_spriteReferenceCount.ContainsKey(textureKey))
+        if (!_spriteReferenceCount.TryGetValue(textureKey, out int count))
         {
             return true; // Not tracked, safe to unload
         }
 
-        _spriteReferenceCount[textureKey]--;
+        count--;
 
-        if (_spriteReferenceCount[textureKey] <= 0)
+        if (count <= 0)
         {
             _spriteReferenceCount.Remove(textureKey);
             return true; // Can unload
         }
 
+        _spriteReferenceCount[textureKey] = count;
         return false; // Still in use
     }
 

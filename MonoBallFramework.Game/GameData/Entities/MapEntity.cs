@@ -61,12 +61,12 @@ public class MapEntity : BaseEntity
     /// <summary>
     ///     Can fly to this map.
     /// </summary>
-    public bool CanFly { get; set; } = false;
+    public bool CanFly { get; set; }
 
     /// <summary>
     ///     Requires Flash HM to see properly (dark caves).
     /// </summary>
-    public bool RequiresFlash { get; set; } = false;
+    public bool RequiresFlash { get; set; }
 
     /// <summary>
     ///     Allow player to run (hold B button).
@@ -81,7 +81,7 @@ public class MapEntity : BaseEntity
     /// <summary>
     ///     Allow player to use Escape Rope or Dig to leave.
     /// </summary>
-    public bool AllowEscaping { get; set; } = false;
+    public bool AllowEscaping { get; set; }
 
     /// <summary>
     ///     Battle scene/background for wild encounters (e.g., "MAP_BATTLE_SCENE_NORMAL").
@@ -107,7 +107,7 @@ public class MapEntity : BaseEntity
     ///     Connection offset for north map in tiles.
     ///     Shifts the connected map horizontally (positive = right, negative = left).
     /// </summary>
-    public int NorthConnectionOffset { get; set; } = 0;
+    public int NorthConnectionOffset { get; set; }
 
     /// <summary>
     ///     Map connected to the south (e.g., "base:map:hoenn/route_102").
@@ -120,7 +120,7 @@ public class MapEntity : BaseEntity
     ///     Connection offset for south map in tiles.
     ///     Shifts the connected map horizontally (positive = right, negative = left).
     /// </summary>
-    public int SouthConnectionOffset { get; set; } = 0;
+    public int SouthConnectionOffset { get; set; }
 
     /// <summary>
     ///     Map connected to the east (e.g., "base:map:hoenn/oldale_town").
@@ -133,7 +133,7 @@ public class MapEntity : BaseEntity
     ///     Connection offset for east map in tiles.
     ///     Shifts the connected map vertically (positive = down, negative = up).
     /// </summary>
-    public int EastConnectionOffset { get; set; } = 0;
+    public int EastConnectionOffset { get; set; }
 
     /// <summary>
     ///     Map connected to the west (e.g., "base:map:hoenn/petalburg_city").
@@ -146,7 +146,7 @@ public class MapEntity : BaseEntity
     ///     Connection offset for west map in tiles.
     ///     Shifts the connected map vertically (positive = down, negative = up).
     /// </summary>
-    public int WestConnectionOffset { get; set; } = 0;
+    public int WestConnectionOffset { get; set; }
 
     /// <summary>
     ///     Wild Pokémon encounter data as JSON.

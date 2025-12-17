@@ -6,12 +6,10 @@ namespace MonoBallFramework.Game.Engine.Core.Modding;
 ///     Resolves mod dependencies and determines load order using topological sort.
 ///     Handles semantic versioning, circular dependency detection, and LoadBefore/LoadAfter relationships.
 /// </summary>
-public sealed class ModDependencyResolver
+public sealed partial class ModDependencyResolver
 {
-    private static readonly Regex DependencyPattern = new(
-        @"^(?<id>[\w-]+)\s*(?<operator>>=|==|>|<|<=)?\s*(?<version>[\d\.]+(?:-[\w\.]+)?)$",
-        RegexOptions.Compiled
-    );
+    [GeneratedRegex(@"^(?<id>[\w-]+)\s*(?<operator>>=|==|>|<|<=)?\s*(?<version>[\d\.]+(?:-[\w\.]+)?)$")]
+    private static partial Regex DependencyPattern();
 
     /// <summary>
     ///     Resolves mod dependencies and returns mods in load order (dependencies first).
@@ -125,12 +123,13 @@ public sealed class ModDependencyResolver
             {
                 if (modLookup.ContainsKey(beforeId))
                 {
-                    if (!graph.ContainsKey(beforeId))
+                    if (!graph.TryGetValue(beforeId, out var beforeList))
                     {
-                        graph[beforeId] = new List<string>();
+                        beforeList = [];
+                        graph[beforeId] = beforeList;
                     }
 
-                    graph[beforeId].Add(mod.Id);
+                    beforeList.Add(mod.Id);
                 }
             }
 
@@ -231,9 +230,9 @@ public sealed class ModDependencyResolver
         {
             foreach (string depId in dependencies)
             {
-                if (inDegree.ContainsKey(depId))
+                if (inDegree.TryGetValue(depId, out int currentDegree))
                 {
-                    inDegree[depId]++;
+                    inDegree[depId] = currentDegree + 1;
                 }
             }
         }
@@ -280,7 +279,7 @@ public sealed class ModDependencyResolver
         out string? version
     )
     {
-        Match match = DependencyPattern.Match(dependency);
+        Match match = DependencyPattern().Match(dependency);
         if (match.Success)
         {
             id = match.Groups["id"].Value;
@@ -351,7 +350,7 @@ public sealed class ModDependencyResolver
         string prerelease = parts.Length > 1 ? parts[1] : string.Empty;
 
         string[] numbers = versionPart.Split('.');
-        if (numbers.Length < 1 || numbers.Length > 3)
+        if (numbers.Length is < 1 or > 3)
         {
             return false;
         }

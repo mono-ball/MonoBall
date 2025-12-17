@@ -48,22 +48,24 @@ public class AudioRegistry : EfCoreRegistry<AudioEntity, GameAudioId>
         _trackIdCache[entity.TrackId] = entity;
 
         // Cache by category
-        if (!_categoryCache.ContainsKey(entity.Category))
+        if (!_categoryCache.TryGetValue(entity.Category, out var categoryList))
         {
-            _categoryCache[entity.Category] = new List<AudioEntity>();
+            categoryList = [];
+            _categoryCache[entity.Category] = categoryList;
         }
 
-        _categoryCache[entity.Category].Add(entity);
+        categoryList.Add(entity);
 
         // Cache by subcategory if present
         if (!string.IsNullOrWhiteSpace(entity.Subcategory))
         {
-            if (!_subcategoryCache.ContainsKey(entity.Subcategory))
+            if (!_subcategoryCache.TryGetValue(entity.Subcategory, out var subcategoryList))
             {
-                _subcategoryCache[entity.Subcategory] = new List<AudioEntity>();
+                subcategoryList = [];
+                _subcategoryCache[entity.Subcategory] = subcategoryList;
             }
 
-            _subcategoryCache[entity.Subcategory].Add(entity);
+            subcategoryList.Add(entity);
         }
     }
 
@@ -158,7 +160,7 @@ public class AudioRegistry : EfCoreRegistry<AudioEntity, GameAudioId>
     {
         if (string.IsNullOrWhiteSpace(category))
         {
-            return Enumerable.Empty<AudioEntity>();
+            return [];
         }
 
         if (_categoryCache.TryGetValue(category, out List<AudioEntity>? cached))
@@ -177,15 +179,12 @@ public class AudioRegistry : EfCoreRegistry<AudioEntity, GameAudioId>
     {
         if (string.IsNullOrWhiteSpace(subcategory))
         {
-            return Enumerable.Empty<AudioEntity>();
+            return [];
         }
 
-        if (_subcategoryCache.TryGetValue(subcategory, out List<AudioEntity>? cached))
-        {
-            return cached;
-        }
-
-        return GetAll().Where(a => subcategory.Equals(a.Subcategory, StringComparison.OrdinalIgnoreCase));
+        return _subcategoryCache.TryGetValue(subcategory, out List<AudioEntity>? cached)
+            ? cached
+            : GetAll().Where(a => subcategory.Equals(a.Subcategory, StringComparison.OrdinalIgnoreCase));
     }
 
     /// <summary>

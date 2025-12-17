@@ -7,8 +7,8 @@ namespace MonoBallFramework.Game.Engine.UI.Utilities;
 public class TextEditorUndoRedo
 {
     private const int MaxHistorySize = 100;
-    private readonly List<EditorState> _redoStack = new();
-    private readonly List<EditorState> _undoStack = new();
+    private readonly List<EditorState> _redoStack = [];
+    private readonly List<EditorState> _undoStack = [];
     private EditorState? _lastSavedState;
 
     /// <summary>

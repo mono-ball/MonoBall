@@ -37,15 +37,15 @@ public class TextBuffer : UIComponent, ITextDisplay
     private const double DoubleClickThresholdSeconds = 0.5;
 
     // Filtering
-    private readonly HashSet<string> _enabledCategories = new();
-    private readonly List<TextBufferLine> _filteredLines = new();
-    private readonly List<TextBufferLine> _lines = new();
+    private readonly HashSet<string> _enabledCategories = [];
+    private readonly List<TextBufferLine> _filteredLines = [];
+    private readonly List<TextBufferLine> _lines = [];
 
     // Scrollbar tracking
     private readonly ScrollbarComponent _scrollbar = new();
 
     // Search
-    private readonly List<int> _searchMatches = new(); // Line indices that match search
+    private readonly List<int> _searchMatches = []; // Line indices that match search
 
     // Visual properties - nullable to allow theme fallback
     // Use GetXxxColor() methods at render time for dynamic theme support
@@ -525,19 +525,19 @@ public class TextBuffer : UIComponent, ITextDisplay
                 // Single line selection - extract substring
                 int start = Math.Clamp(_selectionStartColumn, 0, lineText.Length);
                 int end = Math.Clamp(_selectionEndColumn, start, lineText.Length);
-                sb.Append(lineText.Substring(start, end - start));
+                sb.Append(lineText[start..end]);
             }
             else if (i == _selectionStartLine)
             {
                 // First line of multi-line selection
                 int start = Math.Clamp(_selectionStartColumn, 0, lineText.Length);
-                sb.AppendLine(lineText.Substring(start));
+                sb.AppendLine(lineText[start..]);
             }
             else if (i == _selectionEndLine)
             {
                 // Last line of multi-line selection
                 int end = Math.Clamp(_selectionEndColumn, 0, lineText.Length);
-                sb.Append(lineText.Substring(0, end));
+                sb.Append(lineText[..end]);
             }
             else
             {
@@ -887,17 +887,10 @@ public class TextBuffer : UIComponent, ITextDisplay
                 if (i == _selectionStartLine && i == _selectionEndLine)
                 {
                     // Single line selection - highlight only the selected portion
-                    string textBefore = line.Text.Substring(
-                        0,
-                        Math.Min(_selectionStartColumn, line.Text.Length)
-                    );
-                    string selectedText = line.Text.Substring(
-                        Math.Min(_selectionStartColumn, line.Text.Length),
-                        Math.Min(
-                            _selectionEndColumn - _selectionStartColumn,
-                            line.Text.Length - Math.Min(_selectionStartColumn, line.Text.Length)
-                        )
-                    );
+                    int selStart = Math.Min(_selectionStartColumn, line.Text.Length);
+                    int selEnd = Math.Min(_selectionEndColumn, line.Text.Length);
+                    string textBefore = line.Text[..selStart];
+                    string selectedText = line.Text[selStart..selEnd];
 
                     selStartX = resolvedRect.X + LinePadding + renderer.MeasureText(textBefore).X;
                     selWidth = renderer.MeasureText(selectedText).X;
@@ -905,20 +898,14 @@ public class TextBuffer : UIComponent, ITextDisplay
                 else if (i == _selectionStartLine)
                 {
                     // First line of multi-line selection
-                    string textBefore = line.Text.Substring(
-                        0,
-                        Math.Min(_selectionStartColumn, line.Text.Length)
-                    );
+                    string textBefore = line.Text[..Math.Min(_selectionStartColumn, line.Text.Length)];
                     selStartX = resolvedRect.X + LinePadding + renderer.MeasureText(textBefore).X;
                     selWidth = contentWidth - LinePadding - renderer.MeasureText(textBefore).X;
                 }
                 else if (i == _selectionEndLine)
                 {
                     // Last line of multi-line selection
-                    string selectedText = line.Text.Substring(
-                        0,
-                        Math.Min(_selectionEndColumn, line.Text.Length)
-                    );
+                    string selectedText = line.Text[..Math.Min(_selectionEndColumn, line.Text.Length)];
                     selWidth = renderer.MeasureText(selectedText).X;
                 }
                 // Middle lines use full width (selStartX and selWidth already set correctly)
@@ -957,11 +944,11 @@ public class TextBuffer : UIComponent, ITextDisplay
                         }
 
                         // Measure text before the match to get X position
-                        string textBefore = line.Text.Substring(0, foundIndex);
+                        string textBefore = line.Text[..foundIndex];
                         float offsetX = renderer.MeasureText(textBefore).X;
 
                         // Measure the matched text to get width
-                        string matchedText = line.Text.Substring(foundIndex, _searchFilter.Length);
+                        string matchedText = line.Text[foundIndex..(foundIndex + _searchFilter.Length)];
                         float matchWidth = renderer.MeasureText(matchedText).X;
 
                         // Draw highlight rectangle for this specific match
@@ -1001,7 +988,7 @@ public class TextBuffer : UIComponent, ITextDisplay
                 while (left <= right)
                 {
                     int mid = (left + right) / 2;
-                    string testText = line.Text.Substring(0, mid);
+                    string testText = line.Text[..mid];
                     Vector2 testSize = renderer.MeasureText(testText);
 
                     if (testSize.X <= availableWidth)
@@ -1017,7 +1004,7 @@ public class TextBuffer : UIComponent, ITextDisplay
 
                 if (bestFit > 0)
                 {
-                    string truncatedText = line.Text.Substring(0, bestFit);
+                    string truncatedText = line.Text[..bestFit];
                     renderer.DrawText(truncatedText, textPos, line.Color);
                 }
             }
@@ -1284,7 +1271,7 @@ public class TextBuffer : UIComponent, ITextDisplay
         while (left < right)
         {
             int mid = (left + right) / 2;
-            float textWidth = renderer.MeasureText(lineText.Substring(0, mid)).X;
+            float textWidth = renderer.MeasureText(lineText[..mid]).X;
 
             if (textWidth < relativeX)
             {
@@ -1299,8 +1286,8 @@ public class TextBuffer : UIComponent, ITextDisplay
         // Check if we should snap to the previous or next character
         if (left > 0 && left <= lineText.Length)
         {
-            float prevWidth = renderer.MeasureText(lineText.Substring(0, left - 1)).X;
-            float currWidth = renderer.MeasureText(lineText.Substring(0, left)).X;
+            float prevWidth = renderer.MeasureText(lineText[..(left - 1)]).X;
+            float currWidth = renderer.MeasureText(lineText[..left]).X;
 
             if (relativeX - prevWidth < currWidth - relativeX)
             {

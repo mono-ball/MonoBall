@@ -18,5 +18,5 @@ public class TmxObjectGroup
     /// <summary>
     ///     Gets or sets the objects in this group.
     /// </summary>
-    public List<TmxObject> Objects { get; set; } = new();
+    public List<TmxObject> Objects { get; set; } = [];
 }

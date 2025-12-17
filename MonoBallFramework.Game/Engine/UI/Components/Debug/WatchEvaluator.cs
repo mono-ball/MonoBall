@@ -41,6 +41,7 @@ public class WatchEvaluator : IDisposable
 
     public void Dispose()
     {
+        GC.SuppressFinalize(this);
         _cts.Cancel();
         _workAvailable.Set(); // Wake up worker thread
         _workerThread.Join(1000); // Wait up to 1 second for graceful shutdown

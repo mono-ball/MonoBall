@@ -10,7 +10,7 @@ namespace MonoBallFramework.Game.Engine.Audio.Services.Streaming;
 public class StreamingMusicProvider : ISeekableSampleProvider, IDisposable
 {
     private readonly VorbisReader _reader;
-    private readonly object _readLock = new();
+    private readonly Lock _readLock = new();
     private bool _disposed;
 
     /// <summary>

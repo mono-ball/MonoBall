@@ -13,7 +13,7 @@ namespace MonoBallFramework.Game.Engine.Scenes;
 public class SceneManager : IInputBlocker
 {
     private readonly ILogger<SceneManager> _logger;
-    private readonly Stack<IScene> _sceneStack = new();
+    private readonly Stack<IScene> _sceneStack = [];
     private IScene? _currentScene;
     private bool _isPushOperation;
     private IScene? _nextScene;
@@ -60,12 +60,7 @@ public class SceneManager : IInputBlocker
     {
         get
         {
-            if (_sceneStack.Count > 0)
-            {
-                return _sceneStack.Peek();
-            }
-
-            return _currentScene;
+            return _sceneStack.Count > 0 ? _sceneStack.Peek() : _currentScene;
         }
     }
 
@@ -375,10 +370,7 @@ public class SceneManager : IInputBlocker
             if (topScene.UpdateScenesBelow)
             {
                 // Update base scene first
-                if (_currentScene != null)
-                {
-                    _currentScene.Update(gameTime);
-                }
+                _currentScene?.Update(gameTime);
 
                 // Update all stacked scenes in order
                 foreach (IScene scene in _sceneStack)
@@ -422,10 +414,7 @@ public class SceneManager : IInputBlocker
             if (topScene.RenderScenesBelow)
             {
                 // Render base scene first
-                if (_currentScene != null)
-                {
-                    _currentScene.Draw(gameTime);
-                }
+                _currentScene?.Draw(gameTime);
 
                 // Render all stacked scenes in order (bottom to top = reverse of snapshot)
                 for (int i = stackSnapshot.Length - 1; i >= 0; i--)

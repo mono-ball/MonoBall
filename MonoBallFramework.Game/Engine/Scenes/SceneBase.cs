@@ -12,7 +12,7 @@ namespace MonoBallFramework.Game.Engine.Scenes;
 /// </summary>
 public abstract class SceneBase : IScene
 {
-    private readonly object _lock = new();
+    private readonly Lock _lock = new();
     private SceneState _state = SceneState.Uninitialized;
 
     /// <summary>
@@ -38,7 +38,7 @@ public abstract class SceneBase : IScene
         // Create a minimal service container for ContentManager
         // ContentManager requires IServiceProvider but only uses IGraphicsDeviceService
         var serviceContainer = new GameServiceContainer();
-        serviceContainer.AddService(typeof(IGraphicsDeviceService), new GraphicsDeviceServiceShim(graphicsDevice));
+        serviceContainer.AddService<IGraphicsDeviceService>(new GraphicsDeviceServiceShim(graphicsDevice));
         Content = new ContentManager(serviceContainer, contentRootDirectory);
     }
 
@@ -110,7 +110,7 @@ public abstract class SceneBase : IScene
     ///     When false, only this scene will be rendered (full-screen scenes like menus).
     ///     Default is false (full-screen).
     /// </summary>
-    public virtual bool RenderScenesBelow { get; protected set; } = false;
+    public virtual bool RenderScenesBelow { get; protected set; }
 
     /// <summary>
     ///     Gets or sets a value indicating whether the scenes below this one should be updated.
@@ -118,7 +118,7 @@ public abstract class SceneBase : IScene
     ///     When false, only this scene will be updated (pauses lower scenes).
     ///     Default is false (lower scenes are paused).
     /// </summary>
-    public virtual bool UpdateScenesBelow { get; protected set; } = false;
+    public virtual bool UpdateScenesBelow { get; protected set; }
 
     /// <summary>
     ///     Gets or sets a value indicating whether this scene takes exclusive input.

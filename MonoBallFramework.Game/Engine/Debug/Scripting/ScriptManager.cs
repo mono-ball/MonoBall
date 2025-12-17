@@ -186,12 +186,7 @@ public class ScriptManager
         try
         {
             Result<string> pathResult = SanitizeAndValidatePath(filename);
-            if (!pathResult.IsSuccess)
-            {
-                return false;
-            }
-
-            return File.Exists(pathResult.Value!);
+            return pathResult.IsSuccess && File.Exists(pathResult.Value!);
         }
         catch (Exception ex)
         {

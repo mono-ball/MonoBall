@@ -11,7 +11,7 @@ namespace MonoBallFramework.Game.GameData.PropertyMapping;
 public class PropertyMapperRegistry
 {
     private readonly ILogger<PropertyMapperRegistry>? _logger;
-    private readonly List<object> _mappers = new();
+    private readonly List<object> _mappers = [];
 
     public PropertyMapperRegistry(ILogger<PropertyMapperRegistry>? logger = null)
     {

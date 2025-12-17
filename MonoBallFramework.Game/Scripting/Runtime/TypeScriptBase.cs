@@ -44,7 +44,7 @@ public abstract class TypeScriptBase
     // Scripts must be stateless - use ScriptContext.GetState<T>() for persistent data.
 
     // Track event subscriptions for automatic cleanup
-    private readonly List<IDisposable> _eventSubscriptions = new();
+    private readonly List<IDisposable> _eventSubscriptions = [];
 
     // ============================================================================
     // Lifecycle Hooks

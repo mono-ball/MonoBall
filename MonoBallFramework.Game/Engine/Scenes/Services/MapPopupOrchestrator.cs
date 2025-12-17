@@ -81,6 +81,7 @@ public class MapPopupOrchestrator : IMapPopupOrchestrator
             return;
         }
 
+        GC.SuppressFinalize(this);
         _mapTransitionSubscription?.Dispose();
         _mapRenderReadySubscription?.Dispose();
         _disposed = true;

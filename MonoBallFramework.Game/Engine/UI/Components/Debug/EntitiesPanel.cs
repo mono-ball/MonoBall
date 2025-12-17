@@ -18,8 +18,21 @@ namespace MonoBallFramework.Game.Engine.UI.Components.Debug;
 ///     Supports filtering, search, and entity inspection.
 ///     Implements <see cref="IEntityOperations" /> for command access.
 /// </summary>
-public class EntitiesPanel : DebugPanelBase, IEntityOperations
+public partial class EntitiesPanel : DebugPanelBase, IEntityOperations
 {
+    // Regex patterns for value type detection
+    [GeneratedRegex(@"^\(-?\d+\.?\d*,\s*-?\d+\.?\d*\)$")]
+    private static partial Regex Coords2DRegex();
+
+    [GeneratedRegex(@"^\(-?\d+\.?\d*,\s*-?\d+\.?\d*,\s*-?\d+\.?\d*\)$")]
+    private static partial Regex Coords3DRegex();
+
+    [GeneratedRegex(@"^-?\d+$")]
+    private static partial Regex IntegerRegex();
+
+    [GeneratedRegex(@"^-?\d+\.\d+$")]
+    private static partial Regex FloatRegex();
+
     // Display settings
     private const int MaxComponentsToShow = 50;
     private const int MaxPropertiesToShow = 20;
@@ -36,26 +49,26 @@ public class EntitiesPanel : DebugPanelBase, IEntityOperations
     /// <summary>Maximum depth for relationship tree traversal</summary>
     private const int MaxRelationshipTreeDepth = 5;
 
-    private readonly List<int> _cumulativeHeights = new(); // Cumulative heights for binary search
-    private readonly List<EntityInfo> _entities = new();
+    private readonly List<int> _cumulativeHeights = []; // Cumulative heights for binary search
+    private readonly List<EntityInfo> _entities = [];
 
     // Virtual scrolling infrastructure - PERFORMANCE FIX for 1M+ entities
-    private readonly List<int> _entityHeights = new(); // Height (lines) per entity in _filteredEntities
+    private readonly List<int> _entityHeights = []; // Height (lines) per entity in _filteredEntities
     private readonly TextBuffer _entityListBuffer;
-    private readonly HashSet<int> _expandedEntities = new();
-    private readonly List<EntityInfo> _filteredEntities = new();
+    private readonly HashSet<int> _expandedEntities = [];
+    private readonly List<EntityInfo> _filteredEntities = [];
     private readonly Dictionary<int, int> _lineToEntityId = new(); // Maps line number to entity ID
     private readonly Dictionary<int, EntityInfo> _loadedEntityCache = new(); // Cache loaded entity details
-    private readonly List<int> _navigableEntityIds = new(); // Ordered list of entity IDs for navigation
-    private readonly HashSet<int> _newEntityIds = new();
-    private readonly HashSet<int> _pinnedEntities = new();
+    private readonly List<int> _navigableEntityIds = []; // Ordered list of entity IDs for navigation
+    private readonly HashSet<int> _newEntityIds = [];
+    private readonly HashSet<int> _pinnedEntities = [];
 
     // Entity change tracking
-    private readonly HashSet<int> _previousEntityIds = new();
+    private readonly HashSet<int> _previousEntityIds = [];
 
     // Tree view state
-    private readonly HashSet<int> _processedInTree = new(); // Prevent infinite loops in tree
-    private readonly HashSet<int> _removedEntityIds = new();
+    private readonly HashSet<int> _processedInTree = []; // Prevent infinite loops in tree
+    private readonly HashSet<int> _removedEntityIds = [];
 
     // Auto-refresh settings
     private string _componentFilter = "";
@@ -630,12 +643,7 @@ public class EntitiesPanel : DebugPanelBase, IEntityOperations
             {
                 bool aPinned = _pinnedEntities.Contains(a.Id);
                 bool bPinned = _pinnedEntities.Contains(b.Id);
-                if (aPinned != bPinned)
-                {
-                    return bPinned.CompareTo(aPinned);
-                }
-
-                return a.Id.CompareTo(b.Id);
+                return aPinned != bPinned ? bPinned.CompareTo(aPinned) : a.Id.CompareTo(b.Id);
             }
         );
 
@@ -740,9 +748,8 @@ public class EntitiesPanel : DebugPanelBase, IEntityOperations
     public bool ToggleEntity(int entityId)
     {
         _heightsNeedRecalculation = true; // Virtualization: toggle changes height
-        if (_expandedEntities.Contains(entityId))
+        if (_expandedEntities.Remove(entityId))
         {
-            _expandedEntities.Remove(entityId);
             UpdateDisplay();
             return false;
         }
@@ -805,9 +812,8 @@ public class EntitiesPanel : DebugPanelBase, IEntityOperations
     /// </summary>
     public bool TogglePin(int entityId)
     {
-        if (_pinnedEntities.Contains(entityId))
+        if (_pinnedEntities.Remove(entityId))
         {
-            _pinnedEntities.Remove(entityId);
             ApplyFilters();
             UpdateDisplay();
             return false;
@@ -1314,11 +1320,11 @@ public class EntitiesPanel : DebugPanelBase, IEntityOperations
         }
 
         // Find the line number for the selected entity
-        foreach (KeyValuePair<int, int> kvp in _lineToEntityId)
+        foreach (var (lineNumber, entityId) in _lineToEntityId)
         {
-            if (kvp.Value == _selectedEntityId.Value)
+            if (entityId == _selectedEntityId.Value)
             {
-                int targetLine = kvp.Key;
+                int targetLine = lineNumber;
                 _entityListBuffer.CursorLine = targetLine;
 
                 // Scroll to show the line if needed
@@ -1871,9 +1877,10 @@ public class EntitiesPanel : DebugPanelBase, IEntityOperations
             {
                 foreach (EntityRelationship child in children)
                 {
-                    if (!childLookup.ContainsKey(entity.Id))
+                    if (!childLookup.TryGetValue(entity.Id, out var childList))
                     {
-                        childLookup[entity.Id] = new List<EntityInfo>();
+                        childList = [];
+                        childLookup[entity.Id] = childList;
                     }
 
                     // Find the actual child entity
@@ -1882,7 +1889,7 @@ public class EntitiesPanel : DebugPanelBase, IEntityOperations
                     );
                     if (childEntity != null)
                     {
-                        childLookup[entity.Id].Add(childEntity);
+                        childList.Add(childEntity);
                         hasParent.Add(child.EntityId); // Mark this entity as having a parent
                     }
                 }
@@ -2384,25 +2391,25 @@ public class EntitiesPanel : DebugPanelBase, IEntityOperations
         }
 
         // Position/coordinate patterns like "(1.0, 2.0)" or "(1, 2)"
-        if (Regex.IsMatch(value, @"^\(-?\d+\.?\d*,\s*-?\d+\.?\d*\)$"))
+        if (Coords2DRegex().IsMatch(value))
         {
             return ThemeManager.Current.Info; // Light blue for positions
         }
 
         // 3D coordinates "(x, y, z)"
-        if (Regex.IsMatch(value, @"^\(-?\d+\.?\d*,\s*-?\d+\.?\d*,\s*-?\d+\.?\d*\)$"))
+        if (Coords3DRegex().IsMatch(value))
         {
             return ThemeManager.Current.Info;
         }
 
         // Integer values
-        if (Regex.IsMatch(value, @"^-?\d+$"))
+        if (IntegerRegex().IsMatch(value))
         {
             return ThemeManager.Current.SyntaxNumber; // Theme number color
         }
 
         // Float values
-        if (Regex.IsMatch(value, @"^-?\d+\.\d+$"))
+        if (FloatRegex().IsMatch(value))
         {
             return ThemeManager.Current.SyntaxNumber; // Theme number color
         }

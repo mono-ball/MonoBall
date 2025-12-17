@@ -193,7 +193,7 @@ public class EventMetrics : IEventMetrics
 /// </summary>
 public class EventTypeMetrics
 {
-    private readonly object _lock = new();
+    private readonly Lock _lock = new();
     private int _subscriberCount;
     private double _totalHandlerTimeMs;
     private double _totalPublishTimeMs;
@@ -295,7 +295,7 @@ public class EventTypeMetrics
 /// </summary>
 public class SubscriptionMetrics
 {
-    private readonly object _lock = new();
+    private readonly Lock _lock = new();
     private double _totalTimeMs;
 
     public SubscriptionMetrics(string eventTypeName, int handlerId)

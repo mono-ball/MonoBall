@@ -17,12 +17,12 @@ namespace MonoBallFramework.Game.Engine.UI.Components.Debug;
 public class EntityListPane : UIComponent
 {
     private readonly Dictionary<int, int> _lineToEntityId = new();
-    private readonly List<int> _navigableEntityIds = new();
-    private readonly HashSet<int> _newEntityIds = new();
-    private readonly HashSet<int> _pinnedEntities = new();
+    private readonly List<int> _navigableEntityIds = [];
+    private readonly HashSet<int> _newEntityIds = [];
+    private readonly HashSet<int> _pinnedEntities = [];
 
-    private List<EntityInfo> _entities = new();
-    private List<EntityInfo> _filteredEntities = new();
+    private List<EntityInfo> _entities = [];
+    private List<EntityInfo> _filteredEntities = [];
     private int _lastClickedEntityId = -1;
 
     // Click tracking for double-click detection
@@ -139,9 +139,8 @@ public class EntityListPane : UIComponent
     /// </summary>
     public bool TogglePin(int entityId)
     {
-        if (_pinnedEntities.Contains(entityId))
+        if (_pinnedEntities.Remove(entityId))
         {
-            _pinnedEntities.Remove(entityId);
             ApplyFilters();
             UpdateDisplay();
             return false;
@@ -249,12 +248,9 @@ public class EntityListPane : UIComponent
     /// </summary>
     public EntityInfo? GetSelectedEntity()
     {
-        if (!_selectedEntityId.HasValue)
-        {
-            return null;
-        }
-
-        return _filteredEntities.FirstOrDefault(e => e.Id == _selectedEntityId.Value);
+        return _selectedEntityId.HasValue
+            ? _filteredEntities.FirstOrDefault(e => e.Id == _selectedEntityId.Value)
+            : null;
     }
 
     protected override bool IsInteractive()

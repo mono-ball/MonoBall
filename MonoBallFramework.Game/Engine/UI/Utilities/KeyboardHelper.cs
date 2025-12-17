@@ -17,14 +17,14 @@ public static class KeyboardHelper
     public static char? KeyToChar(Keys key, bool shift)
     {
         // Letters
-        if (key >= Keys.A && key <= Keys.Z)
+        if (key is >= Keys.A and <= Keys.Z)
         {
             char c = (char)('a' + (key - Keys.A));
             return shift ? char.ToUpper(c) : c;
         }
 
         // Numbers and symbols
-        if (key >= Keys.D0 && key <= Keys.D9)
+        if (key is >= Keys.D0 and <= Keys.D9)
         {
             if (shift)
             {

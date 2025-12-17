@@ -21,7 +21,7 @@ public record BehaviorDefinition : IScriptedType
     /// <summary>
     ///     Whether this behavior allows the NPC to be interacted with while moving.
     /// </summary>
-    public bool AllowInteractionWhileMoving { get; init; } = false;
+    public bool AllowInteractionWhileMoving { get; init; }
 
     /// <summary>
     ///     Unique identifier for this behavior type (e.g., "patrol", "stationary", "trainer").

@@ -249,13 +249,13 @@ public class ConsoleContext : IConsoleContext
 
     public async Task ExecuteScriptAsync(string scriptContent)
     {
-        await ExecuteScriptAsync(scriptContent, Array.Empty<string>());
+        await ExecuteScriptAsync(scriptContent, []);
     }
 
     public async Task ExecuteScriptAsync(string scriptContent, string[] args)
     {
         // Set script arguments before execution
-        _services.ScriptGlobals.Args = args ?? Array.Empty<string>();
+        _services.ScriptGlobals.Args = args ?? [];
 
         EvaluationResult result = await _services.ScriptEvaluator.EvaluateAsync(
             scriptContent,
@@ -373,7 +373,7 @@ public class ConsoleContext : IConsoleContext
                     return string.IsNullOrWhiteSpace(result.Output) ? "<null>" : result.Output;
                 }
 
-                if (result.Errors != null && result.Errors.Count > 0)
+                if (result.Errors is { Count: > 0 })
                 {
                     return $"<error: {result.Errors[0].Message}>";
                 }
@@ -401,19 +401,13 @@ public class ConsoleContext : IConsoleContext
                     task.Wait();
                     EvaluationResult result = task.Result;
 
-                    if (result.IsSuccess && !string.IsNullOrWhiteSpace(result.Output))
+                    if (!result.IsSuccess || string.IsNullOrWhiteSpace(result.Output))
                     {
-                        // Try to parse as boolean
-                        if (bool.TryParse(result.Output.Trim(), out bool boolResult))
-                        {
-                            return boolResult;
-                        }
-
-                        // Non-empty result treated as true
-                        return true;
+                        return false;
                     }
 
-                    return false;
+                    // Try to parse as boolean, or treat non-empty result as true
+                    return bool.TryParse(result.Output.Trim(), out bool boolResult) ? boolResult : true;
                 }
                 catch
                 {
@@ -567,13 +561,10 @@ public class ConsoleContext : IConsoleContext
                                 return false;
                             }
 
-                            if (bool.TryParse(result.Output, out bool boolValue))
-                            {
-                                return boolValue;
-                            }
-
                             // Consider "true" (case-insensitive) or non-empty strings as true
-                            return result.Output.Equals("true", StringComparison.OrdinalIgnoreCase);
+                            return bool.TryParse(result.Output, out bool boolValue)
+                                ? boolValue
+                                : result.Output.Equals("true", StringComparison.OrdinalIgnoreCase);
                         }
                         catch
                         {

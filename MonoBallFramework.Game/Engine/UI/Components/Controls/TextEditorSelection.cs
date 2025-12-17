@@ -202,7 +202,7 @@ public class TextEditorSelection
             string line = lines[startLine];
             startColumn = Math.Clamp(startColumn, 0, line.Length);
             endColumn = Math.Clamp(endColumn, 0, line.Length);
-            return line.Substring(startColumn, endColumn - startColumn);
+            return line[startColumn..endColumn];
         }
 
         // Multi-line selection
@@ -216,13 +216,13 @@ public class TextEditorSelection
             {
                 // First line: from start column to end
                 startColumn = Math.Clamp(startColumn, 0, line.Length);
-                result.Append(line.Substring(startColumn));
+                result.Append(line[startColumn..]);
             }
             else if (i == endLine)
             {
                 // Last line: from beginning to end column
                 endColumn = Math.Clamp(endColumn, 0, line.Length);
-                result.Append(line.Substring(0, endColumn));
+                result.Append(line[..endColumn]);
             }
             else
             {

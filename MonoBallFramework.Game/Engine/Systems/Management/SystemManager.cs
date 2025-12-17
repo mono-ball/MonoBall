@@ -24,17 +24,17 @@ namespace MonoBallFramework.Game.Engine.Systems.Management;
 /// </remarks>
 public class SystemManager
 {
-    private readonly List<IRenderSystem> _cachedEnabledRenderSystems = new();
+    private readonly List<IRenderSystem> _cachedEnabledRenderSystems = [];
 
     // Cached enabled systems to avoid LINQ allocations on every frame (120x/sec)
-    private readonly List<IUpdateSystem> _cachedEnabledUpdateSystems = new();
-    private readonly List<IEventDrivenSystem> _eventDrivenSystems = new();
-    private readonly object _lock = new();
+    private readonly List<IUpdateSystem> _cachedEnabledUpdateSystems = [];
+    private readonly List<IEventDrivenSystem> _eventDrivenSystems = [];
+    private readonly Lock _lock = new();
     private readonly ILogger<SystemManager>? _logger;
     private readonly SystemPerformanceTracker _performanceTracker;
-    private readonly List<IRenderSystem> _renderSystems = new();
+    private readonly List<IRenderSystem> _renderSystems = [];
 
-    private readonly List<IUpdateSystem> _updateSystems = new();
+    private readonly List<IUpdateSystem> _updateSystems = [];
     private bool _enabledCacheDirty = true;
 
     private bool _initialized;

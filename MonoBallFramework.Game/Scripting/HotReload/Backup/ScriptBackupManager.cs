@@ -10,7 +10,7 @@ namespace MonoBallFramework.Game.Scripting.HotReload.Backup;
 /// </summary>
 public class ScriptBackupManager
 {
-    private readonly object _backupLock = new();
+    private readonly Lock _backupLock = new();
     private readonly ConcurrentDictionary<string, ScriptBackup> _backups = new();
     private readonly ILogger<ScriptBackupManager> _logger;
 
@@ -214,5 +214,5 @@ public class BackupInfo
 public class BackupStatistics
 {
     public int TotalBackups { get; init; }
-    public List<BackupInfo> Backups { get; init; } = new();
+    public List<BackupInfo> Backups { get; init; } = [];
 }

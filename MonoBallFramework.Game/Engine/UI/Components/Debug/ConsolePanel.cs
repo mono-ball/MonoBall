@@ -173,7 +173,7 @@ public class ConsolePanel : Panel
     {
         _parameterHints.SetHints(hints, currentParameterIndex);
         _overlayMode =
-            hints != null && hints.Overloads.Count > 0
+            hints is { Overloads.Count: > 0 }
                 ? ConsoleOverlayMode.ParameterHints
                 : ConsoleOverlayMode.None;
     }
@@ -389,10 +389,7 @@ public class ConsolePanel : Panel
         OnCommandSubmitted?.Invoke(command);
 
         // Hide suggestions and command history search
-        if (
-            _overlayMode == ConsoleOverlayMode.Suggestions
-            || _overlayMode == ConsoleOverlayMode.CommandHistorySearch
-        )
+        if (_overlayMode is ConsoleOverlayMode.Suggestions or ConsoleOverlayMode.CommandHistorySearch)
         {
             _overlayMode = ConsoleOverlayMode.None;
         }
@@ -484,7 +481,7 @@ public class ConsolePanel : Panel
         }
 
         // Extract the partial word from word start to cursor
-        return text.Substring(wordStart, cursorPos - wordStart);
+        return text[wordStart..cursorPos];
     }
 
     private void HandleRequestCompletions(string text)
@@ -505,10 +502,7 @@ public class ConsolePanel : Panel
         {
             ClearDocumentation();
         }
-        else if (
-            _overlayMode == ConsoleOverlayMode.Suggestions
-            || _overlayMode == ConsoleOverlayMode.CommandHistorySearch
-        )
+        else if (_overlayMode is ConsoleOverlayMode.Suggestions or ConsoleOverlayMode.CommandHistorySearch)
         {
             _overlayMode = ConsoleOverlayMode.None;
             _suggestionsDropdown.Clear();
@@ -523,14 +517,9 @@ public class ConsolePanel : Panel
 
     private void ToggleSearch()
     {
-        if (_overlayMode == ConsoleOverlayMode.Search)
-        {
-            _overlayMode = ConsoleOverlayMode.None;
-        }
-        else
-        {
-            _overlayMode = ConsoleOverlayMode.Search;
-        }
+        _overlayMode = _overlayMode == ConsoleOverlayMode.Search
+            ? ConsoleOverlayMode.None
+            : ConsoleOverlayMode.Search;
 
         if (_overlayMode == ConsoleOverlayMode.Search)
         {
@@ -677,7 +666,7 @@ public class ConsolePanel : Panel
             _hintBar.Visible = false;
 
             // Update search hint bar
-            string searchHintText = "[Enter]/[F3] next | [Shift+F3] previous | [Esc] close";
+            const string searchHintText = "[Enter]/[F3] next | [Shift+F3] previous | [Esc] close";
             _searchHintBar.SetText(searchHintText);
 
             // Calculate search heights
@@ -844,10 +833,7 @@ public class ConsolePanel : Panel
             }
 
             // Handle suggestions keyboard navigation when visible
-            if (
-                _overlayMode == ConsoleOverlayMode.Suggestions
-                || _overlayMode == ConsoleOverlayMode.CommandHistorySearch
-            )
+            if (_overlayMode is ConsoleOverlayMode.Suggestions or ConsoleOverlayMode.CommandHistorySearch)
             {
                 // Up/Down with repeat for smooth navigation
                 if (input.IsKeyPressedWithRepeat(Keys.Down))

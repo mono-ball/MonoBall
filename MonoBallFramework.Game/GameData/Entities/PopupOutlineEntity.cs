@@ -57,7 +57,7 @@ public class PopupOutlineEntity : BaseEntity
     ///     Tile definitions stored as JSON column via EF Core OwnsMany().ToJson().
     ///     Each tile contains: Index, X, Y, Width, Height
     /// </summary>
-    public List<OutlineTile> Tiles { get; set; } = new();
+    public List<OutlineTile> Tiles { get; set; } = [];
 
     /// <summary>
     ///     Tile usage mapping stored as JSON column via EF Core OwnsOne().ToJson().
@@ -144,20 +144,20 @@ public class OutlineTileUsage
     /// <summary>
     ///     Tile indices for the top edge.
     /// </summary>
-    public List<int> TopEdge { get; set; } = new();
+    public List<int> TopEdge { get; set; } = [];
 
     /// <summary>
     ///     Tile indices for the left edge.
     /// </summary>
-    public List<int> LeftEdge { get; set; } = new();
+    public List<int> LeftEdge { get; set; } = [];
 
     /// <summary>
     ///     Tile indices for the right edge.
     /// </summary>
-    public List<int> RightEdge { get; set; } = new();
+    public List<int> RightEdge { get; set; } = [];
 
     /// <summary>
     ///     Tile indices for the bottom edge.
     /// </summary>
-    public List<int> BottomEdge { get; set; } = new();
+    public List<int> BottomEdge { get; set; } = [];
 }

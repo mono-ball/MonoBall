@@ -8,7 +8,7 @@ namespace MonoBallFramework.Game.Engine.Audio.Core;
 public class VorbisReader : ISeekableSampleProvider, IDisposable
 {
     private readonly NVorbis.VorbisReader _reader;
-    private readonly object _readLock = new();
+    private readonly Lock _readLock = new();
     private bool _disposed;
 
     /// <summary>
@@ -38,10 +38,7 @@ public class VorbisReader : ISeekableSampleProvider, IDisposable
     /// <param name="closeOnDispose">Whether to close the stream when this reader is disposed.</param>
     public VorbisReader(Stream stream, bool closeOnDispose = true)
     {
-        if (stream == null)
-        {
-            throw new ArgumentNullException(nameof(stream));
-        }
+        ArgumentNullException.ThrowIfNull(stream);
 
         _reader = new NVorbis.VorbisReader(stream, closeOnDispose);
         Format = new AudioFormat(_reader.SampleRate, _reader.Channels);
@@ -61,12 +58,7 @@ public class VorbisReader : ISeekableSampleProvider, IDisposable
         {
             lock (_readLock)
             {
-                if (_disposed)
-                {
-                    return TimeSpan.Zero;
-                }
-
-                return _reader.TimePosition;
+                return _disposed ? TimeSpan.Zero : _reader.TimePosition;
             }
         }
     }

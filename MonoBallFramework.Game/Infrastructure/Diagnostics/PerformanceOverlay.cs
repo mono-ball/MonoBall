@@ -78,6 +78,7 @@ public class PerformanceOverlay : IDisposable
             return;
         }
 
+        GC.SuppressFinalize(this);
         _disposed = true;
 
         _spriteBatch.Dispose();
@@ -279,12 +280,7 @@ public class PerformanceOverlay : IDisposable
             return Color.LimeGreen;
         }
 
-        if (memoryMb < 512)
-        {
-            return Color.Yellow;
-        }
-
-        return Color.Orange;
+        return memoryMb < 512 ? Color.Yellow : Color.Orange;
     }
 
     private struct PerformanceStats

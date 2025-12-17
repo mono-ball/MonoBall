@@ -153,7 +153,7 @@ public class EventInspectorAdapter
 
                 // Include Roslyn-compiled script assemblies (they have generated names)
                 // These are typically named like "ℛ*" or contain submission identifiers
-                if (name?.StartsWith("\u211B") == true) // Roslyn script prefix
+                if (name?.StartsWith('\u211B') == true) // Roslyn script prefix
                 {
                     return true;
                 }

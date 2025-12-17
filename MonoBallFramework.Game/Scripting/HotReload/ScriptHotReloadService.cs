@@ -40,7 +40,7 @@ public class ScriptHotReloadService : IDisposable
     private readonly ConcurrentDictionary<string, DateTime> _lastDebounceTime = new();
     private readonly ILogger<ScriptHotReloadService> _logger;
     private readonly IHotReloadNotificationService _notificationService;
-    private readonly object _reloadLock = new();
+    private readonly Lock _reloadLock = new();
     private readonly HotReloadStatistics _statistics = new();
     private readonly WatcherFactory _watcherFactory;
     private int _debouncedEventsCount;
@@ -113,6 +113,7 @@ public class ScriptHotReloadService : IDisposable
             return;
         }
 
+        GC.SuppressFinalize(this);
         _disposed = true;
 
         // Synchronously stop watching

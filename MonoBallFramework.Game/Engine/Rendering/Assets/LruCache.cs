@@ -14,7 +14,7 @@ public class LruCache<TKey, TValue>
     where TValue : IDisposable
 {
     private readonly ConcurrentDictionary<TKey, CacheEntry> _cache = new();
-    private readonly object _lock = new();
+    private readonly Lock _lock = new();
     private readonly ILogger? _logger;
     private readonly LinkedList<TKey> _lruList = new();
     private readonly long _maxSizeBytes;

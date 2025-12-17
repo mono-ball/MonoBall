@@ -14,7 +14,7 @@ public class Dropdown : UIComponent
     private int _hoveredItemIndex = -1;
 
     /// <summary>Available options</summary>
-    public List<string> Options { get; set; } = new();
+    public List<string> Options { get; set; } = [];
 
     /// <summary>Currently selected index (-1 for none)</summary>
     public int SelectedIndex { get; set; } = -1;

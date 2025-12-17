@@ -209,7 +209,7 @@ public class EventBus(ILogger<EventBus>? logger = null) : IEventBus
             return (IReadOnlyCollection<int>)handlers.Keys;
         }
 
-        return Array.Empty<int>();
+        return [];
     }
 
     /// <inheritdoc />

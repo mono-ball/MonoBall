@@ -31,7 +31,7 @@ public class WatchPanel : DebugPanelBase, IDisposable, IWatchOperations
     private readonly Dictionary<string, bool> _groupCollapsedState = new(); // Track collapsed groups
     private readonly TextBuffer _watchBuffer;
     private readonly Dictionary<string, WatchEntry> _watches = new();
-    private readonly List<string> _watchKeys = new(); // Maintain insertion order
+    private readonly List<string> _watchKeys = []; // Maintain insertion order
 
     // Cache for sorted watch lists (invalidated when watches change)
     private List<WatchEntry>? _cachedAllWatches;
@@ -89,6 +89,7 @@ public class WatchPanel : DebugPanelBase, IDisposable, IWatchOperations
             return;
         }
 
+        GC.SuppressFinalize(this);
         _disposed = true;
         _evaluator.Dispose();
     }
@@ -300,20 +301,19 @@ public class WatchPanel : DebugPanelBase, IDisposable, IWatchOperations
         Action<string, object?, object?>? alertCallback = null
     )
     {
-        if (_watches.ContainsKey(name))
+        if (_watches.TryGetValue(name, out var existingEntry))
         {
             // Update existing watch
-            WatchEntry entry = _watches[name];
-            entry.Expression = expression;
-            entry.ValueGetter = valueGetter;
-            entry.Group = group;
-            entry.Condition = condition;
-            entry.ConditionEvaluator = conditionEvaluator;
-            entry.AlertType = alertType;
-            entry.AlertThreshold = alertThreshold;
-            entry.AlertCallback = alertCallback;
-            entry.HasError = false;
-            entry.ErrorMessage = null;
+            existingEntry.Expression = expression;
+            existingEntry.ValueGetter = valueGetter;
+            existingEntry.Group = group;
+            existingEntry.Condition = condition;
+            existingEntry.ConditionEvaluator = conditionEvaluator;
+            existingEntry.AlertType = alertType;
+            existingEntry.AlertThreshold = alertThreshold;
+            existingEntry.AlertCallback = alertCallback;
+            existingEntry.HasError = false;
+            existingEntry.ErrorMessage = null;
             UpdateWatchDisplay();
             return true;
         }
@@ -362,12 +362,12 @@ public class WatchPanel : DebugPanelBase, IDisposable, IWatchOperations
     /// </summary>
     public bool PinWatch(string name)
     {
-        if (!_watches.ContainsKey(name))
+        if (!_watches.TryGetValue(name, out var entry))
         {
             return false;
         }
 
-        _watches[name].IsPinned = true;
+        entry.IsPinned = true;
         _watchListDirty = true;
         UpdateWatchDisplay();
         return true;
@@ -378,12 +378,12 @@ public class WatchPanel : DebugPanelBase, IDisposable, IWatchOperations
     /// </summary>
     public bool UnpinWatch(string name)
     {
-        if (!_watches.ContainsKey(name))
+        if (!_watches.TryGetValue(name, out var entry))
         {
             return false;
         }
 
-        _watches[name].IsPinned = false;
+        entry.IsPinned = false;
         _watchListDirty = true;
         UpdateWatchDisplay();
         return true;
@@ -432,9 +432,9 @@ public class WatchPanel : DebugPanelBase, IDisposable, IWatchOperations
     /// </summary>
     public bool ToggleGroup(string groupName)
     {
-        if (_groupCollapsedState.ContainsKey(groupName))
+        if (_groupCollapsedState.TryGetValue(groupName, out bool isCollapsed))
         {
-            _groupCollapsedState[groupName] = !_groupCollapsedState[groupName];
+            _groupCollapsedState[groupName] = !isCollapsed;
             UpdateWatchDisplay();
             return true;
         }
@@ -472,12 +472,11 @@ public class WatchPanel : DebugPanelBase, IDisposable, IWatchOperations
         Action<string, object?, object?>? callback = null
     )
     {
-        if (!_watches.ContainsKey(name))
+        if (!_watches.TryGetValue(name, out var entry))
         {
             return false;
         }
 
-        WatchEntry entry = _watches[name];
         entry.AlertType = alertType;
         entry.AlertThreshold = threshold;
         entry.AlertCallback = callback;
@@ -493,17 +492,16 @@ public class WatchPanel : DebugPanelBase, IDisposable, IWatchOperations
     /// </summary>
     public bool RemoveAlert(string name)
     {
-        if (!_watches.ContainsKey(name))
+        if (!_watches.TryGetValue(name, out var alertEntry))
         {
             return false;
         }
 
-        WatchEntry entry = _watches[name];
-        entry.AlertType = null;
-        entry.AlertThreshold = null;
-        entry.AlertCallback = null;
-        entry.AlertTriggered = false;
-        entry.LastAlertTime = null;
+        alertEntry.AlertType = null;
+        alertEntry.AlertThreshold = null;
+        alertEntry.AlertCallback = null;
+        alertEntry.AlertTriggered = false;
+        alertEntry.LastAlertTime = null;
 
         UpdateWatchDisplay();
         return true;
@@ -525,12 +523,11 @@ public class WatchPanel : DebugPanelBase, IDisposable, IWatchOperations
     /// </summary>
     public bool ClearAlertStatus(string name)
     {
-        if (!_watches.ContainsKey(name))
+        if (!_watches.TryGetValue(name, out var entry))
         {
             return false;
         }
 
-        WatchEntry entry = _watches[name];
         entry.AlertTriggered = false;
 
         UpdateWatchDisplay();
@@ -546,12 +543,11 @@ public class WatchPanel : DebugPanelBase, IDisposable, IWatchOperations
         string comparisonLabel = "Expected"
     )
     {
-        if (!_watches.ContainsKey(watchName) || !_watches.ContainsKey(compareWithName))
+        if (!_watches.TryGetValue(watchName, out var entry) || !_watches.ContainsKey(compareWithName))
         {
             return false;
         }
 
-        WatchEntry entry = _watches[watchName];
         entry.ComparisonWith = compareWithName;
         entry.ComparisonLabel = comparisonLabel;
 
@@ -564,12 +560,11 @@ public class WatchPanel : DebugPanelBase, IDisposable, IWatchOperations
     /// </summary>
     public bool RemoveComparison(string name)
     {
-        if (!_watches.ContainsKey(name))
+        if (!_watches.TryGetValue(name, out var entry))
         {
             return false;
         }
 
-        WatchEntry entry = _watches[name];
         entry.ComparisonWith = null;
         entry.ComparisonLabel = null;
         entry.ComparisonValue = null;
@@ -759,14 +754,13 @@ public class WatchPanel : DebugPanelBase, IDisposable, IWatchOperations
             return;
         }
 
-        if (!_watches.ContainsKey(entry.ComparisonWith))
+        if (!_watches.TryGetValue(entry.ComparisonWith, out var compareWatch))
         {
             entry.ComparisonValue = null;
             entry.ComparisonDiff = null;
             return;
         }
 
-        WatchEntry compareWatch = _watches[entry.ComparisonWith];
         entry.ComparisonValue = compareWatch.LastValue;
 
         // Calculate difference if both values are numeric
@@ -934,7 +928,7 @@ public class WatchPanel : DebugPanelBase, IDisposable, IWatchOperations
         List<WatchEntry>? unpinnedWatches = _cachedUnpinnedWatches!;
 
         // Display pinned watches first (regardless of group)
-        if (pinnedWatches.Any())
+        if (pinnedWatches.Count > 0)
         {
             _watchBuffer.AppendLine(
                 $"  {NerdFontIcons.Pinned} PINNED",
@@ -1454,7 +1448,7 @@ public class WatchPanel : DebugPanelBase, IDisposable, IWatchOperations
         public bool ConditionMet { get; set; } = true;
 
         // History tracking
-        public List<(DateTime Timestamp, object? Value)> History { get; set; } = new();
+        public List<(DateTime Timestamp, object? Value)> History { get; set; } = [];
         public int MaxHistorySize { get; set; } = 10; // Keep last 10 changes
 
         // Alert/Threshold support

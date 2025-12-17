@@ -28,7 +28,7 @@ public class ContentProviderOptions
     ///     Whether to log cache misses for debugging and optimization.
     ///     Default is false.
     /// </summary>
-    public bool LogCacheMisses { get; set; } = false;
+    public bool LogCacheMisses { get; set; }
 
     /// <summary>
     ///     Whether to throw an exception when path traversal attempts (e.g., "..") are detected.

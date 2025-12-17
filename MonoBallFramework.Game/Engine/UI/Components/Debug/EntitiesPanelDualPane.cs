@@ -34,17 +34,17 @@ public class EntitiesPanelDualPane : DebugPanelBase, IEntityOperations
     private readonly TextBuffer _detailBuffer;
 
     // Entity data
-    private readonly List<EntityInfo> _entities = new();
+    private readonly List<EntityInfo> _entities = [];
     private readonly TextBuffer _entityListBuffer;
     private readonly EntityFilterBar _filterBar;
-    private readonly List<EntityInfo> _filteredEntities = new();
+    private readonly List<EntityInfo> _filteredEntities = [];
     private readonly Dictionary<int, int> _lineToEntityId = new();
     private readonly Dictionary<int, EntityInfo> _loadedEntityCache = new();
-    private readonly List<int> _navigableEntityIds = new();
-    private readonly HashSet<int> _newEntityIds = new();
-    private readonly HashSet<int> _pinnedEntities = new();
-    private readonly HashSet<int> _previousEntityIds = new();
-    private readonly HashSet<int> _removedEntityIds = new();
+    private readonly List<int> _navigableEntityIds = [];
+    private readonly HashSet<int> _newEntityIds = [];
+    private readonly HashSet<int> _pinnedEntities = [];
+    private readonly HashSet<int> _previousEntityIds = [];
+    private readonly HashSet<int> _removedEntityIds = [];
 
     private readonly SplitPanel _splitPanel;
     private string _componentFilter = "";
@@ -534,12 +534,7 @@ public class EntitiesPanelDualPane : DebugPanelBase, IEntityOperations
         {
             bool aPinned = _pinnedEntities.Contains(a.Id);
             bool bPinned = _pinnedEntities.Contains(b.Id);
-            if (aPinned != bPinned)
-            {
-                return bPinned.CompareTo(aPinned);
-            }
-
-            return a.Id.CompareTo(b.Id);
+            return aPinned != bPinned ? bPinned.CompareTo(aPinned) : a.Id.CompareTo(b.Id);
         });
 
         // For paged mode, filter the entity IDs by loading and checking each entity
@@ -684,9 +679,8 @@ public class EntitiesPanelDualPane : DebugPanelBase, IEntityOperations
 
     public bool TogglePin(int entityId)
     {
-        if (_pinnedEntities.Contains(entityId))
+        if (_pinnedEntities.Remove(entityId))
         {
-            _pinnedEntities.Remove(entityId);
             ApplyFilters();
             RefreshDisplay();
             return false;
@@ -799,28 +793,16 @@ public class EntitiesPanelDualPane : DebugPanelBase, IEntityOperations
     private void UpdateFilterBarOptions()
     {
         // Update tags - use provider if available (paged mode), otherwise extract from entities
-        List<string> tags;
-        if (_tagNamesProvider != null)
-        {
-            tags = _tagNamesProvider().OrderBy(t => t).ToList();
-        }
-        else
-        {
-            tags = _entities.Where(e => e.Tag != null).Select(e => e.Tag!).Distinct().OrderBy(t => t).ToList();
-        }
+        List<string> tags = _tagNamesProvider != null
+            ? _tagNamesProvider().OrderBy(t => t).ToList()
+            : _entities.Where(e => e.Tag != null).Select(e => e.Tag!).Distinct().OrderBy(t => t).ToList();
 
         _filterBar.SetTags(tags);
 
         // Update components
-        List<string> components;
-        if (_componentNamesProvider != null)
-        {
-            components = _componentNamesProvider().ToList();
-        }
-        else
-        {
-            components = _entities.SelectMany(e => e.Components).Distinct().OrderBy(c => c).ToList();
-        }
+        List<string> components = _componentNamesProvider != null
+            ? _componentNamesProvider().ToList()
+            : _entities.SelectMany(e => e.Components).Distinct().OrderBy(c => c).ToList();
 
         _filterBar.SetComponents(components);
     }
@@ -1322,11 +1304,11 @@ public class EntitiesPanelDualPane : DebugPanelBase, IEntityOperations
 
         // Determine color based on value
         Color valueColor = theme.TextSecondary;
-        if (fieldValue == "null" || fieldValue == "None" || fieldValue == "N/A")
+        if (fieldValue is "null" or "None" or "N/A")
         {
             valueColor = theme.TextDim;
         }
-        else if (fieldValue.StartsWith("[") && fieldValue.EndsWith("]"))
+        else if (fieldValue.StartsWith('[') && fieldValue.EndsWith(']'))
         {
             valueColor = theme.Info;
         }
@@ -1384,7 +1366,7 @@ public class EntitiesPanelDualPane : DebugPanelBase, IEntityOperations
             stats += $" | Selected: [{_selectedEntityId}]";
         }
 
-        string hints = "↑↓:Nav | P:Pin | R:Refresh";
+        const string hints = "↑↓:Nav | P:Pin | R:Refresh";
         SetStatusBar(stats, hints);
     }
 

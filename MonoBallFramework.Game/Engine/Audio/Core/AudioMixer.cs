@@ -6,8 +6,8 @@ namespace MonoBallFramework.Game.Engine.Audio.Core;
 /// </summary>
 public class AudioMixer : ISampleProvider, IDisposable
 {
-    private readonly object _sourceLock = new();
-    private readonly List<MixerInput> _sources = new();
+    private readonly Lock _sourceLock = new();
+    private readonly List<MixerInput> _sources = [];
     private bool _disposed;
     private float[]? _mixBuffer;
 
@@ -75,20 +75,11 @@ public class AudioMixer : ISampleProvider, IDisposable
             return 0;
         }
 
-        if (buffer == null)
-        {
-            throw new ArgumentNullException(nameof(buffer));
-        }
-
-        if (offset < 0 || offset >= buffer.Length)
-        {
-            throw new ArgumentOutOfRangeException(nameof(offset));
-        }
-
-        if (count < 0 || offset + count > buffer.Length)
-        {
-            throw new ArgumentOutOfRangeException(nameof(count));
-        }
+        ArgumentNullException.ThrowIfNull(buffer);
+        ArgumentOutOfRangeException.ThrowIfNegative(offset);
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(offset, buffer.Length);
+        ArgumentOutOfRangeException.ThrowIfNegative(count);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(offset + count, buffer.Length);
 
         // Clear output buffer
         Array.Clear(buffer, offset, count);
@@ -99,7 +90,7 @@ public class AudioMixer : ISampleProvider, IDisposable
             _mixBuffer = new float[count];
         }
 
-        List<MixerInput> sourcesToRemove = new();
+        List<MixerInput> sourcesToRemove = [];
         int samplesRead = 0;
 
         lock (_sourceLock)
@@ -164,15 +155,9 @@ public class AudioMixer : ISampleProvider, IDisposable
     /// <exception cref="ObjectDisposedException">Thrown when mixer is disposed.</exception>
     public MixerInput AddSource(ISampleProvider source, float volume = 1.0f)
     {
-        if (_disposed)
-        {
-            throw new ObjectDisposedException(nameof(AudioMixer));
-        }
+        ObjectDisposedException.ThrowIf(_disposed, this);
 
-        if (source == null)
-        {
-            throw new ArgumentNullException(nameof(source));
-        }
+        ArgumentNullException.ThrowIfNull(source);
 
         if (!source.Format.Equals(Format))
         {

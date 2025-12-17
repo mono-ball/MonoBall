@@ -139,14 +139,9 @@ public static class ConsoleTabs
                 return true;
             }
 
-            // Check name (case-insensitive)
-            if (Name.Equals(input, StringComparison.OrdinalIgnoreCase))
-            {
-                return true;
-            }
-
-            // Check aliases (case-insensitive)
-            return Aliases.Any(a => a.Equals(input, StringComparison.OrdinalIgnoreCase));
+            // Check name (case-insensitive) or aliases (case-insensitive)
+            return Name.Equals(input, StringComparison.OrdinalIgnoreCase)
+                || Aliases.Any(a => a.Equals(input, StringComparison.OrdinalIgnoreCase));
         }
     }
 }

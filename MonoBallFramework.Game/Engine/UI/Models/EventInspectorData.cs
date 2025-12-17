@@ -5,8 +5,8 @@ namespace MonoBallFramework.Game.Engine.UI.Models;
 /// </summary>
 public class EventInspectorData
 {
-    public List<EventTypeInfo> Events { get; set; } = new();
-    public List<EventLogEntry> RecentEvents { get; set; } = new();
+    public List<EventTypeInfo> Events { get; set; } = [];
+    public List<EventLogEntry> RecentEvents { get; set; } = [];
     public string? SelectedEventType { get; set; }
     public EventFilterOptions Filters { get; set; } = new();
 }
@@ -22,7 +22,7 @@ public class EventTypeInfo
     public long PublishCount { get; set; }
     public double AverageTimeMs { get; set; }
     public double MaxTimeMs { get; set; }
-    public List<SubscriptionInfo> Subscriptions { get; set; } = new();
+    public List<SubscriptionInfo> Subscriptions { get; set; } = [];
 }
 
 /// <summary>

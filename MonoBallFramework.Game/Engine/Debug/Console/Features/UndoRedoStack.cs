@@ -7,8 +7,8 @@ namespace MonoBallFramework.Game.Engine.Debug.Console.Features;
 public class UndoRedoStack
 {
     private const int MaxHistorySize = 100;
-    private readonly List<TextState> _redoStack = new();
-    private readonly List<TextState> _undoStack = new();
+    private readonly List<TextState> _redoStack = [];
+    private readonly List<TextState> _undoStack = [];
     private TextState? _lastSavedState;
 
     /// <summary>

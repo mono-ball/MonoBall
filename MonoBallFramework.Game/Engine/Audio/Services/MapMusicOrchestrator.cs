@@ -74,6 +74,7 @@ public class MapMusicOrchestrator : IMapMusicOrchestrator
             return;
         }
 
+        GC.SuppressFinalize(this);
         _mapTransitionSubscription?.Dispose();
         _mapRenderReadySubscription?.Dispose();
         _disposed = true;

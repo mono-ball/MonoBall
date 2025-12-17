@@ -104,6 +104,7 @@ public class PollingWatcher : IScriptWatcher
 
     public void Dispose()
     {
+        GC.SuppressFinalize(this);
         StopAsync().GetAwaiter().GetResult();
     }
 

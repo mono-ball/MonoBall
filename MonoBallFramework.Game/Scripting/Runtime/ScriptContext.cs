@@ -23,14 +23,14 @@ namespace MonoBallFramework.Game.Scripting.Runtime;
 /// // Create context (typically handled by ScriptService)
 /// var apis = serviceProvider.GetRequiredService&lt;IScriptingApiProvider&gt;();
 /// var ctx = new ScriptContext(world, entity, logger, apis);
-/// 
+///
 /// public void Execute(ScriptContext ctx)
 /// {
 ///     if (ctx.TryGetState&lt;Health&gt;(out var health))
 ///     {
 ///         ctx.Logger.LogInformation("Entity has {HP} HP", health.Current);
 ///     }
-/// 
+///
 ///     // Use API services (accessed via facade)
 ///     var playerMoney = ctx.Player.GetMoney();
 ///     ctx.Logger.LogInformation("Player has {Money} money", playerMoney);
@@ -47,7 +47,7 @@ namespace MonoBallFramework.Game.Scripting.Runtime;
 ///     {
 ///         // Process all players
 ///     }
-/// 
+///
 ///     // Use domain APIs
 ///     ctx.Player.GiveMoney(100);
 /// }
@@ -247,7 +247,7 @@ public sealed class ScriptContext
     ///     float intensity = rain.GetProperty&lt;float&gt;("intensity");
     ///     ctx.Logger.LogInformation("Rain intensity: {Intensity}", intensity);
     /// }
-    /// 
+    ///
     /// // Get all weather effects
     /// foreach (var effect in ctx.CustomTypes.GetAllDefinitions("WeatherEffects"))
     /// {
@@ -278,7 +278,7 @@ public sealed class ScriptContext
     ///     ctx.Logger.LogInformation("Entity moving from ({FromX},{FromY}) to ({ToX},{ToY})",
     ///         evt.FromX, evt.FromY, evt.ToX, evt.ToY);
     /// });
-    /// 
+    ///
     /// // Subscribe to custom events
     /// ctx.On&lt;MyCustomEvent&gt;(evt => HandleCustomEvent(evt), priority: 1000);
     /// </code>
@@ -572,7 +572,7 @@ public sealed class ScriptContext
     ///         ctx.Logger.LogInformation("Player reached special tile!");
     ///     }
     /// }, priority: 1000);
-    /// 
+    ///
     /// // Later: unsubscribe when no longer needed
     /// subscription.Dispose();
     /// </code>
@@ -580,10 +580,7 @@ public sealed class ScriptContext
     public IDisposable On<TEvent>(Action<TEvent> handler, int priority = 500)
         where TEvent : class
     {
-        if (handler == null)
-        {
-            throw new ArgumentNullException(nameof(handler));
-        }
+        ArgumentNullException.ThrowIfNull(handler);
 
         // NOTE: Priority is accepted but not yet used by EventBus.Subscribe()
         // This maintains API compatibility for when EventBus is upgraded to support priority.
@@ -612,7 +609,7 @@ public sealed class ScriptContext
     /// {
     ///     ctx.Logger.LogInformation("Entity {EntityId} moving to ({ToX},{ToY})",
     ///         evt.Entity.Id, evt.ToX, evt.ToY);
-    /// 
+    ///
     ///     // Can cancel movement by calling evt.PreventDefault()
     ///     if (IsBlockedByScript(evt.ToX, evt.ToY))
     ///     {
@@ -641,7 +638,7 @@ public sealed class ScriptContext
     /// {
     ///     ctx.Logger.LogInformation("Entity {EntityId} reached ({CurrentX},{CurrentY})",
     ///         evt.Entity.Id, evt.CurrentX, evt.CurrentY);
-    /// 
+    ///
     ///     // Trigger follow-up actions after movement
     ///     CheckForRandomEncounter(evt.CurrentX, evt.CurrentY);
     /// });
@@ -667,7 +664,7 @@ public sealed class ScriptContext
     /// {
     ///     ctx.Logger.LogInformation("Collision: Entity {A} hit Entity {B} at ({X},{Y})",
     ///         evt.EntityA.Id, evt.EntityB.Id, evt.ContactX, evt.ContactY);
-    /// 
+    ///
     ///     // Handle collision based on type
     ///     if (evt.CollisionType == CollisionType.PlayerNPC)
     ///     {
@@ -696,7 +693,7 @@ public sealed class ScriptContext
     /// {
     ///     ctx.Logger.LogInformation("Entity {EntityId} stepped on {TileType} at ({X},{Y})",
     ///         evt.Entity.Id, evt.TileType, evt.TileX, evt.TileY);
-    /// 
+    ///
     ///     // Can cancel tile entry by calling evt.PreventDefault()
     ///     if (evt.TileType == "lava" &amp;&amp; !HasFireResistance(evt.Entity))
     ///     {

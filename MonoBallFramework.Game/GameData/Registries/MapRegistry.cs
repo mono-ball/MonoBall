@@ -44,22 +44,24 @@ public class MapRegistry : EfCoreRegistry<MapEntity, GameMapId>
     protected override void OnEntityCached(GameMapId key, MapEntity entity)
     {
         // Cache by region
-        if (!_regionCache.ContainsKey(entity.Region))
+        if (!_regionCache.TryGetValue(entity.Region, out var regionList))
         {
-            _regionCache[entity.Region] = new List<MapEntity>();
+            regionList = [];
+            _regionCache[entity.Region] = regionList;
         }
 
-        _regionCache[entity.Region].Add(entity);
+        regionList.Add(entity);
 
         // Cache by map type if present
         if (!string.IsNullOrWhiteSpace(entity.MapType))
         {
-            if (!_mapTypeCache.ContainsKey(entity.MapType))
+            if (!_mapTypeCache.TryGetValue(entity.MapType, out var mapTypeList))
             {
-                _mapTypeCache[entity.MapType] = new List<MapEntity>();
+                mapTypeList = [];
+                _mapTypeCache[entity.MapType] = mapTypeList;
             }
 
-            _mapTypeCache[entity.MapType].Add(entity);
+            mapTypeList.Add(entity);
         }
     }
 
@@ -111,7 +113,7 @@ public class MapRegistry : EfCoreRegistry<MapEntity, GameMapId>
     {
         if (string.IsNullOrWhiteSpace(region))
         {
-            return Enumerable.Empty<MapEntity>();
+            return [];
         }
 
         if (_regionCache.TryGetValue(region, out List<MapEntity>? cached))
@@ -130,7 +132,7 @@ public class MapRegistry : EfCoreRegistry<MapEntity, GameMapId>
     {
         if (string.IsNullOrWhiteSpace(mapType))
         {
-            return Enumerable.Empty<MapEntity>();
+            return [];
         }
 
         if (_mapTypeCache.TryGetValue(mapType, out List<MapEntity>? cached))
@@ -206,7 +208,7 @@ public class MapRegistry : EfCoreRegistry<MapEntity, GameMapId>
         MapEntity? map = GetMap(mapId);
         if (map == null)
         {
-            return Enumerable.Empty<MapEntity>();
+            return [];
         }
 
         var connectedMapIds = new List<GameMapId>();

@@ -15,7 +15,7 @@ namespace MonoBallFramework.Game.Engine.Core.Types;
 ///     - base:sprite:players/may
 /// </summary>
 [DebuggerDisplay("{Value}")]
-public abstract record EntityId
+public abstract partial record EntityId
 {
     /// <summary>
     ///     Default namespace for base game content.
@@ -27,9 +27,8 @@ public abstract record EntityId
     ///     Format: namespace:type:category/name OR namespace:type:category/subcategory/name
     ///     Allows forward slashes and hyphens in the name part for hierarchical naming.
     /// </summary>
-    private static readonly Regex IdPattern = new(
-        @"^[a-z0-9_]+:[a-z_]+:[a-z0-9_]+/[a-z0-9_/-]+(/[a-z0-9_]+)?$",
-        RegexOptions.Compiled);
+    [GeneratedRegex(@"^[a-z0-9_]+:[a-z_]+:[a-z0-9_]+/[a-z0-9_/-]+(/[a-z0-9_]+)?$")]
+    private static partial Regex IdPattern();
 
     /// <summary>
     ///     Initializes a new entity ID from a full ID string.
@@ -43,7 +42,7 @@ public abstract record EntityId
             throw new ArgumentException("Entity ID cannot be null or whitespace.", nameof(value));
         }
 
-        if (!IdPattern.IsMatch(value))
+        if (!IdPattern().IsMatch(value))
         {
             throw new ArgumentException(
                 $"Entity ID '{value}' does not match expected format: namespace:type:category/name",
@@ -104,7 +103,7 @@ public abstract record EntityId
             : $"{Namespace}:{EntityType}:{Category}/{Name}";
 
         // Final validation against regex pattern
-        if (!IdPattern.IsMatch(Value))
+        if (!IdPattern().IsMatch(Value))
         {
             throw new ArgumentException(
                 $"Constructed entity ID '{Value}' does not match expected format: namespace:type:category/[subcategory/]name",
@@ -259,7 +258,7 @@ public abstract record EntityId
     /// </summary>
     public static bool IsValidFormat(string? value)
     {
-        return !string.IsNullOrWhiteSpace(value) && IdPattern.IsMatch(value);
+        return !string.IsNullOrWhiteSpace(value) && IdPattern().IsMatch(value);
     }
 
     /// <summary>

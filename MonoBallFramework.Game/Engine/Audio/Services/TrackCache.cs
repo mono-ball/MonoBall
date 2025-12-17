@@ -106,7 +106,7 @@ public class TrackCache : ITrackCache
 {
     private readonly ConcurrentDictionary<string, CachedTrack> _cache = new();
     private readonly IContentProvider _contentProvider;
-    private readonly object _evictionLock = new();
+    private readonly Lock _evictionLock = new();
     private readonly ILogger<TrackCache>? _logger;
     private bool _disposed;
 

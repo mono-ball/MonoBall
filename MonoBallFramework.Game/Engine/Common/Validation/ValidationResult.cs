@@ -14,7 +14,7 @@ namespace MonoBallFramework.Game.Engine.Common.Validation;
 /// var result = new ValidationResult();
 /// result.AddError("Invalid configuration", "config.json:15");
 /// result.AddWarning("Deprecated property used");
-/// 
+///
 /// if (!result.IsValid)
 /// {
 ///     Console.WriteLine(result.GetErrorMessage());
@@ -33,12 +33,12 @@ public class ValidationResult
     /// <summary>
     ///     List of validation errors (must be fixed).
     /// </summary>
-    public List<ValidationError> Errors { get; set; } = new();
+    public List<ValidationError> Errors { get; set; } = [];
 
     /// <summary>
     ///     List of validation warnings (should be reviewed).
     /// </summary>
-    public List<ValidationWarning> Warnings { get; set; } = new();
+    public List<ValidationWarning> Warnings { get; set; } = [];
 
     /// <summary>
     ///     Optional context information about what was validated.
@@ -78,14 +78,9 @@ public class ValidationResult
 
         var lines = new List<string>();
 
-        if (!string.IsNullOrEmpty(Context))
-        {
-            lines.Add($"Validation failed for {Context}:");
-        }
-        else
-        {
-            lines.Add("Validation failed:");
-        }
+        lines.Add(!string.IsNullOrEmpty(Context)
+            ? $"Validation failed for {Context}:"
+            : "Validation failed:");
 
         foreach (ValidationError error in Errors)
         {
@@ -109,14 +104,9 @@ public class ValidationResult
 
         var lines = new List<string>();
 
-        if (!string.IsNullOrEmpty(Context))
-        {
-            lines.Add($"Validation warnings for {Context}:");
-        }
-        else
-        {
-            lines.Add("Validation warnings:");
-        }
+        lines.Add(!string.IsNullOrEmpty(Context)
+            ? $"Validation warnings for {Context}:"
+            : "Validation warnings:");
 
         foreach (ValidationWarning warning in Warnings)
         {

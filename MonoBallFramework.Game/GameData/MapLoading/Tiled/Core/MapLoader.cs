@@ -98,7 +98,7 @@ public class MapLoader(
     private readonly PropertyMapperRegistry? _propertyMapperRegistry = propertyMapperRegistry;
 
     // PHASE 2: Track sprite IDs for lazy loading
-    private readonly HashSet<GameSpriteId> _requiredSpriteIds = new();
+    private readonly HashSet<GameSpriteId> _requiredSpriteIds = [];
 
     private readonly SystemManager _systemManager =
         systemManager ?? throw new ArgumentNullException(nameof(systemManager));
@@ -816,7 +816,7 @@ public class MapLoader(
         // Process all layers and create tile entities (only if tilesets exist)
         // Collect all created tiles for cache registration
         int tilesCreated = 0;
-        List<Entity> createdTiles = new();
+        List<Entity> createdTiles = [];
 
         if (loadedTilesets.Count > 0)
         {

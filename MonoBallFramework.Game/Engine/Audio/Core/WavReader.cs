@@ -11,7 +11,7 @@ public class WavReader : ISeekableSampleProvider, IDisposable
     private readonly long _dataLength;
     private readonly long _dataStartPosition;
     private readonly BinaryReader _reader;
-    private readonly object _readLock = new();
+    private readonly Lock _readLock = new();
     private readonly Stream _stream;
     private bool _disposed;
 

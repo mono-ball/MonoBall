@@ -57,12 +57,7 @@ public static class ComponentFactory
     /// </summary>
     public static byte ParseElevation(object? elevationProp, byte defaultValue = 0)
     {
-        if (byte.TryParse(elevationProp?.ToString(), out byte elevation))
-        {
-            return elevation;
-        }
-
-        return defaultValue;
+        return byte.TryParse(elevationProp?.ToString(), out byte elevation) ? elevation : defaultValue;
     }
 
     /// <summary>
@@ -70,12 +65,9 @@ public static class ComponentFactory
     /// </summary>
     public static float ParseFloat(object? prop, float defaultValue = 0f)
     {
-        if (float.TryParse(prop?.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out float value))
-        {
-            return value;
-        }
-
-        return defaultValue;
+        return float.TryParse(prop?.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out float value)
+            ? value
+            : defaultValue;
     }
 
     /// <summary>

@@ -34,7 +34,7 @@ public class BehaviorEntity : BaseEntity
     /// <summary>
     ///     Whether this behavior allows NPC interaction while moving.
     /// </summary>
-    public bool AllowInteractionWhileMoving { get; set; } = false;
+    public bool AllowInteractionWhileMoving { get; set; }
 
     /// <summary>
     ///     Path to the Roslyn .csx script file that implements this behavior.

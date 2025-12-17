@@ -108,6 +108,6 @@ public class ExpressionBreakpoint : IBreakpoint
         }
 
         string trimmed = output.Trim().ToLowerInvariant();
-        return trimmed == "true" || trimmed == "1";
+        return trimmed is "true" or "1";
     }
 }

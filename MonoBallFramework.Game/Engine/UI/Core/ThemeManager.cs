@@ -14,6 +14,8 @@ public static class ThemeManager
 
     private const string ThemePreferenceFileName = "theme_preference.json";
 
+    private static readonly JsonSerializerOptions s_jsonOptions = new() { WriteIndented = true };
+
     // Use lazy initialization to avoid circular dependency issues
     private static UITheme? _currentTheme;
 
@@ -215,10 +217,7 @@ public static class ThemeManager
             }
 
             var preference = new ThemePreference { ThemeName = themeName };
-            string json = JsonSerializer.Serialize(
-                preference,
-                new JsonSerializerOptions { WriteIndented = true }
-            );
+            string json = JsonSerializer.Serialize(preference, s_jsonOptions);
             File.WriteAllText(filePath, json);
         }
         catch (Exception)

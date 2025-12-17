@@ -14,7 +14,7 @@ namespace MonoBallFramework.Game.GameData.MapLoading.Tiled.Spawners;
 public sealed class EntitySpawnerRegistry
 {
     private readonly ILogger<EntitySpawnerRegistry>? _logger;
-    private readonly List<IEntitySpawner> _spawners = new();
+    private readonly List<IEntitySpawner> _spawners = [];
     private bool _sorted;
 
     public EntitySpawnerRegistry(ILogger<EntitySpawnerRegistry>? logger = null)

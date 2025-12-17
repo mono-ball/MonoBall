@@ -9,7 +9,7 @@ public class PitchShiftProvider : ISampleProvider
 {
     // Interpolation state
     private readonly float[] _lastSamples;
-    private readonly object _lock = new();
+    private readonly Lock _lock = new();
     private readonly double _pitchRatio; // 0.5 to 2.0 (2^pitch)
     private readonly ISampleProvider _source;
     private float[]? _sourceBuffer;
@@ -141,10 +141,7 @@ public class PitchShiftProvider : ISampleProvider
     /// <returns>PitchShiftProvider if needed, otherwise original source</returns>
     public static ISampleProvider CreateIfNeeded(ISampleProvider source, float pitch)
     {
-        if (source == null)
-        {
-            throw new ArgumentNullException(nameof(source));
-        }
+        ArgumentNullException.ThrowIfNull(source);
 
         // No pitch change needed if very close to zero
         if (Math.Abs(pitch) < 0.001f)

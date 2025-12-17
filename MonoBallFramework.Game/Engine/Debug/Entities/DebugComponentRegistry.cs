@@ -21,7 +21,7 @@ public class DebugComponentRegistry
     private static readonly Dictionary<Type, MethodInfo> _hasMethodCache = new();
     private static readonly Dictionary<Type, MethodInfo> _getMethodCache = new();
     private static readonly Type _entityExtensionsType = typeof(EntityExtensions);
-    private readonly List<ComponentDescriptor> _descriptors = new();
+    private readonly List<ComponentDescriptor> _descriptors = [];
     private readonly Dictionary<string, ComponentDescriptor> _nameToDescriptor = new();
     private readonly Dictionary<Type, ComponentDescriptor> _typeToDescriptor = new();
 
@@ -424,12 +424,7 @@ public class DebugComponentRegistry
 
             // Handle common collections (non-generic)
             case ICollection collection:
-                if (collection.Count == 0)
-                {
-                    return "[]";
-                }
-
-                return FormatCollection(collection, indentLevel);
+                return collection.Count == 0 ? "[]" : FormatCollection(collection, indentLevel);
 
             // Handle IEnumerable (last resort for collections like HashSet<T>, List<T>, etc.)
             case IEnumerable enumerable when !(value is string):

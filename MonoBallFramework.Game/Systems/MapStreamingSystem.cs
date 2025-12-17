@@ -75,7 +75,7 @@ public class MapStreamingSystem : SystemBase, IUpdateSystem
     private readonly MapLoader _mapLoader;
 
     // Track which maps have been preloaded to avoid redundant preloading
-    private readonly HashSet<string> _preloadedMaps = new();
+    private readonly HashSet<string> _preloadedMaps = [];
 
     // Invalidation batching flag - set when maps are loaded/unloaded, processed once at end of frame
     private bool _invalidationNeeded;
@@ -845,12 +845,12 @@ public class MapStreamingSystem : SystemBase, IUpdateSystem
         // Don't unload if we're under the capacity limit
         // This provides a buffer so recently-visited maps stay loaded
         // Prevents load/unload/load cycles when walking back and forth
-        if (streaming.LoadedMaps.Count() <= MaxLoadedMaps)
+        if (streaming.LoadedMaps.Count <= MaxLoadedMaps)
         {
             // Use Trace level to avoid log spam - this check runs every frame
             _logger?.LogTrace(
                 "Skipping unload - under capacity limit ({Count}/{Max} maps loaded)",
-                streaming.LoadedMaps.Count(),
+                streaming.LoadedMaps.Count,
                 MaxLoadedMaps
             );
             return;

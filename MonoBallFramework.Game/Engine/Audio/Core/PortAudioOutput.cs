@@ -13,12 +13,12 @@ public class PortAudioOutput : IDisposable
     private const int MaxDeviceErrorsBeforeRecovery = 5;
     private static bool _portAudioInitialized;
     private static int _portAudioRefCount;
-    private static readonly object _initLock = new();
+    private static readonly Lock _initLock = new();
     private readonly int _bufferSizeFrames;
     private readonly AudioFormat _format;
 
     private readonly ISampleProvider _source;
-    private readonly object _streamLock = new();
+    private readonly Lock _streamLock = new();
     private float[]? _callbackBuffer;
     private int _deviceErrorCount;
     private bool _disposed;
@@ -136,10 +136,7 @@ public class PortAudioOutput : IDisposable
     {
         lock (_streamLock)
         {
-            if (_disposed)
-            {
-                throw new ObjectDisposedException(nameof(PortAudioOutput));
-            }
+            ObjectDisposedException.ThrowIf(_disposed, this);
 
             if (_isPlaying && !_isPaused)
             {

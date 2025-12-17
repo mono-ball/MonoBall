@@ -272,11 +272,11 @@ public class ComponentDetailPane : UIComponent
         // Determine value color based on content
         Color valueColor = theme.TextSecondary;
 
-        if (fieldValue == "null" || fieldValue == "None" || fieldValue == "N/A")
+        if (fieldValue is "null" or "None" or "N/A")
         {
             valueColor = theme.TextDim;
         }
-        else if (fieldValue.StartsWith("[") && fieldValue.EndsWith("]"))
+        else if (fieldValue.StartsWith('[') && fieldValue.EndsWith(']'))
         {
             // Entity reference
             valueColor = theme.Info;
@@ -294,7 +294,7 @@ public class ComponentDetailPane : UIComponent
         string displayValue = fieldValue;
         if (displayValue.Length > MaxPropertyValueLength)
         {
-            displayValue = displayValue.Substring(0, MaxPropertyValueLength - 3) + "...";
+            displayValue = displayValue[..(MaxPropertyValueLength - 3)] + "...";
         }
 
         DetailBuffer.AppendLine($"{indent}{fieldName}: {displayValue}", valueColor);

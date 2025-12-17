@@ -182,7 +182,7 @@ events export          - Export event list to clipboard";
             string eventName = stat.EventType.Replace("Event", "");
             if (eventName.Length > 28)
             {
-                eventName = eventName.Substring(0, 25) + "...";
+                eventName = eventName[..25] + "...";
             }
 
             // Format row with proper spacing
@@ -235,7 +235,7 @@ events export          - Export event list to clipboard";
             string eventName = evt.EventTypeName.Replace("Event", "");
             if (eventName.Length > 33)
             {
-                eventName = eventName.Substring(0, 30) + "...";
+                eventName = eventName[..30] + "...";
             }
 
             Color nameColor = evt.IsCustom ? theme.Info : theme.TextPrimary;

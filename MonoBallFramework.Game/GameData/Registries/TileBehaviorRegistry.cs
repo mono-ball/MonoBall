@@ -44,12 +44,13 @@ public class TileBehaviorRegistry : EfCoreRegistry<TileBehaviorEntity, GameTileB
     {
         // Cache by behavior flags for fast lookups by behavior type
         TileBehaviorFlags flags = entity.BehaviorFlags;
-        if (!_flagsCache.ContainsKey(flags))
+        if (!_flagsCache.TryGetValue(flags, out var flagsList))
         {
-            _flagsCache[flags] = new List<TileBehaviorEntity>();
+            flagsList = [];
+            _flagsCache[flags] = flagsList;
         }
 
-        _flagsCache[flags].Add(entity);
+        flagsList.Add(entity);
     }
 
     /// <summary>

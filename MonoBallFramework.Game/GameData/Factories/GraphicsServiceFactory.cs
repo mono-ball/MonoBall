@@ -98,10 +98,7 @@ public class GraphicsServiceFactory : IGraphicsServiceFactory
         string assetRoot = "Assets"
     )
     {
-        if (graphicsDevice == null)
-        {
-            throw new ArgumentNullException(nameof(graphicsDevice));
-        }
+        ArgumentNullException.ThrowIfNull(graphicsDevice);
 
         ILogger<AssetManager> logger = _loggerFactory.CreateLogger<AssetManager>();
         return new AssetManager(graphicsDevice, _contentProvider, logger);
@@ -110,10 +107,7 @@ public class GraphicsServiceFactory : IGraphicsServiceFactory
     /// <inheritdoc />
     public MapLoader CreateMapLoader(AssetManager assetManager)
     {
-        if (assetManager == null)
-        {
-            throw new ArgumentNullException(nameof(assetManager));
-        }
+        ArgumentNullException.ThrowIfNull(assetManager);
 
         // Create processors with proper loggers
         var layerProcessor = new LayerProcessor(

@@ -10,17 +10,14 @@ namespace MonoBallFramework.Game.Engine.UI.Components.Base;
 public abstract class UIContainer : UIComponent
 {
     /// <summary>Child components</summary>
-    protected readonly List<UIComponent> Children = new();
+    protected readonly List<UIComponent> Children = [];
 
     /// <summary>
     ///     Adds a child component.
     /// </summary>
     public void AddChild(UIComponent child)
     {
-        if (child == null)
-        {
-            throw new ArgumentNullException(nameof(child));
-        }
+        ArgumentNullException.ThrowIfNull(child);
 
         Children.Add(child);
     }

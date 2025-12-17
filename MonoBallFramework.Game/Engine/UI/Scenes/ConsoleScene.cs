@@ -338,7 +338,7 @@ public class ConsoleScene : SceneBase
     /// </summary>
     public IReadOnlyList<string> GetCommandHistory()
     {
-        return _consolePanel?.GetCommandHistory() ?? Array.Empty<string>();
+        return _consolePanel?.GetCommandHistory() ?? [];
     }
 
     /// <summary>

@@ -465,12 +465,12 @@ Examples:
         else
         {
             string arg = args[0].ToLowerInvariant();
-            if (arg == "on" || arg == "true" || arg == "1")
+            if (arg is "on" or "true" or "1")
             {
                 context.Entities.AutoRefresh = true;
                 context.WriteLine("Auto-refresh enabled", theme.Success);
             }
-            else if (arg == "off" || arg == "false" || arg == "0")
+            else if (arg is "off" or "false" or "0")
             {
                 context.Entities.AutoRefresh = false;
                 context.WriteLine("Auto-refresh disabled", theme.Success);
@@ -489,7 +489,7 @@ Examples:
 
     private void HandleSession(IConsoleContext context, UITheme theme, string[] args)
     {
-        if (args.Length > 0 && args[0].ToLowerInvariant() == "clear")
+        if (args.Length > 0 && args[0].Equals("clear", StringComparison.OrdinalIgnoreCase))
         {
             context.Entities.ClearSessionStats();
             context.WriteLine("Session stats cleared", theme.Success);
@@ -589,11 +589,11 @@ Examples:
         // Parse optional flags
         foreach (string arg in args)
         {
-            if (arg == "-nc" || arg == "--no-components")
+            if (arg is "-nc" or "--no-components")
             {
                 includeComponents = false;
             }
-            else if (arg == "-np" || arg == "--no-properties")
+            else if (arg is "-np" or "--no-properties")
             {
                 includeProperties = false;
             }
@@ -603,7 +603,7 @@ Examples:
 
         // Print to console (limited to avoid flooding)
         string[] lines = export.Split('\n');
-        int maxLines = 100;
+        const int maxLines = 100;
 
         if (lines.Length <= maxLines)
         {

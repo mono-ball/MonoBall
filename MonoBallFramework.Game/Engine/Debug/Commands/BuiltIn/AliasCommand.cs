@@ -112,7 +112,7 @@ Examples:
             foreach (KeyValuePair<string, string> alias in aliases.OrderBy(a => a.Key))
             {
                 string aliasName = alias.Key.PadRight(15);
-                bool isMacro = alias.Value.Contains("$");
+                bool isMacro = alias.Value.Contains('$');
                 string macroHint = isMacro ? " (macro)" : "";
                 context.WriteLine(
                     $"  {aliasName} = {alias.Value}{macroHint}",

@@ -449,13 +449,8 @@ public class TilesetLoader
 
         // Fallback: try to resolve via ContentProvider Tilesets type
         string relativeTilesetPath = tileset.Image.Source;
-        string? resolvedPath = _contentProvider.ResolveContentPath("Tilesets", relativeTilesetPath);
-        if (resolvedPath != null)
-        {
-            return resolvedPath;
-        }
-
-        throw new FileNotFoundException($"Tileset image not found: {tilesetImagePath}");
+        return _contentProvider.ResolveContentPath("Tilesets", relativeTilesetPath)
+            ?? throw new FileNotFoundException($"Tileset image not found: {tilesetImagePath}");
     }
 
     /// <summary>
@@ -614,13 +609,8 @@ public class TilesetLoader
     private string GetPathForAssetManager(string absolutePath)
     {
         // Use IContentProvider to resolve the path
-        string? resolvedPath = _contentProvider.ResolveContentPath("Graphics", Path.GetFileName(absolutePath));
-        if (resolvedPath == null)
-        {
-            throw new FileNotFoundException($"Asset not found: {absolutePath}");
-        }
-
-        return resolvedPath;
+        return _contentProvider.ResolveContentPath("Graphics", Path.GetFileName(absolutePath))
+            ?? throw new FileNotFoundException($"Asset not found: {absolutePath}");
     }
 
     /// <summary>

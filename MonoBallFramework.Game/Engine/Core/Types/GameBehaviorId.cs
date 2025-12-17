@@ -61,7 +61,7 @@ public sealed record GameBehaviorId : EntityId
     /// <summary>
     ///     Whether this is an NPC behavior.
     /// </summary>
-    public bool IsNpcBehavior => Category == "npc" || Category == "trainer";
+    public bool IsNpcBehavior => Category is "npc" or "trainer";
 
     /// <summary>
     ///     Whether this is a tile behavior.

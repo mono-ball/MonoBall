@@ -34,12 +34,7 @@ public class BehaviorRegistryAdapter(TypeRegistry<BehaviorDefinition> typeRegist
     /// <inheritdoc />
     public bool HasBehavior(GameBehaviorId behaviorId)
     {
-        if (string.IsNullOrWhiteSpace(behaviorId))
-        {
-            return false;
-        }
-
-        return _typeRegistry.Contains(behaviorId);
+        return !string.IsNullOrWhiteSpace(behaviorId) && _typeRegistry.Contains(behaviorId);
     }
 
     /// <inheritdoc />

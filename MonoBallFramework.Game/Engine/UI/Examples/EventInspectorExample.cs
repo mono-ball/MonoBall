@@ -171,7 +171,7 @@ public static class EventInspectorExample
             writer.WriteLine($"  Avg Time: {evt.AverageTimeMs:F3}ms");
             writer.WriteLine($"  Max Time: {evt.MaxTimeMs:F3}ms");
 
-            if (evt.Subscriptions.Any())
+            if (evt.Subscriptions.Count > 0)
             {
                 writer.WriteLine("  Handlers:");
                 foreach (

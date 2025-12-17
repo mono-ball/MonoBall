@@ -7,7 +7,7 @@ namespace MonoBallFramework.Game.Engine.UI.Components.Controls;
 /// </summary>
 public class TextEditorHistory
 {
-    private readonly List<string> _history = new();
+    private readonly List<string> _history = [];
     private int _currentIndex = -1; // -1 means not navigating history
     private int _maxHistorySize = 100;
     private string _temporaryText = string.Empty; // Saves current input when navigating history

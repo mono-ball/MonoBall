@@ -39,22 +39,22 @@ public class TmxDocument
     /// <summary>
     ///     Gets or sets the tilesets used in this map.
     /// </summary>
-    public List<TmxTileset> Tilesets { get; set; } = new();
+    public List<TmxTileset> Tilesets { get; set; } = [];
 
     /// <summary>
     ///     Gets or sets the tile layers in this map.
     /// </summary>
-    public List<TmxLayer> Layers { get; set; } = new();
+    public List<TmxLayer> Layers { get; set; } = [];
 
     /// <summary>
     ///     Gets or sets the object groups (collision, triggers, etc.).
     /// </summary>
-    public List<TmxObjectGroup> ObjectGroups { get; set; } = new();
+    public List<TmxObjectGroup> ObjectGroups { get; set; } = [];
 
     /// <summary>
     ///     Gets or sets the image layers in this map.
     /// </summary>
-    public List<TmxImageLayer> ImageLayers { get; set; } = new();
+    public List<TmxImageLayer> ImageLayers { get; set; } = [];
 
     /// <summary>
     ///     Gets or sets the custom map-level properties (e.g., border, connections).

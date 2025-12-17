@@ -11,9 +11,9 @@ namespace MonoBallFramework.Game.Engine.UI.Components.Controls;
 /// </summary>
 public class TabContainer : Panel
 {
-    private readonly List<Panel> _contentPanels = new();
+    private readonly List<Panel> _contentPanels = [];
     private readonly TabBar _tabBar;
-    private readonly List<string> _tabTitles = new();
+    private readonly List<string> _tabTitles = [];
 
     // Track if colors were explicitly set
     private bool _backgroundColorSet;

@@ -50,7 +50,7 @@ public class FontEntity : BaseEntity
     /// <summary>
     ///     Character spacing in pixels.
     /// </summary>
-    public float CharacterSpacing { get; set; } = 0.0f;
+    public float CharacterSpacing { get; set; }
 
     /// <summary>
     ///     Whether this font supports extended Unicode characters.
@@ -60,7 +60,7 @@ public class FontEntity : BaseEntity
     /// <summary>
     ///     Whether this is a monospace font.
     /// </summary>
-    public bool IsMonospace { get; set; } = false;
+    public bool IsMonospace { get; set; }
 
     // Computed properties (not stored in DB)
 

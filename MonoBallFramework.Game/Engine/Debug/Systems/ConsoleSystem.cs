@@ -50,13 +50,13 @@ public class ConsoleSystem : IUpdateSystem
     private const int MaxPersistentOutput = 5000;
     private readonly IScriptingApiProvider _apiProvider;
     private readonly GraphicsDevice _graphicsDevice;
-    private readonly object _logBufferLock = new();
+    private readonly Lock _logBufferLock = new();
     private readonly ILogger _logger;
     private readonly ConsoleLoggerProvider? _loggerProvider;
 
     // Multi-line input buffer for incomplete statements (like for loops)
     private readonly StringBuilder _multiLineBuffer = new();
-    private readonly object _outputBufferLock = new();
+    private readonly Lock _outputBufferLock = new();
 
     // Persistent log buffer - stores logs even when console is closed
     private readonly List<(
@@ -66,7 +66,7 @@ public class ConsoleSystem : IUpdateSystem
         DateTime Timestamp
         )> _persistentLogBuffer = new();
 
-    private readonly List<(string Text, Color Color)> _persistentOutputBuffer = new();
+    private readonly List<(string Text, Color Color)> _persistentOutputBuffer = [];
 
     private readonly SceneManager _sceneManager;
     private readonly IServiceProvider _services;
@@ -632,12 +632,7 @@ public class ConsoleSystem : IUpdateSystem
 
         // Check if input looks like a command (simple words) rather than C# code
         // This ensures typos like "itme scale 2.0" give an error instead of entering multi-line mode
-        if (LooksLikeCommand(trimmed))
-        {
-            return true;
-        }
-
-        return false;
+        return LooksLikeCommand(trimmed);
     }
 
     /// <summary>
@@ -756,7 +751,7 @@ public class ConsoleSystem : IUpdateSystem
             _parameterHintProvider.UpdateScriptState(_evaluator.CurrentState);
 
             // Get parameter hints from provider (pass text up to the opening paren + opening paren)
-            string textForHints = text.Substring(0, methodCallInfo.Value.OpenParenIndex + 1);
+            string textForHints = text[..(methodCallInfo.Value.OpenParenIndex + 1)];
             ParameterHintInfo? hints = _parameterHintProvider.GetParameterHints(
                 textForHints,
                 textForHints.Length
@@ -869,7 +864,7 @@ public class ConsoleSystem : IUpdateSystem
             return null;
         }
 
-        string methodName = text.Substring(methodStartIndex, methodEndIndex - methodStartIndex + 1);
+        string methodName = text[methodStartIndex..(methodEndIndex + 1)];
 
         // Count commas between opening paren and cursor to determine parameter index
         int parameterIndex = 0;
@@ -1835,12 +1830,13 @@ public class ConsoleSystem : IUpdateSystem
                         }
 
                         // Build inverse: child → parent
-                        if (!index.ParentOf.ContainsKey(childEntity.Id))
+                        if (!index.ParentOf.TryGetValue(childEntity.Id, out var parentList))
                         {
-                            index.ParentOf[childEntity.Id] = new List<Entity>();
+                            parentList = [];
+                            index.ParentOf[childEntity.Id] = parentList;
                         }
 
-                        index.ParentOf[childEntity.Id].Add(entity);
+                        parentList.Add(entity);
                     }
                 }
 
@@ -1858,12 +1854,13 @@ public class ConsoleSystem : IUpdateSystem
                         }
 
                         // Build inverse: owned → owner
-                        if (!index.OwnerOf.ContainsKey(ownedEntity.Id))
+                        if (!index.OwnerOf.TryGetValue(ownedEntity.Id, out var ownerList))
                         {
-                            index.OwnerOf[ownedEntity.Id] = new List<Entity>();
+                            ownerList = [];
+                            index.OwnerOf[ownedEntity.Id] = ownerList;
                         }
 
-                        index.OwnerOf[ownedEntity.Id].Add(entity);
+                        ownerList.Add(entity);
                     }
                 }
 
@@ -2365,7 +2362,7 @@ public class ConsoleSystem : IUpdateSystem
     private class EntityCacheEntry
     {
         public string Name { get; set; } = string.Empty;
-        public List<string> Components { get; set; } = new();
+        public List<string> Components { get; set; } = [];
     }
 
     /// <summary>

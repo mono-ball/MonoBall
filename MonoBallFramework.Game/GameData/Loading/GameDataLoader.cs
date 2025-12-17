@@ -170,12 +170,7 @@ public class GameDataLoader
 
     private static string? GetPropertyString(Dictionary<string, object> props, string key)
     {
-        if (props.TryGetValue(key, out object? value))
-        {
-            return value?.ToString();
-        }
-
-        return null;
+        return props.TryGetValue(key, out object? value) ? value?.ToString() : null;
     }
 
     private static bool? GetPropertyBool(Dictionary<string, object> props, string key)
@@ -353,7 +348,7 @@ public class GameDataLoader
             Path.DirectorySeparatorChar,
             Path.AltDirectorySeparatorChar
         );
-        return pathParts.Any(part => part.StartsWith("."));
+        return pathParts.Any(part => part.StartsWith('.'));
     }
 
     /// <summary>
@@ -794,12 +789,12 @@ public class GameDataLoader
         if (modsIndex >= 0)
         {
             // Extract the mod folder name (first segment after /Mods/)
-            string afterMods = normalizedPath.Substring(modsIndex + modsMarker.Length);
+            string afterMods = normalizedPath[(modsIndex + modsMarker.Length)..];
             int nextSeparator = afterMods.IndexOf('/');
 
             if (nextSeparator > 0)
             {
-                return afterMods.Substring(0, nextSeparator);
+                return afterMods[..nextSeparator];
             }
 
             if (afterMods.Length > 0)

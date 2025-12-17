@@ -114,7 +114,7 @@ Examples:
                 string fkey = $"F{bookmark.Key}".PadRight(5);
                 string command =
                     bookmark.Value.Length > 55
-                        ? bookmark.Value.Substring(0, 52) + "..."
+                        ? bookmark.Value[..52] + "..."
                         : bookmark.Value;
                 context.WriteLine($"  {fkey} -> {command}", theme.Info);
             }
@@ -217,7 +217,7 @@ Examples:
         // Remove "F" prefix if present
         if (fkeyStr.StartsWith("F", StringComparison.OrdinalIgnoreCase))
         {
-            fkeyStr = fkeyStr.Substring(1);
+            fkeyStr = fkeyStr[1..];
         }
 
         // Parse the number

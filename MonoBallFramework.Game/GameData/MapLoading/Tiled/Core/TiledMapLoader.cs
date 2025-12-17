@@ -356,7 +356,7 @@ public static class TiledMapLoader
     {
         if (layer.Data == null)
         {
-            return Array.Empty<uint>();
+            return [];
         }
 
         JsonElement dataElement = layer.Data.Value;
@@ -379,7 +379,7 @@ public static class TiledMapLoader
             string? base64Data = dataElement.GetString();
             if (string.IsNullOrEmpty(base64Data))
             {
-                return Array.Empty<uint>();
+                return [];
             }
 
             byte[] bytes = Convert.FromBase64String(base64Data);
@@ -399,7 +399,7 @@ public static class TiledMapLoader
             layer.Name,
             dataElement.ValueKind
         );
-        return Array.Empty<uint>();
+        return [];
     }
 
     /// <summary>

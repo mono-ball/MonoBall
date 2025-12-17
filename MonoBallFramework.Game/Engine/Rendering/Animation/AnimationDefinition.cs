@@ -134,12 +134,13 @@ public class AnimationDefinition
             );
         }
 
-        if (!Events.ContainsKey(frameIndex))
+        if (!Events.TryGetValue(frameIndex, out var eventList))
         {
-            Events[frameIndex] = new List<AnimationEvent>();
+            eventList = [];
+            Events[frameIndex] = eventList;
         }
 
-        Events[frameIndex].Add(animationEvent);
+        eventList.Add(animationEvent);
         return this;
     }
 

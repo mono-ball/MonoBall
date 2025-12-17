@@ -103,12 +103,7 @@ public class DocumentationProvider
             return "Variable";
         }
 
-        if (item.Tags.Contains("Keyword"))
-        {
-            return "Keyword";
-        }
-
-        return "Symbol";
+        return item.Tags.Contains("Keyword") ? "Keyword" : "Symbol";
     }
 
     /// <summary>
@@ -138,8 +133,8 @@ public class DocumentationProvider
                 int colonIndex = paramText.IndexOf(':');
                 if (colonIndex > 0)
                 {
-                    string paramName = paramText.Substring(0, colonIndex).Trim();
-                    string paramDesc = paramText.Substring(colonIndex + 1).Trim();
+                    string paramName = paramText[..colonIndex].Trim();
+                    string paramDesc = paramText[(colonIndex + 1)..].Trim();
                     parameters.Add(new ParameterInfo(paramName, "unknown", paramDesc));
                 }
             }
@@ -285,7 +280,7 @@ public class DocumentationProvider
     {
         if (text.Length >= width)
         {
-            return text.Substring(0, width);
+            return text[..width];
         }
 
         int padding = (width - text.Length) / 2;
@@ -331,7 +326,7 @@ public class DocumentationProvider
         public string DisplayText { get; init; } = string.Empty;
         public string? Signature { get; init; }
         public string? Summary { get; init; }
-        public List<ParameterInfo> Parameters { get; init; } = new();
+        public List<ParameterInfo> Parameters { get; init; } = [];
         public string? Returns { get; init; }
         public string? Example { get; init; }
         public string? Remarks { get; init; }

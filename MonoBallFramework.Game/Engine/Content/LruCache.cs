@@ -13,7 +13,7 @@ public class LruCache<TKey, TValue> where TKey : notnull
     private readonly int _capacity;
     private readonly ConcurrentDictionary<TKey, LinkedListNode<CacheEntry>> _dictionary;
     private readonly LinkedList<CacheEntry> _linkedList;
-    private readonly object _lock = new();
+    private readonly Lock _lock = new();
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="LruCache{TKey, TValue}" /> class.
@@ -136,10 +136,7 @@ public class LruCache<TKey, TValue> where TKey : notnull
     /// <exception cref="ArgumentNullException">Thrown when predicate is null.</exception>
     public void RemoveWhere(Func<TKey, bool> predicate)
     {
-        if (predicate == null)
-        {
-            throw new ArgumentNullException(nameof(predicate));
-        }
+        ArgumentNullException.ThrowIfNull(predicate);
 
         lock (_lock)
         {

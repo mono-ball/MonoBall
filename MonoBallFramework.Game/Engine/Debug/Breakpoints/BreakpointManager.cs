@@ -11,7 +11,7 @@ namespace MonoBallFramework.Game.Engine.Debug.Breakpoints;
 public class BreakpointManager : IBreakpointOperations
 {
     private readonly Dictionary<int, IBreakpoint> _breakpoints = new();
-    private readonly object _breakpointsLock = new();
+    private readonly Lock _breakpointsLock = new();
     private readonly ConsoleScriptEvaluator _evaluator;
     private readonly ConsoleGlobals _globals;
     private readonly ILogger? _logger;

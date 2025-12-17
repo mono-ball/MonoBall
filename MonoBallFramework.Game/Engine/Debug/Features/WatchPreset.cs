@@ -23,7 +23,7 @@ public class WatchPreset
     /// <summary>
     ///     Watch entries in this preset.
     /// </summary>
-    public List<WatchPresetEntry> Watches { get; set; } = new();
+    public List<WatchPresetEntry> Watches { get; set; } = [];
 
     /// <summary>
     ///     Update interval in milliseconds.

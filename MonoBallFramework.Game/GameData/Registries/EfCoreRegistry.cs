@@ -60,12 +60,7 @@ public abstract class EfCoreRegistry<TEntity, TKey> where TEntity : class where 
             return true;
         }
 
-        if (!_isCacheLoaded)
-        {
-            return TryLoadFromDb(key);
-        }
-
-        return false;
+        return !_isCacheLoaded && TryLoadFromDb(key);
     }
 
     /// <summary>

@@ -8,8 +8,16 @@ namespace MonoBallFramework.Game.Engine.Debug.Console.Features;
 ///     Manages console aliases and macros for creating shortcuts to common commands.
 ///     Supports parameterized macros with $1, $2, etc. for argument substitution.
 /// </summary>
-public class AliasMacroManager
+public partial class AliasMacroManager
 {
+    [GeneratedRegex(@"^[a-zA-Z_][a-zA-Z0-9_]*$")]
+    private static partial Regex ValidAliasNameRegex();
+
+    [GeneratedRegex(@"\$\d")]
+    private static partial Regex UnfilledParameterRegex();
+
+    private static readonly char[] s_newlineSeparators = ['\r', '\n'];
+
     private readonly Dictionary<string, string> _aliases = new();
     private readonly string _aliasesFilePath;
     private readonly ILogger? _logger;
@@ -45,7 +53,7 @@ public class AliasMacroManager
         }
 
         // Sanitize alias name (alphanumeric and underscore only)
-        if (!Regex.IsMatch(name, @"^[a-zA-Z_][a-zA-Z0-9_]*$"))
+        if (!ValidAliasNameRegex().IsMatch(name))
         {
             _logger?.LogWarning(
                 "Invalid alias name: {Name}. Must be alphanumeric with underscores.",
@@ -116,7 +124,7 @@ public class AliasMacroManager
         }
 
         // Extract arguments (everything after alias name)
-        string[] args = parts.Length > 1 ? parts[1..] : Array.Empty<string>();
+        string[] args = parts.Length > 1 ? parts[1..] : [];
 
         // Expand parameters ($1, $2, etc.)
         expandedCommand = ExpandParameters(template, args);
@@ -140,7 +148,7 @@ public class AliasMacroManager
         }
 
         // Check for missing parameters
-        if (Regex.IsMatch(result, @"\$\d"))
+        if (UnfilledParameterRegex().IsMatch(result))
         {
             _logger?.LogWarning("Macro has unfilled parameters: {Template}", result);
         }
@@ -186,12 +194,12 @@ public class AliasMacroManager
         }
 
         _aliases.Clear();
-        string[] lines = content.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+        string[] lines = content.Split(s_newlineSeparators, StringSplitOptions.RemoveEmptyEntries);
         int loaded = 0;
 
         foreach (string line in lines)
         {
-            if (string.IsNullOrWhiteSpace(line) || line.StartsWith("#"))
+            if (string.IsNullOrWhiteSpace(line) || line.StartsWith('#'))
             {
                 continue;
             }

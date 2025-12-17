@@ -167,7 +167,7 @@ public sealed class SchemaValidationResult
 
     public static SchemaValidationResult Success()
     {
-        return new SchemaValidationResult(true, Array.Empty<SchemaValidationError>());
+        return new SchemaValidationResult(true, []);
     }
 
     public static SchemaValidationResult Failed(IReadOnlyList<SchemaValidationError> errors)

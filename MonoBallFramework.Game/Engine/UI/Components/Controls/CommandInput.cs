@@ -15,8 +15,8 @@ namespace MonoBallFramework.Game.Engine.UI.Components.Controls;
 public class CommandInput : UIComponent, ITextInput
 {
     // Command history
-    private readonly List<string> _history = new();
-    private readonly int _maxHistory = 100;
+    private readonly List<string> _history = [];
+    private const int _maxHistory = 100;
 
     // Visual properties - nullable for theme fallback
     private Color? _backgroundColor;
@@ -113,7 +113,7 @@ public class CommandInput : UIComponent, ITextInput
     public bool HasSelection { get; private set; }
 
     public string SelectedText =>
-        HasSelection ? Text.Substring(SelectionStart, SelectionLength) : string.Empty;
+        HasSelection ? Text[SelectionStart..(SelectionStart + SelectionLength)] : string.Empty;
 
     // Events (ITextInput interface)
     public event Action<string>? OnSubmit;
@@ -386,8 +386,8 @@ public class CommandInput : UIComponent, ITextInput
         // Draw selection background
         if (HasSelection)
         {
-            string beforeSelection = Text.Substring(0, SelectionStart);
-            string selectedText = Text.Substring(SelectionStart, SelectionLength);
+            string beforeSelection = Text[..SelectionStart];
+            string selectedText = Text[SelectionStart..(SelectionStart + SelectionLength)];
 
             float beforeWidth = renderer.MeasureText(beforeSelection).X;
             float selectionWidth = renderer.MeasureText(selectedText).X;
@@ -425,7 +425,7 @@ public class CommandInput : UIComponent, ITextInput
 
             if (_cursorBlinkTimer < CursorBlinkRate / 2)
             {
-                string textBeforeCursor = Text.Substring(0, CursorPosition);
+                string textBeforeCursor = Text[..CursorPosition];
                 float cursorX = textPos.X + renderer.MeasureText(textBeforeCursor).X;
 
                 var cursorRect = new LayoutRect(
@@ -470,15 +470,10 @@ public class CommandInput : UIComponent, ITextInput
             else
             {
                 float totalWidth = renderer.MeasureText(Text).X;
-                if (relativeX >= totalWidth)
-                {
-                    newPosition = Text.Length;
-                }
-                else
-                {
-                    // Binary search to find character position
-                    newPosition = FindCharacterPosition(relativeX, renderer);
-                }
+                // Binary search to find character position, or end of text
+                newPosition = relativeX >= totalWidth
+                    ? Text.Length
+                    : FindCharacterPosition(relativeX, renderer);
             }
         }
 
@@ -587,15 +582,10 @@ public class CommandInput : UIComponent, ITextInput
         else
         {
             float totalWidth = renderer.MeasureText(Text).X;
-            if (relativeX >= totalWidth)
-            {
-                newPosition = Text.Length;
-            }
-            else
-            {
-                // Binary search for position
-                newPosition = FindCharacterPosition(relativeX, renderer);
-            }
+            // Binary search for position, or end of text
+            newPosition = relativeX >= totalWidth
+                ? Text.Length
+                : FindCharacterPosition(relativeX, renderer);
         }
 
         // If this is the first drag movement, start selection
@@ -628,7 +618,7 @@ public class CommandInput : UIComponent, ITextInput
         while (left < right)
         {
             int mid = (left + right) / 2;
-            string substring = Text.Substring(0, mid);
+            string substring = Text[..mid];
             float widthAtMid = renderer.MeasureText(substring).X;
 
             if (widthAtMid < relativeX)
@@ -644,8 +634,8 @@ public class CommandInput : UIComponent, ITextInput
         // Check if we should round to previous character
         if (left > 0)
         {
-            string substringAtLeft = Text.Substring(0, left);
-            string substringAtPrev = Text.Substring(0, left - 1);
+            string substringAtLeft = Text[..left];
+            string substringAtPrev = Text[..(left - 1)];
             float widthAtLeft = renderer.MeasureText(substringAtLeft).X;
             float widthAtPrev = renderer.MeasureText(substringAtPrev).X;
             float midPoint = (widthAtPrev + widthAtLeft) / 2;

@@ -9,6 +9,8 @@ namespace MonoBallFramework.Game.Engine.Debug.Utilities;
 /// </summary>
 public static class FileUtilities
 {
+    private static readonly JsonSerializerOptions s_jsonOptions = new() { WriteIndented = true };
+
     /// <summary>
     ///     Safely reads a text file with error handling and logging.
     /// </summary>
@@ -19,12 +21,7 @@ public static class FileUtilities
     {
         try
         {
-            if (!File.Exists(filePath))
-            {
-                return null;
-            }
-
-            return File.ReadAllText(filePath);
+            return File.Exists(filePath) ? File.ReadAllText(filePath) : null;
         }
         catch (Exception ex)
         {
@@ -108,8 +105,7 @@ public static class FileUtilities
                 Directory.CreateDirectory(directory);
             }
 
-            var options = new JsonSerializerOptions { WriteIndented = true };
-            string json = JsonSerializer.Serialize(data, options);
+            string json = JsonSerializer.Serialize(data, s_jsonOptions);
             File.WriteAllText(filePath, json);
             return true;
         }

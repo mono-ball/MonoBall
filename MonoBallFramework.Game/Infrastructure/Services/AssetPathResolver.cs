@@ -103,12 +103,7 @@ public class AssetPathResolver : IAssetPathResolver
     /// <inheritdoc />
     public string ResolveData(string relativePath)
     {
-        if (string.IsNullOrWhiteSpace(relativePath))
-        {
-            return DataPath;
-        }
-
-        return Path.Combine(DataPath, relativePath);
+        return string.IsNullOrWhiteSpace(relativePath) ? DataPath : Path.Combine(DataPath, relativePath);
     }
 
     /// <inheritdoc />

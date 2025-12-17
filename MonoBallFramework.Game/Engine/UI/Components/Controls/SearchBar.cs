@@ -126,7 +126,7 @@ public class SearchBar : UIComponent
         float contentHeight = resolvedRect.Height - (Padding * 2);
 
         // Draw label
-        string labelText = "Find: ";
+        const string labelText = "Find: ";
         renderer.DrawText(labelText, new Vector2(contentX, contentY), InfoColor);
         float labelWidth = renderer.MeasureText(labelText).X;
 
@@ -148,7 +148,7 @@ public class SearchBar : UIComponent
 
             if (_cursorBlinkTimer < CursorBlinkRate / 2)
             {
-                string textBeforeCursor = SearchText.Substring(0, _cursorPosition);
+                string textBeforeCursor = SearchText[.._cursorPosition];
                 float cursorX = textX + renderer.MeasureText(textBeforeCursor).X;
                 var cursorRect = new LayoutRect(cursorX, contentY, 2, contentHeight);
                 renderer.DrawRectangle(cursorRect, CursorColor);
@@ -165,7 +165,7 @@ public class SearchBar : UIComponent
         }
         else if (!string.IsNullOrEmpty(SearchText))
         {
-            string noMatchText = "No matches";
+            const string noMatchText = "No matches";
             float noMatchWidth = renderer.MeasureText(noMatchText).X;
             float noMatchX = resolvedRect.Right - Padding - noMatchWidth;
             renderer.DrawText(noMatchText, new Vector2(noMatchX, contentY), InfoColor);

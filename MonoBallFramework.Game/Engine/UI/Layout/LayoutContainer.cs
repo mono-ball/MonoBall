@@ -7,7 +7,7 @@ namespace MonoBallFramework.Game.Engine.UI.Layout;
 public class LayoutContainer
 {
     /// <summary>Child containers</summary>
-    private readonly List<LayoutContainer> _children = new();
+    private readonly List<LayoutContainer> _children = [];
 
     public LayoutContainer(LayoutConstraint constraint)
     {

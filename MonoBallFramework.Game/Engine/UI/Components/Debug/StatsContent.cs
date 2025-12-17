@@ -145,12 +145,9 @@ public class StatsContent : UIComponent
             return (NerdFontIcons.StatusHealthy, theme.Success, true);
         }
 
-        if (isWarning)
-        {
-            return (NerdFontIcons.StatusWarning, theme.Warning, false);
-        }
-
-        return (NerdFontIcons.StatusError, theme.Error, false);
+        return isWarning
+            ? (NerdFontIcons.StatusWarning, theme.Warning, false)
+            : (NerdFontIcons.StatusError, theme.Error, false);
     }
 
     private void RefreshStats()
@@ -184,7 +181,7 @@ public class StatsContent : UIComponent
         int lineHeight = renderer.GetLineHeight();
         // Use DebugPanelBase.StandardLinePadding for consistent alignment
         // Parent panel already applies Constraint.Padding, so we only add internal line padding
-        int linePadding = DebugPanelBase.StandardLinePadding;
+        const int linePadding = DebugPanelBase.StandardLinePadding;
         int scrollbarWidth = theme.ScrollbarWidth;
         float visibleHeight = Rect.Height;
         _lastVisibleHeight = visibleHeight;
@@ -467,7 +464,7 @@ public class StatsContent : UIComponent
             systemName = systemName.Replace("System", "");
             if (systemName.Length > MaxSystemNameLength)
             {
-                systemName = systemName.Substring(0, TruncatedNameLength) + "...";
+                systemName = systemName[..TruncatedNameLength] + "...";
             }
 
             renderer.DrawText(systemName, valueX, y, theme.TextPrimary);
@@ -574,7 +571,7 @@ public class StatsContent : UIComponent
             renderer.DrawText(inUseText, valueX, y, inUseColor);
             if (_cachedStats.EventPoolCurrentlyInUse > 0)
             {
-                string warningText = "Check for leaks!";
+                const string warningText = "Check for leaks!";
                 float warningWidth = renderer.MeasureText(warningText).X;
                 renderer.DrawText(
                     warningText,
@@ -594,7 +591,7 @@ public class StatsContent : UIComponent
                 string eventName = _cachedStats.MostUsedEventType.Replace("Event", "");
                 if (eventName.Length > MaxSystemNameLength)
                 {
-                    eventName = eventName.Substring(0, TruncatedNameLength) + "...";
+                    eventName = eventName[..TruncatedNameLength] + "...";
                 }
 
                 renderer.DrawText(eventName, valueX, y, theme.Info);

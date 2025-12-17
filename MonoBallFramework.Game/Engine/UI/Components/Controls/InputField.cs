@@ -66,7 +66,7 @@ public class InputField : UIComponent
 
             if (showCursor)
             {
-                string textBeforeCursor = Text.Substring(0, Math.Min(CursorPosition, Text.Length));
+                string textBeforeCursor = Text[..Math.Min(CursorPosition, Text.Length)];
                 float cursorX = textX + context.Renderer.MeasureText(textBeforeCursor).X;
 
                 var cursorRect = new LayoutRect(

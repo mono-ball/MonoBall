@@ -24,7 +24,7 @@ public sealed record DialogueRequestedEvent : TypeEventBase
     ///     Display priority - higher values are shown first.
     ///     Default is 0 for normal priority.
     /// </summary>
-    public int Priority { get; init; } = 0;
+    public int Priority { get; init; }
 
     /// <summary>
     ///     Optional color tint for the dialogue box or text.

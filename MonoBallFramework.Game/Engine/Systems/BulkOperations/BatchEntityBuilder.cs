@@ -34,8 +34,8 @@ namespace MonoBallFramework.Game.Engine.Systems.BulkOperations;
 /// </remarks>
 public sealed class BatchEntityBuilder
 {
-    private readonly List<(Type type, Delegate factory)> _componentFactories = new();
-    private readonly List<(Type type, object component)> _sharedComponents = new();
+    private readonly List<(Type type, Delegate factory)> _componentFactories = [];
+    private readonly List<(Type type, object component)> _sharedComponents = [];
     private readonly World _world;
     private int _count = 1;
 

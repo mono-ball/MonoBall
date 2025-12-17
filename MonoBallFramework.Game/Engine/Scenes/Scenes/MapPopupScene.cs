@@ -375,7 +375,7 @@ public class MapPopupScene : SceneBase
         }
 
         // Don't render if animation is complete or disposed
-        if (_animationState == PopupAnimationState.Complete || _animationState == PopupAnimationState.Disposed)
+        if (_animationState is PopupAnimationState.Complete or PopupAnimationState.Disposed)
         {
             return;
         }
@@ -531,7 +531,7 @@ public class MapPopupScene : SceneBase
             while (left <= right)
             {
                 int mid = (left + right) / 2;
-                string testText = displayText.Substring(0, mid);
+                string testText = displayText[..mid];
                 Vector2 testSize = _scaledFont.MeasureString(testText);
 
                 if (testSize.X <= usableWidth)
@@ -547,7 +547,7 @@ public class MapPopupScene : SceneBase
 
             if (bestFit > 0)
             {
-                displayText = displayText.Substring(0, bestFit);
+                displayText = displayText[..bestFit];
             }
         }
 

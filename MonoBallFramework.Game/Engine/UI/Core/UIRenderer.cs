@@ -23,7 +23,7 @@ public class UIRenderer : IDisposable
     };
 
     // Clipping stack
-    private readonly Stack<Rectangle> _clipStack = new();
+    private readonly Stack<Rectangle> _clipStack = [];
     private readonly GraphicsDevice _graphicsDevice;
     private readonly Texture2D _pixel;
     private readonly SpriteBatch _spriteBatch;
@@ -55,12 +55,7 @@ public class UIRenderer : IDisposable
     {
         get
         {
-            if (_font == null)
-            {
-                throw new InvalidOperationException("Font not set. Call SetFontSystem first.");
-            }
-
-            return _font;
+            return _font ?? throw new InvalidOperationException("Font not set. Call SetFontSystem first.");
         }
     }
 
@@ -365,12 +360,7 @@ public class UIRenderer : IDisposable
 
     private RasterizerState GetRasterizerState()
     {
-        if (!_currentClipRect.HasValue)
-        {
-            return RasterizerState.CullNone;
-        }
-
         // Use static shared RasterizerState with scissor test enabled
-        return _scissorRasterizerState;
+        return _currentClipRect.HasValue ? _scissorRasterizerState : RasterizerState.CullNone;
     }
 }

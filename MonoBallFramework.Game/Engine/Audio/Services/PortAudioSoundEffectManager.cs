@@ -17,7 +17,7 @@ public class PortAudioSoundEffectManager : ISoundEffectManager
     private readonly ConcurrentDictionary<Guid, SoundInstance> _activeSounds;
     private readonly AudioRegistry _audioRegistry;
     private readonly IContentProvider _contentProvider;
-    private readonly object _lock = new();
+    private readonly Lock _lock = new();
     private readonly ILogger<PortAudioSoundEffectManager>? _logger;
     private readonly AudioFormat _mixerFormat;
     private bool _disposed;
@@ -45,10 +45,7 @@ public class PortAudioSoundEffectManager : ISoundEffectManager
         _contentProvider = contentProvider ?? throw new ArgumentNullException(nameof(contentProvider));
         _logger = logger;
 
-        if (maxConcurrentSounds <= 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(maxConcurrentSounds));
-        }
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maxConcurrentSounds);
 
         MaxConcurrentSounds = maxConcurrentSounds;
         _activeSounds = new ConcurrentDictionary<Guid, SoundInstance>();
@@ -404,10 +401,8 @@ public class PortAudioSoundEffectManager : ISoundEffectManager
         DateTime oldestTime = DateTime.MaxValue;
         bool found = false;
 
-        foreach (KeyValuePair<Guid, SoundInstance> kvp in _activeSounds)
+        foreach (var (id, sound) in _activeSounds)
         {
-            SoundInstance sound = kvp.Value;
-
             // Skip protected priorities (Critical and UI are never evicted)
             if (sound.Priority >= SoundPriority.Critical)
             {
@@ -424,7 +419,7 @@ public class PortAudioSoundEffectManager : ISoundEffectManager
             if (sound.Priority < lowestPriority ||
                 (sound.Priority == lowestPriority && sound.CreatedAt < oldestTime))
             {
-                candidateId = kvp.Key;
+                candidateId = id;
                 lowestPriority = sound.Priority;
                 oldestTime = sound.CreatedAt;
                 found = true;

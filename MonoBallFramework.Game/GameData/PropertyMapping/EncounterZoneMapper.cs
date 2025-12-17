@@ -36,7 +36,7 @@ public class EncounterZoneMapper : IEntityPropertyMapper<EncounterZone>
             )
         };
 
-        if (encounterRate < 0 || encounterRate > 255)
+        if (encounterRate is < 0 or > 255)
         {
             throw new InvalidOperationException(
                 $"encounter_rate must be between 0 and 255. Got: {encounterRate}"

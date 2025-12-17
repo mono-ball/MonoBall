@@ -207,14 +207,9 @@ Keyboard: Ctrl+6 to open Profiler tab directly";
             }
         }
 
-        if (count == 0)
-        {
-            context.WriteLine("  No systems tracked yet.", theme.TextSecondary);
-        }
-        else
-        {
-            context.WriteLine($"Total: {count} systems", theme.TextSecondary);
-        }
+        context.WriteLine(count == 0
+            ? "  No systems tracked yet."
+            : $"Total: {count} systems", theme.TextSecondary);
     }
 
     private static void ShowStatistics(IConsoleContext context, IProfilerOperations profiler)

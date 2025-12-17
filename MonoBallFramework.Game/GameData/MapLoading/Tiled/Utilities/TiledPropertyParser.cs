@@ -202,7 +202,7 @@ public static class TiledPropertyParser
         }
 
         // Handle JsonElement
-        if (value is JsonElement je && je.ValueKind == JsonValueKind.Number)
+        if (value is JsonElement { ValueKind: JsonValueKind.Number } je)
         {
             return (float)je.GetDouble();
         }
@@ -270,7 +270,7 @@ public static class TiledPropertyParser
 
         if (value is int intValue)
         {
-            if (intValue < 0 || intValue > 255)
+            if (intValue is < 0 or > 255)
             {
                 throw new InvalidDataException(
                     $"Property '{key}' value {intValue} is out of byte range (0-255). Context: {context}");
@@ -280,10 +280,10 @@ public static class TiledPropertyParser
         }
 
         // Handle JsonElement
-        if (value is JsonElement je && je.ValueKind == JsonValueKind.Number)
+        if (value is JsonElement { ValueKind: JsonValueKind.Number } je)
         {
             int jeValue = je.GetInt32();
-            if (jeValue < 0 || jeValue > 255)
+            if (jeValue is < 0 or > 255)
             {
                 throw new InvalidDataException(
                     $"Property '{key}' value {jeValue} is out of byte range (0-255). Context: {context}");
@@ -559,7 +559,7 @@ public static class TiledPropertyParser
         string? waypointsStr = GetOptionalString(properties, key);
         if (string.IsNullOrEmpty(waypointsStr))
         {
-            return Array.Empty<Point>();
+            return [];
         }
 
         var points = new List<Point>();

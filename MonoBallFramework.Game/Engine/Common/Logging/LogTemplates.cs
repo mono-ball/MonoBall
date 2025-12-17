@@ -629,7 +629,7 @@ public static partial class LogTemplates
     /// </summary>
     public static void LogSpriteLoaderRegistered(this ILogger logger)
     {
-        string body = "[green]✓ Sprite texture loader[/] registered for lazy loading";
+        const string body = "[green]✓ Sprite texture loader[/] registered for lazy loading";
         logger.LogInformation(LogFormatting.FormatTemplate(WithAccent(LogAccent.Render, body)));
     }
 
@@ -1348,7 +1348,7 @@ public static partial class LogTemplates
     /// </summary>
     public static void LogSpriteCacheCleared(this ILogger logger)
     {
-        string body = "Sprite manifest cache cleared";
+        const string body = "Sprite manifest cache cleared";
         logger.LogDebug(LogFormatting.FormatTemplate(WithAccent(LogAccent.Asset, body)));
     }
 

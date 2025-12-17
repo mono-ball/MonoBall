@@ -19,12 +19,12 @@ public class VariablesPanel : DebugPanelBase, IVariableOperations
     private const int MaxExpansionDepth = 5;
     private const int MaxCollectionItems = 20;
 
-    private readonly List<DisplayRow> _displayRows = new();
+    private readonly List<DisplayRow> _displayRows = [];
 
     // Inspection state - tracks which paths are expanded
-    private readonly HashSet<string> _expandedPaths = new();
-    private readonly List<GlobalInfo> _globals = new();
-    private readonly HashSet<string> _pinnedVariables = new();
+    private readonly HashSet<string> _expandedPaths = [];
+    private readonly List<GlobalInfo> _globals = [];
+    private readonly HashSet<string> _pinnedVariables = [];
     private readonly Dictionary<string, VariableInfo> _variables = new();
     private readonly TextBuffer _variablesBuffer;
 
@@ -244,9 +244,8 @@ public class VariablesPanel : DebugPanelBase, IVariableOperations
     /// </summary>
     public bool TogglePin(string name)
     {
-        if (_pinnedVariables.Contains(name))
+        if (_pinnedVariables.Remove(name))
         {
-            _pinnedVariables.Remove(name);
             UpdateVariableDisplay();
             return false;
         }
@@ -757,11 +756,11 @@ public class VariablesPanel : DebugPanelBase, IVariableOperations
         int nameWidth = Math.Max(1, 25 - (row.Depth * 2));
         string name =
             row.Name.Length > nameWidth
-                ? row.Name.Substring(0, nameWidth - 1) + "…"
+                ? row.Name[..(nameWidth - 1)] + "…"
                 : row.Name.PadRight(nameWidth);
         string typeStr =
             row.TypeName.Length > 15
-                ? row.TypeName.Substring(0, 14) + "…"
+                ? row.TypeName[..14] + "…"
                 : row.TypeName.PadRight(15);
 
         // Build the full line - use value color for the whole line for simplicity
@@ -784,15 +783,15 @@ public class VariablesPanel : DebugPanelBase, IVariableOperations
 
         if (dotIndex < 0)
         {
-            return path.Substring(0, bracketIndex);
+            return path[..bracketIndex];
         }
 
         if (bracketIndex < 0)
         {
-            return path.Substring(0, dotIndex);
+            return path[..dotIndex];
         }
 
-        return path.Substring(0, Math.Min(dotIndex, bracketIndex));
+        return path[..Math.Min(dotIndex, bracketIndex)];
     }
 
     /// <summary>
@@ -829,7 +828,7 @@ public class VariablesPanel : DebugPanelBase, IVariableOperations
             {
                 if (s.Length > 50)
                 {
-                    return $"\"{s.Substring(0, 47)}...\"";
+                    return $"\"{s[..47]}...\"";
                 }
 
                 return $"\"{s}\"";
@@ -911,12 +910,7 @@ public class VariablesPanel : DebugPanelBase, IVariableOperations
         }
 
         // Complex object
-        if (isExpanded)
-        {
-            return $"{type.Name}";
-        }
-
-        return $"{{ {type.Name} }}";
+        return isExpanded ? $"{type.Name}" : $"{{ {type.Name} }}";
     }
 
     /// <summary>
@@ -938,7 +932,7 @@ public class VariablesPanel : DebugPanelBase, IVariableOperations
             int tickIndex = baseName.IndexOf('`');
             if (tickIndex > 0)
             {
-                baseName = baseName.Substring(0, tickIndex);
+                baseName = baseName[..tickIndex];
             }
 
             Type[] args = type.GetGenericArguments();
@@ -1005,7 +999,7 @@ public class VariablesPanel : DebugPanelBase, IVariableOperations
         // Objects with properties/fields are expandable
         bool hasProperties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
             .Any(p => p.CanRead && p.GetIndexParameters().Length == 0);
-        bool hasFields = type.GetFields(BindingFlags.Public | BindingFlags.Instance).Any();
+        bool hasFields = type.GetFields(BindingFlags.Public | BindingFlags.Instance).Length > 0;
 
         return hasProperties || hasFields;
     }
@@ -1061,12 +1055,7 @@ public class VariablesPanel : DebugPanelBase, IVariableOperations
             return ThemeManager.Current.Warning; // Yellow for enums
         }
 
-        if (value is ICollection)
-        {
-            return ThemeManager.Current.TextSecondary;
-        }
-
-        return ThemeManager.Current.TextPrimary;
+        return value is ICollection ? ThemeManager.Current.TextSecondary : ThemeManager.Current.TextPrimary;
     }
 
     // ═══════════════════════════════════════════════════════════════════════════

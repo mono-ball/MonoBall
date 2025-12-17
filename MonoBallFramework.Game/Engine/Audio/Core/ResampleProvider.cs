@@ -8,7 +8,7 @@ public class ResampleProvider : ISampleProvider
 {
     // Interpolation state
     private readonly float[] _lastSamples; // Last sample per channel for interpolation
-    private readonly object _lock = new();
+    private readonly Lock _lock = new();
     private readonly double _resampleRatio;
     private readonly ISampleProvider _source;
     private double _samplePosition; // Fractional position in source
@@ -23,15 +23,8 @@ public class ResampleProvider : ISampleProvider
     /// <exception cref="ArgumentOutOfRangeException">Thrown when target sample rate is invalid</exception>
     public ResampleProvider(ISampleProvider source, int targetSampleRate)
     {
-        if (source == null)
-        {
-            throw new ArgumentNullException(nameof(source));
-        }
-
-        if (targetSampleRate <= 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(targetSampleRate), "Target sample rate must be positive");
-        }
+        ArgumentNullException.ThrowIfNull(source);
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(targetSampleRate, nameof(targetSampleRate));
 
         _source = source;
 
@@ -64,20 +57,11 @@ public class ResampleProvider : ISampleProvider
     /// <returns>Number of samples actually read</returns>
     public int Read(float[] buffer, int offset, int count)
     {
-        if (buffer == null)
-        {
-            throw new ArgumentNullException(nameof(buffer));
-        }
-
-        if (offset < 0 || offset >= buffer.Length)
-        {
-            throw new ArgumentOutOfRangeException(nameof(offset));
-        }
-
-        if (count < 0 || offset + count > buffer.Length)
-        {
-            throw new ArgumentOutOfRangeException(nameof(count));
-        }
+        ArgumentNullException.ThrowIfNull(buffer);
+        ArgumentOutOfRangeException.ThrowIfNegative(offset);
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(offset, buffer.Length);
+        ArgumentOutOfRangeException.ThrowIfNegative(count);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(offset + count, buffer.Length);
 
         if (count % Format.Channels != 0)
         {
@@ -212,15 +196,8 @@ public class ResampleProvider : ISampleProvider
     /// <returns>Resampled provider if needed, or original provider if sample rates match</returns>
     public static ISampleProvider CreateIfNeeded(ISampleProvider source, int targetSampleRate)
     {
-        if (source == null)
-        {
-            throw new ArgumentNullException(nameof(source));
-        }
-
-        if (targetSampleRate <= 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(targetSampleRate), "Target sample rate must be positive");
-        }
+        ArgumentNullException.ThrowIfNull(source);
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(targetSampleRate, nameof(targetSampleRate));
 
         // Check if resampling is needed
         if (source.Format.SampleRate == targetSampleRate)

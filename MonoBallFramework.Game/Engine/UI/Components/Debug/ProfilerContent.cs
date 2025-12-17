@@ -20,7 +20,7 @@ public class ProfilerContent : UIComponent
     private const float MsColumnWidth = PanelConstants.Profiler.MsColumnWidth;
 
     // Cached metrics
-    private readonly List<SystemMetricEntry> _cachedMetrics = new();
+    private readonly List<SystemMetricEntry> _cachedMetrics = [];
 
     // Scrolling support
     private readonly ScrollbarComponent _scrollbar = new();
@@ -188,9 +188,8 @@ public class ProfilerContent : UIComponent
             return;
         }
 
-        foreach (KeyValuePair<string, SystemMetrics> kvp in metrics)
+        foreach (var (name, m) in metrics)
         {
-            SystemMetrics m = kvp.Value;
             if (_showOnlyActive && m.UpdateCount == 0)
             {
                 continue;
@@ -198,7 +197,7 @@ public class ProfilerContent : UIComponent
 
             var entry = new SystemMetricEntry
             {
-                Name = kvp.Key,
+                Name = name,
                 LastMs = m.LastUpdateMs,
                 AvgMs = m.AverageUpdateMs,
                 MaxMs = m.MaxUpdateMs,
@@ -235,7 +234,7 @@ public class ProfilerContent : UIComponent
         int lineHeight = renderer.GetLineHeight();
         // Use DebugPanelBase.StandardLinePadding for consistent alignment
         // Parent panel already applies Constraint.Padding, so we only add internal line padding
-        int linePadding = DebugPanelBase.StandardLinePadding;
+        const int linePadding = DebugPanelBase.StandardLinePadding;
         int scrollbarWidth = theme.ScrollbarWidth;
 
         float y = Rect.Y + linePadding;

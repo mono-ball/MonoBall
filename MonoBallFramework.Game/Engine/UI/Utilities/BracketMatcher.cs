@@ -67,13 +67,9 @@ public static class BracketMatcher
             return FindClosingBracket(lines, line, column, bracketChar, _openToClose[bracketChar]);
         }
 
-        if (IsClosingBracket(bracketChar))
-        {
-            // Search backward for opening bracket
-            return FindOpeningBracket(lines, line, column, _closeToOpen[bracketChar], bracketChar);
-        }
-
-        return null; // Not a bracket
+        return IsClosingBracket(bracketChar)
+            ? FindOpeningBracket(lines, line, column, _closeToOpen[bracketChar], bracketChar)
+            : null; // Not a bracket
     }
 
     private static (int line, int column)? FindClosingBracket(

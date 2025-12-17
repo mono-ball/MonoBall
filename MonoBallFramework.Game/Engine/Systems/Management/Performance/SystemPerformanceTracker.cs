@@ -40,16 +40,16 @@ namespace MonoBallFramework.Game.Engine.Systems.Management.Performance;
 ///     <code>
 /// var config = PerformanceConfiguration.Development;
 /// var tracker = new SystemPerformanceTracker(logger, config);
-/// 
+///
 /// // In game loop
 /// tracker.IncrementFrame();
-/// 
+///
 /// // Track system execution
 /// var sw = Stopwatch.StartNew();
 /// mySystem.Update(world, deltaTime);
 /// sw.Stop();
 /// tracker.TrackSystemPerformance("MySystem", sw.Elapsed.TotalMilliseconds);
-/// 
+///
 /// // Log stats periodically
 /// if (tracker.FrameCount % 300 == 0)
 ///     tracker.LogPerformanceStats();
@@ -179,7 +179,7 @@ public class SystemPerformanceTracker
             return;
         }
 
-        if (_metrics.Count == 0)
+        if (_metrics.IsEmpty)
         {
             return;
         }
@@ -194,10 +194,8 @@ public class SystemPerformanceTracker
         );
 
         // Log all systems using the custom template
-        foreach (KeyValuePair<string, SystemMetrics> kvp in _cachedSortedMetrics)
+        foreach (var (systemName, metrics) in _cachedSortedMetrics)
         {
-            string systemName = kvp.Key;
-            SystemMetrics metrics = kvp.Value;
             _logger.LogSystemPerformance(
                 systemName,
                 metrics.AverageUpdateMs,
@@ -225,7 +223,7 @@ public class SystemPerformanceTracker
     /// <returns>A formatted string report containing system performance metrics.</returns>
     public string GenerateReport()
     {
-        if (_metrics.Count == 0)
+        if (_metrics.IsEmpty)
         {
             return "No system performance data available.";
         }
@@ -267,10 +265,8 @@ public class SystemPerformanceTracker
         report.AppendLine();
 
         report.AppendLine("=== System Details ===");
-        foreach (KeyValuePair<string, SystemMetrics> kvp in _cachedSortedMetrics)
+        foreach (var (systemName, metrics) in _cachedSortedMetrics)
         {
-            string systemName = kvp.Key;
-            SystemMetrics metrics = kvp.Value;
             report.AppendLine($"{systemName}:");
             report.AppendLine($"  Total: {metrics.TotalTimeMs:F2} ms");
             report.AppendLine($"  Average: {metrics.AverageUpdateMs:F2} ms");

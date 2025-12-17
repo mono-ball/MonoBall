@@ -66,7 +66,7 @@ public class ConsoleGlobals
     ///     Script arguments passed via 'load script.csx arg1 arg2 ...'
     ///     Access in scripts as: args[0], args[1], etc.
     /// </summary>
-    public string[] Args { get; set; } = Array.Empty<string>();
+    public string[] Args { get; set; } = [];
 
     #endregion
 
@@ -190,7 +190,7 @@ public class ConsoleGlobals
         sb.AppendLine($"Entity {entity.Id}:");
 
         object?[] components = entity.GetAllComponents();
-        if (components.Any())
+        if (components.Length > 0)
         {
             foreach (object? component in components)
             {
@@ -218,7 +218,7 @@ public class ConsoleGlobals
 
         foreach (Entity entity in entities.Take(20)) // Limit to first 20 for readability
         {
-            int componentCount = entity.GetAllComponents().Count();
+            int componentCount = entity.GetAllComponents().Length;
             Print($"  Entity {entity.Id}: {componentCount} component(s)");
         }
 

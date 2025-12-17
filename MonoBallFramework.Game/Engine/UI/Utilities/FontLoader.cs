@@ -208,10 +208,7 @@ public sealed class FontLoader
     /// <exception cref="FileNotFoundException">Thrown if font file not found.</exception>
     public FontSystem LoadFont(FontEntity fontEntity)
     {
-        if (fontEntity == null)
-        {
-            throw new ArgumentNullException(nameof(fontEntity));
-        }
+        ArgumentNullException.ThrowIfNull(fontEntity);
 
         string? fontPath = ResolveFontPath(fontEntity.FontPath);
 

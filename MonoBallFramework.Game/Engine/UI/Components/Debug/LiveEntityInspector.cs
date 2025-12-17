@@ -34,7 +34,7 @@ public class LiveEntityInspector : Panel
     /// <summary>
     ///     List of available entities to inspect
     /// </summary>
-    public List<EntityInfo> AvailableEntities { get; set; } = new();
+    public List<EntityInfo> AvailableEntities { get; set; } = [];
 
     /// <summary>
     ///     Auto-refresh interval in seconds (0 = manual only)

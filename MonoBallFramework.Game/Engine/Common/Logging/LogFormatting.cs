@@ -9,7 +9,7 @@ namespace MonoBallFramework.Game.Engine.Common.Logging;
 ///     Shared formatting helpers for console and file loggers.
 ///     Centralizes palette, markup handling, and plain-text fallbacks.
 /// </summary>
-internal static class LogFormatting
+internal static partial class LogFormatting
 {
     private const string PlainLevelTemplate = "[{0}]";
     private const int LevelLabelWidth = 5;
@@ -44,10 +44,8 @@ internal static class LogFormatting
         }
     });
 
-    private static readonly Regex _markupRegex = new(
-        @"\[/?[^\]]+\]",
-        RegexOptions.Compiled | RegexOptions.CultureInvariant
-    );
+    [GeneratedRegex(@"\[/?[^\]]+\]", RegexOptions.CultureInvariant)]
+    private static partial Regex MarkupRegex();
 
     private static readonly Dictionary<string, string> PlainGlyphMap = new()
     {
@@ -121,19 +119,12 @@ internal static class LogFormatting
 
             if (!string.IsNullOrWhiteSpace(scope))
             {
-                builder.Append($"[dim][[{EscapeMarkup(scope!)}]][/] ");
+                builder.Append($"[dim][[{EscapeMarkup(scope)}]][/] ");
             }
 
             builder.Append($"{FormatCategory(category)}: ");
 
-            if (messageIsMarkup)
-            {
-                builder.Append(message);
-            }
-            else
-            {
-                builder.Append(FormatMessage(style, message));
-            }
+            builder.Append(messageIsMarkup ? message : FormatMessage(style, message));
 
             return builder.ToString();
         }
@@ -193,7 +184,7 @@ internal static class LogFormatting
             return false;
         }
 
-        return _markupRegex.IsMatch(text);
+        return MarkupRegex().IsMatch(text);
     }
 
     public static string EscapeMarkup(string text)
@@ -208,7 +199,7 @@ internal static class LogFormatting
             return text;
         }
 
-        string withoutTags = _markupRegex
+        string withoutTags = MarkupRegex()
             .Replace(text, string.Empty)
             .Replace("[[", "[")
             .Replace("]]", "]");

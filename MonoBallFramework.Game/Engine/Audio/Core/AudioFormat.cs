@@ -20,7 +20,7 @@ public sealed class AudioFormat
             throw new ArgumentOutOfRangeException(nameof(sampleRate), "Sample rate must be positive.");
         }
 
-        if (channels < 1 || channels > 2)
+        if (channels is < 1 or > 2)
         {
             throw new ArgumentOutOfRangeException(nameof(channels), "Channels must be 1 or 2.");
         }

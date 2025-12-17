@@ -29,12 +29,12 @@ public class ValidationResult
     /// <summary>
     ///     List of validation errors (must be fixed)
     /// </summary>
-    public List<ValidationError> Errors { get; set; } = new();
+    public List<ValidationError> Errors { get; set; } = [];
 
     /// <summary>
     ///     List of validation warnings (should be reviewed)
     /// </summary>
-    public List<ValidationWarning> Warnings { get; set; } = new();
+    public List<ValidationWarning> Warnings { get; set; } = [];
 
     /// <summary>
     ///     Adds an error to the validation result

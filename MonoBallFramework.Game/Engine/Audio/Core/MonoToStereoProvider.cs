@@ -6,7 +6,7 @@ namespace MonoBallFramework.Game.Engine.Audio.Core;
 /// </summary>
 public class MonoToStereoProvider : ISampleProvider
 {
-    private readonly object _lock = new();
+    private readonly Lock _lock = new();
     private readonly ISampleProvider _source;
     private float[]? _monoBuffer;
 

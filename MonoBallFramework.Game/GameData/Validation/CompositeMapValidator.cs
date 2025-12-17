@@ -8,7 +8,7 @@ namespace MonoBallFramework.Game.GameData.Validation;
 /// </summary>
 public class CompositeMapValidator : IMapValidator
 {
-    private readonly List<IMapValidator> _validators = new();
+    private readonly List<IMapValidator> _validators = [];
 
     public CompositeMapValidator() { }
 

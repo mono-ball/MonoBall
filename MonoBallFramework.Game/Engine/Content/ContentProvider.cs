@@ -504,7 +504,7 @@ public sealed class ContentProvider : IContentProvider
         // Block null byte injection
         if (pattern.Contains('\0'))
         {
-            string errorMessage = "Search pattern contains null byte";
+            const string errorMessage = "Search pattern contains null byte";
             _logger.LogWarning("Security: {Message}", errorMessage);
             throw new SecurityException(errorMessage);
         }
@@ -543,12 +543,7 @@ public sealed class ContentProvider : IContentProvider
         }
 
         // Block null character
-        if (relativePath.Contains('\0'))
-        {
-            return false;
-        }
-
-        return true;
+        return !relativePath.Contains('\0');
     }
 }
 

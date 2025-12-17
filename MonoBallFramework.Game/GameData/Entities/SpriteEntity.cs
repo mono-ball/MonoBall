@@ -55,13 +55,13 @@ public class SpriteEntity : BaseEntity
     ///     Frame definitions stored as JSON column via EF Core OwnsMany().ToJson().
     ///     Each frame contains: Index, X, Y, Width, Height
     /// </summary>
-    public List<SpriteFrame> Frames { get; set; } = new();
+    public List<SpriteFrame> Frames { get; set; } = [];
 
     /// <summary>
     ///     Animation definitions stored as JSON column via EF Core OwnsMany().ToJson().
     ///     Each animation contains: Name, Loop, FrameIndices[], FrameDurations[], FlipHorizontal
     /// </summary>
-    public List<SpriteAnimation> Animations { get; set; } = new();
+    public List<SpriteAnimation> Animations { get; set; } = [];
 
     // Computed properties (not stored in DB)
 
@@ -135,12 +135,12 @@ public class SpriteAnimation
     /// <summary>
     ///     Indices of frames in this animation.
     /// </summary>
-    public List<int> FrameIndices { get; set; } = new();
+    public List<int> FrameIndices { get; set; } = [];
 
     /// <summary>
     ///     Duration of each frame in seconds.
     /// </summary>
-    public List<double> FrameDurations { get; set; } = new();
+    public List<double> FrameDurations { get; set; } = [];
 
     /// <summary>
     ///     Whether to flip the sprite horizontally.

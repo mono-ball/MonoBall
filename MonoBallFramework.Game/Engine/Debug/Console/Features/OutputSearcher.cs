@@ -7,7 +7,7 @@ namespace MonoBallFramework.Game.Engine.Debug.Console.Features;
 /// </summary>
 public class OutputSearcher
 {
-    private readonly List<SearchMatch> _matches = new();
+    private readonly List<SearchMatch> _matches = [];
 
     /// <summary>
     ///     Gets whether a search is currently active.

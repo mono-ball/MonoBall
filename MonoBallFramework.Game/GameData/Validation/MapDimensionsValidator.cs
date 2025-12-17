@@ -17,14 +17,14 @@ public class MapDimensionsValidator : IMapValidator
         var result = new ValidationResult();
 
         // Validate map dimensions
-        if (map.Width < MinMapSize || map.Width > MaxMapSize)
+        if (map.Width is < MinMapSize or > MaxMapSize)
         {
             result.AddError(
                 $"Map width {map.Width} is outside valid range ({MinMapSize}-{MaxMapSize})"
             );
         }
 
-        if (map.Height < MinMapSize || map.Height > MaxMapSize)
+        if (map.Height is < MinMapSize or > MaxMapSize)
         {
             result.AddError(
                 $"Map height {map.Height} is outside valid range ({MinMapSize}-{MaxMapSize})"
@@ -32,14 +32,14 @@ public class MapDimensionsValidator : IMapValidator
         }
 
         // Validate tile dimensions
-        if (map.TileWidth < MinTileSize || map.TileWidth > MaxTileSize)
+        if (map.TileWidth is < MinTileSize or > MaxTileSize)
         {
             result.AddError(
                 $"Tile width {map.TileWidth} is outside valid range ({MinTileSize}-{MaxTileSize})"
             );
         }
 
-        if (map.TileHeight < MinTileSize || map.TileHeight > MaxTileSize)
+        if (map.TileHeight is < MinTileSize or > MaxTileSize)
         {
             result.AddError(
                 $"Tile height {map.TileHeight} is outside valid range ({MinTileSize}-{MaxTileSize})"

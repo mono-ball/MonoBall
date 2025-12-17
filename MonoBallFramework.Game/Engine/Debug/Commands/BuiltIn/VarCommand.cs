@@ -176,7 +176,7 @@ Examples:
             string valueStr = value?.ToString() ?? "null";
             if (valueStr.Length > 40)
             {
-                valueStr = valueStr.Substring(0, 37) + "...";
+                valueStr = valueStr[..37] + "...";
             }
 
             context.WriteLine($"  {name}: {valueStr}", theme.TextPrimary);

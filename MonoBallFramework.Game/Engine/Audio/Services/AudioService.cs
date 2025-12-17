@@ -508,7 +508,7 @@ public class AudioService : IAudioService
             AudioEntity? definition = _audioRegistry.GetByTrackId(assetName)
                                       ?? _audioRegistry.GetById(assetName);
 
-            if (definition != null && definition.IsMusic)
+            if (definition is { IsMusic: true })
             {
                 _musicPlayer.UnloadTrack(assetName);
             }

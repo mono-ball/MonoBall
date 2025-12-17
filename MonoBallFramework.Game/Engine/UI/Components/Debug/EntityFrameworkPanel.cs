@@ -188,7 +188,7 @@ public class EntityFrameworkPanel : DebugPanelBase
             var allFilterTags = new List<string>();
 
             // Get DbSet properties if context factory is available
-            PropertyInfo[] dbSetProperties = Array.Empty<PropertyInfo>();
+            PropertyInfo[] dbSetProperties = [];
             GameDataContext? context = null;
 
             if (_contextFactory != null)
@@ -200,7 +200,7 @@ public class EntityFrameworkPanel : DebugPanelBase
 
             // Get custom type categories
             IReadOnlyCollection<string> customTypeCategories =
-                _customTypesApi?.GetCategories() ?? Array.Empty<string>();
+                _customTypesApi?.GetCategories() ?? [];
             foreach (string category in customTypeCategories)
             {
                 // Prefix custom types with icon to distinguish from DbSets
@@ -414,16 +414,10 @@ public class EntityFrameworkPanel : DebugPanelBase
             // Restore scroll position (clamp to valid range)
             _listBuffer.SetScrollOffset(Math.Min(prevListScroll, Math.Max(0, _listBuffer.TotalLines - 1)));
 
-            // Reset detail scroll only when viewing a DIFFERENT entity than before
-            if (_selectedEntityPath != prevSelectedEntityPath)
-            {
-                _detailBuffer.SetScrollOffset(0);
-            }
-            else
-            {
-                // Preserve detail scroll if same entity
-                _detailBuffer.SetScrollOffset(Math.Min(prevDetailScroll, Math.Max(0, _detailBuffer.TotalLines - 1)));
-            }
+            // Reset detail scroll when viewing a different entity, preserve for same entity
+            _detailBuffer.SetScrollOffset(_selectedEntityPath != prevSelectedEntityPath
+                ? 0
+                : Math.Min(prevDetailScroll, Math.Max(0, _detailBuffer.TotalLines - 1)));
         }
         catch (Exception ex)
         {
@@ -1004,7 +998,7 @@ public class EntityFrameworkPanel : DebugPanelBase
                     if (valueStr.Length > 30)
                     {
                         int substringLength = Math.Min(27, valueStr.Length);
-                        valueStr = valueStr.Substring(0, substringLength) + "...";
+                        valueStr = valueStr[..substringLength] + "...";
                     }
 
                     parts.Add($"{prop.Name}={valueStr}");
@@ -1108,7 +1102,7 @@ public class EntityFrameworkPanel : DebugPanelBase
                     if (result.Length > 60)
                     {
                         int substringLength = Math.Min(57, result.Length);
-                        return result.Substring(0, substringLength) + "...";
+                        return result[..substringLength] + "...";
                     }
 
                     return result;
@@ -1120,7 +1114,7 @@ public class EntityFrameworkPanel : DebugPanelBase
             if (str.Length > 60)
             {
                 int substringLength = Math.Min(57, str.Length);
-                return str.Substring(0, substringLength) + "...";
+                return str[..substringLength] + "...";
             }
 
             return str;
@@ -1139,17 +1133,17 @@ public class EntityFrameworkPanel : DebugPanelBase
         // Remove common suffixes with bounds checking
         if (typeName.EndsWith("Entity") && typeName.Length > 6)
         {
-            return typeName.Substring(0, typeName.Length - 6);
+            return typeName[..^6];
         }
 
         if (typeName.EndsWith("Model") && typeName.Length > 5)
         {
-            return typeName.Substring(0, typeName.Length - 5);
+            return typeName[..^5];
         }
 
         if (typeName.EndsWith("Data") && typeName.Length > 4)
         {
-            return typeName.Substring(0, typeName.Length - 4);
+            return typeName[..^4];
         }
 
         return typeName;
@@ -1243,7 +1237,7 @@ public class EntityFrameworkPanel : DebugPanelBase
             {
                 // Bounds check before substring
                 int substringLength = Math.Min(47, str.Length);
-                return $"\"{str.Substring(0, substringLength)}...\"";
+                return $"\"{str[..substringLength]}...\"";
             }
 
             return $"\"{str}\"";
@@ -1301,7 +1295,7 @@ public class EntityFrameworkPanel : DebugPanelBase
                 {
                     // Bounds check before substring
                     int substringLength = Math.Min(97, toStringResult.Length);
-                    return toStringResult.Substring(0, substringLength) + "...";
+                    return toStringResult[..substringLength] + "...";
                 }
 
                 return toStringResult;
@@ -1389,7 +1383,7 @@ public class EntityFrameworkPanel : DebugPanelBase
                     if (valueStr.Length > 20)
                     {
                         int substringLength = Math.Min(17, valueStr.Length);
-                        valueStr = valueStr.Substring(0, substringLength) + "...";
+                        valueStr = valueStr[..substringLength] + "...";
                     }
 
                     parts.Add($"{prop.Name}={valueStr}");
@@ -1716,8 +1710,8 @@ public class EntityFrameworkPanel : DebugPanelBase
             return; // Invalid format
         }
 
-        string sourceName = entityPath.Substring(0, bracketIndex);
-        string indexStr = entityPath.Substring(bracketIndex + 1, closeBracketIndex - bracketIndex - 1);
+        string sourceName = entityPath[..bracketIndex];
+        string indexStr = entityPath[(bracketIndex + 1)..closeBracketIndex];
         if (!int.TryParse(indexStr, out int index))
         {
             return;
@@ -1737,7 +1731,7 @@ public class EntityFrameworkPanel : DebugPanelBase
                 return; // Invalid format
             }
 
-            string category = sourceName.Substring(1);
+            string category = sourceName[1..];
             try
             {
                 var definitions = _customTypesApi.GetAllDefinitions(category).ToList();

@@ -12,7 +12,7 @@ namespace MonoBallFramework.Game.Engine.UI.Core;
 /// </summary>
 public class UIContext : IDisposable
 {
-    private readonly Stack<LayoutContainer> _containerStack = new();
+    private readonly Stack<LayoutContainer> _containerStack = [];
     private string? _currentHoveredId;
 
     // Hover tracking during registration

@@ -9,6 +9,9 @@ namespace MonoBallFramework.Game.Engine.Debug.Console.Features;
 public class BookmarkedCommandsManager
 {
     public const int MaxBookmarks = 12; // F1-F12
+
+    private static readonly char[] s_newlineSeparators = ['\r', '\n'];
+
     private readonly Dictionary<int, string> _bookmarks = new(); // Key: F-key number (1-12), Value: command
     private readonly string _bookmarksFilePath;
     private readonly ILogger? _logger;
@@ -38,7 +41,7 @@ public class BookmarkedCommandsManager
     /// <returns>True if bookmarked successfully, false if invalid.</returns>
     public bool BookmarkCommand(int fKeyNumber, string command)
     {
-        if (fKeyNumber < 1 || fKeyNumber > MaxBookmarks)
+        if (fKeyNumber is < 1 or > MaxBookmarks)
         {
             _logger?.LogWarning(
                 "Invalid F-key number: {FKey}. Must be between 1 and {Max}",
@@ -139,12 +142,12 @@ public class BookmarkedCommandsManager
         }
 
         _bookmarks.Clear();
-        string[] lines = content.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+        string[] lines = content.Split(s_newlineSeparators, StringSplitOptions.RemoveEmptyEntries);
         int loaded = 0;
 
         foreach (string line in lines)
         {
-            if (string.IsNullOrWhiteSpace(line) || line.StartsWith("#"))
+            if (string.IsNullOrWhiteSpace(line) || line.StartsWith('#'))
             {
                 continue;
             }
@@ -158,7 +161,7 @@ public class BookmarkedCommandsManager
                 // Parse F-key number (e.g., "F1" -> 1)
                 if (
                     keyPart.StartsWith("F", StringComparison.OrdinalIgnoreCase)
-                    && int.TryParse(keyPart.Substring(1), out int fKeyNumber)
+                    && int.TryParse(keyPart[1..], out int fKeyNumber)
                 )
                 {
                     if (BookmarkCommand(fKeyNumber, command))

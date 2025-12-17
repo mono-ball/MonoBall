@@ -43,12 +43,9 @@ public sealed class CustomTypesApiService : ICustomTypesApi
 
     public IEnumerable<ICustomTypeDefinition> GetAllDefinitions(string category)
     {
-        if (_definitions.TryGetValue(category, out ConcurrentDictionary<string, ICustomTypeDefinition>? categoryDict))
-        {
-            return categoryDict.Values;
-        }
-
-        return Enumerable.Empty<ICustomTypeDefinition>();
+        return _definitions.TryGetValue(category, out ConcurrentDictionary<string, ICustomTypeDefinition>? categoryDict)
+            ? categoryDict.Values
+            : [];
     }
 
     public IReadOnlyCollection<string> GetCategories()
@@ -63,12 +60,9 @@ public sealed class CustomTypesApiService : ICustomTypesApi
 
     public int GetDefinitionCount(string category)
     {
-        if (_definitions.TryGetValue(category, out ConcurrentDictionary<string, ICustomTypeDefinition>? categoryDict))
-        {
-            return categoryDict.Count;
-        }
-
-        return 0;
+        return _definitions.TryGetValue(category, out ConcurrentDictionary<string, ICustomTypeDefinition>? categoryDict)
+            ? categoryDict.Count
+            : 0;
     }
 
     public IEnumerable<ICustomTypeDefinition> Where(string category, Func<ICustomTypeDefinition, bool> predicate)
@@ -82,10 +76,7 @@ public sealed class CustomTypesApiService : ICustomTypesApi
     /// </summary>
     public void RegisterDefinition(ICustomTypeDefinition definition)
     {
-        if (definition == null)
-        {
-            throw new ArgumentNullException(nameof(definition));
-        }
+        ArgumentNullException.ThrowIfNull(definition);
 
         // Get or create category dictionary
         ConcurrentDictionary<string, ICustomTypeDefinition> categoryDict = _definitions.GetOrAdd(definition.Category,
@@ -124,6 +115,6 @@ public sealed class CustomTypesApiService : ICustomTypesApi
     {
         // Full ID format: "mod:type:localid" or just "localid"
         int lastColon = fullId.LastIndexOf(':');
-        return lastColon >= 0 ? fullId.Substring(lastColon + 1) : fullId;
+        return lastColon >= 0 ? fullId[(lastColon + 1)..] : fullId;
     }
 }

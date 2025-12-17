@@ -6,7 +6,7 @@ namespace MonoBallFramework.Game.Engine.Scenes;
 /// </summary>
 public class LoadingProgress
 {
-    private readonly object _lock = new();
+    private readonly Lock _lock = new();
     private string _currentStep = string.Empty;
     private Exception? _error;
     private bool _isComplete;

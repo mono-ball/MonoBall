@@ -64,7 +64,7 @@ public class SizeCommand : IConsoleCommand
                 // Try parsing as a percentage
                 if (int.TryParse(sizeArg.TrimEnd('%'), out int percent))
                 {
-                    if (percent < 25 || percent > 100)
+                    if (percent is < 25 or > 100)
                     {
                         context.WriteLine(
                             "Error: Size must be between 25 and 100",

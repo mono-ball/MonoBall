@@ -70,6 +70,7 @@ public class EventInspectorOverlay : IDisposable
             return;
         }
 
+        GC.SuppressFinalize(this);
         _disposed = true;
         _uiContext.Dispose();
     }

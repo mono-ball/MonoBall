@@ -13,8 +13,8 @@ public class ConsoleLoggerProvider : ILoggerProvider
     private readonly ConcurrentDictionary<string, ConsoleLogger> _loggers = new();
 
     // Buffer for logs that arrive before handlers are set
-    private readonly List<(LogLevel Level, string Message, string Category)> _pendingLogs = new();
-    private readonly object _pendingLogsLock = new();
+    private readonly List<(LogLevel Level, string Message, string Category)> _pendingLogs = [];
+    private readonly Lock _pendingLogsLock = new();
     private Action<LogLevel, string, string>? _addLogEntry; // level, message, category
     private bool _handlersConfigured;
     private Func<LogLevel, bool> _isEnabled = _ => true;
@@ -30,6 +30,7 @@ public class ConsoleLoggerProvider : ILoggerProvider
 
     public void Dispose()
     {
+        GC.SuppressFinalize(this);
         _loggers.Clear();
     }
 

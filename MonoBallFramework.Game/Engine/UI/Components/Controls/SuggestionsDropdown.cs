@@ -22,9 +22,9 @@ public record SuggestionItem(
 /// </summary>
 public class SuggestionsDropdown : UIComponent
 {
-    private readonly List<SuggestionItem> _filteredItems = new();
-    private readonly List<SuggestionItem> _items = new();
-    private readonly object _lock = new();
+    private readonly List<SuggestionItem> _filteredItems = [];
+    private readonly List<SuggestionItem> _items = [];
+    private readonly Lock _lock = new();
 
     // Store the actual rendered rect for input handling
     private LayoutRect _actualDropdownRect;
@@ -448,7 +448,7 @@ public class SuggestionsDropdown : UIComponent
             while (left <= right)
             {
                 int mid = (left + right) / 2;
-                string testText = text.Substring(0, mid);
+                string testText = text[..mid];
                 Vector2 testSize = renderer.MeasureText(testText);
 
                 if (testSize.X <= availableWidth)
@@ -464,7 +464,7 @@ public class SuggestionsDropdown : UIComponent
 
             if (bestFit > 0)
             {
-                string truncatedText = text.Substring(0, bestFit);
+                string truncatedText = text[..bestFit];
                 renderer.DrawText(truncatedText, position, color);
             }
         }

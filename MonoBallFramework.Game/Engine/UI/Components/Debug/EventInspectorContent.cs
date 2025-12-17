@@ -244,7 +244,7 @@ public class EventInspectorContent : UIComponent
     private double _refreshIntervalSeconds = 0.5;
     private int _selectedEventIndex = -1;
     private bool _showSubscriptions = true;
-    private List<EventTypeInfo> _sortedEvents = new();
+    private List<EventTypeInfo> _sortedEvents = [];
     private EventInspectorSortMode _sortMode = EventInspectorSortMode.BySubscribers;
 
     // Layout tracking
@@ -419,7 +419,7 @@ public class EventInspectorContent : UIComponent
         InputState? input = context.Input;
 
         int lineHeight = renderer.GetLineHeight();
-        int linePadding = DebugPanelBase.StandardLinePadding;
+        const int linePadding = DebugPanelBase.StandardLinePadding;
         int scrollbarWidth = theme.ScrollbarWidth;
 
         float y = Rect.Y + linePadding;
@@ -681,7 +681,7 @@ public class EventInspectorContent : UIComponent
         // Check if panel is too narrow to display meaningfully
         if (width < PanelConstants.EventInspector.MinPanelWidth)
         {
-            string warningText = "Panel too narrow - resize to view table";
+            const string warningText = "Panel too narrow - resize to view table";
             renderer.DrawText(warningText, x, y, theme.Warning);
             y += lineHeight + theme.SpacingNormal;
             return y;

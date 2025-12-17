@@ -63,10 +63,7 @@ public class StreamingTrackData : IDisposable
     /// <returns>A new StreamingMusicProvider instance.</returns>
     public StreamingMusicProvider CreateStreamingProvider()
     {
-        if (_disposed)
-        {
-            throw new ObjectDisposedException(nameof(StreamingTrackData));
-        }
+        ObjectDisposedException.ThrowIf(_disposed, this);
 
         return new StreamingMusicProvider(FilePath);
     }
@@ -80,10 +77,7 @@ public class StreamingTrackData : IDisposable
     /// <returns>A new StreamingLoopProvider instance.</returns>
     public StreamingLoopProvider CreateLoopingProvider(bool enableLooping = true)
     {
-        if (_disposed)
-        {
-            throw new ObjectDisposedException(nameof(StreamingTrackData));
-        }
+        ObjectDisposedException.ThrowIf(_disposed, this);
 
         StreamingMusicProvider streamingProvider = CreateStreamingProvider();
 

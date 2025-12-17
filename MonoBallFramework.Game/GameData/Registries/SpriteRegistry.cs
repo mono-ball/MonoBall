@@ -47,12 +47,13 @@ public class SpriteRegistry : EfCoreRegistry<SpriteEntity, GameSpriteId>
         _nameCache[entity.SpriteName] = entity;
 
         // Cache by category
-        if (!_categoryCache.ContainsKey(entity.SpriteCategory))
+        if (!_categoryCache.TryGetValue(entity.SpriteCategory, out var categoryList))
         {
-            _categoryCache[entity.SpriteCategory] = new List<SpriteEntity>();
+            categoryList = [];
+            _categoryCache[entity.SpriteCategory] = categoryList;
         }
 
-        _categoryCache[entity.SpriteCategory].Add(entity);
+        categoryList.Add(entity);
     }
 
     /// <summary>
@@ -145,7 +146,7 @@ public class SpriteRegistry : EfCoreRegistry<SpriteEntity, GameSpriteId>
     {
         if (string.IsNullOrWhiteSpace(category))
         {
-            return Enumerable.Empty<SpriteEntity>();
+            return [];
         }
 
         if (_categoryCache.TryGetValue(category, out List<SpriteEntity>? cached))
@@ -164,7 +165,7 @@ public class SpriteRegistry : EfCoreRegistry<SpriteEntity, GameSpriteId>
     {
         if (string.IsNullOrWhiteSpace(subcategory))
         {
-            return Enumerable.Empty<SpriteEntity>();
+            return [];
         }
 
         return GetAll().Where(s => subcategory.Equals(s.SpriteSubcategory, StringComparison.OrdinalIgnoreCase));

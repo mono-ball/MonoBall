@@ -108,7 +108,7 @@ public class FormattedError
     public int Column { get; set; }
     public int EndLine { get; set; }
     public int EndColumn { get; set; }
-    public List<ContextLine> Context { get; set; } = new();
+    public List<ContextLine> Context { get; set; } = [];
     public DiagnosticSeverity Severity { get; set; }
 }
 

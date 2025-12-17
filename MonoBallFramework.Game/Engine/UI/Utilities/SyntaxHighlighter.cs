@@ -264,7 +264,7 @@ public static class SyntaxHighlighter
 
                 segments.Add(
                     new ColoredSegment(
-                        code.Substring(start, position - start),
+                        code[start..position],
                         DefaultColor,
                         start,
                         position - start
@@ -284,7 +284,7 @@ public static class SyntaxHighlighter
 
                 segments.Add(
                     new ColoredSegment(
-                        code.Substring(start, position - start),
+                        code[start..position],
                         CommentColor,
                         start,
                         position - start
@@ -304,7 +304,7 @@ public static class SyntaxHighlighter
 
                 segments.Add(
                     new ColoredSegment(
-                        code.Substring(start, position - start),
+                        code[start..position],
                         CommentColor,
                         start,
                         position - start
@@ -336,7 +336,7 @@ public static class SyntaxHighlighter
 
                 segments.Add(
                     new ColoredSegment(
-                        code.Substring(start, position - start),
+                        code[start..position],
                         CommentColor,
                         start,
                         position - start
@@ -378,7 +378,7 @@ public static class SyntaxHighlighter
 
                 segments.Add(
                     new ColoredSegment(
-                        code.Substring(start, position - start),
+                        code[start..position],
                         StringColor,
                         start,
                         position - start
@@ -413,7 +413,7 @@ public static class SyntaxHighlighter
 
                 segments.Add(
                     new ColoredSegment(
-                        code.Substring(start, position - start),
+                        code[start..position],
                         StringColor,
                         start,
                         position - start
@@ -448,7 +448,7 @@ public static class SyntaxHighlighter
 
                 segments.Add(
                     new ColoredSegment(
-                        code.Substring(start, position - start),
+                        code[start..position],
                         StringColor,
                         start,
                         position - start
@@ -462,13 +462,7 @@ public static class SyntaxHighlighter
             if (code[position] == '[')
             {
                 // Check if this looks like an attribute (not array access)
-                if (
-                    prevNonWhitespace == null
-                    || prevNonWhitespace == '\n'
-                    || prevNonWhitespace == '{'
-                    || prevNonWhitespace == ';'
-                    || prevNonWhitespace == ']'
-                )
+                if (prevNonWhitespace is null or '\n' or '{' or ';' or ']')
                 {
                     int start = position;
                     int depth = 1;
@@ -490,7 +484,7 @@ public static class SyntaxHighlighter
 
                     segments.Add(
                         new ColoredSegment(
-                            code.Substring(start, position - start),
+                            code[start..position],
                             AttributeColor,
                             start,
                             position - start
@@ -560,7 +554,7 @@ public static class SyntaxHighlighter
 
                 segments.Add(
                     new ColoredSegment(
-                        code.Substring(start, position - start),
+                        code[start..position],
                         NumberColor,
                         start,
                         position - start
@@ -587,8 +581,8 @@ public static class SyntaxHighlighter
                     position++;
                 }
 
-                string word = code.Substring(start, position - start);
-                string bareWord = word.StartsWith("@") ? word.Substring(1) : word;
+                string word = code[start..position];
+                string bareWord = word.StartsWith('@') ? word[1..] : word;
 
                 Color color = GetIdentifierColor(bareWord, code, position, prevNonWhitespace);
 
@@ -633,7 +627,7 @@ public static class SyntaxHighlighter
 
             segments.Add(
                 new ColoredSegment(
-                    code.Substring(opStart, position - opStart),
+                    code[opStart..position],
                     OperatorColor,
                     opStart,
                     position - opStart
@@ -737,7 +731,7 @@ public static class SyntaxHighlighter
         if (word.Length > 1 && char.IsUpper(word[0]) && !word.All(char.IsUpper))
         {
             // Check context to distinguish type from property/method
-            if (prevNonWhitespace == ':' || prevNonWhitespace == '<' || prevNonWhitespace == '(')
+            if (prevNonWhitespace is ':' or '<' or '(')
             {
                 return TypeColor;
             }
@@ -831,7 +825,7 @@ public static class SyntaxHighlighter
                 {
                     segments.Add(
                         new ColoredSegment(
-                            code.Substring(stringStart, position - stringStart),
+                            code[stringStart..position],
                             StringColor,
                             stringStart,
                             position - stringStart
@@ -866,7 +860,7 @@ public static class SyntaxHighlighter
                     // Highlight the interpolation expression
                     segments.Add(
                         new ColoredSegment(
-                            code.Substring(braceStart, position - braceStart + 1),
+                            code[braceStart..(position + 1)],
                             InterpolationColor,
                             braceStart,
                             position - braceStart + 1
@@ -893,7 +887,7 @@ public static class SyntaxHighlighter
         {
             segments.Add(
                 new ColoredSegment(
-                    code.Substring(stringStart, position - stringStart),
+                    code[stringStart..position],
                     StringColor,
                     stringStart,
                     position - stringStart

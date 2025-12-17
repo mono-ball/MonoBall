@@ -69,7 +69,7 @@ public static class AudioBufferPool
     /// <param name="buffer">The buffer to return (must have been rented from RentLarge).</param>
     public static void ReturnLarge(float[] buffer)
     {
-        if (buffer == null || buffer.Length != LargeBufferSize)
+        if (buffer is not { Length: LargeBufferSize })
         {
             return;
         }
@@ -101,7 +101,7 @@ public static class AudioBufferPool
         public bool Return(float[] obj)
         {
             // Only return to pool if it's the correct size
-            if (obj == null || obj.Length != LargeBufferSize)
+            if (obj is not { Length: LargeBufferSize })
             {
                 return false;
             }

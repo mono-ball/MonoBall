@@ -448,11 +448,8 @@ public class MapLifecycleManager(
         int behaviorsCleanedUp = 0;
 
         // 1. Destroy all cached tile entities from all maps
-        foreach (KeyValuePair<GameMapId, List<Entity>> kvp in _mapTileCache.ToList())
+        foreach (var (mapId, tiles) in _mapTileCache.ToList())
         {
-            GameMapId mapId = kvp.Key;
-            List<Entity> tiles = kvp.Value;
-
             foreach (Entity tile in tiles)
             {
                 if (world.IsAlive(tile))

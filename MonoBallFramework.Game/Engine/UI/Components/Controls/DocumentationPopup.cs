@@ -14,7 +14,7 @@ public class DocInfo
     public string Summary { get; set; } = "";
     public string? ReturnType { get; set; }
     public string? Signature { get; set; }
-    public List<ParamDoc> Parameters { get; set; } = new();
+    public List<ParamDoc> Parameters { get; set; } = [];
     public string? Remarks { get; set; }
     public string? Example { get; set; }
 }

@@ -27,9 +27,9 @@ public class ScriptCacheEntry
     /// <summary>
     ///     Lock for cache eviction operations.
     /// </summary>
-    private static readonly object _cacheLock = new();
+    private static readonly Lock _cacheLock = new();
 
-    private readonly object _instanceLock = new();
+    private readonly Lock _instanceLock = new();
     private object? _instance;
 
     public ScriptCacheEntry(int version, Type scriptType)

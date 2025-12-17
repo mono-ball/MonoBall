@@ -8,6 +8,11 @@ namespace MonoBallFramework.Game.Engine.Core.Modding;
 /// </summary>
 public sealed class PatchFileLoader
 {
+    private static readonly JsonSerializerOptions s_jsonOptions = new()
+    {
+        PropertyNameCaseInsensitive = true
+    };
+
     private readonly ILogger<PatchFileLoader> _logger;
 
     public PatchFileLoader(ILogger<PatchFileLoader> logger)
@@ -32,10 +37,7 @@ public sealed class PatchFileLoader
             }
 
             string json = File.ReadAllText(filePath);
-            ModPatch? patch = JsonSerializer.Deserialize<ModPatch>(
-                json,
-                new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
-            );
+            ModPatch? patch = JsonSerializer.Deserialize<ModPatch>(json, s_jsonOptions);
 
             if (patch == null)
             {

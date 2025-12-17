@@ -8,6 +8,7 @@ namespace MonoBallFramework.Game.Engine.UI.Utilities;
 public static class HistoryPersistence
 {
     private static readonly string HistoryFilePath;
+    private static readonly JsonSerializerOptions s_jsonOptions = new() { WriteIndented = true };
 
     static HistoryPersistence()
     {
@@ -37,10 +38,7 @@ public static class HistoryPersistence
             // Take only the most recent entries
             var commandList = commands.TakeLast(maxEntries).ToList();
 
-            string json = JsonSerializer.Serialize(
-                commandList,
-                new JsonSerializerOptions { WriteIndented = true }
-            );
+            string json = JsonSerializer.Serialize(commandList, s_jsonOptions);
 
             File.WriteAllText(HistoryFilePath, json);
         }

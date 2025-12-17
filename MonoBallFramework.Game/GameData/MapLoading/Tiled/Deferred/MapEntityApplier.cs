@@ -398,7 +398,7 @@ public class MapEntityApplier
                 continue;
             }
 
-            if (tileset.Image == null || tileset.Image.Width <= 0 || tileset.Image.Height <= 0)
+            if (tileset.Image is not { Width: > 0, Height: > 0 })
             {
                 _logger?.LogWarning(
                     "Skipping tileset '{TilesetId}' with invalid image dimensions",

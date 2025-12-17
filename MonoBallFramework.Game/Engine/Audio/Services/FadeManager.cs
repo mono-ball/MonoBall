@@ -89,12 +89,7 @@ public static class FadeManager
         playback.CurrentVolume = playback.TargetVolume * (1f - progress);
         playback.VolumeProvider!.Volume = playback.CurrentVolume;
 
-        if (progress >= 1.0f)
-        {
-            return FadeUpdateResult.FadeOutComplete;
-        }
-
-        return FadeUpdateResult.InProgress;
+        return progress >= 1.0f ? FadeUpdateResult.FadeOutComplete : FadeUpdateResult.InProgress;
     }
 
     private static FadeUpdateResult UpdateFadingOutThenPlay(IFadingPlayback playback, float progress, float deltaTime,
@@ -111,12 +106,7 @@ public static class FadeManager
                 progress * 100, playback.CurrentVolume);
         }
 
-        if (progress >= 1.0f)
-        {
-            return FadeUpdateResult.FadeOutThenPlayComplete;
-        }
-
-        return FadeUpdateResult.InProgress;
+        return progress >= 1.0f ? FadeUpdateResult.FadeOutThenPlayComplete : FadeUpdateResult.InProgress;
     }
 
     private static FadeUpdateResult UpdateFadingOutThenFadeIn(IFadingPlayback playback, float progress)
@@ -124,12 +114,7 @@ public static class FadeManager
         playback.CurrentVolume = playback.TargetVolume * (1f - progress);
         playback.VolumeProvider!.Volume = playback.CurrentVolume;
 
-        if (progress >= 1.0f)
-        {
-            return FadeUpdateResult.FadeOutThenFadeInComplete;
-        }
-
-        return FadeUpdateResult.InProgress;
+        return progress >= 1.0f ? FadeUpdateResult.FadeOutThenFadeInComplete : FadeUpdateResult.InProgress;
     }
 
     private static FadeUpdateResult UpdateCrossfading(IFadingPlayback playback, float progress)

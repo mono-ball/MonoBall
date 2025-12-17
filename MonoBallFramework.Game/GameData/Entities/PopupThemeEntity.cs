@@ -49,7 +49,7 @@ public class PopupThemeEntity
     /// <summary>
     ///     Number of map sections using this theme (for statistics).
     /// </summary>
-    public int UsageCount { get; set; } = 0;
+    public int UsageCount { get; set; }
 
     /// <summary>
     ///     Source mod ID (null for base game).

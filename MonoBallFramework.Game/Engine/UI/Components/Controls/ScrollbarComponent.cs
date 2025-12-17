@@ -186,14 +186,9 @@ public class ScrollbarComponent
         float maxScroll = Math.Max(0, contentHeight - visibleHeight);
         float oldOffset = ScrollOffset;
 
-        if (input.ScrollWheelDelta > 0)
-        {
-            ScrollOffset = Math.Max(0, ScrollOffset - scrollAmount);
-        }
-        else
-        {
-            ScrollOffset = Math.Min(maxScroll, ScrollOffset + scrollAmount);
-        }
+        ScrollOffset = input.ScrollWheelDelta > 0
+            ? Math.Max(0, ScrollOffset - scrollAmount)
+            : Math.Min(maxScroll, ScrollOffset + scrollAmount);
 
         return ScrollOffset != oldOffset;
     }
@@ -222,14 +217,9 @@ public class ScrollbarComponent
         int maxScroll = Math.Max(0, totalLines - visibleLines);
         float oldOffset = ScrollOffset;
 
-        if (input.ScrollWheelDelta > 0)
-        {
-            ScrollOffset = Math.Max(0, ScrollOffset - scrollLines);
-        }
-        else
-        {
-            ScrollOffset = Math.Min(maxScroll, ScrollOffset + scrollLines);
-        }
+        ScrollOffset = input.ScrollWheelDelta > 0
+            ? Math.Max(0, ScrollOffset - scrollLines)
+            : Math.Min(maxScroll, ScrollOffset + scrollLines);
 
         return ScrollOffset != oldOffset;
     }

@@ -8,16 +8,15 @@ namespace MonoBallFramework.Game.Engine.Debug.Console.Features;
 /// <summary>
 ///     Provides parameter hints for method calls, showing signatures and highlighting current parameter.
 /// </summary>
-public class ParameterHintProvider
+public partial class ParameterHintProvider
 {
     // Regex to detect method call pattern: methodName(
-    private static readonly Regex MethodCallRegex = new(@"(\w+)\($", RegexOptions.Compiled);
+    [GeneratedRegex(@"(\w+)\($")]
+    private static partial Regex MethodCallRegex();
 
     // Regex to detect member method call: object.methodName(
-    private static readonly Regex MemberMethodCallRegex = new(
-        @"(\w+)\.(\w+)\($",
-        RegexOptions.Compiled
-    );
+    [GeneratedRegex(@"(\w+)\.(\w+)\($")]
+    private static partial Regex MemberMethodCallRegex();
 
     private readonly ILogger? _logger;
     private object? _globalsInstance;
@@ -68,10 +67,10 @@ public class ParameterHintProvider
                 return null;
             }
 
-            string textUpToCursor = code.Substring(0, cursorPosition);
+            string textUpToCursor = code[..cursorPosition];
 
             // Check for member method call (object.Method()
-            Match memberMatch = MemberMethodCallRegex.Match(textUpToCursor);
+            Match memberMatch = MemberMethodCallRegex().Match(textUpToCursor);
             if (memberMatch.Success)
             {
                 string objectName = memberMatch.Groups[1].Value;
@@ -85,7 +84,7 @@ public class ParameterHintProvider
             }
 
             // Check for direct method call (Method()
-            Match methodMatch = MethodCallRegex.Match(textUpToCursor);
+            Match methodMatch = MethodCallRegex().Match(textUpToCursor);
             if (methodMatch.Success)
             {
                 string methodName = methodMatch.Groups[1].Value;
@@ -285,7 +284,7 @@ public class ParameterHintProvider
         {
             Type genericType = type.GetGenericTypeDefinition();
             Type[] genericArgs = type.GetGenericArguments();
-            string genericTypeName = genericType.Name.Substring(0, genericType.Name.IndexOf('`'));
+            string genericTypeName = genericType.Name[..genericType.Name.IndexOf('`')];
             string genericArgsNames = string.Join(", ", genericArgs.Select(GetFriendlyTypeName));
             return $"{genericTypeName}<{genericArgsNames}>";
         }
@@ -309,7 +308,7 @@ public class ParameterHintProvider
 public class ParameterHintInfo
 {
     public string MethodName { get; set; } = "";
-    public List<MethodSignature> Overloads { get; set; } = new();
+    public List<MethodSignature> Overloads { get; set; } = [];
     public int CurrentOverloadIndex { get; set; }
 }
 
@@ -320,7 +319,7 @@ public class MethodSignature
 {
     public string MethodName { get; set; } = "";
     public string ReturnType { get; set; } = "";
-    public List<ParameterInfo> Parameters { get; set; } = new();
+    public List<ParameterInfo> Parameters { get; set; } = [];
 
     public string GetSignature()
     {
