@@ -14,8 +14,8 @@ namespace MonoBallFramework.Game.GameData.Registries;
 /// </summary>
 public class FontRegistry : EfCoreRegistry<FontEntity, GameFontId>
 {
-    private readonly ConcurrentDictionary<string, FontEntity> _nameCache = new();
     private readonly ConcurrentDictionary<string, FontEntity> _categoryCache = new();
+    private readonly ConcurrentDictionary<string, FontEntity> _nameCache = new();
 
     public FontRegistry(IDbContextFactory<GameDataContext> contextFactory, ILogger<FontRegistry> logger)
         : base(contextFactory, logger)
@@ -75,18 +75,22 @@ public class FontRegistry : EfCoreRegistry<FontEntity, GameFontId>
     public FontEntity? GetFontByName(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
+        {
             return null;
+        }
 
         // O(1) lookup using name cache
-        if (_nameCache.TryGetValue(name, out var definition))
+        if (_nameCache.TryGetValue(name, out FontEntity? definition))
+        {
             return definition;
+        }
 
         // If cache not loaded, query database
         if (!_isCacheLoaded)
         {
-            using var context = _contextFactory.CreateDbContext();
+            using GameDataContext context = _contextFactory.CreateDbContext();
             // FontName is computed from FontId, so we need to load all and filter in memory
-            var entity = context.Fonts
+            FontEntity? entity = context.Fonts
                 .AsNoTracking()
                 .ToList()
                 .FirstOrDefault(f => f.FontName == name);

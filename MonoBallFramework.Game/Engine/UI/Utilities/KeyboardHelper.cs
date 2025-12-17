@@ -40,7 +40,7 @@ public static class KeyboardHelper
                     Keys.D7 => '&',
                     Keys.D8 => '*',
                     Keys.D9 => '(',
-                    _ => null,
+                    _ => null
                 };
             }
 
@@ -68,7 +68,7 @@ public static class KeyboardHelper
             Keys.OemCloseBrackets => shift ? '}' : ']',
             Keys.OemPipe => shift ? '|' : '\\',
             Keys.OemTilde => shift ? '~' : '`',
-            _ => null,
+            _ => null
         };
     }
 }

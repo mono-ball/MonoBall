@@ -9,7 +9,6 @@ using MonoBallFramework.Game.Engine.Core.Modding;
 using MonoBallFramework.Game.Engine.Core.Types;
 using MonoBallFramework.Game.Engine.Rendering.Popups;
 using MonoBallFramework.Game.Engine.Systems.Management;
-
 using MonoBallFramework.Game.Engine.UI.Core;
 using MonoBallFramework.Game.Engine.UI.Utilities;
 using MonoBallFramework.Game.GameData;
@@ -17,9 +16,7 @@ using MonoBallFramework.Game.GameData.Loading;
 using MonoBallFramework.Game.GameData.Services;
 using MonoBallFramework.Game.GameData.Sprites;
 using MonoBallFramework.Game.GameSystems.Services;
-using MonoBallFramework.Game.Infrastructure.Configuration;
 using MonoBallFramework.Game.Infrastructure.Services;
-
 
 namespace MonoBallFramework.Game.Infrastructure.ServiceRegistration;
 
@@ -88,9 +85,9 @@ public static class CoreServicesExtensions
             // IContentProvider is resolved lazily to avoid circular dependency
             return new TypeRegistry<BehaviorDefinition>(
                 behaviorPath,
-                "BehaviorDefinitions",  // Content type from ContentProviderOptions
+                "BehaviorDefinitions", // Content type from ContentProviderOptions
                 logger,
-                sp);  // Service provider for lazy IContentProvider resolution
+                sp); // Service provider for lazy IContentProvider resolution
         });
 
         services.AddSingleton(sp =>
@@ -103,9 +100,9 @@ public static class CoreServicesExtensions
             // IContentProvider is resolved lazily to avoid circular dependency
             return new TypeRegistry<TileBehaviorDefinition>(
                 tileBehaviorPath,
-                "TileBehaviorDefinitions",  // Content type from ContentProviderOptions
+                "TileBehaviorDefinitions", // Content type from ContentProviderOptions
                 logger,
-                sp);  // Service provider for lazy IContentProvider resolution
+                sp); // Service provider for lazy IContentProvider resolution
         });
 
         return services;
@@ -135,7 +132,7 @@ public static class CoreServicesExtensions
         // This is used by AudioRegistry (singleton) to avoid holding a scoped context
         services.AddSingleton<IDbContextFactory<GameDataContext>>(sp =>
         {
-            var options = sp.GetRequiredService<DbContextOptions<GameDataContext>>();
+            DbContextOptions<GameDataContext> options = sp.GetRequiredService<DbContextOptions<GameDataContext>>();
             return new GameDataContextFactory(options);
         });
 
@@ -148,8 +145,9 @@ public static class CoreServicesExtensions
         // Uses EF Core as the source of truth with in-memory caching
         services.AddSingleton<SpriteRegistry>(sp =>
         {
-            var contextFactory = sp.GetRequiredService<IDbContextFactory<GameDataContext>>();
-            var logger = sp.GetRequiredService<ILogger<SpriteRegistry>>();
+            IDbContextFactory<GameDataContext> contextFactory =
+                sp.GetRequiredService<IDbContextFactory<GameDataContext>>();
+            ILogger<SpriteRegistry> logger = sp.GetRequiredService<ILogger<SpriteRegistry>>();
             return new SpriteRegistry(contextFactory, logger);
         });
 
@@ -166,10 +164,11 @@ public static class CoreServicesExtensions
         // that GameDataLoader writes to (required for EF Core In-Memory provider to share data)
         services.AddSingleton<PopupRegistry>(sp =>
         {
-            var contextFactory = sp.GetRequiredService<IDbContextFactory<GameDataContext>>();
-            var sharedContext = sp.GetRequiredService<GameDataContext>();
-            var logger = sp.GetRequiredService<ILogger<PopupRegistry>>();
-            var options = sp.GetRequiredService<IOptions<PopupRegistryOptions>>();
+            IDbContextFactory<GameDataContext> contextFactory =
+                sp.GetRequiredService<IDbContextFactory<GameDataContext>>();
+            GameDataContext sharedContext = sp.GetRequiredService<GameDataContext>();
+            ILogger<PopupRegistry> logger = sp.GetRequiredService<ILogger<PopupRegistry>>();
+            IOptions<PopupRegistryOptions> options = sp.GetRequiredService<IOptions<PopupRegistryOptions>>();
             return new PopupRegistry(contextFactory, logger, options, sharedContext);
         });
 
@@ -205,7 +204,8 @@ public static class CoreServicesExtensions
         services.AddSingleton<FontLoader>(sp =>
         {
             IContentProvider contentProvider = sp.GetRequiredService<IContentProvider>();
-            IDbContextFactory<GameDataContext> contextFactory = sp.GetRequiredService<IDbContextFactory<GameDataContext>>();
+            IDbContextFactory<GameDataContext> contextFactory =
+                sp.GetRequiredService<IDbContextFactory<GameDataContext>>();
             ILogger<FontLoader> logger = sp.GetRequiredService<ILogger<FontLoader>>();
             return new FontLoader(contentProvider, contextFactory, logger);
         });

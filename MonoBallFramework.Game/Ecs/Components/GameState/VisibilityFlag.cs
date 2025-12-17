@@ -16,8 +16,8 @@ namespace MonoBallFramework.Game.Ecs.Components.GameState;
 ///     <para>
 ///         <b>Usage Patterns:</b>
 ///         <list type="bullet">
-///             <item>FLAG_HIDE_* pattern: Set <see cref="HideWhenTrue"/> = true (default)</item>
-///             <item>FLAG_SHOW_* pattern: Set <see cref="HideWhenTrue"/> = false</item>
+///             <item>FLAG_HIDE_* pattern: Set <see cref="HideWhenTrue" /> = true (default)</item>
+///             <item>FLAG_SHOW_* pattern: Set <see cref="HideWhenTrue" /> = false</item>
 ///         </list>
 ///     </para>
 ///     <para>

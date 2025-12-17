@@ -201,7 +201,7 @@ public class WatchPanel : DebugPanelBase, IDisposable, IWatchOperations
         string Name,
         string AlertType,
         bool Triggered
-    )> IWatchOperations.GetWatchesWithAlerts()
+        )> IWatchOperations.GetWatchesWithAlerts()
     {
         return GetWatchesWithAlerts();
     }
@@ -246,7 +246,7 @@ public class WatchPanel : DebugPanelBase, IDisposable, IWatchOperations
         int WithErrors,
         int WithAlerts,
         int Groups
-    ) IWatchOperations.GetStatistics()
+        ) IWatchOperations.GetStatistics()
     {
         return GetStatistics();
     }
@@ -262,10 +262,10 @@ public class WatchPanel : DebugPanelBase, IDisposable, IWatchOperations
             object? AlertThreshold,
             string? ComparisonWith,
             string? ComparisonLabel
-        )> Watches,
+            )> Watches,
         double UpdateInterval,
         bool AutoUpdateEnabled
-    )? IWatchOperations.ExportConfiguration()
+        )? IWatchOperations.ExportConfiguration()
     {
         return ExportConfiguration();
     }
@@ -341,7 +341,7 @@ public class WatchPanel : DebugPanelBase, IDisposable, IWatchOperations
                 AlertType = alertType,
                 AlertThreshold = alertThreshold,
                 AlertCallback = alertCallback,
-                AlertTriggered = false,
+                AlertTriggered = false
             }
         );
         _watchKeys.Add(name);
@@ -633,10 +633,10 @@ public class WatchPanel : DebugPanelBase, IDisposable, IWatchOperations
             object? AlertThreshold,
             string? ComparisonWith,
             string? ComparisonLabel
-        )> Watches,
+            )> Watches,
         double UpdateInterval,
         bool AutoUpdateEnabled
-    ) ExportConfiguration()
+        ) ExportConfiguration()
     {
         var watches =
             new List<(
@@ -649,7 +649,7 @@ public class WatchPanel : DebugPanelBase, IDisposable, IWatchOperations
                 object?,
                 string?,
                 string?
-            )>();
+                )>();
 
         foreach (string key in _watchKeys)
         {
@@ -887,7 +887,7 @@ public class WatchPanel : DebugPanelBase, IDisposable, IWatchOperations
                     "above" => numValue > numThreshold,
                     "below" => numValue < numThreshold,
                     "equals" => Math.Abs(numValue - numThreshold) < 0.0001,
-                    _ => false,
+                    _ => false
                 };
                 return true;
             }
@@ -901,7 +901,7 @@ public class WatchPanel : DebugPanelBase, IDisposable, IWatchOperations
                 result = comparison switch
                 {
                     "equals" => strValue == strThreshold,
-                    _ => false,
+                    _ => false
                 };
                 return true;
             }
@@ -1028,7 +1028,7 @@ public class WatchPanel : DebugPanelBase, IDisposable, IWatchOperations
                 "below" => $"< {FormatValue(entry.AlertThreshold)}",
                 "equals" => $"== {FormatValue(entry.AlertThreshold)}",
                 "changes" => "on any change",
-                _ => entry.AlertType,
+                _ => entry.AlertType
             };
 
             string alertStatus = entry.AlertTriggered ? "TRIGGERED" : "watching";
@@ -1400,7 +1400,7 @@ public class WatchPanel : DebugPanelBase, IDisposable, IWatchOperations
                     ? $"ERROR: {watch.ErrorMessage}"
                     : FormatValue(watch.LastValue) ?? "null";
 
-                sb.AppendLine($"{pin}{watch.Name, -20} = {value}");
+                sb.AppendLine($"{pin}{watch.Name,-20} = {value}");
             }
 
             sb.AppendLine();

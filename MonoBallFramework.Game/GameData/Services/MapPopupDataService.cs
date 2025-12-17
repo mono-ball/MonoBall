@@ -1,7 +1,6 @@
 using System.Collections.Concurrent;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using MonoBallFramework.Game.Engine.Common.Logging;
 using MonoBallFramework.Game.Engine.Core.Types;
 using MonoBallFramework.Game.GameData.Entities;
 
@@ -15,10 +14,10 @@ public class MapPopupDataService : IMapPopupDataService
 {
     private readonly GameDataContext _context;
     private readonly ILogger<MapPopupDataService> _logger;
+    private readonly ConcurrentDictionary<string, MapSectionEntity> _sectionCache = new();
 
     // Cache for O(1) lookups (hot paths like map transitions)
     private readonly ConcurrentDictionary<string, PopupThemeEntity> _themeCache = new();
-    private readonly ConcurrentDictionary<string, MapSectionEntity> _sectionCache = new();
 
     public MapPopupDataService(GameDataContext context, ILogger<MapPopupDataService> logger)
     {
@@ -28,6 +27,20 @@ public class MapPopupDataService : IMapPopupDataService
         // Log initialization
         _logger.LogDebug("MapPopupDataService initialized");
     }
+
+    #region Cache Management
+
+    /// <summary>
+    ///     Clear all caches.
+    /// </summary>
+    public void ClearCache()
+    {
+        _themeCache.Clear();
+        _sectionCache.Clear();
+        _logger.LogDebug("Cleared popup theme and section caches");
+    }
+
+    #endregion
 
     #region Statistics
 
@@ -52,7 +65,7 @@ public class MapPopupDataService : IMapPopupDataService
     /// </summary>
     public async Task LogStatisticsAsync()
     {
-        var stats = await GetStatisticsAsync();
+        PopupDataStatistics stats = await GetStatisticsAsync();
         _logger.LogInformation(
             "MapPopup Data: {ThemeCount} themes, {SectionCount} sections loaded (Cached: {ThemesCached} themes, {SectionsCached} sections)",
             stats.TotalThemes,
@@ -64,7 +77,7 @@ public class MapPopupDataService : IMapPopupDataService
         // Log some sample data for verification
         if (stats.TotalThemes > 0)
         {
-            var themes = await _context.PopupThemes.Take(3).ToListAsync();
+            List<PopupThemeEntity> themes = await _context.PopupThemes.Take(3).ToListAsync();
             _logger.LogDebug(
                 "Sample themes: {Themes}",
                 string.Join(", ", themes.Select(t => $"{t.ThemeId} ({t.Name})"))
@@ -73,7 +86,7 @@ public class MapPopupDataService : IMapPopupDataService
 
         if (stats.TotalSections > 0)
         {
-            var sections = await _context.MapSections.Take(3).ToListAsync();
+            List<MapSectionEntity> sections = await _context.MapSections.Take(3).ToListAsync();
             _logger.LogDebug(
                 "Sample sections: {Sections}",
                 string.Join(", ", sections.Select(s => $"{s.MapSectionId} ({s.Name})"))
@@ -409,20 +422,6 @@ public class MapPopupDataService : IMapPopupDataService
     }
 
     #endregion
-
-    #region Cache Management
-
-    /// <summary>
-    ///     Clear all caches.
-    /// </summary>
-    public void ClearCache()
-    {
-        _themeCache.Clear();
-        _sectionCache.Clear();
-        _logger.LogDebug("Cleared popup theme and section caches");
-    }
-
-    #endregion
 }
 
 #region Data Models
@@ -451,4 +450,3 @@ public record PopupDisplayInfo
 }
 
 #endregion
-

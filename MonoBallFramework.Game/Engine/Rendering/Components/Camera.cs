@@ -259,9 +259,9 @@ public struct Camera
         float centerY = Viewport.Height / 2f;
 
         return Matrix.CreateTranslation(-roundedX, -roundedY, 0)
-            * Matrix.CreateRotationZ(Rotation)
-            * Matrix.CreateScale(Zoom, Zoom, 1)
-            * Matrix.CreateTranslation(centerX, centerY, 0);
+               * Matrix.CreateRotationZ(Rotation)
+               * Matrix.CreateScale(Zoom, Zoom, 1)
+               * Matrix.CreateTranslation(centerX, centerY, 0);
     }
 
     /// <summary>

@@ -45,7 +45,7 @@ public class FileSystemWatcherAdapter : IScriptWatcher
                 NotifyFilter =
                     NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.Size,
                 EnableRaisingEvents = false,
-                IncludeSubdirectories = true,
+                IncludeSubdirectories = true
             };
 
             _watcher.Changed += OnFileChanged;
@@ -71,9 +71,7 @@ public class FileSystemWatcherAdapter : IScriptWatcher
                 this,
                 new ScriptWatcherErrorEventArgs
                 {
-                    Exception = ex,
-                    Message = "Failed to start FileSystemWatcher",
-                    IsCritical = true,
+                    Exception = ex, Message = "Failed to start FileSystemWatcher", IsCritical = true
                 }
             );
             throw;
@@ -196,9 +194,7 @@ public class FileSystemWatcherAdapter : IScriptWatcher
             this,
             new ScriptWatcherErrorEventArgs
             {
-                Exception = e.GetException(),
-                Message = "FileSystemWatcher encountered an error",
-                IsCritical = false,
+                Exception = e.GetException(), Message = "FileSystemWatcher encountered an error", IsCritical = false
             }
         );
     }
@@ -254,7 +250,7 @@ public class FileSystemWatcherAdapter : IScriptWatcher
                         FilePath = filePath,
                         ChangeTime = DateTime.UtcNow,
                         FileSize = fileInfo.Length,
-                        ChangeType = changeType,
+                        ChangeType = changeType
                     }
                 );
 

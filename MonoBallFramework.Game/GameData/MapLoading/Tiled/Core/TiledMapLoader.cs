@@ -20,7 +20,7 @@ public static class TiledMapLoader
     {
         PropertyNameCaseInsensitive = true,
         ReadCommentHandling = JsonCommentHandling.Skip,
-        AllowTrailingCommas = true,
+        AllowTrailingCommas = true
     };
 
     private static IMapValidator? _validator;
@@ -39,7 +39,7 @@ public static class TiledMapLoader
         {
             _validator = new TmxDocumentValidator(
                 logger as ILogger<TmxDocumentValidator>
-                    ?? NullLogger<TmxDocumentValidator>.Instance,
+                ?? NullLogger<TmxDocumentValidator>.Instance,
                 options.ValidateFileReferences
             );
         }
@@ -137,7 +137,7 @@ public static class TiledMapLoader
             Layers = ConvertLayers(tiledMap.Layers, tiledMap.Width, tiledMap.Height),
             ObjectGroups = ConvertObjectGroups(tiledMap.Layers),
             ImageLayers = ConvertImageLayers(tiledMap.Layers),
-            Properties = ConvertProperties(tiledMap.Properties),
+            Properties = ConvertProperties(tiledMap.Properties)
         };
 
         return doc;
@@ -168,7 +168,7 @@ public static class TiledMapLoader
                 TileHeight = tiledTileset.TileHeight ?? mapTileHeight,
                 TileCount = tiledTileset.TileCount ?? 0,
                 Spacing = tiledTileset.Spacing ?? 0,
-                Margin = tiledTileset.Margin ?? 0,
+                Margin = tiledTileset.Margin ?? 0
             };
 
             // Handle external tileset
@@ -188,7 +188,7 @@ public static class TiledMapLoader
                 {
                     Source = tiledTileset.Image,
                     Width = tiledTileset.ImageWidth ?? 0,
-                    Height = tiledTileset.ImageHeight ?? 0,
+                    Height = tiledTileset.ImageHeight ?? 0
                 };
             }
 
@@ -235,7 +235,7 @@ public static class TiledMapLoader
                     {
                         Source = resolvedImagePath,
                         Width = tiledTileset.ImageWidth ?? 0,
-                        Height = tiledTileset.ImageHeight ?? 0,
+                        Height = tiledTileset.ImageHeight ?? 0
                     };
                 }
 
@@ -274,8 +274,7 @@ public static class TiledMapLoader
 
                 tileset.Animations[tile.Id] = new TmxTileAnimation
                 {
-                    FrameTileIds = frameTileIds,
-                    FrameDurations = frameDurations,
+                    FrameTileIds = frameTileIds, FrameDurations = frameDurations
                 };
             }
 
@@ -338,7 +337,7 @@ public static class TiledMapLoader
             Visible = tiledLayer.Visible,
             Opacity = tiledLayer.Opacity,
             OffsetX = tiledLayer.OffsetX,
-            OffsetY = tiledLayer.OffsetY,
+            OffsetY = tiledLayer.OffsetY
         };
 
         uint[] flatData = DecodeLayerData(tiledLayer);
@@ -415,7 +414,7 @@ public static class TiledMapLoader
             "zstd" => DecompressZstd(compressed),
             _ => throw new NotSupportedException(
                 $"Compression '{compression}' not supported. Supported formats: gzip, zlib, zstd"
-            ),
+            )
         };
     }
 
@@ -497,9 +496,7 @@ public static class TiledMapLoader
 
             var group = new TmxObjectGroup
             {
-                Id = tiledLayer.Id,
-                Name = tiledLayer.Name,
-                Objects = ConvertObjects(tiledLayer.Objects),
+                Id = tiledLayer.Id, Name = tiledLayer.Name, Objects = ConvertObjects(tiledLayer.Objects)
             };
 
             result.Add(group);
@@ -523,7 +520,7 @@ public static class TiledMapLoader
                 Y = tiledObj.Y,
                 Width = tiledObj.Width,
                 Height = tiledObj.Height,
-                Properties = ConvertProperties(tiledObj.Properties),
+                Properties = ConvertProperties(tiledObj.Properties)
             };
 
             result.Add(obj);
@@ -596,7 +593,7 @@ public static class TiledMapLoader
                 X = tiledLayer.X,
                 Y = tiledLayer.Y,
                 OffsetX = tiledLayer.OffsetX,
-                OffsetY = tiledLayer.OffsetY,
+                OffsetY = tiledLayer.OffsetY
             };
 
             // Parse image source if present
@@ -606,7 +603,7 @@ public static class TiledMapLoader
                 {
                     Source = tiledLayer.Image,
                     Width = 0, // Image dimensions will be determined when texture is loaded
-                    Height = 0,
+                    Height = 0
                 };
             }
 

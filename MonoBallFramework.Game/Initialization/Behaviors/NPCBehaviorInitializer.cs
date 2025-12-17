@@ -121,15 +121,13 @@ public class NPCBehaviorInitializer(
             );
             return true;
         }
-        else
-        {
-            logger.LogError(
-                "✗ Failed to compile script for {TypeId}: {Script}",
-                typeId,
-                scriptPath
-            );
-            return false;
-        }
+
+        logger.LogError(
+            "✗ Failed to compile script for {TypeId}: {Script}",
+            typeId,
+            scriptPath
+        );
+        return false;
     }
 
     /// <summary>

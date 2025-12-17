@@ -23,9 +23,9 @@ public class ConsoleContext : IConsoleContext
     private readonly Action _closeAction;
     private readonly ConsoleScene _consoleScene;
     private readonly ConsoleLoggingCallbacks _loggingCallbacks;
+    private readonly Action<string, Color>? _persistentOutputAction;
     private readonly IServiceProvider _serviceProvider;
     private readonly ConsoleServices _services;
-    private readonly Action<string, Color>? _persistentOutputAction;
 
     /// <summary>
     ///     Creates a new ConsoleContext with aggregated services.
@@ -70,7 +70,9 @@ public class ConsoleContext : IConsoleContext
         IServiceProvider serviceProvider,
         Action<string, Color>? persistentOutputAction = null
     )
-        : this(consoleScene, closeAction, loggingCallbacks, null, services, serviceProvider, persistentOutputAction) { }
+        : this(consoleScene, closeAction, loggingCallbacks, null, services, serviceProvider, persistentOutputAction)
+    {
+    }
 
     public bool EntityAutoRefresh
     {
@@ -438,10 +440,10 @@ public class ConsoleContext : IConsoleContext
                     object? AlertThreshold,
                     string? ComparisonWith,
                     string? ComparisonLabel
-                )> Watches,
+                    )> Watches,
                 double UpdateInterval,
                 bool AutoUpdateEnabled
-            )? config = Watches.ExportConfiguration();
+                )? config = Watches.ExportConfiguration();
             if (config == null)
             {
                 return false;
@@ -458,7 +460,7 @@ public class ConsoleContext : IConsoleContext
                     object? AlertThreshold,
                     string? ComparisonWith,
                     string? ComparisonLabel
-                )> watches,
+                    )> watches,
                 double updateInterval,
                 bool autoUpdateEnabled
             ) = config.Value;
@@ -480,22 +482,17 @@ public class ConsoleContext : IConsoleContext
                         IsPinned = w.IsPinned,
                         Alert =
                             w.AlertType != null
-                                ? new WatchAlertConfig
-                                {
-                                    Type = w.AlertType,
-                                    Threshold = w.AlertThreshold?.ToString(),
-                                }
+                                ? new WatchAlertConfig { Type = w.AlertType, Threshold = w.AlertThreshold?.ToString() }
                                 : null,
                         Comparison =
                             w.ComparisonWith != null
                                 ? new WatchComparisonConfig
                                 {
-                                    CompareWith = w.ComparisonWith,
-                                    Label = w.ComparisonLabel ?? "Expected",
+                                    CompareWith = w.ComparisonWith, Label = w.ComparisonLabel ?? "Expected"
                                 }
-                                : null,
+                                : null
                     })
-                    .ToList(),
+                    .ToList()
             };
 
             return _services.WatchPresetManager.SavePreset(preset);
@@ -639,7 +636,7 @@ public class ConsoleContext : IConsoleContext
         string Description,
         int WatchCount,
         DateTime CreatedAt
-    )> ListWatchPresets()
+        )> ListWatchPresets()
     {
         return _services.WatchPresetManager.ListPresets();
     }
@@ -878,7 +875,7 @@ public class ConsoleContext : IConsoleContext
         int Warnings,
         int LastMinute,
         int Categories
-    ) GetLogStatistics()
+        ) GetLogStatistics()
     {
         return Logs.GetStatistics();
     }

@@ -258,7 +258,7 @@ public class UITheme
             TabPressed = new Color(40, 44, 52, 255),
             TabBorder = new Color(62, 68, 81), // #3e4451
             TabActiveIndicator = new Color(97, 175, 239), // #61afef (blue)
-            TabBarBackground = new Color(33, 37, 43, 255),
+            TabBarBackground = new Color(33, 37, 43, 255)
         };
 
     /// <summary>Monokai theme (Sublime Text classic)</summary>
@@ -419,7 +419,7 @@ public class UITheme
             TabPressed = new Color(39, 40, 34, 255),
             TabBorder = new Color(73, 72, 62),
             TabActiveIndicator = new Color(166, 226, 46),
-            TabBarBackground = new Color(30, 31, 28, 255),
+            TabBarBackground = new Color(30, 31, 28, 255)
         };
 
     /// <summary>Dracula theme (popular dark theme)</summary>
@@ -580,7 +580,7 @@ public class UITheme
             TabPressed = new Color(40, 42, 54, 255),
             TabBorder = new Color(68, 71, 90),
             TabActiveIndicator = new Color(189, 147, 249),
-            TabBarBackground = new Color(33, 34, 44, 255),
+            TabBarBackground = new Color(33, 34, 44, 255)
         };
 
     /// <summary>Gruvbox Dark theme (retro, warm colors)</summary>
@@ -741,7 +741,7 @@ public class UITheme
             TabPressed = new Color(40, 40, 40, 255),
             TabBorder = new Color(80, 73, 69),
             TabActiveIndicator = new Color(215, 153, 33),
-            TabBarBackground = new Color(29, 32, 33, 255),
+            TabBarBackground = new Color(29, 32, 33, 255)
         };
 
     /// <summary>Nord theme (arctic, cool colors)</summary>
@@ -902,7 +902,7 @@ public class UITheme
             TabPressed = new Color(46, 52, 64, 255),
             TabBorder = new Color(67, 76, 94),
             TabActiveIndicator = new Color(136, 192, 208),
-            TabBarBackground = new Color(59, 66, 82, 255),
+            TabBarBackground = new Color(59, 66, 82, 255)
         };
 
     /// <summary>Solarized Dark theme (Ethan Schoonover's classic)</summary>
@@ -1063,7 +1063,7 @@ public class UITheme
             TabPressed = new Color(0, 43, 54, 255),
             TabBorder = new Color(88, 110, 117),
             TabActiveIndicator = new Color(38, 139, 210),
-            TabBarBackground = new Color(7, 54, 66, 255),
+            TabBarBackground = new Color(7, 54, 66, 255)
         };
 
     /// <summary>Pokéball theme - Dark with red/yellow accents inspired by Pokémon</summary>
@@ -1271,7 +1271,7 @@ public class UITheme
             TabPressed = new Color(200, 15, 15, 255),
             TabBorder = new Color(60, 60, 65),
             TabActiveIndicator = new Color(255, 203, 5), // Pikachu yellow indicator
-            TabBarBackground = new Color(20, 20, 23, 255),
+            TabBarBackground = new Color(20, 20, 23, 255)
         };
 
     /// <summary>Solarized Light theme (Ethan Schoonover's classic - light variant)</summary>
@@ -1474,7 +1474,7 @@ public class UITheme
             TabPressed = new Color(253, 246, 227, 255),
             TabBorder = new Color(147, 161, 161), // #93a1a1
             TabActiveIndicator = new Color(38, 139, 210), // #268bd2
-            TabBarBackground = new Color(238, 232, 213, 255), // #eee8d5
+            TabBarBackground = new Color(238, 232, 213, 255) // #eee8d5
         };
 
     /// <summary>Pokéball Light theme - Light variant with Pokéball red accents</summary>
@@ -1680,7 +1680,7 @@ public class UITheme
             TabPressed = new Color(235, 72, 60, 150),
             TabBorder = new Color(200, 200, 198),
             TabActiveIndicator = new Color(235, 72, 60), // Pokéball red indicator
-            TabBarBackground = new Color(234, 234, 233, 255),
+            TabBarBackground = new Color(234, 234, 233, 255)
         };
 
     // Background colors

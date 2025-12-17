@@ -1,9 +1,6 @@
 using System.Text.Json;
 using Arch.Core;
-using Arch.Core.Extensions;
-using Arch.Relationships;
 using Microsoft.Extensions.Logging;
-using MonoBallFramework.Game.Ecs.Components.Relationships;
 using MonoBallFramework.Game.Ecs.Components.Rendering;
 using MonoBallFramework.Game.Ecs.Components.Tiles;
 using MonoBallFramework.Game.Engine.Common.Logging;
@@ -66,7 +63,7 @@ public class LayerProcessor : ILayerProcessor
                     ? new LayerOffset(layer.OffsetX, layer.OffsetY)
                     : null;
 
-            var (count, layerTiles) = CreateTileEntities(
+            (int count, List<Entity> layerTiles) = CreateTileEntities(
                 world,
                 tmxDoc,
                 mapInfoEntity,
@@ -194,7 +191,7 @@ public class LayerProcessor : ILayerProcessor
                     FlipH = flipH,
                     FlipV = flipV,
                     FlipD = flipD,
-                    TilesetIndex = tilesetIndex,
+                    TilesetIndex = tilesetIndex
                 }
             );
         }
@@ -321,7 +318,7 @@ public class LayerProcessor : ILayerProcessor
         {
             0 => Elevation.Ground, // 0
             1 => 2, // Objects layer - render behind player (elevation 3)
-            _ => Elevation.Overhead, // 9 (2+)
+            _ => Elevation.Overhead // 9 (2+)
         };
     }
 
@@ -502,7 +499,7 @@ public class LayerProcessor : ILayerProcessor
             }
 
             // TryCreate handles both full format (base:map:hoenn/route_101) and legacy short names
-            GameMapId? mapId = GameMapId.TryCreate(mapString);
+            var mapId = GameMapId.TryCreate(mapString);
             if (mapId == null)
             {
                 _logger?.LogWarning("Invalid connection map ID format: {Map}", mapString);

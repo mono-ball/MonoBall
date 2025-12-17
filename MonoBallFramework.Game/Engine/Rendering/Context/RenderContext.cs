@@ -62,6 +62,3 @@ public class RenderContext
     /// </summary>
     public Rectangle VirtualViewport => Camera.VirtualViewport;
 }
-
-
-

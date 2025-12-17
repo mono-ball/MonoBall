@@ -7,7 +7,7 @@ using MonoBallFramework.Game.GameData.Entities;
 namespace MonoBallFramework.Game.Engine.Audio.Services;
 
 /// <summary>
-/// Represents a cached audio track with metadata and audio data
+///     Represents a cached audio track with metadata and audio data
 /// </summary>
 public class CachedTrack : IDisposable
 {
@@ -35,14 +35,18 @@ public class CachedTrack : IDisposable
         get
         {
             if (AudioData?.Samples == null || AudioFormat == null)
+            {
                 return TimeSpan.Zero;
+            }
 
             int totalSamples = AudioData.Samples.Length;
             int channels = AudioFormat.Channels;
             int sampleRate = AudioFormat.SampleRate;
 
             if (channels == 0 || sampleRate == 0)
+            {
                 return TimeSpan.Zero;
+            }
 
             double durationSeconds = (double)totalSamples / channels / sampleRate;
             return TimeSpan.FromSeconds(durationSeconds);
@@ -60,7 +64,7 @@ public class CachedTrack : IDisposable
 }
 
 /// <summary>
-/// Cached audio data container
+///     Cached audio data container
 /// </summary>
 public class CachedAudioData
 {
@@ -69,10 +73,19 @@ public class CachedAudioData
 }
 
 /// <summary>
-/// Interface for track caching operations
+///     Interface for track caching operations
 /// </summary>
 public interface ITrackCache : IDisposable
 {
+    /// <summary>Current number of cached tracks</summary>
+    int Count { get; }
+
+    /// <summary>Total memory usage in bytes</summary>
+    long MemoryUsage { get; }
+
+    /// <summary>Maximum cache size in tracks</summary>
+    int MaxCacheSize { get; }
+
     /// <summary>Attempts to retrieve a cached track</summary>
     bool TryGetTrack(string trackId, out CachedTrack? track);
 
@@ -84,31 +97,21 @@ public interface ITrackCache : IDisposable
 
     /// <summary>Clears all cached tracks</summary>
     void Clear();
-
-    /// <summary>Current number of cached tracks</summary>
-    int Count { get; }
-
-    /// <summary>Total memory usage in bytes</summary>
-    long MemoryUsage { get; }
-
-    /// <summary>Maximum cache size in tracks</summary>
-    int MaxCacheSize { get; }
 }
 
 /// <summary>
-/// Thread-safe track cache with LRU eviction policy
+///     Thread-safe track cache with LRU eviction policy
 /// </summary>
 public class TrackCache : ITrackCache
 {
     private readonly ConcurrentDictionary<string, CachedTrack> _cache = new();
-    private readonly int _maxCacheSize;
     private readonly IContentProvider _contentProvider;
-    private readonly ILogger<TrackCache>? _logger;
     private readonly object _evictionLock = new();
+    private readonly ILogger<TrackCache>? _logger;
     private bool _disposed;
 
     /// <summary>
-    /// Creates a new track cache with the specified maximum size
+    ///     Creates a new track cache with the specified maximum size
     /// </summary>
     /// <param name="contentProvider">Content provider for resolving audio paths</param>
     /// <param name="maxCacheSize">Maximum number of tracks to cache (0 = unlimited)</param>
@@ -118,13 +121,15 @@ public class TrackCache : ITrackCache
         _contentProvider = contentProvider ?? throw new ArgumentNullException(nameof(contentProvider));
 
         if (maxCacheSize < 0)
+        {
             throw new ArgumentOutOfRangeException(nameof(maxCacheSize), "Cache size must be non-negative");
+        }
 
-        _maxCacheSize = maxCacheSize;
+        MaxCacheSize = maxCacheSize;
         _logger = logger;
     }
 
-    public int MaxCacheSize => _maxCacheSize;
+    public int MaxCacheSize { get; }
 
     public int Count => _cache.Count;
 
@@ -133,10 +138,11 @@ public class TrackCache : ITrackCache
         get
         {
             long total = 0;
-            foreach (var track in _cache.Values)
+            foreach (CachedTrack track in _cache.Values)
             {
                 total += track.MemoryUsage;
             }
+
             return total;
         }
     }
@@ -163,7 +169,9 @@ public class TrackCache : ITrackCache
     public CachedTrack? LoadAndCache(string trackId, AudioEntity definition)
     {
         if (_disposed || string.IsNullOrEmpty(trackId) || definition == null)
+        {
             return null;
+        }
 
         // ConcurrentDictionary.GetOrAdd is atomic and thread-safe
         // File I/O happens outside any lock for performance
@@ -172,7 +180,7 @@ public class TrackCache : ITrackCache
             try
             {
                 // Check if we need to evict before loading
-                if (_maxCacheSize > 0 && _cache.Count >= _maxCacheSize)
+                if (MaxCacheSize > 0 && _cache.Count >= MaxCacheSize)
                 {
                     EvictLRU();
                 }
@@ -188,7 +196,7 @@ public class TrackCache : ITrackCache
                 }
 
                 // Load entire OGG file into memory for efficient playback
-                var audioData = LoadAudioFile(fullPath);
+                CachedAudioData? audioData = LoadAudioFile(fullPath);
                 if (audioData == null)
                 {
                     _logger?.LogError("Failed to load audio data from: {Path}", fullPath);
@@ -209,7 +217,8 @@ public class TrackCache : ITrackCache
 
                 if (definition.HasLoopPoints)
                 {
-                    _logger?.LogDebug("Loaded track with loop points: {TrackId} (start: {Start}, length: {Length}, size: {Size}MB, duration: {Duration})",
+                    _logger?.LogDebug(
+                        "Loaded track with loop points: {TrackId} (start: {Start}, length: {Length}, size: {Size}MB, duration: {Duration})",
                         trackId, definition.LoopStartSamples, definition.LoopLengthSamples, memoryMB, track.Duration);
                 }
                 else
@@ -231,9 +240,11 @@ public class TrackCache : ITrackCache
     public void Evict(string trackId)
     {
         if (_disposed || string.IsNullOrEmpty(trackId))
+        {
             return;
+        }
 
-        if (_cache.TryRemove(trackId, out var track))
+        if (_cache.TryRemove(trackId, out CachedTrack? track))
         {
             track.Dispose();
             _logger?.LogDebug("Evicted track from cache: {TrackId}", trackId);
@@ -243,14 +254,16 @@ public class TrackCache : ITrackCache
     public void Clear()
     {
         if (_disposed)
+        {
             return;
+        }
 
         lock (_evictionLock)
         {
-            var tracks = _cache.Values.ToArray();
+            CachedTrack[] tracks = _cache.Values.ToArray();
             _cache.Clear();
 
-            foreach (var track in tracks)
+            foreach (CachedTrack track in tracks)
             {
                 track.Dispose();
             }
@@ -262,7 +275,9 @@ public class TrackCache : ITrackCache
     public void Dispose()
     {
         if (_disposed)
+        {
             return;
+        }
 
         _disposed = true;
         Clear();
@@ -270,7 +285,7 @@ public class TrackCache : ITrackCache
     }
 
     /// <summary>
-    /// Evicts the least recently used track from the cache
+    ///     Evicts the least recently used track from the cache
     /// </summary>
     private void EvictLRU()
     {
@@ -278,15 +293,17 @@ public class TrackCache : ITrackCache
         lock (_evictionLock)
         {
             // Re-check count inside lock
-            if (_cache.Count < _maxCacheSize)
+            if (_cache.Count < MaxCacheSize)
+            {
                 return;
+            }
 
             // Find the least recently used track
             CachedTrack? oldestTrack = null;
             DateTime oldestTime = DateTime.MaxValue;
             string? oldestKey = null;
 
-            foreach (var kvp in _cache)
+            foreach (KeyValuePair<string, CachedTrack> kvp in _cache)
             {
                 if (kvp.Value.LastAccessed < oldestTime)
                 {
@@ -299,7 +316,7 @@ public class TrackCache : ITrackCache
             // Evict the oldest track
             if (oldestKey != null && oldestTrack != null)
             {
-                if (_cache.TryRemove(oldestKey, out var removed))
+                if (_cache.TryRemove(oldestKey, out CachedTrack? removed))
                 {
                     removed.Dispose();
                     _logger?.LogDebug("LRU evicted track: {TrackId} (last accessed: {Time}, freed: {Size}MB)",
@@ -310,7 +327,7 @@ public class TrackCache : ITrackCache
     }
 
     /// <summary>
-    /// Loads an audio file from disk into memory using NVorbis
+    ///     Loads an audio file from disk into memory using NVorbis
     /// </summary>
     private CachedAudioData? LoadAudioFile(string filePath)
     {
@@ -318,14 +335,14 @@ public class TrackCache : ITrackCache
         {
             using var reader = new VorbisReader(filePath);
 
-            var format = reader.Format;
+            AudioFormat format = reader.Format;
 
             // Calculate total samples to pre-allocate array
             long totalSamples = reader.TotalSamples;
 
             // Pre-allocate exact size needed - eliminates 3x memory allocations
-            var samples = new float[totalSamples];
-            var buffer = new float[format.SampleRate * format.Channels];
+            float[] samples = new float[totalSamples];
+            float[] buffer = new float[format.SampleRate * format.Channels];
             int offset = 0;
             int samplesRead;
 
@@ -336,11 +353,7 @@ public class TrackCache : ITrackCache
                 offset += samplesRead;
             }
 
-            return new CachedAudioData
-            {
-                AudioFormat = format,
-                Samples = samples
-            };
+            return new CachedAudioData { AudioFormat = format, Samples = samples };
         }
         catch (Exception ex)
         {

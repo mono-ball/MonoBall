@@ -17,7 +17,8 @@ public class PopupThemeEntityRegistry : EfCoreRegistry<PopupThemeEntity, GameThe
     private readonly ConcurrentDictionary<string, PopupThemeEntity> _backgroundCache = new();
     private readonly ConcurrentDictionary<string, PopupThemeEntity> _outlineCache = new();
 
-    public PopupThemeEntityRegistry(IDbContextFactory<GameDataContext> contextFactory, ILogger<PopupThemeEntityRegistry> logger)
+    public PopupThemeEntityRegistry(IDbContextFactory<GameDataContext> contextFactory,
+        ILogger<PopupThemeEntityRegistry> logger)
         : base(contextFactory, logger)
     {
     }
@@ -48,11 +49,15 @@ public class PopupThemeEntityRegistry : EfCoreRegistry<PopupThemeEntity, GameThe
     {
         // Cache by background asset ID
         if (!string.IsNullOrWhiteSpace(entity.Background))
+        {
             _backgroundCache[entity.Background] = entity;
+        }
 
         // Cache by outline asset ID
         if (!string.IsNullOrWhiteSpace(entity.Outline))
+        {
             _outlineCache[entity.Outline] = entity;
+        }
     }
 
     /// <summary>
@@ -82,15 +87,19 @@ public class PopupThemeEntityRegistry : EfCoreRegistry<PopupThemeEntity, GameThe
     public PopupThemeEntity? GetThemeByBackground(string background)
     {
         if (string.IsNullOrWhiteSpace(background))
+        {
             return null;
+        }
 
-        if (_backgroundCache.TryGetValue(background, out var theme))
+        if (_backgroundCache.TryGetValue(background, out PopupThemeEntity? theme))
+        {
             return theme;
+        }
 
         if (!_isCacheLoaded)
         {
-            using var context = _contextFactory.CreateDbContext();
-            var entity = context.PopupThemes
+            using GameDataContext context = _contextFactory.CreateDbContext();
+            PopupThemeEntity? entity = context.PopupThemes
                 .AsNoTracking()
                 .FirstOrDefault(pt => pt.Background == background);
 
@@ -115,15 +124,19 @@ public class PopupThemeEntityRegistry : EfCoreRegistry<PopupThemeEntity, GameThe
     public PopupThemeEntity? GetThemeByOutline(string outline)
     {
         if (string.IsNullOrWhiteSpace(outline))
+        {
             return null;
+        }
 
-        if (_outlineCache.TryGetValue(outline, out var theme))
+        if (_outlineCache.TryGetValue(outline, out PopupThemeEntity? theme))
+        {
             return theme;
+        }
 
         if (!_isCacheLoaded)
         {
-            using var context = _contextFactory.CreateDbContext();
-            var entity = context.PopupThemes
+            using GameDataContext context = _contextFactory.CreateDbContext();
+            PopupThemeEntity? entity = context.PopupThemes
                 .AsNoTracking()
                 .FirstOrDefault(pt => pt.Outline == outline);
 

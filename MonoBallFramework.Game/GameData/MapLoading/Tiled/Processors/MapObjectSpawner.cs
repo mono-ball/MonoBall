@@ -13,7 +13,6 @@ namespace MonoBallFramework.Game.GameData.MapLoading.Tiled.Processors;
 /// <summary>
 ///     Handles spawning of map objects (NPCs, items, triggers, etc.) from Tiled object layers.
 ///     Delegates to specialized IEntitySpawner implementations via EntitySpawnerRegistry.
-///
 ///     Design principles:
 ///     - Single Responsibility: This class only iterates objects and delegates to spawners
 ///     - Fail-fast: Unrecognized objects are optionally logged but don't crash map loading
@@ -21,9 +20,9 @@ namespace MonoBallFramework.Game.GameData.MapLoading.Tiled.Processors;
 /// </summary>
 public sealed class MapObjectSpawner
 {
-    private readonly EntitySpawnerRegistry _spawnerRegistry;
     private readonly IGameStateApi? _gameStateApi;
     private readonly ILogger<MapObjectSpawner>? _logger;
+    private readonly EntitySpawnerRegistry _spawnerRegistry;
 
     public MapObjectSpawner(
         EntitySpawnerRegistry spawnerRegistry,

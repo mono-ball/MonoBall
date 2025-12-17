@@ -4,13 +4,15 @@ This folder contains popup theme definitions for map location popups.
 
 ## Purpose
 
-Themes define which background and outline assets to use for map popups. Each theme references specific popup graphics that match a location type (towns, caves, underwater areas, etc.).
+Themes define which background and outline assets to use for map popups. Each theme references specific popup graphics
+that match a location type (towns, caves, underwater areas, etc.).
 
 ## Theme Files
 
 Six theme files extracted from pokeemerald:
 
 ### wood.json
+
 ```json
 {
   "id": "wood",
@@ -23,33 +25,44 @@ Six theme files extracted from pokeemerald:
 ```
 
 **Used for:**
+
 - All towns (Littleroot, Oldale, Dewford, Lavaridge, Fallarbor, Verdanturf, Pacifidlog)
 - Land routes (101-104, 110-121, 123)
 - Woods and forests (Petalburg Woods)
 - Safari Zone, Abandoned Ship, Southern Island
 
 ### marble.json
+
 **Used for:** Major cities, modern facilities
+
 - Cities: Slateport, Mauville, Rustboro, Lilycove, Sootopolis
 - Modern: Battle Frontier, New Mauville, Trainer Hill, Dynamic
 
 ### stone.json
+
 **Used for:** Caves, mountains, hideouts
+
 - Caves: Granite Cave, Shoal Cave, Seafloor Cavern, Cave of Origin
 - Mountains: Mt. Chimney, Mt. Pyre, Sky Pillar
 - Hideouts: Aqua/Magma Hideout, Mirage Tower
 - Victory Road, Meteor Falls, various ruins
 
 ### brick.json
+
 **Used for:** Some cities
+
 - Petalburg City, Fortree City, Mossdeep City, Ever Grande City
 
 ### underwater.json
+
 **Used for:** Water routes
+
 - Routes 105-109, 122, 124-134 (all ocean routes)
 
 ### stone2.json
+
 **Used for:** Deep underwater areas
+
 - Underwater 124, 125, 126, 127, 128, 129
 - Underwater Sootopolis, Seafloor Cavern, Sealed Chamber, Marine Cave
 
@@ -109,7 +122,9 @@ ShowMapPopup(mapName, background, outline);
 Theme files reference assets in these folders:
 
 ### Backgrounds
+
 `../Popups/Backgrounds/`
+
 - wood.json → `Graphics/Maps/Popups/Backgrounds/wood.png`
 - marble.json → `Graphics/Maps/Popups/Backgrounds/marble.png`
 - stone.json → `Graphics/Maps/Popups/Backgrounds/stone.png`
@@ -118,7 +133,9 @@ Theme files reference assets in these folders:
 - stone2.json → `Graphics/Maps/Popups/Backgrounds/stone2.png`
 
 ### Outlines
+
 `../Popups/Outlines/`
+
 - wood_outline.json → `Graphics/Maps/Popups/Outlines/wood_outline.png`
 - marble_outline.json → `Graphics/Maps/Popups/Outlines/marble_outline.png`
 - stone_outline.json → `Graphics/Maps/Popups/Outlines/stone_outline.png`
@@ -136,6 +153,7 @@ python -m porycon --input /path/to/pokeemerald --output /path/to/PokeSharp/MonoB
 ```
 
 The extractor:
+
 1. Parses `pokeemerald/src/map_name_popup.c` for theme assignments
 2. Counts usage per theme across all sections
 3. Generates theme definition files with usage statistics
@@ -144,14 +162,14 @@ The extractor:
 
 Based on `pokeemerald/src/map_name_popup.c`:
 
-| Theme | Sections | Description |
-|-------|----------|-------------|
-| wood | 143 | Default - towns, land routes, woods |
-| stone | 29 | Caves, mountains, hideouts |
-| underwater | 17 | Ocean/water routes |
-| stone2 | 11 | Deep underwater areas |
-| marble | 9 | Major cities, modern facilities |
-| brick | 4 | Some cities |
+| Theme      | Sections | Description                         |
+|------------|----------|-------------------------------------|
+| wood       | 143      | Default - towns, land routes, woods |
+| stone      | 29       | Caves, mountains, hideouts          |
+| underwater | 17       | Ocean/water routes                  |
+| stone2     | 11       | Deep underwater areas               |
+| marble     | 9        | Major cities, modern facilities     |
+| brick      | 4        | Some cities                         |
 
 **Total: 213 map sections**
 

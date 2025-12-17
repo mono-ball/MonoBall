@@ -5,7 +5,6 @@ namespace MonoBallFramework.Game.Engine.Core.Types;
 /// <summary>
 ///     Strongly-typed identifier for map section definitions (MAPSEC).
 ///     Used for region map highlighting and popup themes.
-///
 ///     Format: base:mapsec:{region}/{name}
 ///     Examples:
 ///     - base:mapsec:hoenn/littleroot_town
@@ -25,9 +24,11 @@ public sealed record GameMapSectionId : EntityId
     public GameMapSectionId(string value) : base(value)
     {
         if (EntityType != TypeName)
+        {
             throw new ArgumentException(
                 $"Expected entity type '{TypeName}', got '{EntityType}'",
                 nameof(value));
+        }
     }
 
     /// <summary>
@@ -57,11 +58,15 @@ public sealed record GameMapSectionId : EntityId
     public static GameMapSectionId? TryCreate(string? value)
     {
         if (string.IsNullOrWhiteSpace(value))
+        {
             return null;
+        }
 
         // Only accept full format
         if (!IsValidFormat(value) || !value.Contains($":{TypeName}:"))
+        {
             return null;
+        }
 
         try
         {
@@ -80,11 +85,13 @@ public sealed record GameMapSectionId : EntityId
     /// <param name="region">Optional region override</param>
     public static GameMapSectionId FromLegacy(string legacyMapsec, string? region = null)
     {
-        var normalized = NormalizeComponent(legacyMapsec);
+        string normalized = NormalizeComponent(legacyMapsec);
 
         // Remove mapsec_ prefix if present
         if (normalized.StartsWith("mapsec_"))
+        {
             normalized = normalized[7..];
+        }
 
         return Create(normalized, region);
     }
@@ -92,5 +99,8 @@ public sealed record GameMapSectionId : EntityId
     /// <summary>
     ///     Explicit conversion from string. Use TryCreate() for safe parsing.
     /// </summary>
-    public static explicit operator GameMapSectionId(string value) => new(value);
+    public static explicit operator GameMapSectionId(string value)
+    {
+        return new GameMapSectionId(value);
+    }
 }

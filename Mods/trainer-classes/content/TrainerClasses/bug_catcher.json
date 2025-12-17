@@ -19,7 +19,9 @@
     "Bug Pokemon rule!",
     "See how strong bugs can be?"
   ],
-  "preferredTypes": ["bug"],
+  "preferredTypes": [
+    "bug"
+  ],
   "levelRange": {
     "min": 3,
     "max": 18

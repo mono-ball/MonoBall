@@ -11,16 +11,11 @@ using Xunit.Abstractions;
 namespace PokeSharp.Tests.Content.Benchmarks;
 
 /// <summary>
-/// Performance benchmarks for ContentProvider operations.
-/// These tests measure and validate performance targets for critical operations.
+///     Performance benchmarks for ContentProvider operations.
+///     These tests measure and validate performance targets for critical operations.
 /// </summary>
 public class ContentProviderBenchmarks : IDisposable
 {
-    private readonly ITestOutputHelper _output;
-    private readonly string _testRoot;
-    private readonly string _baseGameRoot;
-    private readonly string _modsRoot;
-
     // Performance targets (in milliseconds)
     private const double CacheHitTarget = 0.1;
     private const double CacheMissTarget = 10.0;
@@ -31,6 +26,10 @@ public class ContentProviderBenchmarks : IDisposable
     private const int WarmupIterations = 100;
     private const int BenchmarkIterations = 1000;
     private const int BulkFileCount = 1000;
+    private readonly string _baseGameRoot;
+    private readonly string _modsRoot;
+    private readonly ITestOutputHelper _output;
+    private readonly string _testRoot;
 
     public ContentProviderBenchmarks(ITestOutputHelper output)
     {
@@ -56,7 +55,7 @@ public class ContentProviderBenchmarks : IDisposable
         {
             try
             {
-                Directory.Delete(_testRoot, recursive: true);
+                Directory.Delete(_testRoot, true);
             }
             catch
             {
@@ -69,7 +68,7 @@ public class ContentProviderBenchmarks : IDisposable
     {
         modLoader ??= CreateMockModLoader();
 
-        var options = Options.Create(new ContentProviderOptions
+        IOptions<ContentProviderOptions> options = Options.Create(new ContentProviderOptions
         {
             BaseGameRoot = _baseGameRoot,
             MaxCacheSize = 10000,
@@ -77,12 +76,11 @@ public class ContentProviderBenchmarks : IDisposable
             ThrowOnPathTraversal = true,
             BaseContentFolders = new Dictionary<string, string>
             {
-                ["Definitions"] = "Definitions",
-                ["Graphics"] = "Graphics"
+                ["Definitions"] = "Definitions", ["Graphics"] = "Graphics"
             }
         });
 
-        var logger = NullLogger<ContentProvider>.Instance;
+        NullLogger<ContentProvider> logger = NullLogger<ContentProvider>.Instance;
 
         return new ContentProvider(modLoader, logger, options);
     }
@@ -123,10 +121,7 @@ public class ContentProviderBenchmarks : IDisposable
                 Version = "1.0.0",
                 Priority = i * 10,
                 DirectoryPath = modPath,
-                ContentFolders = new Dictionary<string, string>
-                {
-                    ["Definitions"] = "Definitions"
-                }
+                ContentFolders = new Dictionary<string, string> { ["Definitions"] = "Definitions" }
             });
         }
 
@@ -134,7 +129,7 @@ public class ContentProviderBenchmarks : IDisposable
     }
 
     /// <summary>
-    /// Measures the average time for a single operation over multiple iterations.
+    ///     Measures the average time for a single operation over multiple iterations.
     /// </summary>
     private double MeasureAverageTime(Action operation, int iterations)
     {
@@ -155,7 +150,7 @@ public class ContentProviderBenchmarks : IDisposable
     {
         // Arrange
         CreateTestFile("Assets/Definitions/benchmark.json");
-        var provider = CreateContentProvider();
+        ContentProvider provider = CreateContentProvider();
 
         // Warm up cache
         for (int i = 0; i < WarmupIterations; i++)
@@ -164,15 +159,16 @@ public class ContentProviderBenchmarks : IDisposable
         }
 
         // Act - Measure cache hit performance
-        var avgTime = MeasureAverageTime(
+        double avgTime = MeasureAverageTime(
             () => provider.ResolveContentPath("Definitions", "benchmark.json"),
             BenchmarkIterations);
 
-        var stats = provider.GetStats();
+        ContentProviderStats stats = provider.GetStats();
 
         // Assert
         _output.WriteLine($"ResolveContentPath (Cache Hit): {avgTime:F6} ms avg over {BenchmarkIterations} iterations");
-        _output.WriteLine($"Cache Stats - Hits: {stats.CacheHits}, Misses: {stats.CacheMisses}, Hit Rate: {stats.HitRate:P2}");
+        _output.WriteLine(
+            $"Cache Stats - Hits: {stats.CacheHits}, Misses: {stats.CacheMisses}, Hit Rate: {stats.HitRate:P2}");
 
         avgTime.Should().BeLessThan(CacheHitTarget,
             $"Cache hit should complete in less than {CacheHitTarget}ms on average");
@@ -185,8 +181,8 @@ public class ContentProviderBenchmarks : IDisposable
     public void ResolveContentPath_CacheMiss_MeetsPerformanceTarget()
     {
         // Arrange
-        var modLoader = CreateMockModLoaderWithMultipleMods(5);
-        var provider = CreateContentProvider(modLoader);
+        IModLoader modLoader = CreateMockModLoaderWithMultipleMods(5);
+        ContentProvider provider = CreateContentProvider(modLoader);
 
         // Create test files in multiple mods
         for (int i = 0; i < 5; i++)
@@ -200,7 +196,7 @@ public class ContentProviderBenchmarks : IDisposable
             .ToList();
 
         // Warm up
-        foreach (var file in testFiles.Take(WarmupIterations))
+        foreach (string file in testFiles.Take(WarmupIterations))
         {
             provider.ResolveContentPath("Definitions", file);
         }
@@ -211,15 +207,15 @@ public class ContentProviderBenchmarks : IDisposable
         // Act - Measure cache miss performance
         var stopwatch = Stopwatch.StartNew();
 
-        foreach (var file in testFiles)
+        foreach (string file in testFiles)
         {
             provider.ResolveContentPath("Definitions", file);
         }
 
         stopwatch.Stop();
-        var avgTime = (double)stopwatch.ElapsedMilliseconds / testFiles.Count;
+        double avgTime = (double)stopwatch.ElapsedMilliseconds / testFiles.Count;
 
-        var stats = provider.GetStats();
+        ContentProviderStats stats = provider.GetStats();
 
         // Assert
         _output.WriteLine($"ResolveContentPath (Cache Miss): {avgTime:F6} ms avg over {testFiles.Count} iterations");
@@ -233,8 +229,8 @@ public class ContentProviderBenchmarks : IDisposable
     public void GetAllContentPaths_1000Files_MeetsPerformanceTarget()
     {
         // Arrange
-        var modLoader = CreateMockModLoaderWithMultipleMods(3);
-        var provider = CreateContentProvider(modLoader);
+        IModLoader modLoader = CreateMockModLoaderWithMultipleMods(3);
+        ContentProvider provider = CreateContentProvider(modLoader);
 
         // Create 1000 test files across mods and base game
         int filesPerLocation = BulkFileCount / 4;
@@ -257,15 +253,15 @@ public class ContentProviderBenchmarks : IDisposable
         // Warm up
         for (int i = 0; i < 3; i++)
         {
-            _ = provider.GetAllContentPaths("Definitions", "*.json").ToList();
+            _ = provider.GetAllContentPaths("Definitions").ToList();
         }
 
         // Act - Measure bulk retrieval performance
         var stopwatch = Stopwatch.StartNew();
-        var paths = provider.GetAllContentPaths("Definitions", "*.json").ToList();
+        var paths = provider.GetAllContentPaths("Definitions").ToList();
         stopwatch.Stop();
 
-        var elapsedMs = stopwatch.Elapsed.TotalMilliseconds;
+        double elapsedMs = stopwatch.Elapsed.TotalMilliseconds;
 
         // Assert
         _output.WriteLine($"GetAllContentPaths: {elapsedMs:F2} ms for {paths.Count} files");
@@ -296,23 +292,25 @@ public class ContentProviderBenchmarks : IDisposable
 
         // Act - Measure Set performance
         var setStopwatch = Stopwatch.StartNew();
-        foreach (var (key, value) in testData)
+        foreach ((string? key, string? value) in testData)
         {
             cache.Set(key, value);
         }
+
         setStopwatch.Stop();
 
-        var avgSetTime = (double)setStopwatch.ElapsedMilliseconds / testData.Count;
+        double avgSetTime = (double)setStopwatch.ElapsedMilliseconds / testData.Count;
 
         // Act - Measure Get performance
         var getStopwatch = Stopwatch.StartNew();
-        foreach (var (key, _) in testData)
+        foreach ((string? key, string _) in testData)
         {
             cache.TryGet(key, out _);
         }
+
         getStopwatch.Stop();
 
-        var avgGetTime = (double)getStopwatch.ElapsedMilliseconds / testData.Count;
+        double avgGetTime = (double)getStopwatch.ElapsedMilliseconds / testData.Count;
 
         // Assert
         _output.WriteLine($"LRU Cache Set: {avgSetTime:F6} ms avg over {testData.Count} operations");
@@ -348,7 +346,7 @@ public class ContentProviderBenchmarks : IDisposable
 
         stopwatch.Stop();
 
-        var avgTime = (double)stopwatch.ElapsedMilliseconds / BenchmarkIterations;
+        double avgTime = (double)stopwatch.ElapsedMilliseconds / BenchmarkIterations;
 
         // Assert
         _output.WriteLine($"LRU Cache Eviction: {avgTime:F6} ms avg over {BenchmarkIterations} operations");
@@ -364,8 +362,8 @@ public class ContentProviderBenchmarks : IDisposable
     public void ContentProvider_Mixed_Operations_Performance()
     {
         // Arrange
-        var modLoader = CreateMockModLoaderWithMultipleMods(3);
-        var provider = CreateContentProvider(modLoader);
+        IModLoader modLoader = CreateMockModLoaderWithMultipleMods(3);
+        ContentProvider provider = CreateContentProvider(modLoader);
 
         // Create test files
         for (int i = 0; i < 100; i++)
@@ -386,7 +384,7 @@ public class ContentProviderBenchmarks : IDisposable
         // Warm up
         for (int i = 0; i < WarmupIterations; i++)
         {
-            foreach (var op in operations)
+            foreach (Action op in operations)
             {
                 op();
             }
@@ -397,7 +395,7 @@ public class ContentProviderBenchmarks : IDisposable
 
         for (int i = 0; i < BenchmarkIterations; i++)
         {
-            foreach (var op in operations)
+            foreach (Action op in operations)
             {
                 op();
             }
@@ -405,13 +403,14 @@ public class ContentProviderBenchmarks : IDisposable
 
         stopwatch.Stop();
 
-        var avgTimePerOperation = (double)stopwatch.ElapsedMilliseconds / (BenchmarkIterations * operations.Length);
-        var stats = provider.GetStats();
+        double avgTimePerOperation = (double)stopwatch.ElapsedMilliseconds / (BenchmarkIterations * operations.Length);
+        ContentProviderStats stats = provider.GetStats();
 
         // Assert
         _output.WriteLine($"Mixed Operations: {avgTimePerOperation:F6} ms avg per operation");
         _output.WriteLine($"Total Operations: {BenchmarkIterations * operations.Length}");
-        _output.WriteLine($"Cache Stats - Hits: {stats.CacheHits}, Misses: {stats.CacheMisses}, Hit Rate: {stats.HitRate:P2}");
+        _output.WriteLine(
+            $"Cache Stats - Hits: {stats.CacheHits}, Misses: {stats.CacheMisses}, Hit Rate: {stats.HitRate:P2}");
 
         avgTimePerOperation.Should().BeLessThan(CacheHitTarget * 2,
             "Mixed operations should maintain good performance");
@@ -424,8 +423,8 @@ public class ContentProviderBenchmarks : IDisposable
     public void ContentProvider_Concurrent_Access_Performance()
     {
         // Arrange
-        var modLoader = CreateMockModLoaderWithMultipleMods(3);
-        var provider = CreateContentProvider(modLoader);
+        IModLoader modLoader = CreateMockModLoaderWithMultipleMods(3);
+        ContentProvider provider = CreateContentProvider(modLoader);
 
         // Create test files
         for (int i = 0; i < 50; i++)
@@ -433,18 +432,18 @@ public class ContentProviderBenchmarks : IDisposable
             CreateTestFile($"Assets/Definitions/concurrent{i}.json");
         }
 
-        var threadCount = Environment.ProcessorCount;
-        var iterationsPerThread = 200;
+        int threadCount = Environment.ProcessorCount;
+        int iterationsPerThread = 200;
 
         // Act - Measure concurrent access performance
         var stopwatch = Stopwatch.StartNew();
 
-        var tasks = Enumerable.Range(0, threadCount)
+        Task[] tasks = Enumerable.Range(0, threadCount)
             .Select(threadId => Task.Run(() =>
             {
                 for (int i = 0; i < iterationsPerThread; i++)
                 {
-                    int fileIdx = (threadId * iterationsPerThread + i) % 50;
+                    int fileIdx = ((threadId * iterationsPerThread) + i) % 50;
                     provider.ResolveContentPath("Definitions", $"concurrent{fileIdx}.json");
                 }
             }))
@@ -453,15 +452,16 @@ public class ContentProviderBenchmarks : IDisposable
         Task.WaitAll(tasks);
         stopwatch.Stop();
 
-        var totalOperations = threadCount * iterationsPerThread;
-        var avgTime = (double)stopwatch.ElapsedMilliseconds / totalOperations;
-        var stats = provider.GetStats();
+        int totalOperations = threadCount * iterationsPerThread;
+        double avgTime = (double)stopwatch.ElapsedMilliseconds / totalOperations;
+        ContentProviderStats stats = provider.GetStats();
 
         // Assert
         _output.WriteLine($"Concurrent Access: {avgTime:F6} ms avg per operation");
         _output.WriteLine($"Thread Count: {threadCount}, Total Operations: {totalOperations}");
         _output.WriteLine($"Total Time: {stopwatch.ElapsedMilliseconds} ms");
-        _output.WriteLine($"Cache Stats - Hits: {stats.CacheHits}, Misses: {stats.CacheMisses}, Hit Rate: {stats.HitRate:P2}");
+        _output.WriteLine(
+            $"Cache Stats - Hits: {stats.CacheHits}, Misses: {stats.CacheMisses}, Hit Rate: {stats.HitRate:P2}");
 
         avgTime.Should().BeLessThan(CacheHitTarget * 5,
             "Concurrent access should maintain reasonable performance");

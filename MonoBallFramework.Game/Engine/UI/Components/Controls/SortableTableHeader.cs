@@ -19,7 +19,7 @@ public class SortableTableHeader<TSort>
     {
         Left,
         Center,
-        Right,
+        Right
     }
 
     private readonly Dictionary<TSort, LayoutRect> _clickRegions = new();

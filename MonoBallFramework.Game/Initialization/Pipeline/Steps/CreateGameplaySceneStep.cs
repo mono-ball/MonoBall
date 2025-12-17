@@ -1,4 +1,3 @@
-using System;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MonoBallFramework.Game.Engine.Audio.Services;
@@ -23,7 +22,9 @@ public class CreateGameplaySceneStep : InitializationStepBase
             "Creating gameplay scene...",
             InitializationProgress.Complete,
             InitializationProgress.Complete
-        ) { }
+        )
+    {
+    }
 
     /// <inheritdoc />
     protected override Task ExecuteStepAsync(

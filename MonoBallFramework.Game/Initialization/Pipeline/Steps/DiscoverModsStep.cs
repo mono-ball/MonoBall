@@ -22,7 +22,9 @@ public class DiscoverModsStep : InitializationStepBase
             "Discovering mods...",
             InitializationProgress.Start,
             InitializationProgress.ModsDiscovered
-        ) { }
+        )
+    {
+    }
 
     /// <inheritdoc />
     protected override async Task ExecuteStepAsync(

@@ -14,11 +14,11 @@ namespace MonoBallFramework.Game.Engine.Audio;
 /// </summary>
 public class AudioRegistry
 {
-    private readonly IDbContextFactory<GameDataContext> _contextFactory;
-    private readonly ILogger<AudioRegistry> _logger;
     private readonly ConcurrentDictionary<string, AudioEntity> _cache = new();
-    private readonly ConcurrentDictionary<string, AudioEntity> _trackIdCache = new();
+    private readonly IDbContextFactory<GameDataContext> _contextFactory;
     private readonly SemaphoreSlim _loadLock = new(1, 1);
+    private readonly ILogger<AudioRegistry> _logger;
+    private readonly ConcurrentDictionary<string, AudioEntity> _trackIdCache = new();
     private volatile bool _isCacheLoaded;
 
     public AudioRegistry(IDbContextFactory<GameDataContext> contextFactory, ILogger<AudioRegistry> logger)
@@ -40,9 +40,11 @@ public class AudioRegistry
         get
         {
             if (_isCacheLoaded)
+            {
                 return _cache.Count;
+            }
 
-            using var context = _contextFactory.CreateDbContext();
+            using GameDataContext context = _contextFactory.CreateDbContext();
             return context.Audios.Count();
         }
     }
@@ -53,17 +55,23 @@ public class AudioRegistry
     /// </summary>
     public void LoadDefinitions()
     {
-        if (_isCacheLoaded) return;
+        if (_isCacheLoaded)
+        {
+            return;
+        }
 
         _loadLock.Wait();
         try
         {
-            if (_isCacheLoaded) return;
+            if (_isCacheLoaded)
+            {
+                return;
+            }
 
-            using var context = _contextFactory.CreateDbContext();
+            using GameDataContext context = _contextFactory.CreateDbContext();
             var definitions = context.Audios.AsNoTracking().ToList();
 
-            foreach (var def in definitions)
+            foreach (AudioEntity def in definitions)
             {
                 _cache[def.AudioId.Value] = def;
                 _trackIdCache[def.TrackId] = def;
@@ -84,19 +92,25 @@ public class AudioRegistry
     /// </summary>
     public async Task LoadDefinitionsAsync(CancellationToken cancellationToken = default)
     {
-        if (_isCacheLoaded) return;
+        if (_isCacheLoaded)
+        {
+            return;
+        }
 
         await _loadLock.WaitAsync(cancellationToken);
         try
         {
-            if (_isCacheLoaded) return;
+            if (_isCacheLoaded)
+            {
+                return;
+            }
 
-            using var context = _contextFactory.CreateDbContext();
-            var definitions = await context.Audios
+            using GameDataContext context = _contextFactory.CreateDbContext();
+            List<AudioEntity> definitions = await context.Audios
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
 
-            foreach (var def in definitions)
+            foreach (AudioEntity def in definitions)
             {
                 _cache[def.AudioId.Value] = def;
                 _trackIdCache[def.TrackId] = def;
@@ -118,14 +132,16 @@ public class AudioRegistry
     public AudioEntity? GetById(string id)
     {
         // Try cache first
-        if (_cache.TryGetValue(id, out var cached))
+        if (_cache.TryGetValue(id, out AudioEntity? cached))
+        {
             return cached;
+        }
 
         // If cache not loaded, query database
         if (!_isCacheLoaded)
         {
-            using var context = _contextFactory.CreateDbContext();
-            var def = context.Audios
+            using GameDataContext context = _contextFactory.CreateDbContext();
+            AudioEntity? def = context.Audios
                 .AsNoTracking()
                 .FirstOrDefault(a => a.AudioId.Value == id);
 
@@ -148,14 +164,16 @@ public class AudioRegistry
     public AudioEntity? GetByTrackId(string trackId)
     {
         // Try cache first
-        if (_trackIdCache.TryGetValue(trackId, out var cached))
+        if (_trackIdCache.TryGetValue(trackId, out AudioEntity? cached))
+        {
             return cached;
+        }
 
         // If cache not loaded, search in main cache or query database
         if (!_isCacheLoaded)
         {
             // Search in existing cache
-            var fromCache = _cache.Values.FirstOrDefault(d => d.TrackId == trackId);
+            AudioEntity? fromCache = _cache.Values.FirstOrDefault(d => d.TrackId == trackId);
             if (fromCache != null)
             {
                 _trackIdCache[trackId] = fromCache;
@@ -163,9 +181,9 @@ public class AudioRegistry
             }
 
             // Query database - need to load all and filter since TrackId is computed
-            using var context = _contextFactory.CreateDbContext();
+            using GameDataContext context = _contextFactory.CreateDbContext();
             var allDefinitions = context.Audios.AsNoTracking().ToList();
-            var def = allDefinitions.FirstOrDefault(d => d.TrackId == trackId);
+            AudioEntity? def = allDefinitions.FirstOrDefault(d => d.TrackId == trackId);
 
             if (def != null)
             {
@@ -185,9 +203,11 @@ public class AudioRegistry
     public IEnumerable<AudioEntity> GetAll()
     {
         if (_isCacheLoaded)
+        {
             return _cache.Values;
+        }
 
-        using var context = _contextFactory.CreateDbContext();
+        using GameDataContext context = _contextFactory.CreateDbContext();
         return context.Audios.AsNoTracking().ToList();
     }
 
@@ -203,7 +223,7 @@ public class AudioRegistry
                 d.Category.Equals(category, StringComparison.OrdinalIgnoreCase));
         }
 
-        using var context = _contextFactory.CreateDbContext();
+        using GameDataContext context = _contextFactory.CreateDbContext();
         return context.Audios
             .AsNoTracking()
             .Where(d => d.Category == category)
@@ -224,7 +244,7 @@ public class AudioRegistry
                 d.Subcategory.Equals(subcategory, StringComparison.OrdinalIgnoreCase));
         }
 
-        using var context = _contextFactory.CreateDbContext();
+        using GameDataContext context = _contextFactory.CreateDbContext();
         return context.Audios
             .AsNoTracking()
             .Where(d => d.Category == category && d.Subcategory == subcategory)
@@ -253,9 +273,11 @@ public class AudioRegistry
     public IEnumerable<string> GetAllIds()
     {
         if (_isCacheLoaded)
+        {
             return _cache.Keys;
+        }
 
-        using var context = _contextFactory.CreateDbContext();
+        using GameDataContext context = _contextFactory.CreateDbContext();
         return context.Audios
             .AsNoTracking()
             .Select(d => d.AudioId.Value)
@@ -268,11 +290,13 @@ public class AudioRegistry
     public bool Contains(string id)
     {
         if (_cache.ContainsKey(id))
+        {
             return true;
+        }
 
         if (!_isCacheLoaded)
         {
-            using var context = _contextFactory.CreateDbContext();
+            using GameDataContext context = _contextFactory.CreateDbContext();
             return context.Audios.Any(d => d.AudioId.Value == id);
         }
 

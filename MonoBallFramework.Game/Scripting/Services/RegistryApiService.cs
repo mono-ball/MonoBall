@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using MonoBallFramework.Game.Engine.Core.Types;
+using MonoBallFramework.Game.GameData.Entities;
 using MonoBallFramework.Game.GameData.Sprites;
 using MonoBallFramework.Game.GameSystems.Services;
 using MonoBallFramework.Game.Scripting.Api;
@@ -20,14 +21,14 @@ public class RegistryApiService(
     private readonly IBehaviorRegistry _behaviorRegistry =
         behaviorRegistry ?? throw new ArgumentNullException(nameof(behaviorRegistry));
 
+    private readonly ILogger<RegistryApiService> _logger =
+        logger ?? throw new ArgumentNullException(nameof(logger));
+
     private readonly MapRegistry _mapRegistry =
         mapRegistry ?? throw new ArgumentNullException(nameof(mapRegistry));
 
     private readonly SpriteRegistry _spriteRegistry =
         spriteRegistry ?? throw new ArgumentNullException(nameof(spriteRegistry));
-
-    private readonly ILogger<RegistryApiService> _logger =
-        logger ?? throw new ArgumentNullException(nameof(logger));
 
     #region Sprite Registry
 
@@ -44,7 +45,9 @@ public class RegistryApiService(
     public IEnumerable<GameSpriteId> GetSpriteIdsByCategory(string category)
     {
         if (string.IsNullOrWhiteSpace(category))
+        {
             return [];
+        }
 
         _logger.LogDebug("Getting sprite IDs by category: {Category}", category);
 
@@ -57,7 +60,9 @@ public class RegistryApiService(
     public IEnumerable<GameSpriteId> GetSpriteIdsBySubcategory(string category, string subcategory)
     {
         if (string.IsNullOrWhiteSpace(category) || string.IsNullOrWhiteSpace(subcategory))
+        {
             return [];
+        }
 
         _logger.LogDebug("Getting sprite IDs by category/subcategory: {Category}/{Subcategory}", category, subcategory);
 
@@ -82,7 +87,7 @@ public class RegistryApiService(
     {
         ArgumentNullException.ThrowIfNull(spriteId);
 
-        if (_spriteRegistry.TryGetSprite(spriteId, out var definition) && definition != null)
+        if (_spriteRegistry.TryGetSprite(spriteId, out SpriteEntity? definition) && definition != null)
         {
             return definition.Animations.Select(a => a.Name);
         }
@@ -96,9 +101,11 @@ public class RegistryApiService(
         ArgumentNullException.ThrowIfNull(spriteId);
 
         if (animationNames.Length == 0)
+        {
             return true;
+        }
 
-        if (_spriteRegistry.TryGetSprite(spriteId, out var definition) && definition != null)
+        if (_spriteRegistry.TryGetSprite(spriteId, out SpriteEntity? definition) && definition != null)
         {
             var availableAnimations = definition.Animations.Select(a => a.Name).ToHashSet();
             return animationNames.All(name => availableAnimations.Contains(name));
@@ -112,7 +119,7 @@ public class RegistryApiService(
     {
         ArgumentNullException.ThrowIfNull(spriteId);
 
-        if (_spriteRegistry.TryGetSprite(spriteId, out var definition) && definition != null)
+        if (_spriteRegistry.TryGetSprite(spriteId, out SpriteEntity? definition) && definition != null)
         {
             var animations = definition.Animations.Select(a => a.Name).ToHashSet();
 
@@ -153,11 +160,13 @@ public class RegistryApiService(
         _logger.LogDebug("Getting all behavior IDs");
 
         // Convert string IDs to GameBehaviorId
-        foreach (var id in _behaviorRegistry.GetAllBehaviorIds())
+        foreach (string id in _behaviorRegistry.GetAllBehaviorIds())
         {
             var behaviorId = GameBehaviorId.TryCreate(id);
             if (behaviorId != null)
+            {
                 yield return behaviorId;
+            }
         }
     }
 
@@ -165,7 +174,9 @@ public class RegistryApiService(
     public IEnumerable<GameBehaviorId> GetBehaviorIdsByCategory(string category)
     {
         if (string.IsNullOrWhiteSpace(category))
+        {
             return [];
+        }
 
         _logger.LogDebug("Getting behavior IDs by category: {Category}", category);
 
@@ -202,7 +213,9 @@ public class RegistryApiService(
     public IEnumerable<GameMapId> GetMapIdsByCategory(string category)
     {
         if (string.IsNullOrWhiteSpace(category))
+        {
             return [];
+        }
 
         _logger.LogDebug("Getting map IDs by category/region: {Category}", category);
 
@@ -244,7 +257,9 @@ public class RegistryApiService(
     public IEnumerable<GameFlagId> GetFlagIdsByCategory(string category)
     {
         if (string.IsNullOrWhiteSpace(category))
+        {
             return [];
+        }
 
         _logger.LogDebug("Getting flag IDs by category: {Category}", category);
 

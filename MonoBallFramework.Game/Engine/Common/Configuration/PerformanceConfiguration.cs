@@ -43,7 +43,7 @@ public class PerformanceConfiguration
             TargetFrameTimeMs = 16.67f,
             SlowSystemThresholdPercent = 0.05, // Warn at 5% instead of 10%
             SlowSystemWarningCooldownFrames = 60, // Warn more frequently (1 second)
-            MaxCachedLoggers = 50,
+            MaxCachedLoggers = 50
         };
 
     /// <summary>
@@ -55,6 +55,6 @@ public class PerformanceConfiguration
             TargetFrameTimeMs = 16.67f,
             SlowSystemThresholdPercent = 0.15, // Only warn on very slow systems
             SlowSystemWarningCooldownFrames = 600, // Warn less frequently (10 seconds)
-            MaxCachedLoggers = 200, // Allow more caching in production
+            MaxCachedLoggers = 200 // Allow more caching in production
         };
 }

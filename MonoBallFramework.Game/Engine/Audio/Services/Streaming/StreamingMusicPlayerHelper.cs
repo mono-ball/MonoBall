@@ -7,15 +7,15 @@ using MonoBallFramework.Game.GameData.Entities;
 namespace MonoBallFramework.Game.Engine.Audio.Services.Streaming;
 
 /// <summary>
-/// Helper class for integrating streaming audio into music players.
-/// Provides methods for creating streaming providers and managing track metadata.
-/// Thread-safe for concurrent access.
+///     Helper class for integrating streaming audio into music players.
+///     Provides methods for creating streaming providers and managing track metadata.
+///     Thread-safe for concurrent access.
 /// </summary>
 public class StreamingMusicPlayerHelper
 {
-    private readonly ConcurrentDictionary<string, StreamingTrackData> _trackMetadataCache = new();
     private readonly IContentProvider _contentProvider;
     private readonly ILogger? _logger;
+    private readonly ConcurrentDictionary<string, StreamingTrackData> _trackMetadataCache = new();
 
     public StreamingMusicPlayerHelper(IContentProvider contentProvider, ILogger? logger = null)
     {
@@ -24,8 +24,13 @@ public class StreamingMusicPlayerHelper
     }
 
     /// <summary>
-    /// Gets or creates streaming track metadata for a given audio definition.
-    /// Metadata is cached but does NOT keep the audio file open.
+    ///     Gets the number of cached track metadata entries.
+    /// </summary>
+    public int CachedTrackCount => _trackMetadataCache.Count;
+
+    /// <summary>
+    ///     Gets or creates streaming track metadata for a given audio definition.
+    ///     Metadata is cached but does NOT keep the audio file open.
     /// </summary>
     /// <param name="trackName">The track identifier.</param>
     /// <param name="definition">The audio definition with file path and loop points.</param>
@@ -35,21 +40,25 @@ public class StreamingMusicPlayerHelper
         AudioEntity definition)
     {
         // Check cache first
-        if (_trackMetadataCache.TryGetValue(trackName, out var cached))
+        if (_trackMetadataCache.TryGetValue(trackName, out StreamingTrackData? cached))
+        {
             return cached;
+        }
 
         // Create track data (may return null on failure)
-        var data = CreateTrackDataInternal(trackName, definition);
+        StreamingTrackData? data = CreateTrackDataInternal(trackName, definition);
 
         // Only cache successful results (don't cache null!)
         if (data != null)
+        {
             _trackMetadataCache.TryAdd(trackName, data);
+        }
 
         return data;
     }
 
     /// <summary>
-    /// Internal method to create track data. Returns null on failure instead of null!
+    ///     Internal method to create track data. Returns null on failure instead of null!
     /// </summary>
     private StreamingTrackData? CreateTrackDataInternal(
         string trackName,
@@ -85,7 +94,8 @@ public class StreamingMusicPlayerHelper
 
             if (definition.HasLoopPoints)
             {
-                _logger?.LogDebug("Cached streaming track metadata with loop points: {TrackName} (start: {Start}, length: {Length})",
+                _logger?.LogDebug(
+                    "Cached streaming track metadata with loop points: {TrackName} (start: {Start}, length: {Length})",
                     trackName, definition.LoopStartSamples, definition.LoopLengthSamples);
             }
             else
@@ -104,8 +114,8 @@ public class StreamingMusicPlayerHelper
     }
 
     /// <summary>
-    /// Creates a new streaming playback state with all necessary providers.
-    /// Returns a ready-to-play state with volume control configured.
+    ///     Creates a new streaming playback state with all necessary providers.
+    ///     Returns a ready-to-play state with volume control configured.
     /// </summary>
     /// <param name="trackData">The streaming track data.</param>
     /// <param name="loop">Whether the track should loop.</param>
@@ -121,7 +131,7 @@ public class StreamingMusicPlayerHelper
         float definitionFadeOut)
     {
         // Create the streaming provider chain
-        var loopingProvider = trackData.CreateLoopingProvider(loop);
+        StreamingLoopProvider loopingProvider = trackData.CreateLoopingProvider(loop);
 
         try
         {
@@ -156,15 +166,17 @@ public class StreamingMusicPlayerHelper
     }
 
     /// <summary>
-    /// Synchronizes two streaming providers to the same playback position.
-    /// Useful for seamless crossfades.
+    ///     Synchronizes two streaming providers to the same playback position.
+    ///     Useful for seamless crossfades.
     /// </summary>
     /// <param name="sourceProvider">The source provider to read position from.</param>
     /// <param name="targetProvider">The target provider to seek.</param>
     public void SynchronizeProviders(StreamingLoopProvider sourceProvider, StreamingLoopProvider targetProvider)
     {
         if (sourceProvider == null || targetProvider == null)
+        {
             return;
+        }
 
         try
         {
@@ -180,13 +192,13 @@ public class StreamingMusicPlayerHelper
     }
 
     /// <summary>
-    /// Removes track metadata from the cache.
-    /// Does NOT affect currently playing tracks.
+    ///     Removes track metadata from the cache.
+    ///     Does NOT affect currently playing tracks.
     /// </summary>
     /// <param name="trackName">The track name to remove.</param>
     public void UnloadTrackMetadata(string trackName)
     {
-        if (_trackMetadataCache.Remove(trackName, out var trackData))
+        if (_trackMetadataCache.Remove(trackName, out StreamingTrackData? trackData))
         {
             trackData.Dispose();
             _logger?.LogDebug("Unloaded track metadata: {TrackName}", trackName);
@@ -194,11 +206,11 @@ public class StreamingMusicPlayerHelper
     }
 
     /// <summary>
-    /// Clears all cached track metadata.
+    ///     Clears all cached track metadata.
     /// </summary>
     public void ClearCache()
     {
-        foreach (var trackData in _trackMetadataCache.Values)
+        foreach (StreamingTrackData trackData in _trackMetadataCache.Values)
         {
             trackData.Dispose();
         }
@@ -206,9 +218,4 @@ public class StreamingMusicPlayerHelper
         _trackMetadataCache.Clear();
         _logger?.LogDebug("Cleared all streaming track metadata cache");
     }
-
-    /// <summary>
-    /// Gets the number of cached track metadata entries.
-    /// </summary>
-    public int CachedTrackCount => _trackMetadataCache.Count;
 }

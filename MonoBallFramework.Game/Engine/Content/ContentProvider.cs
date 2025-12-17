@@ -1,4 +1,3 @@
-using System.IO;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MonoBallFramework.Game.Engine.Core.Modding;
@@ -6,16 +5,16 @@ using MonoBallFramework.Game.Engine.Core.Modding;
 namespace MonoBallFramework.Game.Engine.Content;
 
 /// <summary>
-/// Provides content path resolution with mod support and LRU caching.
-/// Resolves content paths by checking mods (by priority descending) then the base game.
-/// Thread-safe implementation with comprehensive logging and security validation.
+///     Provides content path resolution with mod support and LRU caching.
+///     Resolves content paths by checking mods (by priority descending) then the base game.
+///     Thread-safe implementation with comprehensive logging and security validation.
 /// </summary>
 public sealed class ContentProvider : IContentProvider
 {
-    private readonly IModLoader _modLoader;
-    private readonly ILogger<ContentProvider> _logger;
-    private readonly ContentProviderOptions _options;
     private readonly LruCache<string, string?> _cache;
+    private readonly ILogger<ContentProvider> _logger;
+    private readonly IModLoader _modLoader;
+    private readonly ContentProviderOptions _options;
 
     // Cache statistics
     private long _cacheHits;
@@ -23,7 +22,7 @@ public sealed class ContentProvider : IContentProvider
     private long _totalResolutions;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ContentProvider"/> class.
+    ///     Initializes a new instance of the <see cref="ContentProvider" /> class.
     /// </summary>
     /// <param name="modLoader">The mod loader for accessing loaded mods.</param>
     /// <param name="logger">The logger for diagnostic information.</param>
@@ -113,7 +112,7 @@ public sealed class ContentProvider : IContentProvider
             .OrderByDescending(m => m.Priority)
             .ToList();
 
-        foreach (var mod in modsOrderedByPriority)
+        foreach (ModManifest mod in modsOrderedByPriority)
         {
             // Check if this mod has the requested content type
             if (!mod.ContentFolders.TryGetValue(contentType, out string? contentFolder))
@@ -201,7 +200,7 @@ public sealed class ContentProvider : IContentProvider
             .OrderByDescending(m => m.Priority)
             .ToList();
 
-        foreach (var mod in modsOrderedByPriority)
+        foreach (ModManifest mod in modsOrderedByPriority)
         {
             if (!mod.ContentFolders.TryGetValue(contentType, out string? contentFolder))
             {
@@ -253,7 +252,8 @@ public sealed class ContentProvider : IContentProvider
             {
                 try
                 {
-                    foreach (string filePath in Directory.EnumerateFiles(baseSearchPath, pattern, SearchOption.AllDirectories))
+                    foreach (string filePath in Directory.EnumerateFiles(baseSearchPath, pattern,
+                                 SearchOption.AllDirectories))
                     {
                         // Calculate relative path for duplicate detection
                         string relativePath = Path.GetRelativePath(baseSearchPath, filePath);
@@ -325,7 +325,7 @@ public sealed class ContentProvider : IContentProvider
             .OrderByDescending(m => m.Priority)
             .ToList();
 
-        foreach (var mod in modsOrderedByPriority)
+        foreach (ModManifest mod in modsOrderedByPriority)
         {
             if (!mod.ContentFolders.TryGetValue(contentType, out string? contentFolder))
             {
@@ -417,7 +417,7 @@ public sealed class ContentProvider : IContentProvider
             .OrderByDescending(m => m.Priority)
             .ToList();
 
-        foreach (var mod in modsOrderedByPriority)
+        foreach (ModManifest mod in modsOrderedByPriority)
         {
             if (!mod.ContentFolders.TryGetValue(contentType, out string? modFolder))
             {
@@ -472,23 +472,23 @@ public sealed class ContentProvider : IContentProvider
     }
 
     /// <summary>
-    /// Validates that a search pattern is safe and doesn't contain path traversal attempts.
-    /// Throws <see cref="SecurityException"/> if the pattern is malicious.
+    ///     Validates that a search pattern is safe and doesn't contain path traversal attempts.
+    ///     Throws <see cref="SecurityException" /> if the pattern is malicious.
     /// </summary>
     /// <param name="pattern">The search pattern to validate.</param>
     /// <exception cref="SecurityException">Thrown when pattern contains path traversal or other dangerous content.</exception>
     /// <remarks>
-    /// Per Microsoft documentation, Directory.EnumerateFiles should reject patterns containing ".."
-    /// followed by a directory separator. However, we perform explicit validation for defense in depth
-    /// and to provide clear error messages.
-    /// See: https://learn.microsoft.com/en-us/dotnet/api/system.io.directory.enumeratefiles
+    ///     Per Microsoft documentation, Directory.EnumerateFiles should reject patterns containing ".."
+    ///     followed by a directory separator. However, we perform explicit validation for defense in depth
+    ///     and to provide clear error messages.
+    ///     See: https://learn.microsoft.com/en-us/dotnet/api/system.io.directory.enumeratefiles
     /// </remarks>
     private void ValidateSearchPattern(string pattern)
     {
         // Block path traversal attempts (e.g., "../*.json", "..\\*.json", "foo/../bar")
         if (pattern.Contains("..", StringComparison.Ordinal))
         {
-            var errorMessage = $"Search pattern contains path traversal sequence '..': {pattern}";
+            string errorMessage = $"Search pattern contains path traversal sequence '..': {pattern}";
             _logger.LogWarning("Security: {Message}", errorMessage);
             throw new SecurityException(errorMessage);
         }
@@ -496,7 +496,7 @@ public sealed class ContentProvider : IContentProvider
         // Block rooted/absolute paths (e.g., "/etc/*.json", "C:\*.json")
         if (Path.IsPathRooted(pattern))
         {
-            var errorMessage = $"Search pattern cannot be an absolute path: {pattern}";
+            string errorMessage = $"Search pattern cannot be an absolute path: {pattern}";
             _logger.LogWarning("Security: {Message}", errorMessage);
             throw new SecurityException(errorMessage);
         }
@@ -504,7 +504,7 @@ public sealed class ContentProvider : IContentProvider
         // Block null byte injection
         if (pattern.Contains('\0'))
         {
-            var errorMessage = "Search pattern contains null byte";
+            string errorMessage = "Search pattern contains null byte";
             _logger.LogWarning("Security: {Message}", errorMessage);
             throw new SecurityException(errorMessage);
         }
@@ -512,14 +512,14 @@ public sealed class ContentProvider : IContentProvider
         // Block patterns starting with directory separator (could bypass base path)
         if (pattern.StartsWith(Path.DirectorySeparatorChar) || pattern.StartsWith(Path.AltDirectorySeparatorChar))
         {
-            var errorMessage = $"Search pattern cannot start with directory separator: {pattern}";
+            string errorMessage = $"Search pattern cannot start with directory separator: {pattern}";
             _logger.LogWarning("Security: {Message}", errorMessage);
             throw new SecurityException(errorMessage);
         }
     }
 
     /// <summary>
-    /// Validates that a relative path is safe and doesn't contain path traversal attempts.
+    ///     Validates that a relative path is safe and doesn't contain path traversal attempts.
     /// </summary>
     /// <param name="relativePath">The relative path to validate.</param>
     /// <returns>True if the path is safe, false otherwise.</returns>
@@ -553,12 +553,12 @@ public sealed class ContentProvider : IContentProvider
 }
 
 /// <summary>
-/// Exception thrown when a security violation is detected in content path resolution.
+///     Exception thrown when a security violation is detected in content path resolution.
 /// </summary>
 public sealed class SecurityException : Exception
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="SecurityException"/> class.
+    ///     Initializes a new instance of the <see cref="SecurityException" /> class.
     /// </summary>
     /// <param name="message">The error message.</param>
     public SecurityException(string message) : base(message)
@@ -566,7 +566,7 @@ public sealed class SecurityException : Exception
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="SecurityException"/> class with an inner exception.
+    ///     Initializes a new instance of the <see cref="SecurityException" /> class with an inner exception.
     /// </summary>
     /// <param name="message">The error message.</param>
     /// <param name="innerException">The inner exception.</param>

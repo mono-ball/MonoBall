@@ -97,19 +97,19 @@ public class HelpCommand : IConsoleCommand
         );
         context.WriteLine("  GET HELP:", theme.BorderFocus);
         context.WriteLine(
-            $"    {"help keyboard", -18} Show all keyboard shortcuts",
+            $"    {"help keyboard",-18} Show all keyboard shortcuts",
             theme.TextPrimary
         );
         context.WriteLine(
-            $"    {"help commands", -18} List all available commands",
+            $"    {"help commands",-18} List all available commands",
             theme.TextPrimary
         );
-        context.WriteLine($"    {"help scripting", -18} C# scripting guide", theme.TextPrimary);
+        context.WriteLine($"    {"help scripting",-18} C# scripting guide", theme.TextPrimary);
         context.WriteLine("  COMMON ACTIONS:", theme.BorderFocus);
-        context.WriteLine($"    {"clear", -18} Clear console output", theme.TextSecondary);
-        context.WriteLine($"    {"Ctrl+R", -18} Search command history", theme.Info);
-        context.WriteLine($"    {"Ctrl+F", -18} Search console output", theme.Info);
-        context.WriteLine($"    {"Tab", -18} Auto-complete code", theme.Info);
+        context.WriteLine($"    {"clear",-18} Clear console output", theme.TextSecondary);
+        context.WriteLine($"    {"Ctrl+R",-18} Search command history", theme.Info);
+        context.WriteLine($"    {"Ctrl+F",-18} Search console output", theme.Info);
+        context.WriteLine($"    {"Tab",-18} Auto-complete code", theme.Info);
         context.WriteLine("  TRY THIS:", theme.BorderFocus);
         context.WriteLine("    Player.GetMoney()", theme.SyntaxString);
         context.WriteLine("    Player.AddMoney(1000)", theme.SyntaxString);
@@ -125,11 +125,11 @@ public class HelpCommand : IConsoleCommand
             theme.Success
         );
         context.WriteLine(
-            $"  {"help keyboard", -20} {"->", -3} All keyboard shortcuts",
+            $"  {"help keyboard",-20} {"->",-3} All keyboard shortcuts",
             theme.Info
         );
-        context.WriteLine($"  {"help commands", -20} {"->", -3} All console commands", theme.Info);
-        context.WriteLine($"  {"help scripting", -20} {"->", -3} C# scripting guide", theme.Info);
+        context.WriteLine($"  {"help commands",-20} {"->",-3} All console commands", theme.Info);
+        context.WriteLine($"  {"help scripting",-20} {"->",-3} C# scripting guide", theme.Info);
         context.WriteLine("");
         context.WriteLine("TIP: Type any help topic above to learn more!", theme.Success);
     }
@@ -148,31 +148,31 @@ public class HelpCommand : IConsoleCommand
             theme.Success
         );
         context.WriteLine("  TEXT INPUT:", theme.BorderFocus);
-        context.WriteLine($"    {"Enter", -18} Submit command (single-line)", theme.Info);
-        context.WriteLine($"    {"Ctrl+Enter", -18} Submit command (multi-line)", theme.Info);
-        context.WriteLine($"    {"Shift+Enter", -18} New line (multi-line input)", theme.Info);
-        context.WriteLine($"    {"Escape", -18} Cancel current operation", theme.Warning);
+        context.WriteLine($"    {"Enter",-18} Submit command (single-line)", theme.Info);
+        context.WriteLine($"    {"Ctrl+Enter",-18} Submit command (multi-line)", theme.Info);
+        context.WriteLine($"    {"Shift+Enter",-18} New line (multi-line input)", theme.Info);
+        context.WriteLine($"    {"Escape",-18} Cancel current operation", theme.Warning);
         context.WriteLine("  NAVIGATION & EDITING:", theme.BorderFocus);
-        context.WriteLine($"    {"Left/Right", -18} Move cursor", theme.TextSecondary);
-        context.WriteLine($"    {"Home/End", -18} Jump to start/end of line", theme.TextSecondary);
-        context.WriteLine($"    {"Ctrl+Left/Right", -18} Jump by word", theme.TextSecondary);
-        context.WriteLine($"    {"Ctrl+A", -18} Select all text", theme.Info);
-        context.WriteLine($"    {"Ctrl+X/C/V", -18} Cut/Copy/Paste", theme.Info);
+        context.WriteLine($"    {"Left/Right",-18} Move cursor", theme.TextSecondary);
+        context.WriteLine($"    {"Home/End",-18} Jump to start/end of line", theme.TextSecondary);
+        context.WriteLine($"    {"Ctrl+Left/Right",-18} Jump by word", theme.TextSecondary);
+        context.WriteLine($"    {"Ctrl+A",-18} Select all text", theme.Info);
+        context.WriteLine($"    {"Ctrl+X/C/V",-18} Cut/Copy/Paste", theme.Info);
         context.WriteLine("  HISTORY & SEARCH:", theme.BorderFocus);
-        context.WriteLine($"    {"Up/Down", -18} Navigate command history", theme.Info);
-        context.WriteLine($"    {"Ctrl+R", -18} Search command history *", theme.Success);
-        context.WriteLine($"    {"", 18}   Type to filter, Enter to select", theme.TextSecondary);
-        context.WriteLine($"    {"Ctrl+F", -18} Search console output", theme.Success);
-        context.WriteLine($"    {"", 18}   F3/Shift+F3 to navigate results", theme.TextSecondary);
+        context.WriteLine($"    {"Up/Down",-18} Navigate command history", theme.Info);
+        context.WriteLine($"    {"Ctrl+R",-18} Search command history *", theme.Success);
+        context.WriteLine($"    {"",18}   Type to filter, Enter to select", theme.TextSecondary);
+        context.WriteLine($"    {"Ctrl+F",-18} Search console output", theme.Success);
+        context.WriteLine($"    {"",18}   F3/Shift+F3 to navigate results", theme.TextSecondary);
         context.WriteLine("  AUTO-COMPLETION:", theme.BorderFocus);
-        context.WriteLine($"    {"Tab", -18} Show/accept completions", theme.Info);
-        context.WriteLine($"    {"Up/Down", -18} Navigate completion list", theme.TextSecondary);
-        context.WriteLine($"    {"Esc", -18} Cancel completions", theme.Warning);
-        context.WriteLine($"    {"F1", -18} Show documentation", theme.Success);
+        context.WriteLine($"    {"Tab",-18} Show/accept completions", theme.Info);
+        context.WriteLine($"    {"Up/Down",-18} Navigate completion list", theme.TextSecondary);
+        context.WriteLine($"    {"Esc",-18} Cancel completions", theme.Warning);
+        context.WriteLine($"    {"F1",-18} Show documentation", theme.Success);
         context.WriteLine("  CONSOLE CONTROL:", theme.BorderFocus);
-        context.WriteLine($"    {"Ctrl+~ or `", -18} Toggle console on/off", theme.Info);
-        context.WriteLine($"    {"Ctrl+Up/Down", -18} Resize console", theme.Info);
-        context.WriteLine($"    {"Ctrl+L", -18} Clear output", theme.Info);
+        context.WriteLine($"    {"Ctrl+~ or `",-18} Toggle console on/off", theme.Info);
+        context.WriteLine($"    {"Ctrl+Up/Down",-18} Resize console", theme.Info);
+        context.WriteLine($"    {"Ctrl+L",-18} Clear output", theme.Info);
         context.WriteLine("");
         context.WriteLine(
             "TIP: Watch the hint bar at the bottom for context-specific shortcuts!",
@@ -206,35 +206,24 @@ public class HelpCommand : IConsoleCommand
         // Hardcoded common commands for better formatting
         (string, string)[] commonCommands = new[]
         {
-            ("help", "Display this help information"),
-            ("clear", "Clear all console output"),
-            ("exit", "Close the console (same as quit)"),
-            ("quit", "Close the console"),
-            ("log", "Manage and view system logs"),
-            ("history", "Manage command history (list, clear, save, load)"),
-            ("alias", "Manage command aliases"),
-            ("script", "Manage scripts (list, load, save, reset)"),
+            ("help", "Display this help information"), ("clear", "Clear all console output"),
+            ("exit", "Close the console (same as quit)"), ("quit", "Close the console"),
+            ("log", "Manage and view system logs"), ("history", "Manage command history (list, clear, save, load)"),
+            ("alias", "Manage command aliases"), ("script", "Manage scripts (list, load, save, reset)"),
             ("bookmark", "Manage bookmarked commands (F-key shortcuts)"),
             ("watch", "Manage watch expressions (real-time monitoring)"),
-            ("break", "Manage breakpoints that pause the game"),
-            ("entity", "Browse and inspect ECS entities"),
-            ("variable", "Manage script variables"),
-            ("vars", "Manage script variables (alias for variable)"),
-            ("tab", "Switch between console tabs"),
-            ("time", "Control game time (pause, resume, step, speed)"),
-            ("pause", "Pause the game"),
-            ("resume", "Resume the game"),
-            ("step", "Step forward frames when paused"),
-            ("profiler", "Control system profiler display"),
-            ("stats", "View performance statistics"),
-            ("theme", "List or switch UI themes"),
-            ("size", "Change the console height"),
-            ("export", "Export console output to clipboard"),
+            ("break", "Manage breakpoints that pause the game"), ("entity", "Browse and inspect ECS entities"),
+            ("variable", "Manage script variables"), ("vars", "Manage script variables (alias for variable)"),
+            ("tab", "Switch between console tabs"), ("time", "Control game time (pause, resume, step, speed)"),
+            ("pause", "Pause the game"), ("resume", "Resume the game"), ("step", "Step forward frames when paused"),
+            ("profiler", "Control system profiler display"), ("stats", "View performance statistics"),
+            ("theme", "List or switch UI themes"), ("size", "Change the console height"),
+            ("export", "Export console output to clipboard")
         };
 
         foreach ((string name, string desc) in commonCommands)
         {
-            context.WriteLine($"    {name, -15} -> {desc}", theme.Info);
+            context.WriteLine($"    {name,-15} -> {desc}", theme.Info);
         }
 
         context.WriteLine("");
@@ -286,10 +275,10 @@ public class HelpCommand : IConsoleCommand
         context.WriteLine("    Entities         ECS entity queries and modifications", theme.Info);
         context.WriteLine("    Scenes           Scene loading and management", theme.Info);
         context.WriteLine("  AUTO-COMPLETION:", theme.BorderFocus);
-        context.WriteLine($"    {"Tab", -15} -> Show context-aware completions", theme.Success);
-        context.WriteLine($"    {"Type '.'", -15} -> Show methods/properties", theme.Success);
-        context.WriteLine($"    {"Type '('", -15} -> Show parameter hints", theme.Success);
-        context.WriteLine($"    {"F1", -15} -> View documentation", theme.Success);
+        context.WriteLine($"    {"Tab",-15} -> Show context-aware completions", theme.Success);
+        context.WriteLine($"    {"Type '.'",-15} -> Show methods/properties", theme.Success);
+        context.WriteLine($"    {"Type '('",-15} -> Show parameter hints", theme.Success);
+        context.WriteLine($"    {"F1",-15} -> View documentation", theme.Success);
         context.WriteLine("  TRY THESE EXAMPLES:", theme.BorderFocus);
         context.WriteLine(
             "    Player.GetMoney()                  Check current money",

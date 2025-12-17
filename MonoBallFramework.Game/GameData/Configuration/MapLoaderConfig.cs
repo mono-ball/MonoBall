@@ -61,12 +61,7 @@ public class MapLoaderConfig
     /// </summary>
     public static MapLoaderConfig CreateDevelopment()
     {
-        return new MapLoaderConfig
-        {
-            ValidateMaps = true,
-            ThrowOnValidationError = true,
-            CacheTilesetTextures = true,
-        };
+        return new MapLoaderConfig { ValidateMaps = true, ThrowOnValidationError = true, CacheTilesetTextures = true };
     }
 
     /// <summary>
@@ -79,7 +74,7 @@ public class MapLoaderConfig
             ValidateMaps = false, // Skip validation in production for performance
             ThrowOnValidationError = false,
             CacheTilesetTextures = true,
-            MaxRenderDistance = 5000, // Smaller render distance for better performance
+            MaxRenderDistance = 5000 // Smaller render distance for better performance
         };
     }
 }

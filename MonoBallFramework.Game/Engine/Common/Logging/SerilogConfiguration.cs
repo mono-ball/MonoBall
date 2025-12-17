@@ -60,7 +60,8 @@ public static class SerilogConfiguration
                     rollingInterval: RollingInterval.Day,
                     retainedFileCountLimit: isDevelopment ? 3 : 7,
                     fileSizeLimitBytes: isDevelopment ? 50 * 1024 * 1024 : 10 * 1024 * 1024, // 50MB dev, 10MB prod
-                    outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] [{ThreadId}] {SourceContext}: {Message:lj}{NewLine}{Exception}"
+                    outputTemplate:
+                    "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] [{ThreadId}] {SourceContext}: {Message:lj}{NewLine}{Exception}"
                 )
             );
         }

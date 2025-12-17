@@ -18,14 +18,14 @@ namespace MonoBallFramework.Game.Engine.Systems.BulkOperations;
 ///     <example>
 ///         <code>
 /// var bulkQuery = new BulkQueryOperations(world);
-///
+/// 
 /// // Find all low-health enemies
 /// var query = new QueryDescription().WithAll&lt;Enemy, Health&gt;();
 /// var weakEnemies = bulkQuery.CollectWithComponent&lt;Health&gt;(query)
 ///     .Where(x => x.component.CurrentHP &lt; x.component.MaxHP * 0.3f)
 ///     .Select(x => x.entity)
 ///     .ToList();
-///
+/// 
 /// // Make them all flee
 /// bulkQuery.AddComponentToMatching&lt;FleeingStatus&gt;(query, new FleeingStatus());
 /// </code>
@@ -84,7 +84,7 @@ public sealed class BulkQueryOperations
     /// // Get all entities with health values
     /// var query = new QueryDescription().WithAll&lt;Health&gt;();
     /// var healthData = bulkQuery.CollectWithComponent&lt;Health&gt;(query);
-    ///
+    /// 
     /// foreach (var (entity, health) in healthData)
     /// {
     ///     if (health.CurrentHP &lt;= 0)
@@ -121,7 +121,7 @@ public sealed class BulkQueryOperations
     /// // Get all entities with position and grid movement
     /// var query = new QueryDescription().WithAll&lt;Position, GridMovement&gt;();
     /// var movingEntities = bulkQuery.CollectWithComponents&lt;Position, GridMovement&gt;(query);
-    ///
+    /// 
     /// foreach (var (entity, pos, vel) in movingEntities)
     /// {
     ///     // Process movement data
@@ -161,7 +161,7 @@ public sealed class BulkQueryOperations
     /// {
     ///     // ✅ SAFE: Read operations, logging, etc.
     ///     Console.WriteLine($"Enemy: {entity.Id}");
-    ///
+    /// 
     ///     // ❌ UNSAFE: Don't add/remove components here!
     ///     // Use AddComponentToMatching() instead for structural changes
     /// });

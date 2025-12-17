@@ -30,14 +30,14 @@ namespace MonoBallFramework.Game.Engine.Core.Events;
 ///     public required int TileY { get; init; }
 ///     public string CustomData { get; init; }
 /// }
-///
+/// 
 /// // Usage in script
 /// public class TileScript : ScriptBase
 /// {
 ///     public override void RegisterEventHandlers(ScriptContext ctx)
 ///     {
 ///         var tilePos = new Vector2(10, 15);
-///
+/// 
 ///         // Only receive events for this specific tile
 ///         OnTile&lt;CustomTileEvent&gt;(tilePos, evt =>
 ///         {

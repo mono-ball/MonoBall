@@ -4,7 +4,6 @@ namespace MonoBallFramework.Game.Engine.Core.Types;
 
 /// <summary>
 ///     Strongly-typed identifier for map definitions.
-///
 ///     Format: base:map:{region}/{name}
 ///     Examples:
 ///     - base:map:hoenn/littleroot_town
@@ -24,9 +23,11 @@ public sealed record GameMapId : EntityId
     public GameMapId(string value) : base(value)
     {
         if (EntityType != TypeName)
+        {
             throw new ArgumentException(
                 $"Expected entity type '{TypeName}', got '{EntityType}'",
                 nameof(value));
+        }
     }
 
     /// <summary>
@@ -61,11 +62,15 @@ public sealed record GameMapId : EntityId
     public static GameMapId? TryCreate(string? value)
     {
         if (string.IsNullOrWhiteSpace(value))
+        {
             return null;
+        }
 
         // Only accept full format
         if (!IsValidFormat(value) || !value.Contains($":{TypeName}:"))
+        {
             return null;
+        }
 
         try
         {
@@ -80,5 +85,8 @@ public sealed record GameMapId : EntityId
     /// <summary>
     ///     Explicit conversion from string. Use TryCreate() for safe parsing.
     /// </summary>
-    public static explicit operator GameMapId(string value) => new(value);
+    public static explicit operator GameMapId(string value)
+    {
+        return new GameMapId(value);
+    }
 }

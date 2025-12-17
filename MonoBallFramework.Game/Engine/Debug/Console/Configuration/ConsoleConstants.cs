@@ -265,42 +265,15 @@ public static class ConsoleConstants
     {
         public const char MemberAccessChar = '.';
 
-        public static readonly char[] WordSeparators =
-        {
-            ' ',
-            '.',
-            '(',
-            ')',
-            ',',
-            ';',
-            '=',
-            '+',
-            '-',
-            '*',
-            '/',
-        };
+        public static readonly char[] WordSeparators = { ' ', '.', '(', ')', ',', ';', '=', '+', '-', '*', '/' };
 
         public static readonly char[] SuggestionDismissChars = { ' ', ';', '{', '}' };
 
         // C# Keywords for auto-complete
         public static readonly string[] Keywords =
         {
-            "var",
-            "int",
-            "string",
-            "bool",
-            "float",
-            "double",
-            "if",
-            "else",
-            "for",
-            "foreach",
-            "while",
-            "return",
-            "true",
-            "false",
-            "null",
-            "new",
+            "var", "int", "string", "bool", "float", "double", "if", "else", "for", "foreach", "while", "return",
+            "true", "false", "null", "new"
         };
     }
 

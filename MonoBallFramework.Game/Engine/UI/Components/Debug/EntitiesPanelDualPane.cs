@@ -1,3 +1,4 @@
+using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using MonoBallFramework.Game.Engine.UI.Components.Base;
@@ -8,6 +9,7 @@ using MonoBallFramework.Game.Engine.UI.Input;
 using MonoBallFramework.Game.Engine.UI.Interfaces;
 using MonoBallFramework.Game.Engine.UI.Layout;
 using MonoBallFramework.Game.Engine.UI.Models;
+using TextCopy;
 
 namespace MonoBallFramework.Game.Engine.UI.Components.Debug;
 
@@ -29,55 +31,55 @@ public class EntitiesPanelDualPane : DebugPanelBase, IEntityOperations
     private const int MaxComponentsDisplay = 50;
     private const int MaxFieldsPerComponent = 20;
     private const int PageUpDownLines = 20;
-
-    private readonly SplitPanel _splitPanel;
-    private readonly TextBuffer _entityListBuffer;
     private readonly TextBuffer _detailBuffer;
-    private readonly EntityFilterBar _filterBar;
 
     // Entity data
     private readonly List<EntityInfo> _entities = new();
+    private readonly TextBuffer _entityListBuffer;
+    private readonly EntityFilterBar _filterBar;
     private readonly List<EntityInfo> _filteredEntities = new();
     private readonly Dictionary<int, int> _lineToEntityId = new();
+    private readonly Dictionary<int, EntityInfo> _loadedEntityCache = new();
     private readonly List<int> _navigableEntityIds = new();
-    private readonly HashSet<int> _pinnedEntities = new();
     private readonly HashSet<int> _newEntityIds = new();
+    private readonly HashSet<int> _pinnedEntities = new();
     private readonly HashSet<int> _previousEntityIds = new();
     private readonly HashSet<int> _removedEntityIds = new();
-    private readonly Dictionary<int, EntityInfo> _loadedEntityCache = new();
 
-    // Selection
-    private int? _selectedEntityId;
-    private int? _lastDisplayedEntityId; // Track for scroll preservation
-    private int _selectedIndex;
-
-    // Filters
-    private string _tagFilter = "";
-    private string _searchFilter = "";
+    private readonly SplitPanel _splitPanel;
     private string _componentFilter = "";
-
-    // Entity providers
-    private Func<IEnumerable<EntityInfo>>? _entityProvider;
-    private Func<int, EntityInfo, EntityInfo?>? _entityDetailLoader;
+    private Func<IEnumerable<string>>? _componentNamesProvider;
 
     // Paged loading (for 1M+ entities)
     private Func<int>? _entityCountProvider;
-    private Func<int, int, List<EntityInfo>>? _entityRangeProvider;
-    private Func<IEnumerable<string>>? _componentNamesProvider;
-    private Func<IEnumerable<string>>? _tagNamesProvider;
+    private Func<int, EntityInfo, EntityInfo?>? _entityDetailLoader;
     private List<int>? _entityIds;
-    private List<int>? _filteredEntityIds; // Filtered subset for paged mode
+
+    // Entity providers
+    private Func<IEnumerable<EntityInfo>>? _entityProvider;
+    private Func<int, int, List<EntityInfo>>? _entityRangeProvider;
     private Dictionary<int, EntityInfo>? _filteredEntityCache; // Cache entities during filtering
-    private int _totalEntityCount;
-    private bool _usePagedLoading;
+    private List<int>? _filteredEntityIds; // Filtered subset for paged mode
+    private float _highlightDuration = 3.0f;
+    private int? _lastDisplayedEntityId; // Track for scroll preservation
 
     // Auto-refresh
     private double _lastUpdateTime;
-    private double _updateInterval = 2.0;
-    private float _highlightDuration = 3.0f;
-    private double _timeSinceLastChange;
-    private int _spawnedThisSession;
     private int _removedThisSession;
+    private string _searchFilter = "";
+
+    // Selection
+    private int? _selectedEntityId;
+    private int _selectedIndex;
+    private int _spawnedThisSession;
+
+    // Filters
+    private string _tagFilter = "";
+    private Func<IEnumerable<string>>? _tagNamesProvider;
+    private double _timeSinceLastChange;
+    private int _totalEntityCount;
+    private double _updateInterval = 2.0;
+    private bool _usePagedLoading;
 
 
     /// <summary>
@@ -88,17 +90,9 @@ public class EntitiesPanelDualPane : DebugPanelBase, IEntityOperations
         Id = "entities_panel_dual";
 
         // Create the text buffers for each pane
-        _entityListBuffer = new TextBuffer("entity_list_buffer")
-        {
-            AutoScroll = false,
-            MaxLines = MaxEntityListLines,
-        };
+        _entityListBuffer = new TextBuffer("entity_list_buffer") { AutoScroll = false, MaxLines = MaxEntityListLines };
 
-        _detailBuffer = new TextBuffer("detail_buffer")
-        {
-            AutoScroll = false,
-            MaxLines = MaxDetailBufferLines,
-        };
+        _detailBuffer = new TextBuffer("detail_buffer") { AutoScroll = false, MaxLines = MaxDetailBufferLines };
 
         // Create split panel with horizontal layout
         _splitPanel = new SplitPanel
@@ -109,7 +103,7 @@ public class EntitiesPanelDualPane : DebugPanelBase, IEntityOperations
             MinFirstPaneSize = 150,
             MinSecondPaneSize = 200,
             SplitterSize = 4,
-            ShowSplitter = true,
+            ShowSplitter = true
         };
 
         // Add buffers to split panel
@@ -121,10 +115,7 @@ public class EntitiesPanelDualPane : DebugPanelBase, IEntityOperations
 
         // Create filter bar with explicit height set during initialization
         // (required because layout is resolved before OnRenderContainer sets heights)
-        _filterBar = new EntityFilterBar
-        {
-            Id = "entity_filter_bar",
-        };
+        _filterBar = new EntityFilterBar { Id = "entity_filter_bar" };
         _filterBar.Constraint.Anchor = Anchor.StretchTop;
         _filterBar.Constraint.Height = _filterBar.PreferredHeight; // Set height at init time
         _filterBar.OnFilterChanged += HandleFilterBarChanged;
@@ -134,15 +125,6 @@ public class EntitiesPanelDualPane : DebugPanelBase, IEntityOperations
 
         AddChild(_filterBar);
         AddChild(_splitPanel);
-    }
-
-    private void HandleFilterBarChanged(string tag, string component, string search)
-    {
-        _tagFilter = tag;
-        _componentFilter = component;
-        _searchFilter = search;
-        ApplyFilters();
-        RefreshDisplay();
     }
 
     /// <summary>Gets or sets the split ratio (0-1, ratio for left pane).</summary>
@@ -183,6 +165,190 @@ public class EntitiesPanelDualPane : DebugPanelBase, IEntityOperations
 
     /// <summary>Gets whether the filter bar has exclusive input focus (dropdown open or search focused).</summary>
     public bool HasExclusiveInputFocus => _filterBar.HasExclusiveFocus;
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // IEntityOperations Interface Implementation
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    void IEntityOperations.Refresh()
+    {
+        RefreshEntities();
+    }
+
+    void IEntityOperations.SetTagFilter(string tag)
+    {
+        SetTagFilter(tag);
+    }
+
+    void IEntityOperations.SetSearchFilter(string search)
+    {
+        SetSearchFilter(search);
+    }
+
+    void IEntityOperations.SetComponentFilter(string componentName)
+    {
+        SetComponentFilter(componentName);
+    }
+
+    void IEntityOperations.ClearFilters()
+    {
+        ClearFilters();
+    }
+
+    (string Tag, string Search, string Component) IEntityOperations.GetFilters()
+    {
+        return GetFilters();
+    }
+
+    void IEntityOperations.Select(int entityId)
+    {
+        SelectEntity(entityId);
+    }
+
+    void IEntityOperations.Expand(int entityId)
+    {
+        SelectEntity(entityId);
+    }
+
+    void IEntityOperations.Collapse(int entityId) { }
+
+    bool IEntityOperations.Toggle(int entityId)
+    {
+        SelectEntity(entityId);
+        return false;
+    }
+
+    void IEntityOperations.ExpandAll() { }
+    void IEntityOperations.CollapseAll() { }
+
+    void IEntityOperations.Pin(int entityId)
+    {
+        PinEntity(entityId);
+    }
+
+    void IEntityOperations.Unpin(int entityId)
+    {
+        UnpinEntity(entityId);
+    }
+
+    (int Total, int Filtered, int Pinned, int Expanded) IEntityOperations.GetStatistics()
+    {
+        return (_entities.Count, _filteredEntities.Count, _pinnedEntities.Count, _selectedEntityId.HasValue ? 1 : 0);
+    }
+
+    Dictionary<string, int> IEntityOperations.GetTagCounts()
+    {
+        return _entities
+            .Where(e => e.Tag != null)
+            .GroupBy(e => e.Tag!)
+            .ToDictionary(g => g.Key, g => g.Count());
+    }
+
+    IEnumerable<string> IEntityOperations.GetComponentNames()
+    {
+        if (_componentNamesProvider != null)
+        {
+            return _componentNamesProvider();
+        }
+
+        return _entities.SelectMany(e => e.Components).Distinct().OrderBy(c => c);
+    }
+
+    IEnumerable<string> IEntityOperations.GetTags()
+    {
+        return _entities.Where(e => e.Tag != null).Select(e => e.Tag!).Distinct().OrderBy(t => t);
+    }
+
+    EntityInfo? IEntityOperations.Find(int entityId)
+    {
+        return _entities.FirstOrDefault(e => e.Id == entityId);
+    }
+
+    IEnumerable<EntityInfo> IEntityOperations.FindByName(string name)
+    {
+        return _entities.Where(e => e.Name.Contains(name, StringComparison.OrdinalIgnoreCase));
+    }
+
+    (int Spawned, int Removed, int CurrentlyHighlighted) IEntityOperations.GetSessionStats()
+    {
+        return (_spawnedThisSession, _removedThisSession, _newEntityIds.Count);
+    }
+
+    void IEntityOperations.ClearSessionStats()
+    {
+        _spawnedThisSession = 0;
+        _removedThisSession = 0;
+        _newEntityIds.Clear();
+        _removedEntityIds.Clear();
+        RefreshDisplay();
+    }
+
+    bool IEntityOperations.AutoRefresh { get => AutoUpdate; set => AutoUpdate = value; }
+    float IEntityOperations.RefreshInterval { get => (float)UpdateInterval; set => UpdateInterval = value; }
+    float IEntityOperations.HighlightDuration { get => HighlightDuration; set => HighlightDuration = value; }
+
+    IEnumerable<int> IEntityOperations.GetNewEntityIds()
+    {
+        return _newEntityIds;
+    }
+
+    string IEntityOperations.ExportToText(bool includeComponents, bool includeProperties)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("=== Entities Export ===");
+        foreach (EntityInfo entity in _filteredEntities)
+        {
+            sb.AppendLine($"[{entity.Id}] {entity.Name}");
+            if (includeComponents)
+            {
+                foreach (string comp in entity.Components)
+                {
+                    sb.AppendLine($"  - {comp}");
+                }
+            }
+        }
+
+        return sb.ToString();
+    }
+
+    string IEntityOperations.ExportToCsv()
+    {
+        return "ID,Name,Tag,ComponentCount\n" +
+               string.Join("\n", _filteredEntities.Select(e => $"{e.Id},{e.Name},{e.Tag ?? ""},{e.Components.Count}"));
+    }
+
+    string? IEntityOperations.ExportSelected()
+    {
+        if (!_selectedEntityId.HasValue)
+        {
+            return null;
+        }
+
+        EntityInfo? entity = _entities.FirstOrDefault(e => e.Id == _selectedEntityId.Value);
+        if (entity == null)
+        {
+            return null;
+        }
+
+        return $"[{entity.Id}] {entity.Name}\nComponents: {string.Join(", ", entity.Components)}";
+    }
+
+    int? IEntityOperations.SelectedId => _selectedEntityId;
+
+    void IEntityOperations.CopyToClipboard(bool asCsv)
+    {
+        string text = asCsv ? ((IEntityOperations)this).ExportToCsv() : ((IEntityOperations)this).ExportToText();
+        ClipboardService.SetText(text);
+    }
+
+    private void HandleFilterBarChanged(string tag, string component, string search)
+    {
+        _tagFilter = tag;
+        _componentFilter = component;
+        _searchFilter = search;
+        ApplyFilters();
+        RefreshDisplay();
+    }
 
     // ═══════════════════════════════════════════════════════════════════════════
     // Entity Provider Setup
@@ -245,7 +411,10 @@ public class EntitiesPanelDualPane : DebugPanelBase, IEntityOperations
             return;
         }
 
-        if (_entityProvider == null) return;
+        if (_entityProvider == null)
+        {
+            return;
+        }
 
         try
         {
@@ -267,6 +436,7 @@ public class EntitiesPanelDualPane : DebugPanelBase, IEntityOperations
                         _timeSinceLastChange = 0.0;
                     }
                 }
+
                 foreach (int id in _previousEntityIds)
                 {
                     if (!newIds.Contains(id))
@@ -349,9 +519,13 @@ public class EntitiesPanelDualPane : DebugPanelBase, IEntityOperations
         // For non-paged mode, filter the in-memory entities
         _filteredEntities.Clear();
 
-        foreach (var entity in _entities)
+        foreach (EntityInfo entity in _entities)
         {
-            if (!PassesFilter(entity)) continue;
+            if (!PassesFilter(entity))
+            {
+                continue;
+            }
+
             _filteredEntities.Add(entity);
         }
 
@@ -360,7 +534,11 @@ public class EntitiesPanelDualPane : DebugPanelBase, IEntityOperations
         {
             bool aPinned = _pinnedEntities.Contains(a.Id);
             bool bPinned = _pinnedEntities.Contains(b.Id);
-            if (aPinned != bPinned) return bPinned.CompareTo(aPinned);
+            if (aPinned != bPinned)
+            {
+                return bPinned.CompareTo(aPinned);
+            }
+
             return a.Id.CompareTo(b.Id);
         });
 
@@ -391,16 +569,19 @@ public class EntitiesPanelDualPane : DebugPanelBase, IEntityOperations
         _filteredEntityIds = new List<int>();
         _filteredEntityCache = new Dictionary<int, EntityInfo>();
 
-        if (_entityRangeProvider == null || _entityIds == null) return;
+        if (_entityRangeProvider == null || _entityIds == null)
+        {
+            return;
+        }
 
         // Load in batches to avoid memory issues
         int batchSize = EntityBatchLoadSize;
         for (int i = 0; i < _entityIds.Count; i += batchSize)
         {
             int count = Math.Min(batchSize, _entityIds.Count - i);
-            var batch = _entityRangeProvider(i, count);
+            List<EntityInfo> batch = _entityRangeProvider(i, count);
 
-            foreach (var entity in batch)
+            foreach (EntityInfo entity in batch)
             {
                 if (PassesFilter(entity))
                 {
@@ -418,21 +599,29 @@ public class EntitiesPanelDualPane : DebugPanelBase, IEntityOperations
         if (!string.IsNullOrEmpty(_tagFilter))
         {
             if (entity.Tag == null || !entity.Tag.Contains(_tagFilter, StringComparison.OrdinalIgnoreCase))
+            {
                 return false;
+            }
         }
 
         if (!string.IsNullOrEmpty(_componentFilter))
         {
             if (!entity.Components.Any(c => c.Contains(_componentFilter, StringComparison.OrdinalIgnoreCase)))
+            {
                 return false;
+            }
         }
 
         if (!string.IsNullOrEmpty(_searchFilter))
         {
             bool matchesSearch = entity.Name.Contains(_searchFilter, StringComparison.OrdinalIgnoreCase)
-                || entity.Id.ToString().Contains(_searchFilter)
-                || entity.Components.Any(c => c.Contains(_searchFilter, StringComparison.OrdinalIgnoreCase));
-            if (!matchesSearch) return false;
+                                 || entity.Id.ToString().Contains(_searchFilter)
+                                 || entity.Components.Any(c =>
+                                     c.Contains(_searchFilter, StringComparison.OrdinalIgnoreCase));
+            if (!matchesSearch)
+            {
+                return false;
+            }
         }
 
         return true;
@@ -449,6 +638,7 @@ public class EntitiesPanelDualPane : DebugPanelBase, IEntityOperations
         {
             _selectedIndex = _navigableEntityIds.IndexOf(entityId);
         }
+
         RefreshDisplay();
     }
 
@@ -462,9 +652,19 @@ public class EntitiesPanelDualPane : DebugPanelBase, IEntityOperations
     // Pinning (IEntityOperations compatibility - no expand in dual-pane mode)
     // ═══════════════════════════════════════════════════════════════════════════
 
-    public void ExpandEntity(int entityId) => SelectEntity(entityId);
+    public void ExpandEntity(int entityId)
+    {
+        SelectEntity(entityId);
+    }
+
     public void CollapseEntity(int entityId) { }
-    public bool ToggleEntity(int entityId) { SelectEntity(entityId); return false; }
+
+    public bool ToggleEntity(int entityId)
+    {
+        SelectEntity(entityId);
+        return false;
+    }
+
     public void ExpandAll() { }
     public void CollapseAll() { }
 
@@ -491,6 +691,7 @@ public class EntitiesPanelDualPane : DebugPanelBase, IEntityOperations
             RefreshDisplay();
             return false;
         }
+
         _pinnedEntities.Add(entityId);
         ApplyFilters();
         RefreshDisplay();
@@ -498,116 +699,13 @@ public class EntitiesPanelDualPane : DebugPanelBase, IEntityOperations
     }
 
     // ═══════════════════════════════════════════════════════════════════════════
-    // IEntityOperations Interface Implementation
-    // ═══════════════════════════════════════════════════════════════════════════
-
-    void IEntityOperations.Refresh() => RefreshEntities();
-    void IEntityOperations.SetTagFilter(string tag) => SetTagFilter(tag);
-    void IEntityOperations.SetSearchFilter(string search) => SetSearchFilter(search);
-    void IEntityOperations.SetComponentFilter(string componentName) => SetComponentFilter(componentName);
-    void IEntityOperations.ClearFilters() => ClearFilters();
-    (string Tag, string Search, string Component) IEntityOperations.GetFilters() => GetFilters();
-    void IEntityOperations.Select(int entityId) => SelectEntity(entityId);
-    void IEntityOperations.Expand(int entityId) => SelectEntity(entityId);
-    void IEntityOperations.Collapse(int entityId) { }
-    bool IEntityOperations.Toggle(int entityId) { SelectEntity(entityId); return false; }
-    void IEntityOperations.ExpandAll() { }
-    void IEntityOperations.CollapseAll() { }
-    void IEntityOperations.Pin(int entityId) => PinEntity(entityId);
-    void IEntityOperations.Unpin(int entityId) => UnpinEntity(entityId);
-
-    (int Total, int Filtered, int Pinned, int Expanded) IEntityOperations.GetStatistics()
-    {
-        return (_entities.Count, _filteredEntities.Count, _pinnedEntities.Count, _selectedEntityId.HasValue ? 1 : 0);
-    }
-
-    Dictionary<string, int> IEntityOperations.GetTagCounts()
-    {
-        return _entities
-            .Where(e => e.Tag != null)
-            .GroupBy(e => e.Tag!)
-            .ToDictionary(g => g.Key, g => g.Count());
-    }
-
-    IEnumerable<string> IEntityOperations.GetComponentNames()
-    {
-        if (_componentNamesProvider != null) return _componentNamesProvider();
-        return _entities.SelectMany(e => e.Components).Distinct().OrderBy(c => c);
-    }
-
-    IEnumerable<string> IEntityOperations.GetTags()
-    {
-        return _entities.Where(e => e.Tag != null).Select(e => e.Tag!).Distinct().OrderBy(t => t);
-    }
-
-    EntityInfo? IEntityOperations.Find(int entityId) => _entities.FirstOrDefault(e => e.Id == entityId);
-
-    IEnumerable<EntityInfo> IEntityOperations.FindByName(string name)
-    {
-        return _entities.Where(e => e.Name.Contains(name, StringComparison.OrdinalIgnoreCase));
-    }
-
-    (int Spawned, int Removed, int CurrentlyHighlighted) IEntityOperations.GetSessionStats()
-    {
-        return (_spawnedThisSession, _removedThisSession, _newEntityIds.Count);
-    }
-
-    void IEntityOperations.ClearSessionStats()
-    {
-        _spawnedThisSession = 0;
-        _removedThisSession = 0;
-        _newEntityIds.Clear();
-        _removedEntityIds.Clear();
-        RefreshDisplay();
-    }
-
-    bool IEntityOperations.AutoRefresh { get => AutoUpdate; set => AutoUpdate = value; }
-    float IEntityOperations.RefreshInterval { get => (float)UpdateInterval; set => UpdateInterval = value; }
-    float IEntityOperations.HighlightDuration { get => HighlightDuration; set => HighlightDuration = value; }
-    IEnumerable<int> IEntityOperations.GetNewEntityIds() => _newEntityIds;
-
-    string IEntityOperations.ExportToText(bool includeComponents, bool includeProperties)
-    {
-        var sb = new System.Text.StringBuilder();
-        sb.AppendLine("=== Entities Export ===");
-        foreach (var entity in _filteredEntities)
-        {
-            sb.AppendLine($"[{entity.Id}] {entity.Name}");
-            if (includeComponents)
-            {
-                foreach (var comp in entity.Components)
-                {
-                    sb.AppendLine($"  - {comp}");
-                }
-            }
-        }
-        return sb.ToString();
-    }
-
-    string IEntityOperations.ExportToCsv() => "ID,Name,Tag,ComponentCount\n" +
-        string.Join("\n", _filteredEntities.Select(e => $"{e.Id},{e.Name},{e.Tag ?? ""},{e.Components.Count}"));
-
-    string? IEntityOperations.ExportSelected()
-    {
-        if (!_selectedEntityId.HasValue) return null;
-        var entity = _entities.FirstOrDefault(e => e.Id == _selectedEntityId.Value);
-        if (entity == null) return null;
-        return $"[{entity.Id}] {entity.Name}\nComponents: {string.Join(", ", entity.Components)}";
-    }
-
-    int? IEntityOperations.SelectedId => _selectedEntityId;
-
-    void IEntityOperations.CopyToClipboard(bool asCsv)
-    {
-        string text = asCsv ? ((IEntityOperations)this).ExportToCsv() : ((IEntityOperations)this).ExportToText(true, true);
-        TextCopy.ClipboardService.SetText(text);
-    }
-
-    // ═══════════════════════════════════════════════════════════════════════════
     // Rendering
     // ═══════════════════════════════════════════════════════════════════════════
 
-    protected override UIComponent GetContentComponent() => _splitPanel;
+    protected override UIComponent GetContentComponent()
+    {
+        return _splitPanel;
+    }
 
     protected override void OnRenderContainer(UIContext context)
     {
@@ -622,6 +720,7 @@ public class EntitiesPanelDualPane : DebugPanelBase, IEntityOperations
         {
             context.Renderer.DrawRectangle(Rect, BackgroundColor.Value);
         }
+
         if (BorderColor.HasValue && BorderThickness > 0)
         {
             context.Renderer.DrawRectangleOutline(Rect, BorderColor.Value, BorderThickness);
@@ -709,6 +808,7 @@ public class EntitiesPanelDualPane : DebugPanelBase, IEntityOperations
         {
             tags = _entities.Where(e => e.Tag != null).Select(e => e.Tag!).Distinct().OrderBy(t => t).ToList();
         }
+
         _filterBar.SetTags(tags);
 
         // Update components
@@ -721,15 +821,18 @@ public class EntitiesPanelDualPane : DebugPanelBase, IEntityOperations
         {
             components = _entities.SelectMany(e => e.Components).Distinct().OrderBy(c => c).ToList();
         }
-        _filterBar.SetComponents(components);
 
+        _filterBar.SetComponents(components);
     }
 
     private void HandleAutoRefresh(UIContext context)
     {
         // Auto-update using GameTime (same pattern as original EntitiesPanel)
         bool hasProvider = _entityProvider != null || (_usePagedLoading && _entityCountProvider != null);
-        if (!AutoUpdate || !hasProvider || context.Input?.GameTime == null) return;
+        if (!AutoUpdate || !hasProvider || context.Input?.GameTime == null)
+        {
+            return;
+        }
 
         double currentTime = context.Input.GameTime.TotalGameTime.TotalSeconds;
         if (currentTime - _lastUpdateTime >= _updateInterval)
@@ -792,7 +895,7 @@ public class EntitiesPanelDualPane : DebugPanelBase, IEntityOperations
     private void RenderEntityListPaged(int scrollOffset)
     {
         // Use filtered IDs if filters are active, otherwise use all IDs
-        var activeIds = _filteredEntityIds ?? _entityIds;
+        List<int>? activeIds = _filteredEntityIds ?? _entityIds;
 
         // Use the count of active IDs (filtered or unfiltered) for all calculations
         int activeCount = activeIds?.Count ?? 0;
@@ -828,12 +931,12 @@ public class EntitiesPanelDualPane : DebugPanelBase, IEntityOperations
                 if (count > 0)
                 {
                     // Get the subset of filtered entity IDs we need to display
-                    var idsToLoad = _filteredEntityIds.Skip(startIndex).Take(count);
+                    IEnumerable<int> idsToLoad = _filteredEntityIds.Skip(startIndex).Take(count);
 
                     // Look up each entity from our filter cache
                     foreach (int filteredId in idsToLoad)
                     {
-                        if (_filteredEntityCache.TryGetValue(filteredId, out var cachedEntity))
+                        if (_filteredEntityCache.TryGetValue(filteredId, out EntityInfo? cachedEntity))
                         {
                             visibleEntities.Add(cachedEntity);
                         }
@@ -856,11 +959,12 @@ public class EntitiesPanelDualPane : DebugPanelBase, IEntityOperations
         // Show "entities above" indicator
         if (startIndex > 0)
         {
-            _entityListBuffer.AppendLine($"  {NerdFontIcons.ArrowUp} {startIndex:N0} entities above", ThemeManager.Current.TextDim);
+            _entityListBuffer.AppendLine($"  {NerdFontIcons.ArrowUp} {startIndex:N0} entities above",
+                ThemeManager.Current.TextDim);
         }
 
         // Render visible entities
-        foreach (var entity in visibleEntities)
+        foreach (EntityInfo entity in visibleEntities)
         {
             _navigableEntityIds.Add(entity.Id);
             int lineNum = _entityListBuffer.TotalLines;
@@ -872,7 +976,8 @@ public class EntitiesPanelDualPane : DebugPanelBase, IEntityOperations
         int entitiesBelow = activeCount - endIndex;
         if (entitiesBelow > 0)
         {
-            _entityListBuffer.AppendLine($"  {NerdFontIcons.ArrowDown} {entitiesBelow:N0} entities below", ThemeManager.Current.TextDim);
+            _entityListBuffer.AppendLine($"  {NerdFontIcons.ArrowDown} {entitiesBelow:N0} entities below",
+                ThemeManager.Current.TextDim);
         }
 
         // Set virtual height for scrollbar based on active (filtered or unfiltered) count
@@ -907,7 +1012,7 @@ public class EntitiesPanelDualPane : DebugPanelBase, IEntityOperations
         }
 
         // Build navigation list
-        foreach (var entity in _filteredEntities)
+        foreach (EntityInfo entity in _filteredEntities)
         {
             _navigableEntityIds.Add(entity.Id);
         }
@@ -928,7 +1033,7 @@ public class EntitiesPanelDualPane : DebugPanelBase, IEntityOperations
 
         // Render entities
         bool inPinnedSection = false;
-        foreach (var entity in _filteredEntities)
+        foreach (EntityInfo entity in _filteredEntities)
         {
             bool isPinned = _pinnedEntities.Contains(entity.Id);
 
@@ -960,18 +1065,34 @@ public class EntitiesPanelDualPane : DebugPanelBase, IEntityOperations
 
         // Determine color
         Color color;
-        if (isSelected) color = ThemeManager.Current.Info;
-        else if (isNew) color = ThemeManager.Current.SuccessDim;
-        else if (!entity.IsActive) color = ThemeManager.Current.TextDim;
-        else color = ThemeManager.Current.Success;
+        if (isSelected)
+        {
+            color = ThemeManager.Current.Info;
+        }
+        else if (isNew)
+        {
+            color = ThemeManager.Current.SuccessDim;
+        }
+        else if (!entity.IsActive)
+        {
+            color = ThemeManager.Current.TextDim;
+        }
+        else
+        {
+            color = ThemeManager.Current.Success;
+        }
 
         string line = $"{marker}{newMarker}[{entity.Id}] {entity.Name}";
         if (entity.Tag != null && entity.Tag != entity.Name)
         {
             line += $" ({entity.Tag})";
         }
+
         line += $" - {entity.Components.Count} components";
-        if (isNew) line += " [NEW]";
+        if (isNew)
+        {
+            line += " [NEW]";
+        }
 
         _entityListBuffer.AppendLine(line, color);
     }
@@ -995,7 +1116,7 @@ public class EntitiesPanelDualPane : DebugPanelBase, IEntityOperations
         int selectedId = _selectedEntityId.Value;
 
         // Check cache first
-        if (_loadedEntityCache.TryGetValue(selectedId, out var cached))
+        if (_loadedEntityCache.TryGetValue(selectedId, out EntityInfo? cached))
         {
             entity = cached;
         }
@@ -1012,14 +1133,17 @@ public class EntitiesPanelDualPane : DebugPanelBase, IEntityOperations
             {
                 try
                 {
-                    var entities = _entityRangeProvider(index, 1);
+                    List<EntityInfo> entities = _entityRangeProvider(index, 1);
                     if (entities.Count > 0)
                     {
                         entity = entities[0];
                         _loadedEntityCache[selectedId] = entity;
                     }
                 }
-                catch { /* Ignore load errors */ }
+                catch
+                {
+                    /* Ignore load errors */
+                }
             }
         }
 
@@ -1032,7 +1156,7 @@ public class EntitiesPanelDualPane : DebugPanelBase, IEntityOperations
         // Load details if needed (only if not already from cache)
         if (_entityDetailLoader != null && (entity.Components.Count == 0 || entity.ComponentData.Count == 0))
         {
-            var loaded = _entityDetailLoader(entity.Id, entity);
+            EntityInfo? loaded = _entityDetailLoader(entity.Id, entity);
             if (loaded != null)
             {
                 entity = loaded;
@@ -1044,13 +1168,14 @@ public class EntitiesPanelDualPane : DebugPanelBase, IEntityOperations
 
         // Header
         _detailBuffer.AppendLine($"  {NerdFontIcons.Entity} Entity Details", theme.Info);
-        _detailBuffer.AppendLine($"  ─────────────────", theme.BorderPrimary);
+        _detailBuffer.AppendLine("  ─────────────────", theme.BorderPrimary);
         _detailBuffer.AppendLine($"  ID: {entity.Id}", theme.TextPrimary);
         _detailBuffer.AppendLine($"  Name: {entity.Name}", theme.TextPrimary);
         if (entity.Tag != null && entity.Tag != entity.Name)
         {
             _detailBuffer.AppendLine($"  Tag: {entity.Tag}", theme.TextSecondary);
         }
+
         _detailBuffer.AppendLine($"  Active: {(entity.IsActive ? "Yes" : "No")}",
             entity.IsActive ? theme.Success : theme.TextDim);
         _detailBuffer.AppendLine("");
@@ -1059,41 +1184,49 @@ public class EntitiesPanelDualPane : DebugPanelBase, IEntityOperations
         if (entity.Relationships.Count > 0)
         {
             _detailBuffer.AppendLine($"  {NerdFontIcons.Relationship} Relationships", theme.Warning);
-            _detailBuffer.AppendLine($"  ─────────────────", theme.BorderPrimary);
-            foreach (var (relType, relationships) in entity.Relationships)
+            _detailBuffer.AppendLine("  ─────────────────", theme.BorderPrimary);
+            foreach ((string relType, List<EntityRelationship> relationships) in entity.Relationships)
             {
                 _detailBuffer.AppendLine($"    {relType}:", theme.Info);
-                foreach (var rel in relationships.Take(MaxRelationshipsDisplay))
+                foreach (EntityRelationship rel in relationships.Take(MaxRelationshipsDisplay))
                 {
-                    string entityRef = rel.EntityName != null ? $"[{rel.EntityId}] {rel.EntityName}" : $"[{rel.EntityId}]";
+                    string entityRef = rel.EntityName != null
+                        ? $"[{rel.EntityId}] {rel.EntityName}"
+                        : $"[{rel.EntityId}]";
                     _detailBuffer.AppendLine($"      → {entityRef}", rel.IsValid ? theme.Success : theme.Error);
                 }
+
                 if (relationships.Count > MaxRelationshipsDisplay)
                 {
-                    _detailBuffer.AppendLine($"      ... ({relationships.Count - MaxRelationshipsDisplay} more)", theme.TextDim);
+                    _detailBuffer.AppendLine($"      ... ({relationships.Count - MaxRelationshipsDisplay} more)",
+                        theme.TextDim);
                 }
             }
+
             _detailBuffer.AppendLine("");
         }
 
         // Components
         _detailBuffer.AppendLine($"  {NerdFontIcons.Component} Components ({entity.Components.Count})", theme.Info);
-        _detailBuffer.AppendLine($"  ─────────────────", theme.BorderPrimary);
+        _detailBuffer.AppendLine("  ─────────────────", theme.BorderPrimary);
 
-        foreach (var component in entity.Components.Take(MaxComponentsDisplay))
+        foreach (string component in entity.Components.Take(MaxComponentsDisplay))
         {
             Color compColor = GetComponentColor(component);
             _detailBuffer.AppendLine($"    {NerdFontIcons.Dot} {component}", compColor);
 
-            if (entity.ComponentData.TryGetValue(component, out var fields) && fields.Count > 0)
+            if (entity.ComponentData.TryGetValue(component, out Dictionary<string, string>? fields) && fields.Count > 0)
             {
-                foreach (var (fieldName, fieldValue) in fields.OrderBy(f => f.Key).Take(MaxFieldsPerComponent))
+                foreach ((string fieldName, string fieldValue) in
+                         fields.OrderBy(f => f.Key).Take(MaxFieldsPerComponent))
                 {
                     RenderPropertyValue(fieldName, fieldValue, "        ");
                 }
+
                 if (fields.Count > MaxFieldsPerComponent)
                 {
-                    _detailBuffer.AppendLine($"        ... ({fields.Count - MaxFieldsPerComponent} more)", theme.TextDim);
+                    _detailBuffer.AppendLine($"        ... ({fields.Count - MaxFieldsPerComponent} more)",
+                        theme.TextDim);
                 }
             }
         }
@@ -1140,12 +1273,42 @@ public class EntitiesPanelDualPane : DebugPanelBase, IEntityOperations
 
         float r, g, b;
 
-        if (h < 60) { r = c; g = x; b = 0; }
-        else if (h < 120) { r = x; g = c; b = 0; }
-        else if (h < 180) { r = 0; g = c; b = x; }
-        else if (h < 240) { r = 0; g = x; b = c; }
-        else if (h < 300) { r = x; g = 0; b = c; }
-        else { r = c; g = 0; b = x; }
+        if (h < 60)
+        {
+            r = c;
+            g = x;
+            b = 0;
+        }
+        else if (h < 120)
+        {
+            r = x;
+            g = c;
+            b = 0;
+        }
+        else if (h < 180)
+        {
+            r = 0;
+            g = c;
+            b = x;
+        }
+        else if (h < 240)
+        {
+            r = 0;
+            g = x;
+            b = c;
+        }
+        else if (h < 300)
+        {
+            r = x;
+            g = 0;
+            b = c;
+        }
+        else
+        {
+            r = c;
+            g = 0;
+            b = x;
+        }
 
         return new Color((byte)((r + m) * 255), (byte)((g + m) * 255), (byte)((b + m) * 255));
     }
@@ -1160,11 +1323,17 @@ public class EntitiesPanelDualPane : DebugPanelBase, IEntityOperations
         // Determine color based on value
         Color valueColor = theme.TextSecondary;
         if (fieldValue == "null" || fieldValue == "None" || fieldValue == "N/A")
+        {
             valueColor = theme.TextDim;
+        }
         else if (fieldValue.StartsWith("[") && fieldValue.EndsWith("]"))
+        {
             valueColor = theme.Info;
+        }
         else if (bool.TryParse(fieldValue, out bool b))
+        {
             valueColor = b ? theme.Success : theme.Error;
+        }
 
         // Handle multiline values (arrays, dictionaries, records, etc.)
         if (fieldValue.Contains('\n'))
@@ -1205,8 +1374,15 @@ public class EntitiesPanelDualPane : DebugPanelBase, IEntityOperations
         int filteredCount = _usePagedLoading ? _totalEntityCount : _filteredEntities.Count;
 
         string stats = $"Entities: {filteredCount}/{totalCount}";
-        if (_pinnedEntities.Count > 0) stats += $" | Pinned: {_pinnedEntities.Count}";
-        if (_selectedEntityId.HasValue) stats += $" | Selected: [{_selectedEntityId}]";
+        if (_pinnedEntities.Count > 0)
+        {
+            stats += $" | Pinned: {_pinnedEntities.Count}";
+        }
+
+        if (_selectedEntityId.HasValue)
+        {
+            stats += $" | Selected: [{_selectedEntityId}]";
+        }
 
         string hints = "↑↓:Nav | P:Pin | R:Refresh";
         SetStatusBar(stats, hints);
@@ -1218,7 +1394,11 @@ public class EntitiesPanelDualPane : DebugPanelBase, IEntityOperations
 
     private void HandleKeyboardInput(UIContext context)
     {
-        if (!KeyboardNavEnabled || context.Input == null) return;
+        if (!KeyboardNavEnabled || context.Input == null)
+        {
+            return;
+        }
+
         InputState input = context.Input;
 
         if (input.IsKeyPressed(Keys.Up))
@@ -1243,21 +1423,33 @@ public class EntitiesPanelDualPane : DebugPanelBase, IEntityOperations
         }
         else if (input.IsKeyPressed(Keys.PageUp))
         {
-            for (int i = 0; i < PageUpDownLines && _selectedIndex > 0; i++) _selectedIndex--;
+            for (int i = 0; i < PageUpDownLines && _selectedIndex > 0; i++)
+            {
+                _selectedIndex--;
+            }
+
             _selectedEntityId = _navigableEntityIds.Count > 0 ? _navigableEntityIds[_selectedIndex] : null;
             RefreshDisplay();
             input.ConsumeKey(Keys.PageUp);
         }
         else if (input.IsKeyPressed(Keys.PageDown))
         {
-            for (int i = 0; i < PageUpDownLines && _selectedIndex < _navigableEntityIds.Count - 1; i++) _selectedIndex++;
+            for (int i = 0; i < PageUpDownLines && _selectedIndex < _navigableEntityIds.Count - 1; i++)
+            {
+                _selectedIndex++;
+            }
+
             _selectedEntityId = _navigableEntityIds.Count > 0 ? _navigableEntityIds[_selectedIndex] : null;
             RefreshDisplay();
             input.ConsumeKey(Keys.PageDown);
         }
         else if (input.IsKeyPressed(Keys.P))
         {
-            if (_selectedEntityId.HasValue) TogglePin(_selectedEntityId.Value);
+            if (_selectedEntityId.HasValue)
+            {
+                TogglePin(_selectedEntityId.Value);
+            }
+
             input.ConsumeKey(Keys.P);
         }
         else if (input.IsKeyPressed(Keys.R))
@@ -1269,7 +1461,11 @@ public class EntitiesPanelDualPane : DebugPanelBase, IEntityOperations
 
     private void HandleMouseInput(UIContext context)
     {
-        if (!MouseNavEnabled || context.Input == null) return;
+        if (!MouseNavEnabled || context.Input == null)
+        {
+            return;
+        }
+
         InputState input = context.Input;
 
         // Skip all mouse handling if filter bar has exclusive focus
@@ -1281,15 +1477,24 @@ public class EntitiesPanelDualPane : DebugPanelBase, IEntityOperations
 
         // Skip if mouse is in the filter bar area - let filter bar handle its own input
         float filterBarBottom = Rect.Y + Constraint.GetPaddingTop() + _filterBar.PreferredHeight;
-        if (input.MousePosition.Y < filterBarBottom) return;
+        if (input.MousePosition.Y < filterBarBottom)
+        {
+            return;
+        }
 
         // Calculate the entity list pane bounds
         // (SplitPanel hasn't rendered yet, so we calculate it ourselves)
         LayoutRect listBounds = GetEntityListBounds();
-        if (!listBounds.Contains(input.MousePosition)) return;
+        if (!listBounds.Contains(input.MousePosition))
+        {
+            return;
+        }
 
         // Don't consume clicks over the scrollbar - let TextBuffer handle those
-        if (IsMouseOverScrollbar(input.MousePosition, listBounds)) return;
+        if (IsMouseOverScrollbar(input.MousePosition, listBounds))
+        {
+            return;
+        }
 
         if (input.IsMouseButtonPressed(MouseButton.Left))
         {
@@ -1332,9 +1537,9 @@ public class EntitiesPanelDualPane : DebugPanelBase, IEntityOperations
         float scrollbarEndY = contentBounds.Y + contentBounds.Height - _entityListBuffer.LinePadding;
 
         return mousePos.X >= scrollbarStartX
-            && mousePos.X <= scrollbarEndX
-            && mousePos.Y >= scrollbarStartY
-            && mousePos.Y <= scrollbarEndY;
+               && mousePos.X <= scrollbarEndX
+               && mousePos.Y >= scrollbarStartY
+               && mousePos.Y <= scrollbarEndY;
     }
 
     private LayoutRect GetEntityListBounds()
@@ -1348,8 +1553,9 @@ public class EntitiesPanelDualPane : DebugPanelBase, IEntityOperations
 
         float splitPanelX = Rect.X + paddingLeft;
         float splitPanelY = Rect.Y + paddingTop + filterBarHeight; // Below filter bar
-        float splitPanelWidth = _splitPanel.Constraint.Width ?? (Rect.Width - paddingLeft - paddingRight);
-        float splitPanelHeight = _splitPanel.Constraint.Height ?? (Rect.Height - paddingTop - paddingBottom - filterBarHeight);
+        float splitPanelWidth = _splitPanel.Constraint.Width ?? Rect.Width - paddingLeft - paddingRight;
+        float splitPanelHeight =
+            _splitPanel.Constraint.Height ?? Rect.Height - paddingTop - paddingBottom - filterBarHeight;
 
         // Calculate first pane (left) width based on split ratio
         // Account for splitter size AND inner padding on both sides of splitter
@@ -1369,19 +1575,27 @@ public class EntitiesPanelDualPane : DebugPanelBase, IEntityOperations
     private int GetLineAtMousePosition(Point mousePos, LayoutRect bounds)
     {
         float relativeY = mousePos.Y - bounds.Y - _entityListBuffer.LinePadding;
-        if (relativeY < 0) return -1;
+        if (relativeY < 0)
+        {
+            return -1;
+        }
+
         int lineIndex = (int)(relativeY / _entityListBuffer.LineHeight);
 
         // In paged loading (virtual mode), line indices are buffer-local (0 to TotalLines)
         // In standard mode, add ScrollOffset to get actual line position
-        int clickedLine = _usePagedLoading ? lineIndex : (lineIndex + _entityListBuffer.ScrollOffset);
+        int clickedLine = _usePagedLoading ? lineIndex : lineIndex + _entityListBuffer.ScrollOffset;
 
         return clickedLine >= 0 && clickedLine < _entityListBuffer.TotalLines ? clickedLine : -1;
     }
 
     private void NavigateNext()
     {
-        if (_navigableEntityIds.Count == 0) return;
+        if (_navigableEntityIds.Count == 0)
+        {
+            return;
+        }
+
         _selectedIndex = Math.Min(_selectedIndex + 1, _navigableEntityIds.Count - 1);
         _selectedEntityId = _navigableEntityIds[_selectedIndex];
         RefreshDisplay();
@@ -1390,7 +1604,11 @@ public class EntitiesPanelDualPane : DebugPanelBase, IEntityOperations
 
     private void NavigatePrevious()
     {
-        if (_navigableEntityIds.Count == 0) return;
+        if (_navigableEntityIds.Count == 0)
+        {
+            return;
+        }
+
         _selectedIndex = Math.Max(_selectedIndex - 1, 0);
         _selectedEntityId = _navigableEntityIds[_selectedIndex];
         RefreshDisplay();
@@ -1399,7 +1617,11 @@ public class EntitiesPanelDualPane : DebugPanelBase, IEntityOperations
 
     private void NavigateFirst()
     {
-        if (_navigableEntityIds.Count == 0) return;
+        if (_navigableEntityIds.Count == 0)
+        {
+            return;
+        }
+
         _selectedIndex = 0;
         _selectedEntityId = _navigableEntityIds[_selectedIndex];
         RefreshDisplay();
@@ -1408,7 +1630,11 @@ public class EntitiesPanelDualPane : DebugPanelBase, IEntityOperations
 
     private void NavigateLast()
     {
-        if (_navigableEntityIds.Count == 0) return;
+        if (_navigableEntityIds.Count == 0)
+        {
+            return;
+        }
+
         _selectedIndex = _navigableEntityIds.Count - 1;
         _selectedEntityId = _navigableEntityIds[_selectedIndex];
         RefreshDisplay();
@@ -1417,14 +1643,25 @@ public class EntitiesPanelDualPane : DebugPanelBase, IEntityOperations
 
     private void EnsureSelectedVisible()
     {
-        if (!_selectedEntityId.HasValue) return;
+        if (!_selectedEntityId.HasValue)
+        {
+            return;
+        }
 
         int selectedLine = -1;
-        foreach (var (line, id) in _lineToEntityId)
+        foreach ((int line, int id) in _lineToEntityId)
         {
-            if (id == _selectedEntityId.Value) { selectedLine = line; break; }
+            if (id == _selectedEntityId.Value)
+            {
+                selectedLine = line;
+                break;
+            }
         }
-        if (selectedLine < 0) return;
+
+        if (selectedLine < 0)
+        {
+            return;
+        }
 
         int visibleLines = _entityListBuffer.VisibleLineCount;
         int currentScroll = _entityListBuffer.ScrollOffset;

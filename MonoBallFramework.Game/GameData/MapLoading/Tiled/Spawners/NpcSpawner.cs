@@ -3,7 +3,9 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
 using MonoBallFramework.Game.Ecs.Components.Movement;
 using MonoBallFramework.Game.Engine.Core.Types;
+using MonoBallFramework.Game.GameData.MapLoading.Tiled.Tmx;
 using MonoBallFramework.Game.GameData.MapLoading.Tiled.Utilities;
+using MonoBallFramework.Game.Scripting.Api;
 using MonoBallFramework.Game.Scripting.Services;
 
 namespace MonoBallFramework.Game.GameData.MapLoading.Tiled.Spawners;
@@ -11,11 +13,9 @@ namespace MonoBallFramework.Game.GameData.MapLoading.Tiled.Spawners;
 /// <summary>
 ///     Spawns NPC entities directly from Tiled properties (no template lookup).
 ///     This is the preferred format - sprites and behaviors are specified directly in Tiled.
-///
 ///     Required Tiled properties:
 ///     - type = "npc"
 ///     - spriteId (string): Sprite ID in format "category/spritename"
-///
 ///     Optional properties:
 ///     - direction (string): north/south/east/west (default: south)
 ///     - elevation (int): 0-255 (default: 0)
@@ -52,8 +52,8 @@ public sealed class NpcSpawner : IEntitySpawner
     public Entity Spawn(EntitySpawnContext context)
     {
         string errorContext = context.CreateErrorContext();
-        var props = context.TiledObject.Properties;
-        var obj = context.TiledObject;
+        Dictionary<string, object> props = context.TiledObject.Properties;
+        TmxObject obj = context.TiledObject;
 
         // Parse required spriteId - format: "npcs/generic_twin" or full "base:sprite:npcs/generic_twin"
         string spriteIdStr = TiledPropertyParser.GetRequiredString(props, "spriteId", errorContext);
@@ -63,7 +63,7 @@ public sealed class NpcSpawner : IEntitySpawner
         context.RegisterSpriteId(spriteId);
 
         // Get tile position
-        var (tileX, tileY) = context.GetTilePosition();
+        (int tileX, int tileY) = context.GetTilePosition();
 
         // Parse optional properties
         byte elevation = TiledPropertyParser.GetOptionalByte(props, "elevation", errorContext) ?? 0;
@@ -92,7 +92,7 @@ public sealed class NpcSpawner : IEntitySpawner
         }
 
         // Use NpcSpawnBuilder to create the entity
-        var builder = new NpcSpawnBuilder(context.World, tileX, tileY, _logger)
+        INpcSpawnBuilder builder = new NpcSpawnBuilder(context.World, tileX, tileY, _logger)
             .FromDefinition(GameNpcId.Create(npcId))
             .WithSprite(spriteId)
             .Facing(direction)
@@ -127,10 +127,11 @@ public sealed class NpcSpawner : IEntitySpawner
             builder.WithBehavior(behaviorId);
 
             // Get patrol waypoints from Tiled properties (explicit or axis-generated)
-            Point[]? waypoints = TiledPropertyParser.GetPatrolWaypoints(props, behaviorIdStr, tileX, tileY, errorContext);
+            Point[]? waypoints =
+                TiledPropertyParser.GetPatrolWaypoints(props, behaviorIdStr, tileX, tileY, errorContext);
             if (waypoints != null)
             {
-                builder.WithPath(waypoints, loop: true);
+                builder.WithPath(waypoints, true);
             }
         }
 

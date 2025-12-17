@@ -120,7 +120,7 @@ public class NPCBehaviorSystem : BehaviorSystemBase, IUpdateSystem
                     if (!behavior.IsInitialized)
                     {
                         string loggerKey = $"{behavior.BehaviorTypeId}.{npc.NpcId}";
-                        ILogger scriptLogger = base.GetOrCreateLogger(loggerKey);
+                        ILogger scriptLogger = GetOrCreateLogger(loggerKey);
 
                         var context = new ScriptContext(
                             world,
@@ -243,12 +243,13 @@ public class NPCBehaviorSystem : BehaviorSystemBase, IUpdateSystem
         {
             if (World.Has<Behavior>(entity))
             {
-                var behavior = World.Get<Behavior>(entity);
+                Behavior behavior = World.Get<Behavior>(entity);
                 behaviorTypeId = behavior.BehaviorTypeId;
             }
+
             if (World.Has<Npc>(entity))
             {
-                var npc = World.Get<Npc>(entity);
+                Npc npc = World.Get<Npc>(entity);
                 npcId = npc.NpcId;
             }
         }

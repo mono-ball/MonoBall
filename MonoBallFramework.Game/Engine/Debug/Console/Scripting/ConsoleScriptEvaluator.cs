@@ -345,7 +345,7 @@ public class ConsoleScriptEvaluator
             typeof(Vector2).Assembly, // MonoGame.Framework
             typeof(Direction).Assembly, // MonoBallFramework.Game.Ecs.Components
             typeof(IScriptingApiProvider).Assembly, // MonoBallFramework.Game.Scripting
-            typeof(ILogger).Assembly, // Microsoft.Extensions.Logging.Abstractions
+            typeof(ILogger).Assembly // Microsoft.Extensions.Logging.Abstractions
         };
     }
 
@@ -356,16 +356,10 @@ public class ConsoleScriptEvaluator
     {
         return new[]
         {
-            "System",
-            "System.Linq",
-            "System.Collections.Generic",
-            "Arch.Core",
-            "Microsoft.Xna.Framework",
-            "Microsoft.Extensions.Logging",
-            "MonoBallFramework.Game.Ecs.Components.Movement",
-            "MonoBallFramework.Game.Ecs.Components.Player",
-            "MonoBallFramework.Game.Ecs.Components.Rendering",
-            "MonoBallFramework.Game.Scripting.Api",
+            "System", "System.Linq", "System.Collections.Generic", "Arch.Core", "Microsoft.Xna.Framework",
+            "Microsoft.Extensions.Logging", "MonoBallFramework.Game.Ecs.Components.Movement",
+            "MonoBallFramework.Game.Ecs.Components.Player", "MonoBallFramework.Game.Ecs.Components.Rendering",
+            "MonoBallFramework.Game.Scripting.Api"
         };
     }
 }

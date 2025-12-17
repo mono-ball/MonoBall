@@ -7,6 +7,11 @@ namespace MonoBallFramework.Game.Engine.Rendering.Assets;
 public interface IAssetProvider
 {
     /// <summary>
+    ///     Gets the number of textures waiting to be uploaded to GPU.
+    /// </summary>
+    int PendingTextureCount { get; }
+
+    /// <summary>
     ///     Loads a texture synchronously from the specified path.
     ///     Uses ContentProvider to resolve the path, ensuring mod overrides are respected.
     /// </summary>
@@ -53,11 +58,6 @@ public interface IAssetProvider
     /// <param name="id">Texture identifier to check.</param>
     /// <returns>True if texture is currently loading.</returns>
     bool IsTextureLoading(string id);
-
-    /// <summary>
-    ///     Gets the number of textures waiting to be uploaded to GPU.
-    /// </summary>
-    int PendingTextureCount { get; }
 
     /// <summary>
     ///     Processes pending textures by uploading them to GPU.

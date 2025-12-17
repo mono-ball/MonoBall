@@ -1,6 +1,3 @@
-using Microsoft.Xna.Framework.Audio;
-using Microsoft.Xna.Framework.Media;
-
 namespace MonoBallFramework.Game.Engine.Audio.Services;
 
 /// <summary>
@@ -38,6 +35,16 @@ public interface IAudioService : IDisposable
     ///     Gets whether the audio system is initialized and ready for playback.
     /// </summary>
     bool IsInitialized { get; }
+
+    /// <summary>
+    ///     Gets whether music is currently playing (not paused or stopped).
+    /// </summary>
+    bool IsMusicPlaying { get; }
+
+    /// <summary>
+    ///     Gets the name of the currently playing music track, or null if no music is playing.
+    /// </summary>
+    string? CurrentMusicName { get; }
 
     /// <summary>
     ///     Initializes the audio system and subscribes to audio events.
@@ -117,16 +124,6 @@ public interface IAudioService : IDisposable
     ///     Resumes paused music playback from the current position.
     /// </summary>
     void ResumeMusic();
-
-    /// <summary>
-    ///     Gets whether music is currently playing (not paused or stopped).
-    /// </summary>
-    bool IsMusicPlaying { get; }
-
-    /// <summary>
-    ///     Gets the name of the currently playing music track, or null if no music is playing.
-    /// </summary>
-    string? CurrentMusicName { get; }
 
     /// <summary>
     ///     Preloads audio assets into memory for faster playback during gameplay.

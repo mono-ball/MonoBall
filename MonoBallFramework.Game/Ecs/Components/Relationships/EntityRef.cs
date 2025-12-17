@@ -17,7 +17,7 @@ namespace MonoBallFramework.Game.Ecs.Components.Relationships;
 ///         <code>
 /// // Create a safe entity reference
 /// var entityRef = new EntityRef(targetEntity);
-///
+/// 
 /// // Later, validate before use
 /// if (entityRef.IsValid(world)) {
 ///     var entity = entityRef.Value;
@@ -25,7 +25,7 @@ namespace MonoBallFramework.Game.Ecs.Components.Relationships;
 /// } else {
 ///     // Entity was destroyed or recycled
 /// }
-///
+/// 
 /// // Optional null-reference pattern
 /// var nullRef = EntityRef.Null;
 /// if (!nullRef.IsNull) { /* ... */ }
@@ -45,7 +45,7 @@ public struct EntityRef
     /// <param name="entity">The entity to reference.</param>
     /// <remarks>
     ///     Generation tracking is handled internally by Arch's Entity struct.
-    ///     Use <see cref="IsValid"/> to check if the entity is still alive.
+    ///     Use <see cref="IsValid" /> to check if the entity is still alive.
     /// </remarks>
     public EntityRef(Entity entity)
     {

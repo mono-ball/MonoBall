@@ -4,7 +4,6 @@ namespace MonoBallFramework.Game.Engine.Core.Types;
 
 /// <summary>
 ///     Strongly-typed identifier for popup outline/border definitions.
-///
 ///     Format: base:popup:outline/{name}
 ///     Examples:
 ///     - base:popup:outline/stone_outline
@@ -30,14 +29,18 @@ public sealed record GamePopupOutlineId : EntityId
     public GamePopupOutlineId(string value) : base(value)
     {
         if (EntityType != TypeName)
+        {
             throw new ArgumentException(
                 $"Expected entity type '{TypeName}', got '{EntityType}'",
                 nameof(value));
+        }
 
         if (Category != DefaultCategory)
+        {
             throw new ArgumentException(
                 $"Expected category '{DefaultCategory}', got '{Category}'",
                 nameof(value));
+        }
     }
 
     /// <summary>
@@ -69,11 +72,15 @@ public sealed record GamePopupOutlineId : EntityId
     public static GamePopupOutlineId? TryCreate(string? value)
     {
         if (string.IsNullOrWhiteSpace(value))
+        {
             return null;
+        }
 
         // Only accept full format
         if (!IsValidFormat(value) || !value.Contains($":{TypeName}:"))
+        {
             return null;
+        }
 
         try
         {
@@ -88,5 +95,8 @@ public sealed record GamePopupOutlineId : EntityId
     /// <summary>
     ///     Explicit conversion from string. Use TryCreate() for safe parsing.
     /// </summary>
-    public static explicit operator GamePopupOutlineId(string value) => new(value);
+    public static explicit operator GamePopupOutlineId(string value)
+    {
+        return new GamePopupOutlineId(value);
+    }
 }

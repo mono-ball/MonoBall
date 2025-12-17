@@ -10,7 +10,7 @@ public enum MouseButton
 {
     Left,
     Middle,
-    Right,
+    Right
 }
 
 /// <summary>
@@ -22,7 +22,6 @@ public class InputState
     // Input consumption tracking - prevents child components from processing already-handled input
     private readonly HashSet<Keys> _consumedKeys = new();
     private readonly HashSet<MouseButton> _consumedMouseButtons = new();
-    private bool _scrollWheelConsumed;
 
     // Key repeat tracking - provides smooth key repeat for held keys
     private readonly Dictionary<Keys, KeyRepeatState> _keyRepeatStates = new();
@@ -30,6 +29,7 @@ public class InputState
     private MouseState _currentMouse;
     private KeyboardState _previousKeyboard;
     private MouseState _previousMouse;
+    private bool _scrollWheelConsumed;
 
     /// <summary>
     ///     Creates a new input state snapshot.
@@ -65,22 +65,29 @@ public class InputState
     /// <summary>
     ///     Mouse scroll wheel delta this frame (returns 0 if consumed).
     /// </summary>
-    public int ScrollWheelDelta => _scrollWheelConsumed ? 0 : _currentMouse.ScrollWheelValue - _previousMouse.ScrollWheelValue;
-
-    /// <summary>
-    ///     Returns true if scroll wheel input has been consumed this frame.
-    /// </summary>
-    public bool IsScrollWheelConsumed() => _scrollWheelConsumed;
-
-    /// <summary>
-    ///     Marks scroll wheel input as consumed, preventing other components from using it.
-    /// </summary>
-    public void ConsumeScrollWheel() => _scrollWheelConsumed = true;
+    public int ScrollWheelDelta =>
+        _scrollWheelConsumed ? 0 : _currentMouse.ScrollWheelValue - _previousMouse.ScrollWheelValue;
 
     /// <summary>
     ///     Game time for this frame (used for animations like cursor blinking).
     /// </summary>
     public GameTime GameTime { get; set; } = new();
+
+    /// <summary>
+    ///     Returns true if scroll wheel input has been consumed this frame.
+    /// </summary>
+    public bool IsScrollWheelConsumed()
+    {
+        return _scrollWheelConsumed;
+    }
+
+    /// <summary>
+    ///     Marks scroll wheel input as consumed, preventing other components from using it.
+    /// </summary>
+    public void ConsumeScrollWheel()
+    {
+        _scrollWheelConsumed = true;
+    }
 
     /// <summary>
     ///     Updates the input state with current input.
@@ -152,7 +159,7 @@ public class InputState
             MouseButton.Left => _currentMouse.LeftButton == ButtonState.Pressed,
             MouseButton.Middle => _currentMouse.MiddleButton == ButtonState.Pressed,
             MouseButton.Right => _currentMouse.RightButton == ButtonState.Pressed,
-            _ => false,
+            _ => false
         };
     }
 
@@ -190,7 +197,7 @@ public class InputState
             MouseButton.Left => state.LeftButton,
             MouseButton.Middle => state.MiddleButton,
             MouseButton.Right => state.RightButton,
-            _ => ButtonState.Released,
+            _ => ButtonState.Released
         };
     }
 
@@ -211,8 +218,8 @@ public class InputState
     public bool IsKeyPressed(Keys key)
     {
         return !_consumedKeys.Contains(key)
-            && _currentKeyboard.IsKeyDown(key)
-            && _previousKeyboard.IsKeyUp(key);
+               && _currentKeyboard.IsKeyDown(key)
+               && _previousKeyboard.IsKeyUp(key);
     }
 
     /// <summary>
@@ -268,7 +275,7 @@ public class InputState
     public bool IsCtrlDown()
     {
         return _currentKeyboard.IsKeyDown(Keys.LeftControl)
-            || _currentKeyboard.IsKeyDown(Keys.RightControl);
+               || _currentKeyboard.IsKeyDown(Keys.RightControl);
     }
 
     /// <summary>
@@ -277,7 +284,7 @@ public class InputState
     public bool IsShiftDown()
     {
         return _currentKeyboard.IsKeyDown(Keys.LeftShift)
-            || _currentKeyboard.IsKeyDown(Keys.RightShift);
+               || _currentKeyboard.IsKeyDown(Keys.RightShift);
     }
 
     /// <summary>
@@ -286,7 +293,7 @@ public class InputState
     public bool IsAltDown()
     {
         return _currentKeyboard.IsKeyDown(Keys.LeftAlt)
-            || _currentKeyboard.IsKeyDown(Keys.RightAlt);
+               || _currentKeyboard.IsKeyDown(Keys.RightAlt);
     }
 
     // Input consumption methods
@@ -332,8 +339,8 @@ public class InputState
     public bool AnyMouseButtonsChanged()
     {
         return _currentMouse.LeftButton != _previousMouse.LeftButton
-            || _currentMouse.MiddleButton != _previousMouse.MiddleButton
-            || _currentMouse.RightButton != _previousMouse.RightButton;
+               || _currentMouse.MiddleButton != _previousMouse.MiddleButton
+               || _currentMouse.RightButton != _previousMouse.RightButton;
     }
 
     /// <summary>

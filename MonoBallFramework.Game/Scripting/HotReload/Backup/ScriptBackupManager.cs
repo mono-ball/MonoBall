@@ -43,7 +43,7 @@ public class ScriptBackupManager
                 Instance = currentInstance,
                 Version = currentVersion,
                 BackupTime = DateTime.UtcNow,
-                SourceCode = sourceCode,
+                SourceCode = sourceCode
             };
 
             _backups[typeId] = backup;
@@ -108,7 +108,7 @@ public class ScriptBackupManager
                 Version = backup.Version,
                 BackupTime = backup.BackupTime,
                 HasInstance = backup.Instance != null,
-                SourceCodeLength = backup.SourceCode?.Length ?? 0,
+                SourceCodeLength = backup.SourceCode?.Length ?? 0
             };
         }
 
@@ -120,11 +120,7 @@ public class ScriptBackupManager
     /// </summary>
     public BackupStatistics GetStatistics()
     {
-        var stats = new BackupStatistics
-        {
-            TotalBackups = _backups.Count,
-            Backups = new List<BackupInfo>(),
-        };
+        var stats = new BackupStatistics { TotalBackups = _backups.Count, Backups = new List<BackupInfo>() };
 
         foreach (KeyValuePair<string, ScriptBackup> kvp in _backups)
         {

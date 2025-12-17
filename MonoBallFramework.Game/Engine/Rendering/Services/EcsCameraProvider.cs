@@ -5,15 +5,15 @@ using MonoBallFramework.Game.Engine.Systems.Management;
 namespace MonoBallFramework.Game.Engine.Rendering.Services;
 
 /// <summary>
-/// ECS-based camera provider with caching for performance.
-/// Queries the Arch ECS world for camera components.
+///     ECS-based camera provider with caching for performance.
+///     Queries the Arch ECS world for camera components.
 /// </summary>
 public class EcsCameraProvider : ICameraProvider
 {
-    private readonly World _world;
-    private Camera? _cachedCamera;
-    private int _cacheAge;
     private const int CacheInvalidationFrames = 30;
+    private readonly World _world;
+    private int _cacheAge;
+    private Camera? _cachedCamera;
 
     public EcsCameraProvider(World world)
     {

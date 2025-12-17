@@ -25,11 +25,11 @@ public class SpriteTextureLoader
     // Persistent sprites that should never be unloaded (e.g., UI elements)
     // Player sprites load on-demand from entity templates
     private readonly HashSet<string> _persistentSprites = new();
-    private readonly SpriteRegistry _spriteRegistry;
-    private readonly Dictionary<string, int> _spriteReferenceCount = new();
 
     // Track missing sprites to avoid repeated log warnings (prevents log spam)
     private readonly HashSet<string> _reportedMissingSprites = new();
+    private readonly Dictionary<string, int> _spriteReferenceCount = new();
+    private readonly SpriteRegistry _spriteRegistry;
 
     public SpriteTextureLoader(
         SpriteRegistry spriteRegistry,
@@ -146,6 +146,7 @@ public class SpriteTextureLoader
             {
                 _logger?.LogSpriteSheetNotFound("sprite", spritePath);
             }
+
             return;
         }
 
@@ -346,7 +347,7 @@ public class SpriteTextureLoader
 
             // Decrement reference count
             if (DecrementReferenceCount(textureKey))
-            // Reference count is zero, safe to unload
+                // Reference count is zero, safe to unload
             {
                 if (_assetManager.UnregisterTexture(textureKey))
                 {

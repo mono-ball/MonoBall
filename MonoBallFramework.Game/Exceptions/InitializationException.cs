@@ -8,10 +8,14 @@ namespace MonoBallFramework.Game.Exceptions;
 public abstract class InitializationException : MonoBallFrameworkException
 {
     protected InitializationException(string errorCode, string message)
-        : base(errorCode, message) { }
+        : base(errorCode, message)
+    {
+    }
 
     protected InitializationException(string errorCode, string message, Exception innerException)
-        : base(errorCode, message, innerException) { }
+        : base(errorCode, message, innerException)
+    {
+    }
 
     public override string GetUserFriendlyMessage()
     {
@@ -117,10 +121,14 @@ public class InitializationPipelineException : InitializationException
 public class PlayerInitializationException : InitializationException
 {
     public PlayerInitializationException(string message)
-        : base("INIT_PLAYER_ERROR", message) { }
+        : base("INIT_PLAYER_ERROR", message)
+    {
+    }
 
     public PlayerInitializationException(string message, Exception innerException)
-        : base("INIT_PLAYER_ERROR", message, innerException) { }
+        : base("INIT_PLAYER_ERROR", message, innerException)
+    {
+    }
 
     public override bool IsRecoverable => false; // Can't play without player
 
@@ -163,10 +171,14 @@ public class InitialMapLoadException : InitializationException
 public class AssetManagerInitializationException : InitializationException
 {
     public AssetManagerInitializationException(string message)
-        : base("INIT_ASSET_MANAGER_ERROR", message) { }
+        : base("INIT_ASSET_MANAGER_ERROR", message)
+    {
+    }
 
     public AssetManagerInitializationException(string message, Exception innerException)
-        : base("INIT_ASSET_MANAGER_ERROR", message, innerException) { }
+        : base("INIT_ASSET_MANAGER_ERROR", message, innerException)
+    {
+    }
 
     public override bool IsRecoverable => false; // Can't render without assets
 

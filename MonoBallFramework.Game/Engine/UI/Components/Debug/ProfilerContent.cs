@@ -202,7 +202,7 @@ public class ProfilerContent : UIComponent
                 LastMs = m.LastUpdateMs,
                 AvgMs = m.AverageUpdateMs,
                 MaxMs = m.MaxUpdateMs,
-                UpdateCount = m.UpdateCount,
+                UpdateCount = m.UpdateCount
             };
 
             _cachedMetrics.Add(entry);
@@ -221,7 +221,7 @@ public class ProfilerContent : UIComponent
                 ProfilerSortMode.ByMaxTime => (a, b) => b.MaxMs.CompareTo(a.MaxMs),
                 ProfilerSortMode.ByName => (a, b) =>
                     string.Compare(a.Name, b.Name, StringComparison.Ordinal),
-                _ => (a, b) => b.LastMs.CompareTo(a.LastMs),
+                _ => (a, b) => b.LastMs.CompareTo(a.LastMs)
             }
         );
     }
@@ -313,7 +313,7 @@ public class ProfilerContent : UIComponent
                 SortMode = ProfilerSortMode.ByName,
                 X = contentX,
                 MaxWidth = nameColWidth,
-                Ascending = true, // Name sorts ascending
+                Ascending = true // Name sorts ascending
             },
             new SortableTableHeader<ProfilerSortMode>.Column
             {
@@ -321,7 +321,7 @@ public class ProfilerContent : UIComponent
                 SortMode = ProfilerSortMode.ByExecutionTime,
                 X = barColStart,
                 MaxWidth = barColWidth,
-                Ascending = false, // Time sorts descending
+                Ascending = false // Time sorts descending
             },
             new SortableTableHeader<ProfilerSortMode>.Column
             {
@@ -330,7 +330,7 @@ public class ProfilerContent : UIComponent
                 X = tableContentRightEdge - MsColumnWidth,
                 MaxWidth = MsColumnWidth,
                 Alignment = SortableTableHeader<ProfilerSortMode>.HorizontalAlignment.Right,
-                Ascending = false, // Time sorts descending
+                Ascending = false // Time sorts descending
             }
         );
 

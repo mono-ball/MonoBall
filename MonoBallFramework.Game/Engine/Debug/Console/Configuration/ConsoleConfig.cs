@@ -20,7 +20,7 @@ public enum ConsoleSize
     /// <summary>
     ///     Full console (100% of screen height).
     /// </summary>
-    Full,
+    Full
 }
 
 /// <summary>
@@ -97,7 +97,7 @@ public record ConsoleConfig
             ConsoleSize.Small => ConsoleConstants.Size.SmallMultiplier,
             ConsoleSize.Medium => ConsoleConstants.Size.MediumMultiplier,
             ConsoleSize.Full => ConsoleConstants.Size.FullMultiplier,
-            _ => ConsoleConstants.Size.MediumMultiplier,
+            _ => ConsoleConstants.Size.MediumMultiplier
         };
     }
 

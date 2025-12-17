@@ -69,18 +69,14 @@ public class BorderProcessor : IBorderProcessor
             // Create MapBorder with both bottom and top layer GIDs
             int[] bottomLayer = new[]
             {
-                borderData.Value.TopLeft,
-                borderData.Value.TopRight,
-                borderData.Value.BottomLeft,
-                borderData.Value.BottomRight,
+                borderData.Value.TopLeft, borderData.Value.TopRight, borderData.Value.BottomLeft,
+                borderData.Value.BottomRight
             };
 
             int[] topLayer = new[]
             {
-                borderData.Value.TopLeftTop,
-                borderData.Value.TopRightTop,
-                borderData.Value.BottomLeftTop,
-                borderData.Value.BottomRightTop,
+                borderData.Value.TopLeftTop, borderData.Value.TopRightTop, borderData.Value.BottomLeftTop,
+                borderData.Value.BottomRightTop
             };
 
             var mapBorder = new MapBorder(bottomLayer, topLayer, tilesetId);
@@ -112,7 +108,7 @@ public class BorderProcessor : IBorderProcessor
 
             _logger?.LogInformation(
                 "Loaded dual-layer border tiles from tileset {TilesetId}: "
-                    + "Bottom=[{B0},{B1},{B2},{B3}], Top=[{T0},{T1},{T2},{T3}]",
+                + "Bottom=[{B0},{B1},{B2},{B3}], Top=[{T0},{T1},{T2},{T3}]",
                 tilesetId,
                 bottomLayer[0],
                 bottomLayer[1],
@@ -183,7 +179,7 @@ public class BorderProcessor : IBorderProcessor
                         TopLeftTop = GetIntProperty(jsonElement, "top_left_top"),
                         TopRightTop = GetIntProperty(jsonElement, "top_right_top"),
                         BottomLeftTop = GetIntProperty(jsonElement, "bottom_left_top"),
-                        BottomRightTop = GetIntProperty(jsonElement, "bottom_right_top"),
+                        BottomRightTop = GetIntProperty(jsonElement, "bottom_right_top")
                     };
                 }
             }
@@ -202,7 +198,7 @@ public class BorderProcessor : IBorderProcessor
                     TopLeftTop = GetIntFromDict(dict, "top_left_top"),
                     TopRightTop = GetIntFromDict(dict, "top_right_top"),
                     BottomLeftTop = GetIntFromDict(dict, "bottom_left_top"),
-                    BottomRightTop = GetIntFromDict(dict, "bottom_right_top"),
+                    BottomRightTop = GetIntFromDict(dict, "bottom_right_top")
                 };
             }
 

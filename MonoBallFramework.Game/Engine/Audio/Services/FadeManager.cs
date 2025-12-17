@@ -4,30 +4,34 @@ using MonoBallFramework.Game.Engine.Audio.Services.Streaming;
 namespace MonoBallFramework.Game.Engine.Audio.Services;
 
 /// <summary>
-/// Shared fade logic for music playback.
-/// Handles fade-in, fade-out, crossfade, and sequential fade transitions.
+///     Shared fade logic for music playback.
+///     Handles fade-in, fade-out, crossfade, and sequential fade transitions.
 /// </summary>
 public static class FadeManager
 {
     /// <summary>
-    /// Result of a fade update operation.
+    ///     Result of a fade update operation.
     /// </summary>
     public enum FadeUpdateResult
     {
         /// <summary>Fade is still in progress.</summary>
         InProgress,
+
         /// <summary>Fade completed normally (fade-in finished or crossfade finished).</summary>
         Completed,
+
         /// <summary>Fade-out completed, ready to stop playback.</summary>
         FadeOutComplete,
+
         /// <summary>Sequential fade-out completed, ready to play pending track immediately.</summary>
         FadeOutThenPlayComplete,
+
         /// <summary>Sequential fade-out completed, ready to fade in pending track.</summary>
         FadeOutThenFadeInComplete
     }
 
     /// <summary>
-    /// Updates the fade state for a playback instance.
+    ///     Updates the fade state for a playback instance.
     /// </summary>
     /// <param name="playback">The playback state to update.</param>
     /// <param name="deltaTime">Time elapsed since last update in seconds.</param>
@@ -36,7 +40,9 @@ public static class FadeManager
     public static FadeUpdateResult UpdateFade(IFadingPlayback playback, float deltaTime, ILogger? logger = null)
     {
         if (playback.FadeState == FadeState.None || playback.VolumeProvider == null)
+        {
             return FadeUpdateResult.Completed;
+        }
 
         playback.FadeTimer += deltaTime;
         float progress = Math.Clamp(playback.FadeTimer / playback.FadeDuration, 0f, 1f);
@@ -91,7 +97,8 @@ public static class FadeManager
         return FadeUpdateResult.InProgress;
     }
 
-    private static FadeUpdateResult UpdateFadingOutThenPlay(IFadingPlayback playback, float progress, float deltaTime, ILogger? logger)
+    private static FadeUpdateResult UpdateFadingOutThenPlay(IFadingPlayback playback, float progress, float deltaTime,
+        ILogger? logger)
     {
         playback.CurrentVolume = playback.TargetVolume * (1f - progress);
         playback.VolumeProvider!.Volume = playback.CurrentVolume;

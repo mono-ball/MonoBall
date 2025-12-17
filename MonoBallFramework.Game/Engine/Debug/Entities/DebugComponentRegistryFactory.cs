@@ -89,8 +89,8 @@ public static class DebugComponentRegistryFactory
     private static bool IsComponentNamespace(string ns)
     {
         return ns.StartsWith("MonoBallFramework.Game.Components")
-            || ns.StartsWith("MonoBallFramework.Game.Ecs.Components")
-            || ns.StartsWith("MonoBallFramework.Engine.Core.Types");
+               || ns.StartsWith("MonoBallFramework.Game.Ecs.Components")
+               || ns.StartsWith("MonoBallFramework.Engine.Core.Types");
     }
 
     /// <summary>
@@ -135,7 +135,7 @@ public static class DebugComponentRegistryFactory
             "BelongsToMap" => 5,
             "Collision" => 4,
             "Pooled" => 1,
-            _ => 0,
+            _ => 0
         };
     }
 }

@@ -86,7 +86,7 @@ public class HistoryCommand : IConsoleCommand
             string displayCommand =
                 command.Length > 80 ? command.Substring(0, 77) + "..." : command;
 
-            context.WriteLine($"  {index, 3}. {displayCommand}", theme.TextPrimary);
+            context.WriteLine($"  {index,3}. {displayCommand}", theme.TextPrimary);
         }
 
         context.WriteLine("");

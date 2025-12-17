@@ -1,5 +1,4 @@
 using Arch.Core;
-using Arch.Core.Extensions;
 using Microsoft.Extensions.Logging;
 using MonoBallFramework.Game.Ecs.Components.Maps;
 using MonoBallFramework.Game.Engine.Audio.Configuration;
@@ -18,19 +17,19 @@ namespace MonoBallFramework.Game.Engine.Audio.Services;
 /// </summary>
 public class MapMusicOrchestrator : IMapMusicOrchestrator
 {
-    private readonly World _world;
     private readonly IAudioService _audioService;
     private readonly AudioConfiguration _config;
-    private readonly MapLifecycleManager? _mapLifecycleManager;
     private readonly ILogger<MapMusicOrchestrator>? _logger;
-    private readonly IDisposable? _mapTransitionSubscription;
+    private readonly MapLifecycleManager? _mapLifecycleManager;
     private readonly IDisposable? _mapRenderReadySubscription;
+    private readonly IDisposable? _mapTransitionSubscription;
+    private readonly World _world;
 
     private string? _currentMapMusicId;
     private bool _disposed;
 
     /// <summary>
-    ///     Initializes a new instance of the <see cref="MapMusicOrchestrator"/> class.
+    ///     Initializes a new instance of the <see cref="MapMusicOrchestrator" /> class.
     /// </summary>
     /// <param name="world">The ECS world.</param>
     /// <param name="audioService">The audio service for playing music.</param>
@@ -66,6 +65,23 @@ public class MapMusicOrchestrator : IMapMusicOrchestrator
     }
 
     /// <summary>
+    ///     Disposes of the orchestrator and unsubscribes from events.
+    /// </summary>
+    public void Dispose()
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        _mapTransitionSubscription?.Dispose();
+        _mapRenderReadySubscription?.Dispose();
+        _disposed = true;
+
+        _logger?.LogDebug("MapMusicOrchestrator disposed");
+    }
+
+    /// <summary>
     ///     Handles map transition events (warps and boundary crossings).
     /// </summary>
     private void OnMapTransition(MapTransitionEvent evt)
@@ -86,7 +102,7 @@ public class MapMusicOrchestrator : IMapMusicOrchestrator
         // Handle music for warp transitions
         if (evt.ToMapId is not null)
         {
-            PlayMusicForMap(evt.ToMapId, isWarp: true);
+            PlayMusicForMap(evt.ToMapId, true);
         }
     }
 
@@ -119,7 +135,7 @@ public class MapMusicOrchestrator : IMapMusicOrchestrator
             }
         }
 
-        PlayMusicForMap(evt.MapId, isWarp: false);
+        PlayMusicForMap(evt.MapId, false);
     }
 
     /// <summary>
@@ -158,7 +174,8 @@ public class MapMusicOrchestrator : IMapMusicOrchestrator
             }
             else
             {
-                _logger?.LogWarning("Map {MapId} has no music assigned (searched {Count} maps)", mapIdStr, mapsWithMusicCount);
+                _logger?.LogWarning("Map {MapId} has no music assigned (searched {Count} maps)", mapIdStr,
+                    mapsWithMusicCount);
             }
         }
         catch (Exception ex)
@@ -186,28 +203,11 @@ public class MapMusicOrchestrator : IMapMusicOrchestrator
             ? _config.DefaultFadeDurationSeconds
             : 0f; // Instant for initial load
 
-        _audioService.PlayMusic(musicId, loop: true, fadeDuration: fadeDuration);
+        _audioService.PlayMusic(musicId, true, fadeDuration);
         _currentMapMusicId = musicId;
 
         _logger?.LogInformation(
             "Playing map music: {MusicId} (fade: {FadeDuration}s, warp: {IsWarp})",
             musicId, fadeDuration, isWarp);
-    }
-
-    /// <summary>
-    ///     Disposes of the orchestrator and unsubscribes from events.
-    /// </summary>
-    public void Dispose()
-    {
-        if (_disposed)
-        {
-            return;
-        }
-
-        _mapTransitionSubscription?.Dispose();
-        _mapRenderReadySubscription?.Dispose();
-        _disposed = true;
-
-        _logger?.LogDebug("MapMusicOrchestrator disposed");
     }
 }

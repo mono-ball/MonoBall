@@ -70,7 +70,7 @@ internal static class LogFormatting
         { "E  ", "[entity]" },
         { "I  ", "[input]" },
         { "WF ", "[task]" },
-        { "SYS", "[sys]" },
+        { "SYS", "[sys]" }
     };
 
     private static readonly LogLevelStyle DefaultStyle = new(
@@ -85,34 +85,17 @@ internal static class LogFormatting
     private static readonly Dictionary<LogLevel, LogLevelStyle> LogLevelStyles = new()
     {
         { LogLevel.Trace, new LogLevelStyle("TRACE", "grey53", false, "grey35", true, "TRACE") },
-        {
-            LogLevel.Debug,
-            new LogLevelStyle("DEBUG", "steelblue1", false, "lightsteelblue1", false, "DEBUG")
-        },
-        {
-            LogLevel.Information,
-            new LogLevelStyle("INFO", "skyblue3", false, "silver", true, "INFO ")
-        },
+        { LogLevel.Debug, new LogLevelStyle("DEBUG", "steelblue1", false, "lightsteelblue1", false, "DEBUG") },
+        { LogLevel.Information, new LogLevelStyle("INFO", "skyblue3", false, "silver", true, "INFO ") },
         { LogLevel.Warning, new LogLevelStyle("WARN", "gold1", true, "gold1", false, "WARN ") },
         { LogLevel.Error, new LogLevelStyle("ERROR", "red3", true, "red3", false, "ERROR") },
-        {
-            LogLevel.Critical,
-            new LogLevelStyle("CRIT", "magenta1", true, "magenta1", false, "CRIT ")
-        },
+        { LogLevel.Critical, new LogLevelStyle("CRIT", "magenta1", true, "magenta1", false, "CRIT ") }
     };
 
     private static readonly string[] CategoryPalette =
     {
-        "cyan1",
-        "deepskyblue1",
-        "mediumorchid",
-        "springgreen1",
-        "gold1",
-        "lightsteelblue",
-        "dodgerblue3",
-        "mediumvioletred",
-        "turquoise2",
-        "plum1",
+        "cyan1", "deepskyblue1", "mediumorchid", "springgreen1", "gold1", "lightsteelblue", "dodgerblue3",
+        "mediumvioletred", "turquoise2", "plum1"
     };
 
     public static bool SupportsMarkup => _supportsMarkup.Value;

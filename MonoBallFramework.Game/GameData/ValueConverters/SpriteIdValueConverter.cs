@@ -12,5 +12,7 @@ public class GameSpriteIdValueConverter : ValueConverter<GameSpriteId?, string?>
         : base(
             v => v != null ? v.Value : null,
             v => v != null ? GameSpriteId.TryCreate(v) : null
-        ) { }
+        )
+    {
+    }
 }

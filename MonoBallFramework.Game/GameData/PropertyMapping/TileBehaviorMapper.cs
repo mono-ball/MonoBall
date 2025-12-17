@@ -45,12 +45,7 @@ public class TileBehaviorMapper : IEntityPropertyMapper<TileBehavior>
         GameTileBehaviorId behaviorId = GameTileBehaviorId.TryCreate(behaviorTypeId)
                                         ?? GameTileBehaviorId.CreateMovement(behaviorTypeId);
 
-        return new TileBehavior
-        {
-            BehaviorId = behaviorId,
-            IsActive = true,
-            IsInitialized = false
-        };
+        return new TileBehavior { BehaviorId = behaviorId, IsActive = true, IsInitialized = false };
     }
 
     public void MapAndAdd(World world, Entity entity, Dictionary<string, object> properties)

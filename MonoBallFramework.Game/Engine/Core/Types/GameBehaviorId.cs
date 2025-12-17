@@ -4,7 +4,6 @@ namespace MonoBallFramework.Game.Engine.Core.Types;
 
 /// <summary>
 ///     Strongly-typed identifier for behavior definitions.
-///
 ///     Format: base:behavior:{category}/{name}
 ///     Examples:
 ///     - base:behavior:npc/patrol
@@ -40,9 +39,11 @@ public sealed record GameBehaviorId : EntityId
     public GameBehaviorId(string value) : base(value)
     {
         if (EntityType != TypeName)
+        {
             throw new ArgumentException(
                 $"Expected entity type '{TypeName}', got '{EntityType}'",
                 nameof(value));
+        }
     }
 
     /// <summary>
@@ -115,11 +116,15 @@ public sealed record GameBehaviorId : EntityId
     public static GameBehaviorId? TryCreate(string? value)
     {
         if (string.IsNullOrWhiteSpace(value))
+        {
             return null;
+        }
 
         // Only accept full format
         if (!IsValidFormat(value) || !value.Contains($":{TypeName}:"))
+        {
             return null;
+        }
 
         try
         {
@@ -134,5 +139,8 @@ public sealed record GameBehaviorId : EntityId
     /// <summary>
     ///     Explicit conversion from string. Use TryCreate() for safe parsing.
     /// </summary>
-    public static explicit operator GameBehaviorId(string value) => new(value);
+    public static explicit operator GameBehaviorId(string value)
+    {
+        return new GameBehaviorId(value);
+    }
 }

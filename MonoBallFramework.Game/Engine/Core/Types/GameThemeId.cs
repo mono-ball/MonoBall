@@ -4,7 +4,6 @@ namespace MonoBallFramework.Game.Engine.Core.Types;
 
 /// <summary>
 ///     Strongly-typed identifier for popup theme definitions.
-///
 ///     Format: base:theme:{category}/{name}
 ///     Examples:
 ///     - base:theme:popup/wood
@@ -24,9 +23,11 @@ public sealed record GameThemeId : EntityId
     public GameThemeId(string value) : base(value)
     {
         if (EntityType != TypeName)
+        {
             throw new ArgumentException(
                 $"Expected entity type '{TypeName}', got '{EntityType}'",
                 nameof(value));
+        }
     }
 
     /// <summary>
@@ -56,11 +57,15 @@ public sealed record GameThemeId : EntityId
     public static GameThemeId? TryCreate(string? value)
     {
         if (string.IsNullOrWhiteSpace(value))
+        {
             return null;
+        }
 
         // Only accept full format
         if (!IsValidFormat(value) || !value.Contains($":{TypeName}:"))
+        {
             return null;
+        }
 
         try
         {
@@ -78,11 +83,13 @@ public sealed record GameThemeId : EntityId
     /// <param name="legacyTheme">Legacy ID (e.g., "wood" or "MAPPOPUP_THEME_WOOD")</param>
     public static GameThemeId FromLegacy(string legacyTheme)
     {
-        var normalized = NormalizeComponent(legacyTheme);
+        string normalized = NormalizeComponent(legacyTheme);
 
         // Remove mappopup_theme_ prefix if present
         if (normalized.StartsWith("mappopup_theme_"))
+        {
             normalized = normalized[15..];
+        }
 
         return Create(normalized);
     }
@@ -90,5 +97,8 @@ public sealed record GameThemeId : EntityId
     /// <summary>
     ///     Explicit conversion from string. Use TryCreate() for safe parsing.
     /// </summary>
-    public static explicit operator GameThemeId(string value) => new(value);
+    public static explicit operator GameThemeId(string value)
+    {
+        return new GameThemeId(value);
+    }
 }

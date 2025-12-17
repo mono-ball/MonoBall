@@ -1,5 +1,6 @@
 using Arch.Core;
 using MonoBallFramework.Game.Ecs.Components.Movement;
+using MonoBallFramework.Game.Engine.Core.Events;
 using MonoBallFramework.Game.Engine.Core.Types;
 using MonoBallFramework.Game.Engine.Core.Types.Events;
 
@@ -14,7 +15,7 @@ namespace MonoBallFramework.Game.GameSystems.Events;
 ///     prevent collisions. The collision service will respect the IsBlocked flag.
 ///     Properties are mutable to support event pooling for performance.
 /// </remarks>
-public record CollisionCheckEvent : TypeEventBase, MonoBallFramework.Game.Engine.Core.Events.ICancellableEvent
+public record CollisionCheckEvent : TypeEventBase, ICancellableEvent
 {
     /// <summary>
     ///     The entity performing the collision check (e.g., player, NPC).
@@ -86,7 +87,7 @@ public record CollisionCheckEvent : TypeEventBase, MonoBallFramework.Game.Engine
     ///     UTC timestamp when this event was created (required by IGameEvent).
     ///     Note: TypeEventBase also has a float Timestamp property for game time.
     /// </summary>
-    DateTime MonoBallFramework.Game.Engine.Core.Events.IGameEvent.Timestamp { get; set; } = DateTime.UtcNow;
+    DateTime IGameEvent.Timestamp { get; set; } = DateTime.UtcNow;
 
     /// <summary>
     ///     Cancels this collision check (blocks movement).
@@ -264,7 +265,7 @@ public enum CollisionType
     Elevation,
 
     /// <summary>Blocked by tile behavior (one-way tiles, etc.)</summary>
-    Behavior,
+    Behavior
 }
 
 /// <summary>
@@ -285,5 +286,5 @@ public enum ResolutionStrategy
     Pushback,
 
     /// <summary>Custom resolution by script</summary>
-    Custom,
+    Custom
 }

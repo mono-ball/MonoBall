@@ -13,7 +13,7 @@ public class ConsoleNotificationService : IHotReloadNotificationService
             NotificationType.Warning => "⚠",
             NotificationType.Error => "✗",
             NotificationType.Info => "ℹ",
-            _ => "•",
+            _ => "•"
         };
 
         ConsoleColor color = notification.Type switch
@@ -22,7 +22,7 @@ public class ConsoleNotificationService : IHotReloadNotificationService
             NotificationType.Warning => ConsoleColor.Yellow,
             NotificationType.Error => ConsoleColor.Red,
             NotificationType.Info => ConsoleColor.Cyan,
-            _ => ConsoleColor.White,
+            _ => ConsoleColor.White
         };
 
         ConsoleColor originalColor = Console.ForegroundColor;

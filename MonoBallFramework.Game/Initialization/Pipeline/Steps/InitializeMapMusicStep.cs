@@ -3,6 +3,7 @@ using MonoBallFramework.Game.Engine.Audio.Configuration;
 using MonoBallFramework.Game.Engine.Audio.Services;
 using MonoBallFramework.Game.Engine.Core.Events;
 using MonoBallFramework.Game.Engine.Scenes;
+using MonoBallFramework.Game.Systems;
 
 namespace MonoBallFramework.Game.Initialization.Pipeline.Steps;
 
@@ -21,7 +22,9 @@ public class InitializeMapMusicStep : InitializationStepBase
             "Initializing map music system...",
             InitializationProgress.Complete,
             InitializationProgress.Complete
-        ) { }
+        )
+    {
+    }
 
     /// <inheritdoc />
     protected override Task ExecuteStepAsync(
@@ -35,16 +38,16 @@ public class InitializeMapMusicStep : InitializationStepBase
 
         // Get required services
         IEventBus eventBus = context.Services.GetService(typeof(IEventBus)) as IEventBus
-            ?? throw new InvalidOperationException("IEventBus not found in services");
+                             ?? throw new InvalidOperationException("IEventBus not found in services");
 
         IAudioService audioService = context.Services.GetService(typeof(IAudioService)) as IAudioService
-            ?? throw new InvalidOperationException("IAudioService not found in services");
+                                     ?? throw new InvalidOperationException("IAudioService not found in services");
 
         AudioConfiguration audioConfig = context.Services.GetService(typeof(AudioConfiguration)) as AudioConfiguration
-            ?? AudioConfiguration.Default;
+                                         ?? AudioConfiguration.Default;
 
         // Get MapLifecycleManager from GameInitializer (for filtering adjacent map events)
-        var mapLifecycleManager = context.GameInitializer?.MapLifecycleManager;
+        MapLifecycleManager? mapLifecycleManager = context.GameInitializer?.MapLifecycleManager;
 
         ILogger<MapMusicOrchestrator> orchestratorLogger =
             context.LoggerFactory.CreateLogger<MapMusicOrchestrator>();

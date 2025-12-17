@@ -41,4 +41,6 @@ public abstract class CancellableEventBase : NotificationEventBase, ICancellable
 ///     Alias for backwards compatibility. Use CancellableEventBase instead.
 /// </summary>
 [Obsolete("Use CancellableEventBase instead. This alias will be removed in a future version.")]
-public abstract class GameEventBase : CancellableEventBase { }
+public abstract class GameEventBase : CancellableEventBase
+{
+}

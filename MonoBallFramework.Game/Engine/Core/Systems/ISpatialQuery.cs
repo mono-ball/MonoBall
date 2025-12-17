@@ -30,12 +30,12 @@ namespace MonoBallFramework.Game.Engine.Core.Systems;
 /// public class MySystem
 /// {
 ///     private readonly ISpatialQuery _spatialQuery;
-///
+/// 
 ///     public MySystem(ISpatialQuery spatialQuery)
 ///     {
 ///         _spatialQuery = spatialQuery;
 ///     }
-///
+/// 
 ///     public void CheckCollision(int mapId, int x, int y)
 ///     {
 ///         // Query all entities at a tile position
@@ -45,7 +45,7 @@ namespace MonoBallFramework.Game.Engine.Core.Systems;
 ///             // Check collision component...
 ///         }
 ///     }
-///
+/// 
 ///     public void FindEntitiesInArea(int mapId, Rectangle bounds)
 ///     {
 ///         // Query entities in a rectangular area

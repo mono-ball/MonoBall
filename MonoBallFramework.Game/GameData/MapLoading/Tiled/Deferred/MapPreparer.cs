@@ -26,20 +26,20 @@ public class MapPreparer
 
     // Maximum number of prepared maps to cache (typical streaming window is 3x3 = 9, minus current = 8 neighbors)
     private const int MaxPreparedMapsCache = 8;
-
-    private readonly ITmxDocumentProvider _tmxDocumentProvider;
-    private readonly TilesetLoader _tilesetLoader;
-    private readonly MapEntityService _mapEntityService;
     private readonly ILogger<MapPreparer>? _logger;
+    private readonly MapEntityService _mapEntityService;
 
     // LRU cache of prepared maps ready for instant application
     private readonly LruCache<string, PreparedMapData> _preparedMaps = new(MaxPreparedMapsCache);
 
-    // Track in-progress preparations to avoid duplicates
-    private readonly ConcurrentDictionary<string, Task<PreparedMapData>> _preparingMaps = new();
-
     // Lock for thread-safe task creation
     private readonly object _prepareLock = new();
+
+    // Track in-progress preparations to avoid duplicates
+    private readonly ConcurrentDictionary<string, Task<PreparedMapData>> _preparingMaps = new();
+    private readonly TilesetLoader _tilesetLoader;
+
+    private readonly ITmxDocumentProvider _tmxDocumentProvider;
 
     public MapPreparer(
         ITmxDocumentProvider tmxDocumentProvider,
@@ -56,14 +56,17 @@ public class MapPreparer
     /// <summary>
     ///     Checks if a map is already prepared and cached.
     /// </summary>
-    public bool IsPrepared(GameMapId mapId) => _preparedMaps.ContainsKey(mapId.Value);
+    public bool IsPrepared(GameMapId mapId)
+    {
+        return _preparedMaps.ContainsKey(mapId.Value);
+    }
 
     /// <summary>
     ///     Gets prepared map data if available.
     /// </summary>
     public PreparedMapData? GetPrepared(GameMapId mapId)
     {
-        _preparedMaps.TryGetValue(mapId.Value, out var data);
+        _preparedMaps.TryGetValue(mapId.Value, out PreparedMapData? data);
         return data;
     }
 
@@ -71,7 +74,8 @@ public class MapPreparer
     ///     Prepares a map asynchronously on a background thread.
     ///     Returns cached data if already prepared.
     /// </summary>
-    public async Task<PreparedMapData> PrepareMapAsync(GameMapId mapId, Vector2 worldOffset = default, CancellationToken cancellationToken = default)
+    public async Task<PreparedMapData> PrepareMapAsync(GameMapId mapId, Vector2 worldOffset = default,
+        CancellationToken cancellationToken = default)
     {
         // Fast path: already prepared (no lock needed for read)
         if (_preparedMaps.TryGetValue(mapId.Value, out PreparedMapData? cached) && cached != null)
@@ -92,7 +96,7 @@ public class MapPreparer
             }
 
             // Check if already preparing
-            if (_preparingMaps.TryGetValue(mapId.Value, out var existingTask))
+            if (_preparingMaps.TryGetValue(mapId.Value, out Task<PreparedMapData>? existingTask))
             {
                 _logger?.LogDebug("Waiting for in-progress preparation: {MapId}", mapId.Value);
                 prepareTask = existingTask;
@@ -105,7 +109,8 @@ public class MapPreparer
                     try
                     {
                         _logger?.LogDebug("Starting background preparation: {MapId}", mapId.Value);
-                        var prepared = await PrepareMapInternalAsync(mapId, worldOffset, cancellationToken).ConfigureAwait(false);
+                        PreparedMapData prepared = await PrepareMapInternalAsync(mapId, worldOffset, cancellationToken)
+                            .ConfigureAwait(false);
                         _preparedMaps[mapId.Value] = prepared;
                         _logger?.LogInformation("Map prepared in background: {MapId} ({TileCount} tiles)",
                             mapId.Value, prepared.Tiles.Count);
@@ -131,7 +136,9 @@ public class MapPreparer
     public void PrepareMapInBackground(GameMapId mapId, Vector2 worldOffset = default)
     {
         if (_preparedMaps.ContainsKey(mapId.Value) || _preparingMaps.ContainsKey(mapId.Value))
+        {
             return;
+        }
 
         // Use ContinueWith to handle exceptions without swallowing them silently
         PrepareMapAsync(mapId, worldOffset).ContinueWith(
@@ -189,49 +196,51 @@ public class MapPreparer
         return mapDef.TiledDataPath;
     }
 
-    private async Task<PreparedMapData> PrepareMapInternalAsync(GameMapId mapId, Vector2 worldOffset, CancellationToken cancellationToken)
+    private async Task<PreparedMapData> PrepareMapInternalAsync(GameMapId mapId, Vector2 worldOffset,
+        CancellationToken cancellationToken)
     {
         // 1. Load TMX document (async file I/O + JSON parsing)
         TmxDocument tmxDoc = await _tmxDocumentProvider.GetOrLoadTmxDocumentAsync(mapId).ConfigureAwait(false);
         string mapPath = GetMapPath(mapId);
 
         // 2. Load tilesets (async)
-        var tilesets = await _tilesetLoader.LoadTilesetsAsync(tmxDoc, mapPath, cancellationToken).ConfigureAwait(false);
+        List<LoadedTileset> tilesets = await _tilesetLoader.LoadTilesetsAsync(tmxDoc, mapPath, cancellationToken)
+            .ConfigureAwait(false);
 
         // 3. Pre-compute all tile data (CPU-intensive but on background thread)
-        var tiles = PrepareTiles(tmxDoc, mapId, tilesets, worldOffset);
+        List<PreparedTile> tiles = PrepareTiles(tmxDoc, mapId, tilesets, worldOffset);
 
         // 4. Prepare image layers
-        var imageLayers = PrepareImageLayers(tmxDoc);
+        List<PreparedImageLayer>? imageLayers = PrepareImageLayers(tmxDoc);
 
         // 5. Prepare object groups
-        var objectGroups = PrepareObjectGroups(tmxDoc);
+        List<PreparedObjectGroup>? objectGroups = PrepareObjectGroups(tmxDoc);
 
         // 6. Extract map properties
-        var properties = tmxDoc.Properties ?? new Dictionary<string, object>();
+        Dictionary<string, object> properties = tmxDoc.Properties ?? new Dictionary<string, object>();
 
         // 7. Get connection data from MapEntityService (critical for map streaming!)
-        var connections = PrepareConnections(mapId, properties);
+        List<MapConnection>? connections = PrepareConnections(mapId, properties);
 
         return new PreparedMapData
         {
             MapId = mapId,
-            MapName = mapId.Value,  // Use full ID to match cache lookups
+            MapName = mapId.Value, // Use full ID to match cache lookups
             WorldOffset = worldOffset,
             MapWidth = tmxDoc.Width,
             MapHeight = tmxDoc.Height,
             TileWidth = tmxDoc.TileWidth,
             TileHeight = tmxDoc.TileHeight,
-            MapPath = mapPath,  // Store for texture resolution in MapEntityApplier
+            MapPath = mapPath, // Store for texture resolution in MapEntityApplier
             Tiles = tiles,
             Tilesets = tilesets,
             Properties = properties,
-            Name = properties.TryGetValue("displayName", out var dn) ? dn?.ToString() : null,
-            RegionSection = properties.TryGetValue("region_section", out var rs) ? rs?.ToString() : null,
-            MusicTrack = properties.TryGetValue("music", out var mt) ? mt?.ToString() : null,
+            Name = properties.TryGetValue("displayName", out object? dn) ? dn?.ToString() : null,
+            RegionSection = properties.TryGetValue("region_section", out object? rs) ? rs?.ToString() : null,
+            MusicTrack = properties.TryGetValue("music", out object? mt) ? mt?.ToString() : null,
             ImageLayers = imageLayers,
             ObjectGroups = objectGroups,
-            Connections = connections,
+            Connections = connections
         };
     }
 
@@ -255,10 +264,10 @@ public class MapPreparer
         );
 
         // Try TMX properties first (using same format as MapMetadataFactory)
-        var (northId, northOffset) = ExtractConnectionFromProperty(properties, "connection_north");
-        var (southId, southOffset) = ExtractConnectionFromProperty(properties, "connection_south");
-        var (eastId, eastOffset) = ExtractConnectionFromProperty(properties, "connection_east");
-        var (westId, westOffset) = ExtractConnectionFromProperty(properties, "connection_west");
+        (GameMapId? northId, int northOffset) = ExtractConnectionFromProperty(properties, "connection_north");
+        (GameMapId? southId, int southOffset) = ExtractConnectionFromProperty(properties, "connection_south");
+        (GameMapId? eastId, int eastOffset) = ExtractConnectionFromProperty(properties, "connection_east");
+        (GameMapId? westId, int westOffset) = ExtractConnectionFromProperty(properties, "connection_west");
 
         // Fall back to MapEntity if Tiled doesn't have the connection
         if (northId == null && mapDef?.NorthMapId != null)
@@ -266,16 +275,19 @@ public class MapPreparer
             northId = mapDef.NorthMapId;
             northOffset = mapDef.NorthConnectionOffset;
         }
+
         if (southId == null && mapDef?.SouthMapId != null)
         {
             southId = mapDef.SouthMapId;
             southOffset = mapDef.SouthConnectionOffset;
         }
+
         if (eastId == null && mapDef?.EastMapId != null)
         {
             eastId = mapDef.EastMapId;
             eastOffset = mapDef.EastConnectionOffset;
         }
+
         if (westId == null && mapDef?.WestMapId != null)
         {
             westId = mapDef.WestMapId;
@@ -287,14 +299,17 @@ public class MapPreparer
         {
             connections.Add(new MapConnection { TargetMapId = northId, Direction = "north", Offset = northOffset });
         }
+
         if (southId != null)
         {
             connections.Add(new MapConnection { TargetMapId = southId, Direction = "south", Offset = southOffset });
         }
+
         if (eastId != null)
         {
             connections.Add(new MapConnection { TargetMapId = eastId, Direction = "east", Offset = eastOffset });
         }
+
         if (westId != null)
         {
             connections.Add(new MapConnection { TargetMapId = westId, Direction = "west", Offset = westOffset });
@@ -338,6 +353,7 @@ public class MapPreparer
                 {
                     mapIdStr = mapProp.GetString();
                 }
+
                 if (je.TryGetProperty("offset", out JsonElement offsetProp) &&
                     offsetProp.ValueKind == JsonValueKind.Number)
                 {
@@ -352,6 +368,7 @@ public class MapPreparer
             {
                 mapIdStr = mapValue?.ToString();
             }
+
             if (dict.TryGetValue("offset", out object? offsetValue))
             {
                 if (offsetValue is int intOffset)
@@ -379,7 +396,7 @@ public class MapPreparer
         Vector2 worldOffset)
     {
         // Pre-size for all layers to avoid resizing (performance optimization)
-        var layers = tmxDoc.Layers;
+        List<TmxLayer>? layers = tmxDoc.Layers;
         if (layers == null || layers.Count == 0)
         {
             return new List<PreparedTile>();
@@ -391,7 +408,7 @@ public class MapPreparer
 
         // Pre-compute tileset FirstGid boundaries (sorted ascending for binary search)
         int tilesetCount = tilesets.Count;
-        var tilesetFirstGids = new int[tilesetCount];
+        int[] tilesetFirstGids = new int[tilesetCount];
         for (int i = 0; i < tilesetCount; i++)
         {
             tilesetFirstGids[i] = tilesets[i].Tileset.FirstGid;
@@ -399,8 +416,11 @@ public class MapPreparer
 
         for (int layerIndex = 0; layerIndex < layerCount; layerIndex++)
         {
-            var layer = layers[layerIndex];
-            if (layer?.Data == null) continue;
+            TmxLayer? layer = layers[layerIndex];
+            if (layer?.Data == null)
+            {
+                continue;
+            }
 
             byte elevation = DetermineElevation(layer, layerIndex);
             float layerOffsetX = layer.OffsetX;
@@ -416,7 +436,10 @@ public class MapPreparer
                 uint rawGid = layer.Data[index];
                 int tileGid = (int)(rawGid & TiledConstants.FlipFlags.TileIdMask);
 
-                if (tileGid == 0) continue;
+                if (tileGid == 0)
+                {
+                    continue;
+                }
 
                 bool flipH = (rawGid & TiledConstants.FlipFlags.HorizontalFlip) != 0;
                 bool flipV = (rawGid & TiledConstants.FlipFlags.VerticalFlip) != 0;
@@ -424,10 +447,13 @@ public class MapPreparer
 
                 // Binary search to find tileset (O(log n) instead of O(n))
                 int tilesetIndex = FindTilesetIndex(tilesetFirstGids, tileGid);
-                if (tilesetIndex < 0) continue;
+                if (tilesetIndex < 0)
+                {
+                    continue;
+                }
 
-                var tileset = tilesets[tilesetIndex];
-                var sourceRect = TilesetUtilities.CalculateSourceRect(tileGid, tileset.Tileset);
+                LoadedTileset tileset = tilesets[tilesetIndex];
+                Rectangle sourceRect = TilesetUtilities.CalculateSourceRect(tileGid, tileset.Tileset);
 
                 // Get tile properties
                 int localTileId = tileGid - tileset.Tileset.FirstGid;
@@ -439,7 +465,7 @@ public class MapPreparer
 
                 // Check for custom elevation
                 byte tileElevation = elevation;
-                if (tileProps?.TryGetValue("elevation", out var elevProp) == true)
+                if (tileProps?.TryGetValue("elevation", out object? elevProp) == true)
                 {
                     tileElevation = Convert.ToByte(elevProp);
                 }
@@ -458,7 +484,7 @@ public class MapPreparer
                     Elevation = tileElevation,
                     LayerOffsetX = layerOffsetX,
                     LayerOffsetY = layerOffsetY,
-                    Properties = tileProps,
+                    Properties = tileProps
                 });
             }
         }
@@ -478,7 +504,7 @@ public class MapPreparer
 
         while (left <= right)
         {
-            int mid = left + (right - left) / 2;
+            int mid = left + ((right - left) / 2);
 
             if (tilesetFirstGids[mid] <= tileGid)
             {
@@ -501,31 +527,41 @@ public class MapPreparer
             // Use ordinal comparison to avoid string allocation from ToLowerInvariant()
             if (layer.Name.Contains("ground", StringComparison.OrdinalIgnoreCase) ||
                 layer.Name.Contains("water", StringComparison.OrdinalIgnoreCase))
+            {
                 return ElevationGround;
+            }
 
             if (layer.Name.Contains("overhead", StringComparison.OrdinalIgnoreCase) ||
                 layer.Name.Contains("roof", StringComparison.OrdinalIgnoreCase))
+            {
                 return ElevationOverhead;
+            }
 
             if (layer.Name.Contains("bridge", StringComparison.OrdinalIgnoreCase))
+            {
                 return ElevationBridge;
+            }
 
             if (layer.Name.Contains("objects", StringComparison.OrdinalIgnoreCase))
+            {
                 return ElevationObjects;
+            }
         }
 
         return layerIndex switch
         {
             0 => ElevationGround,
             1 => ElevationObjects,
-            _ => ElevationOverhead,
+            _ => ElevationOverhead
         };
     }
 
     private List<PreparedImageLayer>? PrepareImageLayers(TmxDocument tmxDoc)
     {
         if (tmxDoc.ImageLayers == null || tmxDoc.ImageLayers.Count == 0)
+        {
             return null;
+        }
 
         return tmxDoc.ImageLayers.Select(il => new PreparedImageLayer
         {
@@ -537,14 +573,16 @@ public class MapPreparer
             OffsetX = il.OffsetX,
             OffsetY = il.OffsetY,
             Opacity = il.Opacity,
-            Visible = il.Visible,
+            Visible = il.Visible
         }).ToList();
     }
 
     private List<PreparedObjectGroup>? PrepareObjectGroups(TmxDocument tmxDoc)
     {
         if (tmxDoc.ObjectGroups == null || tmxDoc.ObjectGroups.Count == 0)
+        {
             return null;
+        }
 
         return tmxDoc.ObjectGroups.Select(og => new PreparedObjectGroup
         {
@@ -559,8 +597,8 @@ public class MapPreparer
                 Y = obj.Y,
                 Width = obj.Width,
                 Height = obj.Height,
-                Properties = obj.Properties ?? new Dictionary<string, object>(),
-            }).ToList(),
+                Properties = obj.Properties ?? new Dictionary<string, object>()
+            }).ToList()
         }).ToList();
     }
 }
@@ -571,19 +609,50 @@ public class MapPreparer
 /// </summary>
 internal sealed class LruCache<TKey, TValue> where TKey : notnull
 {
-    private readonly int _maxCapacity;
     private readonly ConcurrentDictionary<TKey, CacheEntry> _cache = new();
     private readonly object _evictionLock = new();
+    private readonly int _maxCapacity;
 
     public LruCache(int maxCapacity)
     {
         if (maxCapacity <= 0)
+        {
             throw new ArgumentOutOfRangeException(nameof(maxCapacity), "Capacity must be positive");
+        }
 
         _maxCapacity = maxCapacity;
     }
 
     public int Count => _cache.Count;
+
+    public TValue this[TKey key]
+    {
+        get
+        {
+            if (!TryGetValue(key, out TValue? value))
+            {
+                throw new KeyNotFoundException($"Key not found: {key}");
+            }
+
+            return value!;
+        }
+        set
+        {
+            lock (_evictionLock)
+            {
+                // Evict oldest entry if at capacity and this is a new key
+                if (_cache.Count >= _maxCapacity && !_cache.ContainsKey(key))
+                {
+                    EvictLeastRecentlyUsed();
+                }
+
+                // Add or update entry
+                var entry = new CacheEntry { Value = value, LastAccessTime = DateTime.UtcNow };
+
+                _cache[key] = entry;
+            }
+        }
+    }
 
     public bool ContainsKey(TKey key)
     {
@@ -592,7 +661,7 @@ internal sealed class LruCache<TKey, TValue> where TKey : notnull
 
     public bool TryGetValue(TKey key, out TValue? value)
     {
-        if (_cache.TryGetValue(key, out var entry))
+        if (_cache.TryGetValue(key, out CacheEntry? entry))
         {
             // Update access time on retrieval (LRU behavior)
             entry.LastAccessTime = DateTime.UtcNow;
@@ -609,39 +678,9 @@ internal sealed class LruCache<TKey, TValue> where TKey : notnull
         this[key] = value;
     }
 
-    public TValue this[TKey key]
-    {
-        get
-        {
-            if (!TryGetValue(key, out var value))
-                throw new KeyNotFoundException($"Key not found: {key}");
-            return value!;
-        }
-        set
-        {
-            lock (_evictionLock)
-            {
-                // Evict oldest entry if at capacity and this is a new key
-                if (_cache.Count >= _maxCapacity && !_cache.ContainsKey(key))
-                {
-                    EvictLeastRecentlyUsed();
-                }
-
-                // Add or update entry
-                var entry = new CacheEntry
-                {
-                    Value = value,
-                    LastAccessTime = DateTime.UtcNow
-                };
-
-                _cache[key] = entry;
-            }
-        }
-    }
-
     public bool TryRemove(TKey key, out TValue? value)
     {
-        if (_cache.TryRemove(key, out var entry))
+        if (_cache.TryRemove(key, out CacheEntry? entry))
         {
             value = entry.Value;
             return true;
@@ -658,13 +697,16 @@ internal sealed class LruCache<TKey, TValue> where TKey : notnull
 
     private void EvictLeastRecentlyUsed()
     {
-        if (_cache.IsEmpty) return;
+        if (_cache.IsEmpty)
+        {
+            return;
+        }
 
         // Find the entry with the oldest access time
         KeyValuePair<TKey, CacheEntry>? oldestEntry = null;
         DateTime oldestTime = DateTime.MaxValue;
 
-        foreach (var kvp in _cache)
+        foreach (KeyValuePair<TKey, CacheEntry> kvp in _cache)
         {
             if (kvp.Value.LastAccessTime < oldestTime)
             {

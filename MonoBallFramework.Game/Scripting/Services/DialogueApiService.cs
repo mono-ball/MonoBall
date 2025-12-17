@@ -48,7 +48,7 @@ public class DialogueApiService(
             Timestamp = _gameTime.TotalSeconds,
             Message = message,
             SpeakerName = speakerName,
-            Priority = priority,
+            Priority = priority
         };
 
         _eventBus.Publish(dialogueEvent);

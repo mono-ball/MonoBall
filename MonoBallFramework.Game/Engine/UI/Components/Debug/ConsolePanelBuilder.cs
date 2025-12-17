@@ -159,7 +159,7 @@ public class ConsolePanelBuilder
             // BackgroundColor uses theme fallback - don't set explicitly
             AutoScroll = true,
             MaxLines = _maxOutputLines,
-            Constraint = new LayoutConstraint { Anchor = Anchor.StretchTop, Height = 400 },
+            Constraint = new LayoutConstraint { Anchor = Anchor.StretchTop, Height = 400 }
         };
     }
 
@@ -172,12 +172,7 @@ public class ConsolePanelBuilder
             // BackgroundColor uses theme fallback - don't set explicitly
             MinVisibleLines = 1,
             MaxVisibleLines = 10,
-            Constraint = new LayoutConstraint
-            {
-                Anchor = Anchor.StretchBottom,
-                OffsetY = 0,
-                Height = theme.InputHeight,
-            },
+            Constraint = new LayoutConstraint { Anchor = Anchor.StretchBottom, OffsetY = 0, Height = theme.InputHeight }
         };
     }
 
@@ -195,8 +190,8 @@ public class ConsolePanelBuilder
                 WidthPercent = 0.5f,
                 MinWidth = 400f, // Keep as-is for suggestions width
                 MaxWidth = theme.PanelMaxWidth,
-                Height = 0,
-            },
+                Height = 0
+            }
         };
     }
 
@@ -205,12 +200,7 @@ public class ConsolePanelBuilder
         return new HintBar("console_hints")
         {
             // TextColor uses theme fallback - don't set explicitly
-            Constraint = new LayoutConstraint
-            {
-                Anchor = Anchor.StretchBottom,
-                OffsetY = 0,
-                Height = 0,
-            },
+            Constraint = new LayoutConstraint { Anchor = Anchor.StretchBottom, OffsetY = 0, Height = 0 }
         };
     }
 
@@ -221,12 +211,7 @@ public class ConsolePanelBuilder
         {
             // BackgroundColor uses theme fallback - don't set explicitly
             BorderThickness = 0,
-            Constraint = new LayoutConstraint
-            {
-                Anchor = Anchor.StretchBottom,
-                OffsetY = 0,
-                Height = theme.InputHeight,
-            },
+            Constraint = new LayoutConstraint { Anchor = Anchor.StretchBottom, OffsetY = 0, Height = theme.InputHeight }
         };
     }
 
@@ -235,12 +220,7 @@ public class ConsolePanelBuilder
         return new HintBar("search_hints")
         {
             // TextColor uses theme fallback - don't set explicitly
-            Constraint = new LayoutConstraint
-            {
-                Anchor = Anchor.StretchBottom,
-                OffsetY = 0,
-                Height = 0,
-            },
+            Constraint = new LayoutConstraint { Anchor = Anchor.StretchBottom, OffsetY = 0, Height = 0 }
         };
     }
 
@@ -256,8 +236,8 @@ public class ConsolePanelBuilder
                 Height = 0,
                 Width = 0,
                 MaxWidth = theme.PanelMaxWidth,
-                MaxHeight = theme.DropdownMaxHeight,
-            },
+                MaxHeight = theme.DropdownMaxHeight
+            }
         };
     }
 
@@ -275,8 +255,8 @@ public class ConsolePanelBuilder
                 MinWidth = theme.DocumentationMinWidth,
                 MaxWidth = theme.DocumentationMaxWidth,
                 HeightPercent = 0.7f,
-                Height = 0,
-            },
+                Height = 0
+            }
         };
     }
 }

@@ -10,13 +10,13 @@ namespace MonoBallFramework.Game.Ecs.Components.Relationships;
 ///         <code>
 /// // Create parent-child relationship
 /// parent.AddRelationship&lt;ParentOf&gt;(child);
-///
+/// 
 /// // Iterate all children
 /// ref var children = ref parent.GetRelationships&lt;ParentOf&gt;();
 /// foreach(var child in children) {
 ///     // Process child
 /// }
-///
+/// 
 /// // Check if relationship exists
 /// if (parent.HasRelationship&lt;ParentOf&gt;(child)) {
 ///     // Relationship exists
@@ -70,7 +70,7 @@ public enum OwnershipType
     Conditional,
 
     /// <summary>Shared ownership among multiple entities.</summary>
-    Shared,
+    Shared
 }
 
 /// <summary>
@@ -83,7 +83,7 @@ public enum OwnershipType
 ///         <code>
 /// // Create ownership relationship
 /// owner.AddRelationship&lt;OwnerOf&gt;(owned, new OwnerOf(OwnershipType.Permanent));
-///
+/// 
 /// // Iterate all owned entities
 /// ref var owned = ref owner.GetRelationships&lt;OwnerOf&gt;();
 /// foreach(var entity in owned) {

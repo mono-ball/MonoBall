@@ -11,7 +11,6 @@ namespace MonoBallFramework.Game.Engine.Audio.Services;
 ///     PortAudio-based music player with TRUE STREAMING support for OGG Vorbis files.
 ///     Streams audio data on-demand from disk, using only ~64KB per active stream instead
 ///     of ~32MB per cached track.
-///
 ///     Features:
 ///     - Real-time streaming (no full-file loading)
 ///     - Memory efficient (~98% reduction vs cached approach)
@@ -25,32 +24,32 @@ public class PortAudioStreamingMusicPlayer : IMusicPlayer
     private const int TargetSampleRate = 44100;
 
     private readonly AudioRegistry _audioRegistry;
-    private readonly ILogger<PortAudioStreamingMusicPlayer>? _logger;
     private readonly StreamingMusicPlayerHelper _helper;
     private readonly object _lock = new();
-
-    // Shared mixer and output for all playback (prevents dual-stream issues on Linux)
-    private AudioMixer? _mixer;
-    private PortAudioOutput? _sharedOutput;
-    private AudioMixer.MixerInput? _currentMixerInput;
-    private AudioMixer.MixerInput? _crossfadeMixerInput;
-
-    // Playback state tracking
-    private StreamingPlaybackState? _currentPlayback;
-    private StreamingPlaybackState? _crossfadePlayback;
-
-    // Pending track info (for sequential fade-out-then-play like pokeemerald)
-    private string? _pendingTrackName;
-    private bool _pendingLoop;
-    private float _pendingFadeInDuration;
-
-    // Thread-safe volume management using lock-protected access
-    private float _targetVolume = AudioConstants.DefaultMasterVolume;
+    private readonly ILogger<PortAudioStreamingMusicPlayer>? _logger;
     private readonly object _volumeLock = new();
 
     // Background task cancellation support
     private CancellationTokenSource? _backgroundTaskCts;
+    private AudioMixer.MixerInput? _crossfadeMixerInput;
+    private StreamingPlaybackState? _crossfadePlayback;
+    private AudioMixer.MixerInput? _currentMixerInput;
+
+    // Playback state tracking
+    private StreamingPlaybackState? _currentPlayback;
     private bool _disposed;
+
+    // Shared mixer and output for all playback (prevents dual-stream issues on Linux)
+    private AudioMixer? _mixer;
+    private float _pendingFadeInDuration;
+    private bool _pendingLoop;
+
+    // Pending track info (for sequential fade-out-then-play like pokeemerald)
+    private string? _pendingTrackName;
+    private PortAudioOutput? _sharedOutput;
+
+    // Thread-safe volume management using lock-protected access
+    private float _targetVolume = AudioConstants.DefaultMasterVolume;
 
     public PortAudioStreamingMusicPlayer(
         AudioRegistry audioRegistry,
@@ -106,8 +105,12 @@ public class PortAudioStreamingMusicPlayer : IMusicPlayer
     {
         get
         {
-            if (_disposed) return false;
-            var output = _sharedOutput;
+            if (_disposed)
+            {
+                return false;
+            }
+
+            PortAudioOutput? output = _sharedOutput;
             return output?.PlaybackState == PlaybackState.Playing;
         }
     }
@@ -116,8 +119,12 @@ public class PortAudioStreamingMusicPlayer : IMusicPlayer
     {
         get
         {
-            if (_disposed) return false;
-            var output = _sharedOutput;
+            if (_disposed)
+            {
+                return false;
+            }
+
+            PortAudioOutput? output = _sharedOutput;
             return output?.PlaybackState == PlaybackState.Paused;
         }
     }
@@ -126,7 +133,7 @@ public class PortAudioStreamingMusicPlayer : IMusicPlayer
     {
         get
         {
-            var playback = _currentPlayback;
+            StreamingPlaybackState? playback = _currentPlayback;
             return playback?.TrackName;
         }
     }
@@ -135,7 +142,7 @@ public class PortAudioStreamingMusicPlayer : IMusicPlayer
     {
         get
         {
-            var playback = _currentPlayback;
+            StreamingPlaybackState? playback = _currentPlayback;
             return playback?.FadeState == FadeState.Crossfading;
         }
     }
@@ -143,13 +150,15 @@ public class PortAudioStreamingMusicPlayer : IMusicPlayer
     public void Play(string trackName, bool loop = true, float fadeInDuration = 0f)
     {
         if (_disposed || string.IsNullOrEmpty(trackName))
+        {
             return;
+        }
 
         try
         {
             // === PHASE 1: Get track metadata outside lock ===
-            var definition = _audioRegistry.GetByTrackId(trackName)
-                          ?? _audioRegistry.GetById(trackName);
+            AudioEntity? definition = _audioRegistry.GetByTrackId(trackName)
+                                      ?? _audioRegistry.GetById(trackName);
 
             if (definition == null)
             {
@@ -158,7 +167,7 @@ public class PortAudioStreamingMusicPlayer : IMusicPlayer
             }
 
             // Get or create track metadata (cached, but doesn't open file)
-            var trackData = _helper.GetOrCreateTrackData(trackName, definition);
+            StreamingTrackData? trackData = _helper.GetOrCreateTrackData(trackName, definition);
             if (trackData == null)
             {
                 _logger?.LogError("Failed to get track data: {TrackName}", trackName);
@@ -170,7 +179,7 @@ public class PortAudioStreamingMusicPlayer : IMusicPlayer
 
             // === PHASE 2: Create streaming playback state outside lock ===
             // This opens the file for streaming (very fast, just metadata read)
-            var playbackState = _helper.CreatePlaybackState(
+            StreamingPlaybackState playbackState = _helper.CreatePlaybackState(
                 trackData,
                 loop,
                 trackVolume,
@@ -203,7 +212,7 @@ public class PortAudioStreamingMusicPlayer : IMusicPlayer
                 }
 
                 // Add the track to the mixer
-                _currentMixerInput = _mixer.AddSource(outputProvider, 1.0f);
+                _currentMixerInput = _mixer.AddSource(outputProvider);
                 _currentPlayback = playbackState;
 
                 _logger?.LogDebug("Started streaming track: {TrackName} (Loop: {Loop}, FadeIn: {FadeIn}s)",
@@ -229,7 +238,9 @@ public class PortAudioStreamingMusicPlayer : IMusicPlayer
         lock (_lock)
         {
             if (_disposed || _sharedOutput?.PlaybackState != PlaybackState.Playing)
+            {
                 return;
+            }
 
             try
             {
@@ -248,7 +259,9 @@ public class PortAudioStreamingMusicPlayer : IMusicPlayer
         lock (_lock)
         {
             if (_disposed || _sharedOutput?.PlaybackState != PlaybackState.Paused)
+            {
                 return;
+            }
 
             try
             {
@@ -267,7 +280,9 @@ public class PortAudioStreamingMusicPlayer : IMusicPlayer
         lock (_lock)
         {
             if (_disposed || string.IsNullOrEmpty(newTrackName))
+            {
                 return;
+            }
 
             if (_currentPlayback == null || _sharedOutput?.PlaybackState != PlaybackState.Playing)
             {
@@ -276,7 +291,7 @@ public class PortAudioStreamingMusicPlayer : IMusicPlayer
             }
 
             // Preload track metadata on background thread
-            var cts = _backgroundTaskCts;
+            CancellationTokenSource? cts = _backgroundTaskCts;
             if (cts != null && !cts.IsCancellationRequested)
             {
                 _ = Task.Run(() =>
@@ -321,10 +336,12 @@ public class PortAudioStreamingMusicPlayer : IMusicPlayer
         lock (_lock)
         {
             if (_disposed || string.IsNullOrEmpty(newTrackName))
+            {
                 return;
+            }
 
-            var newDefinition = _audioRegistry.GetByTrackId(newTrackName)
-                             ?? _audioRegistry.GetById(newTrackName);
+            AudioEntity? newDefinition = _audioRegistry.GetByTrackId(newTrackName)
+                                         ?? _audioRegistry.GetById(newTrackName);
 
             float fadeInDuration = newDefinition?.FadeIn > 0f
                 ? newDefinition.FadeIn
@@ -336,7 +353,7 @@ public class PortAudioStreamingMusicPlayer : IMusicPlayer
                 return;
             }
 
-            var cts = _backgroundTaskCts;
+            CancellationTokenSource? cts = _backgroundTaskCts;
             if (cts != null && !cts.IsCancellationRequested)
             {
                 _ = Task.Run(() =>
@@ -371,7 +388,8 @@ public class PortAudioStreamingMusicPlayer : IMusicPlayer
             _currentPlayback.FadeDuration = fadeOutDuration;
             _currentPlayback.FadeTimer = 0f;
 
-            _logger?.LogDebug("Starting FadeOutAndFadeIn from {OldTrack} to {NewTrack} (fadeOut: {FadeOut}s, fadeIn: {FadeIn}s)",
+            _logger?.LogDebug(
+                "Starting FadeOutAndFadeIn from {OldTrack} to {NewTrack} (fadeOut: {FadeOut}s, fadeIn: {FadeIn}s)",
                 _currentPlayback.TrackName, newTrackName, fadeOutDuration, fadeInDuration);
         }
     }
@@ -379,7 +397,9 @@ public class PortAudioStreamingMusicPlayer : IMusicPlayer
     public void Crossfade(string newTrackName, float crossfadeDuration = 1.0f, bool loop = true)
     {
         if (_disposed || string.IsNullOrEmpty(newTrackName))
+        {
             return;
+        }
 
         bool needsCrossfade;
         lock (_lock)
@@ -396,8 +416,8 @@ public class PortAudioStreamingMusicPlayer : IMusicPlayer
         try
         {
             // === PHASE 1: Get track data outside lock ===
-            var definition = _audioRegistry.GetByTrackId(newTrackName)
-                          ?? _audioRegistry.GetById(newTrackName);
+            AudioEntity? definition = _audioRegistry.GetByTrackId(newTrackName)
+                                      ?? _audioRegistry.GetById(newTrackName);
 
             if (definition == null)
             {
@@ -405,7 +425,7 @@ public class PortAudioStreamingMusicPlayer : IMusicPlayer
                 return;
             }
 
-            var trackData = _helper.GetOrCreateTrackData(newTrackName, definition);
+            StreamingTrackData? trackData = _helper.GetOrCreateTrackData(newTrackName, definition);
             if (trackData == null)
             {
                 _logger?.LogError("Failed to get track data for crossfade: {TrackName}", newTrackName);
@@ -416,7 +436,7 @@ public class PortAudioStreamingMusicPlayer : IMusicPlayer
             float trackVolume = definition.Volume * _targetVolume;
 
             // Create new streaming playback state
-            var newPlaybackState = _helper.CreatePlaybackState(
+            StreamingPlaybackState newPlaybackState = _helper.CreatePlaybackState(
                 trackData,
                 loop,
                 trackVolume,
@@ -467,10 +487,11 @@ public class PortAudioStreamingMusicPlayer : IMusicPlayer
                 _currentPlayback.CrossfadeStartVolume = _currentPlayback.CurrentVolume;
 
                 // Add crossfade track to the same mixer (this is the key fix!)
-                _crossfadeMixerInput = _mixer.AddSource(crossfadeOutputProvider, 1.0f);
+                _crossfadeMixerInput = _mixer.AddSource(crossfadeOutputProvider);
                 _crossfadePlayback = newPlaybackState;
 
-                _logger?.LogDebug("Started crossfade from {OldTrack} to {NewTrack} (fadeOut: {FadeOut}s, fadeIn: {FadeIn}s)",
+                _logger?.LogDebug(
+                    "Started crossfade from {OldTrack} to {NewTrack} (fadeOut: {FadeOut}s, fadeIn: {FadeIn}s)",
                     _currentPlayback.TrackName, newTrackName, fadeOutDuration, fadeInDuration);
             }
         }
@@ -483,12 +504,16 @@ public class PortAudioStreamingMusicPlayer : IMusicPlayer
     public void Update(float deltaTime)
     {
         if (!Monitor.TryEnter(_lock))
+        {
             return;
+        }
 
         try
         {
             if (_disposed)
+            {
                 return;
+            }
 
             // Apply pending volume changes
             if (_currentPlayback is { FadeState: FadeState.None })
@@ -530,10 +555,12 @@ public class PortAudioStreamingMusicPlayer : IMusicPlayer
     public void PreloadTrack(string trackName)
     {
         if (_disposed || string.IsNullOrEmpty(trackName))
+        {
             return;
+        }
 
-        var definition = _audioRegistry.GetByTrackId(trackName)
-                      ?? _audioRegistry.GetById(trackName);
+        AudioEntity? definition = _audioRegistry.GetByTrackId(trackName)
+                                  ?? _audioRegistry.GetById(trackName);
 
         if (definition != null)
         {
@@ -548,7 +575,9 @@ public class PortAudioStreamingMusicPlayer : IMusicPlayer
         lock (_lock)
         {
             if (_disposed || string.IsNullOrEmpty(trackName))
+            {
                 return;
+            }
 
             if (_currentPlayback?.TrackName == trackName ||
                 _crossfadePlayback?.TrackName == trackName)
@@ -566,7 +595,9 @@ public class PortAudioStreamingMusicPlayer : IMusicPlayer
         lock (_lock)
         {
             if (_disposed)
+            {
                 return;
+            }
 
             _disposed = true;
 
@@ -606,7 +637,9 @@ public class PortAudioStreamingMusicPlayer : IMusicPlayer
     private void StopInternal(float fadeOutDuration)
     {
         if (_currentPlayback == null)
+        {
             return;
+        }
 
         if (fadeOutDuration > 0f && _sharedOutput?.PlaybackState == PlaybackState.Playing)
         {
@@ -624,7 +657,7 @@ public class PortAudioStreamingMusicPlayer : IMusicPlayer
 
     private void UpdatePlaybackFade(StreamingPlaybackState playback, float deltaTime)
     {
-        var result = FadeManager.UpdateFade(playback, deltaTime, _logger);
+        FadeManager.FadeUpdateResult result = FadeManager.UpdateFade(playback, deltaTime, _logger);
 
         // Handle results that require additional action
         switch (result)
@@ -636,6 +669,7 @@ public class PortAudioStreamingMusicPlayer : IMusicPlayer
                     _currentPlayback?.Dispose();
                     _currentPlayback = null;
                 }
+
                 break;
 
             case FadeManager.FadeUpdateResult.FadeOutThenPlayComplete:
@@ -649,6 +683,7 @@ public class PortAudioStreamingMusicPlayer : IMusicPlayer
 
                     PlayPendingTrackAsync(0f);
                 }
+
                 break;
 
             case FadeManager.FadeUpdateResult.FadeOutThenFadeInComplete:
@@ -662,6 +697,7 @@ public class PortAudioStreamingMusicPlayer : IMusicPlayer
 
                     PlayPendingTrackAsync(_pendingFadeInDuration);
                 }
+
                 break;
         }
     }
@@ -669,13 +705,15 @@ public class PortAudioStreamingMusicPlayer : IMusicPlayer
     private void PlayPendingTrackAsync(float fadeInDuration)
     {
         if (string.IsNullOrEmpty(_pendingTrackName))
+        {
             return;
+        }
 
-        var trackToPlay = _pendingTrackName;
-        var shouldLoop = _pendingLoop;
+        string? trackToPlay = _pendingTrackName;
+        bool shouldLoop = _pendingLoop;
         _pendingTrackName = null;
 
-        var cts = _backgroundTaskCts;
+        CancellationTokenSource? cts = _backgroundTaskCts;
         if (cts != null && !cts.IsCancellationRequested)
         {
             _ = Task.Run(() =>
@@ -702,7 +740,9 @@ public class PortAudioStreamingMusicPlayer : IMusicPlayer
     private void CompleteCrossfade()
     {
         if (_crossfadePlayback == null || _crossfadeMixerInput == null)
+        {
             return;
+        }
 
         // Remove old track from mixer
         RemoveMixerInput(ref _currentMixerInput);
@@ -721,7 +761,9 @@ public class PortAudioStreamingMusicPlayer : IMusicPlayer
     private void RemoveMixerInput(ref AudioMixer.MixerInput? mixerInput)
     {
         if (mixerInput == null || _mixer == null)
+        {
             return;
+        }
 
         try
         {
@@ -740,7 +782,9 @@ public class PortAudioStreamingMusicPlayer : IMusicPlayer
     private void RemoveAllMixerSources()
     {
         if (_mixer == null)
+        {
             return;
+        }
 
         try
         {
@@ -757,7 +801,9 @@ public class PortAudioStreamingMusicPlayer : IMusicPlayer
     private void StopSharedOutput()
     {
         if (_sharedOutput == null)
+        {
             return;
+        }
 
         try
         {
@@ -783,4 +829,3 @@ public class PortAudioStreamingMusicPlayer : IMusicPlayer
         }
     }
 }
-

@@ -4,7 +4,6 @@ namespace MonoBallFramework.Game.Engine.Core.Types;
 
 /// <summary>
 ///     Strongly-typed identifier for game flags (boolean state variables).
-///
 ///     Format: base:flag:{category}/{name}
 ///     Examples:
 ///     - base:flag:hide/rival_oak_lab
@@ -35,9 +34,11 @@ public sealed record GameFlagId : EntityId
     public GameFlagId(string value) : base(value)
     {
         if (EntityType != TypeName)
+        {
             throw new ArgumentException(
                 $"Expected entity type '{TypeName}', got '{EntityType}'",
                 nameof(value));
+        }
     }
 
     /// <summary>
@@ -100,11 +101,15 @@ public sealed record GameFlagId : EntityId
     public static GameFlagId? TryCreate(string? value)
     {
         if (string.IsNullOrWhiteSpace(value))
+        {
             return null;
+        }
 
         // Only accept full format
         if (!IsValidFormat(value) || !value.Contains($":{TypeName}:"))
+        {
             return null;
+        }
 
         try
         {
@@ -119,5 +124,8 @@ public sealed record GameFlagId : EntityId
     /// <summary>
     ///     Explicit conversion from string. Use TryCreate() for safe parsing.
     /// </summary>
-    public static explicit operator GameFlagId(string value) => new(value);
+    public static explicit operator GameFlagId(string value)
+    {
+        return new GameFlagId(value);
+    }
 }

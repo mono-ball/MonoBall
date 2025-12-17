@@ -1,6 +1,5 @@
 using Arch.Core;
 using MonoBallFramework.Game.Engine.Core.Types;
-using MonoBallFramework.Game.Systems;
 using MonoBallFramework.Game.Systems.Rendering;
 
 namespace MonoBallFramework.Game.Initialization.Initializers;

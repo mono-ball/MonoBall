@@ -20,7 +20,7 @@ namespace MonoBallFramework.Game.Engine.Systems.Queries;
 ///             .WithAll&lt;Position, Sprite&gt;()
 ///             .WithNone&lt;Player&gt;()
 ///             .Build();
-///
+/// 
 ///         world.Query(in query, (ref Position pos, ref Sprite sprite) => { });
 ///     </code>
 /// </remarks>

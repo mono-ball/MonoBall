@@ -1,7 +1,6 @@
 using Arch.Core;
 using Arch.Core.Extensions;
 using Microsoft.Extensions.Logging;
-using MonoBallFramework.Game.Ecs.Components.Common;
 using MonoBallFramework.Game.Ecs.Components.Maps;
 using MonoBallFramework.Game.Ecs.Components.Movement;
 using MonoBallFramework.Game.Engine.Core.Types;
@@ -12,7 +11,6 @@ namespace MonoBallFramework.Game.GameData.MapLoading.Tiled.Spawners;
 /// <summary>
 ///     Spawns warp entities from Tiled "warp_event" objects.
 ///     Warps transport the player to another map location.
-///
 ///     Required Tiled properties:
 ///     - type = "warp_event"
 ///     - warp.map (string): Target map ID (e.g., "base:map:hoenn/littleroot_town")
@@ -40,7 +38,7 @@ public sealed class WarpEntitySpawner : IEntitySpawner
     public Entity Spawn(EntitySpawnContext context)
     {
         string errorContext = context.CreateErrorContext();
-        var props = context.TiledObject.Properties;
+        Dictionary<string, object> props = context.TiledObject.Properties;
 
         // Get the required "warp" nested object
         Dictionary<string, object> warpData = TiledPropertyParser.GetRequiredNestedObject(
@@ -50,7 +48,7 @@ public sealed class WarpEntitySpawner : IEntitySpawner
         string targetMapStr = TiledPropertyParser.GetRequiredString(
             warpData, "map", $"warp property in {errorContext}");
 
-        GameMapId? targetMapId = GameMapId.TryCreate(targetMapStr);
+        var targetMapId = GameMapId.TryCreate(targetMapStr);
         if (targetMapId == null)
         {
             throw new InvalidDataException(
@@ -64,7 +62,7 @@ public sealed class WarpEntitySpawner : IEntitySpawner
         int targetY = TiledPropertyParser.GetRequiredInt(warpData, "y", warpContext);
 
         // Get source tile position
-        var (tileX, tileY) = context.GetTilePosition();
+        (int tileX, int tileY) = context.GetTilePosition();
 
         // Create warp entity
         Entity warpEntity = context.World.Create(

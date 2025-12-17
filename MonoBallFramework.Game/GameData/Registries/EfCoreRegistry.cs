@@ -13,14 +13,15 @@ namespace MonoBallFramework.Game.GameData.Registries;
 /// <typeparam name="TKey">The key type used to identify entities.</typeparam>
 public abstract class EfCoreRegistry<TEntity, TKey> where TEntity : class where TKey : notnull
 {
-    protected readonly IDbContextFactory<GameDataContext> _contextFactory;
-    protected readonly GameDataContext? _sharedContext;
-    protected readonly ILogger _logger;
     protected readonly ConcurrentDictionary<TKey, TEntity> _cache = new();
+    protected readonly IDbContextFactory<GameDataContext> _contextFactory;
     protected readonly SemaphoreSlim _loadLock = new(1, 1);
+    protected readonly ILogger _logger;
+    protected readonly GameDataContext? _sharedContext;
     protected volatile bool _isCacheLoaded;
 
-    protected EfCoreRegistry(IDbContextFactory<GameDataContext> contextFactory, ILogger logger, GameDataContext? sharedContext = null)
+    protected EfCoreRegistry(IDbContextFactory<GameDataContext> contextFactory, ILogger logger,
+        GameDataContext? sharedContext = null)
     {
         _contextFactory = contextFactory ?? throw new ArgumentNullException(nameof(contextFactory));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -40,9 +41,11 @@ public abstract class EfCoreRegistry<TEntity, TKey> where TEntity : class where 
         get
         {
             if (_isCacheLoaded)
+            {
                 return _cache.Count;
+            }
 
-            using var context = _contextFactory.CreateDbContext();
+            using GameDataContext context = _contextFactory.CreateDbContext();
             return GetQueryable(context).Count();
         }
     }
@@ -53,7 +56,9 @@ public abstract class EfCoreRegistry<TEntity, TKey> where TEntity : class where 
     public bool Contains(TKey key)
     {
         if (_cache.ContainsKey(key))
+        {
             return true;
+        }
 
         if (!_isCacheLoaded)
         {
@@ -79,19 +84,25 @@ public abstract class EfCoreRegistry<TEntity, TKey> where TEntity : class where 
     /// </summary>
     public void LoadDefinitions()
     {
-        if (_isCacheLoaded) return;
+        if (_isCacheLoaded)
+        {
+            return;
+        }
 
         _loadLock.Wait();
         try
         {
-            if (_isCacheLoaded) return;
+            if (_isCacheLoaded)
+            {
+                return;
+            }
 
-            using var context = _contextFactory.CreateDbContext();
+            using GameDataContext context = _contextFactory.CreateDbContext();
             var entities = GetQueryable(context).ToList();
 
-            foreach (var entity in entities)
+            foreach (TEntity entity in entities)
             {
-                var key = GetKey(entity);
+                TKey key = GetKey(entity);
                 _cache[key] = entity;
                 OnEntityCached(key, entity);
             }
@@ -113,12 +124,18 @@ public abstract class EfCoreRegistry<TEntity, TKey> where TEntity : class where 
     /// </summary>
     public async Task LoadDefinitionsAsync(CancellationToken cancellationToken = default)
     {
-        if (_isCacheLoaded) return;
+        if (_isCacheLoaded)
+        {
+            return;
+        }
 
         await _loadLock.WaitAsync(cancellationToken);
         try
         {
-            if (_isCacheLoaded) return;
+            if (_isCacheLoaded)
+            {
+                return;
+            }
 
             _logger.LogInformation("Loading {EntityType} definitions from EF Core (shared context: {UseShared})...",
                 typeof(TEntity).Name, _sharedContext != null);
@@ -132,13 +149,13 @@ public abstract class EfCoreRegistry<TEntity, TKey> where TEntity : class where 
             }
             else
             {
-                await using var context = _contextFactory.CreateDbContext();
+                await using GameDataContext context = _contextFactory.CreateDbContext();
                 entities = await GetQueryable(context).ToListAsync(cancellationToken);
             }
 
-            foreach (var entity in entities)
+            foreach (TEntity entity in entities)
             {
-                var key = GetKey(entity);
+                TKey key = GetKey(entity);
                 _cache[key] = entity;
                 OnEntityCached(key, entity);
             }
@@ -177,9 +194,11 @@ public abstract class EfCoreRegistry<TEntity, TKey> where TEntity : class where 
     public IEnumerable<TEntity> GetAll()
     {
         if (_isCacheLoaded)
+        {
             return _cache.Values;
+        }
 
-        using var context = _contextFactory.CreateDbContext();
+        using GameDataContext context = _contextFactory.CreateDbContext();
         return GetQueryable(context).ToList();
     }
 
@@ -189,9 +208,11 @@ public abstract class EfCoreRegistry<TEntity, TKey> where TEntity : class where 
     public IEnumerable<TKey> GetAllKeys()
     {
         if (_isCacheLoaded)
+        {
             return _cache.Keys;
+        }
 
-        using var context = _contextFactory.CreateDbContext();
+        using GameDataContext context = _contextFactory.CreateDbContext();
         return GetQueryable(context).Select(GetKey).ToList();
     }
 
@@ -200,7 +221,7 @@ public abstract class EfCoreRegistry<TEntity, TKey> where TEntity : class where 
     /// </summary>
     protected TEntity? TryGetFromCache(TKey key)
     {
-        return _cache.TryGetValue(key, out var entity) ? entity : null;
+        return _cache.TryGetValue(key, out TEntity? entity) ? entity : null;
     }
 
     /// <summary>
@@ -209,8 +230,8 @@ public abstract class EfCoreRegistry<TEntity, TKey> where TEntity : class where 
     /// </summary>
     protected bool TryLoadFromDb(TKey key)
     {
-        using var context = _contextFactory.CreateDbContext();
-        var entity = GetQueryable(context).FirstOrDefault(e => GetKey(e).Equals(key));
+        using GameDataContext context = _contextFactory.CreateDbContext();
+        TEntity? entity = GetQueryable(context).FirstOrDefault(e => GetKey(e).Equals(key));
 
         if (entity != null)
         {
@@ -228,14 +249,16 @@ public abstract class EfCoreRegistry<TEntity, TKey> where TEntity : class where 
     protected TEntity? GetEntity(TKey key)
     {
         // Try cache first
-        if (_cache.TryGetValue(key, out var cached))
+        if (_cache.TryGetValue(key, out TEntity? cached))
+        {
             return cached;
+        }
 
         // If cache not loaded, query database
         if (!_isCacheLoaded)
         {
-            using var context = _contextFactory.CreateDbContext();
-            var entity = GetQueryable(context).FirstOrDefault(e => GetKey(e).Equals(key));
+            using GameDataContext context = _contextFactory.CreateDbContext();
+            TEntity? entity = GetQueryable(context).FirstOrDefault(e => GetKey(e).Equals(key));
 
             if (entity != null)
             {

@@ -52,6 +52,3 @@ public sealed class MapTransitionEvent : NotificationEventBase
         RegionName = null;
     }
 }
-
-
-

@@ -17,7 +17,9 @@ public class SetupApiProvidersStep : InitializationStepBase
             "Setting up API providers...",
             InitializationProgress.GameSystemsInitialized,
             InitializationProgress.GameSystemsInitialized
-        ) { }
+        )
+    {
+    }
 
     /// <inheritdoc />
     protected override Task ExecuteStepAsync(

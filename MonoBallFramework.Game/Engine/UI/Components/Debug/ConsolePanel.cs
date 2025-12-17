@@ -67,7 +67,8 @@ public class ConsolePanel : Panel
     private static float SuggestionsMaxHeight => ThemeManager.Current.MaxSuggestionsHeight;
     private static float Padding => ThemeManager.Current.ComponentGap;
 
-    private static float ComponentSpacing => ThemeManager.Current.ComponentGap; // Semantic name for gaps between components
+    private static float ComponentSpacing =>
+        ThemeManager.Current.ComponentGap; // Semantic name for gaps between components
 
     private static float TooltipGap => ThemeManager.Current.TooltipGap; // Gap for tooltips above components
     private static float PanelEdgeGap => ThemeManager.Current.PanelEdgeGap; // Gap from panel edges
@@ -768,8 +769,10 @@ public class ConsolePanel : Panel
         // Calculate layout heights based on the actual constraint padding
         float paddingTop = Constraint.GetPaddingTop();
         float paddingBottom = Constraint.GetPaddingBottom();
-        float contentHeight = Rect.Height - paddingTop - paddingBottom; // Use actual constraint padding, not static Padding property
-        float outputHeight = contentHeight - inputHeight - hintHeight - ComponentSpacing; // Leave space for input + hints + gap
+        float contentHeight =
+            Rect.Height - paddingTop - paddingBottom; // Use actual constraint padding, not static Padding property
+        float outputHeight =
+            contentHeight - inputHeight - hintHeight - ComponentSpacing; // Leave space for input + hints + gap
 
         // Update output buffer height
         _outputBuffer.Constraint.Height = outputHeight;

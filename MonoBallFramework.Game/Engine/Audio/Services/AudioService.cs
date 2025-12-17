@@ -14,25 +14,24 @@ namespace MonoBallFramework.Game.Engine.Audio.Services;
 public class AudioService : IAudioService
 {
     private readonly AudioRegistry _audioRegistry;
-    private readonly ISoundEffectManager _soundEffectManager;
-    private readonly IMusicPlayer _musicPlayer;
+    private readonly AudioConfiguration _config;
     private readonly IEventBus _eventBus;
     private readonly ILogger<AudioService>? _logger;
-    private readonly AudioConfiguration _config;
-
-    private readonly List<IDisposable> _subscriptions;
     private readonly Dictionary<ILoopingSoundHandle, string> _loopingSounds;
     private readonly DuckingController _musicDucker = new();
+    private readonly IMusicPlayer _musicPlayer;
+    private readonly ISoundEffectManager _soundEffectManager;
+
+    private readonly List<IDisposable> _subscriptions;
+    private bool _disposed;
+    private bool _isMuted;
 
     private float _masterVolume = AudioConstants.DefaultMasterVolume;
-    private float _soundEffectVolume = AudioConstants.DefaultSoundEffectVolume;
     private float _musicVolume = AudioConstants.DefaultMusicVolume;
-    private bool _isMuted;
-    private bool _isInitialized;
-    private bool _disposed;
+    private float _soundEffectVolume = AudioConstants.DefaultSoundEffectVolume;
 
     /// <summary>
-    ///     Initializes a new instance of the <see cref="AudioService"/> class.
+    ///     Initializes a new instance of the <see cref="AudioService" /> class.
     /// </summary>
     /// <param name="audioRegistry">Audio registry for track/sound lookup.</param>
     /// <param name="soundEffectManager">Sound effect manager.</param>
@@ -127,7 +126,7 @@ public class AudioService : IAudioService
     /// <summary>
     ///     Gets whether the audio system is initialized and ready.
     /// </summary>
-    public bool IsInitialized => _isInitialized;
+    public bool IsInitialized { get; private set; }
 
     /// <summary>
     ///     Gets whether music is currently playing.
@@ -145,7 +144,7 @@ public class AudioService : IAudioService
     /// </summary>
     public void Initialize()
     {
-        if (_isInitialized)
+        if (IsInitialized)
         {
             _logger?.LogWarning("AudioService already initialized");
             return;
@@ -157,7 +156,7 @@ public class AudioService : IAudioService
         // Set initial volumes
         UpdateVolumes();
 
-        _isInitialized = true;
+        IsInitialized = true;
         _logger?.LogInformation("AudioService initialized successfully");
     }
 
@@ -168,8 +167,10 @@ public class AudioService : IAudioService
     /// <param name="deltaTime">Time elapsed since last update in seconds.</param>
     public void Update(float deltaTime)
     {
-        if (!_isInitialized || _disposed)
+        if (!IsInitialized || _disposed)
+        {
             return;
+        }
 
         _soundEffectManager.Update();
         _musicPlayer.Update(deltaTime);
@@ -202,7 +203,7 @@ public class AudioService : IAudioService
     /// <returns>True if the sound was played successfully.</returns>
     public bool PlaySound(string soundName, float? volume = null, float? pitch = null, float? pan = null)
     {
-        if (!_isInitialized || _disposed)
+        if (!IsInitialized || _disposed)
         {
             _logger?.LogWarning("Cannot play sound: AudioService not initialized or disposed");
             return false;
@@ -210,8 +211,8 @@ public class AudioService : IAudioService
 
         try
         {
-            var effectiveVolume = GetEffectiveSoundVolume(volume ?? 1.0f);
-            var success = _soundEffectManager.Play(
+            float effectiveVolume = GetEffectiveSoundVolume(volume ?? 1.0f);
+            bool success = _soundEffectManager.Play(
                 soundName,
                 effectiveVolume,
                 pitch ?? 0f,
@@ -245,14 +246,16 @@ public class AudioService : IAudioService
     /// <returns>True if the cry was played successfully.</returns>
     public bool PlayCry(string cryName, float cryDuration = 1.0f, float? volume = null)
     {
-        if (!_isInitialized || _disposed)
+        if (!IsInitialized || _disposed)
+        {
             return false;
+        }
 
         // Duck the music
         _musicDucker.Duck(
             AudioConstants.CryDuckVolume,
             AudioConstants.CryDuckDuration,
-            cryDuration  // Hold for cry duration
+            cryDuration // Hold for cry duration
         );
 
         // Play the cry at full volume (or specified volume)
@@ -267,7 +270,7 @@ public class AudioService : IAudioService
     /// <returns>A sound instance handle that can be used to stop the looping sound.</returns>
     public ILoopingSoundHandle? PlayLoopingSound(string soundName, float? volume = null)
     {
-        if (!_isInitialized || _disposed)
+        if (!IsInitialized || _disposed)
         {
             _logger?.LogWarning("Cannot play looping sound: AudioService not initialized or disposed");
             return null;
@@ -275,8 +278,8 @@ public class AudioService : IAudioService
 
         try
         {
-            var effectiveVolume = GetEffectiveSoundVolume(volume ?? 1.0f);
-            var handle = _soundEffectManager.PlayLooping(soundName, effectiveVolume);
+            float effectiveVolume = GetEffectiveSoundVolume(volume ?? 1.0f);
+            ILoopingSoundHandle? handle = _soundEffectManager.PlayLooping(soundName, effectiveVolume);
 
             if (handle != null)
             {
@@ -302,7 +305,9 @@ public class AudioService : IAudioService
     public void StopLoopingSound(ILoopingSoundHandle handle)
     {
         if (handle == null || _disposed)
+        {
             return;
+        }
 
         try
         {
@@ -323,10 +328,12 @@ public class AudioService : IAudioService
     public void StopAllSounds()
     {
         if (_disposed)
+        {
             return;
+        }
 
         // Stop all looping sounds
-        foreach (var handle in _loopingSounds.Keys.ToList())
+        foreach (ILoopingSoundHandle handle in _loopingSounds.Keys.ToList())
         {
             try
             {
@@ -338,6 +345,7 @@ public class AudioService : IAudioService
                 _logger?.LogError(ex, "Error stopping looping sound handle");
             }
         }
+
         _loopingSounds.Clear();
 
         // Stop all one-shot sounds
@@ -353,7 +361,7 @@ public class AudioService : IAudioService
     /// <param name="fadeDuration">Duration of fade-in effect in seconds (0 for instant).</param>
     public void PlayMusic(string musicName, bool loop = true, float fadeDuration = 0f)
     {
-        if (!_isInitialized || _disposed)
+        if (!IsInitialized || _disposed)
         {
             _logger?.LogWarning("Cannot play music: AudioService not initialized or disposed");
             return;
@@ -415,7 +423,9 @@ public class AudioService : IAudioService
     public void StopMusic(float fadeDuration = 0f)
     {
         if (_disposed)
+        {
             return;
+        }
 
         _musicPlayer.Stop(fadeDuration);
         _logger?.LogDebug("Stopped music with fade duration: {FadeDuration}s", fadeDuration);
@@ -427,7 +437,9 @@ public class AudioService : IAudioService
     public void PauseMusic()
     {
         if (_disposed)
+        {
             return;
+        }
 
         _musicPlayer.Pause();
         _logger?.LogDebug("Paused music");
@@ -439,7 +451,9 @@ public class AudioService : IAudioService
     public void ResumeMusic()
     {
         if (_disposed)
+        {
             return;
+        }
 
         _musicPlayer.Resume();
         _logger?.LogDebug("Resumed music");
@@ -452,13 +466,15 @@ public class AudioService : IAudioService
     public void PreloadAssets(params string[] assetNames)
     {
         if (_disposed)
+        {
             return;
+        }
 
         // Preload music tracks
-        foreach (var assetName in assetNames)
+        foreach (string assetName in assetNames)
         {
-            var definition = _audioRegistry.GetByTrackId(assetName)
-                          ?? _audioRegistry.GetById(assetName);
+            AudioEntity? definition = _audioRegistry.GetByTrackId(assetName)
+                                      ?? _audioRegistry.GetById(assetName);
 
             if (definition != null)
             {
@@ -483,12 +499,14 @@ public class AudioService : IAudioService
     public void UnloadAssets(params string[] assetNames)
     {
         if (_disposed)
-            return;
-
-        foreach (var assetName in assetNames)
         {
-            var definition = _audioRegistry.GetByTrackId(assetName)
-                          ?? _audioRegistry.GetById(assetName);
+            return;
+        }
+
+        foreach (string assetName in assetNames)
+        {
+            AudioEntity? definition = _audioRegistry.GetByTrackId(assetName)
+                                      ?? _audioRegistry.GetById(assetName);
 
             if (definition != null && definition.IsMusic)
             {
@@ -505,7 +523,9 @@ public class AudioService : IAudioService
     public void ClearCache()
     {
         if (_disposed)
+        {
             return;
+        }
 
         // PortAudio implementations use streaming
         // This is kept for interface compatibility
@@ -518,13 +538,16 @@ public class AudioService : IAudioService
     public void Dispose()
     {
         if (_disposed)
+        {
             return;
+        }
 
         // Unsubscribe from all events
-        foreach (var subscription in _subscriptions)
+        foreach (IDisposable subscription in _subscriptions)
         {
             subscription.Dispose();
         }
+
         _subscriptions.Clear();
 
         // Stop all sounds
@@ -546,27 +569,27 @@ public class AudioService : IAudioService
     private void SubscribeToEvents()
     {
         // Subscribe to PlaySoundEvent
-        var playSoundSubscription = _eventBus.Subscribe<PlaySoundEvent>(OnPlaySoundEvent);
+        IDisposable playSoundSubscription = _eventBus.Subscribe<PlaySoundEvent>(OnPlaySoundEvent);
         _subscriptions.Add(playSoundSubscription);
 
         // Subscribe to PlayMusicEvent
-        var playMusicSubscription = _eventBus.Subscribe<PlayMusicEvent>(OnPlayMusicEvent);
+        IDisposable playMusicSubscription = _eventBus.Subscribe<PlayMusicEvent>(OnPlayMusicEvent);
         _subscriptions.Add(playMusicSubscription);
 
         // Subscribe to StopMusicEvent
-        var stopMusicSubscription = _eventBus.Subscribe<StopMusicEvent>(OnStopMusicEvent);
+        IDisposable stopMusicSubscription = _eventBus.Subscribe<StopMusicEvent>(OnStopMusicEvent);
         _subscriptions.Add(stopMusicSubscription);
 
         // Subscribe to PauseMusicEvent
-        var pauseMusicSubscription = _eventBus.Subscribe<PauseMusicEvent>(OnPauseMusicEvent);
+        IDisposable pauseMusicSubscription = _eventBus.Subscribe<PauseMusicEvent>(OnPauseMusicEvent);
         _subscriptions.Add(pauseMusicSubscription);
 
         // Subscribe to ResumeMusicEvent
-        var resumeMusicSubscription = _eventBus.Subscribe<ResumeMusicEvent>(OnResumeMusicEvent);
+        IDisposable resumeMusicSubscription = _eventBus.Subscribe<ResumeMusicEvent>(OnResumeMusicEvent);
         _subscriptions.Add(resumeMusicSubscription);
 
         // Subscribe to StopAllSoundsEvent
-        var stopAllSoundsSubscription = _eventBus.Subscribe<StopAllSoundsEvent>(OnStopAllSoundsEvent);
+        IDisposable stopAllSoundsSubscription = _eventBus.Subscribe<StopAllSoundsEvent>(OnStopAllSoundsEvent);
         _subscriptions.Add(stopAllSoundsSubscription);
 
         _logger?.LogDebug("Subscribed to audio events");
@@ -648,11 +671,10 @@ public class AudioService : IAudioService
             .Where(handle => !handle.IsPlaying)
             .ToList();
 
-        foreach (var handle in stoppedHandles)
+        foreach (ILoopingSoundHandle handle in stoppedHandles)
         {
             _loopingSounds.Remove(handle);
             handle.Dispose();
         }
     }
 }
-

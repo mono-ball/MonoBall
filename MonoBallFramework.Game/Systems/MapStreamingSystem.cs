@@ -2,16 +2,15 @@ using Arch.Core;
 using Arch.Core.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
-using MonoBallFramework.Game.Engine.Core.Events;
-using MonoBallFramework.Game.Engine.Core.Events.Map;
-using MonoBallFramework.Game.Engine.Core.Systems;
-using MonoBallFramework.Game.Engine.Core.Types;
-using MonoBallFramework.Game.Components;
 using MonoBallFramework.Game.Ecs.Components;
 using MonoBallFramework.Game.Ecs.Components.Maps;
 using MonoBallFramework.Game.Ecs.Components.Movement;
 using MonoBallFramework.Game.Ecs.Components.Player;
+using MonoBallFramework.Game.Engine.Core.Events;
+using MonoBallFramework.Game.Engine.Core.Events.Map;
+using MonoBallFramework.Game.Engine.Core.Systems;
 using MonoBallFramework.Game.Engine.Core.Systems.Base;
+using MonoBallFramework.Game.Engine.Core.Types;
 using MonoBallFramework.Game.Engine.Systems.Management;
 using MonoBallFramework.Game.GameData.Entities;
 using MonoBallFramework.Game.GameData.MapLoading.Tiled.Core;
@@ -47,8 +46,8 @@ namespace MonoBallFramework.Game.Systems;
 ///     <para>
 ///         1. <strong>Synchronous Phase:</strong> LoadAdjacentMap() creates ECS entities immediately
 ///         2. <strong>Async Phase:</strong> PreloadAdjacentMapsAsync() warms caches in background
-///            - PreloadTmxDocumentAsync(): Loads/parses JSON on background thread
-///            - PreloadMapTexturesAsync(): Queues textures for GPU upload
+///         - PreloadTmxDocumentAsync(): Loads/parses JSON on background thread
+///         - PreloadMapTexturesAsync(): Queues textures for GPU upload
 ///         3. <strong>Next Transition:</strong> When player crosses boundary, assets are cached
 ///     </para>
 ///     <para>
@@ -59,6 +58,10 @@ namespace MonoBallFramework.Game.Systems;
 /// </remarks>
 public class MapStreamingSystem : SystemBase, IUpdateSystem
 {
+    // Maximum number of maps to keep loaded simultaneously
+    // Current + 4 directions + buffer for recently visited maps
+    // Pokemon-style: keeps maps loaded to prevent excessive load/unload churn
+    private const int MaxLoadedMaps = 8;
     private readonly IEventBus? _eventBus;
     private readonly ILogger<MapStreamingSystem>? _logger;
     private readonly MapEntityService _mapDefinitionService;
@@ -74,23 +77,18 @@ public class MapStreamingSystem : SystemBase, IUpdateSystem
     // Track which maps have been preloaded to avoid redundant preloading
     private readonly HashSet<string> _preloadedMaps = new();
 
-    // Maximum number of maps to keep loaded simultaneously
-    // Current + 4 directions + buffer for recently visited maps
-    // Pokemon-style: keeps maps loaded to prevent excessive load/unload churn
-    private const int MaxLoadedMaps = 8;
+    // Invalidation batching flag - set when maps are loaded/unloaded, processed once at end of frame
+    private bool _invalidationNeeded;
 
     // Optional lifecycle manager for proper entity cleanup (set after initialization)
     private MapLifecycleManager? _lifecycleManager;
 
-    // Optional movement system for cache invalidation during map transitions
-    private MovementSystem? _movementSystem;
-    private QueryDescription _mapInfoQuery;
-
     // Dirty flag to avoid rebuilding cache every frame - only rebuild when maps change
     private bool _mapCacheDirty = true;
+    private QueryDescription _mapInfoQuery;
 
-    // Invalidation batching flag - set when maps are loaded/unloaded, processed once at end of frame
-    private bool _invalidationNeeded = false;
+    // Optional movement system for cache invalidation during map transitions
+    private MovementSystem? _movementSystem;
 
     // Cached queries for performance
     private QueryDescription _playerQuery;
@@ -604,7 +602,7 @@ public class MapStreamingSystem : SystemBase, IUpdateSystem
                 sourceOrigin.X - adjacentWidth,
                 sourceOrigin.Y + offsetPixels
             ),
-            _ => sourceOrigin,
+            _ => sourceOrigin
         };
     }
 
@@ -739,7 +737,8 @@ public class MapStreamingSystem : SystemBase, IUpdateSystem
 
         // Get old map name before updating
         string? oldMapName = null;
-        if (_mapInfoCache.TryGetValue(streaming.CurrentMapId.Value, out var oldMapData))
+        if (_mapInfoCache.TryGetValue(streaming.CurrentMapId.Value,
+                out (MapInfo Info, MapWorldPosition WorldPos, MapEntity? Definition) oldMapData))
         {
             oldMapName = oldMapData.Info.MapName;
         }
@@ -934,9 +933,9 @@ public class MapStreamingSystem : SystemBase, IUpdateSystem
                     _mapInfoCache.TryGetValue(
                         mapId.Value,
                         out (
-                            MapInfo Info,
-                            MapWorldPosition WorldPos,
-                            MapEntity? Definition
+                        MapInfo Info,
+                        MapWorldPosition WorldPos,
+                        MapEntity? Definition
                         ) mapData
                     )
                 )
@@ -1012,6 +1011,7 @@ public class MapStreamingSystem : SystemBase, IUpdateSystem
                         destroyedCount++;
                     }
                 }
+
                 _lifecycleManager.ClearMapTileCache(mapId);
             }
         }

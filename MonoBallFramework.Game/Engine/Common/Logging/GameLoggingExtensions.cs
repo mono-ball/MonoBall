@@ -50,11 +50,7 @@ public static class GameLoggingExtensions
     )
     {
         using IDisposable? scope = logger.BeginScope(
-            new Dictionary<string, object>
-            {
-                ["EntityId"] = entityId,
-                ["ComponentType"] = componentType,
-            }
+            new Dictionary<string, object> { ["EntityId"] = entityId, ["ComponentType"] = componentType }
         );
 
         if (componentData != null)
@@ -91,7 +87,7 @@ public static class GameLoggingExtensions
             {
                 ["SystemName"] = systemName,
                 ["ExecutionTimeMs"] = executionTimeMs,
-                ["EntitiesProcessed"] = entitiesProcessed,
+                ["EntitiesProcessed"] = entitiesProcessed
             }
         );
 
@@ -172,7 +168,7 @@ public static class GameLoggingExtensions
             ["Timestamp"] = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"),
             ["MachineName"] = Environment.MachineName,
             ["ExceptionType"] = ex.GetType().Name,
-            ["ExceptionSource"] = ex.Source ?? "Unknown",
+            ["ExceptionSource"] = ex.Source ?? "Unknown"
         };
 
         if (additionalContext != null)
@@ -200,9 +196,7 @@ public static class GameLoggingExtensions
         using IDisposable? scope = logger.BeginScope(
             new Dictionary<string, object>
             {
-                ["AssetPath"] = assetPath,
-                ["AssetType"] = assetType,
-                ["LoadTimeMs"] = loadTimeMs,
+                ["AssetPath"] = assetPath, ["AssetType"] = assetType, ["LoadTimeMs"] = loadTimeMs
             }
         );
 

@@ -22,35 +22,28 @@ public class ComponentDetailPane : UIComponent
     private const int MaxRelationshipMetadataFields = 5;
     private const int MaxPropertyValueLength = 50;
 
-    private readonly TextBuffer _detailBuffer;
-    private EntityInfo? _entity;
+    /// <summary>
+    ///     Cache for loaded entity details.
+    /// </summary>
+    private readonly Dictionary<int, EntityInfo> _loadedEntityCache = new();
 
     /// <summary>
     ///     Callback for loading entity details on-demand (lazy loading).
     /// </summary>
     private Func<int, EntityInfo, EntityInfo?>? _entityDetailLoader;
 
-    /// <summary>
-    ///     Cache for loaded entity details.
-    /// </summary>
-    private readonly Dictionary<int, EntityInfo> _loadedEntityCache = new();
-
     public ComponentDetailPane(string id)
     {
         Id = id;
 
-        _detailBuffer = new TextBuffer($"{id}_buffer")
-        {
-            AutoScroll = false,
-            MaxLines = MaxDetailBufferLines,
-        };
+        DetailBuffer = new TextBuffer($"{id}_buffer") { AutoScroll = false, MaxLines = MaxDetailBufferLines };
     }
 
     /// <summary>Gets the underlying TextBuffer for direct access if needed.</summary>
-    public TextBuffer DetailBuffer => _detailBuffer;
+    public TextBuffer DetailBuffer { get; }
 
     /// <summary>Gets the currently displayed entity.</summary>
-    public EntityInfo? Entity => _entity;
+    public EntityInfo? Entity { get; private set; }
 
     /// <summary>
     ///     Sets the entity detail loader for on-demand loading of component data.
@@ -73,7 +66,7 @@ public class ComponentDetailPane : UIComponent
     /// </summary>
     public void SetEntity(EntityInfo? entity)
     {
-        _entity = entity;
+        Entity = entity;
         UpdateDisplay();
     }
 
@@ -85,40 +78,40 @@ public class ComponentDetailPane : UIComponent
         UpdateDisplay();
     }
 
-    protected override bool IsInteractive() => true;
+    protected override bool IsInteractive()
+    {
+        return true;
+    }
 
     protected override void OnRender(UIContext context)
     {
         // Update buffer constraint to fill this component's rect
-        _detailBuffer.Constraint = new LayoutConstraint
-        {
-            Anchor = Anchor.Fill,
-        };
+        DetailBuffer.Constraint = new LayoutConstraint { Anchor = Anchor.Fill };
 
         // Render the buffer
-        _detailBuffer.Render(context);
+        DetailBuffer.Render(context);
     }
 
     private void UpdateDisplay()
     {
-        int previousScrollOffset = _detailBuffer.ScrollOffset;
-        _detailBuffer.Clear();
+        int previousScrollOffset = DetailBuffer.ScrollOffset;
+        DetailBuffer.Clear();
 
-        if (_entity == null)
+        if (Entity == null)
         {
             RenderEmptyState();
             return;
         }
 
         // Load entity details on-demand if needed
-        EntityInfo entity = LoadEntityDetails(_entity);
+        EntityInfo entity = LoadEntityDetails(Entity);
 
         RenderEntityHeader(entity);
         RenderRelationships(entity);
         RenderComponents(entity);
 
         // Restore scroll position
-        _detailBuffer.SetScrollOffset(Math.Min(previousScrollOffset, Math.Max(0, _detailBuffer.TotalLines - 1)));
+        DetailBuffer.SetScrollOffset(Math.Min(previousScrollOffset, Math.Max(0, DetailBuffer.TotalLines - 1)));
     }
 
     private EntityInfo LoadEntityDetails(EntityInfo entity)
@@ -150,10 +143,10 @@ public class ComponentDetailPane : UIComponent
 
     private void RenderEmptyState()
     {
-        _detailBuffer.AppendLine("", ThemeManager.Current.TextDim);
-        _detailBuffer.AppendLine("  Select an entity to view details", ThemeManager.Current.TextDim);
-        _detailBuffer.AppendLine("", ThemeManager.Current.TextDim);
-        _detailBuffer.AppendLine("  Use arrow keys or click to select", ThemeManager.Current.TextDim);
+        DetailBuffer.AppendLine("", ThemeManager.Current.TextDim);
+        DetailBuffer.AppendLine("  Select an entity to view details", ThemeManager.Current.TextDim);
+        DetailBuffer.AppendLine("", ThemeManager.Current.TextDim);
+        DetailBuffer.AppendLine("  Use arrow keys or click to select", ThemeManager.Current.TextDim);
     }
 
     private void RenderEntityHeader(EntityInfo entity)
@@ -161,27 +154,27 @@ public class ComponentDetailPane : UIComponent
         UITheme theme = ThemeManager.Current;
 
         // Entity name and ID
-        _detailBuffer.AppendLine($"  {NerdFontIcons.Entity} Entity Details", theme.Info);
-        _detailBuffer.AppendLine($"  ─────────────────────", theme.BorderPrimary);
-        _detailBuffer.AppendLine($"  ID: {entity.Id}", theme.TextPrimary);
-        _detailBuffer.AppendLine($"  Name: {entity.Name}", theme.TextPrimary);
+        DetailBuffer.AppendLine($"  {NerdFontIcons.Entity} Entity Details", theme.Info);
+        DetailBuffer.AppendLine("  ─────────────────────", theme.BorderPrimary);
+        DetailBuffer.AppendLine($"  ID: {entity.Id}", theme.TextPrimary);
+        DetailBuffer.AppendLine($"  Name: {entity.Name}", theme.TextPrimary);
 
         if (entity.Tag != null && entity.Tag != entity.Name)
         {
-            _detailBuffer.AppendLine($"  Tag: {entity.Tag}", theme.TextSecondary);
+            DetailBuffer.AppendLine($"  Tag: {entity.Tag}", theme.TextSecondary);
         }
 
-        _detailBuffer.AppendLine($"  Active: {(entity.IsActive ? "Yes" : "No")}",
+        DetailBuffer.AppendLine($"  Active: {(entity.IsActive ? "Yes" : "No")}",
             entity.IsActive ? theme.Success : theme.TextDim);
-        _detailBuffer.AppendLine($"  Components: {entity.Components.Count}", theme.TextSecondary);
+        DetailBuffer.AppendLine($"  Components: {entity.Components.Count}", theme.TextSecondary);
 
         if (entity.Relationships.Count > 0)
         {
             int totalRelationships = entity.Relationships.Values.Sum(r => r.Count);
-            _detailBuffer.AppendLine($"  Relationships: {totalRelationships}", theme.TextSecondary);
+            DetailBuffer.AppendLine($"  Relationships: {totalRelationships}", theme.TextSecondary);
         }
 
-        _detailBuffer.AppendLine("", theme.TextDim);
+        DetailBuffer.AppendLine("", theme.TextDim);
     }
 
     private void RenderRelationships(EntityInfo entity)
@@ -193,12 +186,12 @@ public class ComponentDetailPane : UIComponent
 
         UITheme theme = ThemeManager.Current;
 
-        _detailBuffer.AppendLine($"  {NerdFontIcons.Relationship} Relationships", theme.Warning);
-        _detailBuffer.AppendLine($"  ─────────────────────", theme.BorderPrimary);
+        DetailBuffer.AppendLine($"  {NerdFontIcons.Relationship} Relationships", theme.Warning);
+        DetailBuffer.AppendLine("  ─────────────────────", theme.BorderPrimary);
 
         foreach ((string relationType, List<EntityRelationship> relationships) in entity.Relationships)
         {
-            _detailBuffer.AppendLine($"    {relationType}:", theme.Info);
+            DetailBuffer.AppendLine($"    {relationType}:", theme.Info);
 
             foreach (EntityRelationship rel in relationships.Take(MaxRelationshipsDisplay))
             {
@@ -207,34 +200,35 @@ public class ComponentDetailPane : UIComponent
                     : $"[{rel.EntityId}]";
 
                 Color relColor = rel.IsValid ? theme.Success : theme.Error;
-                _detailBuffer.AppendLine($"      → {entityRef}", relColor);
+                DetailBuffer.AppendLine($"      → {entityRef}", relColor);
 
                 // Show relationship metadata
                 foreach ((string key, string value) in rel.Metadata.Take(MaxRelationshipMetadataFields))
                 {
-                    _detailBuffer.AppendLine($"        {key}: {value}", theme.TextDim);
+                    DetailBuffer.AppendLine($"        {key}: {value}", theme.TextDim);
                 }
             }
 
             if (relationships.Count > MaxRelationshipsDisplay)
             {
-                _detailBuffer.AppendLine($"      ... ({relationships.Count - MaxRelationshipsDisplay} more)", theme.TextDim);
+                DetailBuffer.AppendLine($"      ... ({relationships.Count - MaxRelationshipsDisplay} more)",
+                    theme.TextDim);
             }
         }
 
-        _detailBuffer.AppendLine("", theme.TextDim);
+        DetailBuffer.AppendLine("", theme.TextDim);
     }
 
     private void RenderComponents(EntityInfo entity)
     {
         UITheme theme = ThemeManager.Current;
 
-        _detailBuffer.AppendLine($"  {NerdFontIcons.Component} Components", theme.Info);
-        _detailBuffer.AppendLine($"  ─────────────────────", theme.BorderPrimary);
+        DetailBuffer.AppendLine($"  {NerdFontIcons.Component} Components", theme.Info);
+        DetailBuffer.AppendLine("  ─────────────────────", theme.BorderPrimary);
 
         if (entity.Components.Count == 0)
         {
-            _detailBuffer.AppendLine("    No components attached", theme.TextDim);
+            DetailBuffer.AppendLine("    No components attached", theme.TextDim);
             return;
         }
 
@@ -242,7 +236,7 @@ public class ComponentDetailPane : UIComponent
         foreach (string component in entity.Components.Take(MaxComponentsToShow))
         {
             Color componentColor = GetComponentColor(component);
-            _detailBuffer.AppendLine($"    {NerdFontIcons.Dot} {component}", componentColor);
+            DetailBuffer.AppendLine($"    {NerdFontIcons.Dot} {component}", componentColor);
 
             // Show component field values if available
             if (entity.ComponentData.TryGetValue(component, out Dictionary<string, string>? fields) && fields.Count > 0)
@@ -256,7 +250,7 @@ public class ComponentDetailPane : UIComponent
 
                 if (fields.Count > MaxPropertiesToShow)
                 {
-                    _detailBuffer.AppendLine($"        ... ({fields.Count - MaxPropertiesToShow} more fields)",
+                    DetailBuffer.AppendLine($"        ... ({fields.Count - MaxPropertiesToShow} more fields)",
                         theme.TextDim);
                 }
             }
@@ -266,7 +260,7 @@ public class ComponentDetailPane : UIComponent
 
         if (entity.Components.Count > MaxComponentsToShow)
         {
-            _detailBuffer.AppendLine($"    ... ({entity.Components.Count - MaxComponentsToShow} more components)",
+            DetailBuffer.AppendLine($"    ... ({entity.Components.Count - MaxComponentsToShow} more components)",
                 theme.TextDim);
         }
     }
@@ -303,7 +297,7 @@ public class ComponentDetailPane : UIComponent
             displayValue = displayValue.Substring(0, MaxPropertyValueLength - 3) + "...";
         }
 
-        _detailBuffer.AppendLine($"{indent}{fieldName}: {displayValue}", valueColor);
+        DetailBuffer.AppendLine($"{indent}{fieldName}: {displayValue}", valueColor);
     }
 
     private Color GetComponentColor(string componentName)
@@ -350,14 +344,43 @@ public class ComponentDetailPane : UIComponent
 
         float r, g, b;
 
-        if (h < 60) { r = c; g = x; b = 0; }
-        else if (h < 120) { r = x; g = c; b = 0; }
-        else if (h < 180) { r = 0; g = c; b = x; }
-        else if (h < 240) { r = 0; g = x; b = c; }
-        else if (h < 300) { r = x; g = 0; b = c; }
-        else { r = c; g = 0; b = x; }
+        if (h < 60)
+        {
+            r = c;
+            g = x;
+            b = 0;
+        }
+        else if (h < 120)
+        {
+            r = x;
+            g = c;
+            b = 0;
+        }
+        else if (h < 180)
+        {
+            r = 0;
+            g = c;
+            b = x;
+        }
+        else if (h < 240)
+        {
+            r = 0;
+            g = x;
+            b = c;
+        }
+        else if (h < 300)
+        {
+            r = x;
+            g = 0;
+            b = c;
+        }
+        else
+        {
+            r = c;
+            g = 0;
+            b = x;
+        }
 
         return new Color((byte)((r + m) * 255), (byte)((g + m) * 255), (byte)((b + m) * 255));
     }
 }
-

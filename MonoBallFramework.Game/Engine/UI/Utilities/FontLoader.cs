@@ -9,8 +9,8 @@ using MonoBallFramework.Game.GameData.Entities;
 namespace MonoBallFramework.Game.Engine.UI.Utilities;
 
 /// <summary>
-/// Provides font loading and path resolution using the content provider system.
-/// Supports mod-overridable fonts via database-driven font definitions.
+///     Provides font loading and path resolution using the content provider system.
+///     Supports mod-overridable fonts via database-driven font definitions.
 /// </summary>
 public sealed class FontLoader
 {
@@ -19,7 +19,7 @@ public sealed class FontLoader
     private readonly ILogger<FontLoader> _logger;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="FontLoader"/> class.
+    ///     Initializes a new instance of the <see cref="FontLoader" /> class.
     /// </summary>
     public FontLoader(
         IContentProvider contentProvider,
@@ -32,7 +32,7 @@ public sealed class FontLoader
     }
 
     /// <summary>
-    /// Resolves the full path to a font file.
+    ///     Resolves the full path to a font file.
     /// </summary>
     /// <param name="fontFileName">The font filename (e.g., "pokemon.ttf").</param>
     /// <returns>The resolved path, or null if not found.</returns>
@@ -55,7 +55,7 @@ public sealed class FontLoader
     }
 
     /// <summary>
-    /// Gets the font entity for a specific category from the database.
+    ///     Gets the font entity for a specific category from the database.
     /// </summary>
     /// <param name="category">The font category (e.g., "game", "debug").</param>
     /// <returns>The font entity if found.</returns>
@@ -80,7 +80,7 @@ public sealed class FontLoader
     }
 
     /// <summary>
-    /// Gets the font entity by its unique ID from the database.
+    ///     Gets the font entity by its unique ID from the database.
     /// </summary>
     /// <param name="fontId">The font ID (e.g., "base:font:game/pokemon").</param>
     /// <returns>The font entity if found.</returns>
@@ -103,7 +103,7 @@ public sealed class FontLoader
     }
 
     /// <summary>
-    /// Tries to get the font entity for a specific category from the database.
+    ///     Tries to get the font entity for a specific category from the database.
     /// </summary>
     /// <param name="category">The font category (e.g., "game", "debug").</param>
     /// <returns>The font entity if found, null otherwise.</returns>
@@ -118,7 +118,7 @@ public sealed class FontLoader
     }
 
     /// <summary>
-    /// Tries to get the font entity by its unique ID from the database.
+    ///     Tries to get the font entity by its unique ID from the database.
     /// </summary>
     /// <param name="fontId">The font ID (e.g., "base:font:game/pokemon").</param>
     /// <returns>The font entity if found, null otherwise.</returns>
@@ -131,7 +131,7 @@ public sealed class FontLoader
     }
 
     /// <summary>
-    /// Gets all registered fonts from the database.
+    ///     Gets all registered fonts from the database.
     /// </summary>
     /// <returns>Collection of all font entities.</returns>
     public IReadOnlyList<FontEntity> GetAllFonts()
@@ -143,7 +143,7 @@ public sealed class FontLoader
     }
 
     /// <summary>
-    /// Gets the path to the main game font.
+    ///     Gets the path to the main game font.
     /// </summary>
     /// <exception cref="InvalidOperationException">Thrown if no game font defined.</exception>
     /// <exception cref="FileNotFoundException">Thrown if font file not found.</exception>
@@ -151,11 +151,11 @@ public sealed class FontLoader
     {
         FontEntity fontEntity = GetFontByCategory("game");
         return ResolveFontPath(fontEntity.FontPath)
-            ?? throw new FileNotFoundException($"Game font file not found: {fontEntity.FontPath}");
+               ?? throw new FileNotFoundException($"Game font file not found: {fontEntity.FontPath}");
     }
 
     /// <summary>
-    /// Gets the path to the debug font.
+    ///     Gets the path to the debug font.
     /// </summary>
     /// <exception cref="InvalidOperationException">Thrown if no debug font defined.</exception>
     /// <exception cref="FileNotFoundException">Thrown if font file not found.</exception>
@@ -163,11 +163,11 @@ public sealed class FontLoader
     {
         FontEntity fontEntity = GetFontByCategory("debug");
         return ResolveFontPath(fontEntity.FontPath)
-            ?? throw new FileNotFoundException($"Debug font file not found: {fontEntity.FontPath}");
+               ?? throw new FileNotFoundException($"Debug font file not found: {fontEntity.FontPath}");
     }
 
     /// <summary>
-    /// Checks if a font exists.
+    ///     Checks if a font exists.
     /// </summary>
     public bool FontExists(string fontFileName)
     {
@@ -177,7 +177,7 @@ public sealed class FontLoader
     }
 
     /// <summary>
-    /// Loads a font and returns a FontSystem ready for use.
+    ///     Loads a font and returns a FontSystem ready for use.
     /// </summary>
     /// <param name="fontFileName">The font filename to load.</param>
     /// <returns>A FontSystem loaded with the specified font.</returns>
@@ -201,7 +201,7 @@ public sealed class FontLoader
     }
 
     /// <summary>
-    /// Loads a font by its database entity.
+    ///     Loads a font by its database entity.
     /// </summary>
     /// <param name="fontEntity">The font entity from the database.</param>
     /// <returns>A FontSystem loaded with the specified font.</returns>
@@ -209,7 +209,9 @@ public sealed class FontLoader
     public FontSystem LoadFont(FontEntity fontEntity)
     {
         if (fontEntity == null)
+        {
             throw new ArgumentNullException(nameof(fontEntity));
+        }
 
         string? fontPath = ResolveFontPath(fontEntity.FontPath);
 
@@ -231,7 +233,7 @@ public sealed class FontLoader
     }
 
     /// <summary>
-    /// Loads the debug font from the database.
+    ///     Loads the debug font from the database.
     /// </summary>
     /// <returns>A FontSystem loaded with the debug font.</returns>
     /// <exception cref="InvalidOperationException">Thrown if no debug font defined.</exception>
@@ -242,7 +244,7 @@ public sealed class FontLoader
     }
 
     /// <summary>
-    /// Loads the game font from the database.
+    ///     Loads the game font from the database.
     /// </summary>
     /// <returns>A FontSystem loaded with the game font.</returns>
     /// <exception cref="InvalidOperationException">Thrown if no game font defined.</exception>

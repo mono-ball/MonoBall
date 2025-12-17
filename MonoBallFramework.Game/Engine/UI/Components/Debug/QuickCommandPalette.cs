@@ -46,11 +46,7 @@ public class QuickCommandPalette : Panel
             Id = Id + "_title",
             Text = "Quick Commands",
             Color = theme.Info,
-            Constraint = new LayoutConstraint
-            {
-                Anchor = Anchor.TopLeft,
-                Margin = theme.PaddingMedium,
-            },
+            Constraint = new LayoutConstraint { Anchor = Anchor.TopLeft, Margin = theme.PaddingMedium }
         };
         AddChild(titleLabel);
 
@@ -65,13 +61,13 @@ public class QuickCommandPalette : Panel
                 OffsetY = 30,
                 WidthPercent = 0.9f,
                 Height = theme.InputHeight,
-                MarginLeft = theme.PaddingMedium,
+                MarginLeft = theme.PaddingMedium
             },
             OnTextChanged = text =>
             {
                 FilterText = text;
                 UpdateFilteredCommands();
-            },
+            }
         };
         AddChild(_searchField);
 
@@ -83,10 +79,8 @@ public class QuickCommandPalette : Panel
             Color = theme.TextDim,
             Constraint = new LayoutConstraint
             {
-                Anchor = Anchor.TopLeft,
-                OffsetY = 75,
-                MarginLeft = theme.PaddingMedium,
-            },
+                Anchor = Anchor.TopLeft, OffsetY = 75, MarginLeft = theme.PaddingMedium
+            }
         };
         AddChild(hintLabel);
     }
@@ -143,13 +137,13 @@ public class QuickCommandPalette : Panel
                     OffsetY = yOffset,
                     WidthPercent = 0.9f,
                     Height = theme.ButtonHeight,
-                    MarginLeft = theme.PaddingMedium,
+                    MarginLeft = theme.PaddingMedium
                 },
                 OnClick = () =>
                 {
                     command.Execute?.Invoke();
                     OnCommandExecuted?.Invoke(command);
-                },
+                }
             };
 
             AddChild(button);
@@ -166,8 +160,8 @@ public class QuickCommandPalette : Panel
                     {
                         Anchor = Anchor.TopLeft,
                         OffsetY = yOffset + theme.ButtonHeight + 2,
-                        MarginLeft = theme.PaddingMedium + 5,
-                    },
+                        MarginLeft = theme.PaddingMedium + 5
+                    }
                 };
                 AddChild(descLabel);
                 yOffset += theme.ButtonHeight + 22;
@@ -188,10 +182,8 @@ public class QuickCommandPalette : Panel
                 Color = theme.TextSecondary,
                 Constraint = new LayoutConstraint
                 {
-                    Anchor = Anchor.TopLeft,
-                    OffsetY = yOffset,
-                    MarginLeft = theme.PaddingMedium,
-                },
+                    Anchor = Anchor.TopLeft, OffsetY = yOffset, MarginLeft = theme.PaddingMedium
+                }
             };
             AddChild(moreLabel);
         }

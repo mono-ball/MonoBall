@@ -2,12 +2,12 @@ using Arch.Core;
 using Arch.Core.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
+using MonoBallFramework.Game.Components.Interfaces;
 using MonoBallFramework.Game.Ecs.Components;
 using MonoBallFramework.Game.Ecs.Components.Maps;
 using MonoBallFramework.Game.Ecs.Components.Movement;
 using MonoBallFramework.Game.Ecs.Components.Rendering;
 using MonoBallFramework.Game.Ecs.Components.Tiles;
-using MonoBallFramework.Game.Components.Interfaces;
 using MonoBallFramework.Game.Engine.Common.Logging;
 using MonoBallFramework.Game.Engine.Core.Events;
 using MonoBallFramework.Game.Engine.Core.Systems;
@@ -38,7 +38,7 @@ public class MovementSystem : SystemBase, IUpdateSystem
         "South", // Index 1 for Direction.South (0 + 1)
         "West", // Index 2 for Direction.West (1 + 1)
         "East", // Index 3 for Direction.East (2 + 1)
-        "North", // Index 4 for Direction.North (3 + 1)
+        "North" // Index 4 for Direction.North (3 + 1)
     };
 
     // PERFORMANCE: Cached event pools to eliminate dictionary lookups (50% faster pooling)

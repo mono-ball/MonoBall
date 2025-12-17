@@ -23,7 +23,7 @@ public enum RunningState
     /// <summary>
     ///     Player is actively moving between tiles.
     /// </summary>
-    Moving = 2,
+    Moving = 2
 }
 
 /// <summary>

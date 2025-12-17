@@ -16,20 +16,47 @@ namespace MonoBallFramework.Game.Engine.UI.Components.Debug;
 /// </summary>
 public class EntityListPane : UIComponent
 {
-    private readonly TextBuffer _listBuffer;
     private readonly Dictionary<int, int> _lineToEntityId = new();
     private readonly List<int> _navigableEntityIds = new();
-    private readonly HashSet<int> _pinnedEntities = new();
     private readonly HashSet<int> _newEntityIds = new();
+    private readonly HashSet<int> _pinnedEntities = new();
 
     private List<EntityInfo> _entities = new();
     private List<EntityInfo> _filteredEntities = new();
-    private int? _selectedEntityId;
-    private int _selectedIndex;
+    private int _lastClickedEntityId = -1;
 
     // Click tracking for double-click detection
     private DateTime _lastClickTime = DateTime.MinValue;
-    private int _lastClickedEntityId = -1;
+    private int? _selectedEntityId;
+    private int _selectedIndex;
+
+    public EntityListPane(string id)
+    {
+        Id = id;
+
+        ListBuffer = new TextBuffer($"{id}_buffer") { AutoScroll = false, MaxLines = 50000 };
+    }
+
+    /// <summary>Gets or sets whether keyboard navigation is enabled.</summary>
+    public bool KeyboardNavEnabled { get; set; } = true;
+
+    /// <summary>Gets or sets whether mouse navigation is enabled.</summary>
+    public bool MouseNavEnabled { get; set; } = true;
+
+    /// <summary>Gets the currently selected entity ID.</summary>
+    public int? SelectedEntityId => _selectedEntityId;
+
+    /// <summary>Gets the underlying TextBuffer for direct access if needed.</summary>
+    public TextBuffer ListBuffer { get; }
+
+    /// <summary>Gets the set of pinned entity IDs.</summary>
+    public IReadOnlySet<int> PinnedEntities => _pinnedEntities;
+
+    /// <summary>Gets the set of new (highlighted) entity IDs.</summary>
+    public IReadOnlySet<int> NewEntityIds => _newEntityIds;
+
+    /// <summary>Gets the list of filtered entities currently displayed.</summary>
+    public IReadOnlyList<EntityInfo> FilteredEntities => _filteredEntities;
 
     /// <summary>
     ///     Event raised when an entity is selected.
@@ -45,38 +72,6 @@ public class EntityListPane : UIComponent
     ///     Event raised when an entity is right-clicked (for pin toggle).
     /// </summary>
     public event Action<int>? EntityRightClicked;
-
-    public EntityListPane(string id)
-    {
-        Id = id;
-
-        _listBuffer = new TextBuffer($"{id}_buffer")
-        {
-            AutoScroll = false,
-            MaxLines = 50000,
-        };
-    }
-
-    /// <summary>Gets or sets whether keyboard navigation is enabled.</summary>
-    public bool KeyboardNavEnabled { get; set; } = true;
-
-    /// <summary>Gets or sets whether mouse navigation is enabled.</summary>
-    public bool MouseNavEnabled { get; set; } = true;
-
-    /// <summary>Gets the currently selected entity ID.</summary>
-    public int? SelectedEntityId => _selectedEntityId;
-
-    /// <summary>Gets the underlying TextBuffer for direct access if needed.</summary>
-    public TextBuffer ListBuffer => _listBuffer;
-
-    /// <summary>Gets the set of pinned entity IDs.</summary>
-    public IReadOnlySet<int> PinnedEntities => _pinnedEntities;
-
-    /// <summary>Gets the set of new (highlighted) entity IDs.</summary>
-    public IReadOnlySet<int> NewEntityIds => _newEntityIds;
-
-    /// <summary>Gets the list of filtered entities currently displayed.</summary>
-    public IReadOnlyList<EntityInfo> FilteredEntities => _filteredEntities;
 
     /// <summary>
     ///     Sets the list of entities to display.
@@ -228,7 +223,7 @@ public class EntityListPane : UIComponent
         _selectedIndex = 0;
         _selectedEntityId = _navigableEntityIds[_selectedIndex];
         UpdateDisplay();
-        _listBuffer.SetScrollOffset(0);
+        ListBuffer.SetScrollOffset(0);
         SelectionChanged?.Invoke(_selectedEntityId);
     }
 
@@ -245,7 +240,7 @@ public class EntityListPane : UIComponent
         _selectedIndex = _navigableEntityIds.Count - 1;
         _selectedEntityId = _navigableEntityIds[_selectedIndex];
         UpdateDisplay();
-        _listBuffer.ScrollToBottom();
+        ListBuffer.ScrollToBottom();
         SelectionChanged?.Invoke(_selectedEntityId);
     }
 
@@ -262,22 +257,22 @@ public class EntityListPane : UIComponent
         return _filteredEntities.FirstOrDefault(e => e.Id == _selectedEntityId.Value);
     }
 
-    protected override bool IsInteractive() => true;
+    protected override bool IsInteractive()
+    {
+        return true;
+    }
 
     protected override void OnRender(UIContext context)
     {
         // Update buffer constraint to fill this component's rect
-        _listBuffer.Constraint = new LayoutConstraint
-        {
-            Anchor = Anchor.Fill,
-        };
+        ListBuffer.Constraint = new LayoutConstraint { Anchor = Anchor.Fill };
 
         // Handle input
         HandleKeyboardInput(context);
         HandleMouseInput(context);
 
         // Render the buffer
-        _listBuffer.Render(context);
+        ListBuffer.Render(context);
     }
 
     private void ApplyFilters()
@@ -301,14 +296,14 @@ public class EntityListPane : UIComponent
 
     private void UpdateDisplay()
     {
-        int previousScrollOffset = _listBuffer.ScrollOffset;
-        _listBuffer.Clear();
+        int previousScrollOffset = ListBuffer.ScrollOffset;
+        ListBuffer.Clear();
         _lineToEntityId.Clear();
         _navigableEntityIds.Clear();
 
         if (_filteredEntities.Count == 0)
         {
-            _listBuffer.AppendLine("  No entities to display.", ThemeManager.Current.TextDim);
+            ListBuffer.AppendLine("  No entities to display.", ThemeManager.Current.TextDim);
             return;
         }
 
@@ -341,22 +336,22 @@ public class EntityListPane : UIComponent
             // Show pinned header
             if (isPinned && !inPinnedSection)
             {
-                _listBuffer.AppendLine($"  {NerdFontIcons.Pinned} PINNED", ThemeManager.Current.Warning);
+                ListBuffer.AppendLine($"  {NerdFontIcons.Pinned} PINNED", ThemeManager.Current.Warning);
                 inPinnedSection = true;
             }
             else if (!isPinned && inPinnedSection)
             {
-                _listBuffer.AppendLine("", ThemeManager.Current.TextDim);
+                ListBuffer.AppendLine("", ThemeManager.Current.TextDim);
                 inPinnedSection = false;
             }
 
-            int lineNum = _listBuffer.TotalLines;
+            int lineNum = ListBuffer.TotalLines;
             RenderEntityLine(entity);
             _lineToEntityId[lineNum] = entity.Id;
         }
 
         // Restore scroll position
-        _listBuffer.SetScrollOffset(Math.Min(previousScrollOffset, Math.Max(0, _listBuffer.TotalLines - 1)));
+        ListBuffer.SetScrollOffset(Math.Min(previousScrollOffset, Math.Max(0, ListBuffer.TotalLines - 1)));
     }
 
     private void RenderEntityLine(EntityInfo entity)
@@ -403,7 +398,7 @@ public class EntityListPane : UIComponent
             line += " [NEW]";
         }
 
-        _listBuffer.AppendLine(line, statusColor);
+        ListBuffer.AppendLine(line, statusColor);
     }
 
     private void HandleKeyboardInput(UIContext context)
@@ -502,7 +497,7 @@ public class EntityListPane : UIComponent
                 DateTime now = DateTime.Now;
                 double timeSinceLastClick = (now - _lastClickTime).TotalSeconds;
                 bool isDoubleClick = timeSinceLastClick < ThemeManager.Current.DoubleClickThreshold
-                    && _lastClickedEntityId == entityId;
+                                     && _lastClickedEntityId == entityId;
 
                 _lastClickTime = now;
                 _lastClickedEntityId = entityId;
@@ -534,14 +529,14 @@ public class EntityListPane : UIComponent
 
     private int GetLineAtMousePosition(Point mousePos)
     {
-        float relativeY = mousePos.Y - Rect.Y - _listBuffer.LinePadding;
+        float relativeY = mousePos.Y - Rect.Y - ListBuffer.LinePadding;
         if (relativeY < 0)
         {
             return -1;
         }
 
-        int clickedLine = (int)(relativeY / _listBuffer.LineHeight) + _listBuffer.ScrollOffset;
-        return clickedLine >= 0 && clickedLine < _listBuffer.TotalLines ? clickedLine : -1;
+        int clickedLine = (int)(relativeY / ListBuffer.LineHeight) + ListBuffer.ScrollOffset;
+        return clickedLine >= 0 && clickedLine < ListBuffer.TotalLines ? clickedLine : -1;
     }
 
     private void EnsureSelectedVisible()
@@ -567,16 +562,16 @@ public class EntityListPane : UIComponent
             return;
         }
 
-        int visibleLines = _listBuffer.VisibleLineCount;
-        int currentScroll = _listBuffer.ScrollOffset;
+        int visibleLines = ListBuffer.VisibleLineCount;
+        int currentScroll = ListBuffer.ScrollOffset;
 
         if (selectedLine < currentScroll)
         {
-            _listBuffer.SetScrollOffset(selectedLine);
+            ListBuffer.SetScrollOffset(selectedLine);
         }
         else if (selectedLine >= currentScroll + visibleLines)
         {
-            _listBuffer.SetScrollOffset(selectedLine - visibleLines + 1);
+            ListBuffer.SetScrollOffset(selectedLine - visibleLines + 1);
         }
     }
 }

@@ -4,7 +4,6 @@ namespace MonoBallFramework.Game.Engine.Core.Types;
 
 /// <summary>
 ///     Strongly-typed identifier for font definitions.
-///
 ///     Format: base:font:{category}/{name}
 ///     Examples:
 ///     - base:font:game/pokemon
@@ -37,9 +36,11 @@ public sealed record GameFontId : EntityId
     public GameFontId(string value) : base(value)
     {
         if (EntityType != TypeName)
+        {
             throw new ArgumentException(
                 $"Expected entity type '{TypeName}', got '{EntityType}'",
                 nameof(value));
+        }
     }
 
     /// <summary>
@@ -132,11 +133,15 @@ public sealed record GameFontId : EntityId
     public static GameFontId? TryCreate(string? value)
     {
         if (string.IsNullOrWhiteSpace(value))
+        {
             return null;
+        }
 
         // Only accept full format
         if (!IsValidFormat(value) || !value.Contains($":{TypeName}:"))
+        {
             return null;
+        }
 
         try
         {
@@ -151,5 +156,8 @@ public sealed record GameFontId : EntityId
     /// <summary>
     ///     Explicit conversion from string. Use TryCreate() for safe parsing.
     /// </summary>
-    public static explicit operator GameFontId(string value) => new(value);
+    public static explicit operator GameFontId(string value)
+    {
+        return new GameFontId(value);
+    }
 }

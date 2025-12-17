@@ -37,38 +37,37 @@ public class EntityFilterBar : UIComponent
     private const float ScrollIndicatorVerticalOffset = 4f;
     private const double CursorBlinkVisibleDuration = 0.5;
     private const float CursorWidth = 2f;
-
-    // Dropdown states
-    private bool _tagDropdownOpen;
+    private LayoutRect _clearButtonRect;
     private bool _componentDropdownOpen;
-    private int _tagScrollOffset;
+    private LayoutRect _componentDropdownRect;
+    private float _componentDropdownWidth = MinDropdownWidth;
+    private List<string> _components = new();
     private int _componentScrollOffset;
+    private double _cursorBlinkTimer;
+    private bool _dropdownWidthsCalculated;
+    private int _searchCursorPos;
+
+    // Search input state
+    private LayoutRect _searchRect;
+    private string _searchText = "";
+    private string _selectedComponent = "";
 
     // Filter values
     private string _selectedTag = "";
-    private string _selectedComponent = "";
-    private string _searchText = "";
+    private bool _showComponentDropdown = true;
 
-    // Available options
-    private List<string> _tags = new();
-    private List<string> _components = new();
-
-    // Search input state
-    private bool _searchFocused;
-    private int _searchCursorPos;
-    private double _cursorBlinkTimer;
+    // Dropdown states
+    private bool _tagDropdownOpen;
 
     // Cached layout rects
     private LayoutRect _tagDropdownRect;
-    private LayoutRect _componentDropdownRect;
-    private LayoutRect _searchRect;
-    private LayoutRect _clearButtonRect;
 
     // Cached dropdown widths (calculated from content)
     private float _tagDropdownWidth = MinDropdownWidth;
-    private float _componentDropdownWidth = MinDropdownWidth;
-    private bool _dropdownWidthsCalculated;
-    private bool _showComponentDropdown = true;
+
+    // Available options
+    private List<string> _tags = new();
+    private int _tagScrollOffset;
 
     /// <summary>
     ///     Event fired when any filter changes.
@@ -147,6 +146,31 @@ public class EntityFilterBar : UIComponent
     }
 
     /// <summary>
+    ///     Gets whether any filter is currently active.
+    /// </summary>
+    public bool HasActiveFilters =>
+        !string.IsNullOrEmpty(_selectedTag) ||
+        !string.IsNullOrEmpty(_selectedComponent) ||
+        !string.IsNullOrEmpty(_searchText);
+
+    /// <summary>
+    ///     Gets whether any dropdown is currently open.
+    /// </summary>
+    public bool HasOpenDropdown => _tagDropdownOpen || (_showComponentDropdown && _componentDropdownOpen);
+
+    /// <summary>
+    ///     Gets whether the search input is currently focused.
+    /// </summary>
+    public bool IsSearchFocused { get; private set; }
+
+    /// <summary>
+    ///     Gets whether the filter bar has exclusive input focus
+    ///     (dropdown open or search focused).
+    /// </summary>
+    public bool HasExclusiveFocus =>
+        _tagDropdownOpen || (_showComponentDropdown && _componentDropdownOpen) || IsSearchFocused;
+
+    /// <summary>
     ///     Sets the available tags for the dropdown.
     /// </summary>
     public void SetTags(IEnumerable<string> tags)
@@ -185,30 +209,6 @@ public class EntityFilterBar : UIComponent
     }
 
     /// <summary>
-    ///     Gets whether any filter is currently active.
-    /// </summary>
-    public bool HasActiveFilters =>
-        !string.IsNullOrEmpty(_selectedTag) ||
-        !string.IsNullOrEmpty(_selectedComponent) ||
-        !string.IsNullOrEmpty(_searchText);
-
-    /// <summary>
-    ///     Gets whether any dropdown is currently open.
-    /// </summary>
-    public bool HasOpenDropdown => _tagDropdownOpen || (_showComponentDropdown && _componentDropdownOpen);
-
-    /// <summary>
-    ///     Gets whether the search input is currently focused.
-    /// </summary>
-    public bool IsSearchFocused => _searchFocused;
-
-    /// <summary>
-    ///     Gets whether the filter bar has exclusive input focus
-    ///     (dropdown open or search focused).
-    /// </summary>
-    public bool HasExclusiveFocus => _tagDropdownOpen || (_showComponentDropdown && _componentDropdownOpen) || _searchFocused;
-
-    /// <summary>
     ///     Gets the bounds of any open dropdown (for hit-testing by parent).
     /// </summary>
     public LayoutRect? GetOpenDropdownBounds()
@@ -217,23 +217,33 @@ public class EntityFilterBar : UIComponent
         {
             int visibleCount = Math.Min(MaxDropdownItems, _tags.Count + 1);
             float listHeight = (visibleCount * DropdownItemHeight) + 8;
-            return new LayoutRect(_tagDropdownRect.X, _tagDropdownRect.Y, _tagDropdownRect.Width, _tagDropdownRect.Height + 2 + listHeight);
+            return new LayoutRect(_tagDropdownRect.X, _tagDropdownRect.Y, _tagDropdownRect.Width,
+                _tagDropdownRect.Height + 2 + listHeight);
         }
+
         if (_componentDropdownOpen)
         {
             int visibleCount = Math.Min(MaxDropdownItems, _components.Count + 1);
             float listHeight = (visibleCount * DropdownItemHeight) + 8;
-            return new LayoutRect(_componentDropdownRect.X, _componentDropdownRect.Y, _componentDropdownRect.Width, _componentDropdownRect.Height + 2 + listHeight);
+            return new LayoutRect(_componentDropdownRect.X, _componentDropdownRect.Y, _componentDropdownRect.Width,
+                _componentDropdownRect.Height + 2 + listHeight);
         }
+
         return null;
     }
 
-    protected override bool IsInteractive() => true;
+    protected override bool IsInteractive()
+    {
+        return true;
+    }
 
     /// <summary>
     ///     Provides content size for auto-sizing layout.
     /// </summary>
-    protected override (float width, float height)? GetContentSize() => (0, BarHeight);
+    protected override (float width, float height)? GetContentSize()
+    {
+        return (0, BarHeight);
+    }
 
     /// <summary>
     ///     Calculates the layout rects for interactive elements.
@@ -280,24 +290,35 @@ public class EntityFilterBar : UIComponent
     /// </summary>
     private void CalculateDropdownWidths(UIRenderer renderer)
     {
-        if (_dropdownWidthsCalculated) return;
+        if (_dropdownWidthsCalculated)
+        {
+            return;
+        }
 
         // Calculate tag dropdown width
         float maxTagWidth = renderer.MeasureText("Tag...").X;
-        foreach (var tag in _tags)
+        foreach (string tag in _tags)
         {
             float width = renderer.MeasureText(tag).X;
-            if (width > maxTagWidth) maxTagWidth = width;
+            if (width > maxTagWidth)
+            {
+                maxTagWidth = width;
+            }
         }
+
         _tagDropdownWidth = Math.Clamp(maxTagWidth + DropdownPadding, MinDropdownWidth, MaxDropdownWidth);
 
         // Calculate component dropdown width
         float maxCompWidth = renderer.MeasureText("Component...").X;
-        foreach (var comp in _components)
+        foreach (string comp in _components)
         {
             float width = renderer.MeasureText(comp).X;
-            if (width > maxCompWidth) maxCompWidth = width;
+            if (width > maxCompWidth)
+            {
+                maxCompWidth = width;
+            }
         }
+
         _componentDropdownWidth = Math.Clamp(maxCompWidth + DropdownPadding, MinDropdownWidth, MaxDropdownWidth);
 
         _dropdownWidthsCalculated = true;
@@ -309,7 +330,11 @@ public class EntityFilterBar : UIComponent
     /// </summary>
     public void ProcessInput(UIContext context)
     {
-        if (context?.Input == null) return;
+        if (context?.Input == null)
+        {
+            return;
+        }
+
         InputState input = context.Input;
 
         // Calculate layout rects so we know where interactive elements are
@@ -330,7 +355,10 @@ public class EntityFilterBar : UIComponent
     /// </summary>
     private void HandleDropdownButtonClicks(InputState input, Point mousePos)
     {
-        if (!input.IsMouseButtonPressed(MouseButton.Left)) return;
+        if (!input.IsMouseButtonPressed(MouseButton.Left))
+        {
+            return;
+        }
 
         // Check if clicking on tag dropdown button
         if (_tagDropdownRect.Contains(mousePos))
@@ -341,6 +369,7 @@ public class EntityFilterBar : UIComponent
                 _componentDropdownOpen = false;
                 _tagScrollOffset = 0;
             }
+
             input.ConsumeMouseButton(MouseButton.Left);
             return;
         }
@@ -354,6 +383,7 @@ public class EntityFilterBar : UIComponent
                 _tagDropdownOpen = false;
                 _componentScrollOffset = 0;
             }
+
             input.ConsumeMouseButton(MouseButton.Left);
             return;
         }
@@ -361,7 +391,7 @@ public class EntityFilterBar : UIComponent
         // Check if clicking on search input
         if (_searchRect.Contains(mousePos))
         {
-            _searchFocused = true;
+            IsSearchFocused = true;
             _cursorBlinkTimer = 0;
             // Calculate cursor position from click
             float textX = _searchRect.X + DropdownTextLeftPadding;
@@ -385,7 +415,10 @@ public class EntityFilterBar : UIComponent
     /// </summary>
     private void HandleOpenDropdownClicks(InputState input, Point mousePos)
     {
-        if (!input.IsMouseButtonPressed(MouseButton.Left)) return;
+        if (!input.IsMouseButtonPressed(MouseButton.Left))
+        {
+            return;
+        }
 
         // Handle tag dropdown clicks
         if (_tagDropdownOpen)
@@ -402,7 +435,7 @@ public class EntityFilterBar : UIComponent
         }
 
         // Handle search input clicks
-        if (_searchFocused)
+        if (IsSearchFocused)
         {
             HandleSearchInputClick(input, mousePos);
         }
@@ -454,18 +487,20 @@ public class EntityFilterBar : UIComponent
             // Check if clicking the search clear button (X)
             if (!string.IsNullOrEmpty(_searchText))
             {
-                var clearRect = new LayoutRect(_searchRect.Right - SearchClearButtonRightOffset, _searchRect.Y + 4, SearchClearButtonWidth, _searchRect.Height - 8);
+                var clearRect = new LayoutRect(_searchRect.Right - SearchClearButtonRightOffset, _searchRect.Y + 4,
+                    SearchClearButtonWidth, _searchRect.Height - 8);
                 if (clearRect.Contains(mousePos))
                 {
                     SearchText = "";
                 }
             }
+
             input.ConsumeMouseButton(MouseButton.Left);
         }
         else
         {
             // Clicking outside search - unfocus, let click pass through
-            _searchFocused = false;
+            IsSearchFocused = false;
         }
     }
 
@@ -474,7 +509,10 @@ public class EntityFilterBar : UIComponent
     /// </summary>
     private void HandleEscapeKey(InputState input)
     {
-        if (!input.IsKeyPressed(Keys.Escape)) return;
+        if (!input.IsKeyPressed(Keys.Escape))
+        {
+            return;
+        }
 
         if (_tagDropdownOpen)
         {
@@ -490,9 +528,9 @@ public class EntityFilterBar : UIComponent
             return;
         }
 
-        if (_searchFocused)
+        if (IsSearchFocused)
         {
-            _searchFocused = false;
+            IsSearchFocused = false;
             input.ConsumeKey(Keys.Escape);
         }
     }
@@ -502,7 +540,10 @@ public class EntityFilterBar : UIComponent
     /// </summary>
     private void HandleScrollWheel(InputState input, Point mousePos)
     {
-        if (!HasOpenDropdown || input.ScrollWheelDelta == 0) return;
+        if (!HasOpenDropdown || input.ScrollWheelDelta == 0)
+        {
+            return;
+        }
 
         if (_tagDropdownOpen && IsOverTagDropdown(mousePos))
         {
@@ -545,7 +586,11 @@ public class EntityFilterBar : UIComponent
     /// </summary>
     private void HandleSearchKeyboardInput(InputState input)
     {
-        if (!_searchFocused) return;
+        if (!IsSearchFocused)
+        {
+            return;
+        }
+
         HandleSearchInput(input);
     }
 
@@ -560,13 +605,17 @@ public class EntityFilterBar : UIComponent
         if (input != null)
         {
             _cursorBlinkTimer += (float)input.GameTime.ElapsedGameTime.TotalSeconds;
-            if (_cursorBlinkTimer > 1.0) _cursorBlinkTimer -= 1.0;
+            if (_cursorBlinkTimer > 1.0)
+            {
+                _cursorBlinkTimer -= 1.0;
+            }
         }
 
         // Draw background
         renderer.DrawRectangle(rect, theme.BackgroundSecondary);
         // Draw bottom border line using a thin rectangle
-        var borderLineRect = new LayoutRect(rect.X, rect.Bottom - BottomBorderThickness, rect.Width, BottomBorderThickness);
+        var borderLineRect =
+            new LayoutRect(rect.X, rect.Bottom - BottomBorderThickness, rect.Width, BottomBorderThickness);
         renderer.DrawRectangle(borderLineRect, theme.BorderPrimary);
 
         // Calculate dropdown widths from content (once when tags/components change)
@@ -618,9 +667,9 @@ public class EntityFilterBar : UIComponent
 
         // Draw button background
         bool isHovered = rect.Contains(mousePos);
-        Color bgColor = _tagDropdownOpen ? theme.ButtonPressed : (isHovered ? theme.ButtonHover : theme.ButtonNormal);
+        Color bgColor = _tagDropdownOpen ? theme.ButtonPressed : isHovered ? theme.ButtonHover : theme.ButtonNormal;
         renderer.DrawRectangle(rect, bgColor);
-        renderer.DrawRectangleOutline(rect, theme.BorderPrimary, 1);
+        renderer.DrawRectangleOutline(rect, theme.BorderPrimary);
 
         // Draw label/value
         string displayText = string.IsNullOrEmpty(_selectedTag) ? "Tag..." : _selectedTag;
@@ -628,7 +677,8 @@ public class EntityFilterBar : UIComponent
 
         // Clip text if too long
         float availableWidth = rect.Width - DropdownTextRightPadding;
-        DrawClippedText(renderer, displayText, new Vector2(rect.X + DropdownTextLeftPadding, textY), theme.TextPrimary, availableWidth);
+        DrawClippedText(renderer, displayText, new Vector2(rect.X + DropdownTextLeftPadding, textY), theme.TextPrimary,
+            availableWidth);
 
         // Draw dropdown arrow
         string arrow = _tagDropdownOpen ? NerdFontIcons.CaretUp : NerdFontIcons.CaretDown;
@@ -646,9 +696,10 @@ public class EntityFilterBar : UIComponent
 
         // Draw button background
         bool isHovered = rect.Contains(mousePos);
-        Color bgColor = _componentDropdownOpen ? theme.ButtonPressed : (isHovered ? theme.ButtonHover : theme.ButtonNormal);
+        Color bgColor = _componentDropdownOpen ? theme.ButtonPressed :
+            isHovered ? theme.ButtonHover : theme.ButtonNormal;
         renderer.DrawRectangle(rect, bgColor);
-        renderer.DrawRectangleOutline(rect, theme.BorderPrimary, 1);
+        renderer.DrawRectangleOutline(rect, theme.BorderPrimary);
 
         // Draw label/value
         string displayText = string.IsNullOrEmpty(_selectedComponent) ? "Component..." : _selectedComponent;
@@ -656,7 +707,8 @@ public class EntityFilterBar : UIComponent
 
         // Clip text if too long
         float availableWidth = rect.Width - DropdownTextRightPadding;
-        DrawClippedText(renderer, displayText, new Vector2(rect.X + DropdownTextLeftPadding, textY), theme.TextPrimary, availableWidth);
+        DrawClippedText(renderer, displayText, new Vector2(rect.X + DropdownTextLeftPadding, textY), theme.TextPrimary,
+            availableWidth);
 
         // Draw dropdown arrow
         string arrow = _componentDropdownOpen ? NerdFontIcons.CaretUp : NerdFontIcons.CaretDown;
@@ -682,7 +734,7 @@ public class EntityFilterBar : UIComponent
         var listRect = new LayoutRect(buttonRect.X, buttonRect.Bottom + 2, buttonRect.Width, listHeight);
 
         renderer.DrawRectangle(listRect, theme.BackgroundElevated);
-        renderer.DrawRectangleOutline(listRect, theme.BorderFocus, 1);
+        renderer.DrawRectangleOutline(listRect, theme.BorderFocus);
 
         int maxScroll = Math.Max(0, allOptions.Count - visibleCount);
         _tagScrollOffset = Math.Clamp(_tagScrollOffset, 0, maxScroll);
@@ -695,17 +747,23 @@ public class EntityFilterBar : UIComponent
             string displayText = string.IsNullOrEmpty(option) ? "All" : option;
             bool isSelected = option == _selectedTag;
 
-            var itemRect = new LayoutRect(listRect.X + DropdownItemHorizontalMargin, itemY, listRect.Width - (DropdownItemHorizontalMargin * 2), DropdownItemHeight);
+            var itemRect = new LayoutRect(listRect.X + DropdownItemHorizontalMargin, itemY,
+                listRect.Width - (DropdownItemHorizontalMargin * 2), DropdownItemHeight);
             bool isItemHovered = itemRect.Contains(mousePos);
 
             if (isSelected)
+            {
                 renderer.DrawRectangle(itemRect, theme.Info);
+            }
             else if (isItemHovered)
+            {
                 renderer.DrawRectangle(itemRect, theme.ButtonHover);
+            }
 
             float textY = itemY + ((DropdownItemHeight - renderer.GetLineHeight()) / 2);
-            Color textColor = isSelected ? theme.TextPrimary : (isItemHovered ? theme.TextPrimary : theme.TextSecondary);
-            DrawClippedText(renderer, displayText, new Vector2(itemRect.X + DropdownTextLeftPadding, textY), textColor, itemRect.Width - (DropdownTextLeftPadding * 2));
+            Color textColor = isSelected ? theme.TextPrimary : isItemHovered ? theme.TextPrimary : theme.TextSecondary;
+            DrawClippedText(renderer, displayText, new Vector2(itemRect.X + DropdownTextLeftPadding, textY), textColor,
+                itemRect.Width - (DropdownTextLeftPadding * 2));
 
             // NOTE: Click handling moved to ProcessInput() -> HandleTagDropdownClick()
 
@@ -717,9 +775,16 @@ public class EntityFilterBar : UIComponent
         if (allOptions.Count > visibleCount)
         {
             if (_tagScrollOffset > 0)
-                renderer.DrawText(NerdFontIcons.CaretUp, listRect.Right - ScrollIndicatorRightOffset, listRect.Y + ScrollIndicatorVerticalOffset, theme.TextDim);
+            {
+                renderer.DrawText(NerdFontIcons.CaretUp, listRect.Right - ScrollIndicatorRightOffset,
+                    listRect.Y + ScrollIndicatorVerticalOffset, theme.TextDim);
+            }
+
             if (_tagScrollOffset < maxScroll)
-                renderer.DrawText(NerdFontIcons.CaretDown, listRect.Right - ScrollIndicatorRightOffset, listRect.Bottom - ScrollIndicatorRightOffset, theme.TextDim);
+            {
+                renderer.DrawText(NerdFontIcons.CaretDown, listRect.Right - ScrollIndicatorRightOffset,
+                    listRect.Bottom - ScrollIndicatorRightOffset, theme.TextDim);
+            }
         }
     }
 
@@ -738,7 +803,7 @@ public class EntityFilterBar : UIComponent
         var listRect = new LayoutRect(buttonRect.X, buttonRect.Bottom + 2, buttonRect.Width, listHeight);
 
         renderer.DrawRectangle(listRect, theme.BackgroundElevated);
-        renderer.DrawRectangleOutline(listRect, theme.BorderFocus, 1);
+        renderer.DrawRectangleOutline(listRect, theme.BorderFocus);
 
         int maxScroll = Math.Max(0, allOptions.Count - visibleCount);
         _componentScrollOffset = Math.Clamp(_componentScrollOffset, 0, maxScroll);
@@ -751,17 +816,23 @@ public class EntityFilterBar : UIComponent
             string displayText = string.IsNullOrEmpty(option) ? "All" : option;
             bool isSelected = option == _selectedComponent;
 
-            var itemRect = new LayoutRect(listRect.X + DropdownItemHorizontalMargin, itemY, listRect.Width - (DropdownItemHorizontalMargin * 2), DropdownItemHeight);
+            var itemRect = new LayoutRect(listRect.X + DropdownItemHorizontalMargin, itemY,
+                listRect.Width - (DropdownItemHorizontalMargin * 2), DropdownItemHeight);
             bool isItemHovered = itemRect.Contains(mousePos);
 
             if (isSelected)
+            {
                 renderer.DrawRectangle(itemRect, theme.Info);
+            }
             else if (isItemHovered)
+            {
                 renderer.DrawRectangle(itemRect, theme.ButtonHover);
+            }
 
             float textY = itemY + ((DropdownItemHeight - renderer.GetLineHeight()) / 2);
-            Color textColor = isSelected ? theme.TextPrimary : (isItemHovered ? theme.TextPrimary : theme.TextSecondary);
-            DrawClippedText(renderer, displayText, new Vector2(itemRect.X + DropdownTextLeftPadding, textY), textColor, itemRect.Width - (DropdownTextLeftPadding * 2));
+            Color textColor = isSelected ? theme.TextPrimary : isItemHovered ? theme.TextPrimary : theme.TextSecondary;
+            DrawClippedText(renderer, displayText, new Vector2(itemRect.X + DropdownTextLeftPadding, textY), textColor,
+                itemRect.Width - (DropdownTextLeftPadding * 2));
 
             // NOTE: Click handling moved to ProcessInput() -> HandleComponentDropdownClick()
 
@@ -773,9 +844,16 @@ public class EntityFilterBar : UIComponent
         if (allOptions.Count > visibleCount)
         {
             if (_componentScrollOffset > 0)
-                renderer.DrawText(NerdFontIcons.CaretUp, listRect.Right - ScrollIndicatorRightOffset, listRect.Y + ScrollIndicatorVerticalOffset, theme.TextDim);
+            {
+                renderer.DrawText(NerdFontIcons.CaretUp, listRect.Right - ScrollIndicatorRightOffset,
+                    listRect.Y + ScrollIndicatorVerticalOffset, theme.TextDim);
+            }
+
             if (_componentScrollOffset < maxScroll)
-                renderer.DrawText(NerdFontIcons.CaretDown, listRect.Right - ScrollIndicatorRightOffset, listRect.Bottom - ScrollIndicatorRightOffset, theme.TextDim);
+            {
+                renderer.DrawText(NerdFontIcons.CaretDown, listRect.Right - ScrollIndicatorRightOffset,
+                    listRect.Bottom - ScrollIndicatorRightOffset, theme.TextDim);
+            }
         }
     }
 
@@ -786,17 +864,17 @@ public class EntityFilterBar : UIComponent
 
         // Draw background
         bool isHovered = rect.Contains(mousePos);
-        Color bgColor = _searchFocused ? theme.HoverBackground : (isHovered ? theme.ButtonHover : theme.InputBackground);
-        Color borderColor = _searchFocused ? theme.BorderFocus : theme.BorderPrimary;
+        Color bgColor = IsSearchFocused ? theme.HoverBackground : isHovered ? theme.ButtonHover : theme.InputBackground;
+        Color borderColor = IsSearchFocused ? theme.BorderFocus : theme.BorderPrimary;
 
         renderer.DrawRectangle(rect, bgColor);
-        renderer.DrawRectangleOutline(rect, borderColor, _searchFocused ? 2 : 1);
+        renderer.DrawRectangleOutline(rect, borderColor, IsSearchFocused ? 2 : 1);
 
         // Draw text or placeholder
         float textY = rect.Y + ((rect.Height - renderer.GetLineHeight()) / 2);
         float textX = rect.X + DropdownTextLeftPadding;
 
-        if (string.IsNullOrEmpty(_searchText) && !_searchFocused)
+        if (string.IsNullOrEmpty(_searchText) && !IsSearchFocused)
         {
             renderer.DrawText("Search...", textX, textY, theme.TextDim);
         }
@@ -804,10 +882,11 @@ public class EntityFilterBar : UIComponent
         {
             // Draw search text
             string displayText = _searchText;
-            DrawClippedText(renderer, displayText, new Vector2(textX, textY), theme.TextPrimary, rect.Width - DropdownTextRightPadding);
+            DrawClippedText(renderer, displayText, new Vector2(textX, textY), theme.TextPrimary,
+                rect.Width - DropdownTextRightPadding);
 
             // Draw cursor if focused (use a thin rectangle instead of DrawLine)
-            if (_searchFocused && _cursorBlinkTimer < CursorBlinkVisibleDuration)
+            if (IsSearchFocused && _cursorBlinkTimer < CursorBlinkVisibleDuration)
             {
                 string textBeforeCursor = _searchText.Substring(0, Math.Min(_searchCursorPos, _searchText.Length));
                 float cursorX = textX + renderer.MeasureText(textBeforeCursor).X;
@@ -819,7 +898,8 @@ public class EntityFilterBar : UIComponent
         // Draw clear button if has text (visual only)
         if (!string.IsNullOrEmpty(_searchText))
         {
-            var clearRect = new LayoutRect(rect.Right - SearchClearButtonRightOffset, rect.Y + 4, SearchClearButtonWidth, rect.Height - 8);
+            var clearRect = new LayoutRect(rect.Right - SearchClearButtonRightOffset, rect.Y + 4,
+                SearchClearButtonWidth, rect.Height - 8);
             bool clearHovered = clearRect.Contains(mousePos);
             renderer.DrawText(NerdFontIcons.Close, clearRect.X, textY, clearHovered ? theme.Error : theme.TextDim);
         }
@@ -909,7 +989,7 @@ public class EntityFilterBar : UIComponent
         Color textColor = isHovered ? theme.Error : theme.TextSecondary;
 
         renderer.DrawRectangle(rect, bgColor);
-        renderer.DrawRectangleOutline(rect, theme.BorderPrimary, 1);
+        renderer.DrawRectangleOutline(rect, theme.BorderPrimary);
 
         // Center text horizontally and vertically
         string buttonText = $"{NerdFontIcons.Close} Clear";
@@ -923,25 +1003,41 @@ public class EntityFilterBar : UIComponent
 
     private bool IsOverTagDropdown(Point mousePos)
     {
-        if (_tagDropdownRect.Contains(mousePos)) return true;
-        if (!_tagDropdownOpen) return false;
+        if (_tagDropdownRect.Contains(mousePos))
+        {
+            return true;
+        }
+
+        if (!_tagDropdownOpen)
+        {
+            return false;
+        }
 
         // Check if over the dropdown list
         int visibleCount = Math.Min(MaxDropdownItems, _tags.Count + 1);
         float listHeight = (visibleCount * DropdownItemHeight) + 8;
-        var listRect = new LayoutRect(_tagDropdownRect.X, _tagDropdownRect.Bottom + 2, _tagDropdownRect.Width, listHeight);
+        var listRect = new LayoutRect(_tagDropdownRect.X, _tagDropdownRect.Bottom + 2, _tagDropdownRect.Width,
+            listHeight);
         return listRect.Contains(mousePos);
     }
 
     private bool IsOverComponentDropdown(Point mousePos)
     {
-        if (_componentDropdownRect.Contains(mousePos)) return true;
-        if (!_componentDropdownOpen) return false;
+        if (_componentDropdownRect.Contains(mousePos))
+        {
+            return true;
+        }
+
+        if (!_componentDropdownOpen)
+        {
+            return false;
+        }
 
         // Check if over the dropdown list
         int visibleCount = Math.Min(MaxDropdownItems, _components.Count + 1);
         float listHeight = (visibleCount * DropdownItemHeight) + 8;
-        var listRect = new LayoutRect(_componentDropdownRect.X, _componentDropdownRect.Bottom + 2, _componentDropdownRect.Width, listHeight);
+        var listRect = new LayoutRect(_componentDropdownRect.X, _componentDropdownRect.Bottom + 2,
+            _componentDropdownRect.Width, listHeight);
         return listRect.Contains(mousePos);
     }
 
@@ -956,21 +1052,27 @@ public class EntityFilterBar : UIComponent
 
         int visibleCount = Math.Min(MaxDropdownItems, allOptions.Count);
         float listHeight = (visibleCount * DropdownItemHeight) + 8;
-        var listRect = new LayoutRect(_tagDropdownRect.X, _tagDropdownRect.Bottom + 2, _tagDropdownRect.Width, listHeight);
+        var listRect = new LayoutRect(_tagDropdownRect.X, _tagDropdownRect.Bottom + 2, _tagDropdownRect.Width,
+            listHeight);
 
-        if (!listRect.Contains(mousePos)) return;
+        if (!listRect.Contains(mousePos))
+        {
+            return;
+        }
 
         // Calculate which item was clicked
         float itemY = listRect.Y + DropdownItemVerticalPadding;
         for (int i = _tagScrollOffset; i < Math.Min(_tagScrollOffset + visibleCount, allOptions.Count); i++)
         {
-            var itemRect = new LayoutRect(listRect.X + DropdownItemHorizontalMargin, itemY, listRect.Width - (DropdownItemHorizontalMargin * 2), DropdownItemHeight);
+            var itemRect = new LayoutRect(listRect.X + DropdownItemHorizontalMargin, itemY,
+                listRect.Width - (DropdownItemHorizontalMargin * 2), DropdownItemHeight);
             if (itemRect.Contains(mousePos))
             {
                 SelectedTag = allOptions[i];
                 _tagDropdownOpen = false;
                 return;
             }
+
             itemY += DropdownItemHeight;
         }
     }
@@ -986,28 +1088,37 @@ public class EntityFilterBar : UIComponent
 
         int visibleCount = Math.Min(MaxDropdownItems, allOptions.Count);
         float listHeight = (visibleCount * DropdownItemHeight) + 8;
-        var listRect = new LayoutRect(_componentDropdownRect.X, _componentDropdownRect.Bottom + 2, _componentDropdownRect.Width, listHeight);
+        var listRect = new LayoutRect(_componentDropdownRect.X, _componentDropdownRect.Bottom + 2,
+            _componentDropdownRect.Width, listHeight);
 
-        if (!listRect.Contains(mousePos)) return;
+        if (!listRect.Contains(mousePos))
+        {
+            return;
+        }
 
         // Calculate which item was clicked
         float itemY = listRect.Y + DropdownItemVerticalPadding;
         for (int i = _componentScrollOffset; i < Math.Min(_componentScrollOffset + visibleCount, allOptions.Count); i++)
         {
-            var itemRect = new LayoutRect(listRect.X + DropdownItemHorizontalMargin, itemY, listRect.Width - (DropdownItemHorizontalMargin * 2), DropdownItemHeight);
+            var itemRect = new LayoutRect(listRect.X + DropdownItemHorizontalMargin, itemY,
+                listRect.Width - (DropdownItemHorizontalMargin * 2), DropdownItemHeight);
             if (itemRect.Contains(mousePos))
             {
                 SelectedComponent = allOptions[i];
                 _componentDropdownOpen = false;
                 return;
             }
+
             itemY += DropdownItemHeight;
         }
     }
 
     private void DrawClippedText(UIRenderer renderer, string text, Vector2 position, Color color, float maxWidth)
     {
-        if (string.IsNullOrEmpty(text)) return;
+        if (string.IsNullOrEmpty(text))
+        {
+            return;
+        }
 
         Vector2 textSize = renderer.MeasureText(text);
         if (textSize.X <= maxWidth)
@@ -1042,7 +1153,10 @@ public class EntityFilterBar : UIComponent
 
     private int GetCharIndexAtX(UIRenderer renderer, string text, float x)
     {
-        if (string.IsNullOrEmpty(text) || x <= 0) return 0;
+        if (string.IsNullOrEmpty(text) || x <= 0)
+        {
+            return 0;
+        }
 
         for (int i = 0; i <= text.Length; i++)
         {
@@ -1053,8 +1167,12 @@ public class EntityFilterBar : UIComponent
                 if (i > 0)
                 {
                     float prevWidth = renderer.MeasureText(text.Substring(0, i - 1)).X;
-                    if (x - prevWidth < width - x) return i - 1;
+                    if (x - prevWidth < width - x)
+                    {
+                        return i - 1;
+                    }
                 }
+
                 return i;
             }
         }
@@ -1068,8 +1186,15 @@ public class EntityFilterBar : UIComponent
     /// </summary>
     public void RenderDropdownOverlays(UIContext context)
     {
-        if (!Visible) return;
-        if (!_tagDropdownOpen && !_componentDropdownOpen) return;
+        if (!Visible)
+        {
+            return;
+        }
+
+        if (!_tagDropdownOpen && !_componentDropdownOpen)
+        {
+            return;
+        }
 
         UIRenderer renderer = context.Renderer;
         UITheme theme = context.Theme;
@@ -1083,9 +1208,10 @@ public class EntityFilterBar : UIComponent
             }
             else
             {
-                var listRect = new LayoutRect(_tagDropdownRect.X, _tagDropdownRect.Bottom + 2, _tagDropdownRect.Width, DropdownItemHeight + 8);
+                var listRect = new LayoutRect(_tagDropdownRect.X, _tagDropdownRect.Bottom + 2, _tagDropdownRect.Width,
+                    DropdownItemHeight + 8);
                 renderer.DrawRectangle(listRect, theme.BackgroundElevated);
-                renderer.DrawRectangleOutline(listRect, theme.BorderPrimary, 1);
+                renderer.DrawRectangleOutline(listRect, theme.BorderPrimary);
                 renderer.DrawText("  No items", listRect.X + DropdownTextLeftPadding, listRect.Y + 4, theme.TextDim);
             }
         }
@@ -1099,9 +1225,10 @@ public class EntityFilterBar : UIComponent
             }
             else
             {
-                var listRect = new LayoutRect(_componentDropdownRect.X, _componentDropdownRect.Bottom + 2, _componentDropdownRect.Width, DropdownItemHeight + 8);
+                var listRect = new LayoutRect(_componentDropdownRect.X, _componentDropdownRect.Bottom + 2,
+                    _componentDropdownRect.Width, DropdownItemHeight + 8);
                 renderer.DrawRectangle(listRect, theme.BackgroundElevated);
-                renderer.DrawRectangleOutline(listRect, theme.BorderPrimary, 1);
+                renderer.DrawRectangleOutline(listRect, theme.BorderPrimary);
                 renderer.DrawText("  No items", listRect.X + DropdownTextLeftPadding, listRect.Y + 4, theme.TextDim);
             }
         }

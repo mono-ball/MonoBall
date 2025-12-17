@@ -13,5 +13,7 @@ public class GameSpriteIdNonNullableValueConverter : ValueConverter<GameSpriteId
         : base(
             v => v.Value,
             v => GameSpriteId.TryCreate(v) ?? new GameSpriteId(v)
-        ) { }
+        )
+    {
+    }
 }

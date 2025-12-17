@@ -6,7 +6,6 @@ namespace MonoBallFramework.Game.Engine.Audio.Services;
 /// <summary>
 ///     High-performance object pool for audio buffers to eliminate GC pressure.
 ///     Uses ArrayPool for small buffers and ObjectPool for large streaming buffers.
-///
 ///     Performance benefits:
 ///     - Eliminates per-frame allocations in hot audio paths
 ///     - Reduces GC pressure by ~95% in audio playback
@@ -56,7 +55,9 @@ public static class AudioBufferPool
     public static void ReturnSmall(float[] buffer, bool clearArray = false)
     {
         if (buffer == null)
+        {
             return;
+        }
 
         SmallBufferPool.Return(buffer, clearArray);
     }
@@ -69,9 +70,22 @@ public static class AudioBufferPool
     public static void ReturnLarge(float[] buffer)
     {
         if (buffer == null || buffer.Length != LargeBufferSize)
+        {
             return;
+        }
 
         LargeBufferPool.Return(buffer);
+    }
+
+    /// <summary>
+    ///     Gets pool statistics for monitoring and diagnostics.
+    /// </summary>
+    public static (int smallPoolSize, int largePoolSize) GetStatistics()
+    {
+        // ArrayPool doesn't expose size, so we can't report it
+        // ObjectPool also doesn't expose internals
+        // This is a placeholder for potential future monitoring
+        return (0, 0);
     }
 
     /// <summary>
@@ -88,23 +102,14 @@ public static class AudioBufferPool
         {
             // Only return to pool if it's the correct size
             if (obj == null || obj.Length != LargeBufferSize)
+            {
                 return false;
+            }
 
             // Clear the buffer for security/correctness
             // Note: Array.Clear is JIT-optimized and very fast
             Array.Clear(obj, 0, obj.Length);
             return true;
         }
-    }
-
-    /// <summary>
-    ///     Gets pool statistics for monitoring and diagnostics.
-    /// </summary>
-    public static (int smallPoolSize, int largePoolSize) GetStatistics()
-    {
-        // ArrayPool doesn't expose size, so we can't report it
-        // ObjectPool also doesn't expose internals
-        // This is a placeholder for potential future monitoring
-        return (0, 0);
     }
 }

@@ -45,5 +45,5 @@ public enum Anchor
     StretchRight,
 
     /// <summary>Stretch to fill entire parent</summary>
-    Fill,
+    Fill
 }

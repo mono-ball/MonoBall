@@ -113,12 +113,12 @@ public class SceneManager : IInputBlocker
 
         // Create new stack without the scenes to remove
         var tempStack = new Stack<IScene>();
-        
+
         // Pop all scenes into temp stack
         while (_sceneStack.Count > 0)
         {
             IScene scene = _sceneStack.Pop();
-            
+
             // Only keep if not in removal list
             if (!scenesToRemove.Contains(scene))
             {

@@ -11,7 +11,6 @@ using MonoBallFramework.Game.GameSystems.Movement;
 using MonoBallFramework.Game.Scripting.Api;
 using MonoBallFramework.Game.Scripting.Services;
 using MonoBallFramework.Game.Scripting.Systems;
-using MonoBallFramework.Game.Systems;
 
 namespace MonoBallFramework.Game.Initialization.Behaviors;
 
@@ -127,15 +126,13 @@ public class TileBehaviorInitializer(
             );
             return true;
         }
-        else
-        {
-            logger.LogError(
-                "✗ Failed to compile script for {TypeId}: {Script}",
-                typeId,
-                scriptPath
-            );
-            return false;
-        }
+
+        logger.LogError(
+            "✗ Failed to compile script for {TypeId}: {Script}",
+            typeId,
+            scriptPath
+        );
+        return false;
     }
 
     /// <summary>

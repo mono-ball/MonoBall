@@ -28,9 +28,8 @@ public class TabContainer : Panel
             BorderThickness = 1,
             Constraint = new LayoutConstraint
             {
-                Anchor = Anchor.StretchTop,
-                Height = 30, // Fixed height
-            },
+                Anchor = Anchor.StretchTop, Height = 30 // Fixed height
+            }
         };
 
         _tabBar.OnTabChanged = index =>
@@ -119,7 +118,7 @@ public class TabContainer : Panel
         {
             Anchor = Anchor.Fill,
             MarginTop = tabBarHeight, // Below tab bar (use margin so height is calculated correctly)
-            Padding = 0, // No padding - let content manage its own
+            Padding = 0 // No padding - let content manage its own
         };
 
         // Only the first tab (index 0) should be visible by default

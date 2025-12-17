@@ -43,7 +43,7 @@ public sealed class EventBasedDialogueSystem : IDialogueSystem
             Timestamp = _gameTime,
             Message = message,
             SpeakerName = speakerName,
-            Priority = priority,
+            Priority = priority
         };
 
         _eventBus.Publish(dialogueEvent);

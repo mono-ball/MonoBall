@@ -1,4 +1,7 @@
+using System.Collections;
+using System.ComponentModel.DataAnnotations;
 using System.Reflection;
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
@@ -26,19 +29,19 @@ public class EntityFrameworkPanel : DebugPanelBase
     private const int MaxItemsPerSet = 1000; // Show more items since we're listing everything
     private const int MaxListLines = 50000;
     private const int MaxDetailLines = 10000;
-
-    private readonly SplitPanel _splitPanel;
-    private readonly TextBuffer _listBuffer;
     private readonly TextBuffer _detailBuffer;
     private readonly EntityFilterBar _filterBar;
 
     private readonly Dictionary<int, string> _lineToEntity = new(); // Line number -> Entity path
+    private readonly TextBuffer _listBuffer;
+
+    private readonly SplitPanel _splitPanel;
     private IDbContextFactory<GameDataContext>? _contextFactory;
     private ICustomTypesApi? _customTypesApi;
     private string _dbSetFilter = "";
     private string _searchFilter = "";
-    private string? _selectedEntityPath;
     private object? _selectedEntity;
+    private string? _selectedEntityPath;
 
     /// <summary>
     ///     Creates an EntityFrameworkPanel with the specified components.
@@ -50,17 +53,9 @@ public class EntityFrameworkPanel : DebugPanelBase
         Id = "entityframework_panel";
 
         // Create text buffers for each pane
-        _listBuffer = new TextBuffer("ef_list_buffer")
-        {
-            AutoScroll = false,
-            MaxLines = MaxListLines,
-        };
+        _listBuffer = new TextBuffer("ef_list_buffer") { AutoScroll = false, MaxLines = MaxListLines };
 
-        _detailBuffer = new TextBuffer("ef_detail_buffer")
-        {
-            AutoScroll = false,
-            MaxLines = MaxDetailLines,
-        };
+        _detailBuffer = new TextBuffer("ef_detail_buffer") { AutoScroll = false, MaxLines = MaxDetailLines };
 
         // Create split panel with horizontal layout
         _splitPanel = new SplitPanel
@@ -71,7 +66,7 @@ public class EntityFrameworkPanel : DebugPanelBase
             MinFirstPaneSize = 150,
             MinSecondPaneSize = 200,
             SplitterSize = 4,
-            ShowSplitter = true,
+            ShowSplitter = true
         };
 
         // Add buffers to split panel
@@ -84,8 +79,7 @@ public class EntityFrameworkPanel : DebugPanelBase
         // Create filter bar
         _filterBar = new EntityFilterBar
         {
-            Id = "ef_filter_bar",
-            ShowComponentDropdown = false, // Hide component dropdown for EF panel
+            Id = "ef_filter_bar", ShowComponentDropdown = false // Hide component dropdown for EF panel
         };
         _filterBar.Constraint.Anchor = Anchor.StretchTop;
         _filterBar.Constraint.Height = _filterBar.PreferredHeight;
@@ -98,13 +92,6 @@ public class EntityFrameworkPanel : DebugPanelBase
         AddChild(_splitPanel);
     }
 
-    private void HandleFilterBarChanged(string tag, string component, string search)
-    {
-        _dbSetFilter = tag; // Use tag dropdown for DbSet filter
-        _searchFilter = search;
-        UpdateDisplay();
-    }
-
     /// <summary>
     ///     Gets or sets the split ratio (0-1, ratio for left pane).
     /// </summary>
@@ -112,6 +99,13 @@ public class EntityFrameworkPanel : DebugPanelBase
     {
         get => _splitPanel.SplitRatio;
         set => _splitPanel.SplitRatio = Math.Clamp(value, 0.2f, 0.8f);
+    }
+
+    private void HandleFilterBarChanged(string tag, string component, string search)
+    {
+        _dbSetFilter = tag; // Use tag dropdown for DbSet filter
+        _searchFilter = search;
+        UpdateDisplay();
     }
 
     /// <summary>
@@ -205,7 +199,8 @@ public class EntityFrameworkPanel : DebugPanelBase
             }
 
             // Get custom type categories
-            IReadOnlyCollection<string> customTypeCategories = _customTypesApi?.GetCategories() ?? Array.Empty<string>();
+            IReadOnlyCollection<string> customTypeCategories =
+                _customTypesApi?.GetCategories() ?? Array.Empty<string>();
             foreach (string category in customTypeCategories)
             {
                 // Prefix custom types with icon to distinguish from DbSets
@@ -228,7 +223,8 @@ public class EntityFrameworkPanel : DebugPanelBase
             _filterBar.SetComponents(new List<string>()); // No component filter for EF
 
             // Collect all entities from all sources into a flat list
-            var allEntities = new List<(string SourceName, int Index, object Entity, Type? EntityType, bool IsCustomType)>();
+            var allEntities =
+                new List<(string SourceName, int Index, object Entity, Type? EntityType, bool IsCustomType)>();
 
             // Collect from DbSets
             if (context != null)
@@ -238,10 +234,12 @@ public class EntityFrameworkPanel : DebugPanelBase
                     string dbSetName = prop.Name;
 
                     // Apply filter (check without prefix for DbSets)
-                    if (!string.IsNullOrEmpty(_dbSetFilter) && _dbSetFilter != dbSetName && !_dbSetFilter.StartsWith("⚡"))
+                    if (!string.IsNullOrEmpty(_dbSetFilter) && _dbSetFilter != dbSetName &&
+                        !_dbSetFilter.StartsWith("⚡"))
                     {
                         continue;
                     }
+
                     // Skip DbSets if filtering by custom type
                     if (!string.IsNullOrEmpty(_dbSetFilter) && _dbSetFilter.StartsWith("⚡"))
                     {
@@ -251,7 +249,10 @@ public class EntityFrameworkPanel : DebugPanelBase
                     try
                     {
                         object? dbSetValue = prop.GetValue(context);
-                        if (dbSetValue == null) continue;
+                        if (dbSetValue == null)
+                        {
+                            continue;
+                        }
 
                         Type? entityType = GetEntityType(prop.PropertyType);
                         IEnumerable<object>? items = null;
@@ -307,6 +308,7 @@ public class EntityFrameworkPanel : DebugPanelBase
                         {
                             continue;
                         }
+
                         // If filtering for a specific custom type category, skip non-matching custom types
                         if (_dbSetFilter.StartsWith("⚡") && prefixedCategory.StartsWith("⚡"))
                         {
@@ -345,7 +347,7 @@ public class EntityFrameworkPanel : DebugPanelBase
             }
 
             // Display all entities in a flat list
-            foreach (var (sourceName, index, entity, entityType, isCustomType) in allEntities)
+            foreach ((string sourceName, int index, object entity, Type? entityType, bool isCustomType) in allEntities)
             {
                 string entityPath = $"{sourceName}[{index}]";
                 bool entitySelected = _selectedEntityPath == entityPath;
@@ -364,7 +366,8 @@ public class EntityFrameworkPanel : DebugPanelBase
 
                 // Display entity (track line number before appending)
                 int entityLine = _listBuffer.TotalLines;
-                string entitySelectionIcon = entitySelected ? NerdFontIcons.SelectedWithSpace : NerdFontIcons.UnselectedSpace;
+                string entitySelectionIcon =
+                    entitySelected ? NerdFontIcons.SelectedWithSpace : NerdFontIcons.UnselectedSpace;
 
                 string entityKey;
                 string typeName;
@@ -513,8 +516,8 @@ public class EntityFrameworkPanel : DebugPanelBase
                 {
                     rawDataProp = prop;
                 }
-                else if (prop.GetCustomAttribute<System.ComponentModel.DataAnnotations.KeyAttribute>() != null ||
-                    prop.Name.EndsWith("Id", StringComparison.OrdinalIgnoreCase))
+                else if (prop.GetCustomAttribute<KeyAttribute>() != null ||
+                         prop.Name.EndsWith("Id", StringComparison.OrdinalIgnoreCase))
                 {
                     keyProps.Add(prop);
                 }
@@ -539,6 +542,7 @@ public class EntityFrameworkPanel : DebugPanelBase
                 {
                     FormatPropertyToBuffer(prop, "  ", new Color(80, 200, 220)); // Cyan for keys
                 }
+
                 _detailBuffer.AppendLine("", ThemeManager.Current.TextDim);
             }
 
@@ -629,7 +633,7 @@ public class EntityFrameworkPanel : DebugPanelBase
             }
 
             // Get collection as enumerable
-            if (value is not System.Collections.IEnumerable enumerable)
+            if (value is not IEnumerable enumerable)
             {
                 _detailBuffer.AppendLine(
                     $"{indent}{prop.Name}: [not enumerable]",
@@ -721,7 +725,8 @@ public class EntityFrameworkPanel : DebugPanelBase
             // Parse JSON to display individual properties
             try
             {
-                var extensionData = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, System.Text.Json.JsonElement>>(jsonString);
+                Dictionary<string, JsonElement>? extensionData =
+                    JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(jsonString);
                 if (extensionData == null || extensionData.Count == 0)
                 {
                     return;
@@ -734,7 +739,7 @@ public class EntityFrameworkPanel : DebugPanelBase
                 );
 
                 string itemIndent = indent + "    ";
-                foreach (var kvp in extensionData.OrderBy(k => k.Key))
+                foreach (KeyValuePair<string, JsonElement> kvp in extensionData.OrderBy(k => k.Key))
                 {
                     string valueStr = FormatJsonElement(kvp.Value);
                     _detailBuffer.AppendLine(
@@ -743,7 +748,7 @@ public class EntityFrameworkPanel : DebugPanelBase
                     );
                 }
             }
-            catch (System.Text.Json.JsonException)
+            catch (JsonException)
             {
                 // If JSON parsing fails, show raw string
                 _detailBuffer.AppendLine("", ThemeManager.Current.TextDim);
@@ -780,16 +785,16 @@ public class EntityFrameworkPanel : DebugPanelBase
             }
 
             // Handle JsonElement type (from ICustomTypeDefinition.RawData)
-            if (value is System.Text.Json.JsonElement jsonElement)
+            if (value is JsonElement jsonElement)
             {
-                if (jsonElement.ValueKind != System.Text.Json.JsonValueKind.Object)
+                if (jsonElement.ValueKind != JsonValueKind.Object)
                 {
                     return; // Only display object types
                 }
 
                 // Count properties
                 int propCount = 0;
-                foreach (var _ in jsonElement.EnumerateObject())
+                foreach (JsonProperty _ in jsonElement.EnumerateObject())
                 {
                     propCount++;
                 }
@@ -806,7 +811,7 @@ public class EntityFrameworkPanel : DebugPanelBase
                 );
 
                 string itemIndent = indent + "    ";
-                foreach (System.Text.Json.JsonProperty jsonProp in jsonElement.EnumerateObject().OrderBy(p => p.Name))
+                foreach (JsonProperty jsonProp in jsonElement.EnumerateObject().OrderBy(p => p.Name))
                 {
                     string valueStr = FormatJsonElement(jsonProp.Value);
                     _detailBuffer.AppendLine(
@@ -815,11 +820,11 @@ public class EntityFrameworkPanel : DebugPanelBase
                     );
 
                     // For nested objects/arrays, show expanded content
-                    if (jsonProp.Value.ValueKind == System.Text.Json.JsonValueKind.Object)
+                    if (jsonProp.Value.ValueKind == JsonValueKind.Object)
                     {
                         FormatNestedJsonObject(jsonProp.Value, itemIndent + "    ");
                     }
-                    else if (jsonProp.Value.ValueKind == System.Text.Json.JsonValueKind.Array)
+                    else if (jsonProp.Value.ValueKind == JsonValueKind.Array)
                     {
                         FormatNestedJsonArray(jsonProp.Value, itemIndent + "    ");
                     }
@@ -835,7 +840,7 @@ public class EntityFrameworkPanel : DebugPanelBase
                 );
 
                 string itemIndent = indent + "    ";
-                foreach (var kvp in rawData.OrderBy(k => k.Key))
+                foreach (KeyValuePair<string, object?> kvp in rawData.OrderBy(k => k.Key))
                 {
                     string valueStr = FormatRawDataValue(kvp.Value);
                     _detailBuffer.AppendLine(
@@ -857,14 +862,14 @@ public class EntityFrameworkPanel : DebugPanelBase
     /// <summary>
     ///     Formats nested JSON object properties with indentation.
     /// </summary>
-    private void FormatNestedJsonObject(System.Text.Json.JsonElement element, string indent, int depth = 0)
+    private void FormatNestedJsonObject(JsonElement element, string indent, int depth = 0)
     {
         if (depth > 3) // Limit recursion depth
         {
             return;
         }
 
-        foreach (System.Text.Json.JsonProperty prop in element.EnumerateObject().OrderBy(p => p.Name).Take(10))
+        foreach (JsonProperty prop in element.EnumerateObject().OrderBy(p => p.Name).Take(10))
         {
             string valueStr = FormatJsonElement(prop.Value);
             _detailBuffer.AppendLine(
@@ -872,11 +877,11 @@ public class EntityFrameworkPanel : DebugPanelBase
                 new Color(160, 120, 180) // Even lighter magenta for nested
             );
 
-            if (prop.Value.ValueKind == System.Text.Json.JsonValueKind.Object)
+            if (prop.Value.ValueKind == JsonValueKind.Object)
             {
                 FormatNestedJsonObject(prop.Value, indent + "    ", depth + 1);
             }
-            else if (prop.Value.ValueKind == System.Text.Json.JsonValueKind.Array)
+            else if (prop.Value.ValueKind == JsonValueKind.Array)
             {
                 FormatNestedJsonArray(prop.Value, indent + "    ", depth + 1);
             }
@@ -886,7 +891,7 @@ public class EntityFrameworkPanel : DebugPanelBase
     /// <summary>
     ///     Formats nested JSON array elements with indentation.
     /// </summary>
-    private void FormatNestedJsonArray(System.Text.Json.JsonElement element, string indent, int depth = 0)
+    private void FormatNestedJsonArray(JsonElement element, string indent, int depth = 0)
     {
         if (depth > 3) // Limit recursion depth
         {
@@ -894,7 +899,7 @@ public class EntityFrameworkPanel : DebugPanelBase
         }
 
         int index = 0;
-        foreach (System.Text.Json.JsonElement item in element.EnumerateArray().Take(5))
+        foreach (JsonElement item in element.EnumerateArray().Take(5))
         {
             string valueStr = FormatJsonElement(item);
             _detailBuffer.AppendLine(
@@ -902,10 +907,11 @@ public class EntityFrameworkPanel : DebugPanelBase
                 new Color(160, 120, 180) // Even lighter magenta for nested
             );
 
-            if (item.ValueKind == System.Text.Json.JsonValueKind.Object)
+            if (item.ValueKind == JsonValueKind.Object)
             {
                 FormatNestedJsonObject(item, indent + "    ", depth + 1);
             }
+
             index++;
         }
 
@@ -933,9 +939,9 @@ public class EntityFrameworkPanel : DebugPanelBase
         {
             string s => $"\"{s}\"",
             bool b => b ? "true" : "false",
-            System.Text.Json.JsonElement element => FormatJsonElement(element),
-            System.Collections.IList list => $"[array: {list.Count} items]",
-            System.Collections.IDictionary dict => $"[object: {dict.Count} properties]",
+            JsonElement element => FormatJsonElement(element),
+            IList list => $"[array: {list.Count} items]",
+            IDictionary dict => $"[object: {dict.Count} properties]",
             _ => value.ToString() ?? "[null]"
         };
     }
@@ -943,17 +949,17 @@ public class EntityFrameworkPanel : DebugPanelBase
     /// <summary>
     ///     Formats a JsonElement for display.
     /// </summary>
-    private string FormatJsonElement(System.Text.Json.JsonElement element)
+    private string FormatJsonElement(JsonElement element)
     {
         return element.ValueKind switch
         {
-            System.Text.Json.JsonValueKind.String => $"\"{element.GetString()}\"",
-            System.Text.Json.JsonValueKind.Number => element.ToString(),
-            System.Text.Json.JsonValueKind.True => "true",
-            System.Text.Json.JsonValueKind.False => "false",
-            System.Text.Json.JsonValueKind.Null => "[null]",
-            System.Text.Json.JsonValueKind.Array => $"[array: {element.GetArrayLength()} items]",
-            System.Text.Json.JsonValueKind.Object => "[object]",
+            JsonValueKind.String => $"\"{element.GetString()}\"",
+            JsonValueKind.Number => element.ToString(),
+            JsonValueKind.True => "true",
+            JsonValueKind.False => "false",
+            JsonValueKind.Null => "[null]",
+            JsonValueKind.Array => $"[array: {element.GetArrayLength()} items]",
+            JsonValueKind.Object => "[object]",
             _ => element.ToString()
         };
     }
@@ -991,6 +997,7 @@ public class EntityFrameworkPanel : DebugPanelBase
                         int substringLength = Math.Min(27, valueStr.Length);
                         valueStr = valueStr.Substring(0, substringLength) + "...";
                     }
+
                     parts.Add($"{prop.Name}={valueStr}");
                 }
             }
@@ -1046,7 +1053,7 @@ public class EntityFrameworkPanel : DebugPanelBase
 
         // First, look for a property with [Key] attribute
         PropertyInfo? keyProp = properties.FirstOrDefault(p =>
-            p.GetCustomAttribute<System.ComponentModel.DataAnnotations.KeyAttribute>() != null);
+            p.GetCustomAttribute<KeyAttribute>() != null);
 
         // If no [Key] attribute, look for common ID patterns
         if (keyProp == null)
@@ -1094,6 +1101,7 @@ public class EntityFrameworkPanel : DebugPanelBase
                         int substringLength = Math.Min(57, result.Length);
                         return result.Substring(0, substringLength) + "...";
                     }
+
                     return result;
                 }
             }
@@ -1105,6 +1113,7 @@ public class EntityFrameworkPanel : DebugPanelBase
                 int substringLength = Math.Min(57, str.Length);
                 return str.Substring(0, substringLength) + "...";
             }
+
             return str;
         }
         catch
@@ -1123,14 +1132,17 @@ public class EntityFrameworkPanel : DebugPanelBase
         {
             return typeName.Substring(0, typeName.Length - 6);
         }
+
         if (typeName.EndsWith("Model") && typeName.Length > 5)
         {
             return typeName.Substring(0, typeName.Length - 5);
         }
+
         if (typeName.EndsWith("Data") && typeName.Length > 4)
         {
             return typeName.Substring(0, typeName.Length - 4);
         }
+
         return typeName;
     }
 
@@ -1147,7 +1159,7 @@ public class EntityFrameworkPanel : DebugPanelBase
                 || type.GetGenericTypeDefinition() == typeof(IList<>)
                 || type.GetGenericTypeDefinition() == typeof(List<>)
             ))
-            || typeof(System.Collections.IEnumerable).IsAssignableFrom(type)
+            || typeof(IEnumerable).IsAssignableFrom(type)
         );
     }
 
@@ -1157,14 +1169,14 @@ public class EntityFrameworkPanel : DebugPanelBase
     private bool IsSimpleType(Type type)
     {
         return type.IsPrimitive
-            || type == typeof(string)
-            || type == typeof(decimal)
-            || type == typeof(DateTime)
-            || type == typeof(DateTimeOffset)
-            || type == typeof(TimeSpan)
-            || type == typeof(Guid)
-            || type.IsEnum
-            || Nullable.GetUnderlyingType(type) != null && IsSimpleType(Nullable.GetUnderlyingType(type)!);
+               || type == typeof(string)
+               || type == typeof(decimal)
+               || type == typeof(DateTime)
+               || type == typeof(DateTimeOffset)
+               || type == typeof(TimeSpan)
+               || type == typeof(Guid)
+               || type.IsEnum
+               || (Nullable.GetUnderlyingType(type) != null && IsSimpleType(Nullable.GetUnderlyingType(type)!));
     }
 
     /// <summary>
@@ -1172,15 +1184,21 @@ public class EntityFrameworkPanel : DebugPanelBase
     /// </summary>
     private bool IsDefaultValue(object value, Type type)
     {
-        if (value == null) return true;
+        if (value == null)
+        {
+            return true;
+        }
+
         if (type.IsValueType)
         {
             return value.Equals(Activator.CreateInstance(type));
         }
+
         if (type == typeof(string))
         {
             return string.IsNullOrWhiteSpace((string)value);
         }
+
         return false;
     }
 
@@ -1218,11 +1236,13 @@ public class EntityFrameworkPanel : DebugPanelBase
                 int substringLength = Math.Min(47, str.Length);
                 return $"\"{str.Substring(0, substringLength)}...\"";
             }
+
             return $"\"{str}\"";
         }
 
         // Primitives and common value types
-        if (type.IsPrimitive || type == typeof(decimal) || type == typeof(DateTime) || type == typeof(DateTimeOffset) || type == typeof(TimeSpan) || type == typeof(Guid))
+        if (type.IsPrimitive || type == typeof(decimal) || type == typeof(DateTime) || type == typeof(DateTimeOffset) ||
+            type == typeof(TimeSpan) || type == typeof(Guid))
         {
             return value.ToString() ?? "[null]";
         }
@@ -1264,7 +1284,8 @@ public class EntityFrameworkPanel : DebugPanelBase
         if (!string.IsNullOrEmpty(toStringResult))
         {
             // If ToString() just returns the type name, it's not helpful
-            if (toStringResult != type.FullName && toStringResult != type.Name && !toStringResult.StartsWith(type.Namespace ?? ""))
+            if (toStringResult != type.FullName && toStringResult != type.Name &&
+                !toStringResult.StartsWith(type.Namespace ?? ""))
             {
                 // ToString() is meaningful, use it
                 if (toStringResult.Length > 100)
@@ -1273,6 +1294,7 @@ public class EntityFrameworkPanel : DebugPanelBase
                     int substringLength = Math.Min(97, toStringResult.Length);
                     return toStringResult.Substring(0, substringLength) + "...";
                 }
+
                 return toStringResult;
             }
         }
@@ -1346,7 +1368,7 @@ public class EntityFrameworkPanel : DebugPanelBase
         }
 
         var parts = new List<string>();
-        foreach (var prop in keyProps)
+        foreach (PropertyInfo prop in keyProps)
         {
             try
             {
@@ -1360,6 +1382,7 @@ public class EntityFrameworkPanel : DebugPanelBase
                         int substringLength = Math.Min(17, valueStr.Length);
                         valueStr = valueStr.Substring(0, substringLength) + "...";
                     }
+
                     parts.Add($"{prop.Name}={valueStr}");
                 }
             }
@@ -1469,7 +1492,7 @@ public class EntityFrameworkPanel : DebugPanelBase
         }
 
         // Get sorted line numbers
-        List<int> lines = _lineToEntity.Keys.OrderBy(l => l).ToList();
+        var lines = _lineToEntity.Keys.OrderBy(l => l).ToList();
 
         // Find current selection index
         int currentIndex = -1;
@@ -1661,9 +1684,9 @@ public class EntityFrameworkPanel : DebugPanelBase
         float scrollbarEndY = contentBounds.Y + contentBounds.Height - _listBuffer.LinePadding;
 
         return mousePos.X >= scrollbarStartX
-            && mousePos.X <= scrollbarEndX
-            && mousePos.Y >= scrollbarStartY
-            && mousePos.Y <= scrollbarEndY;
+               && mousePos.X <= scrollbarEndX
+               && mousePos.Y >= scrollbarStartY
+               && mousePos.Y <= scrollbarEndY;
     }
 
     /// <summary>
@@ -1704,6 +1727,7 @@ public class EntityFrameworkPanel : DebugPanelBase
             {
                 return; // Invalid format
             }
+
             string category = sourceName.Substring(1);
             try
             {
@@ -1774,8 +1798,9 @@ public class EntityFrameworkPanel : DebugPanelBase
 
         float splitPanelX = Rect.X + paddingLeft;
         float splitPanelY = Rect.Y + paddingTop + filterBarHeight; // Below filter bar
-        float splitPanelWidth = _splitPanel.Constraint.Width ?? (Rect.Width - paddingLeft - paddingRight);
-        float splitPanelHeight = _splitPanel.Constraint.Height ?? (Rect.Height - paddingTop - paddingBottom - filterBarHeight - statusBarHeight);
+        float splitPanelWidth = _splitPanel.Constraint.Width ?? Rect.Width - paddingLeft - paddingRight;
+        float splitPanelHeight = _splitPanel.Constraint.Height ??
+                                 Rect.Height - paddingTop - paddingBottom - filterBarHeight - statusBarHeight;
 
         // Calculate first pane (left) width based on split ratio
         // Account for splitter size AND inner padding on both sides of splitter
@@ -1858,7 +1883,7 @@ public class EntityFrameworkPanel : DebugPanelBase
 
             if (_selectedEntityPath != null)
             {
-                stats += $" | Selected: Entity";
+                stats += " | Selected: Entity";
             }
 
             if (!string.IsNullOrEmpty(_dbSetFilter))
@@ -1925,27 +1950,39 @@ public class EntityFrameworkPanel : DebugPanelBase
 
         if (h < 60)
         {
-            r = c; g = x; b = 0;
+            r = c;
+            g = x;
+            b = 0;
         }
         else if (h < 120)
         {
-            r = x; g = c; b = 0;
+            r = x;
+            g = c;
+            b = 0;
         }
         else if (h < 180)
         {
-            r = 0; g = c; b = x;
+            r = 0;
+            g = c;
+            b = x;
         }
         else if (h < 240)
         {
-            r = 0; g = x; b = c;
+            r = 0;
+            g = x;
+            b = c;
         }
         else if (h < 300)
         {
-            r = x; g = 0; b = c;
+            r = x;
+            g = 0;
+            b = c;
         }
         else
         {
-            r = c; g = 0; b = x;
+            r = c;
+            g = 0;
+            b = x;
         }
 
         return new Color(

@@ -1,36 +1,48 @@
 namespace MonoBallFramework.Game.Engine.Audio.Core;
 
 /// <summary>
-/// Controls audio ducking - temporarily lowering volume of one audio source
-/// while another plays (e.g., duck music when Pokemon cry plays).
-/// Thread-safe.
+///     Controls audio ducking - temporarily lowering volume of one audio source
+///     while another plays (e.g., duck music when Pokemon cry plays).
+///     Thread-safe.
 /// </summary>
 public class DuckingController
 {
     private readonly object _lock = new();
 
-    private float _normalVolume = 1.0f;
-    private float _duckVolume;
-    private float _duckDuration;
+    private readonly float _normalVolume = 1.0f;
     private float _currentVolume = 1.0f;
+    private float _duckDuration;
+    private float _duckVolume;
+    private float _fadeTimer;
+    private float _holdDuration;
+    private float _holdTimer;
 
     private DuckState _state = DuckState.Normal;
-    private float _fadeTimer;
-    private float _holdTimer;
-    private float _holdDuration;
 
     public float CurrentVolume
     {
-        get { lock (_lock) return _currentVolume; }
+        get
+        {
+            lock (_lock)
+            {
+                return _currentVolume;
+            }
+        }
     }
 
     public bool IsDucking
     {
-        get { lock (_lock) return _state != DuckState.Normal; }
+        get
+        {
+            lock (_lock)
+            {
+                return _state != DuckState.Normal;
+            }
+        }
     }
 
     /// <summary>
-    /// Start ducking with specified parameters.
+    ///     Start ducking with specified parameters.
     /// </summary>
     /// <param name="duckVolume">Target ducked volume (e.g., 0.33f)</param>
     /// <param name="fadeDuration">Time to fade to duck volume</param>
@@ -48,13 +60,17 @@ public class DuckingController
     }
 
     /// <summary>
-    /// Release the duck and fade back to normal volume.
+    ///     Release the duck and fade back to normal volume.
     /// </summary>
     public void Release(float fadeDuration)
     {
         lock (_lock)
         {
-            if (_state == DuckState.Normal) return;
+            if (_state == DuckState.Normal)
+            {
+                return;
+            }
+
             _duckDuration = fadeDuration;
             _state = DuckState.FadingUp;
             _fadeTimer = 0f;
@@ -62,7 +78,7 @@ public class DuckingController
     }
 
     /// <summary>
-    /// Update the ducking state. Call every frame.
+    ///     Update the ducking state. Call every frame.
     /// </summary>
     public void Update(float deltaTime)
     {
@@ -80,6 +96,7 @@ public class DuckingController
                         _state = _holdDuration > 0 ? DuckState.Holding : DuckState.Ducked;
                         _holdTimer = 0f;
                     }
+
                     break;
 
                 case DuckState.Holding:
@@ -89,6 +106,7 @@ public class DuckingController
                         _state = DuckState.FadingUp;
                         _fadeTimer = 0f;
                     }
+
                     break;
 
                 case DuckState.FadingUp:
@@ -100,6 +118,7 @@ public class DuckingController
                         _currentVolume = _normalVolume;
                         _state = DuckState.Normal;
                     }
+
                     break;
 
                 case DuckState.Ducked:
@@ -109,7 +128,10 @@ public class DuckingController
         }
     }
 
-    private static float Lerp(float a, float b, float t) => a + (b - a) * t;
+    private static float Lerp(float a, float b, float t)
+    {
+        return a + ((b - a) * t);
+    }
 
     private enum DuckState { Normal, FadingDown, Holding, Ducked, FadingUp }
 }

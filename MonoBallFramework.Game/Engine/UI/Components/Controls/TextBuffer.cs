@@ -65,6 +65,14 @@ public class TextBuffer : UIComponent, ITextDisplay
 
     // Text selection tracking
     private bool _isSelectingText;
+
+    /// <summary>
+    ///     When true, the buffer is in virtual mode where content is re-rendered for each scroll position.
+    ///     In this mode, hover/cursor calculations use buffer-local indices (0 to TotalLines)
+    ///     instead of virtual positions (ScrollOffset + lineIndex).
+    /// </summary>
+    private bool _isVirtualMode;
+
     private int _lastClickLine = -1;
 
     // Click tracking for double/triple click
@@ -86,13 +94,6 @@ public class TextBuffer : UIComponent, ITextDisplay
 
     // Virtual scrolling support (for virtualized lists with millions of items)
     private int _virtualTotalLines = -1; // -1 means use actual line count
-
-    /// <summary>
-    /// When true, the buffer is in virtual mode where content is re-rendered for each scroll position.
-    /// In this mode, hover/cursor calculations use buffer-local indices (0 to TotalLines)
-    /// instead of virtual positions (ScrollOffset + lineIndex).
-    /// </summary>
-    private bool _isVirtualMode;
 
     public TextBuffer(string id)
     {
@@ -270,17 +271,6 @@ public class TextBuffer : UIComponent, ITextDisplay
     }
 
     /// <summary>
-    ///     Clears all lines from the buffer while preserving scroll position.
-    /// </summary>
-    public void ClearPreservingScroll()
-    {
-        _lines.Clear();
-        _filteredLines.Clear();
-        _isDirty = true;
-        ClearSelection();
-    }
-
-    /// <summary>
     ///     Scrolls to the bottom of the buffer.
     ///     Safe to call even when not in render context (will defer to next render).
     /// </summary>
@@ -307,6 +297,17 @@ public class TextBuffer : UIComponent, ITextDisplay
     public void ScrollToTop()
     {
         ScrollOffset = 0;
+    }
+
+    /// <summary>
+    ///     Clears all lines from the buffer while preserving scroll position.
+    /// </summary>
+    public void ClearPreservingScroll()
+    {
+        _lines.Clear();
+        _filteredLines.Clear();
+        _isDirty = true;
+        ClearSelection();
     }
 
     /// <summary>
@@ -1241,7 +1242,7 @@ public class TextBuffer : UIComponent, ITextDisplay
         // In virtual mode, the buffer only contains visible lines (re-rendered each scroll).
         // Use buffer-local indices (0 to TotalLines) instead of virtual positions.
         // In normal mode, add ScrollOffset to get the actual line in the full buffer.
-        int actualLine = _isVirtualMode ? lineIndex : (ScrollOffset + lineIndex);
+        int actualLine = _isVirtualMode ? lineIndex : ScrollOffset + lineIndex;
 
         List<TextBufferLine> lines = GetFilteredLines();
         return actualLine >= 0 && actualLine < lines.Count ? actualLine : -1;

@@ -12,7 +12,9 @@ public class GamePopupBackgroundIdValueConverter : ValueConverter<GamePopupBackg
         : base(
             v => v.Value,
             v => ConvertFromString(v)
-        ) { }
+        )
+    {
+    }
 
     private static GamePopupBackgroundId ConvertFromString(string value)
     {
@@ -29,7 +31,9 @@ public class NullableGamePopupBackgroundIdValueConverter : ValueConverter<GamePo
         : base(
             v => v != null ? v.Value : null,
             v => ConvertFromString(v)
-        ) { }
+        )
+    {
+    }
 
     private static GamePopupBackgroundId? ConvertFromString(string? value)
     {

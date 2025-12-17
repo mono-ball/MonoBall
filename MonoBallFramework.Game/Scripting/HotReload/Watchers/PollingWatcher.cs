@@ -162,9 +162,7 @@ public class PollingWatcher : IScriptWatcher
                     this,
                     new ScriptWatcherErrorEventArgs
                     {
-                        Exception = ex,
-                        Message = "Error during polling",
-                        IsCritical = false,
+                        Exception = ex, Message = "Error during polling", IsCritical = false
                     }
                 );
             }
@@ -247,10 +245,7 @@ public class PollingWatcher : IScriptWatcher
             this,
             new ScriptChangedEventArgs
             {
-                FilePath = filePath,
-                ChangeTime = DateTime.UtcNow,
-                FileSize = fileSize,
-                ChangeType = changeType,
+                FilePath = filePath, ChangeTime = DateTime.UtcNow, FileSize = fileSize, ChangeType = changeType
             }
         );
 

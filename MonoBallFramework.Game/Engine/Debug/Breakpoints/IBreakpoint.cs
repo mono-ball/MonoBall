@@ -59,7 +59,7 @@ public enum BreakpointType
     WatchAlert,
 
     /// <summary>Breakpoint triggered on a specific log level.</summary>
-    LogLevel,
+    LogLevel
 
     // Future breakpoint types (not yet implemented):
     // EntitySpawn - Trigger when an entity with specific tag spawns

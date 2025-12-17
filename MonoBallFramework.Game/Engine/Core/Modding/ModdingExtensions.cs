@@ -1,5 +1,7 @@
+using Arch.Core;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using MonoBallFramework.Game.Engine.Core.Events;
 using MonoBallFramework.Game.Engine.Core.Modding.CustomTypes;
 using MonoBallFramework.Game.Scripting.Api;
 using MonoBallFramework.Game.Scripting.Services;
@@ -37,9 +39,9 @@ public static class ModdingExtensions
         {
             ILogger<ModLoader> logger = sp.GetRequiredService<ILogger<ModLoader>>();
             ScriptService scriptService = sp.GetRequiredService<ScriptService>();
-            Arch.Core.World world = sp.GetRequiredService<Arch.Core.World>();
-            Engine.Core.Events.IEventBus eventBus = sp.GetRequiredService<Engine.Core.Events.IEventBus>();
-            Scripting.Api.IScriptingApiProvider apis = sp.GetRequiredService<Scripting.Api.IScriptingApiProvider>();
+            World world = sp.GetRequiredService<World>();
+            IEventBus eventBus = sp.GetRequiredService<IEventBus>();
+            IScriptingApiProvider apis = sp.GetRequiredService<IScriptingApiProvider>();
             PatchApplicator patchApplicator = sp.GetRequiredService<PatchApplicator>();
             PatchFileLoader patchFileLoader = sp.GetRequiredService<PatchFileLoader>();
             CustomTypesApiService customTypesService = sp.GetRequiredService<CustomTypesApiService>();

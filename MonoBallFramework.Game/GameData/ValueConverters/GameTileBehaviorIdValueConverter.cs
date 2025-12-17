@@ -12,7 +12,9 @@ public class GameTileBehaviorIdValueConverter : ValueConverter<GameTileBehaviorI
         : base(
             v => v.Value,
             v => ConvertFromString(v)
-        ) { }
+        )
+    {
+    }
 
     private static GameTileBehaviorId ConvertFromString(string value)
     {
@@ -29,7 +31,9 @@ public class NullableGameTileBehaviorIdValueConverter : ValueConverter<GameTileB
         : base(
             v => v != null ? v.Value : null,
             v => ConvertFromString(v)
-        ) { }
+        )
+    {
+    }
 
     private static GameTileBehaviorId? ConvertFromString(string? value)
     {

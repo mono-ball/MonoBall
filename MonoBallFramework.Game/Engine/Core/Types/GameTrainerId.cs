@@ -4,7 +4,6 @@ namespace MonoBallFramework.Game.Engine.Core.Types;
 
 /// <summary>
 ///     Strongly-typed identifier for trainer definitions.
-///
 ///     Format: base:trainer:{class}/{name}
 ///     Examples:
 ///     - base:trainer:youngster/joey
@@ -24,9 +23,11 @@ public sealed record GameTrainerId : EntityId
     public GameTrainerId(string value) : base(value)
     {
         if (EntityType != TypeName)
+        {
             throw new ArgumentException(
                 $"Expected entity type '{TypeName}', got '{EntityType}'",
                 nameof(value));
+        }
     }
 
     /// <summary>
@@ -89,11 +90,15 @@ public sealed record GameTrainerId : EntityId
     public static GameTrainerId? TryCreate(string? value)
     {
         if (string.IsNullOrWhiteSpace(value))
+        {
             return null;
+        }
 
         // Only accept full format
         if (!IsValidFormat(value) || !value.Contains($":{TypeName}:"))
+        {
             return null;
+        }
 
         try
         {
@@ -108,5 +113,8 @@ public sealed record GameTrainerId : EntityId
     /// <summary>
     ///     Explicit conversion from string. Use TryCreate() for safe parsing.
     /// </summary>
-    public static explicit operator GameTrainerId(string value) => new(value);
+    public static explicit operator GameTrainerId(string value)
+    {
+        return new GameTrainerId(value);
+    }
 }

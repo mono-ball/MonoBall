@@ -47,10 +47,7 @@ public class DocumentationProvider
         }
 
         // Generate signature
-        doc = doc with
-        {
-            Signature = GenerateSignature(item, doc),
-        };
+        doc = doc with { Signature = GenerateSignature(item, doc) };
 
         return doc;
     }

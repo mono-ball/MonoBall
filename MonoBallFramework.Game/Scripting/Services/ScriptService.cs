@@ -7,8 +7,8 @@ using Microsoft.Extensions.Logging.Abstractions;
 using MonoBallFramework.Game.Engine.Common.Logging;
 using MonoBallFramework.Game.Engine.Content;
 using MonoBallFramework.Game.Engine.Core.Events;
-using MonoBallFramework.Game.Scripting.Api;
 using MonoBallFramework.Game.Engine.Core.Modding;
+using MonoBallFramework.Game.Scripting.Api;
 using MonoBallFramework.Game.Scripting.Runtime;
 
 namespace MonoBallFramework.Game.Scripting.Services;
@@ -88,6 +88,7 @@ public class ScriptService : IAsyncDisposable
                 _contentProvider = _serviceProvider.GetService(typeof(IContentProvider)) as IContentProvider;
                 _contentProviderResolved = true;
             }
+
             return _contentProvider;
         }
     }
@@ -386,9 +387,9 @@ public class ScriptService : IAsyncDisposable
                     MethodInfo? method = type.GetMethod(
                         "Initialize",
                         BindingFlags.NonPublic
-                            | BindingFlags.Public
-                            | BindingFlags.Instance
-                            | BindingFlags.FlattenHierarchy
+                        | BindingFlags.Public
+                        | BindingFlags.Instance
+                        | BindingFlags.FlattenHierarchy
                     );
 
                     if (method == null)

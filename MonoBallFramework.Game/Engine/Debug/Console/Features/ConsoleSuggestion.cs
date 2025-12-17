@@ -20,7 +20,7 @@ public class ConsoleSuggestion
         /// <summary>
         ///     Command from history.
         /// </summary>
-        History,
+        History
     }
 
     private ConsoleSuggestion()
@@ -77,7 +77,7 @@ public class ConsoleSuggestion
             Description = item.InlineDescription,
             CompletionItem = item,
             UseCount = 0,
-            RelevanceScore = score,
+            RelevanceScore = score
         };
     }
 
@@ -94,7 +94,7 @@ public class ConsoleSuggestion
             Description = $"Used {useCount} time{(useCount != 1 ? "s" : "")}",
             CompletionItem = null,
             UseCount = useCount,
-            RelevanceScore = score,
+            RelevanceScore = score
         };
     }
 
@@ -107,7 +107,7 @@ public class ConsoleSuggestion
         return Type switch
         {
             SuggestionType.History => "@", // At-sign for history
-            _ => string.Empty, // No text prefix (triangles rendered separately if needed)
+            _ => string.Empty // No text prefix (triangles rendered separately if needed)
         };
     }
 }

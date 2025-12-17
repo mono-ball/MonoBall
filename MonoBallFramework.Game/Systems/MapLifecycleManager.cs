@@ -1,18 +1,16 @@
 using Arch.Core;
 using Arch.Core.Extensions;
 using Microsoft.Extensions.Logging;
+using MonoBallFramework.Game.Ecs.Components.Maps;
+using MonoBallFramework.Game.Ecs.Components.Movement;
+using MonoBallFramework.Game.Ecs.Components.NPCs;
+using MonoBallFramework.Game.Ecs.Components.Player;
 using MonoBallFramework.Game.Engine.Common.Logging;
 using MonoBallFramework.Game.Engine.Core.Events;
 using MonoBallFramework.Game.Engine.Core.Events.Map;
 using MonoBallFramework.Game.Engine.Core.Types;
 using MonoBallFramework.Game.Engine.Rendering.Assets;
 using MonoBallFramework.Game.Engine.Systems.Management;
-using MonoBallFramework.Game.Components;
-using MonoBallFramework.Game.Ecs.Components;
-using MonoBallFramework.Game.Ecs.Components.Maps;
-using MonoBallFramework.Game.Ecs.Components.Movement;
-using MonoBallFramework.Game.Ecs.Components.NPCs;
-using MonoBallFramework.Game.Ecs.Components.Player;
 using MonoBallFramework.Game.GameSystems.Spatial;
 using MonoBallFramework.Game.Scripting.Systems;
 using MonoBallFramework.Game.Systems.Rendering;
@@ -35,9 +33,13 @@ public class MapLifecycleManager(
 {
     private readonly Dictionary<string, MapMetadata> _loadedMaps = new();
     private readonly Dictionary<GameMapId, List<Entity>> _mapTileCache = new();
-    private GameMapId? _currentMapId;
-    private GameMapId? _previousMapId;
     private NPCBehaviorSystem? _npcBehaviorSystem;
+    private GameMapId? _previousMapId;
+
+    /// <summary>
+    ///     Gets the current active map ID
+    /// </summary>
+    public GameMapId? CurrentMapId { get; private set; }
 
     /// <summary>
     ///     Sets the NPCBehaviorSystem for behavior cleanup during entity destruction.
@@ -48,11 +50,6 @@ public class MapLifecycleManager(
         _npcBehaviorSystem = npcBehaviorSystem;
         logger?.LogDebug("NPCBehaviorSystem linked to MapLifecycleManager for cleanup");
     }
-
-    /// <summary>
-    ///     Gets the current active map ID
-    /// </summary>
-    public GameMapId? CurrentMapId => _currentMapId;
 
     /// <summary>
     ///     Registers tile entities for a map. Called by MapLoader after creating tiles.
@@ -68,7 +65,7 @@ public class MapLifecycleManager(
     /// </summary>
     public IReadOnlyList<Entity>? GetMapTiles(GameMapId mapId)
     {
-        return _mapTileCache.TryGetValue(mapId, out var tiles) ? tiles : null;
+        return _mapTileCache.TryGetValue(mapId, out List<Entity>? tiles) ? tiles : null;
     }
 
     /// <summary>
@@ -104,15 +101,15 @@ public class MapLifecycleManager(
     /// </summary>
     public void TransitionToMap(GameMapId newMapId)
     {
-        if (_currentMapId != null && _currentMapId.Value == newMapId.Value)
+        if (CurrentMapId != null && CurrentMapId.Value == newMapId.Value)
         {
             logger?.LogDebug("Already on map {MapId}, skipping transition", newMapId.Value);
             return;
         }
 
-        GameMapId? oldMapId = _currentMapId;
-        _previousMapId = _currentMapId;
-        _currentMapId = newMapId;
+        GameMapId? oldMapId = CurrentMapId;
+        _previousMapId = CurrentMapId;
+        CurrentMapId = newMapId;
 
         logger?.LogWorkflowStatus(
             "Map transition",
@@ -126,7 +123,7 @@ public class MapLifecycleManager(
         // Clean up old maps (keep current + previous for smooth transitions)
         var mapsToUnload = _loadedMaps
             .Keys.Where(id =>
-                (_currentMapId == null || id != _currentMapId.Value) &&
+                (CurrentMapId == null || id != CurrentMapId.Value) &&
                 (_previousMapId == null || id != _previousMapId.Value))
             .ToList();
 
@@ -252,9 +249,9 @@ public class MapLifecycleManager(
         spatialHashSystem.RemoveMapTiles(mapId);
 
         // 1. Destroy all cached tile entities (no relationships, no pooling)
-        if (_mapTileCache.TryGetValue(mapId, out var tiles))
+        if (_mapTileCache.TryGetValue(mapId, out List<Entity>? tiles))
         {
-            foreach (var tile in tiles)
+            foreach (Entity tile in tiles)
             {
                 if (world.IsAlive(tile))
                 {
@@ -262,6 +259,7 @@ public class MapLifecycleManager(
                     destroyedCount++;
                 }
             }
+
             _mapTileCache.Remove(mapId);
             logger?.LogDebug("Destroyed {Count} cached tiles for map {MapId}", destroyedCount, mapId.Value);
         }
@@ -279,7 +277,7 @@ public class MapLifecycleManager(
         });
 
         int dynamicCount = 0;
-        foreach (var entity in dynamicEntities)
+        foreach (Entity entity in dynamicEntities)
         {
             if (world.IsAlive(entity))
             {
@@ -288,14 +286,17 @@ public class MapLifecycleManager(
                 {
                     _npcBehaviorSystem.CleanupEntityBehavior(entity);
                 }
+
                 world.Destroy(entity);
                 dynamicCount++;
                 destroyedCount++;
             }
         }
+
         if (dynamicCount > 0)
         {
-            logger?.LogDebug("Destroyed {Count} dynamic entities (NPCs, etc.) for map {MapId}", dynamicCount, mapId.Value);
+            logger?.LogDebug("Destroyed {Count} dynamic entities (NPCs, etc.) for map {MapId}", dynamicCount,
+                mapId.Value);
         }
 
         // 3. Find and destroy the MapInfo entity
@@ -316,6 +317,7 @@ public class MapLifecycleManager(
             {
                 _npcBehaviorSystem.CleanupEntityBehavior(mapInfoEntity.Value);
             }
+
             world.Destroy(mapInfoEntity.Value);
             destroyedCount++;
         }
@@ -383,7 +385,7 @@ public class MapLifecycleManager(
         logger?.LogWarning("Force cleanup triggered - unloading all inactive maps");
 
         var mapsToUnload = _loadedMaps.Keys
-            .Where(id => _currentMapId == null || id != _currentMapId.Value)
+            .Where(id => CurrentMapId == null || id != CurrentMapId.Value)
             .ToList();
 
         foreach (string mapIdValue in mapsToUnload)
@@ -418,7 +420,7 @@ public class MapLifecycleManager(
         _mapTileCache.Clear();
 
         // Reset map tracking state
-        _currentMapId = null;
+        CurrentMapId = null;
         _previousMapId = null;
 
         // Invalidate spatial hash so it rebuilds for the new map
@@ -446,12 +448,12 @@ public class MapLifecycleManager(
         int behaviorsCleanedUp = 0;
 
         // 1. Destroy all cached tile entities from all maps
-        foreach (var kvp in _mapTileCache.ToList())
+        foreach (KeyValuePair<GameMapId, List<Entity>> kvp in _mapTileCache.ToList())
         {
-            var mapId = kvp.Key;
-            var tiles = kvp.Value;
+            GameMapId mapId = kvp.Key;
+            List<Entity> tiles = kvp.Value;
 
-            foreach (var tile in tiles)
+            foreach (Entity tile in tiles)
             {
                 if (world.IsAlive(tile))
                 {
@@ -462,6 +464,7 @@ public class MapLifecycleManager(
 
             logger?.LogDebug("Destroyed {Count} cached tiles for map {MapId}", tiles.Count, mapId.Value);
         }
+
         _mapTileCache.Clear();
 
         // 2. Destroy all entities with Position (NPCs, warps, etc.) - explicitly excludes player
@@ -476,7 +479,7 @@ public class MapLifecycleManager(
             }
         });
 
-        foreach (var entity in dynamicEntities)
+        foreach (Entity entity in dynamicEntities)
         {
             if (world.IsAlive(entity))
             {
@@ -500,7 +503,7 @@ public class MapLifecycleManager(
             mapInfoEntities.Add(entity);
         });
 
-        foreach (var entity in mapInfoEntities)
+        foreach (Entity entity in mapInfoEntities)
         {
             if (world.IsAlive(entity))
             {

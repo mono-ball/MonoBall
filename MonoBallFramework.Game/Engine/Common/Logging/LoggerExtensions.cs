@@ -29,7 +29,7 @@ public static class LoggerExtensions
             ["Timestamp"] = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"),
             ["MachineName"] = Environment.MachineName,
             ["ExceptionType"] = ex.GetType().Name,
-            ["ExceptionSource"] = ex.Source ?? "Unknown",
+            ["ExceptionSource"] = ex.Source ?? "Unknown"
         };
 
         string contextString = string.Join(

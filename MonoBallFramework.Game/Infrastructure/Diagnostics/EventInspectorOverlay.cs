@@ -40,7 +40,7 @@ public class EventInspectorOverlay : IDisposable
         }
 
         // Create adapter using the shared metrics
-        _adapter = new EventInspectorAdapter(eventBus, _metrics, 100);
+        _adapter = new EventInspectorAdapter(eventBus, _metrics);
 
         // Create panel
         _panel = new EventInspectorPanelBuilder()

@@ -5,5 +5,5 @@ public enum DiagnosticSeverity
     Hidden,
     Info,
     Warning,
-    Error,
+    Error
 }

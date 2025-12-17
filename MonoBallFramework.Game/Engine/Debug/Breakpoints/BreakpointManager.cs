@@ -62,7 +62,7 @@ public class BreakpointManager : IBreakpointOperations
             int id = _nextId++;
             var breakpoint = new ExpressionBreakpoint(id, expression, _evaluator, _globals, _logger)
             {
-                TriggerOnChange = triggerOnChange,
+                TriggerOnChange = triggerOnChange
             };
             _breakpoints[id] = breakpoint;
             _logger?.LogDebug("Added expression breakpoint #{Id}: {Expression}", id, expression);

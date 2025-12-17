@@ -65,7 +65,7 @@ public class ScrollView : UIContainer
                 WidthPercent = originalConstraint.WidthPercent,
                 HeightPercent = originalConstraint.HeightPercent,
                 Margin = originalConstraint.Margin,
-                Padding = originalConstraint.Padding,
+                Padding = originalConstraint.Padding
             };
 
             child.Render(context);

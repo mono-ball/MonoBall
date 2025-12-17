@@ -140,7 +140,7 @@ public enum BattleType
     /// <summary>
     ///     Scripted battle (story event, legendary encounter).
     /// </summary>
-    Scripted,
+    Scripted
 }
 
 /// <summary>
@@ -171,5 +171,5 @@ public enum BattleTrigger
     /// <summary>
     ///     Surfing or fishing encounter.
     /// </summary>
-    WaterEncounter,
+    WaterEncounter
 }

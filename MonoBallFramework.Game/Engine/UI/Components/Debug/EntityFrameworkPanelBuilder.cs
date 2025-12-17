@@ -36,7 +36,7 @@ public class EntityFrameworkPanelBuilder
     {
         return new StatusBar("entityframework_status")
         {
-            Constraint = new LayoutConstraint { Anchor = Anchor.StretchBottom },
+            Constraint = new LayoutConstraint { Anchor = Anchor.StretchBottom }
         };
     }
 }

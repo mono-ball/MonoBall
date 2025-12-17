@@ -14,7 +14,7 @@ public enum SplitOrientation
     Horizontal,
 
     /// <summary>Panes arranged top/bottom</summary>
-    Vertical,
+    Vertical
 }
 
 /// <summary>
@@ -24,9 +24,6 @@ public enum SplitOrientation
 /// </summary>
 public class SplitPanel : UIContainer
 {
-    private UIComponent? _firstPane;
-    private UIComponent? _secondPane;
-
     /// <summary>Background color (null for transparent)</summary>
     public Color? BackgroundColor { get; set; }
 
@@ -68,12 +65,12 @@ public class SplitPanel : UIContainer
     /// <summary>
     ///     Gets the first pane component (left for horizontal, top for vertical).
     /// </summary>
-    public UIComponent? FirstPane => _firstPane;
+    public UIComponent? FirstPane { get; private set; }
 
     /// <summary>
     ///     Gets the second pane component (right for horizontal, bottom for vertical).
     /// </summary>
-    public UIComponent? SecondPane => _secondPane;
+    public UIComponent? SecondPane { get; private set; }
 
     /// <summary>
     ///     Gets the calculated rectangle for the first pane (after layout).
@@ -90,16 +87,16 @@ public class SplitPanel : UIContainer
     /// </summary>
     public void SetFirstPane(UIComponent? component)
     {
-        if (_firstPane != null)
+        if (FirstPane != null)
         {
-            RemoveChild(_firstPane);
+            RemoveChild(FirstPane);
         }
 
-        _firstPane = component;
+        FirstPane = component;
 
-        if (_firstPane != null)
+        if (FirstPane != null)
         {
-            AddChild(_firstPane);
+            AddChild(FirstPane);
         }
     }
 
@@ -108,16 +105,16 @@ public class SplitPanel : UIContainer
     /// </summary>
     public void SetSecondPane(UIComponent? component)
     {
-        if (_secondPane != null)
+        if (SecondPane != null)
         {
-            RemoveChild(_secondPane);
+            RemoveChild(SecondPane);
         }
 
-        _secondPane = component;
+        SecondPane = component;
 
-        if (_secondPane != null)
+        if (SecondPane != null)
         {
-            AddChild(_secondPane);
+            AddChild(SecondPane);
         }
     }
 
@@ -148,47 +145,47 @@ public class SplitPanel : UIContainer
     protected override void OnRenderChildren(UIContext context)
     {
         // Render first pane in its own container context
-        if (_firstPane != null)
+        if (FirstPane != null)
         {
-            context.BeginContainer($"{Id}_first_pane", new LayoutConstraint
-            {
-                Anchor = Anchor.TopLeft,
-                OffsetX = FirstPaneRect.X - Rect.X,
-                OffsetY = FirstPaneRect.Y - Rect.Y,
-                Width = FirstPaneRect.Width,
-                Height = FirstPaneRect.Height,
-            });
+            context.BeginContainer($"{Id}_first_pane",
+                new LayoutConstraint
+                {
+                    Anchor = Anchor.TopLeft,
+                    OffsetX = FirstPaneRect.X - Rect.X,
+                    OffsetY = FirstPaneRect.Y - Rect.Y,
+                    Width = FirstPaneRect.Width,
+                    Height = FirstPaneRect.Height
+                });
 
             // Preserve existing padding while setting fill anchor
-            _firstPane.Constraint = new LayoutConstraint
+            FirstPane.Constraint = new LayoutConstraint
             {
-                Anchor = Anchor.Fill,
-                Padding = _firstPane.Constraint.Padding,
+                Anchor = Anchor.Fill, Padding = FirstPane.Constraint.Padding
             };
-            _firstPane.Render(context);
+            FirstPane.Render(context);
 
             context.EndContainer();
         }
 
         // Render second pane in its own container context
-        if (_secondPane != null)
+        if (SecondPane != null)
         {
-            context.BeginContainer($"{Id}_second_pane", new LayoutConstraint
-            {
-                Anchor = Anchor.TopLeft,
-                OffsetX = SecondPaneRect.X - Rect.X,
-                OffsetY = SecondPaneRect.Y - Rect.Y,
-                Width = SecondPaneRect.Width,
-                Height = SecondPaneRect.Height,
-            });
+            context.BeginContainer($"{Id}_second_pane",
+                new LayoutConstraint
+                {
+                    Anchor = Anchor.TopLeft,
+                    OffsetX = SecondPaneRect.X - Rect.X,
+                    OffsetY = SecondPaneRect.Y - Rect.Y,
+                    Width = SecondPaneRect.Width,
+                    Height = SecondPaneRect.Height
+                });
 
             // Preserve existing padding while setting fill anchor
-            _secondPane.Constraint = new LayoutConstraint
+            SecondPane.Constraint = new LayoutConstraint
             {
-                Anchor = Anchor.Fill,
-                Padding = _secondPane.Constraint.Padding,
+                Anchor = Anchor.Fill, Padding = SecondPane.Constraint.Padding
             };
-            _secondPane.Render(context);
+            SecondPane.Render(context);
 
             context.EndContainer();
         }

@@ -47,6 +47,3 @@ public static class CameraConstants
     /// </summary>
     public const float DefaultZoomTransitionSpeed = 0.1f;
 }
-
-
-

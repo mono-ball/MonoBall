@@ -12,7 +12,9 @@ public class GamePopupOutlineIdValueConverter : ValueConverter<GamePopupOutlineI
         : base(
             v => v.Value,
             v => ConvertFromString(v)
-        ) { }
+        )
+    {
+    }
 
     private static GamePopupOutlineId ConvertFromString(string value)
     {
@@ -29,7 +31,9 @@ public class NullableGamePopupOutlineIdValueConverter : ValueConverter<GamePopup
         : base(
             v => v != null ? v.Value : null,
             v => ConvertFromString(v)
-        ) { }
+        )
+    {
+    }
 
     private static GamePopupOutlineId? ConvertFromString(string? value)
     {

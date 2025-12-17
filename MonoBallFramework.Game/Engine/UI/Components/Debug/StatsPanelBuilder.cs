@@ -54,17 +54,11 @@ public class StatsPanelBuilder
 
     private static StatsContent CreateDefaultContent()
     {
-        return new StatsContent("stats_content")
-        {
-            Constraint = new LayoutConstraint { Anchor = Anchor.StretchTop },
-        };
+        return new StatsContent("stats_content") { Constraint = new LayoutConstraint { Anchor = Anchor.StretchTop } };
     }
 
     private static StatusBar CreateDefaultStatusBar()
     {
-        return new StatusBar("stats_status")
-        {
-            Constraint = new LayoutConstraint { Anchor = Anchor.StretchBottom },
-        };
+        return new StatusBar("stats_status") { Constraint = new LayoutConstraint { Anchor = Anchor.StretchBottom } };
     }
 }

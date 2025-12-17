@@ -18,7 +18,9 @@ public class LoadInitialMapStep : InitializationStepBase
             "Loading map...",
             InitializationProgress.GameSystemsInitialized,
             InitializationProgress.InitialMapLoaded
-        ) { }
+        )
+    {
+    }
 
     /// <inheritdoc />
     protected override async Task ExecuteStepAsync(
@@ -41,7 +43,7 @@ public class LoadInitialMapStep : InitializationStepBase
 
         // TryCreate handles both full format (base:map:hoenn/littleroot_town)
         // and legacy format (littleroot_town)
-        GameMapId? mapId = GameMapId.TryCreate(mapIdString);
+        var mapId = GameMapId.TryCreate(mapIdString);
         if (mapId == null)
         {
             logger.LogError("Invalid map ID format: {MapId}", mapIdString);

@@ -2,20 +2,19 @@ using Arch.Core;
 using Arch.Core.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
-using MonoBallFramework.Game.Engine.Common.Logging;
-using MonoBallFramework.Game.Engine.Core.Events;
-using MonoBallFramework.Game.Engine.Core.Events.Map;
-using MonoBallFramework.Game.Engine.Core.Systems;
-using MonoBallFramework.Game.Engine.Core.Types;
-using MonoBallFramework.Game.Engine.Rendering.Components;
-using MonoBallFramework.Game.Components;
 using MonoBallFramework.Game.Ecs.Components;
 using MonoBallFramework.Game.Ecs.Components.Maps;
 using MonoBallFramework.Game.Ecs.Components.Movement;
 using MonoBallFramework.Game.Ecs.Components.Player;
 using MonoBallFramework.Game.Ecs.Components.Rendering;
 using MonoBallFramework.Game.Ecs.Components.Warps;
+using MonoBallFramework.Game.Engine.Common.Logging;
+using MonoBallFramework.Game.Engine.Core.Events;
+using MonoBallFramework.Game.Engine.Core.Events.Map;
+using MonoBallFramework.Game.Engine.Core.Systems;
 using MonoBallFramework.Game.Engine.Core.Systems.Base;
+using MonoBallFramework.Game.Engine.Core.Types;
+using MonoBallFramework.Game.Engine.Rendering.Components;
 using MonoBallFramework.Game.GameSystems.Movement;
 using MonoBallFramework.Game.Initialization.Initializers;
 
@@ -53,12 +52,12 @@ public class WarpExecutionSystem : SystemBase, IUpdateSystem
 
     // Track active warp task to prevent duplicate execution
     private Task? _activeWarpTask;
+    private IEventBus? _eventBus;
     private bool _isExecutingWarp;
 
     // Services set via SetServices (delayed initialization)
     private IMapInitializer? _mapInitializer;
     private MapLifecycleManager? _mapLifecycleManager;
-    private IEventBus? _eventBus;
     private MovementSystem? _movementSystem;
 
     private QueryDescription _pendingWarpQuery;

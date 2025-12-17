@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MonoBallFramework.Game.GameData.Entities;
@@ -10,9 +11,10 @@ namespace MonoBallFramework.Game.GameData.Registries;
 /// </summary>
 internal class PopupBackgroundRegistry : EfCoreRegistry<PopupBackgroundEntity, string>
 {
-    private readonly System.Collections.Concurrent.ConcurrentDictionary<string, PopupBackgroundEntity> _themeCache = new();
+    private readonly ConcurrentDictionary<string, PopupBackgroundEntity> _themeCache = new();
 
-    public PopupBackgroundRegistry(IDbContextFactory<GameDataContext> contextFactory, ILogger logger, GameDataContext? sharedContext = null)
+    public PopupBackgroundRegistry(IDbContextFactory<GameDataContext> contextFactory, ILogger logger,
+        GameDataContext? sharedContext = null)
         : base(contextFactory, logger, sharedContext)
     {
     }
@@ -42,14 +44,16 @@ internal class PopupBackgroundRegistry : EfCoreRegistry<PopupBackgroundEntity, s
     /// </summary>
     public PopupBackgroundEntity? GetByTheme(string themeName)
     {
-        if (_themeCache.TryGetValue(themeName, out var cached))
+        if (_themeCache.TryGetValue(themeName, out PopupBackgroundEntity? cached))
+        {
             return cached;
+        }
 
         if (!_isCacheLoaded)
         {
-            using var context = _contextFactory.CreateDbContext();
+            using GameDataContext context = _contextFactory.CreateDbContext();
             var backgrounds = context.PopupBackgrounds.AsNoTracking().ToList();
-            var bg = backgrounds.FirstOrDefault(b => b.ThemeName == themeName);
+            PopupBackgroundEntity? bg = backgrounds.FirstOrDefault(b => b.ThemeName == themeName);
 
             if (bg != null)
             {

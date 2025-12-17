@@ -1,12 +1,10 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
-using System.Text.Json;
 using FontStashSharp;
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework.Graphics;
 using MonoBallFramework.Game.Engine.Common.Logging;
 using MonoBallFramework.Game.Engine.Content;
-using MonoBallFramework.Game.Engine.Rendering.Configuration;
 
 namespace MonoBallFramework.Game.Engine.Rendering.Assets;
 
@@ -20,12 +18,26 @@ public class AssetManager(
     ILogger<AssetManager>? logger = null
 ) : IAssetProvider, IDisposable
 {
+    // Maximum textures to upload to GPU per frame (prevents stutter)
+    private const int MaxTextureUploadsPerFrame = 2;
+
+    private readonly IContentProvider _contentProvider =
+        contentProvider ?? throw new ArgumentNullException(nameof(contentProvider));
+
+    private readonly Dictionary<string, byte[]> _fontDataCache = new();
+
+    // Font cache - FontStashSharp FontSystem instances
+    private readonly Dictionary<string, FontSystem> _fontSystems = new();
+
     private readonly GraphicsDevice _graphicsDevice =
         graphicsDevice ?? throw new ArgumentNullException(nameof(graphicsDevice));
 
+    private readonly ConcurrentDictionary<string, Task> _loadingTextures = new();
+
     private readonly ILogger<AssetManager>? _logger = logger;
-    private readonly IContentProvider _contentProvider =
-        contentProvider ?? throw new ArgumentNullException(nameof(contentProvider));
+
+    // Async texture preloading - file bytes ready for GPU upload
+    private readonly ConcurrentQueue<PendingTexture> _pendingTextures = new();
 
     // LRU cache with 50MB budget for texture memory management
     private readonly LruCache<string, Texture2D> _textures = new(
@@ -33,17 +45,6 @@ public class AssetManager(
         texture => texture.Width * texture.Height * 4L, // RGBA = 4 bytes/pixel
         logger
     );
-
-    // Font cache - FontStashSharp FontSystem instances
-    private readonly Dictionary<string, FontSystem> _fontSystems = new();
-    private readonly Dictionary<string, byte[]> _fontDataCache = new();
-
-    // Async texture preloading - file bytes ready for GPU upload
-    private readonly ConcurrentQueue<PendingTexture> _pendingTextures = new();
-    private readonly ConcurrentDictionary<string, Task> _loadingTextures = new();
-
-    // Maximum textures to upload to GPU per frame (prevents stutter)
-    private const int MaxTextureUploadsPerFrame = 2;
 
     private bool _disposed;
 
@@ -158,58 +159,6 @@ public class AssetManager(
     }
 
     /// <summary>
-    ///     Loads a texture from raw bytes (used for preloaded textures).
-    /// </summary>
-    private void LoadTextureFromBytes(string id, byte[] data)
-    {
-        var sw = Stopwatch.StartNew();
-
-        using var memoryStream = new MemoryStream(data);
-        var texture = Texture2D.FromStream(_graphicsDevice, memoryStream);
-
-        sw.Stop();
-        double elapsedMs = sw.Elapsed.TotalMilliseconds;
-
-        _textures.AddOrUpdate(id, texture);
-        _logger?.LogDebug("Used preloaded texture data: {Id} ({ElapsedMs:F1}ms GPU upload)", id, elapsedMs);
-    }
-
-    /// <summary>
-    ///     Tries to find preloaded texture data in the pending queue.
-    ///     Removes the entry from the queue if found.
-    /// </summary>
-    private bool TryGetPreloadedTexture(string id, out byte[]? data)
-    {
-        data = null;
-
-        // We need to search through the queue - create a temporary list
-        var tempList = new List<PendingTexture>();
-        bool found = false;
-
-        while (_pendingTextures.TryDequeue(out PendingTexture pending))
-        {
-            if (pending.Id == id && !found)
-            {
-                data = pending.Data;
-                found = true;
-                // Don't re-queue this one
-            }
-            else
-            {
-                tempList.Add(pending);
-            }
-        }
-
-        // Re-queue items we didn't use
-        foreach (var item in tempList)
-        {
-            _pendingTextures.Enqueue(item);
-        }
-
-        return found;
-    }
-
-    /// <summary>
     ///     Checks if a texture is loaded in cache.
     /// </summary>
     /// <param name="id">The texture identifier.</param>
@@ -218,79 +167,6 @@ public class AssetManager(
     {
         ArgumentException.ThrowIfNullOrEmpty(id);
         return _textures.TryGetValue(id, out _);
-    }
-
-    /// <summary>
-    ///     Tries to get a texture from cache in a single lookup.
-    ///     PERFORMANCE: Combines HasTexture + GetTexture into single dictionary lookup.
-    /// </summary>
-    /// <param name="id">The texture identifier.</param>
-    /// <param name="texture">The texture if found, null otherwise.</param>
-    /// <returns>True if texture was found.</returns>
-    public bool TryGetTexture(string id, out Texture2D? texture)
-    {
-        if (string.IsNullOrEmpty(id))
-        {
-            texture = null;
-            return false;
-        }
-        return _textures.TryGetValue(id, out texture);
-    }
-
-    /// <summary>
-    ///     Loads a font from file and caches it.
-    /// </summary>
-    public void LoadFont(string id, string relativePath)
-    {
-        ArgumentException.ThrowIfNullOrEmpty(id);
-        ArgumentException.ThrowIfNullOrEmpty(relativePath);
-
-        if (_fontSystems.ContainsKey(id))
-        {
-            _logger?.LogDebug("Font '{FontId}' already loaded", id);
-            return;
-        }
-
-        string normalizedRelative = relativePath.Replace('/', Path.DirectorySeparatorChar);
-
-        // Use ContentProvider to resolve path
-        string? fullPath = _contentProvider.ResolveContentPath("Fonts", normalizedRelative);
-        if (fullPath == null)
-        {
-            throw new FileNotFoundException($"Font not found: {relativePath}");
-        }
-
-        if (!File.Exists(fullPath))
-        {
-            throw new FileNotFoundException($"Font file not found: {fullPath}");
-        }
-
-        byte[] fontData = File.ReadAllBytes(fullPath);
-        _fontDataCache[id] = fontData;
-
-        var fontSystem = new FontSystem();
-        fontSystem.AddFont(fontData);
-        _fontSystems[id] = fontSystem;
-
-        _logger?.LogInformation("Font loaded and cached: {FontId} ({Size:N0} bytes)", id, fontData.Length);
-    }
-
-    /// <summary>
-    ///     Gets a cached FontSystem by ID.
-    /// </summary>
-    public FontSystem? GetFontSystem(string id)
-    {
-        ArgumentException.ThrowIfNullOrEmpty(id);
-        return _fontSystems.TryGetValue(id, out var fontSystem) ? fontSystem : null;
-    }
-
-    /// <summary>
-    ///     Checks if a font is loaded.
-    /// </summary>
-    public bool HasFont(string id)
-    {
-        ArgumentException.ThrowIfNullOrEmpty(id);
-        return _fontSystems.ContainsKey(id);
     }
 
     /// <summary>
@@ -450,16 +326,143 @@ public class AssetManager(
         _textures.Clear(); // LruCache.Clear() disposes all textures
 
         // Dispose font systems
-        foreach (var fontSystem in _fontSystems.Values)
+        foreach (FontSystem fontSystem in _fontSystems.Values)
         {
             fontSystem.Dispose();
         }
+
         _fontSystems.Clear();
         _fontDataCache.Clear();
 
         _disposed = true;
 
         GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    ///     Loads a texture from raw bytes (used for preloaded textures).
+    /// </summary>
+    private void LoadTextureFromBytes(string id, byte[] data)
+    {
+        var sw = Stopwatch.StartNew();
+
+        using var memoryStream = new MemoryStream(data);
+        var texture = Texture2D.FromStream(_graphicsDevice, memoryStream);
+
+        sw.Stop();
+        double elapsedMs = sw.Elapsed.TotalMilliseconds;
+
+        _textures.AddOrUpdate(id, texture);
+        _logger?.LogDebug("Used preloaded texture data: {Id} ({ElapsedMs:F1}ms GPU upload)", id, elapsedMs);
+    }
+
+    /// <summary>
+    ///     Tries to find preloaded texture data in the pending queue.
+    ///     Removes the entry from the queue if found.
+    /// </summary>
+    private bool TryGetPreloadedTexture(string id, out byte[]? data)
+    {
+        data = null;
+
+        // We need to search through the queue - create a temporary list
+        var tempList = new List<PendingTexture>();
+        bool found = false;
+
+        while (_pendingTextures.TryDequeue(out PendingTexture pending))
+        {
+            if (pending.Id == id && !found)
+            {
+                data = pending.Data;
+                found = true;
+                // Don't re-queue this one
+            }
+            else
+            {
+                tempList.Add(pending);
+            }
+        }
+
+        // Re-queue items we didn't use
+        foreach (PendingTexture item in tempList)
+        {
+            _pendingTextures.Enqueue(item);
+        }
+
+        return found;
+    }
+
+    /// <summary>
+    ///     Tries to get a texture from cache in a single lookup.
+    ///     PERFORMANCE: Combines HasTexture + GetTexture into single dictionary lookup.
+    /// </summary>
+    /// <param name="id">The texture identifier.</param>
+    /// <param name="texture">The texture if found, null otherwise.</param>
+    /// <returns>True if texture was found.</returns>
+    public bool TryGetTexture(string id, out Texture2D? texture)
+    {
+        if (string.IsNullOrEmpty(id))
+        {
+            texture = null;
+            return false;
+        }
+
+        return _textures.TryGetValue(id, out texture);
+    }
+
+    /// <summary>
+    ///     Loads a font from file and caches it.
+    /// </summary>
+    public void LoadFont(string id, string relativePath)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(id);
+        ArgumentException.ThrowIfNullOrEmpty(relativePath);
+
+        if (_fontSystems.ContainsKey(id))
+        {
+            _logger?.LogDebug("Font '{FontId}' already loaded", id);
+            return;
+        }
+
+        string normalizedRelative = relativePath.Replace('/', Path.DirectorySeparatorChar);
+
+        // Use ContentProvider to resolve path
+        string? fullPath = _contentProvider.ResolveContentPath("Fonts", normalizedRelative);
+        if (fullPath == null)
+        {
+            throw new FileNotFoundException($"Font not found: {relativePath}");
+        }
+
+        if (!File.Exists(fullPath))
+        {
+            throw new FileNotFoundException($"Font file not found: {fullPath}");
+        }
+
+        byte[] fontData = File.ReadAllBytes(fullPath);
+        _fontDataCache[id] = fontData;
+
+        var fontSystem = new FontSystem();
+        fontSystem.AddFont(fontData);
+        _fontSystems[id] = fontSystem;
+
+        _logger?.LogInformation("Font loaded and cached: {FontId} ({Size:N0} bytes)", id, fontData.Length);
+    }
+
+    /// <summary>
+    ///     Gets a cached FontSystem by ID.
+    /// </summary>
+    public FontSystem? GetFontSystem(string id)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(id);
+        return _fontSystems.TryGetValue(id, out FontSystem? fontSystem) ? fontSystem : null;
+    }
+
+    /// <summary>
+    ///     Checks if a font is loaded.
+    /// </summary>
+    public bool HasFont(string id)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(id);
+        return _fontSystems.ContainsKey(id);
     }
 
     /// <summary>

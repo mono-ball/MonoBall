@@ -45,7 +45,7 @@ public class EventMetrics : IEventMetrics
 
         // Only record timing when enabled (for performance)
         double elapsedMs = IsEnabled ? elapsedNanoseconds / 1_000_000.0 : 0.0;
-        metrics.RecordPublish(elapsedMs, trackTiming: IsEnabled);
+        metrics.RecordPublish(elapsedMs, IsEnabled);
     }
 
     /// <summary>

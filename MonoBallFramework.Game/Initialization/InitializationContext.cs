@@ -3,10 +3,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using MonoBallFramework.Game.Engine.Audio.Services;
 using MonoBallFramework.Game.Engine.Core.Types;
 using MonoBallFramework.Game.Engine.Rendering.Assets;
+using MonoBallFramework.Game.Engine.Rendering.Popups;
 using MonoBallFramework.Game.Engine.Rendering.Services;
 using MonoBallFramework.Game.Engine.Scenes;
+using MonoBallFramework.Game.Engine.Scenes.Services;
 using MonoBallFramework.Game.Engine.Systems.Management;
 using MonoBallFramework.Game.GameData.Loading;
 using MonoBallFramework.Game.GameData.MapLoading.Tiled.Core;
@@ -22,7 +25,6 @@ using MonoBallFramework.Game.Input;
 using MonoBallFramework.Game.Scenes;
 using MonoBallFramework.Game.Scripting.Api;
 using MonoBallFramework.Game.Scripting.Services;
-using MonoBallFramework.Game.Systems;
 using MonoBallFramework.Game.Systems.Rendering;
 
 namespace MonoBallFramework.Game.Initialization;
@@ -119,17 +121,17 @@ public class InitializationContext
     /// <summary>
     ///     Gets or sets the popup registry (backgrounds and outlines, created during map popup initialization).
     /// </summary>
-    public Engine.Rendering.Popups.PopupRegistry? PopupRegistry { get; set; }
+    public PopupRegistry? PopupRegistry { get; set; }
 
     /// <summary>
     ///     Gets or sets the map popup orchestrator (created during map popup initialization).
     /// </summary>
-    public Engine.Scenes.Services.IMapPopupOrchestrator? MapPopupOrchestrator { get; set; }
+    public IMapPopupOrchestrator? MapPopupOrchestrator { get; set; }
 
     /// <summary>
     ///     Gets or sets the map music orchestrator (created during map music initialization).
     /// </summary>
-    public Engine.Audio.Services.MapMusicOrchestrator? MapMusicOrchestrator { get; set; }
+    public MapMusicOrchestrator? MapMusicOrchestrator { get; set; }
 
     /// <summary>
     ///     Gets or sets the rendering service (shared SpriteBatch, created in Phase 2).

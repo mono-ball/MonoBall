@@ -8,7 +8,6 @@ namespace MonoBallFramework.Game.GameSystems.Services;
 public class GameStateService : IGameStateService
 {
     private readonly ILogger<GameStateService>? _logger;
-    private bool _collisionServiceEnabled = true;
 
     public GameStateService(ILogger<GameStateService>? logger = null)
     {
@@ -17,9 +16,5 @@ public class GameStateService : IGameStateService
     }
 
     /// <inheritdoc />
-    public bool CollisionServiceEnabled
-    {
-        get => _collisionServiceEnabled;
-        set => _collisionServiceEnabled = value;
-    }
+    public bool CollisionServiceEnabled { get; set; } = true;
 }

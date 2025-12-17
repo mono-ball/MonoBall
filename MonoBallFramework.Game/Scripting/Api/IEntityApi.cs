@@ -36,7 +36,7 @@ public interface IEntityApi
     ///     .WithDisplayName("Town Guard")
     ///     .Visible()
     ///     .Spawn();
-    ///
+    /// 
     /// // Or spawn and immediately configure with chaining
     /// Entity.CreateNpc(5, 5)
     ///     .WithSprite(spriteId)
@@ -61,7 +61,8 @@ public interface IEntityApi
     /// <param name="behaviorId">Optional behavior ID. If null, NPC will be stationary.</param>
     /// <param name="displayName">Optional display name shown during interaction.</param>
     /// <returns>The spawned entity.</returns>
-    Entity SpawnNpcAt(int x, int y, GameSpriteId spriteId, GameBehaviorId? behaviorId = null, string? displayName = null);
+    Entity SpawnNpcAt(int x, int y, GameSpriteId spriteId, GameBehaviorId? behaviorId = null,
+        string? displayName = null);
 
     #endregion
 

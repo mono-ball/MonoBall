@@ -65,6 +65,9 @@ public class MapLoader(
     private readonly IBorderProcessor _borderProcessor =
         borderProcessor ?? throw new ArgumentNullException(nameof(borderProcessor));
 
+    // Initialize EntitySpawnerRegistry with all available spawners
+    private readonly EntitySpawnerRegistry _entitySpawnerRegistry = CreateSpawnerRegistry();
+
     // Initialize ImageLayerProcessor (logger handled by MapLoader, so pass null)
     private readonly ImageLayerProcessor _imageLayerProcessor = new(
         assetManager ?? throw new ArgumentNullException(nameof(assetManager)),
@@ -75,6 +78,11 @@ public class MapLoader(
     private readonly ILayerProcessor _layerProcessor =
         layerProcessor ?? throw new ArgumentNullException(nameof(layerProcessor));
 
+    private readonly MapLifecycleManager? _lifecycleManager = lifecycleManager;
+
+    // Track in-progress async document loading (similar to AssetManager._loadingTextures pattern)
+    private readonly ConcurrentDictionary<string, Task<TmxDocument>> _loadingDocuments = new();
+
     private readonly ILogger<MapLoader>? _logger = logger;
     private readonly MapEntityService? _mapDefinitionService = mapDefinitionService;
 
@@ -83,48 +91,6 @@ public class MapLoader(
 
     // Initialize MapMetadataFactory with logger for connection debugging
     private readonly MapMetadataFactory _mapMetadataFactory = new(logger);
-
-    // Initialize EntitySpawnerRegistry with all available spawners
-    private readonly EntitySpawnerRegistry _entitySpawnerRegistry = CreateSpawnerRegistry();
-
-    // Initialize MapObjectSpawner using registry (lazy init to use already-created registry)
-    // Pass GameStateApi for flag-based NPC visibility at spawn time
-    private MapObjectSpawner? _mapObjectSpawnerBacking;
-    private MapObjectSpawner _mapObjectSpawner => _mapObjectSpawnerBacking ??= new(_entitySpawnerRegistry, gameStateApi);
-
-    private static EntitySpawnerRegistry CreateSpawnerRegistry()
-    {
-        var registry = new EntitySpawnerRegistry();
-
-        // Register spawners in priority order (higher priority = checked first)
-        registry.Register(new WarpEntitySpawner());
-        registry.Register(new NpcSpawner());
-
-        return registry;
-    }
-
-    /// <summary>
-    ///     Gets the MapPathResolver instance, creating it lazily if needed.
-    ///     Requires IContentProvider to be available.
-    /// </summary>
-    private MapPathResolver GetMapPathResolver()
-    {
-        if (_mapPathResolver == null)
-        {
-            if (contentProvider == null)
-            {
-                throw new InvalidOperationException(
-                    "IContentProvider is required for MapPathResolver initialization. " +
-                    "Pass IContentProvider to MapLoader constructor."
-                );
-            }
-            _mapPathResolver = new MapPathResolver(_assetManager, contentProvider);
-        }
-        return _mapPathResolver;
-    }
-
-    // MapPathResolver - initialized lazily since we need IContentProvider from DI
-    private MapPathResolver? _mapPathResolver;
 
     // Initialize MapTextureTracker
     private readonly MapTextureTracker _mapTextureTracker = new();
@@ -137,53 +103,40 @@ public class MapLoader(
     private readonly SystemManager _systemManager =
         systemManager ?? throw new ArgumentNullException(nameof(systemManager));
 
-    private readonly MapLifecycleManager? _lifecycleManager = lifecycleManager;
+    // Initialize TilesetLoader (logger handled by MapLoader, so pass null)
+
+    // TMX Document cache to avoid redundant file reads and parsing
+    private readonly Dictionary<string, TmxDocument> _tmxDocumentCache = new();
+
+    // Initialize MapObjectSpawner using registry (lazy init to use already-created registry)
+    // Pass GameStateApi for flag-based NPC visibility at spawn time
+    private MapObjectSpawner? _mapObjectSpawnerBacking;
+
+    // MapPathResolver - initialized lazily since we need IContentProvider from DI
+    private MapPathResolver? _mapPathResolver;
 
     // Deferred loading services (optional - if not provided, falls back to async loading)
     // These are NOT readonly to allow property injection after construction
     // (breaks circular dependency: MapLoader -> MapPreparer -> MapLoader)
     private MapPreparer? _mapPreparer = mapPreparer;
-    private MapEntityApplier? _mapEntityApplier = mapEntityApplier;
 
-    // Initialize TilesetLoader (logger handled by MapLoader, so pass null)
-    private readonly TilesetLoader _tilesetLoader = new(
-        assetManager ?? throw new ArgumentNullException(nameof(assetManager)),
-        contentProvider ?? throw new ArgumentNullException(nameof(contentProvider))
-    );
-
-    // TMX Document cache to avoid redundant file reads and parsing
-    private readonly Dictionary<string, TmxDocument> _tmxDocumentCache = new();
-
-    // Track in-progress async document loading (similar to AssetManager._loadingTextures pattern)
-    private readonly ConcurrentDictionary<string, Task<TmxDocument>> _loadingDocuments = new();
+    private MapObjectSpawner _mapObjectSpawner =>
+        _mapObjectSpawnerBacking ??= new MapObjectSpawner(_entitySpawnerRegistry, gameStateApi);
 
     /// <summary>
     ///     Gets the TilesetLoader instance for external access.
     ///     Used by MapPreparer to load tilesets without circular dependency.
     /// </summary>
-    public TilesetLoader TilesetLoader => _tilesetLoader;
+    public TilesetLoader TilesetLoader { get; } = new(
+        assetManager ?? throw new ArgumentNullException(nameof(assetManager)),
+        contentProvider ?? throw new ArgumentNullException(nameof(contentProvider))
+    );
 
     /// <summary>
     ///     Gets the MapEntityApplier instance for wiring lifecycle manager.
     ///     Returns null if deferred loading is not configured.
     /// </summary>
-    public MapEntityApplier? MapEntityApplier => _mapEntityApplier;
-
-    /// <summary>
-    ///     Sets the deferred loading services after construction.
-    ///     This breaks the circular dependency: MapLoader creates TilesetLoader,
-    ///     then MapPreparer is created with MapLoader, then this method wires them together.
-    /// </summary>
-    /// <param name="preparer">The MapPreparer for background data preparation.</param>
-    /// <param name="applier">The MapEntityApplier for fast entity creation.</param>
-    public void SetDeferredServices(MapPreparer preparer, MapEntityApplier applier)
-    {
-        _mapPreparer = preparer ?? throw new ArgumentNullException(nameof(preparer));
-        _mapEntityApplier = applier ?? throw new ArgumentNullException(nameof(applier));
-        _logger?.LogInformation(
-            "Deferred loading services configured - background map preparation enabled"
-        );
-    }
+    public MapEntityApplier? MapEntityApplier { get; private set; } = mapEntityApplier;
 
     /// <summary>
     ///     Gets a cached TMX document or loads and caches it if not already loaded.
@@ -253,7 +206,7 @@ public class MapLoader(
         }
 
         // Start async load
-        var loadTask = LoadTmxDocumentAsync(fullPath);
+        Task<TmxDocument> loadTask = LoadTmxDocumentAsync(fullPath);
 
         // Track this task to avoid duplicate loads
         _loadingDocuments.TryAdd(fullPath, loadTask);
@@ -268,6 +221,55 @@ public class MapLoader(
             // Remove from tracking when complete
             _loadingDocuments.TryRemove(fullPath, out _);
         }
+    }
+
+    private static EntitySpawnerRegistry CreateSpawnerRegistry()
+    {
+        var registry = new EntitySpawnerRegistry();
+
+        // Register spawners in priority order (higher priority = checked first)
+        registry.Register(new WarpEntitySpawner());
+        registry.Register(new NpcSpawner());
+
+        return registry;
+    }
+
+    /// <summary>
+    ///     Gets the MapPathResolver instance, creating it lazily if needed.
+    ///     Requires IContentProvider to be available.
+    /// </summary>
+    private MapPathResolver GetMapPathResolver()
+    {
+        if (_mapPathResolver == null)
+        {
+            if (contentProvider == null)
+            {
+                throw new InvalidOperationException(
+                    "IContentProvider is required for MapPathResolver initialization. " +
+                    "Pass IContentProvider to MapLoader constructor."
+                );
+            }
+
+            _mapPathResolver = new MapPathResolver(_assetManager, contentProvider);
+        }
+
+        return _mapPathResolver;
+    }
+
+    /// <summary>
+    ///     Sets the deferred loading services after construction.
+    ///     This breaks the circular dependency: MapLoader creates TilesetLoader,
+    ///     then MapPreparer is created with MapLoader, then this method wires them together.
+    /// </summary>
+    /// <param name="preparer">The MapPreparer for background data preparation.</param>
+    /// <param name="applier">The MapEntityApplier for fast entity creation.</param>
+    public void SetDeferredServices(MapPreparer preparer, MapEntityApplier applier)
+    {
+        _mapPreparer = preparer ?? throw new ArgumentNullException(nameof(preparer));
+        MapEntityApplier = applier ?? throw new ArgumentNullException(nameof(applier));
+        _logger?.LogInformation(
+            "Deferred loading services configured - background map preparation enabled"
+        );
     }
 
     /// <summary>
@@ -466,7 +468,7 @@ public class MapLoader(
         {
             throw new InvalidOperationException(
                 "MapEntityService is required for definition-based map loading. "
-                    + "Use LoadMapEntities(world, mapPath) for file-based loading."
+                + "Use LoadMapEntities(world, mapPath) for file-based loading."
             );
         }
 
@@ -514,7 +516,7 @@ public class MapLoader(
         MapPathResolver pathResolver2 = GetMapPathResolver();
         string mapDirectoryBase =
             Path.GetDirectoryName(fullPath) ?? pathResolver2.ResolveMapDirectoryBase();
-        _tilesetLoader.LoadExternalTilesets(tmxDoc, mapDirectoryBase);
+        TilesetLoader.LoadExternalTilesets(tmxDoc, mapDirectoryBase);
 
         // Use scoped logging
         using (_logger?.BeginScope($"Loading:{mapDef.MapId}"))
@@ -540,7 +542,7 @@ public class MapLoader(
         {
             throw new InvalidOperationException(
                 "MapEntityService is required for definition-based map loading. "
-                    + "Use LoadMapEntities(world, mapPath) for file-based loading."
+                + "Use LoadMapEntities(world, mapPath) for file-based loading."
             );
         }
 
@@ -592,7 +594,7 @@ public class MapLoader(
         MapPathResolver pathResolver2 = GetMapPathResolver();
         string mapDirectoryBase =
             Path.GetDirectoryName(fullPath) ?? pathResolver2.ResolveMapDirectoryBase();
-        _tilesetLoader.LoadExternalTilesets(tmxDoc, mapDirectoryBase);
+        TilesetLoader.LoadExternalTilesets(tmxDoc, mapDirectoryBase);
 
         // Use scoped logging
         using (_logger?.BeginScope($"Loading:{mapDef.MapId}"))
@@ -618,7 +620,7 @@ public class MapLoader(
         {
             throw new InvalidOperationException(
                 "MapEntityService is required for definition-based map loading. "
-                    + "Use LoadMapEntities(world, mapPath) for file-based loading."
+                + "Use LoadMapEntities(world, mapPath) for file-based loading."
             );
         }
 
@@ -667,7 +669,7 @@ public class MapLoader(
         TmxDocument tmxDoc = await GetOrLoadTmxDocumentAsync(mapId);
 
         // Load external tileset files asynchronously (Tiled JSON format supports external tilesets)
-        await _tilesetLoader.LoadTilesetsAsync(tmxDoc, fullPath);
+        await TilesetLoader.LoadTilesetsAsync(tmxDoc, fullPath);
 
         // Use scoped logging
         using (_logger?.BeginScope($"LoadingAsync:{mapDef.MapId}"))
@@ -766,7 +768,7 @@ public class MapLoader(
             MapName = mapName,
             ImageLayerPath = Path.GetDirectoryName(mapDef.TiledDataPath) ?? "Tiled/Regions",
             LogIdentifier = mapDef.MapId.Value,
-            WorldOffset = worldOffset ?? Vector2.Zero,
+            WorldOffset = worldOffset ?? Vector2.Zero
         };
 
         return LoadMapEntitiesCore(
@@ -774,7 +776,7 @@ public class MapLoader(
             tmxDoc,
             context,
             () =>
-                _tilesetLoader.LoadTilesets(tmxDoc, tiledFullPath),
+                TilesetLoader.LoadTilesets(tmxDoc, tiledFullPath),
             (w, doc, id, name, tilesets) =>
                 _mapMetadataFactory.CreateMapMetadataFromDefinition(w, doc, mapDef, mapId, tilesets)
         );
@@ -818,7 +820,7 @@ public class MapLoader(
 
         if (loadedTilesets.Count > 0)
         {
-            var (count, tiles) = _layerProcessor.ProcessLayers(
+            (int count, List<Entity> tiles) = _layerProcessor.ProcessLayers(
                 world,
                 tmxDoc,
                 mapInfoEntity,
@@ -1077,7 +1079,7 @@ public class MapLoader(
         }
 
         _logger?.LogDebug("Starting async texture preload for map: {MapId}", mapId.Value);
-        _tilesetLoader.PreloadMapTexturesAsync(fullPath);
+        TilesetLoader.PreloadMapTexturesAsync(fullPath);
     }
 
     /// <summary>
@@ -1102,7 +1104,7 @@ public class MapLoader(
 
         // Try deferred loading path first (uses pre-prepared data from background thread)
         // Fixed: MapEntityApplier now creates TilesetInfo entities (was the missing piece)
-        if (_mapPreparer != null && _mapEntityApplier != null)
+        if (_mapPreparer != null && MapEntityApplier != null)
         {
             PreparedMapData? prepared = _mapPreparer.GetPrepared(mapId);
             if (prepared != null)
@@ -1111,7 +1113,7 @@ public class MapLoader(
                     "Using deferred loading for map {MapId} (prepared data available)",
                     mapId.Value
                 );
-                return _mapEntityApplier.ApplyPreparedMap(world, prepared);
+                return MapEntityApplier.ApplyPreparedMap(world, prepared);
             }
         }
 
@@ -1141,7 +1143,7 @@ public class MapLoader(
         }
 
         // Phase 1: Prepare on background thread (or get cached)
-        if (_mapPreparer == null || _mapEntityApplier == null)
+        if (_mapPreparer == null || MapEntityApplier == null)
         {
             // Fallback to regular async loading if deferred services not available
             _logger?.LogDebug(
@@ -1163,7 +1165,7 @@ public class MapLoader(
         _logger?.LogDebug("Map data prepared, applying to world: {MapId}", mapId.Value);
 
         // Phase 2: Apply on main thread (fast!)
-        Entity mapEntity = _mapEntityApplier.ApplyPreparedMap(world, prepared);
+        Entity mapEntity = MapEntityApplier.ApplyPreparedMap(world, prepared);
 
         _logger?.LogInformation("Deferred map load complete: {MapId}", mapId.Value);
 

@@ -56,11 +56,7 @@ public class LiveEntityInspector : Panel
             Id = Id + "_title",
             Text = "Entity Inspector",
             Color = theme.Info,
-            Constraint = new LayoutConstraint
-            {
-                Anchor = Anchor.TopLeft,
-                Margin = theme.PaddingMedium,
-            },
+            Constraint = new LayoutConstraint { Anchor = Anchor.TopLeft, Margin = theme.PaddingMedium }
         };
         AddChild(titleLabel);
 
@@ -76,7 +72,7 @@ public class LiveEntityInspector : Panel
                 OffsetY = 28,
                 WidthPercent = 0.9f,
                 Height = 30,
-                MarginLeft = theme.PaddingMedium,
+                MarginLeft = theme.PaddingMedium
             },
             OnSelectionChanged = index =>
             {
@@ -84,7 +80,7 @@ public class LiveEntityInspector : Panel
                 {
                     SelectEntity(AvailableEntities[index]);
                 }
-            },
+            }
         };
         AddChild(_entityDropdown);
 
@@ -99,9 +95,9 @@ public class LiveEntityInspector : Panel
                 OffsetY = 68,
                 Width = 100,
                 Height = 25,
-                MarginLeft = theme.PaddingMedium,
+                MarginLeft = theme.PaddingMedium
             },
-            OnClick = () => RefreshEntityData(),
+            OnClick = () => RefreshEntityData()
         };
         AddChild(refreshButton);
 
@@ -112,11 +108,8 @@ public class LiveEntityInspector : Panel
             Color = theme.TextDim,
             Constraint = new LayoutConstraint
             {
-                Anchor = Anchor.TopLeft,
-                OffsetY = 73,
-                OffsetX = 110,
-                MarginLeft = theme.PaddingMedium,
-            },
+                Anchor = Anchor.TopLeft, OffsetY = 73, OffsetX = 110, MarginLeft = theme.PaddingMedium
+            }
         };
         AddChild(_refreshLabel);
 
@@ -130,8 +123,8 @@ public class LiveEntityInspector : Panel
                 OffsetY = 105,
                 WidthPercent = 0.9f,
                 HeightPercent = 0.65f,
-                Margin = theme.PaddingMedium,
-            },
+                Margin = theme.PaddingMedium
+            }
         };
         AddChild(_propertiesScrollView);
     }
@@ -195,7 +188,7 @@ public class LiveEntityInspector : Panel
                 Id = Id + "_no_selection",
                 Text = "No entity selected",
                 Color = context.Theme.TextDim,
-                Constraint = new LayoutConstraint { Anchor = Anchor.TopLeft },
+                Constraint = new LayoutConstraint { Anchor = Anchor.TopLeft }
             };
             _propertiesScrollView.AddChild(noSelectionLabel);
             return;
@@ -210,12 +203,7 @@ public class LiveEntityInspector : Panel
             Id = Id + "_header",
             Text = $"Entity: {SelectedEntity.Name} (ID: {SelectedEntity.Id})",
             Color = context.Theme.Info,
-            Constraint = new LayoutConstraint
-            {
-                Anchor = Anchor.TopLeft,
-                OffsetY = yOffset,
-                Height = lineHeight,
-            },
+            Constraint = new LayoutConstraint { Anchor = Anchor.TopLeft, OffsetY = yOffset, Height = lineHeight }
         };
         _propertiesScrollView.AddChild(headerLabel);
         yOffset += lineHeight + 5;
@@ -230,10 +218,8 @@ public class LiveEntityInspector : Panel
                 Color = context.Theme.Success,
                 Constraint = new LayoutConstraint
                 {
-                    Anchor = Anchor.TopLeft,
-                    OffsetY = yOffset,
-                    Height = lineHeight,
-                },
+                    Anchor = Anchor.TopLeft, OffsetY = yOffset, Height = lineHeight
+                }
             };
             _propertiesScrollView.AddChild(propsHeaderLabel);
             yOffset += lineHeight;
@@ -247,10 +233,8 @@ public class LiveEntityInspector : Panel
                     Color = context.Theme.TextPrimary,
                     Constraint = new LayoutConstraint
                     {
-                        Anchor = Anchor.TopLeft,
-                        OffsetY = yOffset,
-                        Height = lineHeight,
-                    },
+                        Anchor = Anchor.TopLeft, OffsetY = yOffset, Height = lineHeight
+                    }
                 };
                 _propertiesScrollView.AddChild(propLabel);
                 yOffset += lineHeight;
@@ -269,10 +253,8 @@ public class LiveEntityInspector : Panel
                 Color = context.Theme.Warning,
                 Constraint = new LayoutConstraint
                 {
-                    Anchor = Anchor.TopLeft,
-                    OffsetY = yOffset,
-                    Height = lineHeight,
-                },
+                    Anchor = Anchor.TopLeft, OffsetY = yOffset, Height = lineHeight
+                }
             };
             _propertiesScrollView.AddChild(compsHeaderLabel);
             yOffset += lineHeight;
@@ -286,11 +268,8 @@ public class LiveEntityInspector : Panel
                     Color = context.Theme.Success,
                     Constraint = new LayoutConstraint
                     {
-                        Anchor = Anchor.TopLeft,
-                        OffsetY = yOffset,
-                        OffsetX = 10,
-                        Height = lineHeight,
-                    },
+                        Anchor = Anchor.TopLeft, OffsetY = yOffset, OffsetX = 10, Height = lineHeight
+                    }
                 };
                 _propertiesScrollView.AddChild(compLabel);
                 yOffset += lineHeight;

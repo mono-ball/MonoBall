@@ -54,6 +54,3 @@ public enum SceneState
     /// </summary>
     Disposed
 }
-
-
-

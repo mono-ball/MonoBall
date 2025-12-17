@@ -21,7 +21,9 @@ public class InitializeBehaviorSystemsStep : InitializationStepBase
             "Initializing behavior systems...",
             InitializationProgress.GameSystemsInitialized,
             InitializationProgress.GameSystemsInitialized
-        ) { }
+        )
+    {
+    }
 
     /// <inheritdoc />
     protected override async Task ExecuteStepAsync(
@@ -55,8 +57,8 @@ public class InitializeBehaviorSystemsStep : InitializationStepBase
             context.ScriptService,
             context.ApiProvider,
             eventBus,
-            gameDataContext,  // Pass GameDataContext for loading mod behaviors
-            context.GameInitializer.MapLifecycleManager  // Pass MapLifecycleManager for behavior cleanup
+            gameDataContext, // Pass GameDataContext for loading mod behaviors
+            context.GameInitializer.MapLifecycleManager // Pass MapLifecycleManager for behavior cleanup
         );
         await npcBehaviorInitializer.InitializeAsync();
 
@@ -72,7 +74,7 @@ public class InitializeBehaviorSystemsStep : InitializationStepBase
             context.ScriptService,
             context.ApiProvider,
             eventBus,
-            gameDataContext,  // Pass GameDataContext for loading mod behaviors
+            gameDataContext, // Pass GameDataContext for loading mod behaviors
             context.GameInitializer.CollisionService
         );
         await tileBehaviorInitializer.InitializeAsync();

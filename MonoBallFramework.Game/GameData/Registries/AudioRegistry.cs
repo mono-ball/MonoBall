@@ -14,9 +14,9 @@ namespace MonoBallFramework.Game.GameData.Registries;
 /// </summary>
 public class AudioRegistry : EfCoreRegistry<AudioEntity, GameAudioId>
 {
-    private readonly ConcurrentDictionary<string, AudioEntity> _trackIdCache = new();
     private readonly ConcurrentDictionary<string, List<AudioEntity>> _categoryCache = new();
     private readonly ConcurrentDictionary<string, List<AudioEntity>> _subcategoryCache = new();
+    private readonly ConcurrentDictionary<string, AudioEntity> _trackIdCache = new();
 
     public AudioRegistry(IDbContextFactory<GameDataContext> contextFactory, ILogger<AudioRegistry> logger)
         : base(contextFactory, logger)
@@ -49,14 +49,20 @@ public class AudioRegistry : EfCoreRegistry<AudioEntity, GameAudioId>
 
         // Cache by category
         if (!_categoryCache.ContainsKey(entity.Category))
+        {
             _categoryCache[entity.Category] = new List<AudioEntity>();
+        }
+
         _categoryCache[entity.Category].Add(entity);
 
         // Cache by subcategory if present
         if (!string.IsNullOrWhiteSpace(entity.Subcategory))
         {
             if (!_subcategoryCache.ContainsKey(entity.Subcategory))
+            {
                 _subcategoryCache[entity.Subcategory] = new List<AudioEntity>();
+            }
+
             _subcategoryCache[entity.Subcategory].Add(entity);
         }
     }
@@ -90,18 +96,22 @@ public class AudioRegistry : EfCoreRegistry<AudioEntity, GameAudioId>
     public AudioEntity? GetAudioByTrackId(string trackId)
     {
         if (string.IsNullOrWhiteSpace(trackId))
+        {
             return null;
+        }
 
         // O(1) lookup using track ID cache
-        if (_trackIdCache.TryGetValue(trackId, out var definition))
+        if (_trackIdCache.TryGetValue(trackId, out AudioEntity? definition))
+        {
             return definition;
+        }
 
         // If cache not loaded, query database
         if (!_isCacheLoaded)
         {
-            using var context = _contextFactory.CreateDbContext();
+            using GameDataContext context = _contextFactory.CreateDbContext();
             // TrackId is computed from AudioId, so we need to load all and filter in memory
-            var entity = context.Audios
+            AudioEntity? entity = context.Audios
                 .AsNoTracking()
                 .ToList()
                 .FirstOrDefault(a => a.TrackId == trackId);
@@ -147,10 +157,14 @@ public class AudioRegistry : EfCoreRegistry<AudioEntity, GameAudioId>
     public IEnumerable<AudioEntity> GetByCategory(string category)
     {
         if (string.IsNullOrWhiteSpace(category))
+        {
             return Enumerable.Empty<AudioEntity>();
+        }
 
-        if (_categoryCache.TryGetValue(category, out var cached))
+        if (_categoryCache.TryGetValue(category, out List<AudioEntity>? cached))
+        {
             return cached;
+        }
 
         return GetAll().Where(a => a.Category.Equals(category, StringComparison.OrdinalIgnoreCase));
     }
@@ -162,10 +176,14 @@ public class AudioRegistry : EfCoreRegistry<AudioEntity, GameAudioId>
     public IEnumerable<AudioEntity> GetBySubcategory(string subcategory)
     {
         if (string.IsNullOrWhiteSpace(subcategory))
+        {
             return Enumerable.Empty<AudioEntity>();
+        }
 
-        if (_subcategoryCache.TryGetValue(subcategory, out var cached))
+        if (_subcategoryCache.TryGetValue(subcategory, out List<AudioEntity>? cached))
+        {
             return cached;
+        }
 
         return GetAll().Where(a => subcategory.Equals(a.Subcategory, StringComparison.OrdinalIgnoreCase));
     }

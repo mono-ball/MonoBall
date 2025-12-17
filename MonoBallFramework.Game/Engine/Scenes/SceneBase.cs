@@ -75,10 +75,10 @@ public abstract class SceneBase : IScene
             {
                 // Validate state transition
                 SceneStateTransitions.ValidateTransition(_state, value);
-                
+
                 SceneState oldState = _state;
                 _state = value;
-                
+
                 Logger.LogDebug(
                     "Scene {SceneType} state transition: {OldState} → {NewState}",
                     GetType().Name,
@@ -142,20 +142,11 @@ public abstract class SceneBase : IScene
         }
 
         State = SceneState.Initializing;
-        
+
         // Perform initialization (override in derived classes)
         OnInitialize();
-        
-        State = SceneState.Initialized;
-    }
 
-    /// <summary>
-    ///     Override this method in derived classes to perform initialization.
-    ///     State transitions are handled automatically by the base class.
-    /// </summary>
-    protected virtual void OnInitialize()
-    {
-        // Default: No initialization needed
+        State = SceneState.Initialized;
     }
 
     /// <summary>
@@ -171,20 +162,11 @@ public abstract class SceneBase : IScene
         }
 
         State = SceneState.LoadingContent;
-        
+
         // Perform content loading (override in derived classes)
         OnLoadContent();
-        
-        State = SceneState.ContentLoaded;
-    }
 
-    /// <summary>
-    ///     Override this method in derived classes to load content.
-    ///     State transitions are handled automatically by the base class.
-    /// </summary>
-    protected virtual void OnLoadContent()
-    {
-        // Default: No content to load
+        State = SceneState.ContentLoaded;
     }
 
     /// <summary>
@@ -221,6 +203,24 @@ public abstract class SceneBase : IScene
     }
 
     /// <summary>
+    ///     Override this method in derived classes to perform initialization.
+    ///     State transitions are handled automatically by the base class.
+    /// </summary>
+    protected virtual void OnInitialize()
+    {
+        // Default: No initialization needed
+    }
+
+    /// <summary>
+    ///     Override this method in derived classes to load content.
+    ///     State transitions are handled automatically by the base class.
+    /// </summary>
+    protected virtual void OnLoadContent()
+    {
+        // Default: No content to load
+    }
+
+    /// <summary>
     ///     Disposes the scene and releases all resources.
     /// </summary>
     /// <param name="disposing">True if called from Dispose(), false if called from finalizer.</param>
@@ -252,8 +252,8 @@ public abstract class SceneBase : IScene
 }
 
 /// <summary>
-/// Minimal IGraphicsDeviceService implementation for ContentManager.
-/// ContentManager only needs the GraphicsDevice property.
+///     Minimal IGraphicsDeviceService implementation for ContentManager.
+///     ContentManager only needs the GraphicsDevice property.
 /// </summary>
 internal sealed class GraphicsDeviceServiceShim : IGraphicsDeviceService
 {

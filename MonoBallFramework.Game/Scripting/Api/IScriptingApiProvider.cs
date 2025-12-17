@@ -35,9 +35,8 @@ public interface IScriptingApiProvider
     IDialogueApi Dialogue { get; }
 
     /// <summary>
-    
+
     /// </summary>
-    
 
     #endregion
 

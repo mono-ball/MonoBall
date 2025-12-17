@@ -85,15 +85,15 @@ Outline files are **tile sheets** containing individual 8×8 pixel tiles used to
 - **TileWidth/TileHeight**: Size of each tile (8×8 for GBA)
 - **TileCount**: Total number of tiles (30 for pokeemerald popups)
 - **Tiles**: Array of tile definitions with positions
-  - **Index**: Tile number (0-29)
-  - **X/Y**: Position in the sprite sheet
-  - **Width/Height**: Size of this tile (8×8)
+    - **Index**: Tile number (0-29)
+    - **X/Y**: Position in the sprite sheet
+    - **Width/Height**: Size of this tile (8×8)
 - **TileUsage**: Maps tile indices to their purpose in the frame
-  - **TopEdge**: Tiles for top border (12 tiles)
-  - **LeftTopCorner/RightTopCorner**: Corner tiles
-  - **LeftMiddle/RightMiddle**: Vertical edge tiles
-  - **LeftBottomCorner/RightBottomCorner**: Corner tiles
-  - **BottomEdge**: Tiles for bottom border (12 tiles)
+    - **TopEdge**: Tiles for top border (12 tiles)
+    - **LeftTopCorner/RightTopCorner**: Corner tiles
+    - **LeftMiddle/RightMiddle**: Vertical edge tiles
+    - **LeftBottomCorner/RightBottomCorner**: Corner tiles
+    - **BottomEdge**: Tiles for bottom border (12 tiles)
 
 ## Tile Sheet Layout
 
@@ -137,7 +137,8 @@ These tile sheets match pokeemerald's GBA tile-based rendering:
 - **30 tiles total**: 960 bytes in .4bpp format (4 bits per pixel)
 - **Assembly at runtime**: Game places individual tiles to build the frame
 
-This differs from modern 9-slice sprites which use continuous image regions. The tile-based approach was necessary for GBA's hardware limitations.
+This differs from modern 9-slice sprites which use continuous image regions. The tile-based approach was necessary for
+GBA's hardware limitations.
 
 ## Usage in PokeSharp
 

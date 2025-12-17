@@ -1,7 +1,9 @@
 using Arch.Core;
 using Microsoft.Extensions.Logging;
+using MonoBallFramework.Game.Ecs.Components.Common;
 using MonoBallFramework.Game.Ecs.Components.Movement;
 using MonoBallFramework.Game.Ecs.Components.NPCs;
+using MonoBallFramework.Game.Ecs.Components.Rendering;
 using MonoBallFramework.Game.Engine.Core.Types;
 using MonoBallFramework.Game.Scripting.Api;
 using EcsQueries = MonoBallFramework.Game.Engine.Systems.Queries.Queries;
@@ -61,23 +63,23 @@ public class EntityApiService(
         );
 
         // Create entity with basic components directly
-        var entity = _world.Create(
-            new MonoBallFramework.Game.Ecs.Components.Movement.Position(x, y),
-            new MonoBallFramework.Game.Ecs.Components.Rendering.Sprite(spriteId),
-            new MonoBallFramework.Game.Ecs.Components.Movement.GridMovement(),
-            new MonoBallFramework.Game.Ecs.Components.Rendering.Visible()
+        Entity entity = _world.Create(
+            new Position(x, y),
+            new Sprite(spriteId),
+            new GridMovement(),
+            new Visible()
         );
 
         // Add behavior if specified
         if (behaviorId != null)
         {
-            _world.Add(entity, new MonoBallFramework.Game.Ecs.Components.NPCs.Behavior(behaviorId.ToString()));
+            _world.Add(entity, new Behavior(behaviorId.ToString()));
         }
 
         // Add display name if specified
         if (!string.IsNullOrWhiteSpace(displayName))
         {
-            _world.Add(entity, new MonoBallFramework.Game.Ecs.Components.Common.Name(displayName));
+            _world.Add(entity, new Name(displayName));
         }
 
         _logger.LogDebug("Created generic NPC entity {EntityId} at ({X}, {Y})", entity.Id, x, y);
@@ -120,7 +122,7 @@ public class EntityApiService(
         {
             _logger.LogWarning(
                 "Delayed destruction requested for entity {EntityId} with delay {Delay}s, " +
-                    "but scheduler not yet implemented - destroying immediately",
+                "but scheduler not yet implemented - destroying immediately",
                 entity.Id,
                 delaySeconds
             );
@@ -155,7 +157,9 @@ public class EntityApiService(
     public Entity[] FindEntitiesByTag(string tag)
     {
         if (string.IsNullOrWhiteSpace(tag))
+        {
             return [];
+        }
 
         _logger.LogDebug("Finding entities with tag: {Tag}", tag);
 
@@ -175,7 +179,7 @@ public class EntityApiService(
             {
                 int dx = position.X - centerX;
                 int dy = position.Y - centerY;
-                int distanceSquared = dx * dx + dy * dy;
+                int distanceSquared = (dx * dx) + (dy * dy);
 
                 if (distanceSquared <= radiusSquared)
                 {
@@ -219,7 +223,9 @@ public class EntityApiService(
     public GameNpcId? GetNpcId(Entity entity)
     {
         if (!_world.IsAlive(entity))
+        {
             return null;
+        }
 
         if (_world.Has<Npc>(entity))
         {

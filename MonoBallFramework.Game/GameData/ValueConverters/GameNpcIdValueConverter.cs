@@ -13,11 +13,13 @@ public class GameNpcIdValueConverter : ValueConverter<GameNpcId, string>
         : base(
             v => v.Value,
             v => ConvertFromString(v)
-        ) { }
+        )
+    {
+    }
 
     private static GameNpcId ConvertFromString(string value)
     {
-        return GameNpcId.TryCreate(value) ?? GameNpcId.Create(value, null);
+        return GameNpcId.TryCreate(value) ?? GameNpcId.Create(value);
     }
 }
 
@@ -30,7 +32,9 @@ public class NullableGameNpcIdValueConverter : ValueConverter<GameNpcId?, string
         : base(
             v => v != null ? v.Value : null,
             v => ConvertFromString(v)
-        ) { }
+        )
+    {
+    }
 
     private static GameNpcId? ConvertFromString(string? value)
     {

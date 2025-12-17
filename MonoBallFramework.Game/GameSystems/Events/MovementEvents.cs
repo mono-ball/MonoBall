@@ -1,6 +1,7 @@
 using Arch.Core;
 using Microsoft.Xna.Framework;
 using MonoBallFramework.Game.Ecs.Components.Movement;
+using MonoBallFramework.Game.Engine.Core.Events;
 using MonoBallFramework.Game.Engine.Core.Types;
 using MonoBallFramework.Game.Engine.Core.Types.Events;
 
@@ -35,7 +36,7 @@ public abstract record MovementEventBase : TypeEventBase
 ///     Can be cancelled by handlers (e.g., for cutscenes, menus, mods).
 ///     This is the FIRST event in the movement pipeline.
 /// </summary>
-public record MovementStartedEvent : MovementEventBase, MonoBallFramework.Game.Engine.Core.Events.ICancellableEvent
+public record MovementStartedEvent : MovementEventBase, ICancellableEvent
 {
     /// <summary>
     ///     Target grid position where entity will move to.
@@ -46,6 +47,11 @@ public record MovementStartedEvent : MovementEventBase, MonoBallFramework.Game.E
     ///     Direction of movement.
     /// </summary>
     public Direction Direction { get; set; }
+
+    /// <summary>
+    ///     Starting pixel position (for interpolation tracking).
+    /// </summary>
+    public Vector2 StartPosition { get; set; }
 
     /// <summary>
     ///     Whether this event has been cancelled by a handler.
@@ -60,11 +66,6 @@ public record MovementStartedEvent : MovementEventBase, MonoBallFramework.Game.E
     public string? CancellationReason { get; set; }
 
     /// <summary>
-    ///     Starting pixel position (for interpolation tracking).
-    /// </summary>
-    public Vector2 StartPosition { get; set; }
-
-    /// <summary>
     ///     Unique identifier for this event instance (required by IGameEvent).
     /// </summary>
     public Guid EventId { get; set; } = Guid.NewGuid();
@@ -73,7 +74,7 @@ public record MovementStartedEvent : MovementEventBase, MonoBallFramework.Game.E
     ///     UTC timestamp when this event was created (required by IGameEvent).
     ///     Note: TypeEventBase also has a float Timestamp property for game time.
     /// </summary>
-    DateTime MonoBallFramework.Game.Engine.Core.Events.IGameEvent.Timestamp { get; set; } = DateTime.UtcNow;
+    DateTime IGameEvent.Timestamp { get; set; } = DateTime.UtcNow;
 
     /// <summary>
     ///     Cancels this movement event.

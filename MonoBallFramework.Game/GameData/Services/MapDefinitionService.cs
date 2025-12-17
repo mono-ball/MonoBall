@@ -47,7 +47,7 @@ public class MapEntityService
                 .Where(m => m.MapType != null)
                 .GroupBy(m => m.MapType!)
                 .Select(g => new { Type = g.Key, Count = g.Count() })
-                .ToDictionaryAsync(x => x.Type, x => x.Count),
+                .ToDictionaryAsync(x => x.Type, x => x.Count)
         };
 
         return stats;
@@ -134,7 +134,7 @@ public class MapEntityService
             MapDirection.South => map.SouthMapId,
             MapDirection.East => map.EastMapId,
             MapDirection.West => map.WestMapId,
-            _ => null,
+            _ => null
         };
 
         return connectedMapId != null ? GetMap(connectedMapId) : null;
@@ -181,7 +181,7 @@ public enum MapDirection
     North,
     South,
     East,
-    West,
+    West
 }
 
 /// <summary>

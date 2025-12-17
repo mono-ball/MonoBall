@@ -5,13 +5,13 @@ using MonoBallFramework.Game.Engine.Rendering.Configuration;
 namespace MonoBallFramework.Game.Engine.Rendering.Services;
 
 /// <summary>
-/// Default implementation of IRenderingService.
-/// Manages shared rendering resources with proper lifecycle.
+///     Default implementation of IRenderingService.
+///     Manages shared rendering resources with proper lifecycle.
 /// </summary>
 public class RenderingService : IRenderingService
 {
-    private readonly ILogger<RenderingService> _logger;
     private readonly RenderingConfiguration _config;
+    private readonly ILogger<RenderingService> _logger;
     private bool _disposed;
 
     public RenderingService(
@@ -36,7 +36,10 @@ public class RenderingService : IRenderingService
 
     public void Dispose()
     {
-        if (_disposed) return;
+        if (_disposed)
+        {
+            return;
+        }
 
         SpriteBatch?.Dispose();
         _disposed = true;

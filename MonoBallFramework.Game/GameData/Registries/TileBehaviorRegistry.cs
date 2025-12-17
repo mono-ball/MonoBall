@@ -43,9 +43,12 @@ public class TileBehaviorRegistry : EfCoreRegistry<TileBehaviorEntity, GameTileB
     protected override void OnEntityCached(GameTileBehaviorId key, TileBehaviorEntity entity)
     {
         // Cache by behavior flags for fast lookups by behavior type
-        var flags = entity.BehaviorFlags;
+        TileBehaviorFlags flags = entity.BehaviorFlags;
         if (!_flagsCache.ContainsKey(flags))
+        {
             _flagsCache[flags] = new List<TileBehaviorEntity>();
+        }
+
         _flagsCache[flags].Add(entity);
     }
 
@@ -94,8 +97,10 @@ public class TileBehaviorRegistry : EfCoreRegistry<TileBehaviorEntity, GameTileB
     /// <param name="flags">The behavior flags to match.</param>
     public IEnumerable<TileBehaviorEntity> GetByFlags(TileBehaviorFlags flags)
     {
-        if (_flagsCache.TryGetValue(flags, out var cached))
+        if (_flagsCache.TryGetValue(flags, out List<TileBehaviorEntity>? cached))
+        {
             return cached;
+        }
 
         return GetAll().Where(tb => tb.BehaviorFlags == flags);
     }

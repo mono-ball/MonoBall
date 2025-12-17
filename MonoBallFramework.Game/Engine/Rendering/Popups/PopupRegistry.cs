@@ -22,8 +22,8 @@ namespace MonoBallFramework.Game.Engine.Rendering.Popups;
 public class PopupRegistry
 {
     private readonly PopupBackgroundRegistry _backgroundRegistry;
-    private readonly PopupOutlineRegistry _outlineRegistry;
     private readonly ILogger<PopupRegistry> _logger;
+    private readonly PopupOutlineRegistry _outlineRegistry;
     private string _defaultBackgroundId;
     private string _defaultOutlineId;
 
@@ -44,7 +44,7 @@ public class PopupRegistry
 
         _logger = logger;
 
-        var opts = options.Value;
+        PopupRegistryOptions opts = options.Value;
         _defaultBackgroundId = opts.DefaultBackgroundId;
         _defaultOutlineId = opts.DefaultOutlineId;
 
@@ -105,7 +105,7 @@ public class PopupRegistry
             "GetBackground called for ID='{BackgroundId}', CacheLoaded={CacheLoaded}, CacheCount={Count}",
             backgroundId, _backgroundRegistry.IsLoaded, BackgroundCount);
 
-        var result = _backgroundRegistry.GetBackground(backgroundId);
+        PopupBackgroundEntity? result = _backgroundRegistry.GetBackground(backgroundId);
 
         if (result != null)
         {
@@ -131,7 +131,7 @@ public class PopupRegistry
             "GetOutline called for ID='{OutlineId}', CacheLoaded={CacheLoaded}, CacheCount={Count}",
             outlineId, _outlineRegistry.IsLoaded, OutlineCount);
 
-        var result = _outlineRegistry.GetOutline(outlineId);
+        PopupOutlineEntity? result = _outlineRegistry.GetOutline(outlineId);
 
         if (result != null)
         {

@@ -10,10 +10,10 @@ namespace MonoBallFramework.Game.Engine.UI.Components.Debug;
 public class EntitiesPanelDualPaneBuilder
 {
     private bool _autoUpdate = true;
-    private double _updateInterval = 2.0;
-    private float _splitRatio = 0.4f;
-    private Func<IEnumerable<EntityInfo>>? _entityProvider;
     private Func<int, EntityInfo, EntityInfo?>? _entityDetailLoader;
+    private Func<IEnumerable<EntityInfo>>? _entityProvider;
+    private float _splitRatio = 0.4f;
+    private double _updateInterval = 2.0;
 
     public static EntitiesPanelDualPaneBuilder Create()
     {
@@ -73,14 +73,12 @@ public class EntitiesPanelDualPaneBuilder
     {
         var statusBar = new StatusBar("entities_dual_status")
         {
-            Constraint = new LayoutConstraint { Anchor = Anchor.StretchBottom },
+            Constraint = new LayoutConstraint { Anchor = Anchor.StretchBottom }
         };
 
         var panel = new EntitiesPanelDualPane(statusBar)
         {
-            AutoUpdate = _autoUpdate,
-            UpdateInterval = _updateInterval,
-            SplitRatio = _splitRatio,
+            AutoUpdate = _autoUpdate, UpdateInterval = _updateInterval, SplitRatio = _splitRatio
         };
 
         if (_entityProvider != null)

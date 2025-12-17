@@ -74,5 +74,5 @@ public enum TileBehaviorFlags
     /// <summary>
     ///     Prevents running on this tile.
     /// </summary>
-    DisablesRunning = 1 << 4,
+    DisablesRunning = 1 << 4
 }

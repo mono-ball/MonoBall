@@ -22,7 +22,7 @@ public class TextEditor : UIComponent, ITextInput
         { '[', ']' },
         { '{', '}' },
         { '"', '"' },
-        { '\'', '\'' },
+        { '\'', '\'' }
     };
 
     // Code snippets with VS Code-style tabstops
@@ -41,10 +41,7 @@ public class TextEditor : UIComponent, ITextInput
             "switch (${1:expression})\n{\n    case ${2:value}:\n        $0\n        break;\n    default:\n        break;\n}"
         },
         { "try", "try\n{\n    $0\n}\ncatch (${1:Exception} ${2:ex})\n{\n    \n}" },
-        {
-            "trycf",
-            "try\n{\n    $0\n}\ncatch (${1:Exception} ${2:ex})\n{\n    \n}\nfinally\n{\n    \n}"
-        },
+        { "trycf", "try\n{\n    $0\n}\ncatch (${1:Exception} ${2:ex})\n{\n    \n}\nfinally\n{\n    \n}" },
         { "cw", "Console.WriteLine(${1:\"$0\"});" },
         { "print", "Print(${1:$0});" },
         { "var", "var ${1:name} = ${2:value};$0" },
@@ -54,12 +51,9 @@ public class TextEditor : UIComponent, ITextInput
         { "class", "public class ${1:ClassName}\n{\n    $0\n}" },
         { "interface", "public interface ${1:IName}\n{\n    $0\n}" },
         { "method", "public ${1:void} ${2:MethodName}(${3:parameters})\n{\n    $0\n}" },
-        {
-            "async",
-            "public async Task${1:<T>} ${2:MethodName}Async(${3:parameters})\n{\n    $0\n}"
-        },
+        { "async", "public async Task${1:<T>} ${2:MethodName}Async(${3:parameters})\n{\n    $0\n}" },
         { "lambda", "(${1:x}) => ${2:expression}$0" },
-        { "linq", "${1:collection}.Where(${2:x} => ${3:condition})$0" },
+        { "linq", "${1:collection}.Where(${2:x} => ${3:condition})$0" }
     };
 
     // Command history
@@ -733,11 +727,7 @@ public class TextEditor : UIComponent, ITextInput
         // Set up the snippet session
         if (tabStops.Count > 0)
         {
-            _activeSnippet = new SnippetSession
-            {
-                StartLine = _cursorLine,
-                StartColumn = wordStart,
-            };
+            _activeSnippet = new SnippetSession { StartLine = _cursorLine, StartColumn = wordStart };
 
             // Adjust tabstop positions based on beforeWord offset
             foreach (
@@ -831,7 +821,7 @@ public class TextEditor : UIComponent, ITextInput
                                 StartColumn = currentColumn,
                                 EndColumn = currentColumn + defaultValue.Length,
                                 DefaultValue = defaultValue,
-                                IsFinalPosition = tabIndex == 0,
+                                IsFinalPosition = tabIndex == 0
                             };
                             tabStops.Add(ts);
 
@@ -866,7 +856,7 @@ public class TextEditor : UIComponent, ITextInput
                             StartColumn = currentColumn,
                             EndColumn = currentColumn + defaultValue.Length,
                             DefaultValue = defaultValue,
-                            IsFinalPosition = tabIndex == 0,
+                            IsFinalPosition = tabIndex == 0
                         };
                         tabStops.Add(ts);
 

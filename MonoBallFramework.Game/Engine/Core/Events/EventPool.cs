@@ -110,7 +110,7 @@ public sealed class EventPool<TEvent>
             TotalReturned = _totalReturned,
             TotalCreated = _totalCreated,
             CurrentlyInUse = _totalRented - _totalReturned,
-            ReuseRate = _totalRented > 0 ? 1.0 - ((double)_totalCreated / _totalRented) : 0.0,
+            ReuseRate = _totalRented > 0 ? 1.0 - ((double)_totalCreated / _totalRented) : 0.0
         };
     }
 

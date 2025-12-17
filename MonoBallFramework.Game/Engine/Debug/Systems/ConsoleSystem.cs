@@ -9,7 +9,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using MonoBallFramework.Game.GameData;
 using MonoBallFramework.Game.Ecs.Components.Relationships;
 using MonoBallFramework.Game.Engine.Core.Events;
 using MonoBallFramework.Game.Engine.Core.Services;
@@ -32,6 +31,7 @@ using MonoBallFramework.Game.Engine.UI.Core;
 using MonoBallFramework.Game.Engine.UI.Models;
 using MonoBallFramework.Game.Engine.UI.Scenes;
 using MonoBallFramework.Game.Engine.UI.Utilities;
+using MonoBallFramework.Game.GameData;
 using MonoBallFramework.Game.Scripting.Api;
 
 namespace MonoBallFramework.Game.Engine.Debug.Systems;
@@ -44,6 +44,10 @@ public class ConsoleSystem : IUpdateSystem
 {
     private const int MaxPersistentLogs = 5000;
     private const int CompletionDebounceMs = 50;
+
+    // Persistent output buffer - stores console output even when console is closed
+    // Must match ConsolePanelBuilder._maxOutputLines (5000)
+    private const int MaxPersistentOutput = 5000;
     private readonly IScriptingApiProvider _apiProvider;
     private readonly GraphicsDevice _graphicsDevice;
     private readonly object _logBufferLock = new();
@@ -52,6 +56,7 @@ public class ConsoleSystem : IUpdateSystem
 
     // Multi-line input buffer for incomplete statements (like for loops)
     private readonly StringBuilder _multiLineBuffer = new();
+    private readonly object _outputBufferLock = new();
 
     // Persistent log buffer - stores logs even when console is closed
     private readonly List<(
@@ -59,12 +64,8 @@ public class ConsoleSystem : IUpdateSystem
         string Message,
         string Category,
         DateTime Timestamp
-    )> _persistentLogBuffer = new();
+        )> _persistentLogBuffer = new();
 
-    // Persistent output buffer - stores console output even when console is closed
-    // Must match ConsolePanelBuilder._maxOutputLines (5000)
-    private const int MaxPersistentOutput = 5000;
-    private readonly object _outputBufferLock = new();
     private readonly List<(string Text, Color Color)> _persistentOutputBuffer = new();
 
     private readonly SceneManager _sceneManager;
@@ -190,8 +191,7 @@ public class ConsoleSystem : IUpdateSystem
             {
                 // Logs only go to the Logs panel, not the console output
                 // Set up log entry handler for the Logs panel
-                _loggerProvider.SetLogEntryHandler(
-                    (level, message, category) =>
+                _loggerProvider.SetLogEntryHandler((level, message, category) =>
                     {
                         // Only buffer logs if logging is enabled
                         if (!_loggingEnabled)
@@ -657,21 +657,7 @@ public class ConsoleSystem : IUpdateSystem
         // C# code indicators that suggest this is NOT a simple command
         string[] csharpIndicators = new[]
         {
-            "=",
-            "{",
-            "}",
-            "(",
-            ")",
-            "[",
-            "]",
-            "=>",
-            "++",
-            "--",
-            "&&",
-            "||",
-            "<<",
-            ">>",
-            "::",
+            "=", "{", "}", "(", ")", "[", "]", "=>", "++", "--", "&&", "||", "<<", ">>", "::"
         };
         foreach (string indicator in csharpIndicators)
         {
@@ -686,37 +672,9 @@ public class ConsoleSystem : IUpdateSystem
             input.Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? "";
         string[] csharpKeywords = new[]
         {
-            "var",
-            "int",
-            "float",
-            "double",
-            "string",
-            "bool",
-            "if",
-            "else",
-            "for",
-            "foreach",
-            "while",
-            "do",
-            "switch",
-            "try",
-            "catch",
-            "finally",
-            "throw",
-            "return",
-            "class",
-            "struct",
-            "interface",
-            "enum",
-            "namespace",
-            "using",
-            "new",
-            "public",
-            "private",
-            "protected",
-            "static",
-            "async",
-            "await",
+            "var", "int", "float", "double", "string", "bool", "if", "else", "for", "foreach", "while", "do",
+            "switch", "try", "catch", "finally", "throw", "return", "class", "struct", "interface", "enum",
+            "namespace", "using", "new", "public", "private", "protected", "static", "async", "await"
         };
         if (csharpKeywords.Contains(firstWord, StringComparer.Ordinal))
         {
@@ -819,11 +777,11 @@ public class ConsoleSystem : IUpdateSystem
                                     Name = param.Name ?? string.Empty,
                                     Type = param.Type,
                                     IsOptional = param.IsOptional,
-                                    DefaultValue = param.DefaultValue ?? string.Empty,
+                                    DefaultValue = param.DefaultValue ?? string.Empty
                                 })
-                                .ToList(),
+                                .ToList()
                         })
-                        .ToList(),
+                        .ToList()
                 };
 
                 _consoleScene?.SetParameterHints(uiHints, methodCallInfo.Value.ParameterIndex);
@@ -1639,7 +1597,7 @@ public class ConsoleSystem : IUpdateSystem
                         Properties = new Dictionary<string, string> { ["Components"] = "?" },
                         ComponentData = new Dictionary<string, Dictionary<string, string>>(),
                         Relationships = new Dictionary<string, List<EntityRelationship>>(),
-                        Tag = null,
+                        Tag = null
                     };
                     result.Add(info);
                 }
@@ -1718,6 +1676,7 @@ public class ConsoleSystem : IUpdateSystem
         {
             _logger.LogWarning(ex, "Error getting entity IDs");
         }
+
         return ids;
     }
 
@@ -1760,7 +1719,7 @@ public class ConsoleSystem : IUpdateSystem
                     Properties = new Dictionary<string, string> { ["Components"] = components.Count.ToString() },
                     ComponentData = new Dictionary<string, Dictionary<string, string>>(), // Loaded on-demand
                     Relationships = new Dictionary<string, List<EntityRelationship>>(), // Loaded on-demand
-                    Tag = DetermineEntityTag(components),
+                    Tag = DetermineEntityTag(components)
                 };
                 result.Add(info);
             }
@@ -1773,6 +1732,7 @@ public class ConsoleSystem : IUpdateSystem
         {
             _logger.LogWarning(ex, "Error loading entity range {Start}-{Count}", startIndex, count);
         }
+
         return result;
     }
 
@@ -1802,6 +1762,7 @@ public class ConsoleSystem : IUpdateSystem
         {
             _logger.LogWarning(ex, "Error getting unique entity tags");
         }
+
         return tags;
     }
 
@@ -1830,8 +1791,7 @@ public class ConsoleSystem : IUpdateSystem
             {
                 cache[entity.Id] = new EntityCacheEntry
                 {
-                    Name = $"Entity_{entity.Id}",
-                    Components = new List<string>(),
+                    Name = $"Entity_{entity.Id}", Components = new List<string>()
                 };
             }
         }
@@ -1929,7 +1889,7 @@ public class ConsoleSystem : IUpdateSystem
             Components = new List<string>(),
             Properties = new Dictionary<string, string>(),
             ComponentData = new Dictionary<string, Dictionary<string, string>>(),
-            Relationships = new Dictionary<string, List<EntityRelationship>>(),
+            Relationships = new Dictionary<string, List<EntityRelationship>>()
         };
 
         try
@@ -1937,11 +1897,7 @@ public class ConsoleSystem : IUpdateSystem
             // Use cached component detection
             EntityCacheEntry cacheEntry = entityCache.GetValueOrDefault(
                 entity.Id,
-                new EntityCacheEntry
-                {
-                    Name = $"Entity_{entity.Id}",
-                    Components = new List<string>(),
-                }
+                new EntityCacheEntry { Name = $"Entity_{entity.Id}", Components = new List<string>() }
             );
 
             info.Components = cacheEntry.Components;
@@ -2070,8 +2026,7 @@ public class ConsoleSystem : IUpdateSystem
                     {
                         childList.Add(new EntityRelationship
                         {
-                            EntityId = childEntity.Id,
-                            EntityName = $"Entity_{childEntity.Id}",
+                            EntityId = childEntity.Id, EntityName = $"Entity_{childEntity.Id}"
                         });
                     }
                 }
@@ -2095,8 +2050,7 @@ public class ConsoleSystem : IUpdateSystem
                     {
                         ownedList.Add(new EntityRelationship
                         {
-                            EntityId = ownedEntity.Id,
-                            EntityName = $"Entity_{ownedEntity.Id}",
+                            EntityId = ownedEntity.Id, EntityName = $"Entity_{ownedEntity.Id}"
                         });
                     }
                 }
@@ -2182,7 +2136,7 @@ public class ConsoleSystem : IUpdateSystem
                         entityCache.GetValueOrDefault(childEntity.Id)?.Name
                         ?? $"Entity_{childEntity.Id}",
                     IsValid = true,
-                    Metadata = new Dictionary<string, string>(),
+                    Metadata = new Dictionary<string, string>()
                 };
 
                 ParentOf relationshipData = entity.GetRelationship<ParentOf>(childEntity);
@@ -2239,7 +2193,7 @@ public class ConsoleSystem : IUpdateSystem
                         entityCache.GetValueOrDefault(ownedEntity.Id)?.Name
                         ?? $"Entity_{ownedEntity.Id}",
                     IsValid = true,
-                    Metadata = new Dictionary<string, string>(),
+                    Metadata = new Dictionary<string, string>()
                 };
 
                 OwnerOf relationshipData = entity.GetRelationship<OwnerOf>(ownedEntity);
@@ -2296,7 +2250,7 @@ public class ConsoleSystem : IUpdateSystem
                         entityCache.GetValueOrDefault(potentialParent.Id)?.Name
                         ?? $"Entity_{potentialParent.Id}",
                     IsValid = true,
-                    Metadata = new Dictionary<string, string>(),
+                    Metadata = new Dictionary<string, string>()
                 };
 
                 ParentOf relationshipData = potentialParent.GetRelationship<ParentOf>(entity);
@@ -2352,7 +2306,7 @@ public class ConsoleSystem : IUpdateSystem
                         entityCache.GetValueOrDefault(potentialOwner.Id)?.Name
                         ?? $"Entity_{potentialOwner.Id}",
                     IsValid = true,
-                    Metadata = new Dictionary<string, string>(),
+                    Metadata = new Dictionary<string, string>()
                 };
 
                 OwnerOf relationshipData = potentialOwner.GetRelationship<OwnerOf>(entity);

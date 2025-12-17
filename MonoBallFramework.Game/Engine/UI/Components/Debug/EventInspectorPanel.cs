@@ -118,7 +118,7 @@ public class EventInspectorPanel : DebugPanelBase, IEventInspectorOperations
         int TotalSubscribers,
         double SlowestEventMs,
         string SlowestEventName
-    ) GetStatistics()
+        ) GetStatistics()
     {
         return _content.GetStatistics();
     }
@@ -141,14 +141,14 @@ public class EventInspectorPanel : DebugPanelBase, IEventInspectorOperations
             int TotalSubscribers,
             double SlowestEventMs,
             string SlowestEventName
-        ) stats = _content.GetStatistics();
+            ) stats = _content.GetStatistics();
         var sb = new StringBuilder();
         sb.AppendLine($"# Event Inspector Export - {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
         sb.AppendLine($"# Total Events: {stats.EventCount}");
         sb.AppendLine($"# Total Subscribers: {stats.TotalSubscribers}");
         sb.AppendLine($"# Slowest Event: {stats.SlowestEventName} ({stats.SlowestEventMs:F3}ms)");
         sb.AppendLine();
-        sb.AppendLine($"{"Event Type", -50} {"Subscribers", 12} {"Avg (ms)", 12} {"Max (ms)", 12}");
+        sb.AppendLine($"{"Event Type",-50} {"Subscribers",12} {"Avg (ms)",12} {"Max (ms)",12}");
         sb.AppendLine(new string('-', 88));
 
         // Note: Full event list would require caching in content
@@ -168,7 +168,7 @@ public class EventInspectorPanel : DebugPanelBase, IEventInspectorOperations
             int TotalSubscribers,
             double SlowestEventMs,
             string SlowestEventName
-        ) stats = _content.GetStatistics();
+            ) stats = _content.GetStatistics();
         var sb = new StringBuilder();
         sb.AppendLine("Metric,Value");
         sb.AppendLine($"TotalEvents,{stats.EventCount}");
@@ -207,7 +207,7 @@ public class EventInspectorPanel : DebugPanelBase, IEventInspectorOperations
             int TotalSubscribers,
             double SlowestEventMs,
             string SlowestEventName
-        ) stats = _content.GetStatistics();
+            ) stats = _content.GetStatistics();
         UITheme theme = ThemeManager.Current;
 
         // Determine health indicator based on slowest event time

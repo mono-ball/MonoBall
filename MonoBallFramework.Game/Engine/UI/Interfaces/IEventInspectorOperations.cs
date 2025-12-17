@@ -65,7 +65,7 @@ public interface IEventInspectorOperations
         int TotalSubscribers,
         double SlowestEventMs,
         string SlowestEventName
-    ) GetStatistics();
+        ) GetStatistics();
 
     /// <summary>
     ///     Gets the current event inspector data including all event types.

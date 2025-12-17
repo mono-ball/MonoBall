@@ -15,7 +15,7 @@ public enum ProfilerSortMode
     ByMaxTime,
 
     /// <summary>Sort alphabetically by name.</summary>
-    ByName,
+    ByName
 }
 
 /// <summary>

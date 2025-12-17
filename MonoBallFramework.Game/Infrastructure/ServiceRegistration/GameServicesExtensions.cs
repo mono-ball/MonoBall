@@ -5,7 +5,6 @@ using MonoBallFramework.Game.Engine.Content;
 using MonoBallFramework.Game.Engine.Core.Events;
 using MonoBallFramework.Game.Engine.Core.Services;
 using MonoBallFramework.Game.Engine.Rendering.Services;
-using MonoBallFramework.Game.Engine.Scenes.Factories;
 using MonoBallFramework.Game.Engine.Systems.Management;
 using MonoBallFramework.Game.GameData.Factories;
 using MonoBallFramework.Game.GameData.PropertyMapping;
@@ -17,7 +16,6 @@ using MonoBallFramework.Game.Infrastructure.Diagnostics;
 using MonoBallFramework.Game.Initialization.Factories;
 using MonoBallFramework.Game.Input;
 using MonoBallFramework.Game.Scripting.Api;
-using MonoBallFramework.Game.Systems;
 
 namespace MonoBallFramework.Game.Infrastructure.ServiceRegistration;
 
@@ -121,4 +119,3 @@ public static class GameServicesExtensions
         return services;
     }
 }
-

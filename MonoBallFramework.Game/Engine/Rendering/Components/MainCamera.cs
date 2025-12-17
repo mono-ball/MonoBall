@@ -22,6 +22,3 @@ public struct MainCamera
 {
     // Tag component - no data needed
 }
-
-
-

@@ -395,7 +395,7 @@ public class SystemManager
             try
             {
                 var sw = Stopwatch.StartNew();
-                system.Render(world, context);  // Pass context to render system
+                system.Render(world, context); // Pass context to render system
                 sw.Stop();
 
                 TrackSystemPerformance(system.GetType().Name, sw.Elapsed.TotalMilliseconds);

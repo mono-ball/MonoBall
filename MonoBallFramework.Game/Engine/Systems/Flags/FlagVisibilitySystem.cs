@@ -5,7 +5,6 @@ using MonoBallFramework.Game.Ecs.Components.GameState;
 using MonoBallFramework.Game.Ecs.Components.Rendering;
 using MonoBallFramework.Game.Engine.Core.Events;
 using MonoBallFramework.Game.Engine.Core.Events.Flags;
-using MonoBallFramework.Game.Engine.Core.Systems;
 using MonoBallFramework.Game.Engine.Core.Systems.Base;
 using MonoBallFramework.Game.Engine.Core.Types;
 using MonoBallFramework.Game.Scripting.Api;
@@ -14,8 +13,8 @@ namespace MonoBallFramework.Game.Engine.Systems.Flags;
 
 /// <summary>
 ///     Event-driven system that reacts to flag changes and updates entity visibility.
-///     Subscribes to <see cref="FlagChangedEvent"/> and toggles the <see cref="Visible"/>
-///     component on entities with matching <see cref="VisibilityFlag"/> components.
+///     Subscribes to <see cref="FlagChangedEvent" /> and toggles the <see cref="Visible" />
+///     component on entities with matching <see cref="VisibilityFlag" /> components.
 /// </summary>
 /// <remarks>
 ///     <para>
@@ -36,16 +35,16 @@ namespace MonoBallFramework.Game.Engine.Systems.Flags;
 /// </remarks>
 public sealed class FlagVisibilitySystem : EventDrivenSystemBase, IDisposable
 {
-    private readonly IEventBus _eventBus;
-    private readonly IGameStateApi _gameStateApi;
-    private readonly ILogger<FlagVisibilitySystem>? _logger;
-    private IDisposable? _subscription;
-
     /// <summary>
     ///     Query for entities with visibility flag components.
     /// </summary>
     private static readonly QueryDescription VisibilityFlagQuery = new QueryDescription()
         .WithAll<VisibilityFlag>();
+
+    private readonly IEventBus _eventBus;
+    private readonly IGameStateApi _gameStateApi;
+    private readonly ILogger<FlagVisibilitySystem>? _logger;
+    private IDisposable? _subscription;
 
     public FlagVisibilitySystem(
         IEventBus eventBus,
@@ -59,6 +58,13 @@ public sealed class FlagVisibilitySystem : EventDrivenSystemBase, IDisposable
 
     /// <inheritdoc />
     public override int Priority => 50; // Early priority for flag handling
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        _subscription?.Dispose();
+        _subscription = null;
+    }
 
     /// <inheritdoc />
     protected override void OnInitialized()
@@ -156,12 +162,5 @@ public sealed class FlagVisibilitySystem : EventDrivenSystemBase, IDisposable
         });
 
         _logger?.LogDebug("Synchronized visibility for {Count} entities", synchronized);
-    }
-
-    /// <inheritdoc />
-    public void Dispose()
-    {
-        _subscription?.Dispose();
-        _subscription = null;
     }
 }

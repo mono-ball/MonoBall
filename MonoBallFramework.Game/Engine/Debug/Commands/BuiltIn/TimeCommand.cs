@@ -139,7 +139,7 @@ Examples:
                         0f => "Game paused (time scale = 0)",
                         1f => "Normal speed (time scale = 1)",
                         < 1f => $"Slow motion: {scale * 100:F0}% speed",
-                        _ => $"Fast forward: {scale:F1}x speed",
+                        _ => $"Fast forward: {scale:F1}x speed"
                     };
                     context.WriteLine(message, scale == 0 ? theme.Warning : theme.Success);
                 }
@@ -251,7 +251,7 @@ Examples:
             < 1f => "Slow motion",
             1f => "Normal",
             < 2f => "Fast",
-            _ => "Very fast",
+            _ => "Very fast"
         };
         context.WriteLine($"  Time Scale: {scale:F2}x ({scaleDescription})", theme.TextPrimary);
         context.WriteLine($"  Speed:      {scale * 100:F0}%", theme.TextPrimary);

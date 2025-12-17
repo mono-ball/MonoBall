@@ -627,22 +627,8 @@ public class ConsoleAutoComplete
         // Add common C# keywords
         string[] keywords = new[]
         {
-            "var",
-            "int",
-            "string",
-            "bool",
-            "float",
-            "double",
-            "if",
-            "else",
-            "for",
-            "foreach",
-            "while",
-            "return",
-            "true",
-            "false",
-            "null",
-            "new",
+            "var", "int", "string", "bool", "float", "double", "if", "else", "for", "foreach", "while", "return",
+            "true", "false", "null", "new"
         };
         foreach (string keyword in keywords)
         {
@@ -1028,7 +1014,7 @@ public class ConsoleAutoComplete
             "Char" => "char",
             "Object" => "object",
             "Void" => "void",
-            _ => type.Name,
+            _ => type.Name
         };
     }
 }

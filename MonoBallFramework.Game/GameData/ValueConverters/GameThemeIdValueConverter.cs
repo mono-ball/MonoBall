@@ -13,11 +13,13 @@ public class GameThemeIdValueConverter : ValueConverter<GameThemeId, string>
         : base(
             v => v.Value,
             v => ConvertFromString(v)
-        ) { }
+        )
+    {
+    }
 
     private static GameThemeId ConvertFromString(string value)
     {
-        return GameThemeId.TryCreate(value) ?? GameThemeId.Create(value, null);
+        return GameThemeId.TryCreate(value) ?? GameThemeId.Create(value);
     }
 }
 
@@ -30,7 +32,9 @@ public class NullableGameThemeIdValueConverter : ValueConverter<GameThemeId?, st
         : base(
             v => v != null ? v.Value : null,
             v => ConvertFromString(v)
-        ) { }
+        )
+    {
+    }
 
     private static GameThemeId? ConvertFromString(string? value)
     {

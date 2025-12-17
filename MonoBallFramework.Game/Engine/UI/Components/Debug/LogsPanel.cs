@@ -122,7 +122,7 @@ public class LogsPanel : Panel, ILogOperations
         int Warnings,
         int LastMinute,
         int Categories
-    ) ILogOperations.GetStatistics()
+        ) ILogOperations.GetStatistics()
     {
         LogStatistics stats = GetStatistics();
         return (
@@ -148,13 +148,7 @@ public class LogsPanel : Panel, ILogOperations
     /// </summary>
     public void AddLog(LogLevel level, string message, string category, DateTime timestamp)
     {
-        var entry = new LogEntry
-        {
-            Timestamp = timestamp,
-            Level = level,
-            Message = message,
-            Category = category,
-        };
+        var entry = new LogEntry { Timestamp = timestamp, Level = level, Message = message, Category = category };
 
         _allLogs.Add(entry);
 
@@ -437,7 +431,7 @@ public class LogsPanel : Panel, ILogOperations
             LogLevel.Warning => theme.ConsoleOutputWarning, // Yellow - matches console
             LogLevel.Error => theme.ConsoleOutputError, // Red - matches console
             LogLevel.Critical => theme.Error, // Bright red for critical
-            _ => theme.TextPrimary,
+            _ => theme.TextPrimary
         };
     }
 
@@ -454,7 +448,7 @@ public class LogsPanel : Panel, ILogOperations
             LogLevel.Warning => "WARN",
             LogLevel.Error => "ERROR",
             LogLevel.Critical => "CRIT",
-            _ => "LOG",
+            _ => "LOG"
         };
     }
 
@@ -471,7 +465,7 @@ public class LogsPanel : Panel, ILogOperations
             LogLevel.Warning => "Warning",
             LogLevel.Error => "Error",
             LogLevel.Critical => "Critical",
-            _ => "All",
+            _ => "All"
         };
     }
 
@@ -589,7 +583,7 @@ public class LogsPanel : Panel, ILogOperations
             LogsLastMinute = logs.Count(l => (now - l.Timestamp).TotalMinutes <= 1),
             LogsLastFiveMinutes = logs.Count(l => (now - l.Timestamp).TotalMinutes <= 5),
             OldestLog = logs.Count > 0 ? logs.Min(l => l.Timestamp) : null,
-            NewestLog = logs.Count > 0 ? logs.Max(l => l.Timestamp) : null,
+            NewestLog = logs.Count > 0 ? logs.Max(l => l.Timestamp) : null
         };
     }
 

@@ -18,7 +18,7 @@ public enum EventInspectorSortMode
     BySubscribers,
     ByAvgTime,
     ByMaxTime,
-    ByCount,
+    ByCount
 }
 
 /// <summary>
@@ -197,7 +197,7 @@ internal readonly struct ColumnLayout
         {
             >= 1_000_000 => $"{count / 1_000_000.0:F1}M",
             >= 1_000 => $"{count / 1_000.0:F1}K",
-            _ => count.ToString(),
+            _ => count.ToString()
         };
     }
 }
@@ -357,7 +357,7 @@ public class EventInspectorContent : UIComponent
         int TotalSubscribers,
         double SlowestEventMs,
         string SlowestEventName
-    ) GetStatistics()
+        ) GetStatistics()
     {
         if (_cachedData == null || _cachedData.Events.Count == 0)
         {
@@ -390,12 +390,12 @@ public class EventInspectorContent : UIComponent
         }
 
         return _cachedData
-            ?? new EventInspectorData
-            {
-                Events = new List<EventTypeInfo>(),
-                RecentEvents = new List<EventLogEntry>(),
-                Filters = new EventFilterOptions(),
-            };
+               ?? new EventInspectorData
+               {
+                   Events = new List<EventTypeInfo>(),
+                   RecentEvents = new List<EventLogEntry>(),
+                   Filters = new EventFilterOptions()
+               };
     }
 
     public EventInspectorSortMode GetSortMode()
@@ -636,7 +636,7 @@ public class EventInspectorContent : UIComponent
             int TotalSubscribers,
             double SlowestEventMs,
             string SlowestEventName
-        ) stats = GetStatistics();
+            ) stats = GetStatistics();
 
         // Title line (left) + Sort mode (right) - matches Profiler pattern
         renderer.DrawText("Event Inspector", x, y, theme.Info);
@@ -701,7 +701,7 @@ public class EventInspectorContent : UIComponent
                 SortMode = EventInspectorSortMode.ByName,
                 X = layout.EventNameX,
                 MaxWidth = layout.EventNameWidth,
-                Ascending = true,
+                Ascending = true
             }
         );
 
@@ -714,7 +714,7 @@ public class EventInspectorContent : UIComponent
                     Label = "Execution Time",
                     SortMode = EventInspectorSortMode.ByAvgTime,
                     X = layout.BarX,
-                    MaxWidth = layout.BarWidth,
+                    MaxWidth = layout.BarWidth
                 }
             );
         }
@@ -727,7 +727,7 @@ public class EventInspectorContent : UIComponent
                 SortMode = EventInspectorSortMode.BySubscribers,
                 X = layout.SubsX,
                 MaxWidth = layout.SubsWidth,
-                Alignment = SortableTableHeader<EventInspectorSortMode>.HorizontalAlignment.Right,
+                Alignment = SortableTableHeader<EventInspectorSortMode>.HorizontalAlignment.Right
             }
         );
 
@@ -739,7 +739,7 @@ public class EventInspectorContent : UIComponent
                 SortMode = EventInspectorSortMode.ByCount,
                 X = layout.CountX,
                 MaxWidth = layout.CountWidth,
-                Alignment = SortableTableHeader<EventInspectorSortMode>.HorizontalAlignment.Right,
+                Alignment = SortableTableHeader<EventInspectorSortMode>.HorizontalAlignment.Right
             }
         );
 
@@ -751,7 +751,7 @@ public class EventInspectorContent : UIComponent
                 SortMode = EventInspectorSortMode.ByMaxTime,
                 X = layout.TimeX,
                 MaxWidth = layout.TimeWidth,
-                Alignment = SortableTableHeader<EventInspectorSortMode>.HorizontalAlignment.Right,
+                Alignment = SortableTableHeader<EventInspectorSortMode>.HorizontalAlignment.Right
             }
         );
 
@@ -1037,8 +1037,8 @@ public class EventInspectorContent : UIComponent
             renderer.DrawText(
                 entry.EventType,
                 x
-                    + PanelConstants.EventInspector.TimestampColumnWidth
-                    + PanelConstants.EventInspector.OperationIconWidth,
+                + PanelConstants.EventInspector.TimestampColumnWidth
+                + PanelConstants.EventInspector.OperationIconWidth,
                 y,
                 theme.TextPrimary
             );
@@ -1098,7 +1098,7 @@ public class EventInspectorContent : UIComponent
                 .Events.OrderByDescending(e => e.PublishCount)
                 .ThenBy(e => e.EventTypeName)
                 .ToList(),
-            _ => _cachedData.Events.ToList(),
+            _ => _cachedData.Events.ToList()
         };
     }
 
@@ -1183,7 +1183,7 @@ public class EventInspectorContent : UIComponent
         {
             >= 1_000_000 => $"{count / 1_000_000.0:F1}M",
             >= 1_000 => $"{count / 1_000.0:F1}K",
-            _ => count.ToString(),
+            _ => count.ToString()
         };
     }
 
@@ -1198,7 +1198,7 @@ public class EventInspectorContent : UIComponent
             >= 1_000_000_000 => $"{number / 1_000_000_000.0:F1}B",
             >= 1_000_000 => $"{number / 1_000_000.0:F1}M",
             >= 1_000 => $"{number / 1_000.0:F1}K",
-            _ => number.ToString(),
+            _ => number.ToString()
         };
 
         // If still too long, use scientific notation

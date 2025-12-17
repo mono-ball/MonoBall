@@ -51,7 +51,8 @@ public static class ScriptingServicesExtensions
         // Behavior Registry Adapter (wraps TypeRegistry<BehaviorDefinition> for IBehaviorRegistry interface)
         services.AddSingleton<IBehaviorRegistry>(sp =>
         {
-            var behaviorRegistry = sp.GetRequiredService<TypeRegistry<BehaviorDefinition>>();
+            TypeRegistry<BehaviorDefinition> behaviorRegistry =
+                sp.GetRequiredService<TypeRegistry<BehaviorDefinition>>();
             return new BehaviorRegistryAdapter(behaviorRegistry);
         });
 

@@ -94,7 +94,7 @@ public class TileAnimationSystem(ILogger<TileAnimationSystem>? logger = null)
                 _logger?.LogAnimatedTilesProcessed(_animatedTileCount);
                 _logger?.LogWarning(
                     "PERFORMANCE CHECK: {PrecalcCount}/{TotalCount} tiles have precalculated rects. "
-                        + "{NullCount} tiles missing precalc (OLD MAP DATA - RELOAD REQUIRED!)",
+                    + "{NullCount} tiles missing precalc (OLD MAP DATA - RELOAD REQUIRED!)",
                     precalcCount,
                     tileCount,
                     nullRectCount

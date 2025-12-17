@@ -50,13 +50,7 @@ public struct WarpState
     ///     Creates a default WarpState with no active warp.
     /// </summary>
     public static WarpState Default =>
-        new()
-        {
-            PendingWarp = null,
-            LastDestination = null,
-            IsWarping = false,
-            WarpStartTime = 0f,
-        };
+        new() { PendingWarp = null, LastDestination = null, IsWarping = false, WarpStartTime = 0f };
 
     /// <summary>
     ///     Clears the warp state, resetting all tracking.

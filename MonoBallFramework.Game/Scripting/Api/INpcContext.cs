@@ -7,7 +7,7 @@ namespace MonoBallFramework.Game.Scripting.Api;
 
 /// <summary>
 ///     Fluent context for chaining NPC operations on a single entity.
-///     Obtained via <see cref="INpcApi.For(Entity)"/>.
+///     Obtained via <see cref="INpcApi.For(Entity)" />.
 /// </summary>
 /// <example>
 ///     <code>
@@ -25,6 +25,15 @@ public interface INpcContext
     ///     Gets the entity this context operates on.
     /// </summary>
     Entity Entity { get; }
+
+    #region Identity
+
+    /// <summary>
+    ///     Set the NPC's display name.
+    /// </summary>
+    INpcContext SetDisplayName(string displayName);
+
+    #endregion
 
     #region Movement
 
@@ -114,15 +123,6 @@ public interface INpcContext
     ///     Deactivate the NPC's behavior (pauses OnTick execution).
     /// </summary>
     INpcContext DeactivateBehavior();
-
-    #endregion
-
-    #region Identity
-
-    /// <summary>
-    ///     Set the NPC's display name.
-    /// </summary>
-    INpcContext SetDisplayName(string displayName);
 
     #endregion
 }

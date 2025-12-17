@@ -34,12 +34,7 @@ public class EvaluationResult
     /// </summary>
     public static EvaluationResult CompilationError(List<FormattedError> errors, string sourceCode)
     {
-        return new EvaluationResult
-        {
-            IsCompilationError = true,
-            Errors = errors,
-            SourceCode = sourceCode,
-        };
+        return new EvaluationResult { IsCompilationError = true, Errors = errors, SourceCode = sourceCode };
     }
 
     /// <summary>
@@ -51,7 +46,7 @@ public class EvaluationResult
         {
             IsRuntimeError = true,
             RuntimeException = exception,
-            Output = $"Runtime Error: {exception.GetType().Name}: {exception.Message}",
+            Output = $"Runtime Error: {exception.GetType().Name}: {exception.Message}"
         };
     }
 }

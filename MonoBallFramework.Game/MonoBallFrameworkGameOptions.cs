@@ -6,7 +6,6 @@ using MonoBallFramework.Game.GameData.Services;
 using MonoBallFramework.Game.GameData.Sprites;
 using MonoBallFramework.Game.GameSystems.Services;
 using MonoBallFramework.Game.Infrastructure.Diagnostics;
-using MonoBallFramework.Game.Infrastructure.Services;
 using MonoBallFramework.Game.Initialization.Factories;
 using MonoBallFramework.Game.Input;
 using MonoBallFramework.Game.Scripting.Api;
@@ -73,7 +72,6 @@ public sealed class MonoBallFrameworkGameOptions
     /// <summary>
     ///     Gets or sets the entity pool manager.
     /// </summary>
-
     /// <summary>
     ///     Gets or sets the game data loader.
     /// </summary>

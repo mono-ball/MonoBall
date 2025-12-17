@@ -109,6 +109,3 @@ public class GameplaySceneContext
     /// </summary>
     public IAssetProvider? AssetProvider { get; }
 }
-
-
-

@@ -27,7 +27,7 @@ namespace MonoBallFramework.Game.Engine.Systems.BulkOperations;
 ///     i => new Health { MaxHP = 100, CurrentHP = 100 },
 ///     i => new Enemy { Type = EnemyType.Slime }
 /// );
-///
+/// 
 /// // Much faster than:
 /// for (int i = 0; i &lt; 1000; i++) {
 ///     var entity = world.Create();
@@ -409,7 +409,7 @@ public sealed class BulkEntityOperations
             AverageCreationTime =
                 _totalBulkCreations > 0 ? _totalCreationTime / _totalBulkCreations : 0,
             AverageDestructionTime =
-                _totalBulkDestructions > 0 ? _totalDestructionTime / _totalBulkDestructions : 0,
+                _totalBulkDestructions > 0 ? _totalDestructionTime / _totalBulkDestructions : 0
         };
     }
 

@@ -22,14 +22,14 @@ namespace MonoBallFramework.Game.Scripting.Runtime;
 /// {
 ///     // ❌ WRONG - instance state will break with multiple entities
 ///     private int counter;
-///
+/// 
 ///     // ✅ CORRECT - use ScriptContext for state
 ///     protected override void OnTick(ScriptContext ctx, float deltaTime)
 ///     {
 ///         var counter = ctx.GetState&lt;int&gt;("counter");
 ///         counter++;
 ///         ctx.SetState("counter", counter);
-///
+/// 
 ///         // Access ECS world, entity, logger via context
 ///         var position = ctx.World.Get&lt;Position&gt;(ctx.Entity);
 ///         ctx.Logger?.LogInformation("Position: {Pos}", position);

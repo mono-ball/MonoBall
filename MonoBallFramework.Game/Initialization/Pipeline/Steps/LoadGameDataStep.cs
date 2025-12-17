@@ -19,7 +19,9 @@ public class LoadGameDataStep : InitializationStepBase
             "Loading game data...",
             InitializationProgress.ModsDiscovered,
             InitializationProgress.GameDataLoaded
-        ) { }
+        )
+    {
+    }
 
     /// <inheritdoc />
     protected override async Task ExecuteStepAsync(
@@ -39,7 +41,7 @@ public class LoadGameDataStep : InitializationStepBase
 
             // Preload all popup themes and sections into cache for O(1) runtime access
             // This is CRITICAL - without preloading, cache misses cause database queries during gameplay
-            var mapPopupDataService = context.Services.GetService<IMapPopupDataService>();
+            IMapPopupDataService? mapPopupDataService = context.Services.GetService<IMapPopupDataService>();
             if (mapPopupDataService != null)
             {
                 await mapPopupDataService.PreloadAllAsync(cancellationToken);

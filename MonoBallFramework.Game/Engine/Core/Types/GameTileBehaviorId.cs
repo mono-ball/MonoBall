@@ -4,7 +4,6 @@ namespace MonoBallFramework.Game.Engine.Core.Types;
 
 /// <summary>
 ///     Strongly-typed identifier for tile behavior definitions.
-///
 ///     Format: base:tile_behavior:{category}/{name}
 ///     Examples:
 ///     - base:tile_behavior:movement/jump_south
@@ -37,9 +36,11 @@ public sealed record GameTileBehaviorId : EntityId
     public GameTileBehaviorId(string value) : base(value)
     {
         if (EntityType != TypeName)
+        {
             throw new ArgumentException(
                 $"Expected entity type '{TypeName}', got '{EntityType}'",
                 nameof(value));
+        }
     }
 
     /// <summary>
@@ -102,11 +103,15 @@ public sealed record GameTileBehaviorId : EntityId
     public static GameTileBehaviorId? TryCreate(string? value)
     {
         if (string.IsNullOrWhiteSpace(value))
+        {
             return null;
+        }
 
         // Only accept full format
         if (!IsValidFormat(value) || !value.Contains($":{TypeName}:"))
+        {
             return null;
+        }
 
         try
         {
@@ -121,5 +126,8 @@ public sealed record GameTileBehaviorId : EntityId
     /// <summary>
     ///     Explicit conversion from string. Use TryCreate() for safe parsing.
     /// </summary>
-    public static explicit operator GameTileBehaviorId(string value) => new(value);
+    public static explicit operator GameTileBehaviorId(string value)
+    {
+        return new GameTileBehaviorId(value);
+    }
 }

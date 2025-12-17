@@ -60,7 +60,10 @@ public abstract class BaseEntity
         get
         {
             if (string.IsNullOrEmpty(ExtensionData))
+            {
                 return null;
+            }
+
             try
             {
                 return JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(ExtensionData);
@@ -80,9 +83,12 @@ public abstract class BaseEntity
     /// <returns>The property value, or default if not found or wrong type.</returns>
     public T? GetExtensionProperty<T>(string propertyName)
     {
-        var data = ParsedExtensionData;
-        if (data == null || !data.TryGetValue(propertyName, out var element))
+        Dictionary<string, JsonElement>? data = ParsedExtensionData;
+        if (data == null || !data.TryGetValue(propertyName, out JsonElement element))
+        {
             return default;
+        }
+
         try
         {
             return JsonSerializer.Deserialize<T>(element.GetRawText());
@@ -101,8 +107,8 @@ public abstract class BaseEntity
     /// <param name="value">The value to set.</param>
     public void SetExtensionProperty<T>(string propertyName, T value)
     {
-        var data = ParsedExtensionData ?? new Dictionary<string, JsonElement>();
-        var json = JsonSerializer.Serialize(value);
+        Dictionary<string, JsonElement> data = ParsedExtensionData ?? new Dictionary<string, JsonElement>();
+        string json = JsonSerializer.Serialize(value);
         data[propertyName] = JsonSerializer.Deserialize<JsonElement>(json);
         ExtensionData = JsonSerializer.Serialize(data);
     }

@@ -77,12 +77,12 @@ public class LayerValidator : IMapValidator
                 ts.FirstGid,
                 // Calculate last GID based on tileset image dimensions
                 LastGid = ts.FirstGid
-                    + (
-                        (ts.Image?.Width ?? 256)
-                        / ts.TileWidth
-                        * ((ts.Image?.Height ?? 256) / ts.TileHeight)
-                    )
-                    - 1,
+                          + (
+                              (ts.Image?.Width ?? 256)
+                              / ts.TileWidth
+                              * ((ts.Image?.Height ?? 256) / ts.TileHeight)
+                          )
+                          - 1
             })
             .ToList();
 

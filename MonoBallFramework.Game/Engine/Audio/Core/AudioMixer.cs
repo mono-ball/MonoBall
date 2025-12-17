@@ -1,33 +1,27 @@
 namespace MonoBallFramework.Game.Engine.Audio.Core;
 
 /// <summary>
-/// Mixes multiple audio sources into a single output stream.
-/// Thread-safe for adding/removing sources during playback.
+///     Mixes multiple audio sources into a single output stream.
+///     Thread-safe for adding/removing sources during playback.
 /// </summary>
 public class AudioMixer : ISampleProvider, IDisposable
 {
-    private readonly List<MixerInput> _sources = new();
     private readonly object _sourceLock = new();
-    private readonly AudioFormat _format;
-    private float[]? _mixBuffer;
+    private readonly List<MixerInput> _sources = new();
     private bool _disposed;
+    private float[]? _mixBuffer;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="AudioMixer"/> class.
+    ///     Initializes a new instance of the <see cref="AudioMixer" /> class.
     /// </summary>
     /// <param name="format">The audio format for the mixer output.</param>
     public AudioMixer(AudioFormat format)
     {
-        _format = format ?? throw new ArgumentNullException(nameof(format));
+        Format = format ?? throw new ArgumentNullException(nameof(format));
     }
 
     /// <summary>
-    /// Gets the audio format of the mixer output.
-    /// </summary>
-    public AudioFormat Format => _format;
-
-    /// <summary>
-    /// Gets the number of active sources currently being mixed.
+    ///     Gets the number of active sources currently being mixed.
     /// </summary>
     public int SourceCount
     {
@@ -41,66 +35,34 @@ public class AudioMixer : ISampleProvider, IDisposable
     }
 
     /// <summary>
-    /// Adds an audio source to the mixer.
+    ///     Disposes the mixer and releases resources.
     /// </summary>
-    /// <param name="source">The sample provider to mix.</param>
-    /// <param name="volume">The volume level (0.0 to 1.0).</param>
-    /// <returns>A handle that can be used to remove or adjust the source.</returns>
-    /// <exception cref="ArgumentNullException">Thrown when source is null.</exception>
-    /// <exception cref="ArgumentException">Thrown when source format doesn't match mixer format.</exception>
-    /// <exception cref="ObjectDisposedException">Thrown when mixer is disposed.</exception>
-    public MixerInput AddSource(ISampleProvider source, float volume = 1.0f)
+    public void Dispose()
     {
         if (_disposed)
-            throw new ObjectDisposedException(nameof(AudioMixer));
-
-        if (source == null)
-            throw new ArgumentNullException(nameof(source));
-
-        if (!source.Format.Equals(_format))
-            throw new ArgumentException(
-                $"Source format ({source.Format}) does not match mixer format ({_format})",
-                nameof(source));
-
-        var input = new MixerInput(source, volume);
-
-        lock (_sourceLock)
         {
-            _sources.Add(input);
+            return;
         }
 
-        return input;
-    }
+        _disposed = true;
 
-    /// <summary>
-    /// Removes a source from the mixer.
-    /// </summary>
-    /// <param name="input">The mixer input to remove.</param>
-    /// <returns>True if the source was removed; false if it wasn't found.</returns>
-    public bool RemoveSource(MixerInput input)
-    {
-        if (input == null)
-            return false;
-
-        lock (_sourceLock)
-        {
-            return _sources.Remove(input);
-        }
-    }
-
-    /// <summary>
-    /// Removes all sources from the mixer.
-    /// </summary>
-    public void ClearSources()
-    {
         lock (_sourceLock)
         {
             _sources.Clear();
         }
+
+        _mixBuffer = null;
+
+        GC.SuppressFinalize(this);
     }
 
     /// <summary>
-    /// Reads mixed audio samples from all active sources.
+    ///     Gets the audio format of the mixer output.
+    /// </summary>
+    public AudioFormat Format { get; }
+
+    /// <summary>
+    ///     Reads mixed audio samples from all active sources.
     /// </summary>
     /// <param name="buffer">The buffer to fill with mixed samples.</param>
     /// <param name="offset">The offset in the buffer to start writing.</param>
@@ -109,16 +71,24 @@ public class AudioMixer : ISampleProvider, IDisposable
     public int Read(float[] buffer, int offset, int count)
     {
         if (_disposed)
+        {
             return 0;
+        }
 
         if (buffer == null)
+        {
             throw new ArgumentNullException(nameof(buffer));
+        }
 
         if (offset < 0 || offset >= buffer.Length)
+        {
             throw new ArgumentOutOfRangeException(nameof(offset));
+        }
 
         if (count < 0 || offset + count > buffer.Length)
+        {
             throw new ArgumentOutOfRangeException(nameof(count));
+        }
 
         // Clear output buffer
         Array.Clear(buffer, offset, count);
@@ -134,7 +104,7 @@ public class AudioMixer : ISampleProvider, IDisposable
 
         lock (_sourceLock)
         {
-            foreach (var input in _sources)
+            foreach (MixerInput input in _sources)
             {
                 // Clear mix buffer for this source
                 Array.Clear(_mixBuffer, 0, count);
@@ -161,7 +131,7 @@ public class AudioMixer : ISampleProvider, IDisposable
             }
 
             // Remove finished sources
-            foreach (var input in sourcesToRemove)
+            foreach (MixerInput input in sourcesToRemove)
             {
                 _sources.Remove(input);
             }
@@ -171,36 +141,87 @@ public class AudioMixer : ISampleProvider, IDisposable
         for (int i = offset; i < offset + samplesRead; i++)
         {
             if (buffer[i] > 1.0f)
+            {
                 buffer[i] = 1.0f;
+            }
             else if (buffer[i] < -1.0f)
+            {
                 buffer[i] = -1.0f;
+            }
         }
 
         return samplesRead;
     }
 
     /// <summary>
-    /// Disposes the mixer and releases resources.
+    ///     Adds an audio source to the mixer.
     /// </summary>
-    public void Dispose()
+    /// <param name="source">The sample provider to mix.</param>
+    /// <param name="volume">The volume level (0.0 to 1.0).</param>
+    /// <returns>A handle that can be used to remove or adjust the source.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when source is null.</exception>
+    /// <exception cref="ArgumentException">Thrown when source format doesn't match mixer format.</exception>
+    /// <exception cref="ObjectDisposedException">Thrown when mixer is disposed.</exception>
+    public MixerInput AddSource(ISampleProvider source, float volume = 1.0f)
     {
         if (_disposed)
-            return;
+        {
+            throw new ObjectDisposedException(nameof(AudioMixer));
+        }
 
-        _disposed = true;
+        if (source == null)
+        {
+            throw new ArgumentNullException(nameof(source));
+        }
 
+        if (!source.Format.Equals(Format))
+        {
+            throw new ArgumentException(
+                $"Source format ({source.Format}) does not match mixer format ({Format})",
+                nameof(source));
+        }
+
+        var input = new MixerInput(source, volume);
+
+        lock (_sourceLock)
+        {
+            _sources.Add(input);
+        }
+
+        return input;
+    }
+
+    /// <summary>
+    ///     Removes a source from the mixer.
+    /// </summary>
+    /// <param name="input">The mixer input to remove.</param>
+    /// <returns>True if the source was removed; false if it wasn't found.</returns>
+    public bool RemoveSource(MixerInput input)
+    {
+        if (input == null)
+        {
+            return false;
+        }
+
+        lock (_sourceLock)
+        {
+            return _sources.Remove(input);
+        }
+    }
+
+    /// <summary>
+    ///     Removes all sources from the mixer.
+    /// </summary>
+    public void ClearSources()
+    {
         lock (_sourceLock)
         {
             _sources.Clear();
         }
-
-        _mixBuffer = null;
-
-        GC.SuppressFinalize(this);
     }
 
     /// <summary>
-    /// Represents an input source in the mixer with volume control.
+    ///     Represents an input source in the mixer with volume control.
     /// </summary>
     public class MixerInput
     {
@@ -213,12 +234,12 @@ public class AudioMixer : ISampleProvider, IDisposable
         }
 
         /// <summary>
-        /// Gets the underlying sample provider.
+        ///     Gets the underlying sample provider.
         /// </summary>
         public ISampleProvider Source { get; }
 
         /// <summary>
-        /// Gets or sets the volume level (0.0 to 1.0).
+        ///     Gets or sets the volume level (0.0 to 1.0).
         /// </summary>
         public float Volume
         {

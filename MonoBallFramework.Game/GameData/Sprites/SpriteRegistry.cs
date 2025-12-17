@@ -79,19 +79,23 @@ public class SpriteRegistry : EfCoreRegistry<SpriteEntity, GameSpriteId>
     public SpriteEntity? GetSpriteByPath(string path)
     {
         if (string.IsNullOrWhiteSpace(path))
+        {
             return null;
+        }
 
         string normalizedPath = path.Replace('\\', '/').Trim('/');
 
         // O(1) lookup using path cache
-        if (_pathCache.TryGetValue(normalizedPath, out var definition))
+        if (_pathCache.TryGetValue(normalizedPath, out SpriteEntity? definition))
+        {
             return definition;
+        }
 
         // If cache not loaded, query database
         if (!_isCacheLoaded)
         {
             // Build the full sprite ID and query
-            var fullId = $"base:sprite:{normalizedPath}";
+            string fullId = $"base:sprite:{normalizedPath}";
             var spriteId = GameSpriteId.TryCreate(fullId);
             if (spriteId != null)
             {

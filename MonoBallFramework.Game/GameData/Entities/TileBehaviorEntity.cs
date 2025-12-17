@@ -25,7 +25,7 @@ public class TileBehaviorEntity : BaseEntity
     ///     Behavior flags for fast lookup without script execution.
     ///     Stored as integer representation of TileBehaviorFlags enum.
     /// </summary>
-    public int Flags { get; set; } = 0;
+    public int Flags { get; set; }
 
     /// <summary>
     ///     Path to the Roslyn .csx script file that implements this behavior.

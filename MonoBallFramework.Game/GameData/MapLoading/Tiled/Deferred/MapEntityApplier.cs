@@ -1,5 +1,5 @@
+using System.Diagnostics;
 using Arch.Core;
-using Arch.Core.Extensions;
 using Microsoft.Extensions.Logging;
 using MonoBallFramework.Game.Ecs.Components;
 using MonoBallFramework.Game.Ecs.Components.Maps;
@@ -10,6 +10,7 @@ using MonoBallFramework.Game.Engine.Rendering.Assets;
 using MonoBallFramework.Game.Engine.Systems.BulkOperations;
 using MonoBallFramework.Game.Engine.Systems.Management;
 using MonoBallFramework.Game.GameData.MapLoading.Tiled.Services;
+using MonoBallFramework.Game.GameData.MapLoading.Tiled.Tmx;
 using MonoBallFramework.Game.GameSystems.Spatial;
 using MonoBallFramework.Game.Systems;
 
@@ -21,12 +22,12 @@ namespace MonoBallFramework.Game.GameData.MapLoading.Tiled.Deferred;
 /// </summary>
 public class MapEntityApplier
 {
-    private readonly ILogger<MapEntityApplier>? _logger;
-    private readonly SystemManager? _systemManager;
     private readonly IAssetProvider? _assetProvider;
     private readonly IContentProvider? _contentProvider;
-    private readonly TilesetLoader? _tilesetLoader;
     private readonly Lazy<MapLifecycleManager>? _lifecycleManager;
+    private readonly ILogger<MapEntityApplier>? _logger;
+    private readonly SystemManager? _systemManager;
+    private readonly TilesetLoader? _tilesetLoader;
 
     public MapEntityApplier(
         SystemManager? systemManager = null,
@@ -53,7 +54,7 @@ public class MapEntityApplier
     /// <returns>The map info entity.</returns>
     public Entity ApplyPreparedMap(World world, PreparedMapData data)
     {
-        var sw = System.Diagnostics.Stopwatch.StartNew();
+        var sw = Stopwatch.StartNew();
 
         _logger?.LogDebug(
             "ApplyPreparedMap: Applying map {MapId}, Tiles={TileCount}",
@@ -71,14 +72,14 @@ public class MapEntityApplier
         CreateTilesetInfoEntities(world, data);
 
         // 3. Bulk create tile entities (the fast part!)
-        var tileEntities = CreateTileEntities(world, data);
+        List<Entity> tileEntities = CreateTileEntities(world, data);
 
         // 3. Register with lifecycle manager for cleanup
         _lifecycleManager?.Value.RegisterMapTiles(data.MapId, tileEntities);
 
         // 4. Collect tileset texture IDs for lifecycle manager
         var tilesetTextureIds = new HashSet<string>();
-        foreach (var tileset in data.Tilesets)
+        foreach (LoadedTileset tileset in data.Tilesets)
         {
             tilesetTextureIds.Add(tileset.TilesetId);
         }
@@ -154,7 +155,7 @@ public class MapEntityApplier
         // CRITICAL: Add connection components for map streaming
         if (data.Connections != null && data.Connections.Count > 0)
         {
-            foreach (var conn in data.Connections)
+            foreach (MapConnection conn in data.Connections)
             {
                 switch (conn.Direction.ToLowerInvariant())
                 {
@@ -189,9 +190,9 @@ public class MapEntityApplier
     /// </summary>
     private void CreateTilesetInfoEntities(World world, PreparedMapData data)
     {
-        foreach (var loadedTileset in data.Tilesets)
+        foreach (LoadedTileset loadedTileset in data.Tilesets)
         {
-            var tileset = loadedTileset.Tileset;
+            TmxTileset tileset = loadedTileset.Tileset;
 
             // Validate tileset data
             if (tileset.FirstGid <= 0)
@@ -257,7 +258,7 @@ public class MapEntityApplier
             i => new TilePosition(data.Tiles[i].X, data.Tiles[i].Y, data.Tiles[i].MapId),
             i =>
             {
-                var tile = data.Tiles[i];
+                PreparedTile tile = data.Tiles[i];
                 return new TileSprite(
                     tile.TilesetId,
                     tile.TileGid,
@@ -273,7 +274,7 @@ public class MapEntityApplier
         for (int i = 0; i < entities.Length; i++)
         {
             Entity entity = entities[i];
-            var tile = data.Tiles[i];
+            PreparedTile tile = data.Tiles[i];
 
             // Always add elevation
             world.Add(entity, new Elevation(tile.Elevation));
@@ -297,16 +298,16 @@ public class MapEntityApplier
     private void ProcessTileProperties(World world, Entity entity, Dictionary<string, object> props)
     {
         // Add TerrainType if present
-        if (props.TryGetValue("terrain_type", out var terrainValue) && terrainValue is string terrainType)
+        if (props.TryGetValue("terrain_type", out object? terrainValue) && terrainValue is string terrainType)
         {
-            string footstepSound = props.TryGetValue("footstep_sound", out var soundValue)
+            string footstepSound = props.TryGetValue("footstep_sound", out object? soundValue)
                 ? soundValue?.ToString() ?? ""
                 : "";
             world.Add(entity, new TerrainType(terrainType, footstepSound));
         }
 
         // Add TileScript if present
-        if (props.TryGetValue("script", out var scriptValue) && scriptValue is string scriptPath)
+        if (props.TryGetValue("script", out object? scriptValue) && scriptValue is string scriptPath)
         {
             world.Add(entity, new TileScript(scriptPath));
         }
@@ -339,14 +340,14 @@ public class MapEntityApplier
 
         // Check each tileset and load synchronously if needed
         int loadedCount = 0;
-        foreach (var loadedTileset in data.Tilesets)
+        foreach (LoadedTileset loadedTileset in data.Tilesets)
         {
             string tilesetId = loadedTileset.TilesetId;
 
             if (!_assetProvider.HasTexture(tilesetId))
             {
                 // Texture not loaded - need to load it synchronously
-                var tileset = loadedTileset.Tileset;
+                TmxTileset tileset = loadedTileset.Tileset;
                 if (tileset.Image != null && !string.IsNullOrEmpty(tileset.Image.Source))
                 {
                     string mapDirectory = Path.GetDirectoryName(data.MapPath) ?? string.Empty;
@@ -355,13 +356,15 @@ public class MapEntityApplier
                     // Resolve path through content provider
                     if (_contentProvider != null)
                     {
-                        string? resolvedPath = _contentProvider.ResolveContentPath("Graphics", Path.GetFileName(imagePath));
+                        string? resolvedPath =
+                            _contentProvider.ResolveContentPath("Graphics", Path.GetFileName(imagePath));
                         if (resolvedPath == null)
                         {
                             _logger?.LogError("Failed to resolve tileset texture path: {TilesetId} from {Path}",
                                 tilesetId, imagePath);
                             continue;
                         }
+
                         imagePath = resolvedPath;
                     }
 

@@ -12,7 +12,9 @@ public class GameAudioIdValueConverter : ValueConverter<GameAudioId, string>
         : base(
             v => v.Value,
             v => ConvertFromString(v)
-        ) { }
+        )
+    {
+    }
 
     private static GameAudioId ConvertFromString(string value)
     {
@@ -29,7 +31,9 @@ public class NullableGameAudioIdValueConverter : ValueConverter<GameAudioId?, st
         : base(
             v => v != null ? v.Value : null,
             v => ConvertFromString(v)
-        ) { }
+        )
+    {
+    }
 
     private static GameAudioId? ConvertFromString(string? value)
     {

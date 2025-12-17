@@ -86,7 +86,7 @@ public class WarpSpawner
         try
         {
             // Parse target map ID - TryCreate handles both full format and legacy short names
-            GameMapId? targetMapId = GameMapId.TryCreate(targetMap);
+            var targetMapId = GameMapId.TryCreate(targetMap);
             if (targetMapId == null)
             {
                 _logger?.LogWarning(

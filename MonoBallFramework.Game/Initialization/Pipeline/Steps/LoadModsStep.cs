@@ -20,7 +20,9 @@ public class LoadModsStep : InitializationStepBase
             "Loading mod scripts...",
             InitializationProgress.GameSystemsInitialized,
             InitializationProgress.ModsLoaded
-        ) { }
+        )
+    {
+    }
 
     /// <inheritdoc />
     protected override async Task ExecuteStepAsync(
@@ -60,5 +62,3 @@ public class LoadModsStep : InitializationStepBase
         }
     }
 }
-
-

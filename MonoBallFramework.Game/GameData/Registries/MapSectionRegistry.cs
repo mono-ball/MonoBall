@@ -16,7 +16,8 @@ public class MapSectionEntityRegistry : EfCoreRegistry<MapSectionEntity, GameMap
 {
     private readonly ConcurrentDictionary<GameThemeId, List<MapSectionEntity>> _themeCache = new();
 
-    public MapSectionEntityRegistry(IDbContextFactory<GameDataContext> contextFactory, ILogger<MapSectionEntityRegistry> logger)
+    public MapSectionEntityRegistry(IDbContextFactory<GameDataContext> contextFactory,
+        ILogger<MapSectionEntityRegistry> logger)
         : base(contextFactory, logger)
     {
     }
@@ -47,7 +48,10 @@ public class MapSectionEntityRegistry : EfCoreRegistry<MapSectionEntity, GameMap
     {
         // Cache by theme ID for fast lookups by theme
         if (!_themeCache.ContainsKey(entity.ThemeId))
+        {
             _themeCache[entity.ThemeId] = new List<MapSectionEntity>();
+        }
+
         _themeCache[entity.ThemeId].Add(entity);
     }
 
@@ -96,8 +100,10 @@ public class MapSectionEntityRegistry : EfCoreRegistry<MapSectionEntity, GameMap
     /// <param name="themeId">The theme ID (e.g., "base:theme:popup/wood").</param>
     public IEnumerable<MapSectionEntity> GetByTheme(GameThemeId themeId)
     {
-        if (_themeCache.TryGetValue(themeId, out var cached))
+        if (_themeCache.TryGetValue(themeId, out List<MapSectionEntity>? cached))
+        {
             return cached;
+        }
 
         return GetAll().Where(ms => ms.ThemeId == themeId);
     }

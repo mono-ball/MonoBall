@@ -18,54 +18,10 @@ namespace MonoBallFramework.Game.Engine.Scenes.Scenes;
 /// </summary>
 public class MapPopupScene : SceneBase
 {
-    private readonly IAssetProvider _assetProvider;
-    private readonly PopupBackgroundEntity _backgroundDef;
-    private readonly IContentProvider _contentProvider;
-    private readonly PopupOutlineEntity _outlineDef;
-    private readonly string _mapName;
-    private readonly SceneManager _sceneManager;
-    private readonly ICameraProvider _cameraProvider;
-    private readonly IRenderingService _renderingService;
-
-    private SpriteBatch _spriteBatch = null!; // Set from IRenderingService - shared, not disposed here
-    private Texture2D? _outlineTexture;
-    private Texture2D? _backgroundTexture;
-    private FontSystem? _fontSystem;
-    private DynamicSpriteFont? _font;
-
-    // Animation state
-    private float _elapsedTime;
-    private PopupAnimationState _animationState = PopupAnimationState.SlideIn;
-
     // Animation timing (in seconds)
     private const float SlideInDuration = 0.4f;
     private const float DisplayDuration = 2.5f;
     private const float SlideOutDuration = 0.4f;
-
-    // Position (slides DOWN from top, positioned in top-left corner)
-    private int _fixedX; // Fixed X position in top-left area
-    private float _currentY;
-    private float _targetY;
-
-    // Popup dimensions (at 1x GBA scale)
-    private int _popupWidth;
-    private int _popupHeight;
-
-    // Current viewport scale factor (e.g., 3 for 720x480 window)
-    // Setting this triggers cache recalculation via OnScaleChanged()
-    private int _currentScale = 1;
-    private int CurrentScale
-    {
-        get => _currentScale;
-        set
-        {
-            if (_currentScale != value)
-            {
-                _currentScale = value;
-                OnScaleChanged();
-            }
-        }
-    }
 
     // GBA-accurate constants (pokeemerald dimensions at 1x scale)
     private const int ScreenPadding = 0; // No padding from screen edges (pokeemerald accurate)
@@ -78,17 +34,48 @@ public class MapPopupScene : SceneBase
     private const int GbaShadowOffsetY = 1; // Shadow offset Y (pokeemerald: 1 pixel down at 1x scale)
     private const int GbaInteriorTilesX = 10; // Interior tiles width (80 / 8)
     private const int GbaInteriorTilesY = 3; // Interior tiles height (24 / 8)
+    private readonly IAssetProvider _assetProvider;
+    private readonly PopupBackgroundEntity _backgroundDef;
+    private readonly ICameraProvider _cameraProvider;
+    private readonly IContentProvider _contentProvider;
+    private readonly string _mapName;
+    private readonly PopupOutlineEntity _outlineDef;
+    private readonly IRenderingService _renderingService;
+    private readonly SceneManager _sceneManager;
+    private PopupAnimationState _animationState = PopupAnimationState.SlideIn;
+    private Texture2D? _backgroundTexture;
+    private int _cachedBgHeight;
+    private int _cachedBgWidth;
+    private int _cachedBorderThickness;
+    private string? _cachedDisplayText;
+    private int _cachedMaxTextWidth;
+    private int _cachedShadowOffset;
+    private int _cachedTextOffsetY;
+    private int _cachedTextPadding;
+
+    // Current viewport scale factor (e.g., 3 for 720x480 window)
+    // Setting this triggers cache recalculation via OnScaleChanged()
+    private int _currentScale = 1;
+    private float _currentY;
+
+    // Animation state
+    private float _elapsedTime;
+
+    // Position (slides DOWN from top, positioned in top-left corner)
+    private int _fixedX; // Fixed X position in top-left area
+    private DynamicSpriteFont? _font;
+    private FontSystem? _fontSystem;
+    private Texture2D? _outlineTexture;
+    private int _popupHeight;
+
+    // Popup dimensions (at 1x GBA scale)
+    private int _popupWidth;
 
     // Scale-dependent cached values (recalculated when scale changes)
     private DynamicSpriteFont? _scaledFont;
-    private string? _cachedDisplayText;
-    private int _cachedBorderThickness;
-    private int _cachedBgWidth;
-    private int _cachedBgHeight;
-    private int _cachedMaxTextWidth;
-    private int _cachedTextPadding;
-    private int _cachedTextOffsetY;
-    private int _cachedShadowOffset;
+
+    private SpriteBatch _spriteBatch = null!; // Set from IRenderingService - shared, not disposed here
+    private float _targetY;
 
     /// <summary>
     ///     Initializes a new instance of the MapPopupScene class.
@@ -138,6 +125,19 @@ public class MapPopupScene : SceneBase
         );
     }
 
+    private int CurrentScale
+    {
+        get => _currentScale;
+        set
+        {
+            if (_currentScale != value)
+            {
+                _currentScale = value;
+                OnScaleChanged();
+            }
+        }
+    }
+
     /// <inheritdoc />
     public override void LoadContent()
     {
@@ -184,7 +184,7 @@ public class MapPopupScene : SceneBase
     /// <remarks>
     ///     <para>
     ///         <b>Texture Lifecycle:</b>
-    ///         Textures are loaded via <see cref="IAssetProvider"/> which owns and manages their lifecycle.
+    ///         Textures are loaded via <see cref="IAssetProvider" /> which owns and manages their lifecycle.
     ///         The AssetManager caches textures and handles disposal when the manager is disposed.
     ///         This scene does NOT dispose textures - they remain cached for reuse across multiple popup displays.
     ///     </para>
@@ -218,6 +218,7 @@ public class MapPopupScene : SceneBase
                 Logger.LogDebug("Loading outline texture from: {Path}", _outlineDef.TexturePath);
                 _assetProvider.LoadTexture(outlineKey, _outlineDef.TexturePath);
             }
+
             _outlineTexture = assetManager.GetTexture(outlineKey);
 
             // Load background texture
@@ -227,6 +228,7 @@ public class MapPopupScene : SceneBase
                 Logger.LogDebug("Loading background texture from: {Path}", _backgroundDef.TexturePath);
                 _assetProvider.LoadTexture(backgroundKey, _backgroundDef.TexturePath);
             }
+
             _backgroundTexture = assetManager.GetTexture(backgroundKey);
 
             Logger.LogDebug("Popup textures loaded - Background={BgLoaded}, Outline={OutLoaded}",
@@ -568,7 +570,9 @@ public class MapPopupScene : SceneBase
     private void DrawNineSliceBorder(int x, int y, int width, int height, int scale)
     {
         if (_outlineTexture == null || _spriteBatch == null)
+        {
             return;
+        }
 
         // Use tile sheet rendering if available (GBA-accurate)
         if (_outlineDef.IsTileSheet)
@@ -588,8 +592,11 @@ public class MapPopupScene : SceneBase
     /// <param name="scale">The viewport scale factor to apply to tile dimensions.</param>
     private void DrawTileSheetBorder(int x, int y, int width, int height, int scale)
     {
-        if (_outlineTexture == null || _spriteBatch == null || _outlineDef.Tiles.Count == 0 || _outlineDef.TileUsage == null)
+        if (_outlineTexture == null || _spriteBatch == null || _outlineDef.Tiles.Count == 0 ||
+            _outlineDef.TileUsage == null)
+        {
             return;
+        }
 
         // Scale tile dimensions to match viewport scaling
         int tileW = _outlineDef.TileWidth * scale;
@@ -603,7 +610,9 @@ public class MapPopupScene : SceneBase
         void DrawTile(int tileIndex, int destX, int destY)
         {
             if (!tileLookup.TryGetValue(tileIndex, out OutlineTile? tile))
+            {
                 return;
+            }
 
             var srcRect = new Rectangle(tile.X, tile.Y, tile.Width, tile.Height);
             var destRect = new Rectangle(destX, destY, tileW, tileH);
@@ -621,7 +630,7 @@ public class MapPopupScene : SceneBase
         for (int i = 0; i < usage.TopEdge.Count && i < 12; i++)
         {
             int tileIndex = usage.TopEdge[i];
-            int tileX = x + (i - 1) * tileW; // i-1 means first tile is at x-1 (pokeemerald: i - 1 + x)
+            int tileX = x + ((i - 1) * tileW); // i-1 means first tile is at x-1 (pokeemerald: i - 1 + x)
             int tileY = y - tileH; // y-1 in tile units (pokeemerald: y - 1)
             DrawTile(tileIndex, tileX, tileY);
         }
@@ -645,7 +654,7 @@ public class MapPopupScene : SceneBase
         for (int i = 0; i < usage.BottomEdge.Count && i < 12; i++)
         {
             int tileIndex = usage.BottomEdge[i];
-            int tileX = x + (i - 1) * tileW;
+            int tileX = x + ((i - 1) * tileW);
             int tileY = y + (GbaInteriorTilesY * tileH);
             DrawTile(tileIndex, tileX, tileY);
         }
@@ -657,7 +666,9 @@ public class MapPopupScene : SceneBase
     private void DrawLegacyNineSliceBorder(int x, int y, int width, int height, int scale)
     {
         if (_outlineTexture == null || _spriteBatch == null)
+        {
             return;
+        }
 
         // Original texture dimensions (unscaled)
         int srcCornerW = _outlineDef.CornerWidth;
@@ -670,27 +681,37 @@ public class MapPopupScene : SceneBase
         int destCornerH = srcCornerH * scale;
 
         // Calculate source rectangles for 9-slice regions (unscaled texture coordinates)
-        Rectangle srcTopLeft = new Rectangle(0, 0, srcCornerW, srcCornerH);
-        Rectangle srcTopRight = new Rectangle(texWidth - srcCornerW, 0, srcCornerW, srcCornerH);
-        Rectangle srcBottomLeft = new Rectangle(0, texHeight - srcCornerH, srcCornerW, srcCornerH);
-        Rectangle srcBottomRight = new Rectangle(texWidth - srcCornerW, texHeight - srcCornerH, srcCornerW, srcCornerH);
+        var srcTopLeft = new Rectangle(0, 0, srcCornerW, srcCornerH);
+        var srcTopRight = new Rectangle(texWidth - srcCornerW, 0, srcCornerW, srcCornerH);
+        var srcBottomLeft = new Rectangle(0, texHeight - srcCornerH, srcCornerW, srcCornerH);
+        var srcBottomRight = new Rectangle(texWidth - srcCornerW, texHeight - srcCornerH, srcCornerW, srcCornerH);
 
-        Rectangle srcTop = new Rectangle(srcCornerW, 0, texWidth - (srcCornerW * 2), srcCornerH);
-        Rectangle srcBottom = new Rectangle(srcCornerW, texHeight - srcCornerH, texWidth - (srcCornerW * 2), srcCornerH);
-        Rectangle srcLeft = new Rectangle(0, srcCornerH, srcCornerW, texHeight - (srcCornerH * 2));
-        Rectangle srcRight = new Rectangle(texWidth - srcCornerW, srcCornerH, srcCornerW, texHeight - (srcCornerH * 2));
+        var srcTop = new Rectangle(srcCornerW, 0, texWidth - (srcCornerW * 2), srcCornerH);
+        var srcBottom = new Rectangle(srcCornerW, texHeight - srcCornerH, texWidth - (srcCornerW * 2), srcCornerH);
+        var srcLeft = new Rectangle(0, srcCornerH, srcCornerW, texHeight - (srcCornerH * 2));
+        var srcRight = new Rectangle(texWidth - srcCornerW, srcCornerH, srcCornerW, texHeight - (srcCornerH * 2));
 
         // Draw corners (scaled destinations, unscaled sources)
         _spriteBatch.Draw(_outlineTexture, new Rectangle(x, y, destCornerW, destCornerH), srcTopLeft, Color.White);
-        _spriteBatch.Draw(_outlineTexture, new Rectangle(x + width - destCornerW, y, destCornerW, destCornerH), srcTopRight, Color.White);
-        _spriteBatch.Draw(_outlineTexture, new Rectangle(x, y + height - destCornerH, destCornerW, destCornerH), srcBottomLeft, Color.White);
-        _spriteBatch.Draw(_outlineTexture, new Rectangle(x + width - destCornerW, y + height - destCornerH, destCornerW, destCornerH), srcBottomRight, Color.White);
+        _spriteBatch.Draw(_outlineTexture, new Rectangle(x + width - destCornerW, y, destCornerW, destCornerH),
+            srcTopRight, Color.White);
+        _spriteBatch.Draw(_outlineTexture, new Rectangle(x, y + height - destCornerH, destCornerW, destCornerH),
+            srcBottomLeft, Color.White);
+        _spriteBatch.Draw(_outlineTexture,
+            new Rectangle(x + width - destCornerW, y + height - destCornerH, destCornerW, destCornerH), srcBottomRight,
+            Color.White);
 
         // Draw edges (stretched to fill space between corners)
-        _spriteBatch.Draw(_outlineTexture, new Rectangle(x + destCornerW, y, width - (destCornerW * 2), destCornerH), srcTop, Color.White);
-        _spriteBatch.Draw(_outlineTexture, new Rectangle(x + destCornerW, y + height - destCornerH, width - (destCornerW * 2), destCornerH), srcBottom, Color.White);
-        _spriteBatch.Draw(_outlineTexture, new Rectangle(x, y + destCornerH, destCornerW, height - (destCornerH * 2)), srcLeft, Color.White);
-        _spriteBatch.Draw(_outlineTexture, new Rectangle(x + width - destCornerW, y + destCornerH, destCornerW, height - (destCornerH * 2)), srcRight, Color.White);
+        _spriteBatch.Draw(_outlineTexture, new Rectangle(x + destCornerW, y, width - (destCornerW * 2), destCornerH),
+            srcTop, Color.White);
+        _spriteBatch.Draw(_outlineTexture,
+            new Rectangle(x + destCornerW, y + height - destCornerH, width - (destCornerW * 2), destCornerH), srcBottom,
+            Color.White);
+        _spriteBatch.Draw(_outlineTexture, new Rectangle(x, y + destCornerH, destCornerW, height - (destCornerH * 2)),
+            srcLeft, Color.White);
+        _spriteBatch.Draw(_outlineTexture,
+            new Rectangle(x + width - destCornerW, y + destCornerH, destCornerW, height - (destCornerH * 2)), srcRight,
+            Color.White);
     }
 
     /// <inheritdoc />

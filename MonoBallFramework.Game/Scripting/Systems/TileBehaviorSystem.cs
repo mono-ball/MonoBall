@@ -1,6 +1,7 @@
 using Arch.Core;
 using Arch.Core.Extensions;
 using Microsoft.Extensions.Logging;
+using MonoBallFramework.Game.Components.Interfaces;
 using MonoBallFramework.Game.Ecs.Components.Movement;
 using MonoBallFramework.Game.Ecs.Components.Tiles;
 using MonoBallFramework.Game.Engine.Common.Configuration;
@@ -9,7 +10,6 @@ using MonoBallFramework.Game.Engine.Core.Events;
 using MonoBallFramework.Game.Engine.Core.Events.Tile;
 using MonoBallFramework.Game.Engine.Core.Systems;
 using MonoBallFramework.Game.Engine.Core.Types;
-using MonoBallFramework.Game.Components.Interfaces;
 using MonoBallFramework.Game.Scripting.Api;
 using MonoBallFramework.Game.Scripting.Runtime;
 
@@ -325,7 +325,7 @@ public class TileBehaviorSystem : BehaviorSystemBase, IUpdateSystem, ITileBehavi
 
                     // Create ScriptContext for this entity
                     string loggerKey = $"{behavior.BehaviorTypeId}.{entity.Id}";
-                    ILogger scriptLogger = base.GetOrCreateLogger(loggerKey);
+                    ILogger scriptLogger = GetOrCreateLogger(loggerKey);
                     var context = new ScriptContext(
                         world,
                         entity,
@@ -408,7 +408,7 @@ public class TileBehaviorSystem : BehaviorSystemBase, IUpdateSystem, ITileBehavi
                 TileY = tilePosition.Y,
                 TileType = tileType,
                 FromDirection = 0, // TODO: Get actual direction if needed
-                Elevation = 0, // TODO: Get actual elevation if needed
+                Elevation = 0 // TODO: Get actual elevation if needed
             };
 
             EventBus.Publish(steppedOnEvent);
@@ -498,7 +498,7 @@ public class TileBehaviorSystem : BehaviorSystemBase, IUpdateSystem, ITileBehavi
                 NewTileX = tilePosition.X, // TODO: Get actual new tile position from movement system
                 NewTileY = tilePosition.Y, // TODO: Get actual new tile position from movement system
                 ExitDirection = 0, // TODO: Get actual exit direction if needed
-                Elevation = 0, // TODO: Get actual elevation if needed
+                Elevation = 0 // TODO: Get actual elevation if needed
             };
 
             EventBus.Publish(steppedOffEvent);
@@ -507,5 +507,4 @@ public class TileBehaviorSystem : BehaviorSystemBase, IUpdateSystem, ITileBehavi
         // Note: TileBehaviorScriptBase doesn't have an OnStepOff method yet
         // This is just for event publishing to support event-driven mods
     }
-
 }

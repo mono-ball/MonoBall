@@ -14,8 +14,8 @@ namespace MonoBallFramework.Game.GameData.Registries;
 /// </summary>
 public class SpriteRegistry : EfCoreRegistry<SpriteEntity, GameSpriteId>
 {
-    private readonly ConcurrentDictionary<string, SpriteEntity> _nameCache = new();
     private readonly ConcurrentDictionary<string, List<SpriteEntity>> _categoryCache = new();
+    private readonly ConcurrentDictionary<string, SpriteEntity> _nameCache = new();
 
     public SpriteRegistry(IDbContextFactory<GameDataContext> contextFactory, ILogger<SpriteRegistry> logger)
         : base(contextFactory, logger)
@@ -48,7 +48,10 @@ public class SpriteRegistry : EfCoreRegistry<SpriteEntity, GameSpriteId>
 
         // Cache by category
         if (!_categoryCache.ContainsKey(entity.SpriteCategory))
+        {
             _categoryCache[entity.SpriteCategory] = new List<SpriteEntity>();
+        }
+
         _categoryCache[entity.SpriteCategory].Add(entity);
     }
 
@@ -80,18 +83,22 @@ public class SpriteRegistry : EfCoreRegistry<SpriteEntity, GameSpriteId>
     public SpriteEntity? GetSpriteByName(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
+        {
             return null;
+        }
 
         // O(1) lookup using name cache
-        if (_nameCache.TryGetValue(name, out var definition))
+        if (_nameCache.TryGetValue(name, out SpriteEntity? definition))
+        {
             return definition;
+        }
 
         // If cache not loaded, query database
         if (!_isCacheLoaded)
         {
-            using var context = _contextFactory.CreateDbContext();
+            using GameDataContext context = _contextFactory.CreateDbContext();
             // SpriteName is computed from SpriteId, so we need to load all and filter in memory
-            var entity = context.Sprites
+            SpriteEntity? entity = context.Sprites
                 .AsNoTracking()
                 .ToList()
                 .FirstOrDefault(s => s.SpriteName == name);
@@ -137,10 +144,14 @@ public class SpriteRegistry : EfCoreRegistry<SpriteEntity, GameSpriteId>
     public IEnumerable<SpriteEntity> GetByCategory(string category)
     {
         if (string.IsNullOrWhiteSpace(category))
+        {
             return Enumerable.Empty<SpriteEntity>();
+        }
 
-        if (_categoryCache.TryGetValue(category, out var cached))
+        if (_categoryCache.TryGetValue(category, out List<SpriteEntity>? cached))
+        {
             return cached;
+        }
 
         return GetAll().Where(s => s.SpriteCategory.Equals(category, StringComparison.OrdinalIgnoreCase));
     }
@@ -152,7 +163,9 @@ public class SpriteRegistry : EfCoreRegistry<SpriteEntity, GameSpriteId>
     public IEnumerable<SpriteEntity> GetBySubcategory(string subcategory)
     {
         if (string.IsNullOrWhiteSpace(subcategory))
+        {
             return Enumerable.Empty<SpriteEntity>();
+        }
 
         return GetAll().Where(s => subcategory.Equals(s.SpriteSubcategory, StringComparison.OrdinalIgnoreCase));
     }

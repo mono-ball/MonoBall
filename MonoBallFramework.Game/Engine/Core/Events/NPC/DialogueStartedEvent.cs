@@ -104,5 +104,5 @@ public enum DialogueSource
     /// <summary>
     ///     Dialogue triggered by system message (berry planted, etc.).
     /// </summary>
-    System,
+    System
 }

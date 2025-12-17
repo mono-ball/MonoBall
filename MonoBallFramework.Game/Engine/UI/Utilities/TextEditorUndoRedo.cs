@@ -131,9 +131,9 @@ public class TextEditorUndoRedo
             }
 
             return CursorLine == other.CursorLine
-                && CursorColumn == other.CursorColumn
-                && Lines.Count == other.Lines.Count
-                && Lines.SequenceEqual(other.Lines);
+                   && CursorColumn == other.CursorColumn
+                   && Lines.Count == other.Lines.Count
+                   && Lines.SequenceEqual(other.Lines);
         }
 
         public override int GetHashCode()

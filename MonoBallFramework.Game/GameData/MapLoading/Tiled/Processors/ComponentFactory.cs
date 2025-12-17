@@ -1,6 +1,5 @@
 using System.Globalization;
 using Microsoft.Xna.Framework;
-using MonoBallFramework.Game.Ecs.Components.Common;
 using MonoBallFramework.Game.Ecs.Components.Movement;
 using MonoBallFramework.Game.Ecs.Components.Rendering;
 using MonoBallFramework.Game.Engine.Core.Types;
@@ -34,7 +33,7 @@ public static class ComponentFactory
             "south" or "down" => Direction.South,
             "west" or "left" => Direction.West,
             "east" or "right" => Direction.East,
-            _ => defaultDirection,
+            _ => defaultDirection
         };
     }
 
@@ -59,7 +58,10 @@ public static class ComponentFactory
     public static byte ParseElevation(object? elevationProp, byte defaultValue = 0)
     {
         if (byte.TryParse(elevationProp?.ToString(), out byte elevation))
+        {
             return elevation;
+        }
+
         return defaultValue;
     }
 
@@ -69,7 +71,10 @@ public static class ComponentFactory
     public static float ParseFloat(object? prop, float defaultValue = 0f)
     {
         if (float.TryParse(prop?.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out float value))
+        {
             return value;
+        }
+
         return defaultValue;
     }
 
@@ -79,7 +84,10 @@ public static class ComponentFactory
     public static int ParseInt(object? prop, int defaultValue = 0)
     {
         if (int.TryParse(prop?.ToString(), out int value))
+        {
             return value;
+        }
+
         return defaultValue;
     }
 
@@ -89,7 +97,9 @@ public static class ComponentFactory
     public static Point[]? ParseWaypoints(string? waypointsStr)
     {
         if (string.IsNullOrEmpty(waypointsStr))
+        {
             return null;
+        }
 
         var points = new List<Point>();
         string[] pairs = waypointsStr.Split(';');
@@ -117,19 +127,10 @@ public static class ComponentFactory
 
         if (axis == "horizontal")
         {
-            return new[]
-            {
-                new Point(startX, startY),
-                new Point(startX + range, startY)
-            };
+            return new[] { new Point(startX, startY), new Point(startX + range, startY) };
         }
-        else // vertical
-        {
-            return new[]
-            {
-                new Point(startX, startY),
-                new Point(startX, startY + range)
-            };
-        }
+
+        // vertical
+        return new[] { new Point(startX, startY), new Point(startX, startY + range) };
     }
 }

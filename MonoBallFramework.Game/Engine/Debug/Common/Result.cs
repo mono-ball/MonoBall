@@ -55,12 +55,7 @@ public record Result<T>
     /// </summary>
     public static Result<T> Failure(string error, Exception exception)
     {
-        return new Result<T>
-        {
-            IsSuccess = false,
-            Error = error,
-            Exception = exception,
-        };
+        return new Result<T> { IsSuccess = false, Error = error, Exception = exception };
     }
 
     /// <summary>
@@ -68,12 +63,7 @@ public record Result<T>
     /// </summary>
     public static Result<T> Failure(Exception exception)
     {
-        return new Result<T>
-        {
-            IsSuccess = false,
-            Error = exception.Message,
-            Exception = exception,
-        };
+        return new Result<T> { IsSuccess = false, Error = exception.Message, Exception = exception };
     }
 }
 
@@ -125,12 +115,7 @@ public record Result
     /// </summary>
     public static Result Failure(string error, Exception exception)
     {
-        return new Result
-        {
-            IsSuccess = false,
-            Error = error,
-            Exception = exception,
-        };
+        return new Result { IsSuccess = false, Error = error, Exception = exception };
     }
 
     /// <summary>
@@ -138,11 +123,6 @@ public record Result
     /// </summary>
     public static Result Failure(Exception exception)
     {
-        return new Result
-        {
-            IsSuccess = false,
-            Error = exception.Message,
-            Exception = exception,
-        };
+        return new Result { IsSuccess = false, Error = exception.Message, Exception = exception };
     }
 }

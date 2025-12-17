@@ -60,7 +60,7 @@ public sealed class ModDependencyResolver
                 {
                     throw new ModDependencyException(
                         $"Mod '{mod.Id}' has invalid dependency format: '{dependency}'. "
-                            + "Expected format: 'mod-id >= version' or 'mod-id == version'"
+                        + "Expected format: 'mod-id >= version' or 'mod-id == version'"
                     );
                 }
 
@@ -332,7 +332,7 @@ public sealed class ModDependencyResolver
             "==" => comparison == 0,
             "<=" => comparison <= 0,
             "<" => comparison < 0,
-            _ => true,
+            _ => true
         };
     }
 
@@ -412,10 +412,12 @@ public sealed class ModDependencyResolver
 public sealed class ModDependencyException : Exception
 {
     public ModDependencyException(string message)
-        : base(message) { }
+        : base(message)
+    {
+    }
 
     public ModDependencyException(string message, Exception innerException)
-        : base(message, innerException) { }
+        : base(message, innerException)
+    {
+    }
 }
-
-

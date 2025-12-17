@@ -23,13 +23,13 @@ public class SpriteAnimationSystem : SystemBase, IUpdateSystem
     private readonly Dictionary<string, Dictionary<string, SpriteAnimation>> _animationCache =
         new();
 
+    // Cache definitions for performance (avoid repeated registry lookups)
+    private readonly Dictionary<string, SpriteEntity> _definitionCache = new();
+
     // Cache frame lookups by Index property (EF Core owned collections don't guarantee order)
     private readonly Dictionary<string, Dictionary<int, SpriteFrame>> _frameCache = new();
 
     private readonly ILogger<SpriteAnimationSystem>? _logger;
-
-    // Cache definitions for performance (avoid repeated registry lookups)
-    private readonly Dictionary<string, SpriteEntity> _definitionCache = new();
 
     // Track missing sprites to avoid repeated lookup attempts and log spam
     private readonly HashSet<string> _missingSprites = new();

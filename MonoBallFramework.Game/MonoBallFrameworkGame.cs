@@ -1,14 +1,13 @@
-using System;
 using Arch.Core;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using MonoBallFramework.Game.Engine.Content;
 using MonoBallFramework.Game.Engine.Core.Types;
 using MonoBallFramework.Game.Engine.Scenes;
 using MonoBallFramework.Game.Engine.Scenes.Scenes;
+using MonoBallFramework.Game.Engine.Scenes.Services;
 using MonoBallFramework.Game.Engine.Systems.Management;
 using MonoBallFramework.Game.GameData.Loading;
 using MonoBallFramework.Game.GameData.Services;
@@ -16,7 +15,6 @@ using MonoBallFramework.Game.GameData.Sprites;
 using MonoBallFramework.Game.GameSystems.Services;
 using MonoBallFramework.Game.Infrastructure.Configuration;
 using MonoBallFramework.Game.Infrastructure.Diagnostics;
-using MonoBallFramework.Game.Infrastructure.Services;
 using MonoBallFramework.Game.Initialization;
 using MonoBallFramework.Game.Initialization.Factories;
 using MonoBallFramework.Game.Initialization.Initializers;
@@ -26,7 +24,6 @@ using MonoBallFramework.Game.Input;
 using MonoBallFramework.Game.Scenes;
 using MonoBallFramework.Game.Scripting.Api;
 using MonoBallFramework.Game.Scripting.Services;
-using MonoBallFramework.Game.Systems;
 using MonoBallFramework.Game.Systems.Rendering;
 
 namespace MonoBallFramework.Game;
@@ -51,12 +48,12 @@ public class MonoBallFrameworkGame : Microsoft.Xna.Framework.Game, IAsyncDisposa
     private readonly ScriptService _scriptService;
     private readonly IServiceProvider _services; // Required for SceneManager and scenes that need DI
     private readonly SpriteRegistry _spriteRegistry;
-    private IContentProvider _contentProvider = null!; // Initialized in Initialize() from services
 
     // Services that depend on GraphicsDevice (created in Initialize)
     private readonly SystemManager _systemManager;
     private readonly TypeRegistry<TileBehaviorDefinition> _tileBehaviorRegistry;
     private readonly World _world;
+    private IContentProvider _contentProvider = null!; // Initialized in Initialize() from services
 
     private IGameInitializer _gameInitializer = null!;
     private Task<GameplayScene>? _initializationTask;
@@ -64,7 +61,7 @@ public class MonoBallFrameworkGame : Microsoft.Xna.Framework.Game, IAsyncDisposa
 
     // Async initialization state
     private IMapInitializer _mapInitializer = null!;
-    private Engine.Scenes.Services.IMapPopupOrchestrator? _mapPopupOrchestrator;
+    private IMapPopupOrchestrator? _mapPopupOrchestrator;
     private SceneManager? _sceneManager;
     private SpriteTextureLoader? _spriteTextureLoader;
 

@@ -40,7 +40,7 @@ public static class TmxParser
             Tilesets = ParseTilesets(mapElement, tmxPath),
             Layers = ParseLayers(mapElement),
             ObjectGroups = ParseObjectGroups(mapElement),
-            ImageLayers = ParseImageLayers(mapElement),
+            ImageLayers = ParseImageLayers(mapElement)
         };
 
         return tmxDoc;
@@ -60,7 +60,7 @@ public static class TmxParser
                 Source = tilesetElement.Attribute("source")?.Value,
                 TileWidth = ParseInt(tilesetElement, "tilewidth", 16),
                 TileHeight = ParseInt(tilesetElement, "tileheight", 16),
-                TileCount = ParseInt(tilesetElement, "tilecount"),
+                TileCount = ParseInt(tilesetElement, "tilecount")
             };
 
             // Parse embedded image
@@ -71,7 +71,7 @@ public static class TmxParser
                 {
                     Source = imageElement.Attribute("source")?.Value ?? string.Empty,
                     Width = ParseInt(imageElement, "width"),
-                    Height = ParseInt(imageElement, "height"),
+                    Height = ParseInt(imageElement, "height")
                 };
             }
 
@@ -108,7 +108,7 @@ public static class TmxParser
             {
                 Source = imageElement.Attribute("source")?.Value ?? string.Empty,
                 Width = ParseInt(imageElement, "width"),
-                Height = ParseInt(imageElement, "height"),
+                Height = ParseInt(imageElement, "height")
             };
         }
     }
@@ -126,7 +126,7 @@ public static class TmxParser
                 Width = ParseInt(layerElement, "width"),
                 Height = ParseInt(layerElement, "height"),
                 Visible = ParseInt(layerElement, "visible", 1) == 1,
-                Opacity = ParseFloat(layerElement, "opacity", 1.0f),
+                Opacity = ParseFloat(layerElement, "opacity", 1.0f)
             };
 
             // Parse tile data
@@ -140,7 +140,7 @@ public static class TmxParser
                     layer.Data = ParseCsvData(dataElement.Value, layer.Width, layer.Height);
                 }
                 else if (encoding == null)
-                // XML encoding (tile elements)
+                    // XML encoding (tile elements)
                 {
                     layer.Data = ParseXmlData(dataElement, layer.Width, layer.Height);
                 }
@@ -208,7 +208,7 @@ public static class TmxParser
             {
                 Id = ParseInt(groupElement, "id"),
                 Name = groupElement.Attribute("name")?.Value ?? string.Empty,
-                Objects = ParseObjects(groupElement),
+                Objects = ParseObjects(groupElement)
             };
 
             objectGroups.Add(group);
@@ -232,7 +232,7 @@ public static class TmxParser
                 Height = ParseFloat(objElement, "height"),
                 Type = objElement.Attribute("type")?.Value,
                 Name = objElement.Attribute("name")?.Value,
-                Properties = ParseProperties(objElement),
+                Properties = ParseProperties(objElement)
             };
 
             objects.Add(obj);
@@ -268,7 +268,7 @@ public static class TmxParser
                 "int" => int.Parse(value, CultureInfo.InvariantCulture),
                 "float" => float.Parse(value, CultureInfo.InvariantCulture),
                 "string" => value,
-                _ => value,
+                _ => value
             };
         }
 
@@ -280,8 +280,8 @@ public static class TmxParser
         XAttribute? attr = element.Attribute(attributeName);
         return
             attr != null && int.TryParse(attr.Value, CultureInfo.InvariantCulture, out int result)
-            ? result
-            : defaultValue;
+                ? result
+                : defaultValue;
     }
 
     private static float ParseFloat(XElement element, string attributeName, float defaultValue = 0f)
@@ -290,8 +290,8 @@ public static class TmxParser
         return
             attr != null
             && float.TryParse(attr.Value, CultureInfo.InvariantCulture, out float result)
-            ? result
-            : defaultValue;
+                ? result
+                : defaultValue;
     }
 
     private static List<TmxImageLayer> ParseImageLayers(XElement mapElement)
@@ -307,7 +307,7 @@ public static class TmxParser
                 X = ParseFloat(layerElement, "offsetx"),
                 Y = ParseFloat(layerElement, "offsety"),
                 Visible = ParseInt(layerElement, "visible", 1) == 1,
-                Opacity = ParseFloat(layerElement, "opacity", 1.0f),
+                Opacity = ParseFloat(layerElement, "opacity", 1.0f)
             };
 
             // Parse image element
@@ -318,7 +318,7 @@ public static class TmxParser
                 {
                     Source = imageElement.Attribute("source")?.Value ?? string.Empty,
                     Width = ParseInt(imageElement, "width"),
-                    Height = ParseInt(imageElement, "height"),
+                    Height = ParseInt(imageElement, "height")
                 };
             }
 

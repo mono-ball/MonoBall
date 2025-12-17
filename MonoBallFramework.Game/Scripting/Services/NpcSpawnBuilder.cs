@@ -1,5 +1,4 @@
 using Arch.Core;
-using Arch.Core.Extensions;
 using Arch.Relationships;
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
@@ -20,42 +19,42 @@ namespace MonoBallFramework.Game.Scripting.Services;
 internal sealed class NpcSpawnBuilder : INpcSpawnBuilder
 {
     private static int _dynamicIdCounter;
+    private readonly ILogger? _logger;
+    private readonly NpcApiService? _npcService;
 
     private readonly World _world;
-    private readonly NpcApiService? _npcService;
-    private readonly ILogger? _logger;
     private readonly int _x;
     private readonly int _y;
+    private string? _animationName;
+    private GameBehaviorId? _behaviorId;
+    private string? _dialogueScript;
+    private string? _displayName;
+    private byte _elevation = Elevation.Default;
+    private Direction _facing = Direction.South;
+    private bool _hasInteraction;
+    private bool _hideWhenFlagTrue = true;
+    private bool _interactionEnabled = true;
+    private string? _interactionEvent;
+    private int _interactionRange = 1;
+    private bool _isDefeated;
+    private bool _isSolid = true;
+    private bool _isTrainer;
+    private GameMapId? _mapId;
+    private float _movementSpeed = 3.75f;
 
     // Configuration
     private GameNpcId? _npcId;
-    private GameSpriteId? _spriteId;
-    private GameBehaviorId? _behaviorId;
-    private string? _displayName;
-    private bool _visible = true;
-    private Direction _facing = Direction.South;
-    private Point[]? _pathWaypoints;
+    private Entity? _parentEntity;
     private bool _pathLoop;
-    private GameFlagId? _visibilityFlagId;
-    private bool _hideWhenFlagTrue = true;
-    private bool _isTrainer;
-    private int _viewRange;
-    private bool _isDefeated;
+    private Point[]? _pathWaypoints;
     private int? _rangeX;
     private int? _rangeY;
-    private float _movementSpeed = 3.75f;
-    private byte _elevation = Elevation.Default;
-    private string? _animationName;
-    private bool _isSolid = true;
-    private bool _hasInteraction;
-    private int _interactionRange = 1;
     private bool _requiresFacing = true;
-    private bool _interactionEnabled = true;
-    private string? _dialogueScript;
-    private string? _interactionEvent;
-    private GameMapId? _mapId;
+    private GameSpriteId? _spriteId;
     private int _tileSize = 16;
-    private Entity? _parentEntity;
+    private int _viewRange;
+    private GameFlagId? _visibilityFlagId;
+    private bool _visible = true;
 
     public NpcSpawnBuilder(
         World world,
@@ -129,13 +128,13 @@ internal sealed class NpcSpawnBuilder : INpcSpawnBuilder
     /// <inheritdoc />
     public INpcSpawnBuilder HideWhenFlagSet(GameFlagId flagId)
     {
-        return WithVisibilityFlag(flagId, hideWhenTrue: true);
+        return WithVisibilityFlag(flagId, true);
     }
 
     /// <inheritdoc />
     public INpcSpawnBuilder ShowWhenFlagSet(GameFlagId flagId)
     {
-        return WithVisibilityFlag(flagId, hideWhenTrue: false);
+        return WithVisibilityFlag(flagId, false);
     }
 
     /// <inheritdoc />
@@ -276,20 +275,16 @@ internal sealed class NpcSpawnBuilder : INpcSpawnBuilder
     public Entity Spawn()
     {
         // Create the entity with base components
-        var entity = _world.Create(
+        Entity entity = _world.Create(
             new Position(_x, _y, _mapId, _tileSize),
             _facing,
             new GridMovement(_movementSpeed) { FacingDirection = _facing }
         );
 
         // Add NPC component - always generate an ID if not provided
-        var npcId = _npcId ?? GameNpcId.Create($"spawned_{Interlocked.Increment(ref _dynamicIdCounter)}", "dynamic");
-        var npcComponent = new Npc(npcId)
-        {
-            IsTrainer = _isTrainer,
-            IsDefeated = _isDefeated,
-            ViewRange = _viewRange
-        };
+        GameNpcId npcId =
+            _npcId ?? GameNpcId.Create($"spawned_{Interlocked.Increment(ref _dynamicIdCounter)}", "dynamic");
+        var npcComponent = new Npc(npcId) { IsTrainer = _isTrainer, IsDefeated = _isDefeated, ViewRange = _viewRange };
         _world.Add(entity, npcComponent);
 
         // Add sprite if specified
@@ -332,7 +327,7 @@ internal sealed class NpcSpawnBuilder : INpcSpawnBuilder
         }
 
         // Add animation - default to direction-based if not specified
-        var animationName = _animationName ?? GetDefaultAnimationForDirection(_facing);
+        string animationName = _animationName ?? GetDefaultAnimationForDirection(_facing);
         _world.Add(entity, new Animation(animationName));
 
         // Add collision component
@@ -341,14 +336,15 @@ internal sealed class NpcSpawnBuilder : INpcSpawnBuilder
         // Add interaction if configured
         if (_hasInteraction || _dialogueScript != null || _interactionEvent != null)
         {
-            _world.Add(entity, new Interaction
-            {
-                InteractionRange = _interactionRange,
-                RequiresFacing = _requiresFacing,
-                IsEnabled = _interactionEnabled,
-                DialogueScript = _dialogueScript,
-                InteractionEvent = _interactionEvent
-            });
+            _world.Add(entity,
+                new Interaction
+                {
+                    InteractionRange = _interactionRange,
+                    RequiresFacing = _requiresFacing,
+                    IsEnabled = _interactionEnabled,
+                    DialogueScript = _dialogueScript,
+                    InteractionEvent = _interactionEvent
+                });
         }
 
         // Set path if specified
@@ -391,7 +387,7 @@ internal sealed class NpcSpawnBuilder : INpcSpawnBuilder
                 "SpawnAndConfigure() requires NpcApiService. Use the full constructor or call Spawn() instead.");
         }
 
-        var entity = Spawn();
+        Entity entity = Spawn();
         return _npcService.For(entity);
     }
 
@@ -409,5 +405,4 @@ internal sealed class NpcSpawnBuilder : INpcSpawnBuilder
             _ => "face_south"
         };
     }
-
 }

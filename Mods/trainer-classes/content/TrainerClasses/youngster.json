@@ -19,7 +19,10 @@
     "Yes! I won!",
     "My training paid off!"
   ],
-  "preferredTypes": ["normal", "bug"],
+  "preferredTypes": [
+    "normal",
+    "bug"
+  ],
   "levelRange": {
     "min": 2,
     "max": 15

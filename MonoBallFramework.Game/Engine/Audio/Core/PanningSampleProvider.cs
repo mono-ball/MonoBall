@@ -1,8 +1,8 @@
 namespace MonoBallFramework.Game.Engine.Audio.Core;
 
 /// <summary>
-/// Sample provider that applies stereo panning to audio samples.
-/// Only works with stereo (2-channel) audio.
+///     Sample provider that applies stereo panning to audio samples.
+///     Only works with stereo (2-channel) audio.
 /// </summary>
 public class PanningSampleProvider : ISampleProvider
 {
@@ -10,7 +10,7 @@ public class PanningSampleProvider : ISampleProvider
     private volatile float _pan;
 
     /// <summary>
-    /// Creates a new panning sample provider.
+    ///     Creates a new panning sample provider.
     /// </summary>
     /// <param name="source">The source sample provider (must be stereo).</param>
     public PanningSampleProvider(ISampleProvider source)
@@ -18,17 +18,14 @@ public class PanningSampleProvider : ISampleProvider
         _source = source ?? throw new ArgumentNullException(nameof(source));
 
         if (source.Format.Channels != 2)
+        {
             throw new ArgumentException("Panning only works with stereo audio.", nameof(source));
+        }
     }
 
     /// <summary>
-    /// Gets the audio format (same as source).
-    /// </summary>
-    public AudioFormat Format => _source.Format;
-
-    /// <summary>
-    /// Gets or sets the pan position (-1.0 = full left, 0.0 = center, 1.0 = full right).
-    /// Thread-safe; changes take effect immediately.
+    ///     Gets or sets the pan position (-1.0 = full left, 0.0 = center, 1.0 = full right).
+    ///     Thread-safe; changes take effect immediately.
     /// </summary>
     public float Pan
     {
@@ -37,8 +34,13 @@ public class PanningSampleProvider : ISampleProvider
     }
 
     /// <summary>
-    /// Reads samples from the source and applies panning.
-    /// Uses constant-power panning for smooth transitions.
+    ///     Gets the audio format (same as source).
+    /// </summary>
+    public AudioFormat Format => _source.Format;
+
+    /// <summary>
+    ///     Reads samples from the source and applies panning.
+    ///     Uses constant-power panning for smooth transitions.
     /// </summary>
     public int Read(float[] buffer, int offset, int count)
     {
@@ -46,7 +48,9 @@ public class PanningSampleProvider : ISampleProvider
 
         float pan = _pan;
         if (Math.Abs(pan) < 0.0001f) // Skip if centered
+        {
             return samplesRead;
+        }
 
         // Constant-power panning
         // When pan is at center (0), both channels are at full volume
@@ -76,4 +80,3 @@ public class PanningSampleProvider : ISampleProvider
         return samplesRead;
     }
 }
-

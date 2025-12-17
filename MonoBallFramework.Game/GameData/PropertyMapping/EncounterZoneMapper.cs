@@ -33,7 +33,7 @@ public class EncounterZoneMapper : IEntityPropertyMapper<EncounterZone>
             string s when int.TryParse(s, out int result) => result,
             _ => throw new InvalidOperationException(
                 $"Invalid encounter_rate value: '{encounterRateValue}'. Must be an integer."
-            ),
+            )
         };
 
         if (encounterRate < 0 || encounterRate > 255)

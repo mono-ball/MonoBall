@@ -84,9 +84,9 @@ public struct MapWorldPosition
     public readonly bool Contains(Vector2 worldPosition)
     {
         return worldPosition.X >= WorldOrigin.X
-            && worldPosition.X < WorldOrigin.X + WidthInPixels
-            && worldPosition.Y >= WorldOrigin.Y
-            && worldPosition.Y < WorldOrigin.Y + HeightInPixels;
+               && worldPosition.X < WorldOrigin.X + WidthInPixels
+               && worldPosition.Y >= WorldOrigin.Y
+               && worldPosition.Y < WorldOrigin.Y + HeightInPixels;
     }
 
     /// <summary>

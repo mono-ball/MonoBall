@@ -16,7 +16,9 @@ public class InitializeGameSystemsStep : InitializationStepBase
             "Initializing game systems...",
             InitializationProgress.SpriteDefinitionsLoaded,
             InitializationProgress.GameSystemsInitialized
-        ) { }
+        )
+    {
+    }
 
     /// <inheritdoc />
     protected override Task ExecuteStepAsync(

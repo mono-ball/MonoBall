@@ -69,7 +69,7 @@ public static class DebugServiceCollectionExtensions
                     AutoCompleteEnabled = true,
                     PersistHistory = true,
                     LoggingEnabled = true,
-                    MinimumLogLevel = LogLevel.Debug,
+                    MinimumLogLevel = LogLevel.Debug
                 };
             });
         }

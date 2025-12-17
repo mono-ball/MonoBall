@@ -29,11 +29,15 @@ public interface ISoundEffectManager : IDisposable
     /// </summary>
     /// <param name="trackId">The track ID from AudioRegistry (e.g., "se_battle_hit").</param>
     /// <param name="volume">Volume multiplier (0.0 to 1.0, default: 1.0).</param>
-    /// <param name="pitch">Pitch adjustment in semitones (-1.0 to 1.0, default: 0.0). Note: Pitch control requires resampling and may not be fully implemented.</param>
+    /// <param name="pitch">
+    ///     Pitch adjustment in semitones (-1.0 to 1.0, default: 0.0). Note: Pitch control requires resampling
+    ///     and may not be fully implemented.
+    /// </param>
     /// <param name="pan">Stereo pan adjustment (-1.0 left to 1.0 right, default: 0.0 center).</param>
     /// <param name="priority">Sound priority level for eviction control (default: Normal).</param>
     /// <returns>True if the sound was played successfully; false if track not found or max concurrent limit reached.</returns>
-    bool Play(string trackId, float volume = 1.0f, float pitch = 0.0f, float pan = 0.0f, SoundPriority priority = SoundPriority.Normal);
+    bool Play(string trackId, float volume = 1.0f, float pitch = 0.0f, float pan = 0.0f,
+        SoundPriority priority = SoundPriority.Normal);
 
     /// <summary>
     ///     Plays a sound effect directly from a file path.
@@ -45,7 +49,8 @@ public interface ISoundEffectManager : IDisposable
     /// <param name="priority">Sound priority level for eviction control (default: Normal).</param>
     /// <returns>True if the sound was played successfully; false if file not found or playback failed.</returns>
     /// <exception cref="FileNotFoundException">Thrown when the audio file does not exist.</exception>
-    bool PlayFromFile(string filePath, float volume = 1.0f, float pitch = 0.0f, float pan = 0.0f, SoundPriority priority = SoundPriority.Normal);
+    bool PlayFromFile(string filePath, float volume = 1.0f, float pitch = 0.0f, float pan = 0.0f,
+        SoundPriority priority = SoundPriority.Normal);
 
     /// <summary>
     ///     Plays a looping sound effect by track ID and returns a control handle.
@@ -56,7 +61,8 @@ public interface ISoundEffectManager : IDisposable
     /// <param name="pan">Stereo pan adjustment (-1.0 left to 1.0 right, default: 0.0 center).</param>
     /// <param name="priority">Sound priority level for eviction control (default: Normal).</param>
     /// <returns>A handle to control the looping sound, or null if playback failed or max concurrent limit reached.</returns>
-    ILoopingSoundHandle? PlayLooping(string trackId, float volume = 1.0f, float pitch = 0.0f, float pan = 0.0f, SoundPriority priority = SoundPriority.Normal);
+    ILoopingSoundHandle? PlayLooping(string trackId, float volume = 1.0f, float pitch = 0.0f, float pan = 0.0f,
+        SoundPriority priority = SoundPriority.Normal);
 
     /// <summary>
     ///     Plays a looping sound effect from a file path and returns a control handle.
@@ -68,7 +74,8 @@ public interface ISoundEffectManager : IDisposable
     /// <param name="priority">Sound priority level for eviction control (default: Normal).</param>
     /// <returns>A handle to control the looping sound, or null if playback failed.</returns>
     /// <exception cref="FileNotFoundException">Thrown when the audio file does not exist.</exception>
-    ILoopingSoundHandle? PlayLoopingFromFile(string filePath, float volume = 1.0f, float pitch = 0.0f, float pan = 0.0f, SoundPriority priority = SoundPriority.Normal);
+    ILoopingSoundHandle? PlayLoopingFromFile(string filePath, float volume = 1.0f, float pitch = 0.0f, float pan = 0.0f,
+        SoundPriority priority = SoundPriority.Normal);
 
     /// <summary>
     ///     Updates the manager, cleaning up stopped sound instances and freeing resources.
@@ -136,4 +143,3 @@ public interface ILoopingSoundHandle : IDisposable
     /// </summary>
     void Resume();
 }
-

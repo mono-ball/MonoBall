@@ -14,8 +14,8 @@ namespace MonoBallFramework.Game.GameData.Registries;
 /// </summary>
 public class MapRegistry : EfCoreRegistry<MapEntity, GameMapId>
 {
-    private readonly ConcurrentDictionary<string, List<MapEntity>> _regionCache = new();
     private readonly ConcurrentDictionary<string, List<MapEntity>> _mapTypeCache = new();
+    private readonly ConcurrentDictionary<string, List<MapEntity>> _regionCache = new();
 
     public MapRegistry(IDbContextFactory<GameDataContext> contextFactory, ILogger<MapRegistry> logger)
         : base(contextFactory, logger)
@@ -45,14 +45,20 @@ public class MapRegistry : EfCoreRegistry<MapEntity, GameMapId>
     {
         // Cache by region
         if (!_regionCache.ContainsKey(entity.Region))
+        {
             _regionCache[entity.Region] = new List<MapEntity>();
+        }
+
         _regionCache[entity.Region].Add(entity);
 
         // Cache by map type if present
         if (!string.IsNullOrWhiteSpace(entity.MapType))
         {
             if (!_mapTypeCache.ContainsKey(entity.MapType))
+            {
                 _mapTypeCache[entity.MapType] = new List<MapEntity>();
+            }
+
             _mapTypeCache[entity.MapType].Add(entity);
         }
     }
@@ -104,10 +110,14 @@ public class MapRegistry : EfCoreRegistry<MapEntity, GameMapId>
     public IEnumerable<MapEntity> GetByRegion(string region)
     {
         if (string.IsNullOrWhiteSpace(region))
+        {
             return Enumerable.Empty<MapEntity>();
+        }
 
-        if (_regionCache.TryGetValue(region, out var cached))
+        if (_regionCache.TryGetValue(region, out List<MapEntity>? cached))
+        {
             return cached;
+        }
 
         return GetAll().Where(m => m.Region.Equals(region, StringComparison.OrdinalIgnoreCase));
     }
@@ -119,10 +129,14 @@ public class MapRegistry : EfCoreRegistry<MapEntity, GameMapId>
     public IEnumerable<MapEntity> GetByMapType(string mapType)
     {
         if (string.IsNullOrWhiteSpace(mapType))
+        {
             return Enumerable.Empty<MapEntity>();
+        }
 
-        if (_mapTypeCache.TryGetValue(mapType, out var cached))
+        if (_mapTypeCache.TryGetValue(mapType, out List<MapEntity>? cached))
+        {
             return cached;
+        }
 
         return GetAll().Where(m => mapType.Equals(m.MapType, StringComparison.OrdinalIgnoreCase));
     }
@@ -189,15 +203,32 @@ public class MapRegistry : EfCoreRegistry<MapEntity, GameMapId>
     /// <param name="mapId">The map ID to find connections for.</param>
     public IEnumerable<MapEntity> GetConnectedMaps(GameMapId mapId)
     {
-        var map = GetMap(mapId);
+        MapEntity? map = GetMap(mapId);
         if (map == null)
+        {
             return Enumerable.Empty<MapEntity>();
+        }
 
         var connectedMapIds = new List<GameMapId>();
-        if (map.NorthMapId != null) connectedMapIds.Add(map.NorthMapId);
-        if (map.SouthMapId != null) connectedMapIds.Add(map.SouthMapId);
-        if (map.EastMapId != null) connectedMapIds.Add(map.EastMapId);
-        if (map.WestMapId != null) connectedMapIds.Add(map.WestMapId);
+        if (map.NorthMapId != null)
+        {
+            connectedMapIds.Add(map.NorthMapId);
+        }
+
+        if (map.SouthMapId != null)
+        {
+            connectedMapIds.Add(map.SouthMapId);
+        }
+
+        if (map.EastMapId != null)
+        {
+            connectedMapIds.Add(map.EastMapId);
+        }
+
+        if (map.WestMapId != null)
+        {
+            connectedMapIds.Add(map.WestMapId);
+        }
 
         return connectedMapIds.Select(GetMap).Where(m => m != null).Cast<MapEntity>();
     }

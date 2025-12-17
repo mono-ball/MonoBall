@@ -74,7 +74,7 @@ public class StatsPanel : DebugPanelBase, IStatsOperations
         int Entities,
         int Systems,
         int GCDeltaPerSec
-    ) GetStatistics()
+        ) GetStatistics()
     {
         (int Gen0Delta, int Gen1Delta, int Gen2Delta) deltas = _content.GCDeltas;
         return (

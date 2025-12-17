@@ -25,8 +25,11 @@ public class SpatialHashSystem(ILogger<SpatialHashSystem>? logger = null)
     private readonly SpatialHash _dynamicHash = new(); // For entities with Position (cleared each frame)
     private readonly ILogger<SpatialHashSystem>? _logger = logger;
     private readonly List<Entity> _queryResultBuffer = new(128); // Pooled buffer for query results
-    private readonly List<Entity> _staticQueryBuffer = new(512); // Separate buffer for static-only queries (tile rendering)
     private readonly SpatialHash _staticHash = new(); // For tiles (indexed once)
+
+    private readonly List<Entity>
+        _staticQueryBuffer = new(512); // Separate buffer for static-only queries (tile rendering)
+
     private bool _staticTilesIndexed;
 
     /// <summary>

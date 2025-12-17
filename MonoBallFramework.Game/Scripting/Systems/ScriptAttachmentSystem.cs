@@ -291,8 +291,7 @@ public class ScriptAttachmentSystem : SystemBase, IUpdateSystem
             _eventBus.Publish(
                 new TickEvent
                 {
-                    DeltaTime = deltaTime,
-                    TotalTime = 0f, // TODO: Track total elapsed time if needed
+                    DeltaTime = deltaTime, TotalTime = 0f // TODO: Track total elapsed time if needed
                 }
             );
         }

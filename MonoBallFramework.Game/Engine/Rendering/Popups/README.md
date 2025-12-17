@@ -27,17 +27,20 @@ The system supports two rendering modes for outlines:
 Used for pokeemerald-extracted popups. Assembles frames from individual 8×8 pixel tiles.
 
 **Features**:
+
 - Matches GBA's tile-based hardware
 - No stretching or scaling
 - Tiles are repeated along edges to fill the frame
 - Pixel-perfect rendering
 
 **How It Works**:
+
 1. Loads tile sheet texture (80×24 pixels = 30 tiles)
 2. Uses `TileUsage` to select appropriate tiles for each frame section
 3. Draws tiles at 8-pixel intervals
 
 **Example**:
+
 ```
 Top edge: [tile 0][tile 1][tile 2]...[tile 11] (repeated as needed)
 Corners: [tile 12] (TL), [tile 13] (TR), [tile 16] (BL), [tile 17] (BR)
@@ -52,6 +55,7 @@ Bottom: [tile 18][tile 19]...[tile 29] (repeated as needed)
 Used for custom popups or legacy content. Uses traditional 9-slice/9-patch rendering.
 
 **Features**:
+
 - Corners are never stretched
 - Edges are stretched along one axis
 - Center is transparent
@@ -98,6 +102,7 @@ Pokeemerald outlines use a 10×3 tile grid (30 tiles total):
 ### Animation
 
 **Pokeemerald-accurate timing**:
+
 - **Slide In**: 0.4 seconds (from left, cubic ease-out)
 - **Display**: 2.5 seconds (stationary in top-left corner)
 - **Slide Out**: 0.4 seconds (to left, cubic ease-in)
@@ -105,9 +110,9 @@ Pokeemerald outlines use a 10×3 tile grid (30 tiles total):
 ### Drawing (per frame)
 
 1. **Background**: Stretch bitmap to popup size
-2. **Outline**: 
-   - If tile sheet: Assemble from tiles
-   - If 9-slice: Render with corner/edge slicing
+2. **Outline**:
+    - If tile sheet: Assemble from tiles
+    - If 9-slice: Render with corner/edge slicing
 3. **Text**: Draw map name with shadow (dark navy blue)
 
 ## Tile Sheet Rendering Algorithm

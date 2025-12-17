@@ -62,7 +62,7 @@ public static class ErrorFormatter
             EndLine = endLine + 1,
             EndColumn = endColumn + 1,
             Context = context,
-            Severity = diagnostic.Severity,
+            Severity = diagnostic.Severity
         };
     }
 

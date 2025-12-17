@@ -4,10 +4,8 @@ namespace MonoBallFramework.Game.Engine.Core.Types;
 
 /// <summary>
 ///     Strongly-typed identifier for NPC definitions.
-///
 ///     Format: base:npc:{category}/{name}
 ///     Or with subcategory: base:npc:{category}/{subcategory}/{name}
-///
 ///     Examples:
 ///     - base:npc:townfolk/prof_birch
 ///     - base:npc:shopkeeper/pokemart_clerk
@@ -26,9 +24,11 @@ public sealed record GameNpcId : EntityId
     public GameNpcId(string value) : base(value)
     {
         if (EntityType != TypeName)
+        {
             throw new ArgumentException(
                 $"Expected entity type '{TypeName}', got '{EntityType}'",
                 nameof(value));
+        }
     }
 
     /// <summary>
@@ -92,11 +92,15 @@ public sealed record GameNpcId : EntityId
     public static GameNpcId? TryCreate(string? value)
     {
         if (string.IsNullOrWhiteSpace(value))
+        {
             return null;
+        }
 
         // Only accept full format
         if (!IsValidFormat(value) || !value.Contains($":{TypeName}:"))
+        {
             return null;
+        }
 
         try
         {
@@ -111,5 +115,8 @@ public sealed record GameNpcId : EntityId
     /// <summary>
     ///     Explicit conversion from string. Use TryCreate() for safe parsing.
     /// </summary>
-    public static explicit operator GameNpcId(string value) => new(value);
+    public static explicit operator GameNpcId(string value)
+    {
+        return new GameNpcId(value);
+    }
 }

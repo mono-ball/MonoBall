@@ -204,7 +204,7 @@ public class LogCommand : IConsoleCommand
             context.WriteLine("Available log categories:", theme.Info);
             foreach ((string category, int count) in counts.OrderByDescending(kvp => kvp.Value))
             {
-                context.WriteLine($"  {category, -20} ({count} logs)", theme.TextPrimary);
+                context.WriteLine($"  {category,-20} ({count} logs)", theme.TextPrimary);
             }
 
             context.WriteLine("", theme.TextPrimary);
@@ -240,41 +240,41 @@ public class LogCommand : IConsoleCommand
             context.WriteLine("═══════════════════════════════════════", theme.Info);
             context.WriteLine("          LOG STATISTICS", theme.Info);
             context.WriteLine("═══════════════════════════════════════", theme.Info);
-            context.WriteLine($"  Total Logs:       {total, 6}", theme.TextPrimary);
-            context.WriteLine($"  Filtered View:    {filtered, 6}", theme.TextPrimary);
-            context.WriteLine($"  Categories:       {categories, 6}", theme.TextPrimary);
-            context.WriteLine($"  Last Minute:      {lastMinute, 6}", theme.TextSecondary);
+            context.WriteLine($"  Total Logs:       {total,6}", theme.TextPrimary);
+            context.WriteLine($"  Filtered View:    {filtered,6}", theme.TextPrimary);
+            context.WriteLine($"  Categories:       {categories,6}", theme.TextPrimary);
+            context.WriteLine($"  Last Minute:      {lastMinute,6}", theme.TextSecondary);
             context.WriteLine("───────────────────────────────────────", theme.TextDim);
             context.WriteLine("  By Level:", theme.TextSecondary);
 
             if (levelCounts.TryGetValue(LogLevel.Critical, out int critical) && critical > 0)
             {
-                context.WriteLine($"    Critical:       {critical, 6}", theme.Error);
+                context.WriteLine($"    Critical:       {critical,6}", theme.Error);
             }
 
             if (levelCounts.TryGetValue(LogLevel.Error, out int errorCount) && errorCount > 0)
             {
-                context.WriteLine($"    Error:          {errorCount, 6}", theme.Error);
+                context.WriteLine($"    Error:          {errorCount,6}", theme.Error);
             }
 
             if (levelCounts.TryGetValue(LogLevel.Warning, out int warningCount) && warningCount > 0)
             {
-                context.WriteLine($"    Warning:        {warningCount, 6}", theme.Warning);
+                context.WriteLine($"    Warning:        {warningCount,6}", theme.Warning);
             }
 
             if (levelCounts.TryGetValue(LogLevel.Information, out int info) && info > 0)
             {
-                context.WriteLine($"    Information:    {info, 6}", theme.TextPrimary);
+                context.WriteLine($"    Information:    {info,6}", theme.TextPrimary);
             }
 
             if (levelCounts.TryGetValue(LogLevel.Debug, out int debug) && debug > 0)
             {
-                context.WriteLine($"    Debug:          {debug, 6}", theme.Info);
+                context.WriteLine($"    Debug:          {debug,6}", theme.Info);
             }
 
             if (levelCounts.TryGetValue(LogLevel.Trace, out int trace) && trace > 0)
             {
-                context.WriteLine($"    Trace:          {trace, 6}", theme.TextDim);
+                context.WriteLine($"    Trace:          {trace,6}", theme.TextDim);
             }
 
             context.WriteLine("═══════════════════════════════════════", theme.Info);

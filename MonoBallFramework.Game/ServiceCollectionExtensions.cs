@@ -63,7 +63,7 @@ public static class ServiceCollectionExtensions
         services.AddAudioServices(AudioConfiguration.Production);
 
         // Rendering Configuration (sprite batching, layers, performance tuning)
-        var renderingConfig = environment == "Development"
+        RenderingConfiguration renderingConfig = environment == "Development"
             ? RenderingConfiguration.Default
             : RenderingConfiguration.Production;
         services.AddSingleton(renderingConfig);

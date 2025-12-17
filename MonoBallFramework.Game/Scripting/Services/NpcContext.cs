@@ -22,6 +22,17 @@ internal sealed class NpcContext : INpcContext
     /// <inheritdoc />
     public Entity Entity { get; }
 
+    #region Identity
+
+    /// <inheritdoc />
+    public INpcContext SetDisplayName(string displayName)
+    {
+        _npcService.SetNpcDisplayName(Entity, displayName);
+        return this;
+    }
+
+    #endregion
+
     #region Movement
 
     /// <inheritdoc />
@@ -136,17 +147,6 @@ internal sealed class NpcContext : INpcContext
     public INpcContext DeactivateBehavior()
     {
         _npcService.DeactivateBehavior(Entity);
-        return this;
-    }
-
-    #endregion
-
-    #region Identity
-
-    /// <inheritdoc />
-    public INpcContext SetDisplayName(string displayName)
-    {
-        _npcService.SetNpcDisplayName(Entity, displayName);
         return this;
     }
 

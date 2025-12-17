@@ -89,10 +89,14 @@ public struct AudioEmitterComponent
         float distance = Vector2.Distance(Position, listenerPosition);
 
         if (distance <= ReferenceDistance)
+        {
             return BaseVolume;
+        }
 
         if (distance >= MaxDistance)
+        {
             return 0f;
+        }
 
         // Linear rolloff with configurable factor
         float normalizedDistance = (distance - ReferenceDistance) / (MaxDistance - ReferenceDistance);
@@ -109,7 +113,9 @@ public struct AudioEmitterComponent
     public readonly float CalculatePan(Vector2 listenerPosition)
     {
         if (!UsePanning)
+        {
             return 0f;
+        }
 
         float horizontalDelta = Position.X - listenerPosition.X;
         float panRange = MaxDistance * 0.5f; // Pan falls off faster than volume

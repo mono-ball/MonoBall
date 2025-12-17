@@ -56,7 +56,7 @@ public interface ILogOperations
         int Warnings,
         int LastMinute,
         int Categories
-    ) GetStatistics();
+        ) GetStatistics();
 
     /// <summary>Gets log counts by level.</summary>
     Dictionary<LogLevel, int> GetLevelCounts();

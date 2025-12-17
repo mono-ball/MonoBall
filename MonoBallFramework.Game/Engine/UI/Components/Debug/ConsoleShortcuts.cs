@@ -126,7 +126,7 @@ public static class ConsoleShortcuts
                 Keys.Enter => "Enter",
                 Keys.Escape => "Esc",
                 Keys.F1 => "F1",
-                _ => Key.ToString(),
+                _ => Key.ToString()
             };
 
             return $"[{modifiers}{keyName}] {Action}";

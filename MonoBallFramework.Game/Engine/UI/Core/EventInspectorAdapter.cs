@@ -9,6 +9,7 @@ namespace MonoBallFramework.Game.Engine.UI.Core;
 /// </summary>
 public class EventInspectorAdapter
 {
+    private static readonly TimeSpan CacheRefreshInterval = TimeSpan.FromSeconds(5);
     private readonly EventBus _eventBus;
     private readonly Queue<EventLogEntry> _eventLog;
     private readonly int _maxLogEntries;
@@ -18,7 +19,6 @@ public class EventInspectorAdapter
     private List<Type>? _cachedEventTypes;
     private int _cachedRegisteredTypesCount;
     private DateTime _lastCacheRefresh = DateTime.MinValue;
-    private static readonly TimeSpan CacheRefreshInterval = TimeSpan.FromSeconds(5);
 
     public EventInspectorAdapter(EventBus eventBus, EventMetrics metrics, int maxLogEntries = 100)
     {
@@ -70,7 +70,7 @@ public class EventInspectorAdapter
         {
             Events = new List<EventTypeInfo>(),
             RecentEvents = _eventLog.ToList(),
-            Filters = new EventFilterOptions(),
+            Filters = new EventFilterOptions()
         };
 
         // Get ALL event types (not just ones with subscribers)
@@ -90,7 +90,7 @@ public class EventInspectorAdapter
                 AverageTimeMs = eventMetrics?.AveragePublishTimeMs ?? 0.0,
                 MaxTimeMs = eventMetrics?.MaxPublishTimeMs ?? 0.0,
                 IsCustom = IsCustomEvent(eventType),
-                Subscriptions = new List<SubscriptionInfo>(),
+                Subscriptions = new List<SubscriptionInfo>()
             };
 
             // Get subscription details if metrics exist
@@ -108,7 +108,7 @@ public class EventInspectorAdapter
                             Source = sub.Source,
                             InvocationCount = sub.InvocationCount,
                             AverageTimeMs = sub.AverageTimeMs,
-                            MaxTimeMs = sub.MaxTimeMs,
+                            MaxTimeMs = sub.MaxTimeMs
                         }
                     );
                 }
@@ -147,15 +147,24 @@ public class EventInspectorAdapter
                 string? name = a.GetName().Name;
                 // Include MonoBall Framework assemblies
                 if (name?.StartsWith("MonoBallFramework") == true)
+                {
                     return true;
+                }
+
                 // Include Roslyn-compiled script assemblies (they have generated names)
                 // These are typically named like "ℛ*" or contain submission identifiers
                 if (name?.StartsWith("\u211B") == true) // Roslyn script prefix
+                {
                     return true;
+                }
+
                 // Include assemblies that might contain script-defined types
                 // Dynamic assemblies from Roslyn often have names starting with numbers or special chars
                 if (a.IsDynamic && name != null && !name.StartsWith("System") && !name.StartsWith("Microsoft"))
+                {
                     return true;
+                }
+
                 return false;
             });
 
@@ -229,7 +238,7 @@ public class EventInspectorAdapter
                 EventType = eventTypeName,
                 Operation = "Publish",
                 DurationMs = durationMs,
-                Details = details,
+                Details = details
             }
         );
     }
@@ -257,7 +266,7 @@ public class EventInspectorAdapter
                 Operation = "Handle",
                 HandlerId = handlerId,
                 DurationMs = durationMs,
-                Details = details,
+                Details = details
             }
         );
     }

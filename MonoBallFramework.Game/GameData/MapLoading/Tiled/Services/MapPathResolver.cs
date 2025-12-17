@@ -29,7 +29,8 @@ public class MapPathResolver
         string? definitionsPath = _contentProvider.GetContentDirectory("Definitions");
         if (definitionsPath == null)
         {
-            throw new DirectoryNotFoundException("Definitions directory not found. Ensure content provider is configured correctly.");
+            throw new DirectoryNotFoundException(
+                "Definitions directory not found. Ensure content provider is configured correctly.");
         }
 
         return definitionsPath;
@@ -46,7 +47,8 @@ public class MapPathResolver
         string? rootPath = _contentProvider.GetContentDirectory("Root");
         if (rootPath == null)
         {
-            throw new DirectoryNotFoundException("Asset root directory not found. Ensure content provider is configured correctly.");
+            throw new DirectoryNotFoundException(
+                "Asset root directory not found. Ensure content provider is configured correctly.");
         }
 
         return rootPath;

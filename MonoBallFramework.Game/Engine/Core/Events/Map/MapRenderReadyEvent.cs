@@ -31,6 +31,3 @@ public sealed class MapRenderReadyEvent : NotificationEventBase
         RegionName = null;
     }
 }
-
-
-

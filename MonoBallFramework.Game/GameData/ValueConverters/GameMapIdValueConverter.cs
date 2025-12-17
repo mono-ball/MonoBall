@@ -13,7 +13,9 @@ public class GameMapIdValueConverter : ValueConverter<GameMapId, string>
         : base(
             v => v.Value,
             v => ConvertFromString(v)
-        ) { }
+        )
+    {
+    }
 
     private static GameMapId ConvertFromString(string value)
     {
@@ -30,7 +32,9 @@ public class NullableGameMapIdValueConverter : ValueConverter<GameMapId?, string
         : base(
             v => v != null ? v.Value : null,
             v => ConvertFromString(v)
-        ) { }
+        )
+    {
+    }
 
     private static GameMapId? ConvertFromString(string? value)
     {

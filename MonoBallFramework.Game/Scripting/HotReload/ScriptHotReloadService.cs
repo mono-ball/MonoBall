@@ -185,7 +185,7 @@ public class ScriptHotReloadService : IDisposable
                 {
                     Type = NotificationType.Info,
                     Message = "Hot-reload enabled with auto-rollback",
-                    Details = $"Watching {scriptDirectory} for changes",
+                    Details = $"Watching {scriptDirectory} for changes"
                 }
             );
         }
@@ -394,7 +394,7 @@ public class ScriptHotReloadService : IDisposable
                         TypeId = typeId,
                         Success = true,
                         Result = compileResult,
-                        CompiledType = compileResult.CompiledType,
+                        CompiledType = compileResult.CompiledType
                     }
                 );
 
@@ -404,7 +404,7 @@ public class ScriptHotReloadService : IDisposable
                         Type = NotificationType.Success,
                         Message = $"✓ Reloaded {typeId}",
                         Duration = sw.Elapsed,
-                        AffectedScripts = 1,
+                        AffectedScripts = 1
                     }
                 );
             }
@@ -433,7 +433,7 @@ public class ScriptHotReloadService : IDisposable
                     Type = NotificationType.Error,
                     Message = "Hot-reload error - emergency rollback attempted",
                     Details = ex.Message,
-                    IsAutoDismiss = false,
+                    IsAutoDismiss = false
                 }
             );
         }
@@ -488,12 +488,7 @@ public class ScriptHotReloadService : IDisposable
         // Trigger compilation failed event
         CompilationFailed?.Invoke(
             this,
-            new CompilationEventArgs
-            {
-                TypeId = typeId,
-                Success = false,
-                Result = compileResult,
-            }
+            new CompilationEventArgs { TypeId = typeId, Success = false, Result = compileResult }
         );
 
         // Attempt automatic rollback
@@ -509,7 +504,7 @@ public class ScriptHotReloadService : IDisposable
                     Message = $"⚠ Compilation failed - rolled back {typeId}",
                     Details =
                         $"Previous version restored. Fix errors and save again.\n\n{errorSummary}",
-                    IsAutoDismiss = false,
+                    IsAutoDismiss = false
                 }
             );
         }
@@ -522,7 +517,7 @@ public class ScriptHotReloadService : IDisposable
                     Type = NotificationType.Error,
                     Message = $"✗ Compilation failed - NO BACKUP for {typeId}",
                     Details = $"This is the first version. Manual fix required.\n\n{errorSummary}",
-                    IsAutoDismiss = false,
+                    IsAutoDismiss = false
                 }
             );
         }
@@ -549,12 +544,7 @@ public class ScriptHotReloadService : IDisposable
             Type? rolledBackType = ScriptCache.GetScriptType(typeId);
             RollbackPerformed?.Invoke(
                 this,
-                new CompilationEventArgs
-                {
-                    TypeId = typeId,
-                    Success = true,
-                    CompiledType = rolledBackType,
-                }
+                new CompilationEventArgs { TypeId = typeId, Success = true, CompiledType = rolledBackType }
             );
 
             return Task.FromResult(true);
@@ -575,12 +565,7 @@ public class ScriptHotReloadService : IDisposable
 
             RollbackPerformed?.Invoke(
                 this,
-                new CompilationEventArgs
-                {
-                    TypeId = typeId,
-                    Success = true,
-                    CompiledType = restored.Value.type,
-                }
+                new CompilationEventArgs { TypeId = typeId, Success = true, CompiledType = restored.Value.type }
             );
 
             return Task.FromResult(true);
@@ -671,7 +656,7 @@ public class ScriptHotReloadService : IDisposable
                     Type = NotificationType.Error,
                     Message = "Hot-reload watcher failed",
                     Details = e.Message,
-                    IsAutoDismiss = false,
+                    IsAutoDismiss = false
                 }
             );
         }
@@ -713,7 +698,8 @@ public class HotReloadStatistics
     public double RollbackRate =>
         FailedReloads > 0 ? (double)RollbacksPerformed / FailedReloads * 100 : 0;
 
-    public double UptimeRate => RollbacksPerformed == FailedReloads ? 100.0 : 0.0; // 100% if all failures were rolled back
+    public double UptimeRate =>
+        RollbacksPerformed == FailedReloads ? 100.0 : 0.0; // 100% if all failures were rolled back
 
     public int TotalFileEvents => TotalReloads + DebouncedEvents;
 

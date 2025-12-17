@@ -9,10 +9,14 @@ namespace MonoBallFramework.Game.GameData.Exceptions;
 public abstract class DataException : MonoBallFrameworkException
 {
     protected DataException(string errorCode, string message)
-        : base(errorCode, message) { }
+        : base(errorCode, message)
+    {
+    }
 
     protected DataException(string errorCode, string message, Exception innerException)
-        : base(errorCode, message, innerException) { }
+        : base(errorCode, message, innerException)
+    {
+    }
 
     public override string GetUserFriendlyMessage()
     {

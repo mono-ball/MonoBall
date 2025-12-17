@@ -179,7 +179,7 @@ public sealed class FileLogger<T> : ILogger<T>, IDisposable
         // This dramatically reduces disk I/O overhead (95%+ reduction)
         _currentWriter = new StreamWriter(_currentLogFile, true, Encoding.UTF8)
         {
-            AutoFlush = false, // Buffered writes for performance
+            AutoFlush = false // Buffered writes for performance
         };
         _currentFileSize = 0;
 
@@ -225,7 +225,7 @@ public sealed class FileLogger<T> : ILogger<T>, IDisposable
             LogLevel.Warning => "WARN ",
             LogLevel.Error => "ERROR",
             LogLevel.Critical => "CRIT ",
-            _ => "NONE ",
+            _ => "NONE "
         };
     }
 }

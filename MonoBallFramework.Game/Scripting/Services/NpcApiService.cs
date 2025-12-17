@@ -151,7 +151,7 @@ public class NpcApiService(World world, ILogger<NpcApiService> logger) : INpcApi
             CurrentWaypointIndex = 0,
             Loop = loop,
             WaypointWaitTime = 0f,
-            CurrentWaitTime = 0f,
+            CurrentWaitTime = 0f
         };
 
         if (_world.Has<MovementRoute>(npc))

@@ -160,7 +160,7 @@ Use 'Help()' in console for full API reference.";
             "warn" or "warning" => LogLevel.Warning,
             "error" => LogLevel.Error,
             "critical" or "fatal" => LogLevel.Critical,
-            _ => null,
+            _ => null
         };
 
         if (level == null)

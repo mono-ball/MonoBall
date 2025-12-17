@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MonoBallFramework.Game.GameData.Entities;
@@ -10,9 +11,10 @@ namespace MonoBallFramework.Game.GameData.Registries;
 /// </summary>
 internal class PopupOutlineRegistry : EfCoreRegistry<PopupOutlineEntity, string>
 {
-    private readonly System.Collections.Concurrent.ConcurrentDictionary<string, PopupOutlineEntity> _themeCache = new();
+    private readonly ConcurrentDictionary<string, PopupOutlineEntity> _themeCache = new();
 
-    public PopupOutlineRegistry(IDbContextFactory<GameDataContext> contextFactory, ILogger logger, GameDataContext? sharedContext = null)
+    public PopupOutlineRegistry(IDbContextFactory<GameDataContext> contextFactory, ILogger logger,
+        GameDataContext? sharedContext = null)
         : base(contextFactory, logger, sharedContext)
     {
     }
@@ -45,18 +47,20 @@ internal class PopupOutlineRegistry : EfCoreRegistry<PopupOutlineEntity, string>
     /// </summary>
     public PopupOutlineEntity? GetByTheme(string themeName)
     {
-        if (_themeCache.TryGetValue(themeName, out var cached))
+        if (_themeCache.TryGetValue(themeName, out PopupOutlineEntity? cached))
+        {
             return cached;
+        }
 
         if (!_isCacheLoaded)
         {
-            using var context = _contextFactory.CreateDbContext();
+            using GameDataContext context = _contextFactory.CreateDbContext();
             var outlines = context.PopupOutlines
                 .Include(o => o.Tiles)
                 .Include(o => o.TileUsage)
                 .AsNoTracking()
                 .ToList();
-            var outline = outlines.FirstOrDefault(o => o.ThemeName == themeName);
+            PopupOutlineEntity? outline = outlines.FirstOrDefault(o => o.ThemeName == themeName);
 
             if (outline != null)
             {

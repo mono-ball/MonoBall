@@ -19,18 +19,18 @@ public static class SceneStateTransitions
             // Initialization flow
             (SceneState.Uninitialized, SceneState.Initializing) => true,
             (SceneState.Initializing, SceneState.Initialized) => true,
-            
+
             // Content loading flow
             (SceneState.Initialized, SceneState.LoadingContent) => true,
             (SceneState.LoadingContent, SceneState.ContentLoaded) => true,
-            
+
             // Running state
             (SceneState.ContentLoaded, SceneState.Running) => true,
-            
+
             // Disposal from any state except Disposed
             (_, SceneState.Disposing) when from != SceneState.Disposed => true,
             (SceneState.Disposing, SceneState.Disposed) => true,
-            
+
             // No other transitions allowed
             _ => false
         };
@@ -107,6 +107,3 @@ public static class SceneStateTransitions
         return state == SceneState.Initialized;
     }
 }
-
-
-

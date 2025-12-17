@@ -22,5 +22,5 @@ public enum ConsoleOverlayMode
     ParameterHints,
 
     /// <summary>Documentation popup is showing.</summary>
-    Documentation,
+    Documentation
 }

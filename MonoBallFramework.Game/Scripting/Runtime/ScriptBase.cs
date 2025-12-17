@@ -50,7 +50,7 @@ namespace MonoBallFramework.Game.Scripting.Runtime;
 ///             }
 ///         });
 ///     }
-///
+/// 
 ///     private void TriggerRandomEncounter()
 ///     {
 ///         var encounterRate = Get&lt;float&gt;("encounter_rate", 0.1f);
@@ -71,7 +71,7 @@ namespace MonoBallFramework.Game.Scripting.Runtime;
 ///     public override void RegisterEventHandlers(ScriptContext ctx)
 ///     {
 ///         var playerEntity = ctx.Player.GetPlayerEntity();
-///
+/// 
 ///         // Only receive movement events for the player
 ///         OnEntity&lt;MovementCompletedEvent&gt;(playerEntity, evt =>
 ///         {
@@ -124,10 +124,10 @@ public abstract class ScriptBase
     /// public override void Initialize(ScriptContext ctx)
     /// {
     ///     base.Initialize(ctx);
-    ///
+    /// 
     ///     // Initialize state
     ///     Set("counter", 0);
-    ///
+    /// 
     ///     // Log initialization
     ///     Context.Logger.LogInformation("Script initialized for entity {EntityId}",
     ///         ctx.Entity?.Id ?? 0);
@@ -170,7 +170,7 @@ public abstract class ScriptBase
     ///             evt.PreventDefault("Movement blocked by script");
     ///         }
     ///     }, priority: 1000);
-    ///
+    /// 
     ///     // Subscribe to tile events at specific position
     ///     OnTile&lt;TileSteppedOnEvent&gt;(new Vector2(10, 15), evt =>
     ///     {
@@ -210,7 +210,7 @@ public abstract class ScriptBase
     /// {
     ///     // Clean up custom resources
     ///     _customResource?.Dispose();
-    ///
+    /// 
     ///     // Base class handles event subscription cleanup
     ///     base.OnUnload();
     /// }
@@ -264,7 +264,7 @@ public abstract class ScriptBase
     ///     Context.Logger.LogInformation("Entity {Id} moving to ({X}, {Y})",
     ///         evt.Entity.Id, evt.ToX, evt.ToY);
     /// });
-    ///
+    /// 
     /// // Subscribe with high priority to validate movement
     /// On&lt;MovementStartedEvent&gt;(evt =>
     /// {
@@ -331,7 +331,7 @@ public abstract class ScriptBase
     /// public override void RegisterEventHandlers(ScriptContext ctx)
     /// {
     ///     var playerEntity = ctx.Player.GetPlayerEntity();
-    ///
+    /// 
     ///     // Only receive movement events for the player
     ///     OnEntity&lt;MovementCompletedEvent&gt;(playerEntity, evt =>
     ///     {
@@ -397,7 +397,7 @@ public abstract class ScriptBase
     /// public override void RegisterEventHandlers(ScriptContext ctx)
     /// {
     ///     var warpTilePos = new Vector2(10, 15);
-    ///
+    /// 
     ///     // Only receive step events at this specific tile
     ///     OnTile&lt;TileSteppedOnEvent&gt;(warpTilePos, evt =>
     ///     {
@@ -464,7 +464,7 @@ public abstract class ScriptBase
     ///     <code>
     /// // Get movement speed, default to 1.0 if not set
     /// var speed = Get&lt;MovementSpeed&gt;("speed", new MovementSpeed { Value = 1.0f });
-    ///
+    /// 
     /// // Get counter, default to 0
     /// var counter = Get&lt;int&gt;("counter", 0);
     /// </code>
@@ -472,7 +472,7 @@ public abstract class ScriptBase
     protected T Get<T>(string key, T defaultValue = default)
         where T : struct
     {
-        if (Context?.TryGetState<T>(out T value) == true)
+        if (Context?.TryGetState(out T value) == true)
         {
             return value;
         }
@@ -504,7 +504,7 @@ public abstract class ScriptBase
     ///     <code>
     /// // Set movement speed
     /// Set("speed", new MovementSpeed { Value = 2.0f });
-    ///
+    /// 
     /// // Increment counter
     /// var counter = Get&lt;int&gt;("counter", 0);
     /// Set("counter", counter + 1);
@@ -564,7 +564,7 @@ public abstract class ScriptBase
     ///     public string PokemonSpecies { get; init; }
     ///     public int Level { get; init; }
     /// }
-    ///
+    /// 
     /// // Publish custom event
     /// Publish(new WildEncounterEvent
     /// {

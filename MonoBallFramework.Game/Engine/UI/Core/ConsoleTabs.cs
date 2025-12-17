@@ -55,15 +55,7 @@ public static class ConsoleTabs
     /// </summary>
     public static readonly IReadOnlyList<TabDefinition> All = new[]
     {
-        Console,
-        Logs,
-        Watch,
-        Variables,
-        Data,
-        Entities,
-        Events,
-        Profiler,
-        Stats,
+        Console, Logs, Watch, Variables, Data, Entities, Events, Profiler, Stats
     };
 
     /// <summary>

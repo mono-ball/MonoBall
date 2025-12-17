@@ -158,7 +158,7 @@ public static class LayoutResolver
             Anchor.StretchLeft => (parent.X, parent.Y),
             Anchor.StretchRight => (parent.Right, parent.Y),
             Anchor.Fill => (parent.X, parent.Y),
-            _ => (parent.X, parent.Y),
+            _ => (parent.X, parent.Y)
         };
     }
 
@@ -194,7 +194,7 @@ public static class LayoutResolver
             Anchor.StretchRight => (x - width, y),
             Anchor.Fill => (x, y),
 
-            _ => (x, y),
+            _ => (x, y)
         };
     }
 

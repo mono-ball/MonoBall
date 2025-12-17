@@ -17,7 +17,9 @@ public class CreateMapInitializerStep : InitializationStepBase
             "Creating map initializer...",
             InitializationProgress.GameSystemsInitialized,
             InitializationProgress.GameSystemsInitialized
-        ) { }
+        )
+    {
+    }
 
     /// <inheritdoc />
     protected override Task ExecuteStepAsync(

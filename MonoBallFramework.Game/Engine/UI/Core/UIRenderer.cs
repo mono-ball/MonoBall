@@ -19,8 +19,7 @@ public class UIRenderer : IDisposable
     // Static reusable RasterizerState for scissor testing
     private static readonly RasterizerState _scissorRasterizerState = new()
     {
-        CullMode = CullMode.None,
-        ScissorTestEnable = true,
+        CullMode = CullMode.None, ScissorTestEnable = true
     };
 
     // Clipping stack

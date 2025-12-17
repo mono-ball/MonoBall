@@ -21,7 +21,9 @@ public class InitializeConsoleStep : InitializationStepBase
             "Initializing debug console...",
             InitializationProgress.Complete,
             InitializationProgress.Complete
-        ) { }
+        )
+    {
+    }
 
     /// <inheritdoc />
     protected override Task ExecuteStepAsync(

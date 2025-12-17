@@ -120,5 +120,5 @@ public enum NPCType
     /// <summary>
     ///     Quest-related NPC with scripted behaviors.
     /// </summary>
-    Quest,
+    Quest
 }

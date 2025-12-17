@@ -14,7 +14,7 @@ namespace MonoBallFramework.Game.Engine.Common.Validation;
 /// var result = new ValidationResult();
 /// result.AddError("Invalid configuration", "config.json:15");
 /// result.AddWarning("Deprecated property used");
-///
+/// 
 /// if (!result.IsValid)
 /// {
 ///     Console.WriteLine(result.GetErrorMessage());

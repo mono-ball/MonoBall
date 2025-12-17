@@ -1,31 +1,29 @@
 namespace MonoBallFramework.Game.Engine.Audio.Core;
 
 /// <summary>
-/// Pitch shifts audio by resampling. Uses linear interpolation for quality.
-/// Pitch range: -1.0 (octave down) to +1.0 (octave up).
-/// Thread-safe for concurrent Read() calls.
+///     Pitch shifts audio by resampling. Uses linear interpolation for quality.
+///     Pitch range: -1.0 (octave down) to +1.0 (octave up).
+///     Thread-safe for concurrent Read() calls.
 /// </summary>
 public class PitchShiftProvider : ISampleProvider
 {
-    private readonly ISampleProvider _source;
-    private readonly AudioFormat _format;
-    private readonly double _pitchRatio;  // 0.5 to 2.0 (2^pitch)
-    private readonly object _lock = new();
-
     // Interpolation state
-    private float[] _lastSamples;
-    private double _sourcePosition;
+    private readonly float[] _lastSamples;
+    private readonly object _lock = new();
+    private readonly double _pitchRatio; // 0.5 to 2.0 (2^pitch)
+    private readonly ISampleProvider _source;
     private float[]? _sourceBuffer;
+    private double _sourcePosition;
 
     /// <summary>
-    /// Creates a pitch shift provider.
+    ///     Creates a pitch shift provider.
     /// </summary>
     /// <param name="source">Source audio provider</param>
     /// <param name="pitch">Pitch shift in range -1.0 (octave down) to +1.0 (octave up)</param>
     public PitchShiftProvider(ISampleProvider source, float pitch)
     {
         _source = source ?? throw new ArgumentNullException(nameof(source));
-        _format = source.Format;
+        Format = source.Format;
 
         // Clamp pitch to safe range
         pitch = Math.Clamp(pitch, -1.0f, 1.0f);
@@ -35,22 +33,22 @@ public class PitchShiftProvider : ISampleProvider
         _pitchRatio = Math.Pow(2.0, pitch);
 
         // Initialize interpolation state
-        _lastSamples = new float[_format.Channels];
+        _lastSamples = new float[Format.Channels];
         _sourcePosition = 0.0;
 
         // Pre-allocate source buffer for reading ahead
         // Buffer size based on worst case (pitch down requires more samples)
-        int maxSourceSamples = (int)Math.Ceiling(4096 * 2.0) + _format.Channels;
+        int maxSourceSamples = (int)Math.Ceiling(4096 * 2.0) + Format.Channels;
         _sourceBuffer = new float[maxSourceSamples];
     }
 
     /// <summary>
-    /// Gets the audio format (same as source).
+    ///     Gets the audio format (same as source).
     /// </summary>
-    public AudioFormat Format => _format;
+    public AudioFormat Format { get; }
 
     /// <summary>
-    /// Reads pitch-shifted audio samples.
+    ///     Reads pitch-shifted audio samples.
     /// </summary>
     /// <param name="buffer">Destination buffer</param>
     /// <param name="offset">Offset in destination buffer</param>
@@ -61,7 +59,7 @@ public class PitchShiftProvider : ISampleProvider
         lock (_lock)
         {
             int samplesWritten = 0;
-            int channels = _format.Channels;
+            int channels = Format.Channels;
 
             // Ensure source buffer is large enough
             int maxSourceSamples = (int)Math.Ceiling(count * _pitchRatio) + channels;
@@ -106,7 +104,7 @@ public class PitchShiftProvider : ISampleProvider
                         ? _sourceBuffer[idx + channels]
                         : sample1;
 
-                    float interpolated = (float)(sample1 + (sample2 - sample1) * fraction);
+                    float interpolated = (float)(sample1 + ((sample2 - sample1) * fraction));
 
                     buffer[offset + i + ch] = interpolated;
 
@@ -135,8 +133,8 @@ public class PitchShiftProvider : ISampleProvider
     }
 
     /// <summary>
-    /// Creates a PitchShiftProvider only if pitch shift is needed.
-    /// Returns the original provider if pitch is near zero.
+    ///     Creates a PitchShiftProvider only if pitch shift is needed.
+    ///     Returns the original provider if pitch is near zero.
     /// </summary>
     /// <param name="source">Source audio provider</param>
     /// <param name="pitch">Pitch shift value</param>

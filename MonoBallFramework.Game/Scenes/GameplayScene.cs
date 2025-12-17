@@ -1,24 +1,18 @@
-using System;
 using Arch.Core;
 using Arch.Core.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoBallFramework.Game.Ecs.Components.Maps;
-using MonoBallFramework.Game.Ecs.Components.Player;
 using MonoBallFramework.Game.Engine.Core.Events;
 using MonoBallFramework.Game.Engine.Core.Events.Map;
-using MonoBallFramework.Game.Engine.UI.Core;
-using MonoBallFramework.Game.Engine.Core.Types;
 using MonoBallFramework.Game.Engine.Rendering.Components;
 using MonoBallFramework.Game.Engine.Rendering.Context;
 using MonoBallFramework.Game.Engine.Scenes;
 using MonoBallFramework.Game.Engine.Systems.Management;
+using MonoBallFramework.Game.Engine.UI.Core;
 using MonoBallFramework.Game.Engine.UI.Utilities;
-using MonoBallFramework.Game.GameSystems.Services;
 using MonoBallFramework.Game.Infrastructure.Diagnostics;
-using MonoBallFramework.Game.Initialization.Initializers;
-using MonoBallFramework.Game.Input;
 
 namespace MonoBallFramework.Game.Scenes;
 
@@ -30,10 +24,10 @@ namespace MonoBallFramework.Game.Scenes;
 public class GameplayScene : SceneBase
 {
     private readonly GameplaySceneContext _context;
+    private readonly IEventBus? _eventBus;
     private readonly EventInspectorOverlay? _eventInspectorOverlay;
     private readonly PerformanceOverlay _performanceOverlay;
-    private readonly IEventBus? _eventBus;
-    
+
     private bool _firstFrameRendered;
 
     /// <summary>
@@ -149,7 +143,7 @@ public class GameplayScene : SceneBase
         if (sceneCamera.HasValue)
         {
             var renderContext = new RenderContext(sceneCamera.Value);
-            
+
             // Render all systems with the scene's camera
             _context.SystemManager.Render(_context.World, renderContext);
         }
@@ -184,9 +178,9 @@ public class GameplayScene : SceneBase
     private Camera? GetSceneCamera()
     {
         Camera? camera = null;
-        
+
         // Query for main camera (marked with MainCamera tag)
-        var mainCameraQuery = QueryCache.Get<Camera, MainCamera>();
+        QueryDescription mainCameraQuery = QueryCache.Get<Camera, MainCamera>();
         _context.World.Query(
             in mainCameraQuery,
             (ref Camera cam, ref MainCamera _) =>
@@ -218,7 +212,7 @@ public class GameplayScene : SceneBase
             {
                 // Copy values from ref parameter to avoid lambda capture issues
                 MapInfo mapInfoCopy = info;
-                
+
                 // Get display name and region from map entity
                 string? displayName = null;
                 string? regionSection = null;

@@ -45,7 +45,7 @@ public enum EasingType
     // Bounce
     BounceIn,
     BounceOut,
-    BounceInOut,
+    BounceInOut
 }
 
 /// <summary>
@@ -89,7 +89,7 @@ public static class EasingFunctions
             EasingType.BounceIn => BounceIn(t),
             EasingType.BounceOut => BounceOut(t),
             EasingType.BounceInOut => BounceInOut(t),
-            _ => Linear(t),
+            _ => Linear(t)
         };
     }
 
@@ -232,7 +232,7 @@ public static class EasingFunctions
         return t < 0.5f
             ? MathF.Pow(2f * t, 2f) * (((BackC2 + 1f) * 2f * t) - BackC2) / 2f
             : ((MathF.Pow((2f * t) - 2f, 2f) * (((BackC2 + 1f) * ((t * 2f) - 2f)) + BackC2)) + 2f)
-                / 2f;
+              / 2f;
     }
 
     #endregion
@@ -258,13 +258,15 @@ public static class EasingFunctions
 
     public static float ElasticInOut(float t)
     {
-        return t == 0f ? 0f
-            : t == 1f ? 1f
-            : t < 0.5f
-                ? -(MathF.Pow(2f, (20f * t) - 10f) * MathF.Sin(((20f * t) - 11.125f) * ElasticC5))
-                    / 2f
-            : (MathF.Pow(2f, (-20f * t) + 10f) * MathF.Sin(((20f * t) - 11.125f) * ElasticC5) / 2f)
-                + 1f;
+        return t == 0f
+            ? 0f
+            : t == 1f
+                ? 1f
+                : t < 0.5f
+                    ? -(MathF.Pow(2f, (20f * t) - 10f) * MathF.Sin(((20f * t) - 11.125f) * ElasticC5))
+                      / 2f
+                    : (MathF.Pow(2f, (-20f * t) + 10f) * MathF.Sin(((20f * t) - 11.125f) * ElasticC5) / 2f)
+                      + 1f;
     }
 
     #endregion

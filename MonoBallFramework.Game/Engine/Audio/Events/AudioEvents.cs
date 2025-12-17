@@ -26,12 +26,12 @@ public class PlaySoundEvent : NotificationEventBase
     /// <summary>
     ///     Gets or sets the pitch adjustment (-1.0 to 1.0). Default is 0.0.
     /// </summary>
-    public float Pitch { get; set; } = 0f;
+    public float Pitch { get; set; }
 
     /// <summary>
     ///     Gets or sets the pan adjustment (-1.0 left to 1.0 right). Default is 0.0.
     /// </summary>
-    public float Pan { get; set; } = 0f;
+    public float Pan { get; set; }
 
     public override void Reset()
     {

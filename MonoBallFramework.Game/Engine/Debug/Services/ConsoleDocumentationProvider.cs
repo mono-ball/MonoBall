@@ -60,9 +60,7 @@ public class ConsoleDocumentationProvider
 
             return new DocInfo
             {
-                Title = symbolName,
-                Summary = "Error retrieving documentation.",
-                Remarks = ex.Message,
+                Title = symbolName, Summary = "Error retrieving documentation.", Remarks = ex.Message
             };
         }
     }
@@ -156,7 +154,7 @@ public class ConsoleDocumentationProvider
                     {
                         Name = p.Name ?? "param",
                         Description =
-                            $"{FormatTypeName(p.ParameterType)}{(p.HasDefaultValue ? $" (default: {p.DefaultValue ?? "null"})" : "")}",
+                            $"{FormatTypeName(p.ParameterType)}{(p.HasDefaultValue ? $" (default: {p.DefaultValue ?? "null"})" : "")}"
                     })
                     .ToList();
             }

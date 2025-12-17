@@ -1,11 +1,10 @@
 using Arch.Core;
 using Arch.Core.Extensions;
 using Microsoft.Xna.Framework;
-using MonoBallFramework.Game.Engine.Core.Types;
-using MonoBallFramework.Game.Components;
 using MonoBallFramework.Game.Ecs.Components;
 using MonoBallFramework.Game.Ecs.Components.Maps;
 using MonoBallFramework.Game.Ecs.Components.Movement;
+using MonoBallFramework.Game.Engine.Core.Types;
 
 namespace MonoBallFramework.Game.Systems;
 
@@ -56,7 +55,7 @@ public readonly record struct MapLoadContext(
                 MapEntity.Get<WestConnection>().Offset,
                 direction
             ),
-            _ => null,
+            _ => null
         };
     }
 

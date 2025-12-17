@@ -28,7 +28,7 @@ namespace MonoBallFramework.Game.Engine.Core.Systems;
 ///     </para>
 /// </remarks>
 /// <example>
-/// <code>
+///     <code>
 /// public class CameraViewportSystem : IEventDrivenSystem
 /// {
 ///     public void HandleResize(World world, int width, int height)
@@ -59,6 +59,3 @@ public interface IEventDrivenSystem
     /// <param name="world">The ECS world.</param>
     void Initialize(World world);
 }
-
-
-

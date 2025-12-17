@@ -18,7 +18,6 @@ public class GameDataLoader
     private readonly GameDataContext _context;
     private readonly JsonSerializerOptions _jsonOptions;
     private readonly ILogger<GameDataLoader> _logger;
-    private readonly IContentProvider _contentProvider;
 
     public GameDataLoader(
         GameDataContext context,
@@ -27,104 +26,21 @@ public class GameDataLoader
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _contentProvider = contentProvider ?? throw new ArgumentNullException(nameof(contentProvider));
+        ContentProvider = contentProvider ?? throw new ArgumentNullException(nameof(contentProvider));
 
         _jsonOptions = new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true,
             ReadCommentHandling = JsonCommentHandling.Skip,
             AllowTrailingCommas = true,
-            WriteIndented = true,
+            WriteIndented = true
         };
     }
 
-    #region Generic Definition Loading Infrastructure
-
     /// <summary>
-    ///     Result of parsing a DTO into an entity with mod override information.
+    ///     Gets the content provider for mod-aware loading.
     /// </summary>
-    /// <typeparam name="TEntity">Entity type.</typeparam>
-    /// <typeparam name="TKey">Entity key type.</typeparam>
-    private record ParseResult<TEntity, TKey>(TEntity Entity, TKey Key, bool Success, string? ErrorMessage = null);
-
-    /// <summary>
-    ///     Generic loader for definition files that handles the common pattern:
-    ///     get files → read JSON → deserialize → validate → create entity → save.
-    /// </summary>
-    /// <typeparam name="TDto">DTO type for JSON deserialization.</typeparam>
-    /// <typeparam name="TEntity">Entity type for EF Core.</typeparam>
-    /// <typeparam name="TKey">Entity key type.</typeparam>
-    /// <param name="contentType">ContentProvider content type key.</param>
-    /// <param name="parseDto">Function to parse DTO into entity with key.</param>
-    /// <param name="addEntity">Action to add entity to DbContext.</param>
-    /// <param name="existingEntities">Optional dictionary of existing entities for override support.</param>
-    /// <param name="handleOverride">Optional action to handle entity override (update existing).</param>
-    /// <param name="ct">Cancellation token.</param>
-    /// <returns>Number of entities loaded.</returns>
-    private async Task<int> LoadDefinitionsAsync<TDto, TEntity, TKey>(
-        string contentType,
-        Func<TDto, string, ParseResult<TEntity, TKey>> parseDto,
-        Action<TEntity> addEntity,
-        Dictionary<TKey, TEntity>? existingEntities = null,
-        Action<TEntity, TEntity>? handleOverride = null,
-        CancellationToken ct = default)
-        where TDto : class
-        where TEntity : class
-        where TKey : notnull
-    {
-        IEnumerable<string> files = _contentProvider.GetAllContentPaths(contentType, "*.json");
-        _logger.LogDebug("Using ContentProvider for {ContentType} - found {Count} files", contentType, files.Count());
-        int count = 0;
-
-        foreach (string file in files)
-        {
-            ct.ThrowIfCancellationRequested();
-
-            try
-            {
-                string json = await File.ReadAllTextAsync(file, ct);
-                TDto? dto = JsonSerializer.Deserialize<TDto>(json, _jsonOptions);
-
-                if (dto == null)
-                {
-                    _logger.LogWarning("Failed to deserialize {ContentType}: {File}", contentType, file);
-                    continue;
-                }
-
-                ParseResult<TEntity, TKey> result = parseDto(dto, file);
-                if (!result.Success)
-                {
-                    _logger.LogWarning("{ContentType} validation failed for {File}: {Error}",
-                        contentType, file, result.ErrorMessage ?? "Unknown error");
-                    continue;
-                }
-
-                // Handle mod override if existing entities provided
-                if (existingEntities != null && handleOverride != null &&
-                    existingEntities.TryGetValue(result.Key, out TEntity? existing))
-                {
-                    handleOverride(existing, result.Entity);
-                    _logger.LogDebug("{ContentType} overridden: {Key}", contentType, result.Key);
-                }
-                else
-                {
-                    addEntity(result.Entity);
-                }
-
-                count++;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Failed to load {ContentType}: {File}", contentType, file);
-            }
-        }
-
-        await _context.SaveChangesAsync(ct);
-        _logger.LogInformation("Loaded {Count} {ContentType}", count, contentType);
-        return count;
-    }
-
-    #endregion
+    public IContentProvider ContentProvider { get; }
 
     /// <summary>
     ///     Load all game data from JSON files.
@@ -171,11 +87,15 @@ public class GameDataLoader
             (dto, file) =>
             {
                 if (string.IsNullOrWhiteSpace(dto.Id) || string.IsNullOrWhiteSpace(dto.TiledPath))
+                {
                     return new ParseResult<MapEntity, GameMapId>(null!, default!, false, "Missing Id or TiledPath");
+                }
 
-                GameMapId? gameMapId = GameMapId.TryCreate(dto.Id);
+                var gameMapId = GameMapId.TryCreate(dto.Id);
                 if (gameMapId == null)
+                {
                     return new ParseResult<MapEntity, GameMapId>(null!, default!, false, "Invalid map ID format");
+                }
 
                 var mapDef = new MapEntity
                 {
@@ -301,7 +221,7 @@ public class GameDataLoader
         int EastOffset,
         GameMapId? West,
         int WestOffset
-    ) ParseMapConnections(Dictionary<string, object> properties)
+        ) ParseMapConnections(Dictionary<string, object> properties)
     {
         GameMapId? north = null,
             south = null,
@@ -446,7 +366,9 @@ public class GameDataLoader
             (dto, file) =>
             {
                 if (string.IsNullOrWhiteSpace(dto.Id))
+                {
                     return new ParseResult<PopupThemeEntity, GameThemeId>(null!, default!, false, "Missing Id");
+                }
 
                 GameThemeId themeId = GameThemeId.TryCreate(dto.Id) ?? GameThemeId.Create(dto.Id);
                 var theme = new PopupThemeEntity
@@ -476,7 +398,10 @@ public class GameDataLoader
             (dto, file) =>
             {
                 if (string.IsNullOrWhiteSpace(dto.Id) || string.IsNullOrWhiteSpace(dto.Theme))
-                    return new ParseResult<MapSectionEntity, GameMapSectionId>(null!, default!, false, "Missing Id or Theme");
+                {
+                    return new ParseResult<MapSectionEntity, GameMapSectionId>(null!, default!, false,
+                        "Missing Id or Theme");
+                }
 
                 GameMapSectionId sectionId = GameMapSectionId.TryCreate(dto.Id) ?? GameMapSectionId.Create(dto.Id);
                 var section = new MapSectionEntity
@@ -508,11 +433,15 @@ public class GameDataLoader
             (dto, file) =>
             {
                 if (string.IsNullOrWhiteSpace(dto.Id) || string.IsNullOrWhiteSpace(dto.AudioPath))
+                {
                     return new ParseResult<AudioEntity, GameAudioId>(null!, default!, false, "Missing Id or AudioPath");
+                }
 
-                GameAudioId? audioId = GameAudioId.TryCreate(dto.Id);
+                var audioId = GameAudioId.TryCreate(dto.Id);
                 if (audioId == null)
+                {
                     return new ParseResult<AudioEntity, GameAudioId>(null!, default!, false, "Invalid audio ID format");
+                }
 
                 var audioDef = new AudioEntity
                 {
@@ -553,11 +482,17 @@ public class GameDataLoader
             (dto, file) =>
             {
                 if (string.IsNullOrWhiteSpace(dto.Id) || string.IsNullOrWhiteSpace(dto.TexturePath))
-                    return new ParseResult<SpriteEntity, GameSpriteId>(null!, default!, false, "Missing Id or TexturePath");
+                {
+                    return new ParseResult<SpriteEntity, GameSpriteId>(null!, default!, false,
+                        "Missing Id or TexturePath");
+                }
 
-                GameSpriteId? spriteId = GameSpriteId.TryCreate(dto.Id);
+                var spriteId = GameSpriteId.TryCreate(dto.Id);
                 if (spriteId == null)
-                    return new ParseResult<SpriteEntity, GameSpriteId>(null!, default!, false, "Invalid sprite ID format");
+                {
+                    return new ParseResult<SpriteEntity, GameSpriteId>(null!, default!, false,
+                        "Invalid sprite ID format");
+                }
 
                 var spriteDef = new SpriteEntity
                 {
@@ -568,13 +503,19 @@ public class GameDataLoader
                     FrameWidth = dto.FrameWidth ?? 16,
                     FrameHeight = dto.FrameHeight ?? 32,
                     FrameCount = dto.FrameCount ?? 1,
-                    Frames = dto.Frames?.Select(f => new SpriteFrame
-                    {
-                        Index = f.Index, X = f.X, Y = f.Y, Width = f.Width, Height = f.Height
-                    }).ToList() ?? new List<SpriteFrame>(),
+                    Frames =
+                        dto.Frames?.Select(f => new SpriteFrame
+                        {
+                            Index = f.Index,
+                            X = f.X,
+                            Y = f.Y,
+                            Width = f.Width,
+                            Height = f.Height
+                        }).ToList() ?? new List<SpriteFrame>(),
                     Animations = dto.Animations?.Select(a => new SpriteAnimation
                     {
-                        Name = a.Name ?? string.Empty, Loop = a.Loop,
+                        Name = a.Name ?? string.Empty,
+                        Loop = a.Loop,
                         FrameIndices = a.FrameIndices?.ToList() ?? new List<int>(),
                         FrameDurations = a.FrameDurations?.ToList() ?? new List<double>(),
                         FlipHorizontal = a.FlipHorizontal
@@ -599,9 +540,13 @@ public class GameDataLoader
             (dto, file) =>
             {
                 if (string.IsNullOrWhiteSpace(dto.Id) || string.IsNullOrWhiteSpace(dto.TexturePath))
-                    return new ParseResult<PopupBackgroundEntity, GamePopupBackgroundId>(null!, default!, false, "Missing Id or TexturePath");
+                {
+                    return new ParseResult<PopupBackgroundEntity, GamePopupBackgroundId>(null!, default!, false,
+                        "Missing Id or TexturePath");
+                }
 
-                GamePopupBackgroundId backgroundId = GamePopupBackgroundId.TryCreate(dto.Id) ?? GamePopupBackgroundId.Create(dto.Id);
+                GamePopupBackgroundId backgroundId =
+                    GamePopupBackgroundId.TryCreate(dto.Id) ?? GamePopupBackgroundId.Create(dto.Id);
                 var backgroundDef = new PopupBackgroundEntity
                 {
                     BackgroundId = backgroundId,
@@ -631,9 +576,13 @@ public class GameDataLoader
             (dto, file) =>
             {
                 if (string.IsNullOrWhiteSpace(dto.Id) || string.IsNullOrWhiteSpace(dto.TexturePath))
-                    return new ParseResult<PopupOutlineEntity, GamePopupOutlineId>(null!, default!, false, "Missing Id or TexturePath");
+                {
+                    return new ParseResult<PopupOutlineEntity, GamePopupOutlineId>(null!, default!, false,
+                        "Missing Id or TexturePath");
+                }
 
-                GamePopupOutlineId outlineId = GamePopupOutlineId.TryCreate(dto.Id) ?? GamePopupOutlineId.Create(dto.Id);
+                GamePopupOutlineId outlineId =
+                    GamePopupOutlineId.TryCreate(dto.Id) ?? GamePopupOutlineId.Create(dto.Id);
                 var outlineDef = new PopupOutlineEntity
                 {
                     OutlineId = outlineId,
@@ -643,17 +592,25 @@ public class GameDataLoader
                     TileWidth = dto.TileWidth ?? 8,
                     TileHeight = dto.TileHeight ?? 8,
                     TileCount = dto.TileCount ?? 0,
-                    Tiles = dto.Tiles?.Select(t => new OutlineTile
-                    {
-                        Index = t.Index, X = t.X, Y = t.Y, Width = t.Width, Height = t.Height
-                    }).ToList() ?? new List<OutlineTile>(),
-                    TileUsage = dto.TileUsage != null ? new OutlineTileUsage
-                    {
-                        TopEdge = dto.TileUsage.TopEdge?.ToList() ?? new List<int>(),
-                        LeftEdge = dto.TileUsage.LeftEdge?.ToList() ?? new List<int>(),
-                        RightEdge = dto.TileUsage.RightEdge?.ToList() ?? new List<int>(),
-                        BottomEdge = dto.TileUsage.BottomEdge?.ToList() ?? new List<int>()
-                    } : null,
+                    Tiles =
+                        dto.Tiles?.Select(t => new OutlineTile
+                        {
+                            Index = t.Index,
+                            X = t.X,
+                            Y = t.Y,
+                            Width = t.Width,
+                            Height = t.Height
+                        }).ToList() ?? new List<OutlineTile>(),
+                    TileUsage =
+                        dto.TileUsage != null
+                            ? new OutlineTileUsage
+                            {
+                                TopEdge = dto.TileUsage.TopEdge?.ToList() ?? new List<int>(),
+                                LeftEdge = dto.TileUsage.LeftEdge?.ToList() ?? new List<int>(),
+                                RightEdge = dto.TileUsage.RightEdge?.ToList() ?? new List<int>(),
+                                BottomEdge = dto.TileUsage.BottomEdge?.ToList() ?? new List<int>()
+                            }
+                            : null,
                     CornerWidth = dto.CornerWidth ?? 8,
                     CornerHeight = dto.CornerHeight ?? 8,
                     BorderWidth = dto.BorderWidth ?? 8,
@@ -679,7 +636,9 @@ public class GameDataLoader
             (dto, file) =>
             {
                 if (string.IsNullOrWhiteSpace(dto.Id))
+                {
                     return new ParseResult<BehaviorEntity, GameBehaviorId>(null!, default!, false, "Missing Id");
+                }
 
                 string? sourceMod = dto.SourceMod ?? DetectSourceModFromPath(file);
                 GameBehaviorId behaviorId = GameBehaviorId.TryCreate(dto.Id) ?? GameBehaviorId.Create(dto.Id);
@@ -713,7 +672,10 @@ public class GameDataLoader
             (dto, file) =>
             {
                 if (string.IsNullOrWhiteSpace(dto.Id))
-                    return new ParseResult<TileBehaviorEntity, GameTileBehaviorId>(null!, default!, false, "Missing Id");
+                {
+                    return new ParseResult<TileBehaviorEntity, GameTileBehaviorId>(null!, default!, false,
+                        "Missing Id");
+                }
 
                 int flags = !string.IsNullOrWhiteSpace(dto.Flags) ? ParseTileBehaviorFlags(dto.Flags) : 0;
                 string? sourceMod = dto.SourceMod ?? DetectSourceModFromPath(file);
@@ -721,7 +683,8 @@ public class GameDataLoader
                     ? JsonSerializer.Serialize(dto.ExtensionData, _jsonOptions)
                     : null;
 
-                GameTileBehaviorId tileBehaviorId = GameTileBehaviorId.TryCreate(dto.Id) ?? GameTileBehaviorId.Create(dto.Id);
+                GameTileBehaviorId tileBehaviorId =
+                    GameTileBehaviorId.TryCreate(dto.Id) ?? GameTileBehaviorId.Create(dto.Id);
                 var tileBehaviorDef = new TileBehaviorEntity
                 {
                     TileBehaviorId = tileBehaviorId,
@@ -756,11 +719,15 @@ public class GameDataLoader
             (dto, file) =>
             {
                 if (string.IsNullOrWhiteSpace(dto.Id) || string.IsNullOrWhiteSpace(dto.FontPath))
+                {
                     return new ParseResult<FontEntity, GameFontId>(null!, default!, false, "Missing Id or FontPath");
+                }
 
-                GameFontId? fontId = GameFontId.TryCreate(dto.Id);
+                var fontId = GameFontId.TryCreate(dto.Id);
                 if (fontId == null)
+                {
                     return new ParseResult<FontEntity, GameFontId>(null!, default!, false, "Invalid font ID format");
+                }
 
                 string? sourceMod = dto.SourceMod ?? DetectSourceModFromPath(file);
                 var fontDef = new FontEntity
@@ -798,10 +765,11 @@ public class GameDataLoader
         int result = 0;
 
         // Parse each flag name and combine using bitwise OR
-        string[] flagNames = flagsString.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        string[] flagNames =
+            flagsString.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
         foreach (string flagName in flagNames)
         {
-            if (Enum.TryParse<TileBehaviorFlags>(flagName, ignoreCase: true, out TileBehaviorFlags flag))
+            if (Enum.TryParse(flagName, true, out TileBehaviorFlags flag))
             {
                 result |= (int)flag;
             }
@@ -833,7 +801,8 @@ public class GameDataLoader
             {
                 return afterMods.Substring(0, nextSeparator);
             }
-            else if (afterMods.Length > 0)
+
+            if (afterMods.Length > 0)
             {
                 return afterMods;
             }
@@ -852,10 +821,93 @@ public class GameDataLoader
         return source == "base" ? null : source;
     }
 
+    #region Generic Definition Loading Infrastructure
+
     /// <summary>
-    ///     Gets the content provider for mod-aware loading.
+    ///     Result of parsing a DTO into an entity with mod override information.
     /// </summary>
-    public IContentProvider ContentProvider => _contentProvider;
+    /// <typeparam name="TEntity">Entity type.</typeparam>
+    /// <typeparam name="TKey">Entity key type.</typeparam>
+    private record ParseResult<TEntity, TKey>(TEntity Entity, TKey Key, bool Success, string? ErrorMessage = null);
+
+    /// <summary>
+    ///     Generic loader for definition files that handles the common pattern:
+    ///     get files → read JSON → deserialize → validate → create entity → save.
+    /// </summary>
+    /// <typeparam name="TDto">DTO type for JSON deserialization.</typeparam>
+    /// <typeparam name="TEntity">Entity type for EF Core.</typeparam>
+    /// <typeparam name="TKey">Entity key type.</typeparam>
+    /// <param name="contentType">ContentProvider content type key.</param>
+    /// <param name="parseDto">Function to parse DTO into entity with key.</param>
+    /// <param name="addEntity">Action to add entity to DbContext.</param>
+    /// <param name="existingEntities">Optional dictionary of existing entities for override support.</param>
+    /// <param name="handleOverride">Optional action to handle entity override (update existing).</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>Number of entities loaded.</returns>
+    private async Task<int> LoadDefinitionsAsync<TDto, TEntity, TKey>(
+        string contentType,
+        Func<TDto, string, ParseResult<TEntity, TKey>> parseDto,
+        Action<TEntity> addEntity,
+        Dictionary<TKey, TEntity>? existingEntities = null,
+        Action<TEntity, TEntity>? handleOverride = null,
+        CancellationToken ct = default)
+        where TDto : class
+        where TEntity : class
+        where TKey : notnull
+    {
+        IEnumerable<string> files = ContentProvider.GetAllContentPaths(contentType);
+        _logger.LogDebug("Using ContentProvider for {ContentType} - found {Count} files", contentType, files.Count());
+        int count = 0;
+
+        foreach (string file in files)
+        {
+            ct.ThrowIfCancellationRequested();
+
+            try
+            {
+                string json = await File.ReadAllTextAsync(file, ct);
+                TDto? dto = JsonSerializer.Deserialize<TDto>(json, _jsonOptions);
+
+                if (dto == null)
+                {
+                    _logger.LogWarning("Failed to deserialize {ContentType}: {File}", contentType, file);
+                    continue;
+                }
+
+                ParseResult<TEntity, TKey> result = parseDto(dto, file);
+                if (!result.Success)
+                {
+                    _logger.LogWarning("{ContentType} validation failed for {File}: {Error}",
+                        contentType, file, result.ErrorMessage ?? "Unknown error");
+                    continue;
+                }
+
+                // Handle mod override if existing entities provided
+                if (existingEntities != null && handleOverride != null &&
+                    existingEntities.TryGetValue(result.Key, out TEntity? existing))
+                {
+                    handleOverride(existing, result.Entity);
+                    _logger.LogDebug("{ContentType} overridden: {Key}", contentType, result.Key);
+                }
+                else
+                {
+                    addEntity(result.Entity);
+                }
+
+                count++;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to load {ContentType}: {File}", contentType, file);
+            }
+        }
+
+        await _context.SaveChangesAsync(ct);
+        _logger.LogInformation("Loaded {Count} {ContentType}", count, contentType);
+        return count;
+    }
+
+    #endregion
 }
 
 #region DTOs for JSON Deserialization
@@ -941,7 +993,10 @@ internal record AudioEntityDto
     [JsonPropertyName("fadeIn")] public float? FadeIn { get; init; }
     [JsonPropertyName("fadeOut")] public float? FadeOut { get; init; }
     [JsonPropertyName("loopStartSamples")] public int? LoopStartSamples { get; init; }
-    [JsonPropertyName("loopLengthSamples")] public int? LoopLengthSamples { get; init; }
+
+    [JsonPropertyName("loopLengthSamples")]
+    public int? LoopLengthSamples { get; init; }
+
     [JsonPropertyName("loopStartSec")] public float? LoopStartSec { get; init; }
     [JsonPropertyName("loopEndSec")] public float? LoopEndSec { get; init; }
     [JsonPropertyName("sourceMod")] public string? SourceMod { get; init; }
@@ -1063,7 +1118,10 @@ internal record BehaviorDefinitionDto
     [JsonPropertyName("behaviorScript")] public string? BehaviorScript { get; init; }
     [JsonPropertyName("defaultSpeed")] public float? DefaultSpeed { get; init; }
     [JsonPropertyName("pauseAtWaypoint")] public float? PauseAtWaypoint { get; init; }
-    [JsonPropertyName("allowInteractionWhileMoving")] public bool? AllowInteractionWhileMoving { get; init; }
+
+    [JsonPropertyName("allowInteractionWhileMoving")]
+    public bool? AllowInteractionWhileMoving { get; init; }
+
     [JsonPropertyName("sourceMod")] public string? SourceMod { get; init; }
     [JsonPropertyName("version")] public string? Version { get; init; }
 }

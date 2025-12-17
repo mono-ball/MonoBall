@@ -4,7 +4,6 @@ namespace MonoBallFramework.Game.Engine.Core.Types;
 
 /// <summary>
 ///     Strongly-typed identifier for audio definitions (music and sound effects).
-///
 ///     Format: base:audio:{category}/{subcategory}/{name}
 ///     Examples:
 ///     - base:audio:music/towns/mus_littleroot
@@ -25,9 +24,11 @@ public sealed record GameAudioId : EntityId
     public GameAudioId(string value) : base(value)
     {
         if (EntityType != TypeName)
+        {
             throw new ArgumentException(
                 $"Expected entity type '{TypeName}', got '{EntityType}'",
                 nameof(value));
+        }
     }
 
     /// <summary>
@@ -41,6 +42,21 @@ public sealed record GameAudioId : EntityId
         : base(TypeName, category, name, ns, subcategory)
     {
     }
+
+    /// <summary>
+    ///     Returns true if this is a music track.
+    /// </summary>
+    public bool IsMusic => Category == "music";
+
+    /// <summary>
+    ///     Returns true if this is a sound effect.
+    /// </summary>
+    public bool IsSoundEffect => Category == "sfx";
+
+    /// <summary>
+    ///     Returns the audio subcategory (e.g., "towns", "battle", "routes").
+    /// </summary>
+    public string? AudioSubcategory => Subcategory;
 
     /// <summary>
     ///     Constructs a GameAudioId from audio name and category components.
@@ -63,11 +79,15 @@ public sealed record GameAudioId : EntityId
     public static GameAudioId? TryCreate(string? value)
     {
         if (string.IsNullOrWhiteSpace(value))
+        {
             return null;
+        }
 
         // Only accept full format
         if (!IsValidFormat(value) || !value.Contains($":{TypeName}:"))
+        {
             return null;
+        }
 
         try
         {
@@ -80,22 +100,10 @@ public sealed record GameAudioId : EntityId
     }
 
     /// <summary>
-    ///     Returns true if this is a music track.
-    /// </summary>
-    public bool IsMusic => Category == "music";
-
-    /// <summary>
-    ///     Returns true if this is a sound effect.
-    /// </summary>
-    public bool IsSoundEffect => Category == "sfx";
-
-    /// <summary>
-    ///     Returns the audio subcategory (e.g., "towns", "battle", "routes").
-    /// </summary>
-    public string? AudioSubcategory => Subcategory;
-
-    /// <summary>
     ///     Explicit conversion from string. Use TryCreate() for safe parsing.
     /// </summary>
-    public static explicit operator GameAudioId(string value) => new(value);
+    public static explicit operator GameAudioId(string value)
+    {
+        return new GameAudioId(value);
+    }
 }

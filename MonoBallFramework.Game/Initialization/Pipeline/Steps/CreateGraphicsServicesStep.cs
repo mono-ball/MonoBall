@@ -23,7 +23,9 @@ public class CreateGraphicsServicesStep : InitializationStepBase
             "Creating asset manager...",
             InitializationProgress.TemplateCacheInitialized,
             InitializationProgress.AssetManagerCreated
-        ) { }
+        )
+    {
+    }
 
     /// <inheritdoc />
     protected override Task ExecuteStepAsync(
@@ -54,7 +56,7 @@ public class CreateGraphicsServicesStep : InitializationStepBase
         // Create RenderingService for shared SpriteBatch (eliminates GPU resource churn)
         ILogger<RenderingService> renderingLogger = context.LoggerFactory.CreateLogger<RenderingService>();
         RenderingConfiguration renderingConfig = context.Services.GetService<RenderingConfiguration>()
-            ?? RenderingConfiguration.Default;
+                                                 ?? RenderingConfiguration.Default;
         var renderingService = new RenderingService(context.GraphicsDevice, renderingLogger, renderingConfig);
         context.RenderingService = renderingService;
 

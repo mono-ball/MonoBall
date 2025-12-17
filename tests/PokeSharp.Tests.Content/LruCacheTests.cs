@@ -5,7 +5,7 @@ using Xunit;
 namespace PokeSharp.Tests.Content;
 
 /// <summary>
-/// Unit tests for the LruCache class.
+///     Unit tests for the LruCache class.
 /// </summary>
 public class LruCacheTests
 {
@@ -26,7 +26,7 @@ public class LruCacheTests
     public void Constructor_WithInvalidCapacity_ThrowsArgumentOutOfRangeException(int capacity)
     {
         // Arrange & Act
-        var act = () => new LruCache<string, int>(capacity);
+        Func<LruCache<string, int>> act = () => new LruCache<string, int>(capacity);
 
         // Assert
         act.Should().Throw<ArgumentOutOfRangeException>();
@@ -39,7 +39,7 @@ public class LruCacheTests
         var cache = new LruCache<string, string>(10);
 
         // Act
-        bool result = cache.TryGet("nonexistent", out var value);
+        bool result = cache.TryGet("nonexistent", out string value);
 
         // Assert
         result.Should().BeFalse();
@@ -54,7 +54,7 @@ public class LruCacheTests
 
         // Act
         cache.Set("key1", 42);
-        bool result = cache.TryGet("key1", out var value);
+        bool result = cache.TryGet("key1", out int value);
 
         // Assert
         result.Should().BeTrue();
@@ -75,9 +75,9 @@ public class LruCacheTests
 
         // Assert
         cache.Count.Should().Be(3);
-        cache.TryGet("key1", out var v1).Should().BeTrue();
-        cache.TryGet("key2", out var v2).Should().BeTrue();
-        cache.TryGet("key3", out var v3).Should().BeTrue();
+        cache.TryGet("key1", out int v1).Should().BeTrue();
+        cache.TryGet("key2", out int v2).Should().BeTrue();
+        cache.TryGet("key3", out int v3).Should().BeTrue();
         v1.Should().Be(1);
         v2.Should().Be(2);
         v3.Should().Be(3);
@@ -141,7 +141,7 @@ public class LruCacheTests
         cache.Set("key4", 4);
 
         // Assert
-        cache.TryGet("key1", out var v1).Should().BeTrue();
+        cache.TryGet("key1", out int v1).Should().BeTrue();
         v1.Should().Be(100); // Value was updated
         cache.TryGet("key2", out _).Should().BeFalse(); // key2 was evicted
     }
@@ -193,7 +193,7 @@ public class LruCacheTests
         var cache = new LruCache<string, int>(10);
 
         // Act
-        var act = () => cache.RemoveWhere(null!);
+        Action act = () => cache.RemoveWhere(null!);
 
         // Assert
         act.Should().Throw<ArgumentNullException>();
@@ -207,7 +207,7 @@ public class LruCacheTests
 
         // Act
         cache.Set("key1", null);
-        bool result = cache.TryGet("key1", out var value);
+        bool result = cache.TryGet("key1", out string? value);
 
         // Assert
         result.Should().BeTrue();
@@ -251,7 +251,7 @@ public class LruCacheTests
             {
                 for (int j = 0; j < 100; j++)
                 {
-                    int key = threadId * 100 + j;
+                    int key = (threadId * 100) + j;
                     cache.Set(key, key * 2);
                     cache.TryGet(key, out _);
                 }
@@ -259,7 +259,7 @@ public class LruCacheTests
         }
 
         // Assert - Should complete without exceptions
-        var act = () => Task.WaitAll(tasks.ToArray());
+        Action act = () => Task.WaitAll(tasks.ToArray());
         act.Should().NotThrow();
     }
 }

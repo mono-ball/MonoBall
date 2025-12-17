@@ -1,11 +1,13 @@
 using Arch.Core;
+using Microsoft.Xna.Framework;
+using MonoBallFramework.Game.Ecs.Components.Movement;
 using MonoBallFramework.Game.Engine.Core.Types;
 
 namespace MonoBallFramework.Game.Scripting.Api;
 
 /// <summary>
 ///     Fluent builder for spawning and configuring NPCs.
-///     Obtained via <see cref="IEntityApi.CreateNpc(int, int)"/>.
+///     Obtained via <see cref="IEntityApi.CreateNpc(int, int)" />.
 /// </summary>
 /// <example>
 ///     <code>
@@ -68,12 +70,12 @@ public interface INpcSpawnBuilder
     /// <summary>
     ///     Set initial facing direction.
     /// </summary>
-    INpcSpawnBuilder Facing(Ecs.Components.Movement.Direction direction);
+    INpcSpawnBuilder Facing(Direction direction);
 
     /// <summary>
     ///     Set a patrol path for the NPC.
     /// </summary>
-    INpcSpawnBuilder WithPath(Microsoft.Xna.Framework.Point[] waypoints, bool loop = false);
+    INpcSpawnBuilder WithPath(Point[] waypoints, bool loop = false);
 
     /// <summary>
     ///     Set the initial animation for the NPC.
@@ -163,14 +165,14 @@ public interface INpcSpawnBuilder
     /// </summary>
     /// <param name="mapId">The map identifier.</param>
     /// <param name="tileSize">Tile size in pixels (default 16).</param>
-    INpcSpawnBuilder OnMap(Engine.Core.Types.GameMapId mapId, int tileSize = 16);
+    INpcSpawnBuilder OnMap(GameMapId mapId, int tileSize = 16);
 
     /// <summary>
     ///     Set the parent entity for relationship tracking.
     ///     Used to associate NPCs with their owning map entity.
     /// </summary>
     /// <param name="parentEntity">The parent entity (typically MapInfoEntity).</param>
-    INpcSpawnBuilder WithParent(Arch.Core.Entity parentEntity);
+    INpcSpawnBuilder WithParent(Entity parentEntity);
 
     /// <summary>
     ///     Spawn the configured NPC entity.

@@ -81,6 +81,3 @@ public abstract class EventDrivenSystemBase : IEventDrivenSystem
         return World != null ? func() : default;
     }
 }
-
-
-

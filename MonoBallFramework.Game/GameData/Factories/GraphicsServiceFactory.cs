@@ -1,4 +1,3 @@
-using System;
 using Arch.Core;
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework.Graphics;
@@ -52,17 +51,17 @@ public class MapLifecycleManagerHolder
 /// </summary>
 public class GraphicsServiceFactory : IGraphicsServiceFactory
 {
-    private readonly ILoggerFactory _loggerFactory;
     private readonly IContentProvider _contentProvider;
+    private readonly IGameStateApi? _gameStateApi;
+    private readonly ILoggerFactory _loggerFactory;
     private readonly MapEntityService? _mapDefinitionService;
     private readonly PropertyMapperRegistry? _propertyMapperRegistry;
     private readonly SystemManager _systemManager;
-    private readonly IGameStateApi? _gameStateApi;
+
+    private readonly World _world;
 
     // Holder for MapLifecycleManager to enable factory delegate pattern
     private MapLifecycleManagerHolder? _lifecycleManagerHolder;
-
-    private readonly World _world;
 
     /// <summary>
     ///     Initializes a new instance of the GraphicsServiceFactory.

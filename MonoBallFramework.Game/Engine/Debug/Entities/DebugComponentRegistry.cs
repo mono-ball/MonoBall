@@ -22,8 +22,8 @@ public class DebugComponentRegistry
     private static readonly Dictionary<Type, MethodInfo> _getMethodCache = new();
     private static readonly Type _entityExtensionsType = typeof(EntityExtensions);
     private readonly List<ComponentDescriptor> _descriptors = new();
-    private readonly Dictionary<Type, ComponentDescriptor> _typeToDescriptor = new();
     private readonly Dictionary<string, ComponentDescriptor> _nameToDescriptor = new();
+    private readonly Dictionary<Type, ComponentDescriptor> _typeToDescriptor = new();
 
     /// <summary>
     ///     Registers a component type with the given display name.
@@ -41,7 +41,7 @@ public class DebugComponentRegistry
             DisplayName = displayName,
             Category = category,
             Priority = priority,
-            HasComponent = entity => entity.Has<T>(),
+            HasComponent = entity => entity.Has<T>()
         };
 
         _descriptors.Add(descriptor);
@@ -77,7 +77,7 @@ public class DebugComponentRegistry
 
                 ref T component = ref entity.Get<T>();
                 return propertyReader(component);
-            },
+            }
         };
 
         _descriptors.Add(descriptor);
@@ -110,7 +110,7 @@ public class DebugComponentRegistry
             Priority = priority,
             HasComponent = entity => HasComponentDynamic(entity, componentType),
             // Create a GetProperties function that uses entity.Get<T> with reflection
-            GetProperties = entity => GetComponentPropertiesReflection(entity, componentType),
+            GetProperties = entity => GetComponentPropertiesReflection(entity, componentType)
         };
 
         _descriptors.Add(descriptor);
@@ -368,19 +368,19 @@ public class DebugComponentRegistry
                     return "{}";
                 }
 
-                string dictIndent = new string(' ', indentLevel * 2);
-                string dictItemIndent = new string(' ', (indentLevel + 1) * 2);
+                string dictIndent = new(' ', indentLevel * 2);
+                string dictItemIndent = new(' ', (indentLevel + 1) * 2);
                 var lines = new List<string> { $"{dictIndent}{{{dict.Count} entries}}" };
 
                 foreach (DictionaryEntry entry in dict)
                 {
                     string key = FormatValue(entry.Key, indentLevel + 1);
                     string val = FormatValue(entry.Value, indentLevel + 1);
-                    
+
                     // Split key and value into lines
                     string[] keyLines = key.Split('\n');
                     string[] valLines = val.Split('\n');
-                    
+
                     // If key is multiline, put all key lines first, then value on new line
                     if (keyLines.Length > 1)
                     {
@@ -389,6 +389,7 @@ public class DebugComponentRegistry
                         {
                             lines.Add($"{dictItemIndent}{keyLine}");
                         }
+
                         // Add value on new line with proper indentation
                         lines.Add($"{dictItemIndent}→ {valLines[0]}");
                         for (int i = 1; i < valLines.Length; i++)
@@ -483,9 +484,9 @@ public class DebugComponentRegistry
             return "[]";
         }
 
-        string arrayIndent = new string(' ', indentLevel * 2);
+        string arrayIndent = new(' ', indentLevel * 2);
         // Array items get 2 more levels of indentation (4 spaces) for proper nesting
-        string itemIndent = new string(' ', (indentLevel + 2) * 2);
+        string itemIndent = new(' ', (indentLevel + 2) * 2);
         var lines = new List<string> { $"{arrayIndent}[{arr.Length} items]" };
 
         for (int i = 0; i < arr.Length; i++)
@@ -505,10 +506,11 @@ public class DebugComponentRegistry
                     {
                         continue;
                     }
+
                     lines.Add($"{itemIndent}  {itemLines[j]}");
                 }
             }
-            
+
             // Add blank line after each item (except the last) for better readability
             if (i < arr.Length - 1)
             {
@@ -529,9 +531,9 @@ public class DebugComponentRegistry
             return "[]";
         }
 
-        string collectionIndent = new string(' ', indentLevel * 2);
+        string collectionIndent = new(' ', indentLevel * 2);
         // Collection items get 2 more levels of indentation (4 spaces) for proper nesting
-        string itemIndent = new string(' ', (indentLevel + 2) * 2);
+        string itemIndent = new(' ', (indentLevel + 2) * 2);
         var lines = new List<string> { $"{collectionIndent}[{collection.Count} items]" };
 
         int idx = 0;
@@ -552,15 +554,17 @@ public class DebugComponentRegistry
                     {
                         continue;
                     }
+
                     lines.Add($"{itemIndent}  {itemLines[j]}");
                 }
             }
-            
+
             // Add blank line after each item (except the last) for better readability
             if (idx < collection.Count - 1)
             {
                 lines.Add("");
             }
+
             idx++;
         }
 
@@ -583,9 +587,9 @@ public class DebugComponentRegistry
             return "[]";
         }
 
-        string enumerableIndent = new string(' ', indentLevel * 2);
+        string enumerableIndent = new(' ', indentLevel * 2);
         // Enumerable items get 2 more levels of indentation (4 spaces) for proper nesting
-        string itemIndent = new string(' ', (indentLevel + 2) * 2);
+        string itemIndent = new(' ', (indentLevel + 2) * 2);
         var lines = new List<string> { $"{enumerableIndent}[{items.Count} items]" };
         for (int i = 0; i < items.Count; i++)
         {
@@ -604,10 +608,11 @@ public class DebugComponentRegistry
                     {
                         continue;
                     }
+
                     lines.Add($"{itemIndent}  {itemLines[j]}");
                 }
             }
-            
+
             // Add blank line after each item (except the last) for better readability
             if (i < items.Count - 1)
             {
@@ -663,12 +668,12 @@ public class DebugComponentRegistry
         }
 
         // For records with multiple properties, show each on its own line with clear delimiters
-        string recordIndent = new string(' ', indentLevel * 2);
-        string propIndent = new string(' ', (indentLevel + 1) * 2);
-        
+        string recordIndent = new(' ', indentLevel * 2);
+        string propIndent = new(' ', (indentLevel + 1) * 2);
+
         // Add opening brace for record
         lines.Add($"{recordIndent}{{");
-        
+
         foreach (PropertyInfo prop in properties)
         {
             try
@@ -895,10 +900,7 @@ public class DebugComponentRegistry
         catch (Exception ex)
         {
             // Add error to help debug
-            componentData["_GetComponentData_Error"] = new Dictionary<string, string>
-            {
-                ["error"] = ex.Message,
-            };
+            componentData["_GetComponentData_Error"] = new Dictionary<string, string> { ["error"] = ex.Message };
         }
 
         return componentData;
@@ -944,13 +946,10 @@ public class DebugComponentRegistry
                         }
                     }
                 }
-                else
-                {
-                    // Unregistered component - add empty entry
-                    // This can happen if component detection found a component
-                    // that wasn't explicitly registered with a GetProperties function
-                }
 
+                // Unregistered component - add empty entry
+                // This can happen if component detection found a component
+                // that wasn't explicitly registered with a GetProperties function
                 // Always add to componentData (even if empty) so we know it's there
                 componentData[componentName] = fields;
             }
@@ -958,10 +957,7 @@ public class DebugComponentRegistry
         catch (Exception ex)
         {
             // Add error to help debug
-            componentData["_GetComponentData_Error"] = new Dictionary<string, string>
-            {
-                ["error"] = ex.Message,
-            };
+            componentData["_GetComponentData_Error"] = new Dictionary<string, string> { ["error"] = ex.Message };
         }
 
         return componentData;

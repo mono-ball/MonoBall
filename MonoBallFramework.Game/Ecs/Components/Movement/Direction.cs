@@ -29,7 +29,7 @@ public enum Direction
     /// <summary>
     ///     Facing north (up on screen).
     /// </summary>
-    North = 3,
+    North = 3
 }
 
 /// <summary>
@@ -50,7 +50,7 @@ public static class DirectionExtensions
             Direction.West => (-1, 0),
             Direction.East => (1, 0),
             Direction.North => (0, -1),
-            _ => (0, 0),
+            _ => (0, 0)
         };
     }
 
@@ -68,7 +68,7 @@ public static class DirectionExtensions
             Direction.North => "north",
             Direction.West => "west",
             Direction.East => "east",
-            _ => "south",
+            _ => "south"
         };
     }
 
@@ -126,7 +126,7 @@ public static class DirectionExtensions
             Direction.West => Direction.East,
             Direction.East => Direction.West,
             Direction.North => Direction.South,
-            _ => direction,
+            _ => direction
         };
     }
 }

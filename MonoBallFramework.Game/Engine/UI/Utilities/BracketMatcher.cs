@@ -6,19 +6,9 @@ namespace MonoBallFramework.Game.Engine.UI.Utilities;
 /// </summary>
 public static class BracketMatcher
 {
-    private static readonly Dictionary<char, char> _openToClose = new()
-    {
-        { '(', ')' },
-        { '[', ']' },
-        { '{', '}' },
-    };
+    private static readonly Dictionary<char, char> _openToClose = new() { { '(', ')' }, { '[', ']' }, { '{', '}' } };
 
-    private static readonly Dictionary<char, char> _closeToOpen = new()
-    {
-        { ')', '(' },
-        { ']', '[' },
-        { '}', '{' },
-    };
+    private static readonly Dictionary<char, char> _closeToOpen = new() { { ')', '(' }, { ']', '[' }, { '}', '{' } };
 
     /// <summary>
     ///     Checks if a character is an opening bracket.
@@ -180,7 +170,7 @@ public static class BracketMatcher
     public static (
         (int line, int col) cursor,
         (int line, int col) match
-    )? FindBracketPairNearCursor(List<string> lines, int cursorLine, int cursorColumn)
+        )? FindBracketPairNearCursor(List<string> lines, int cursorLine, int cursorColumn)
     {
         if (cursorLine < 0 || cursorLine >= lines.Count)
         {

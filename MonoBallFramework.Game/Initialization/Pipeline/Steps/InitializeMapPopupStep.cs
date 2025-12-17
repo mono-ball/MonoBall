@@ -27,7 +27,9 @@ public class InitializeMapPopupStep : InitializationStepBase
             "Initializing map popup system...",
             InitializationProgress.Complete,
             InitializationProgress.Complete
-        ) { }
+        )
+    {
+    }
 
     /// <inheritdoc />
     protected override async Task ExecuteStepAsync(
@@ -40,7 +42,7 @@ public class InitializeMapPopupStep : InitializationStepBase
             context.LoggerFactory.CreateLogger<InitializeMapPopupStep>();
 
         // Get popup registry from DI (already registered in CoreServicesExtensions)
-        var popupRegistry = context.Services.GetRequiredService<PopupRegistry>();
+        PopupRegistry popupRegistry = context.Services.GetRequiredService<PopupRegistry>();
         await popupRegistry.LoadDefinitionsAsync(cancellationToken);
         logger.LogInformation(
             "Registered {BgCount} popup backgrounds and {OutlineCount} popup outlines (async)",
@@ -83,23 +85,27 @@ public class InitializeMapPopupStep : InitializationStepBase
 
         // Get required services
         IEventBus eventBus = context.Services.GetService(typeof(IEventBus)) as IEventBus
-            ?? throw new InvalidOperationException("IEventBus not found in services");
+                             ?? throw new InvalidOperationException("IEventBus not found in services");
 
         ICameraProvider cameraProvider = context.Services.GetService(typeof(ICameraProvider)) as ICameraProvider
-            ?? throw new InvalidOperationException("ICameraProvider not found in services");
+                                         ?? throw new InvalidOperationException(
+                                             "ICameraProvider not found in services");
 
-        IMapPopupDataService mapPopupDataService = context.Services.GetService(typeof(IMapPopupDataService)) as IMapPopupDataService
+        IMapPopupDataService mapPopupDataService =
+            context.Services.GetService(typeof(IMapPopupDataService)) as IMapPopupDataService
             ?? throw new InvalidOperationException("IMapPopupDataService not found in services");
 
         // Get RenderingService from context (created in CreateGraphicsServicesStep)
         if (context.RenderingService == null)
         {
-            throw new InvalidOperationException("RenderingService must be created before initializing map popup system");
+            throw new InvalidOperationException(
+                "RenderingService must be created before initializing map popup system");
         }
+
         IRenderingService renderingService = context.RenderingService;
 
         // Get IContentProvider from services
-        var contentProvider = context.Services.GetRequiredService<IContentProvider>();
+        IContentProvider contentProvider = context.Services.GetRequiredService<IContentProvider>();
 
         // Create SceneFactory for proper dependency injection
         var sceneFactory = new SceneFactory(
@@ -116,7 +122,8 @@ public class InitializeMapPopupStep : InitializationStepBase
             context.LoggerFactory.CreateLogger<MapPopupOrchestrator>();
 
         // Get PopupRegistryOptions from DI
-        var popupOptions = context.Services.GetRequiredService<IOptions<PopupRegistryOptions>>();
+        IOptions<PopupRegistryOptions> popupOptions =
+            context.Services.GetRequiredService<IOptions<PopupRegistryOptions>>();
 
         var mapPopupOrchestrator = new MapPopupOrchestrator(
             context.World,
@@ -135,4 +142,3 @@ public class InitializeMapPopupStep : InitializationStepBase
         logger.LogInformation("Map popup system initialized successfully");
     }
 }
-

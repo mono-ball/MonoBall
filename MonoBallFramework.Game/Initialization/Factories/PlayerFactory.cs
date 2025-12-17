@@ -1,12 +1,6 @@
 using Arch.Core;
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
-using MonoBallFramework.Game.Engine.Common.Logging;
-using MonoBallFramework.Game.Engine.Core.Types;
-using MonoBallFramework.Game.Engine.Input.Components;
-using MonoBallFramework.Game.Engine.Rendering.Components;
-using MonoBallFramework.Game.Engine.Rendering.Constants;
-using MonoBallFramework.Game.Engine.Systems.Management;
 using MonoBallFramework.Game.Ecs.Components;
 using MonoBallFramework.Game.Ecs.Components.Common;
 using MonoBallFramework.Game.Ecs.Components.Maps;
@@ -14,6 +8,12 @@ using MonoBallFramework.Game.Ecs.Components.Movement;
 using MonoBallFramework.Game.Ecs.Components.Player;
 using MonoBallFramework.Game.Ecs.Components.Rendering;
 using MonoBallFramework.Game.Ecs.Components.Warps;
+using MonoBallFramework.Game.Engine.Common.Logging;
+using MonoBallFramework.Game.Engine.Core.Types;
+using MonoBallFramework.Game.Engine.Input.Components;
+using MonoBallFramework.Game.Engine.Rendering.Components;
+using MonoBallFramework.Game.Engine.Rendering.Constants;
+using MonoBallFramework.Game.Engine.Systems.Management;
 using MonoBallFramework.Game.Infrastructure.Configuration;
 
 namespace MonoBallFramework.Game.Initialization.Factories;
@@ -57,15 +57,15 @@ public class PlayerFactory(
         int scale = Math.Min(scaleX, scaleY);
         int gbaViewportWidth = Camera.GbaNativeWidth * scale;
         int gbaViewportHeight = Camera.GbaNativeHeight * scale;
-        
+
         // Create camera component with GBA-scaled viewport (matches UpdateViewportForResize)
         var viewport = new Rectangle(0, 0, gbaViewportWidth, gbaViewportHeight);
-        
+
         // Initialize camera position to tile center (matches what CameraFollowSystem will set)
         // This ensures camera is correctly positioned from the start, preventing visual glitches
         float initialPixelX = x * tileSize;
         float initialPixelY = y * tileSize;
-        
+
         var camera = new Camera(viewport)
         {
             // Set zoom to match GBA scale (same as UpdateViewportForResize does)
@@ -78,9 +78,9 @@ public class PlayerFactory(
             ),
             // Set reference dimensions so UpdateViewportForResize knows it's already initialized
             ReferenceWidth = viewportWidth,
-            ReferenceHeight = viewportHeight,
+            ReferenceHeight = viewportHeight
         };
-        
+
         // Set VirtualViewport to match what UpdateViewportForResize will calculate
         camera.VirtualViewport = new Rectangle(
             (viewportWidth - gbaViewportWidth) / 2,
@@ -100,7 +100,7 @@ public class PlayerFactory(
             new Sprite(new GameSpriteId("base:sprite:players/may/normal")),
             new Elevation(3),
             new GridMovement(3.75f),
-            Direction.South,  // Direction component for InputSystem
+            Direction.South, // Direction component for InputSystem
             new Animation("face_south"),
             new InputState(),
             new Collision(true),

@@ -12,7 +12,9 @@ public class GameFontIdValueConverter : ValueConverter<GameFontId, string>
         : base(
             v => v.Value,
             v => ConvertFromString(v)
-        ) { }
+        )
+    {
+    }
 
     private static GameFontId ConvertFromString(string value)
     {
@@ -29,7 +31,9 @@ public class NullableGameFontIdValueConverter : ValueConverter<GameFontId?, stri
         : base(
             v => v != null ? v.Value : null,
             v => ConvertFromString(v)
-        ) { }
+        )
+    {
+    }
 
     private static GameFontId? ConvertFromString(string? value)
     {

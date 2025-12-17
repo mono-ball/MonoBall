@@ -16,7 +16,9 @@ public class CreateInitialPlayerStep : InitializationStepBase
             "Creating player...",
             InitializationProgress.InitialMapLoaded,
             InitializationProgress.Complete
-        ) { }
+        )
+    {
+    }
 
     /// <inheritdoc />
     protected override Task ExecuteStepAsync(

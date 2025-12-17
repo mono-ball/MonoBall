@@ -50,10 +50,10 @@ public class CameraUpdateSystem(ILogger<CameraUpdateSystem>? logger = null)
     public override void Initialize(World world)
     {
         base.Initialize(world);
-        
+
         // Query for all cameras (works with MainCamera tag or any camera)
         _cameraQuery = QueryCache.Get<Camera>();
-        
+
         _logger?.LogDebug("CameraUpdateSystem initialized");
     }
 
@@ -132,4 +132,3 @@ public class CameraUpdateSystem(ILogger<CameraUpdateSystem>? logger = null)
         );
     }
 }
-

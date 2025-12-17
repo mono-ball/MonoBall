@@ -129,7 +129,7 @@ public class TiledJsonParser
             Id = groupElement.TryGetProperty("id", out JsonElement id) ? id.GetInt32() : 0,
             Name = groupElement.TryGetProperty("name", out JsonElement name)
                 ? name.GetString() ?? ""
-                : "",
+                : ""
         };
 
         if (!groupElement.TryGetProperty("objects", out JsonElement objectsArray))
@@ -155,7 +155,7 @@ public class TiledJsonParser
                     : 0,
                 Height = objElement.TryGetProperty("height", out JsonElement height)
                     ? height.GetSingle()
-                    : 0,
+                    : 0
             };
 
             // Parse properties array into dictionary
@@ -224,7 +224,7 @@ public class TiledJsonParser
             JsonValueKind.Null => null,
             JsonValueKind.Object => ConvertJsonObjectToDictionary(jsonElement),
             JsonValueKind.Array => ConvertJsonArrayToList(jsonElement),
-            _ => jsonElement.ToString(),
+            _ => jsonElement.ToString()
         };
     }
 

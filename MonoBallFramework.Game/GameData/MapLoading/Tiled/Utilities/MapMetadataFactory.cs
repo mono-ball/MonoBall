@@ -68,10 +68,12 @@ public class MapMetadataFactory
         {
             musicId = GameAudioId.TryCreate(musicValue?.ToString());
         }
+
         if (musicId == null && mapDef.MusicId != null)
         {
             musicId = mapDef.MusicId;
         }
+
         if (musicId != null)
         {
             mapInfoEntity.Add(new Music(musicId));
@@ -180,7 +182,7 @@ public class MapMetadataFactory
         );
 
         // Log all property keys for debugging
-        foreach (var key in properties.Keys)
+        foreach (string key in properties.Keys)
         {
             if (key.StartsWith("connection_"))
             {
@@ -193,10 +195,10 @@ public class MapMetadataFactory
         }
 
         // Try to get connections from Tiled properties first
-        var (northId, northOffset) = ExtractConnectionFromProperty(properties, "connection_north");
-        var (southId, southOffset) = ExtractConnectionFromProperty(properties, "connection_south");
-        var (eastId, eastOffset) = ExtractConnectionFromProperty(properties, "connection_east");
-        var (westId, westOffset) = ExtractConnectionFromProperty(properties, "connection_west");
+        (GameMapId? northId, int northOffset) = ExtractConnectionFromProperty(properties, "connection_north");
+        (GameMapId? southId, int southOffset) = ExtractConnectionFromProperty(properties, "connection_south");
+        (GameMapId? eastId, int eastOffset) = ExtractConnectionFromProperty(properties, "connection_east");
+        (GameMapId? westId, int westOffset) = ExtractConnectionFromProperty(properties, "connection_west");
 
         // Fall back to MapEntity if Tiled doesn't have the connection
         if (northId == null && mapDef.NorthMapId != null)
@@ -204,16 +206,19 @@ public class MapMetadataFactory
             northId = mapDef.NorthMapId;
             northOffset = mapDef.NorthConnectionOffset;
         }
+
         if (southId == null && mapDef.SouthMapId != null)
         {
             southId = mapDef.SouthMapId;
             southOffset = mapDef.SouthConnectionOffset;
         }
+
         if (eastId == null && mapDef.EastMapId != null)
         {
             eastId = mapDef.EastMapId;
             eastOffset = mapDef.EastConnectionOffset;
         }
+
         if (westId == null && mapDef.WestMapId != null)
         {
             westId = mapDef.WestMapId;
@@ -233,6 +238,7 @@ public class MapMetadataFactory
                 mapDef.MapId.Value
             );
         }
+
         if (southId != null)
         {
             mapInfoEntity.Add(new SouthConnection(southId, southOffset));
@@ -244,6 +250,7 @@ public class MapMetadataFactory
                 mapDef.MapId.Value
             );
         }
+
         if (eastId != null)
         {
             mapInfoEntity.Add(new EastConnection(eastId, eastOffset));
@@ -255,6 +262,7 @@ public class MapMetadataFactory
                 mapDef.MapId.Value
             );
         }
+
         if (westId != null)
         {
             mapInfoEntity.Add(new WestConnection(westId, westOffset));
@@ -324,6 +332,7 @@ public class MapMetadataFactory
                     je.GetRawText()
                 );
             }
+
             if (je.TryGetProperty("offset", out JsonElement offsetProp) &&
                 offsetProp.ValueKind == JsonValueKind.Number)
             {
@@ -342,6 +351,7 @@ public class MapMetadataFactory
             {
                 mapIdStr = mapValue?.ToString();
             }
+
             if (dict.TryGetValue("offset", out object? offsetValue))
             {
                 if (offsetValue is int intOffset)
@@ -367,7 +377,7 @@ public class MapMetadataFactory
             );
         }
 
-        GameMapId? mapId = GameMapId.TryCreate(mapIdStr);
+        var mapId = GameMapId.TryCreate(mapIdStr);
         _logger?.LogInformation(
             "ExtractConnectionFromProperty: Result for '{PropertyName}': MapId={MapId}, Offset={Offset}",
             propertyName,

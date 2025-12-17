@@ -26,7 +26,7 @@ public static class EventInspectorExample
         var metrics = new EventMetrics { IsEnabled = enabledByDefault };
 
         // Step 2: Create the adapter that bridges EventBus and UI
-        var adapter = new EventInspectorAdapter(eventBus, metrics, 100);
+        var adapter = new EventInspectorAdapter(eventBus, metrics);
 
         // Step 3: Build the UI panel
         EventInspectorPanel panel = new EventInspectorPanelBuilder()
@@ -182,7 +182,7 @@ public static class EventInspectorExample
                 {
                     writer.WriteLine(
                         $"    [#{sub.HandlerId}] {sub.Source ?? "Unknown"} - "
-                            + $"{sub.AverageTimeMs:F3}ms avg ({sub.InvocationCount} calls)"
+                        + $"{sub.AverageTimeMs:F3}ms avg ({sub.InvocationCount} calls)"
                     );
                 }
             }
@@ -198,7 +198,7 @@ public static class EventInspectorExample
         {
             writer.WriteLine(
                 $"[{entry.Timestamp:HH:mm:ss.fff}] {entry.Operation} "
-                    + $"{entry.EventType} - {entry.DurationMs:F3}ms"
+                + $"{entry.EventType} - {entry.DurationMs:F3}ms"
             );
         }
     }

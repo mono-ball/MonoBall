@@ -98,7 +98,7 @@ public class AudioConfiguration
             MaxConcurrentSounds = AudioConstants.MaxConcurrentSounds,
             CryDuckVolume = AudioConstants.CryDuckVolume,
             CryDuckDurationSeconds = AudioConstants.CryDuckDuration,
-            DefaultFadeDurationSeconds = AudioConstants.DefaultCrossfadeDuration,
+            DefaultFadeDurationSeconds = AudioConstants.DefaultCrossfadeDuration
         };
 
     /// <summary>
@@ -116,11 +116,14 @@ public class AudioConfiguration
             MaxConcurrentSounds = 64, // More concurrent sounds for testing
             CryDuckVolume = 0.25f, // More aggressive ducking for clarity
             CryDuckDurationSeconds = 0.05f, // Faster ducking for testing
-            DefaultFadeDurationSeconds = 0.5f, // Faster fades for iteration
+            DefaultFadeDurationSeconds = 0.5f // Faster fades for iteration
         };
 
     /// <summary>
     ///     Factory method to create a default configuration instance.
     /// </summary>
-    public static AudioConfiguration CreateDefault() => new();
+    public static AudioConfiguration CreateDefault()
+    {
+        return new AudioConfiguration();
+    }
 }

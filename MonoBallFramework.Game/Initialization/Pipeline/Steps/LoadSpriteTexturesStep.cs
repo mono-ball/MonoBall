@@ -17,7 +17,9 @@ public class LoadSpriteTexturesStep : InitializationStepBase
             "Initializing sprite loading...",
             InitializationProgress.GameSystemsInitialized,
             InitializationProgress.GameSystemsInitialized
-        ) { }
+        )
+    {
+    }
 
     /// <inheritdoc />
     protected override Task ExecuteStepAsync(

@@ -1,12 +1,11 @@
 using Arch.Core;
 using Arch.Core.Extensions;
 using Microsoft.Extensions.Logging;
+using MonoBallFramework.Game.Components.Interfaces;
 using MonoBallFramework.Game.Ecs.Components.Movement;
 using MonoBallFramework.Game.Ecs.Components.Rendering;
 using MonoBallFramework.Game.Ecs.Components.Tiles;
-using MonoBallFramework.Game.Components.Interfaces;
 using MonoBallFramework.Game.Engine.Core.Events;
-using MonoBallFramework.Game.Engine.Core.Services;
 using MonoBallFramework.Game.Engine.Core.Systems;
 using MonoBallFramework.Game.Engine.Core.Types;
 using MonoBallFramework.Game.GameSystems.Events;
@@ -163,7 +162,7 @@ public class CollisionService : ICollisionService
             {
                 ref Elevation elevation = ref entity.Get<Elevation>();
                 if (elevation.Value != entityElevation)
-                // Different elevation - no collision (e.g., walking under bridge)
+                    // Different elevation - no collision (e.g., walking under bridge)
                 {
                     continue;
                 }
@@ -213,7 +212,7 @@ public class CollisionService : ICollisionService
                 ref Collision collision = ref entity.Get<Collision>();
 
                 if (collision.IsSolid)
-                // Solid collision blocks movement
+                    // Solid collision blocks movement
                 {
                     // EVENT-DRIVEN: Publish CollisionDetectedEvent for solid collision
                     PublishCollisionDetected(
@@ -350,7 +349,7 @@ public class CollisionService : ICollisionService
             {
                 ref Elevation elevation = ref entity.Get<Elevation>();
                 if (elevation.Value != entityElevation)
-                // Different elevation - no collision (e.g., walking under bridge)
+                    // Different elevation - no collision (e.g., walking under bridge)
                 {
                     continue;
                 }
@@ -397,7 +396,7 @@ public class CollisionService : ICollisionService
                 ref Collision collision = ref entity.Get<Collision>();
 
                 if (collision.IsSolid)
-                // Solid collision blocks movement
+                    // Solid collision blocks movement
                 {
                     isWalkable = false;
                 }

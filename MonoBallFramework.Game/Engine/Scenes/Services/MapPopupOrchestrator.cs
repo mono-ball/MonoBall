@@ -1,17 +1,17 @@
 using Arch.Core;
 using Arch.Core.Extensions;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MonoBallFramework.Game.Ecs.Components.Maps;
 using MonoBallFramework.Game.Engine.Core.Events;
 using MonoBallFramework.Game.Engine.Core.Events.Map;
 using MonoBallFramework.Game.Engine.Core.Types;
+using MonoBallFramework.Game.Engine.Rendering.Popups;
 using MonoBallFramework.Game.Engine.Scenes.Factories;
 using MonoBallFramework.Game.Engine.Scenes.Scenes;
 using MonoBallFramework.Game.Engine.Systems.Management;
 using MonoBallFramework.Game.GameData.Entities;
-using MonoBallFramework.Game.Engine.Rendering.Popups;
+using MonoBallFramework.Game.GameData.Services;
 
 namespace MonoBallFramework.Game.Engine.Scenes.Services;
 
@@ -21,15 +21,15 @@ namespace MonoBallFramework.Game.Engine.Scenes.Services;
 /// </summary>
 public class MapPopupOrchestrator : IMapPopupOrchestrator
 {
-    private readonly World _world;
-    private readonly SceneManager _sceneManager;
-    private readonly ISceneFactory _sceneFactory;
-    private readonly PopupRegistry _popupRegistry;
-    private readonly GameData.Services.IMapPopupDataService _mapPopupDataService;
-    private readonly ILogger<MapPopupOrchestrator> _logger;
     private readonly string _defaultTheme;
-    private readonly IDisposable? _mapTransitionSubscription;
+    private readonly ILogger<MapPopupOrchestrator> _logger;
+    private readonly IMapPopupDataService _mapPopupDataService;
     private readonly IDisposable? _mapRenderReadySubscription;
+    private readonly IDisposable? _mapTransitionSubscription;
+    private readonly PopupRegistry _popupRegistry;
+    private readonly ISceneFactory _sceneFactory;
+    private readonly SceneManager _sceneManager;
+    private readonly World _world;
 
     private bool _disposed;
 
@@ -41,7 +41,7 @@ public class MapPopupOrchestrator : IMapPopupOrchestrator
         SceneManager sceneManager,
         ISceneFactory sceneFactory,
         PopupRegistry popupRegistry,
-        GameData.Services.IMapPopupDataService mapPopupDataService,
+        IMapPopupDataService mapPopupDataService,
         IEventBus eventBus,
         ILogger<MapPopupOrchestrator> logger,
         IOptions<PopupRegistryOptions> options
@@ -71,6 +71,21 @@ public class MapPopupOrchestrator : IMapPopupOrchestrator
         _mapRenderReadySubscription = eventBus.Subscribe<MapRenderReadyEvent>(OnMapRenderReady);
 
         _logger.LogInformation("MapPopupOrchestrator initialized and subscribed to map events");
+    }
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        _mapTransitionSubscription?.Dispose();
+        _mapRenderReadySubscription?.Dispose();
+        _disposed = true;
+
+        _logger.LogDebug("MapPopupOrchestrator disposed");
     }
 
     /// <summary>
@@ -151,14 +166,14 @@ public class MapPopupOrchestrator : IMapPopupOrchestrator
                     regionName
                 );
 
-                GameData.Services.PopupDisplayInfo? popupInfo = _mapPopupDataService.GetPopupDisplayInfo(regionName);
+                PopupDisplayInfo? popupInfo = _mapPopupDataService.GetPopupDisplayInfo(regionName);
                 if (popupInfo != null)
                 {
                     // Get definitions from registry using the theme's asset IDs
                     backgroundDef = _popupRegistry.GetBackground(popupInfo.BackgroundAssetId);
                     outlineDef = _popupRegistry.GetOutline(popupInfo.OutlineAssetId);
                     usedThemeId = popupInfo.ThemeId;
-                    
+
                     // IMPORTANT: Use the section name from the database, not the map's display name
                     // This ensures we show the proper MAPSEC name (e.g., "LITTLEROOT TOWN")
                     if (!string.IsNullOrWhiteSpace(popupInfo.SectionName))
@@ -189,6 +204,7 @@ public class MapPopupOrchestrator : IMapPopupOrchestrator
                             _popupRegistry.IsLoaded,
                             _popupRegistry.BackgroundCount);
                     }
+
                     if (outlineDef == null)
                     {
                         _logger.LogError(
@@ -242,7 +258,7 @@ public class MapPopupOrchestrator : IMapPopupOrchestrator
             }
 
             // Create and push new popup scene using factory
-            var popupScene = _sceneFactory.CreateMapPopupScene(
+            MapPopupScene popupScene = _sceneFactory.CreateMapPopupScene(
                 backgroundDef,
                 outlineDef,
                 displayName
@@ -289,20 +305,5 @@ public class MapPopupOrchestrator : IMapPopupOrchestrator
         );
 
         return shouldShow;
-    }
-
-    /// <inheritdoc />
-    public void Dispose()
-    {
-        if (_disposed)
-        {
-            return;
-        }
-
-        _mapTransitionSubscription?.Dispose();
-        _mapRenderReadySubscription?.Dispose();
-        _disposed = true;
-
-        _logger.LogDebug("MapPopupOrchestrator disposed");
     }
 }

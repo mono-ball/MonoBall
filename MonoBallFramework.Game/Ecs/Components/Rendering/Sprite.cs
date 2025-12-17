@@ -65,5 +65,4 @@ public struct Sprite
         Tint = Color.White;
         Scale = 1f;
     }
-
 }

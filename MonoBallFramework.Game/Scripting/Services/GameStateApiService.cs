@@ -54,7 +54,8 @@ public class GameStateApiService(
             }
             else
             {
-                _logger.LogWarning("GameStateApiService: IGameStateService is null, cannot set CollisionServiceEnabled!");
+                _logger.LogWarning(
+                    "GameStateApiService: IGameStateService is null, cannot set CollisionServiceEnabled!");
             }
         }
     }
@@ -228,69 +229,6 @@ public class GameStateApiService(
         return System.Random.Shared.Next(min, max);
     }
 
-    #region Batch Flag Operations
-
-    /// <inheritdoc />
-    public IGameStateApi SetFlags(params string[] flagIds)
-    {
-        foreach (var flagId in flagIds)
-        {
-            SetFlag(new GameFlagId(flagId), true);
-        }
-
-        return this;
-    }
-
-    /// <inheritdoc />
-    public IGameStateApi ClearFlags(params string[] flagIds)
-    {
-        foreach (var flagId in flagIds)
-        {
-            SetFlag(new GameFlagId(flagId), false);
-        }
-
-        return this;
-    }
-
-    /// <inheritdoc />
-    public bool CheckAllFlags(params string[] flagIds)
-    {
-        return flagIds.All(f => GetFlag(new GameFlagId(f)));
-    }
-
-    /// <inheritdoc />
-    public bool CheckAnyFlag(params string[] flagIds)
-    {
-        return flagIds.Any(f => GetFlag(new GameFlagId(f)));
-    }
-
-    /// <inheritdoc />
-    public IGameStateApi ToggleFlag(GameFlagId flagId)
-    {
-        SetFlag(flagId, !GetFlag(flagId));
-        return this;
-    }
-
-    /// <inheritdoc />
-    public IEnumerable<string> GetFlagsByCategory(string category)
-    {
-        if (string.IsNullOrWhiteSpace(category))
-        {
-            return [];
-        }
-
-        var prefix = category.EndsWith('/') ? category : category + "/";
-        return GetActiveFlags().Where(f => f.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
-    }
-
-    /// <inheritdoc />
-    public int CountSetFlags(params string[] flagIds)
-    {
-        return flagIds.Count(f => GetFlag(new GameFlagId(f)));
-    }
-
-    #endregion
-
     /// <summary>
     ///     Ensures the GameState singleton entity exists, creating it if necessary.
     /// </summary>
@@ -327,4 +265,67 @@ public class GameStateApiService(
 
         _initialized = true;
     }
+
+    #region Batch Flag Operations
+
+    /// <inheritdoc />
+    public IGameStateApi SetFlags(params string[] flagIds)
+    {
+        foreach (string flagId in flagIds)
+        {
+            SetFlag(new GameFlagId(flagId), true);
+        }
+
+        return this;
+    }
+
+    /// <inheritdoc />
+    public IGameStateApi ClearFlags(params string[] flagIds)
+    {
+        foreach (string flagId in flagIds)
+        {
+            SetFlag(new GameFlagId(flagId), false);
+        }
+
+        return this;
+    }
+
+    /// <inheritdoc />
+    public bool CheckAllFlags(params string[] flagIds)
+    {
+        return flagIds.All(f => GetFlag(new GameFlagId(f)));
+    }
+
+    /// <inheritdoc />
+    public bool CheckAnyFlag(params string[] flagIds)
+    {
+        return flagIds.Any(f => GetFlag(new GameFlagId(f)));
+    }
+
+    /// <inheritdoc />
+    public IGameStateApi ToggleFlag(GameFlagId flagId)
+    {
+        SetFlag(flagId, !GetFlag(flagId));
+        return this;
+    }
+
+    /// <inheritdoc />
+    public IEnumerable<string> GetFlagsByCategory(string category)
+    {
+        if (string.IsNullOrWhiteSpace(category))
+        {
+            return [];
+        }
+
+        string prefix = category.EndsWith('/') ? category : category + "/";
+        return GetActiveFlags().Where(f => f.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
+    }
+
+    /// <inheritdoc />
+    public int CountSetFlags(params string[] flagIds)
+    {
+        return flagIds.Count(f => GetFlag(new GameFlagId(f)));
+    }
+
+    #endregion
 }

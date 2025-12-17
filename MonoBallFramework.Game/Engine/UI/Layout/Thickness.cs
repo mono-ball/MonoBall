@@ -58,9 +58,9 @@ public readonly struct Thickness : IEquatable<Thickness>
     public bool Equals(Thickness other)
     {
         return Left == other.Left
-            && Top == other.Top
-            && Right == other.Right
-            && Bottom == other.Bottom;
+               && Top == other.Top
+               && Right == other.Right
+               && Bottom == other.Bottom;
     }
 
     public override bool Equals(object? obj)

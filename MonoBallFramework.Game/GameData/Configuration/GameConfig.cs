@@ -30,7 +30,7 @@ public class GameConfig
         {
             MapLoader = MapLoaderConfig.CreateDefault(),
             Assets = new AssetConfig(),
-            Performance = new PerformanceConfig(),
+            Performance = new PerformanceConfig()
         };
     }
 
@@ -43,7 +43,7 @@ public class GameConfig
         {
             MapLoader = MapLoaderConfig.CreateDevelopment(),
             Assets = AssetConfig.CreateDevelopment(),
-            Performance = PerformanceConfig.CreateDevelopment(),
+            Performance = PerformanceConfig.CreateDevelopment()
         };
     }
 
@@ -56,7 +56,7 @@ public class GameConfig
         {
             MapLoader = MapLoaderConfig.CreateProduction(),
             Assets = AssetConfig.CreateProduction(),
-            Performance = PerformanceConfig.CreateProduction(),
+            Performance = PerformanceConfig.CreateProduction()
         };
     }
 }

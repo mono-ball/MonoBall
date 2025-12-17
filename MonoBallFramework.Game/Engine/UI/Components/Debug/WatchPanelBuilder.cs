@@ -61,17 +61,12 @@ public class WatchPanelBuilder
         return new TextBuffer("watch_buffer")
         {
             // BackgroundColor uses theme fallback - don't set explicitly
-            AutoScroll = false,
-            MaxLines = _maxLines,
-            Constraint = new LayoutConstraint { Anchor = Anchor.StretchTop },
+            AutoScroll = false, MaxLines = _maxLines, Constraint = new LayoutConstraint { Anchor = Anchor.StretchTop }
         };
     }
 
     private static StatusBar CreateDefaultStatusBar()
     {
-        return new StatusBar("watch_status")
-        {
-            Constraint = new LayoutConstraint { Anchor = Anchor.StretchBottom },
-        };
+        return new StatusBar("watch_status") { Constraint = new LayoutConstraint { Anchor = Anchor.StretchBottom } };
     }
 }

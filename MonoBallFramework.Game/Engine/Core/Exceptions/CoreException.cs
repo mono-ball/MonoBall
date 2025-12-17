@@ -6,10 +6,14 @@ namespace MonoBallFramework.Game.Engine.Core.Exceptions;
 public abstract class CoreException : MonoBallFrameworkException
 {
     protected CoreException(string errorCode, string message)
-        : base(errorCode, message) { }
+        : base(errorCode, message)
+    {
+    }
 
     protected CoreException(string errorCode, string message, Exception innerException)
-        : base(errorCode, message, innerException) { }
+        : base(errorCode, message, innerException)
+    {
+    }
 
     public override string GetUserFriendlyMessage()
     {

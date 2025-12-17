@@ -8,7 +8,6 @@ namespace MonoBallFramework.Game.GameData.MapLoading.Tiled.Spawners;
 /// <summary>
 ///     Context object passed to entity spawners containing all information
 ///     needed to spawn an entity from a Tiled object.
-///
 ///     This eliminates parameter bloat and makes spawner signatures consistent.
 /// </summary>
 public sealed class EntitySpawnContext
@@ -70,7 +69,7 @@ public sealed class EntitySpawnContext
     /// </summary>
     public string CreateErrorContext()
     {
-        var (x, y) = GetTilePosition();
+        (int x, int y) = GetTilePosition();
         string name = TiledObject.Name ?? "(unnamed)";
         string type = TiledObject.Type ?? "(no type)";
         return $"{type} '{name}' at tile ({x}, {y}) in map {MapId}";

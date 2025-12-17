@@ -2,7 +2,8 @@
 
 ## Overview
 
-The MonoBall Framework debug UI framework is a **hybrid immediate-mode/retained-mode UI system** designed specifically for debug
+The MonoBall Framework debug UI framework is a **hybrid immediate-mode/retained-mode UI system** designed specifically
+for debug
 interfaces. It combines the flexibility of immediate mode with the performance benefits of retained mode.
 
 ## Architecture Modes

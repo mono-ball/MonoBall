@@ -31,14 +31,14 @@ namespace MonoBallFramework.Game.Engine.Core.Events;
 ///     public required Entity Entity { get; init; }
 ///     public string CustomData { get; init; }
 /// }
-///
+/// 
 /// // Usage in script
 /// public class MyScript : ScriptBase
 /// {
 ///     public override void RegisterEventHandlers(ScriptContext ctx)
 ///     {
 ///         var playerEntity = ctx.Player.GetPlayerEntity();
-///
+/// 
 ///         // Only receive events for player entity
 ///         OnEntity&lt;CustomEntityEvent&gt;(playerEntity, evt =>
 ///         {

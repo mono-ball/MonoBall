@@ -73,17 +73,21 @@ public class BehaviorRegistry : EfCoreRegistry<BehaviorEntity, GameBehaviorId>
     public BehaviorEntity? GetBehaviorByName(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
+        {
             return null;
+        }
 
         // O(1) lookup using name cache
-        if (_nameCache.TryGetValue(name, out var definition))
+        if (_nameCache.TryGetValue(name, out BehaviorEntity? definition))
+        {
             return definition;
+        }
 
         // If cache not loaded, query database
         if (!_isCacheLoaded)
         {
-            using var context = _contextFactory.CreateDbContext();
-            var entity = context.Behaviors
+            using GameDataContext context = _contextFactory.CreateDbContext();
+            BehaviorEntity? entity = context.Behaviors
                 .AsNoTracking()
                 .FirstOrDefault(b => b.Name == name);
 

@@ -24,7 +24,9 @@ public class BehaviorRegistryAdapter(TypeRegistry<BehaviorDefinition> typeRegist
     public BehaviorDefinition? GetBehavior(GameBehaviorId behaviorId)
     {
         if (string.IsNullOrWhiteSpace(behaviorId))
+        {
             return null;
+        }
 
         return _typeRegistry.Get(behaviorId);
     }
@@ -33,7 +35,9 @@ public class BehaviorRegistryAdapter(TypeRegistry<BehaviorDefinition> typeRegist
     public bool HasBehavior(GameBehaviorId behaviorId)
     {
         if (string.IsNullOrWhiteSpace(behaviorId))
+        {
             return false;
+        }
 
         return _typeRegistry.Contains(behaviorId);
     }
@@ -42,7 +46,9 @@ public class BehaviorRegistryAdapter(TypeRegistry<BehaviorDefinition> typeRegist
     public bool RemoveBehavior(GameBehaviorId behaviorId)
     {
         if (string.IsNullOrWhiteSpace(behaviorId))
+        {
             return false;
+        }
 
         return _typeRegistry.Remove(behaviorId);
     }

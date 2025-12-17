@@ -101,8 +101,8 @@ public interface IWatchOperations
             object? AlertThreshold,
             string? ComparisonWith,
             string? ComparisonLabel
-        )> Watches,
+            )> Watches,
         double UpdateInterval,
         bool AutoUpdateEnabled
-    )? ExportConfiguration();
+        )? ExportConfiguration();
 }

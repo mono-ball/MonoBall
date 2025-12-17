@@ -1,40 +1,44 @@
 namespace MonoBallFramework.Game.Engine.Audio.Core;
 
 /// <summary>
-/// Simple WAV file reader that provides audio samples in float format.
-/// Supports 8-bit, 16-bit, 24-bit, and 32-bit PCM as well as 32-bit float WAV files.
-/// Thread-safe for concurrent Read() calls.
+///     Simple WAV file reader that provides audio samples in float format.
+///     Supports 8-bit, 16-bit, 24-bit, and 32-bit PCM as well as 32-bit float WAV files.
+///     Thread-safe for concurrent Read() calls.
 /// </summary>
 public class WavReader : ISeekableSampleProvider, IDisposable
 {
-    private readonly BinaryReader _reader;
-    private readonly Stream _stream;
-    private readonly AudioFormat _format;
-    private readonly long _dataStartPosition;
-    private readonly long _dataLength;
     private readonly int _bytesPerSample;
+    private readonly long _dataLength;
+    private readonly long _dataStartPosition;
+    private readonly BinaryReader _reader;
     private readonly object _readLock = new();
+    private readonly Stream _stream;
     private bool _disposed;
 
     /// <summary>
-    /// Creates a new WAV reader for the specified file.
+    ///     Creates a new WAV reader for the specified file.
     /// </summary>
     /// <param name="filePath">Path to the WAV file.</param>
     public WavReader(string filePath)
     {
         if (string.IsNullOrEmpty(filePath))
+        {
             throw new ArgumentNullException(nameof(filePath));
+        }
 
         if (!File.Exists(filePath))
+        {
             throw new FileNotFoundException($"Audio file not found: {filePath}", filePath);
+        }
 
         _stream = File.OpenRead(filePath);
         _reader = new BinaryReader(_stream);
 
         try
         {
-            ParseWavHeader(out int sampleRate, out int channels, out int bitsPerSample, out bool isFloat, out _dataStartPosition, out _dataLength);
-            _format = new AudioFormat(sampleRate, channels, bitsPerSample, isFloat);
+            ParseWavHeader(out int sampleRate, out int channels, out int bitsPerSample, out bool isFloat,
+                out _dataStartPosition, out _dataLength);
+            Format = new AudioFormat(sampleRate, channels, bitsPerSample, isFloat);
             _bytesPerSample = bitsPerSample / 8;
         }
         catch
@@ -46,22 +50,42 @@ public class WavReader : ISeekableSampleProvider, IDisposable
     }
 
     /// <summary>
-    /// Gets the audio format.
+    ///     Gets the total duration of the audio.
     /// </summary>
-    public AudioFormat Format => _format;
+    public TimeSpan TotalTime => Format.SamplesToTime(TotalSamples);
 
     /// <summary>
-    /// Gets the total number of samples (interleaved).
+    ///     Disposes the reader and releases resources.
+    /// </summary>
+    public void Dispose()
+    {
+        lock (_readLock)
+        {
+            if (_disposed)
+            {
+                return;
+            }
+
+            _disposed = true;
+            _reader?.Dispose();
+            _stream?.Dispose();
+        }
+
+        GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    ///     Gets the audio format.
+    /// </summary>
+    public AudioFormat Format { get; }
+
+    /// <summary>
+    ///     Gets the total number of samples (interleaved).
     /// </summary>
     public long TotalSamples => _dataLength / _bytesPerSample;
 
     /// <summary>
-    /// Gets the total duration of the audio.
-    /// </summary>
-    public TimeSpan TotalTime => _format.SamplesToTime(TotalSamples);
-
-    /// <summary>
-    /// Gets the current position in samples (interleaved).
+    ///     Gets the current position in samples (interleaved).
     /// </summary>
     public long Position
     {
@@ -69,25 +93,31 @@ public class WavReader : ISeekableSampleProvider, IDisposable
         {
             lock (_readLock)
             {
-                if (_disposed) return 0;
+                if (_disposed)
+                {
+                    return 0;
+                }
+
                 return (_stream.Position - _dataStartPosition) / _bytesPerSample;
             }
         }
     }
 
     /// <summary>
-    /// Reads samples from the WAV stream and converts to float format.
-    /// Thread-safe.
+    ///     Reads samples from the WAV stream and converts to float format.
+    ///     Thread-safe.
     /// </summary>
     public int Read(float[] buffer, int offset, int count)
     {
         lock (_readLock)
         {
             if (_disposed)
+            {
                 return 0;
+            }
 
             int samplesRead = 0;
-            long remainingBytes = (_dataStartPosition + _dataLength) - _stream.Position;
+            long remainingBytes = _dataStartPosition + _dataLength - _stream.Position;
             int maxSamples = (int)Math.Min(count, remainingBytes / _bytesPerSample);
 
             try
@@ -109,15 +139,17 @@ public class WavReader : ISeekableSampleProvider, IDisposable
     }
 
     /// <summary>
-    /// Seeks to a specific sample position.
-    /// Thread-safe.
+    ///     Seeks to a specific sample position.
+    ///     Thread-safe.
     /// </summary>
     public void SeekToSample(long samplePosition)
     {
         lock (_readLock)
         {
             if (_disposed)
+            {
                 return;
+            }
 
             long bytePosition = samplePosition * _bytesPerSample;
             bytePosition = Math.Max(0, Math.Min(bytePosition, _dataLength));
@@ -126,52 +158,39 @@ public class WavReader : ISeekableSampleProvider, IDisposable
     }
 
     /// <summary>
-    /// Seeks to a specific time position.
+    ///     Seeks to a specific time position.
     /// </summary>
     public void SeekToTime(TimeSpan time)
     {
-        long samplePosition = _format.TimeToSamples(time);
+        long samplePosition = Format.TimeToSamples(time);
         SeekToSample(samplePosition);
     }
 
     /// <summary>
-    /// Resets the reader to the beginning.
+    ///     Resets the reader to the beginning.
     /// </summary>
     public void Reset()
     {
         SeekToSample(0);
     }
 
-    /// <summary>
-    /// Disposes the reader and releases resources.
-    /// </summary>
-    public void Dispose()
-    {
-        lock (_readLock)
-        {
-            if (_disposed)
-                return;
-
-            _disposed = true;
-            _reader?.Dispose();
-            _stream?.Dispose();
-        }
-
-        GC.SuppressFinalize(this);
-    }
-
-    private void ParseWavHeader(out int sampleRate, out int channels, out int bitsPerSample, out bool isFloat, out long dataStart, out long dataLength)
+    private void ParseWavHeader(out int sampleRate, out int channels, out int bitsPerSample, out bool isFloat,
+        out long dataStart, out long dataLength)
     {
         // Read RIFF header
-        string riff = new string(_reader.ReadChars(4));
+        string riff = new(_reader.ReadChars(4));
         if (riff != "RIFF")
+        {
             throw new InvalidDataException("Not a valid WAV file - missing RIFF header");
+        }
 
         _reader.ReadInt32(); // File size minus 8
 
-        string wave = new string(_reader.ReadChars(4));
+        string wave = new(_reader.ReadChars(4));
         if (wave != "WAVE")
+        {
             throw new InvalidDataException("Not a valid WAV file - missing WAVE format");
+        }
 
         // Initialize output values
         sampleRate = 0;
@@ -188,9 +207,11 @@ public class WavReader : ISeekableSampleProvider, IDisposable
         while (!foundFmt || !foundData)
         {
             if (_stream.Position >= _stream.Length - 8)
+            {
                 throw new InvalidDataException("WAV file is missing required chunks");
+            }
 
-            string chunkId = new string(_reader.ReadChars(4));
+            string chunkId = new(_reader.ReadChars(4));
             int chunkSize = _reader.ReadInt32();
 
             if (chunkId == "fmt ")
@@ -206,12 +227,17 @@ public class WavReader : ISeekableSampleProvider, IDisposable
                 isFloat = audioFormat == 3;
 
                 if (audioFormat != 1 && audioFormat != 3)
-                    throw new NotSupportedException($"Unsupported WAV format: {audioFormat}. Only PCM (1) and IEEE float (3) are supported.");
+                {
+                    throw new NotSupportedException(
+                        $"Unsupported WAV format: {audioFormat}. Only PCM (1) and IEEE float (3) are supported.");
+                }
 
                 // Skip any extra format bytes
                 int extraBytes = chunkSize - 16;
                 if (extraBytes > 0)
+                {
                     _reader.ReadBytes(extraBytes);
+                }
 
                 foundFmt = true;
             }
@@ -236,18 +262,18 @@ public class WavReader : ISeekableSampleProvider, IDisposable
 
     private float ReadSample()
     {
-        if (_format.IsFloat && _format.BitsPerSample == 32)
+        if (Format.IsFloat && Format.BitsPerSample == 32)
         {
             return _reader.ReadSingle();
         }
 
-        return _format.BitsPerSample switch
+        return Format.BitsPerSample switch
         {
             8 => (_reader.ReadByte() - 128) / 128f,
             16 => _reader.ReadInt16() / 32768f,
             24 => Read24BitSample() / 8388608f,
             32 => _reader.ReadInt32() / 2147483648f,
-            _ => throw new NotSupportedException($"Unsupported bit depth: {_format.BitsPerSample}")
+            _ => throw new NotSupportedException($"Unsupported bit depth: {Format.BitsPerSample}")
         };
     }
 
@@ -260,9 +286,10 @@ public class WavReader : ISeekableSampleProvider, IDisposable
         // Sign extend if negative
         int value = (b3 << 16) | (b2 << 8) | b1;
         if ((b3 & 0x80) != 0)
+        {
             value |= unchecked((int)0xFF000000); // Sign extend
+        }
 
         return value;
     }
 }
-

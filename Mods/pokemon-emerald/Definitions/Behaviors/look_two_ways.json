@@ -8,6 +8,9 @@
   "allowInteractionWhileMoving": false,
   "parameters": {
     "lookInterval": 2.0,
-    "directions": ["down", "left"]
+    "directions": [
+      "down",
+      "left"
+    ]
   }
 }

@@ -113,7 +113,7 @@ public sealed class PatchApplicator
         else if (parent is JsonArray arr)
         {
             if (key == "-")
-            // Append to end of array
+                // Append to end of array
             {
                 arr.Add(jsonValue);
             }

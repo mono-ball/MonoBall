@@ -71,8 +71,8 @@ public interface ICameraService
 /// </summary>
 public class CameraService : ICameraService
 {
-    private readonly World _world;
     private readonly QueryDescription _mainCameraQuery;
+    private readonly World _world;
 
     /// <summary>
     ///     Initializes a new instance of the CameraService class.
@@ -81,7 +81,7 @@ public class CameraService : ICameraService
     public CameraService(World world)
     {
         _world = world ?? throw new ArgumentNullException(nameof(world));
-        
+
         // Query for the main camera
         _mainCameraQuery = QueryCache.Get<Camera, MainCamera>();
     }
@@ -90,7 +90,7 @@ public class CameraService : ICameraService
     public Matrix GetViewMatrix()
     {
         Matrix result = Matrix.Identity;
-        
+
         _world.Query(
             in _mainCameraQuery,
             (ref Camera camera, ref MainCamera _) =>
@@ -220,4 +220,3 @@ public class CameraService : ICameraService
         return result;
     }
 }
-

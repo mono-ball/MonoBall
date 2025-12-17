@@ -73,7 +73,7 @@ public class RenderingConfiguration
             EnableTextureAtlasing = true,
             TargetFrameRate = 60,
             EnableVSync = true,
-            PixelScale = 1,
+            PixelScale = 1
         };
 
     /// <summary>
@@ -89,11 +89,14 @@ public class RenderingConfiguration
             EnableTextureAtlasing = true,
             TargetFrameRate = 60,
             EnableVSync = false,
-            PixelScale = 1,
+            PixelScale = 1
         };
 
     /// <summary>
     ///     Factory method to create a default configuration instance.
     /// </summary>
-    public static RenderingConfiguration CreateDefault() => new();
+    public static RenderingConfiguration CreateDefault()
+    {
+        return new RenderingConfiguration();
+    }
 }

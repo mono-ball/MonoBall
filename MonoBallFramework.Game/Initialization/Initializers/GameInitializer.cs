@@ -1,4 +1,3 @@
-using System;
 using Arch.Core;
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework.Graphics;
@@ -8,24 +7,22 @@ using MonoBallFramework.Game.Engine.Core.Services;
 using MonoBallFramework.Game.Engine.Input.Systems;
 using MonoBallFramework.Game.Engine.Rendering.Assets;
 using MonoBallFramework.Game.Engine.Rendering.Systems;
+using MonoBallFramework.Game.Engine.Systems.Flags;
 using MonoBallFramework.Game.Engine.Systems.Management;
 using MonoBallFramework.Game.GameData.Factories;
 using MonoBallFramework.Game.GameData.MapLoading.Tiled.Core;
 using MonoBallFramework.Game.GameData.Services;
 using MonoBallFramework.Game.GameData.Sprites;
-using MonoBallFramework.Game.GameSystems;
 using MonoBallFramework.Game.GameSystems.Movement;
+using MonoBallFramework.Game.GameSystems.Services;
 using MonoBallFramework.Game.GameSystems.Spatial;
 using MonoBallFramework.Game.GameSystems.Tiles;
 using MonoBallFramework.Game.GameSystems.Warps;
 using MonoBallFramework.Game.Infrastructure.Configuration;
-using MonoBallFramework.Game.Infrastructure.Services;
 using MonoBallFramework.Game.Scripting.Api;
 using MonoBallFramework.Game.Systems;
 using MonoBallFramework.Game.Systems.Rendering;
 using MonoBallFramework.Game.Systems.Warps;
-using MonoBallFramework.Game.Engine.Systems.Flags;
-using MonoBallFramework.Game.GameSystems.Services;
 
 namespace MonoBallFramework.Game.Initialization.Initializers;
 
@@ -49,6 +46,11 @@ public class GameInitializer(
 {
     // Store reference to MapStreamingSystem so we can wire up lifecycle manager later
     private MapStreamingSystem? _mapStreamingSystem;
+
+    /// <summary>
+    ///     Gets the flag visibility system (reacts to flag changes to show/hide entities).
+    /// </summary>
+    public FlagVisibilitySystem FlagVisibilitySystem { get; private set; } = null!;
 
     /// <summary>
     ///     Gets the spatial hash system.
@@ -90,11 +92,6 @@ public class GameInitializer(
     ///     Gets the camera viewport system (handles window resize events).
     /// </summary>
     public CameraViewportSystem CameraViewportSystem { get; private set; } = null!;
-
-    /// <summary>
-    ///     Gets the flag visibility system (reacts to flag changes to show/hide entities).
-    /// </summary>
-    public FlagVisibilitySystem FlagVisibilitySystem { get; private set; } = null!;
 
     /// <summary>
     ///     Initializes all game systems and infrastructure.

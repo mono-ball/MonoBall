@@ -11,13 +11,13 @@ using MonoBallFramework.Game.GameData;
 namespace MonoBallFramework.Game.Infrastructure.ServiceRegistration;
 
 /// <summary>
-/// Extension methods for registering audio services.
+///     Extension methods for registering audio services.
 /// </summary>
 public static class AudioServicesExtensions
 {
     /// <summary>
-    /// Registers PortAudio-based audio services with the DI container.
-    /// Cross-platform audio implementation using PortAudioSharp2 and NVorbis.
+    ///     Registers PortAudio-based audio services with the DI container.
+    ///     Cross-platform audio implementation using PortAudioSharp2 and NVorbis.
     /// </summary>
     public static IServiceCollection AddAudioServices(
         this IServiceCollection services,
@@ -29,8 +29,9 @@ public static class AudioServicesExtensions
         // Register AudioRegistry (queries from EF Core GameDataContext using factory pattern)
         services.AddSingleton<AudioRegistry>(sp =>
         {
-            var contextFactory = sp.GetRequiredService<IDbContextFactory<GameDataContext>>();
-            var logger = sp.GetRequiredService<ILogger<AudioRegistry>>();
+            IDbContextFactory<GameDataContext> contextFactory =
+                sp.GetRequiredService<IDbContextFactory<GameDataContext>>();
+            ILogger<AudioRegistry> logger = sp.GetRequiredService<ILogger<AudioRegistry>>();
             var registry = new AudioRegistry(contextFactory, logger);
 
             // Load audio definitions into cache for fast runtime access
@@ -42,10 +43,10 @@ public static class AudioServicesExtensions
         // Register PortAudio-based sound effect manager
         services.AddSingleton<ISoundEffectManager>(sp =>
         {
-            var audioRegistry = sp.GetRequiredService<AudioRegistry>();
-            var contentProvider = sp.GetRequiredService<IContentProvider>();
-            var audioConfig = sp.GetRequiredService<AudioConfiguration>();
-            var logger = sp.GetService<ILogger<PortAudioSoundEffectManager>>();
+            AudioRegistry audioRegistry = sp.GetRequiredService<AudioRegistry>();
+            IContentProvider contentProvider = sp.GetRequiredService<IContentProvider>();
+            AudioConfiguration audioConfig = sp.GetRequiredService<AudioConfiguration>();
+            ILogger<PortAudioSoundEffectManager>? logger = sp.GetService<ILogger<PortAudioSoundEffectManager>>();
 
             return new PortAudioSoundEffectManager(
                 audioRegistry,
@@ -58,21 +59,21 @@ public static class AudioServicesExtensions
         // Streams audio on-demand (~64KB per stream vs ~32MB per cached track)
         services.AddSingleton<IMusicPlayer>(sp =>
         {
-            var audioRegistry = sp.GetRequiredService<AudioRegistry>();
-            var contentProvider = sp.GetRequiredService<IContentProvider>();
-            var logger = sp.GetService<ILogger<PortAudioStreamingMusicPlayer>>();
+            AudioRegistry audioRegistry = sp.GetRequiredService<AudioRegistry>();
+            IContentProvider contentProvider = sp.GetRequiredService<IContentProvider>();
+            ILogger<PortAudioStreamingMusicPlayer>? logger = sp.GetService<ILogger<PortAudioStreamingMusicPlayer>>();
             return new PortAudioStreamingMusicPlayer(audioRegistry, contentProvider, logger);
         });
 
         // Register audio service
         services.AddSingleton<IAudioService>(sp =>
         {
-            var audioRegistry = sp.GetRequiredService<AudioRegistry>();
-            var soundEffectManager = sp.GetRequiredService<ISoundEffectManager>();
-            var musicPlayer = sp.GetRequiredService<IMusicPlayer>();
-            var eventBus = sp.GetRequiredService<IEventBus>();
-            var audioConfig = sp.GetRequiredService<AudioConfiguration>();
-            var logger = sp.GetService<ILogger<AudioService>>();
+            AudioRegistry audioRegistry = sp.GetRequiredService<AudioRegistry>();
+            ISoundEffectManager soundEffectManager = sp.GetRequiredService<ISoundEffectManager>();
+            IMusicPlayer musicPlayer = sp.GetRequiredService<IMusicPlayer>();
+            IEventBus eventBus = sp.GetRequiredService<IEventBus>();
+            AudioConfiguration audioConfig = sp.GetRequiredService<AudioConfiguration>();
+            ILogger<AudioService>? logger = sp.GetService<ILogger<AudioService>>();
 
             var service = new AudioService(
                 audioRegistry,

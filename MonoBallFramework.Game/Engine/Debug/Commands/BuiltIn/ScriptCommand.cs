@@ -107,7 +107,7 @@ Examples:
             foreach (string script in exampleScripts)
             {
                 string name = Path.GetFileNameWithoutExtension(script);
-                context.WriteLine($"    {script, -30} script load {name}", theme.Info);
+                context.WriteLine($"    {script,-30} script load {name}", theme.Info);
             }
 
             context.WriteLine("");
@@ -119,7 +119,7 @@ Examples:
             foreach (string script in userScripts)
             {
                 string name = Path.GetFileNameWithoutExtension(script);
-                context.WriteLine($"    {script, -30} script load {name}", theme.TextPrimary);
+                context.WriteLine($"    {script,-30} script load {name}", theme.TextPrimary);
             }
 
             context.WriteLine("");
@@ -161,6 +161,7 @@ Examples:
         {
             context.WriteLine($"Arguments: {string.Join(", ", scriptArgs)}", theme.TextSecondary);
         }
+
         context.WriteLine("", theme.TextPrimary);
 
         // Execute the script using the evaluator with arguments

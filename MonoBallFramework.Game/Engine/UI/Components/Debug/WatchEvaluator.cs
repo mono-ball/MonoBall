@@ -19,9 +19,7 @@ public class WatchEvaluator : IDisposable
     {
         _workerThread = new Thread(WorkerLoop)
         {
-            Name = "WatchEvaluator",
-            IsBackground = true,
-            Priority = ThreadPriority.BelowNormal,
+            Name = "WatchEvaluator", IsBackground = true, Priority = ThreadPriority.BelowNormal
         };
         _workerThread.Start();
     }
@@ -62,9 +60,7 @@ public class WatchEvaluator : IDisposable
         _requestQueue.Enqueue(
             new EvaluationRequest
             {
-                WatchName = watchName,
-                ValueGetter = valueGetter,
-                ConditionEvaluator = conditionEvaluator,
+                WatchName = watchName, ValueGetter = valueGetter, ConditionEvaluator = conditionEvaluator
             }
         );
         _workAvailable.Set();
@@ -169,7 +165,7 @@ public class WatchEvaluator : IDisposable
                         ErrorMessage =
                             $"Evaluation timed out after {EvaluationTimeout.TotalSeconds:F1}s",
                         EvaluatedAt = DateTime.Now,
-                        EvaluationTime = DateTime.Now - startTime,
+                        EvaluationTime = DateTime.Now - startTime
                     };
                 }
             }
@@ -181,7 +177,7 @@ public class WatchEvaluator : IDisposable
                 ConditionMet = conditionMet,
                 HasError = false,
                 EvaluatedAt = DateTime.Now,
-                EvaluationTime = DateTime.Now - startTime,
+                EvaluationTime = DateTime.Now - startTime
             };
         }
         catch (Exception ex)
@@ -192,7 +188,7 @@ public class WatchEvaluator : IDisposable
                 HasError = true,
                 ErrorMessage = ex.InnerException?.Message ?? ex.Message,
                 EvaluatedAt = DateTime.Now,
-                EvaluationTime = DateTime.Now - startTime,
+                EvaluationTime = DateTime.Now - startTime
             };
         }
     }

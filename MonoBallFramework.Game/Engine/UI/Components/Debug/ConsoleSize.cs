@@ -23,7 +23,7 @@ public enum ConsoleSize
     /// <summary>
     ///     Full console (100% of screen height).
     /// </summary>
-    Full,
+    Full
 }
 
 /// <summary>
@@ -42,7 +42,7 @@ public static class ConsoleSizeExtensions
             ConsoleSize.Medium => 0.5f,
             ConsoleSize.Large => 0.75f,
             ConsoleSize.Full => 1.0f,
-            _ => 0.5f,
+            _ => 0.5f
         };
     }
 
@@ -57,7 +57,7 @@ public static class ConsoleSizeExtensions
             ConsoleSize.Medium => ConsoleSize.Large,
             ConsoleSize.Large => ConsoleSize.Full,
             ConsoleSize.Full => ConsoleSize.Small,
-            _ => ConsoleSize.Medium,
+            _ => ConsoleSize.Medium
         };
     }
 
@@ -72,7 +72,7 @@ public static class ConsoleSizeExtensions
             ConsoleSize.Medium => ConsoleSize.Small,
             ConsoleSize.Large => ConsoleSize.Medium,
             ConsoleSize.Full => ConsoleSize.Large,
-            _ => ConsoleSize.Medium,
+            _ => ConsoleSize.Medium
         };
     }
 }

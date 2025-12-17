@@ -39,10 +39,7 @@ public class TabBar : UIContainer
         int tabIndex = Children.Count;
         var tab = new Tab
         {
-            Id = id,
-            Text = text,
-            IsActive = tabIndex == ActiveTabIndex,
-            OnClick = () => SetActiveTab(tabIndex),
+            Id = id, Text = text, IsActive = tabIndex == ActiveTabIndex, OnClick = () => SetActiveTab(tabIndex)
         };
         AddChild(tab);
     }
@@ -118,7 +115,7 @@ public class TabBar : UIContainer
                     OffsetX = currentX,
                     OffsetY = 0,
                     Width = tabWidth,
-                    Height = tabHeight,
+                    Height = tabHeight
                 };
 
                 // Move to next position

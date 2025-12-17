@@ -15,6 +15,7 @@ using MonoBallFramework.Game.Engine.UI.Layout;
 using MonoBallFramework.Game.Engine.UI.Models;
 using MonoBallFramework.Game.Engine.UI.Utilities;
 using MonoBallFramework.Game.GameData;
+using MonoBallFramework.Game.Scripting.Api;
 
 namespace MonoBallFramework.Game.Engine.UI.Scenes;
 
@@ -24,8 +25,8 @@ namespace MonoBallFramework.Game.Engine.UI.Scenes;
 /// </summary>
 public class ConsoleScene : SceneBase
 {
-    private readonly InputState _inputState = new();
     private readonly FontLoader _fontLoader;
+    private readonly InputState _inputState = new();
 
     // Configuration
     private float _consoleHeightPercent = 0.5f; // 50% of screen height by default
@@ -103,9 +104,7 @@ public class ConsoleScene : SceneBase
         {
             _tabContainer.Constraint = new LayoutConstraint
             {
-                Anchor = Anchor.StretchTop,
-                HeightPercent = _consoleHeightPercent,
-                Padding = 10f, // Preserve padding
+                Anchor = Anchor.StretchTop, HeightPercent = _consoleHeightPercent, Padding = 10f // Preserve padding
             };
         }
     }
@@ -259,7 +258,8 @@ public class ConsoleScene : SceneBase
         Func<IEnumerable<string>>? componentNamesProvider = null,
         Func<IEnumerable<string>>? tagNamesProvider = null)
     {
-        _entitiesPanel?.SetPagedEntityProvider(countProvider, idsProvider, rangeProvider, componentNamesProvider, tagNamesProvider);
+        _entitiesPanel?.SetPagedEntityProvider(countProvider, idsProvider, rangeProvider, componentNamesProvider,
+            tagNamesProvider);
     }
 
     /// <summary>
@@ -311,7 +311,7 @@ public class ConsoleScene : SceneBase
     /// <summary>
     ///     Sets the custom types API for the EntityFramework panel.
     /// </summary>
-    public void SetCustomTypesApi(Scripting.Api.ICustomTypesApi? customTypesApi)
+    public void SetCustomTypesApi(ICustomTypesApi? customTypesApi)
     {
         _entityFrameworkPanel?.SetCustomTypesApi(customTypesApi);
     }
@@ -401,8 +401,8 @@ public class ConsoleScene : SceneBase
                 {
                     Anchor = Anchor.StretchTop,
                     HeightPercent = _consoleHeightPercent,
-                    Padding = 10f, // Apply padding to create space around console content
-                },
+                    Padding = 10f // Apply padding to create space around console content
+                }
             };
             // Create console panel via builder
             _consolePanel = ConsolePanelBuilder.Create().Build();
@@ -449,26 +449,20 @@ public class ConsoleScene : SceneBase
                     {
                         Name = "Player",
                         TypeName = "IPlayerScripting",
-                        Description = "Player control and state API",
+                        Description = "Player control and state API"
                     },
                     new VariablesPanel.GlobalInfo
                     {
-                        Name = "World",
-                        TypeName = "Arch.Core.World",
-                        Description = "ECS World instance",
+                        Name = "World", TypeName = "Arch.Core.World", Description = "ECS World instance"
                     },
                     new VariablesPanel.GlobalInfo
                     {
-                        Name = "Api",
-                        TypeName = "IScriptingApiProvider",
-                        Description = "Scripting API provider",
+                        Name = "Api", TypeName = "IScriptingApiProvider", Description = "Scripting API provider"
                     },
                     new VariablesPanel.GlobalInfo
                     {
-                        Name = "Systems",
-                        TypeName = "SystemManager",
-                        Description = "ECS system manager",
-                    },
+                        Name = "Systems", TypeName = "SystemManager", Description = "ECS system manager"
+                    }
                 }
             );
 
@@ -509,11 +503,7 @@ public class ConsoleScene : SceneBase
             EventInspectorPanel.BackgroundColor = Color.Transparent;
             EventInspectorPanel.BorderColor = Color.Transparent;
             EventInspectorPanel.BorderThickness = 0;
-            EventInspectorPanel.Constraint = new LayoutConstraint
-            {
-                Anchor = Anchor.Fill,
-                Padding = 0,
-            };
+            EventInspectorPanel.Constraint = new LayoutConstraint { Anchor = Anchor.Fill, Padding = 0 };
 
             // Create EntityFramework panel
             _entityFrameworkPanel = EntityFrameworkPanelBuilder.Create().Build();
@@ -540,7 +530,8 @@ public class ConsoleScene : SceneBase
             // Fire OnReady event - LogsPanel now exists and can receive buffered logs
             Logger.LogInformation("ConsoleScene LoadContent completed - firing OnReady event");
             OnReady?.Invoke();
-            Logger.LogInformation("OnReady event fired - subscribers: {Count}", OnReady?.GetInvocationList().Length ?? 0);
+            Logger.LogInformation("OnReady event fired - subscribers: {Count}",
+                OnReady?.GetInvocationList().Length ?? 0);
         }
         catch (Exception ex)
         {

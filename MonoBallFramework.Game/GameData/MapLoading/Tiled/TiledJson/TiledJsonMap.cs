@@ -8,42 +8,29 @@ namespace MonoBallFramework.Game.GameData.MapLoading.Tiled.TiledJson;
 /// </summary>
 public class TiledJsonMap
 {
-    [JsonPropertyName("version")]
-    public string Version { get; set; } = "1.0";
+    [JsonPropertyName("version")] public string Version { get; set; } = "1.0";
 
-    [JsonPropertyName("tiledversion")]
-    public string? TiledVersion { get; set; }
+    [JsonPropertyName("tiledversion")] public string? TiledVersion { get; set; }
 
-    [JsonPropertyName("type")]
-    public string Type { get; set; } = "map";
+    [JsonPropertyName("type")] public string Type { get; set; } = "map";
 
-    [JsonPropertyName("orientation")]
-    public string Orientation { get; set; } = "orthogonal";
+    [JsonPropertyName("orientation")] public string Orientation { get; set; } = "orthogonal";
 
-    [JsonPropertyName("renderorder")]
-    public string RenderOrder { get; set; } = "right-down";
+    [JsonPropertyName("renderorder")] public string RenderOrder { get; set; } = "right-down";
 
-    [JsonPropertyName("width")]
-    public int Width { get; set; }
+    [JsonPropertyName("width")] public int Width { get; set; }
 
-    [JsonPropertyName("height")]
-    public int Height { get; set; }
+    [JsonPropertyName("height")] public int Height { get; set; }
 
-    [JsonPropertyName("tilewidth")]
-    public int TileWidth { get; set; }
+    [JsonPropertyName("tilewidth")] public int TileWidth { get; set; }
 
-    [JsonPropertyName("tileheight")]
-    public int TileHeight { get; set; }
+    [JsonPropertyName("tileheight")] public int TileHeight { get; set; }
 
-    [JsonPropertyName("infinite")]
-    public bool Infinite { get; set; }
+    [JsonPropertyName("infinite")] public bool Infinite { get; set; }
 
-    [JsonPropertyName("layers")]
-    public List<TiledJsonLayer>? Layers { get; set; }
+    [JsonPropertyName("layers")] public List<TiledJsonLayer>? Layers { get; set; }
 
-    [JsonPropertyName("tilesets")]
-    public List<TiledJsonTileset>? Tilesets { get; set; }
+    [JsonPropertyName("tilesets")] public List<TiledJsonTileset>? Tilesets { get; set; }
 
-    [JsonPropertyName("properties")]
-    public List<TiledJsonProperty>? Properties { get; set; }
+    [JsonPropertyName("properties")] public List<TiledJsonProperty>? Properties { get; set; }
 }

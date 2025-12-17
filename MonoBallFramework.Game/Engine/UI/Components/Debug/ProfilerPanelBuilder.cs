@@ -103,15 +103,12 @@ public class ProfilerPanelBuilder
     {
         return new ProfilerContent("profiler_content", _targetFrameTimeMs, _warningThresholdMs)
         {
-            Constraint = new LayoutConstraint { Anchor = Anchor.StretchTop },
+            Constraint = new LayoutConstraint { Anchor = Anchor.StretchTop }
         };
     }
 
     private static StatusBar CreateDefaultStatusBar()
     {
-        return new StatusBar("profiler_status")
-        {
-            Constraint = new LayoutConstraint { Anchor = Anchor.StretchBottom },
-        };
+        return new StatusBar("profiler_status") { Constraint = new LayoutConstraint { Anchor = Anchor.StretchBottom } };
     }
 }

@@ -13,11 +13,13 @@ public class GameMapSectionIdValueConverter : ValueConverter<GameMapSectionId, s
         : base(
             v => v.Value,
             v => ConvertFromString(v)
-        ) { }
+        )
+    {
+    }
 
     private static GameMapSectionId ConvertFromString(string value)
     {
-        return GameMapSectionId.TryCreate(value) ?? GameMapSectionId.Create(value, null);
+        return GameMapSectionId.TryCreate(value) ?? GameMapSectionId.Create(value);
     }
 }
 
@@ -30,7 +32,9 @@ public class NullableGameMapSectionIdValueConverter : ValueConverter<GameMapSect
         : base(
             v => v != null ? v.Value : null,
             v => ConvertFromString(v)
-        ) { }
+        )
+    {
+    }
 
     private static GameMapSectionId? ConvertFromString(string? value)
     {

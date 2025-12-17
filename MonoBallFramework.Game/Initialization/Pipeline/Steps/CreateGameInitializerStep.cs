@@ -22,7 +22,9 @@ public class CreateGameInitializerStep : InitializationStepBase
             "Creating game initializer...",
             InitializationProgress.AssetManagerCreated,
             InitializationProgress.AssetManagerCreated
-        ) { }
+        )
+    {
+    }
 
     /// <inheritdoc />
     protected override Task ExecuteStepAsync(
@@ -73,4 +75,3 @@ public class CreateGameInitializerStep : InitializationStepBase
         return Task.CompletedTask;
     }
 }
-

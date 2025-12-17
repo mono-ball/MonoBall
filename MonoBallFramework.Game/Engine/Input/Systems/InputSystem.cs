@@ -123,7 +123,8 @@ public class InputSystem(
                     // Exception: If already facing the input direction, allow immediate movement (no turn needed)
                     if (
                         currentDirection != movement.MovementDirection
-                        && currentDirection != movement.FacingDirection // Already facing this direction - no turn needed
+                        && currentDirection !=
+                        movement.FacingDirection // Already facing this direction - no turn needed
                         && movement.RunningState != RunningState.Moving
                         && !movement.IsMoving
                     )

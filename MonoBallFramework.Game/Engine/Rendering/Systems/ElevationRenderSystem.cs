@@ -5,23 +5,22 @@ using Arch.Core.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using MonoBallFramework.Game.Engine.Common.Logging;
-using MonoBallFramework.Game.Engine.Core.Systems;
-using MonoBallFramework.Game.Engine.Rendering.Assets;
-using MonoBallFramework.Game.Engine.Rendering.Components;
-using MonoBallFramework.Game.Engine.Rendering.Configuration;
-using MonoBallFramework.Game.Engine.Rendering.Constants;
-using MonoBallFramework.Game.Engine.Rendering.Context;
-using MonoBallFramework.Game.Engine.Systems.Management;
-using MonoBallFramework.Game.Components;
 using MonoBallFramework.Game.Ecs.Components;
 using MonoBallFramework.Game.Ecs.Components.Maps;
 using MonoBallFramework.Game.Ecs.Components.Movement;
 using MonoBallFramework.Game.Ecs.Components.Player;
 using MonoBallFramework.Game.Ecs.Components.Rendering;
 using MonoBallFramework.Game.Ecs.Components.Tiles;
+using MonoBallFramework.Game.Engine.Common.Logging;
+using MonoBallFramework.Game.Engine.Core.Systems;
 using MonoBallFramework.Game.Engine.Core.Systems.Base;
 using MonoBallFramework.Game.Engine.Core.Types;
+using MonoBallFramework.Game.Engine.Rendering.Assets;
+using MonoBallFramework.Game.Engine.Rendering.Components;
+using MonoBallFramework.Game.Engine.Rendering.Configuration;
+using MonoBallFramework.Game.Engine.Rendering.Constants;
+using MonoBallFramework.Game.Engine.Rendering.Context;
+using MonoBallFramework.Game.Engine.Systems.Management;
 
 namespace MonoBallFramework.Game.Engine.Rendering.Systems;
 
@@ -51,8 +50,6 @@ public class ElevationRenderSystem(
     ILogger<ElevationRenderSystem>? logger = null
 ) : SystemBase, IRenderSystem
 {
-    // Spatial query for efficient tile lookups (only visible tiles)
-    private readonly ISpatialQuery _spatialQuery = spatialQuery ?? throw new ArgumentNullException(nameof(spatialQuery));
     private const float MapHeight = RenderingConstants.MaxRenderDistance;
 
     // Cache border data for the current frame (avoids repeated queries)
@@ -78,11 +75,11 @@ public class ElevationRenderSystem(
         MapBorder
     >();
 
-    // Cache map world origins for multi-map rendering (updated per frame)
-    private readonly Dictionary<string, Vector2> _mapWorldOrigins = new(10);
-
     // PERFORMANCE: Cache map render order for O(1) lookups instead of O(maps) linear search
     private readonly Dictionary<string, int> _mapRenderOrderCache = new(10);
+
+    // Cache map world origins for multi-map rendering (updated per frame)
+    private readonly Dictionary<string, Vector2> _mapWorldOrigins = new(10);
 
     // Map world position query for multi-map streaming
     private readonly QueryDescription _mapWorldPosQuery = QueryCache.Get<
@@ -101,6 +98,13 @@ public class ElevationRenderSystem(
 
     // Query for player position (to determine current map for borders)
     private readonly QueryDescription _playerPositionQuery = QueryCache.Get<Player, Position>();
+
+    // Track missing sprite textures to avoid repeated log warnings (prevents log spam)
+    private readonly HashSet<string> _reportedMissingSpriteTextures = new();
+
+    // Spatial query for efficient tile lookups (only visible tiles)
+    private readonly ISpatialQuery
+        _spatialQuery = spatialQuery ?? throw new ArgumentNullException(nameof(spatialQuery));
 
     private readonly SpriteBatch _spriteBatch = new(graphicsDevice);
 
@@ -139,13 +143,9 @@ public class ElevationRenderSystem(
     private ulong _frameCounter;
     private int _lastEntityCount;
     private int _lastSpriteCount;
-    private int _lastTileCount;
 
     // Track whether we've logged the border texture warning (avoid spam)
     private bool _loggedBorderTextureWarning;
-
-    // Track missing sprite textures to avoid repeated log warnings (prevents log spam)
-    private readonly HashSet<string> _reportedMissingSpriteTextures = new();
 
     // Reusable Vector2/Rectangle instances to avoid allocations (400-600 per frame eliminated)
     private Vector2 _reusablePosition = Vector2.Zero;
@@ -185,7 +185,7 @@ public class ElevationRenderSystem(
     ///     Gets the number of tiles rendered in the last frame.
     ///     This includes both regular tiles and border tiles.
     /// </summary>
-    public int LastRenderedTileCount => _lastTileCount;
+    public int LastRenderedTileCount { get; private set; }
 
     /// <inheritdoc />
     public override int Priority => SystemPriority.Render;
@@ -227,14 +227,14 @@ public class ElevationRenderSystem(
 
             // Fast path - no profiling overhead
             UpdateCameraCache(world, context.Camera);
-            
+
             // Defensive check: Skip rendering if viewport is not initialized
             // This should never happen with proper initialization, but prevents crashes
             if (context.Camera.Viewport.Width == 0 || context.Camera.Viewport.Height == 0)
             {
                 return;
             }
-            
+
             UpdateMapWorldOriginsCache(world);
             UpdateMapBordersCache(world);
 
@@ -293,7 +293,7 @@ public class ElevationRenderSystem(
 
             _lastEntityCount =
                 totalTilesRendered + spriteCount + imageLayerCount + borderTilesRendered;
-            _lastTileCount = totalTilesRendered + borderTilesRendered;
+            LastRenderedTileCount = totalTilesRendered + borderTilesRendered;
             _lastSpriteCount = spriteCount;
 
             _spriteBatch.End();
@@ -352,7 +352,7 @@ public class ElevationRenderSystem(
             {
                 _spriteLoadDelegate =
                     (Action<string>)
-                        Delegate.CreateDelegate(typeof(Action<string>), loader, method);
+                    Delegate.CreateDelegate(typeof(Action<string>), loader, method);
                 _logger?.LogSpriteLoaderRegistered();
             }
             else
@@ -444,7 +444,7 @@ public class ElevationRenderSystem(
         }
 
         _lastEntityCount = totalTilesRendered + spriteCount + imageLayerCount;
-        _lastTileCount = totalTilesRendered;
+        LastRenderedTileCount = totalTilesRendered;
         _lastSpriteCount = spriteCount;
     }
 
@@ -622,7 +622,7 @@ public class ElevationRenderSystem(
                         TileX = tileX,
                         TileY = tileY,
                         TileRight = tileX + mapInfo.Width,
-                        TileBottom = tileY + mapInfo.Height,
+                        TileBottom = tileY + mapInfo.Height
                     }
                 );
             }
@@ -768,6 +768,7 @@ public class ElevationRenderSystem(
                 {
                     effects |= SpriteEffects.FlipHorizontally;
                 }
+
                 if (sprite.FlipVertically)
                 {
                     effects |= SpriteEffects.FlipVertically;
@@ -1046,6 +1047,7 @@ public class ElevationRenderSystem(
                 sprite.SpriteId.Name
             );
         }
+
         return null;
     }
 
@@ -1195,7 +1197,7 @@ public class ElevationRenderSystem(
                             MapWidth = mapInfo.Width,
                             MapHeight = mapInfo.Height,
                             TileSize = mapInfo.TileSize,
-                            Border = border,
+                            Border = border
                         }
                     );
                 }

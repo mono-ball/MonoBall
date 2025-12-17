@@ -1,4 +1,3 @@
-using System;
 using Arch.Core;
 using FontStashSharp;
 using Microsoft.Xna.Framework;
@@ -144,7 +143,7 @@ public class PerformanceOverlay : IDisposable
             Gen0Collections = _performanceMonitor.Gen0Collections,
             Gen1Collections = _performanceMonitor.Gen1Collections,
             Gen2Collections = _performanceMonitor.Gen2Collections,
-            EntityCount = _world.Size,
+            EntityCount = _world.Size
         };
 
         return stats;
@@ -173,7 +172,7 @@ public class PerformanceOverlay : IDisposable
                 Color.White
             ),
             ("--- Entities ---", Color.Gray),
-            ($"Entities: {stats.EntityCount:N0}", Color.Cyan),
+            ($"Entities: {stats.EntityCount:N0}", Color.Cyan)
         };
 
         // Add camera information if available

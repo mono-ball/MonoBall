@@ -1,7 +1,6 @@
 using Microsoft.Xna.Framework.Graphics;
 using MonoBallFramework.Game.Engine.Core.Services;
 using MonoBallFramework.Game.Engine.Rendering.Systems;
-
 using MonoBallFramework.Game.GameSystems.Movement;
 using MonoBallFramework.Game.GameSystems.Spatial;
 using MonoBallFramework.Game.GameSystems.Warps;

@@ -1,4 +1,3 @@
-using Arch.Core;
 using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework.Graphics;
 using MonoBallFramework.Game.Engine.Content;
@@ -10,18 +9,18 @@ using MonoBallFramework.Game.GameData.Entities;
 namespace MonoBallFramework.Game.Engine.Scenes.Factories;
 
 /// <summary>
-/// Default implementation of ISceneFactory.
-/// Resolves scene dependencies from DI container.
+///     Default implementation of ISceneFactory.
+///     Resolves scene dependencies from DI container.
 /// </summary>
 public class SceneFactory : ISceneFactory
 {
+    private readonly IAssetProvider _assetProvider;
+    private readonly ICameraProvider _cameraProvider;
+    private readonly IContentProvider _contentProvider;
     private readonly GraphicsDevice _graphicsDevice;
     private readonly ILoggerFactory _loggerFactory;
-    private readonly IAssetProvider _assetProvider;
-    private readonly SceneManager _sceneManager;
-    private readonly ICameraProvider _cameraProvider;
     private readonly IRenderingService _renderingService;
-    private readonly IContentProvider _contentProvider;
+    private readonly SceneManager _sceneManager;
 
     public SceneFactory(
         GraphicsDevice graphicsDevice,
@@ -52,7 +51,7 @@ public class SceneFactory : ISceneFactory
         ArgumentNullException.ThrowIfNull(outlineDefinition);
         ArgumentException.ThrowIfNullOrEmpty(mapName);
 
-        var logger = _loggerFactory.CreateLogger<MapPopupScene>();
+        ILogger<MapPopupScene> logger = _loggerFactory.CreateLogger<MapPopupScene>();
 
         return new MapPopupScene(
             _graphicsDevice,

@@ -123,12 +123,7 @@ public class UIContext : IDisposable
 
         // Create root container (entire screen)
         _rootContainer = new LayoutContainer(
-            new LayoutConstraint
-            {
-                Anchor = Anchor.Fill,
-                Width = _screenWidth,
-                Height = _screenHeight,
-            }
+            new LayoutConstraint { Anchor = Anchor.Fill, Width = _screenWidth, Height = _screenHeight }
         );
 
         _rootContainer.ResolveLayout(new LayoutRect(0, 0, _screenWidth, _screenHeight));
@@ -146,7 +141,7 @@ public class UIContext : IDisposable
         {
             throw new InvalidOperationException(
                 $"Container stack not balanced. Expected 1 item, found {_containerStack.Count}. "
-                    + "Ensure all BeginPanel/BeginContainer calls have matching End calls."
+                + "Ensure all BeginPanel/BeginContainer calls have matching End calls."
             );
         }
 
@@ -172,10 +167,7 @@ public class UIContext : IDisposable
         // Track in frame
         Frame.Components[id] = new ComponentFrameState
         {
-            Id = id,
-            Rect = container.Rect,
-            IsInteractive = false,
-            ZOrder = _containerStack.Count,
+            Id = id, Rect = container.Rect, IsInteractive = false, ZOrder = _containerStack.Count
         };
 
         // Apply clipping
@@ -223,7 +215,7 @@ public class UIContext : IDisposable
             ParentId = parentId,
             Rect = rect,
             IsInteractive = interactive,
-            ZOrder = zOrder,
+            ZOrder = zOrder
         };
 
         // Incremental hover detection: check if mouse is over this component

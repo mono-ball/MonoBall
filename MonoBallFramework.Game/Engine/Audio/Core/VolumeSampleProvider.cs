@@ -1,8 +1,8 @@
 namespace MonoBallFramework.Game.Engine.Audio.Core;
 
 /// <summary>
-/// Sample provider that applies volume scaling to audio samples.
-/// Thread-safe volume adjustments during playback.
+///     Sample provider that applies volume scaling to audio samples.
+///     Thread-safe volume adjustments during playback.
 /// </summary>
 public class VolumeSampleProvider : ISampleProvider
 {
@@ -10,7 +10,7 @@ public class VolumeSampleProvider : ISampleProvider
     private volatile float _volume = 1.0f;
 
     /// <summary>
-    /// Creates a new volume sample provider.
+    ///     Creates a new volume sample provider.
     /// </summary>
     /// <param name="source">The source sample provider.</param>
     public VolumeSampleProvider(ISampleProvider source)
@@ -19,13 +19,8 @@ public class VolumeSampleProvider : ISampleProvider
     }
 
     /// <summary>
-    /// Gets the audio format (same as source).
-    /// </summary>
-    public AudioFormat Format => _source.Format;
-
-    /// <summary>
-    /// Gets or sets the volume multiplier (0.0 to 1.0).
-    /// Thread-safe; changes take effect immediately on the next read.
+    ///     Gets or sets the volume multiplier (0.0 to 1.0).
+    ///     Thread-safe; changes take effect immediately on the next read.
     /// </summary>
     public float Volume
     {
@@ -34,7 +29,12 @@ public class VolumeSampleProvider : ISampleProvider
     }
 
     /// <summary>
-    /// Reads samples from the source and applies volume scaling.
+    ///     Gets the audio format (same as source).
+    /// </summary>
+    public AudioFormat Format => _source.Format;
+
+    /// <summary>
+    ///     Reads samples from the source and applies volume scaling.
     /// </summary>
     public int Read(float[] buffer, int offset, int count)
     {
@@ -52,4 +52,3 @@ public class VolumeSampleProvider : ISampleProvider
         return samplesRead;
     }
 }
-

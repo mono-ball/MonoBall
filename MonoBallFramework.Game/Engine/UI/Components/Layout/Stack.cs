@@ -10,7 +10,7 @@ namespace MonoBallFramework.Game.Engine.UI.Components.Layout;
 public enum StackDirection
 {
     Vertical,
-    Horizontal,
+    Horizontal
 }
 
 /// <summary>
@@ -48,7 +48,7 @@ public class Stack : UIContainer
                 WidthPercent = originalConstraint.WidthPercent,
                 HeightPercent = originalConstraint.HeightPercent,
                 Margin = originalConstraint.Margin,
-                Padding = originalConstraint.Padding,
+                Padding = originalConstraint.Padding
             };
 
             child.Render(context);
@@ -61,7 +61,7 @@ public class Stack : UIContainer
                 float height =
                     originalConstraint.Height
                     ?? originalConstraint.HeightPercent
-                        * context.CurrentContainer.ContentRect.Height
+                    * context.CurrentContainer.ContentRect.Height
                     ?? 30;
                 currentOffset += height + Spacing;
             }

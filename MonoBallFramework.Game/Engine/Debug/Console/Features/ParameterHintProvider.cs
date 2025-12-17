@@ -170,7 +170,7 @@ public class ParameterHintProvider
         {
             MethodName = methodName,
             Overloads = methods.Select(CreateMethodSignature).ToList(),
-            CurrentOverloadIndex = 0,
+            CurrentOverloadIndex = 0
         };
     }
 
@@ -200,7 +200,7 @@ public class ParameterHintProvider
         {
             MethodName = methodName,
             Overloads = methods.Select(CreateMethodSignature).ToList(),
-            CurrentOverloadIndex = 0,
+            CurrentOverloadIndex = 0
         };
     }
 
@@ -216,15 +216,13 @@ public class ParameterHintProvider
                 Name = p.Name ?? "arg",
                 Type = GetFriendlyTypeName(p.ParameterType),
                 IsOptional = p.IsOptional,
-                DefaultValue = p.IsOptional ? p.DefaultValue?.ToString() : null,
+                DefaultValue = p.IsOptional ? p.DefaultValue?.ToString() : null
             })
             .ToList();
 
         return new MethodSignature
         {
-            MethodName = method.Name,
-            ReturnType = GetFriendlyTypeName(method.ReturnType),
-            Parameters = parameters,
+            MethodName = method.Name, ReturnType = GetFriendlyTypeName(method.ReturnType), Parameters = parameters
         };
     }
 
@@ -300,7 +298,7 @@ public class ParameterHintProvider
             "Single" => "float",
             "Double" => "double",
             "Void" => "void",
-            _ => type.Name,
+            _ => type.Name
         };
     }
 }

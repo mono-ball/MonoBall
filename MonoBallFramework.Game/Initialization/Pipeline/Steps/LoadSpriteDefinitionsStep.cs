@@ -16,7 +16,9 @@ public class LoadSpriteDefinitionsStep : InitializationStepBase
             "Loading sprite definitions...",
             InitializationProgress.AssetManagerCreated,
             InitializationProgress.SpriteDefinitionsLoaded
-        ) { }
+        )
+    {
+    }
 
     /// <inheritdoc />
     protected override async Task ExecuteStepAsync(

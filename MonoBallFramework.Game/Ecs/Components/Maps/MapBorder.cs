@@ -91,7 +91,9 @@ public struct MapBorder
     ///     Legacy constructor for backward compatibility (bottom layer only).
     /// </summary>
     public MapBorder(int topLeft, int topRight, int bottomLeft, int bottomRight, string tilesetId)
-        : this([topLeft, topRight, bottomLeft, bottomRight], [0, 0, 0, 0], tilesetId) { }
+        : this([topLeft, topRight, bottomLeft, bottomRight], [0, 0, 0, 0], tilesetId)
+    {
+    }
 
     /// <summary>
     ///     Gets the border tile index for a given world coordinate.

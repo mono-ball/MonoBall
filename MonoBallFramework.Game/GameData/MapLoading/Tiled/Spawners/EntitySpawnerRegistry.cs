@@ -6,7 +6,6 @@ namespace MonoBallFramework.Game.GameData.MapLoading.Tiled.Spawners;
 /// <summary>
 ///     Registry of entity spawners for Tiled map objects.
 ///     Uses Chain of Responsibility pattern to find the appropriate spawner.
-///
 ///     Design principles (fail-fast):
 ///     - No fallback spawner: If no spawner handles an object, throw immediately
 ///     - Priority ordering: Higher priority spawners are checked first
@@ -14,14 +13,19 @@ namespace MonoBallFramework.Game.GameData.MapLoading.Tiled.Spawners;
 /// </summary>
 public sealed class EntitySpawnerRegistry
 {
-    private readonly List<IEntitySpawner> _spawners = new();
     private readonly ILogger<EntitySpawnerRegistry>? _logger;
+    private readonly List<IEntitySpawner> _spawners = new();
     private bool _sorted;
 
     public EntitySpawnerRegistry(ILogger<EntitySpawnerRegistry>? logger = null)
     {
         _logger = logger;
     }
+
+    /// <summary>
+    ///     Gets the number of registered spawners.
+    /// </summary>
+    public int Count => _spawners.Count;
 
     /// <summary>
     ///     Registers a spawner with the registry.
@@ -99,11 +103,6 @@ public sealed class EntitySpawnerRegistry
         return FindSpawner(context) != null;
     }
 
-    /// <summary>
-    ///     Gets the number of registered spawners.
-    /// </summary>
-    public int Count => _spawners.Count;
-
     private IEntitySpawner? FindSpawner(EntitySpawnContext context)
     {
         foreach (IEntitySpawner spawner in _spawners)
@@ -113,6 +112,7 @@ public sealed class EntitySpawnerRegistry
                 return spawner;
             }
         }
+
         return null;
     }
 

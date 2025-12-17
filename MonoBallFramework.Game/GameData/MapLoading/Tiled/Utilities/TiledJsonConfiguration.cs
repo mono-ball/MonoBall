@@ -20,7 +20,7 @@ public static class TiledJsonConfiguration
             PropertyNameCaseInsensitive = true,
             ReadCommentHandling = JsonCommentHandling.Skip,
             AllowTrailingCommas = true,
-            NumberHandling = JsonNumberHandling.AllowReadingFromString,
+            NumberHandling = JsonNumberHandling.AllowReadingFromString
         };
 
     /// <summary>
@@ -34,7 +34,7 @@ public static class TiledJsonConfiguration
             ReadCommentHandling = JsonCommentHandling.Skip,
             AllowTrailingCommas = true,
             NumberHandling = JsonNumberHandling.AllowReadingFromString,
-            WriteIndented = true,
+            WriteIndented = true
         };
 
     /// <summary>

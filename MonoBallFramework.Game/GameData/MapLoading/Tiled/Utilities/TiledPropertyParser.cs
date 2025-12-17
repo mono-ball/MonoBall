@@ -9,7 +9,6 @@ namespace MonoBallFramework.Game.GameData.MapLoading.Tiled.Utilities;
 /// <summary>
 ///     Unified utility for parsing Tiled custom properties with fail-fast behavior.
 ///     Handles both JsonElement and Dictionary&lt;string, object&gt; formats.
-///
 ///     Design principles (fail-fast):
 ///     - Required methods throw InvalidDataException if property is missing or invalid
 ///     - Optional methods return null if property is missing
@@ -132,6 +131,7 @@ public static class TiledPropertyParser
             {
                 return je.GetInt32();
             }
+
             // Try parsing string representation
             if (je.ValueKind == JsonValueKind.String && int.TryParse(je.GetString(), out int jeResult))
             {
@@ -195,6 +195,7 @@ public static class TiledPropertyParser
         {
             return floatValue;
         }
+
         if (value is double doubleValue)
         {
             return (float)doubleValue;
@@ -208,10 +209,10 @@ public static class TiledPropertyParser
 
         // Handle string conversion with InvariantCulture
         if (float.TryParse(
-            value?.ToString(),
-            NumberStyles.Float,
-            CultureInfo.InvariantCulture,
-            out float parsedValue))
+                value?.ToString(),
+                NumberStyles.Float,
+                CultureInfo.InvariantCulture,
+                out float parsedValue))
         {
             return parsedValue;
         }
@@ -266,6 +267,7 @@ public static class TiledPropertyParser
         {
             return byteValue;
         }
+
         if (value is int intValue)
         {
             if (intValue < 0 || intValue > 255)
@@ -273,6 +275,7 @@ public static class TiledPropertyParser
                 throw new InvalidDataException(
                     $"Property '{key}' value {intValue} is out of byte range (0-255). Context: {context}");
             }
+
             return (byte)intValue;
         }
 
@@ -285,6 +288,7 @@ public static class TiledPropertyParser
                 throw new InvalidDataException(
                     $"Property '{key}' value {jeValue} is out of byte range (0-255). Context: {context}");
             }
+
             return (byte)jeValue;
         }
 
@@ -370,6 +374,7 @@ public static class TiledPropertyParser
             {
                 return true;
             }
+
             if (je.ValueKind == JsonValueKind.False)
             {
                 return false;
@@ -486,6 +491,7 @@ public static class TiledPropertyParser
                     throw new InvalidDataException(
                         $"Property '{key}.offset' must be a number. Context: {context}");
                 }
+
                 offset = offsetProp.GetInt32();
             }
         }
@@ -602,6 +608,7 @@ public static class TiledPropertyParser
             throw new InvalidDataException(
                 $"Required property '{key}' is missing or has no waypoints. Context: {context}");
         }
+
         return waypoints;
     }
 
@@ -644,6 +651,7 @@ public static class TiledPropertyParser
             {
                 result[prop.Name] = prop.Value;
             }
+
             return result;
         }
 
@@ -666,6 +674,7 @@ public static class TiledPropertyParser
             throw new InvalidDataException(
                 $"Required property '{key}' is missing. Context: {context}");
         }
+
         return nested;
     }
 
@@ -755,10 +764,12 @@ public static class TiledPropertyParser
         {
             ctx += $" '{objectName}'";
         }
+
         if (x.HasValue && y.HasValue)
         {
             ctx += $" at ({x}, {y})";
         }
+
         return ctx;
     }
 }

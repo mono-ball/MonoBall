@@ -29,7 +29,7 @@ public class CollisionMapper : IEntityPropertyMapper<Collision>
             {
                 bool b => b,
                 string s => bool.TryParse(s, out bool result) && result,
-                _ => false,
+                _ => false
             };
             return new Collision(isSolid);
         }
@@ -41,7 +41,7 @@ public class CollisionMapper : IEntityPropertyMapper<Collision>
             {
                 bool b => b,
                 string s => bool.TryParse(s, out bool result) && result,
-                _ => false,
+                _ => false
             };
             return new Collision(isCollidable);
         }

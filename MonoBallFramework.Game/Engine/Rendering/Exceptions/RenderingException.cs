@@ -8,10 +8,14 @@ namespace MonoBallFramework.Game.Engine.Rendering.Exceptions;
 public abstract class RenderingException : MonoBallFrameworkException
 {
     protected RenderingException(string errorCode, string message)
-        : base(errorCode, message) { }
+        : base(errorCode, message)
+    {
+    }
 
     protected RenderingException(string errorCode, string message, Exception innerException)
-        : base(errorCode, message, innerException) { }
+        : base(errorCode, message, innerException)
+    {
+    }
 
     public override string GetUserFriendlyMessage()
     {

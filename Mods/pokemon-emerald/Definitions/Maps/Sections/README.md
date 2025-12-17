@@ -5,6 +5,7 @@ This folder contains map section (MAPSEC) definitions extracted from pokeemerald
 ## Purpose
 
 Map sections define:
+
 1. **Region Map Areas**: Where each map appears on the region map (x, y, width, height)
 2. **Popup Theme Reference**: Which popup theme to use for each map section
 
@@ -33,6 +34,7 @@ Contains all MAPSEC definitions in a single file:
 ```
 
 **Fields:**
+
 - `id`: Unique MAPSEC identifier (e.g., `"MAPSEC_LITTLEROOT_TOWN"`)
 - `name`: Display name for the region map
 - `x`, `y`: Grid position on region map (8x8 pixel tiles)
@@ -126,6 +128,7 @@ python -m porycon --input /path/to/pokeemerald --output /path/to/PokeSharp/MonoB
 ```
 
 This will:
+
 1. Parse `pokeemerald/src/data/region_map/region_map_sections.json` for section definitions
 2. Parse `pokeemerald/src/map_name_popup.c` for theme mappings
 3. Generate `sections.json` with all MAPSEC definitions
@@ -135,6 +138,7 @@ This will:
 ## Integration with Map Popups
 
 When a map transition occurs:
+
 1. Get the map's `regionMapSection` property (e.g., `"MAPSEC_LITTLEROOT_TOWN"`)
 2. Look up the section in `sections.json` to get `popupTheme` (e.g., `"wood"`)
 3. Load the theme from `../Themes/wood.json` to get `background` and `outline` IDs

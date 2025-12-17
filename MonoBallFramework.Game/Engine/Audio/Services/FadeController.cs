@@ -10,6 +10,22 @@ namespace MonoBallFramework.Game.Engine.Audio.Services;
 /// </summary>
 public class FadeController
 {
+    private float _fadeTimer;
+
+    /// <summary>
+    ///     Initializes a new fade controller with no active fade.
+    /// </summary>
+    public FadeController()
+    {
+        State = FadeState.None;
+        Progress = 0f;
+        TargetVolume = 1.0f;
+        FadeDuration = 0f;
+        CurrentVolume = 1.0f;
+        CrossfadeStartVolume = 1.0f;
+        _fadeTimer = 0f;
+    }
+
     /// <summary>Current fade state.</summary>
     public FadeState State { get; private set; }
 
@@ -28,21 +44,15 @@ public class FadeController
     /// <summary>Volume at the start of a crossfade (used for crossfade calculations).</summary>
     public float CrossfadeStartVolume { get; set; }
 
-    private float _fadeTimer;
+    /// <summary>
+    ///     Checks if a fade is currently active.
+    /// </summary>
+    public bool IsFading => State != FadeState.None;
 
     /// <summary>
-    ///     Initializes a new fade controller with no active fade.
+    ///     Checks if the fade has completed (Progress >= 1.0).
     /// </summary>
-    public FadeController()
-    {
-        State = FadeState.None;
-        Progress = 0f;
-        TargetVolume = 1.0f;
-        FadeDuration = 0f;
-        CurrentVolume = 1.0f;
-        CrossfadeStartVolume = 1.0f;
-        _fadeTimer = 0f;
-    }
+    public bool IsComplete => Progress >= 1.0f;
 
     /// <summary>
     ///     Starts a fade-in effect from 0 to target volume.
@@ -185,6 +195,7 @@ public class FadeController
                     State = FadeState.None;
                     CurrentVolume = TargetVolume;
                 }
+
                 break;
 
             case FadeState.FadingOut:
@@ -195,6 +206,7 @@ public class FadeController
                     State = FadeState.None;
                     CurrentVolume = 0f;
                 }
+
                 break;
 
             case FadeState.FadingOutThenPlay:
@@ -206,6 +218,7 @@ public class FadeController
                     CurrentVolume = 0f;
                     // Caller should check Progress >= 1.0f and trigger next track
                 }
+
                 break;
 
             case FadeState.FadingOutThenFadeIn:
@@ -217,6 +230,7 @@ public class FadeController
                     CurrentVolume = 0f;
                     // Caller should check Progress >= 1.0f and trigger next track with fade-in
                 }
+
                 break;
 
             case FadeState.Crossfading:
@@ -227,6 +241,7 @@ public class FadeController
                     State = FadeState.None;
                     CurrentVolume = 0f;
                 }
+
                 break;
         }
 
@@ -260,14 +275,4 @@ public class FadeController
         CrossfadeStartVolume = volume;
         _fadeTimer = 0f;
     }
-
-    /// <summary>
-    ///     Checks if a fade is currently active.
-    /// </summary>
-    public bool IsFading => State != FadeState.None;
-
-    /// <summary>
-    ///     Checks if the fade has completed (Progress >= 1.0).
-    /// </summary>
-    public bool IsComplete => Progress >= 1.0f;
 }

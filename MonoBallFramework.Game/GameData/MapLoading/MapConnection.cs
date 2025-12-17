@@ -79,7 +79,7 @@ public enum ConnectionDirection : byte
     /// <summary>
     ///     Connection to the west (left).
     /// </summary>
-    West = 3,
+    West = 3
 }
 
 /// <summary>
@@ -100,7 +100,7 @@ public static class ConnectionDirectionExtensions
             ConnectionDirection.South => ConnectionDirection.North,
             ConnectionDirection.East => ConnectionDirection.West,
             ConnectionDirection.West => ConnectionDirection.East,
-            _ => throw new ArgumentOutOfRangeException(nameof(direction)),
+            _ => throw new ArgumentOutOfRangeException(nameof(direction))
         };
     }
 
@@ -142,7 +142,7 @@ public static class ConnectionDirectionExtensions
             "south" or "down" => ConnectionDirection.South,
             "east" or "right" => ConnectionDirection.East,
             "west" or "left" => ConnectionDirection.West,
-            _ => null,
+            _ => null
         };
     }
 }

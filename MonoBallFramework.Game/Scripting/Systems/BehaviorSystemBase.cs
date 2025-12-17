@@ -1,5 +1,4 @@
 using System.Collections.Concurrent;
-using Arch.Core;
 using Microsoft.Extensions.Logging;
 using MonoBallFramework.Game.Engine.Common.Configuration;
 using MonoBallFramework.Game.Engine.Common.Logging;
@@ -23,6 +22,12 @@ namespace MonoBallFramework.Game.Scripting.Systems;
 public abstract class BehaviorSystemBase : SystemBase
 {
     /// <summary>
+    ///     Cache of loggers for individual script instances.
+    ///     Key format is typically "{BehaviorTypeId}.{EntityId}" or "{BehaviorTypeId}.{NpcId}".
+    /// </summary>
+    private readonly ConcurrentDictionary<string, ILogger> _scriptLoggerCache = new();
+
+    /// <summary>
     ///     API provider for script access to game systems.
     /// </summary>
     protected readonly IScriptingApiProvider Apis;
@@ -41,12 +46,6 @@ public abstract class BehaviorSystemBase : SystemBase
     ///     Logger factory for creating per-script loggers.
     /// </summary>
     protected readonly ILoggerFactory LoggerFactory;
-
-    /// <summary>
-    ///     Cache of loggers for individual script instances.
-    ///     Key format is typically "{BehaviorTypeId}.{EntityId}" or "{BehaviorTypeId}.{NpcId}".
-    /// </summary>
-    private readonly ConcurrentDictionary<string, ILogger> _scriptLoggerCache = new();
 
     /// <summary>
     ///     Last count of behaviors executed, used to detect changes for logging.
@@ -86,6 +85,11 @@ public abstract class BehaviorSystemBase : SystemBase
     ///     Gets the system logger for derived class logging.
     /// </summary>
     protected abstract ILogger SystemLogger { get; }
+
+    /// <summary>
+    ///     Gets the total number of cached loggers.
+    /// </summary>
+    protected int CachedLoggerCount => _scriptLoggerCache.Count;
 
     /// <summary>
     ///     Gets or creates a logger for a specific behavior instance.
@@ -168,11 +172,6 @@ public abstract class BehaviorSystemBase : SystemBase
     {
         return EventBus ?? throw new InvalidOperationException("EventBus is required for ScriptContext");
     }
-
-    /// <summary>
-    ///     Gets the total number of cached loggers.
-    /// </summary>
-    protected int CachedLoggerCount => _scriptLoggerCache.Count;
 
     /// <summary>
     ///     Clears all cached loggers. Use during cleanup or testing.

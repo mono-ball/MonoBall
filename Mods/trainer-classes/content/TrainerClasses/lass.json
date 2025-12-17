@@ -19,7 +19,11 @@
     "Yay! We won!",
     "That was exciting!"
   ],
-  "preferredTypes": ["normal", "fairy", "grass"],
+  "preferredTypes": [
+    "normal",
+    "fairy",
+    "grass"
+  ],
   "levelRange": {
     "min": 4,
     "max": 20

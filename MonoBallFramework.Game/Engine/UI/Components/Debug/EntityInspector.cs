@@ -37,11 +37,7 @@ public class EntityInspector : Panel
             Id = Id + "_title",
             Text = "Entity Inspector",
             Color = theme.Info,
-            Constraint = new LayoutConstraint
-            {
-                Anchor = Anchor.TopLeft,
-                Margin = theme.PaddingMedium,
-            },
+            Constraint = new LayoutConstraint { Anchor = Anchor.TopLeft, Margin = theme.PaddingMedium }
         };
         AddChild(titleLabel);
 
@@ -53,10 +49,8 @@ public class EntityInspector : Panel
             Color = theme.TextSecondary,
             Constraint = new LayoutConstraint
             {
-                Anchor = Anchor.TopLeft,
-                OffsetY = 25,
-                MarginLeft = theme.PaddingMedium,
-            },
+                Anchor = Anchor.TopLeft, OffsetY = 25, MarginLeft = theme.PaddingMedium
+            }
         };
         AddChild(entityIdLabel);
 
@@ -70,8 +64,8 @@ public class EntityInspector : Panel
                 OffsetY = 55,
                 WidthPercent = 0.9f,
                 HeightPercent = 0.7f,
-                Margin = theme.PaddingMedium,
-            },
+                Margin = theme.PaddingMedium
+            }
         };
         AddChild(_propertiesScrollView);
     }
@@ -107,10 +101,8 @@ public class EntityInspector : Panel
                     Color = context.Theme.TextPrimary,
                     Constraint = new LayoutConstraint
                     {
-                        Anchor = Anchor.TopLeft,
-                        OffsetY = yOffset,
-                        Height = lineHeight,
-                    },
+                        Anchor = Anchor.TopLeft, OffsetY = yOffset, Height = lineHeight
+                    }
                 };
 
                 _propertiesScrollView.AddChild(propertyLabel);
@@ -126,10 +118,8 @@ public class EntityInspector : Panel
                 Color = context.Theme.Info,
                 Constraint = new LayoutConstraint
                 {
-                    Anchor = Anchor.TopLeft,
-                    OffsetY = yOffset,
-                    Height = lineHeight,
-                },
+                    Anchor = Anchor.TopLeft, OffsetY = yOffset, Height = lineHeight
+                }
             };
             _propertiesScrollView.AddChild(componentsLabel);
             yOffset += lineHeight;
@@ -143,11 +133,8 @@ public class EntityInspector : Panel
                     Color = context.Theme.Success,
                     Constraint = new LayoutConstraint
                     {
-                        Anchor = Anchor.TopLeft,
-                        OffsetY = yOffset,
-                        OffsetX = 10,
-                        Height = lineHeight,
-                    },
+                        Anchor = Anchor.TopLeft, OffsetY = yOffset, OffsetX = 10, Height = lineHeight
+                    }
                 };
 
                 _propertiesScrollView.AddChild(componentLabel);
@@ -162,7 +149,7 @@ public class EntityInspector : Panel
                 Id = Id + "_no_selection",
                 Text = "No entity selected",
                 Color = context.Theme.TextDim,
-                Constraint = new LayoutConstraint { Anchor = Anchor.TopLeft },
+                Constraint = new LayoutConstraint { Anchor = Anchor.TopLeft }
             };
             _propertiesScrollView.AddChild(noSelectionLabel);
         }

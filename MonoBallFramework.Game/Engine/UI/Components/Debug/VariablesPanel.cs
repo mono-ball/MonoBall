@@ -143,10 +143,7 @@ public class VariablesPanel : DebugPanelBase, IVariableOperations
     {
         _variables[name] = new VariableInfo
         {
-            Name = name,
-            TypeName = typeName,
-            ValueGetter = valueGetter,
-            ValueSetter = valueSetter,
+            Name = name, TypeName = typeName, ValueGetter = valueGetter, ValueSetter = valueSetter
         };
 
         UpdateVariableDisplay();
@@ -477,7 +474,7 @@ public class VariablesPanel : DebugPanelBase, IVariableOperations
                         ValueStr = $"[Error: {ex.Message}]",
                         ValueColor = ThemeManager.Current.Error,
                         Depth = 0,
-                        IsPinned = _pinnedVariables.Contains(variable.Name),
+                        IsPinned = _pinnedVariables.Contains(variable.Name)
                     }
                 );
             }
@@ -530,7 +527,7 @@ public class VariablesPanel : DebugPanelBase, IVariableOperations
             IsExpanded = isExpanded,
             IsPinned = isPinned && depth == 0,
             IsEditable = isEditable && IsEditableType(value),
-            ValueColor = GetValueColor(value),
+            ValueColor = GetValueColor(value)
         };
 
         _displayRows.Add(row);
@@ -565,7 +562,7 @@ public class VariablesPanel : DebugPanelBase, IVariableOperations
                             TypeName = "",
                             ValueStr = "",
                             Depth = depth,
-                            ValueColor = ThemeManager.Current.TextDim,
+                            ValueColor = ThemeManager.Current.TextDim
                         }
                     );
                     break;
@@ -612,7 +609,7 @@ public class VariablesPanel : DebugPanelBase, IVariableOperations
                         TypeName = "",
                         ValueStr = "",
                         Depth = depth,
-                        ValueColor = ThemeManager.Current.TextDim,
+                        ValueColor = ThemeManager.Current.TextDim
                     }
                 );
             }
@@ -632,7 +629,7 @@ public class VariablesPanel : DebugPanelBase, IVariableOperations
                             TypeName = "",
                             ValueStr = "",
                             Depth = depth,
-                            ValueColor = ThemeManager.Current.TextDim,
+                            ValueColor = ThemeManager.Current.TextDim
                         }
                     );
                     break;
@@ -688,7 +685,7 @@ public class VariablesPanel : DebugPanelBase, IVariableOperations
                             TypeName = prop.PropertyType.Name,
                             ValueStr = "[Error reading]",
                             Depth = depth,
-                            ValueColor = ThemeManager.Current.Error,
+                            ValueColor = ThemeManager.Current.Error
                         }
                     );
                 }
@@ -728,7 +725,7 @@ public class VariablesPanel : DebugPanelBase, IVariableOperations
                             TypeName = field.FieldType.Name,
                             ValueStr = "[Error reading]",
                             Depth = depth,
-                            ValueColor = ThemeManager.Current.Error,
+                            ValueColor = ThemeManager.Current.Error
                         }
                     );
                 }
@@ -1027,9 +1024,9 @@ public class VariablesPanel : DebugPanelBase, IVariableOperations
 
         // Only allow editing of simple types
         return type.IsPrimitive
-            || type == typeof(string)
-            || type == typeof(DateTime)
-            || type.IsEnum;
+               || type == typeof(string)
+               || type == typeof(DateTime)
+               || type.IsEnum;
     }
 
     /// <summary>

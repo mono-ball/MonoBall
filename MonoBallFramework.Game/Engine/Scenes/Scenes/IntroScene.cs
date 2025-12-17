@@ -34,15 +34,15 @@ public class IntroScene : SceneBase
     private readonly ILogger<IntroScene> _logger;
     private readonly SceneManager _sceneManager;
 
+    // Audio playback using PortAudio
+    private PortAudioOutput? _audioOutput;
+    private IDisposable? _audioReader;
+
     private float _elapsedTime;
     private Texture2D? _logoTexture;
     private Texture2D? _pixel;
     private SpriteBatch? _spriteBatch;
     private bool _transitionStarted;
-
-    // Audio playback using PortAudio
-    private PortAudioOutput? _audioOutput;
-    private IDisposable? _audioReader;
 
     /// <summary>
     ///     Initializes a new instance of the IntroScene class.
@@ -142,7 +142,8 @@ public class IntroScene : SceneBase
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Failed to load or play intro audio from {Path} - continuing without audio", audioPath);
+            _logger.LogWarning(ex, "Failed to load or play intro audio from {Path} - continuing without audio",
+                audioPath);
             // Don't throw - audio failure shouldn't prevent the intro from playing
         }
     }
@@ -195,17 +196,6 @@ public class IntroScene : SceneBase
     }
 
     /// <summary>
-    ///     Animation state containing scale, rotation, and alpha values.
-    /// </summary>
-    private readonly record struct AnimationState(
-        float Scale,
-        float Rotation,
-        float Alpha,
-        bool ShowLogo = true,
-        float LogoAlpha = 1f
-    );
-
-    /// <summary>
     ///     Calculates the current animation state based on elapsed time.
     /// </summary>
     private AnimationState CalculateAnimationState()
@@ -213,7 +203,7 @@ public class IntroScene : SceneBase
         if (_elapsedTime < PauseBeforeSpinDuration)
         {
             // Pause phase - waiting before logo appears
-            return new AnimationState(0f, 0f, 1f, ShowLogo: false);
+            return new AnimationState(0f, 0f, 1f, false);
         }
 
         float spinStartTime = PauseBeforeSpinDuration;
@@ -231,7 +221,7 @@ public class IntroScene : SceneBase
             float rotation = MathHelper.TwoPi * TotalRotations * EaseOutQuad(progress);
 
             // Logo at full opacity (no fade-in)
-            return new AnimationState(scale, rotation, 1f, ShowLogo: true, LogoAlpha: 1f);
+            return new AnimationState(scale, rotation, 1f, true, 1f);
         }
 
         float holdStartTime = spinStartTime + SpinInDuration;
@@ -239,7 +229,7 @@ public class IntroScene : SceneBase
         if (_elapsedTime < holdStartTime + HoldDuration)
         {
             // Hold phase - full size, no rotation, full opacity
-            return new AnimationState(1.0f, 0f, 1f, ShowLogo: true);
+            return new AnimationState(1.0f, 0f, 1f, true);
         }
 
         // Spin-out phase - logo shrinks while spinning until gone
@@ -254,7 +244,7 @@ public class IntroScene : SceneBase
         // Continue rotating (accelerates as it shrinks)
         float outRotation = MathHelper.TwoPi * TotalRotations * clampedOutProgress;
 
-        return new AnimationState(outScale, outRotation, 1f, ShowLogo: outScale > 0.001f, LogoAlpha: 1f);
+        return new AnimationState(outScale, outRotation, 1f, outScale > 0.001f, 1f);
     }
 
     /// <summary>
@@ -355,7 +345,8 @@ public class IntroScene : SceneBase
         int size = (int)(fullSize * state.Scale);
 
         Color color = new Color(235, 72, 60) * state.LogoAlpha; // Pokéball red
-        _spriteBatch.Draw(_pixel, new Rectangle((int)center.X - size / 2, (int)center.Y - size / 2, size, size), color);
+        _spriteBatch.Draw(_pixel, new Rectangle((int)center.X - (size / 2), (int)center.Y - (size / 2), size, size),
+            color);
     }
 
     /// <summary>
@@ -393,4 +384,15 @@ public class IntroScene : SceneBase
 
         base.Dispose(disposing);
     }
+
+    /// <summary>
+    ///     Animation state containing scale, rotation, and alpha values.
+    /// </summary>
+    private readonly record struct AnimationState(
+        float Scale,
+        float Rotation,
+        float Alpha,
+        bool ShowLogo = true,
+        float LogoAlpha = 1f
+    );
 }

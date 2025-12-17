@@ -161,7 +161,7 @@ events export          - Export event list to clipboard";
 
         context.WriteLine("═══ Event Pool Statistics ═══", theme.Info);
         context.WriteLine(
-            $"{"Event Type", -30} {"Rented", 10} {"Created", 10} {"Reuse", 8} {"In Use", 8}",
+            $"{"Event Type",-30} {"Rented",10} {"Created",10} {"Reuse",8} {"In Use",8}",
             theme.TextSecondary
         );
         context.WriteLine(new string('─', 74), theme.BorderPrimary);
@@ -187,7 +187,7 @@ events export          - Export event list to clipboard";
 
             // Format row with proper spacing
             context.WriteLine(
-                $"{eventName, -30} {stat.TotalRented, 10:N0} {stat.TotalCreated, 10:N0} {stat.ReuseRate, 7:P0} {stat.CurrentlyInUse, 8}",
+                $"{eventName,-30} {stat.TotalRented,10:N0} {stat.TotalCreated,10:N0} {stat.ReuseRate,7:P0} {stat.CurrentlyInUse,8}",
                 theme.TextPrimary
             );
         }
@@ -224,7 +224,7 @@ events export          - Export event list to clipboard";
 
         context.WriteLine("═══ All Event Types ═══", theme.Info);
         context.WriteLine(
-            $"{"Event Type", -35} {"Subs", 5} {"Count", 10} {"Avg ms", 8}",
+            $"{"Event Type",-35} {"Subs",5} {"Count",10} {"Avg ms",8}",
             theme.TextSecondary
         );
         context.WriteLine(new string('─', 64), theme.BorderPrimary);
@@ -245,9 +245,9 @@ events export          - Export event list to clipboard";
                 : evt.PublishCount > 0 ? theme.TextSecondary
                 : theme.TextDim;
 
-            string subsText = $"{evt.SubscriberCount, 5}";
-            string countText = $"{evt.PublishCount, 10:N0}";
-            string avgText = evt.PublishCount > 0 ? $"{evt.AverageTimeMs, 7:F2}" : "     -";
+            string subsText = $"{evt.SubscriberCount,5}";
+            string countText = $"{evt.PublishCount,10:N0}";
+            string avgText = evt.PublishCount > 0 ? $"{evt.AverageTimeMs,7:F2}" : "     -";
 
             Color timeColor =
                 evt.AverageTimeMs >= 1.0 ? theme.Error
@@ -255,7 +255,7 @@ events export          - Export event list to clipboard";
                 : evt.PublishCount > 0 ? theme.Success
                 : theme.TextDim;
 
-            context.WriteLine($"{eventName, -35} {subsText} {countText} {avgText}", nameColor);
+            context.WriteLine($"{eventName,-35} {subsText} {countText} {avgText}", nameColor);
         }
 
         context.WriteLine(new string('─', 64), theme.BorderPrimary);

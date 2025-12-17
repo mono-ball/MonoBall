@@ -108,7 +108,7 @@ public class ProfilerPanel : DebugPanelBase, IProfilerOperations
         sb.AppendLine($"# Profiler Export - {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
         sb.AppendLine($"# Total Frame Time: {stats.TotalMs:F2}ms");
         sb.AppendLine();
-        sb.AppendLine($"{"System", -40} {"Last(ms)", 10} {"Avg(ms)", 10} {"Max(ms)", 10}");
+        sb.AppendLine($"{"System",-40} {"Last(ms)",10} {"Avg(ms)",10} {"Max(ms)",10}");
         sb.AppendLine(new string('-', 72));
 
         foreach (string name in _content.GetSystemNames())
@@ -118,7 +118,7 @@ public class ProfilerPanel : DebugPanelBase, IProfilerOperations
             if (m.HasValue)
             {
                 sb.AppendLine(
-                    $"{name, -40} {m.Value.LastMs, 10:F3} {m.Value.AvgMs, 10:F3} {m.Value.MaxMs, 10:F3}"
+                    $"{name,-40} {m.Value.LastMs,10:F3} {m.Value.AvgMs,10:F3} {m.Value.MaxMs,10:F3}"
                 );
             }
         }

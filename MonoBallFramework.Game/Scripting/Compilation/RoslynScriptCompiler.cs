@@ -80,8 +80,7 @@ public class RoslynScriptCompiler : IScriptCompiler
         {
             return new CompilationResult
             {
-                Success = false,
-                Errors = new List<string> { "File path cannot be null or empty" },
+                Success = false, Errors = new List<string> { "File path cannot be null or empty" }
             };
         }
 
@@ -90,8 +89,7 @@ public class RoslynScriptCompiler : IScriptCompiler
             _logger.LogError("Script file not found: {FilePath}", filePath);
             return new CompilationResult
             {
-                Success = false,
-                Errors = new List<string> { $"File not found: {filePath}" },
+                Success = false, Errors = new List<string> { $"File not found: {filePath}" }
             };
         }
 
@@ -116,7 +114,7 @@ public class RoslynScriptCompiler : IScriptCompiler
                     Success = true,
                     CompiledType = cached.CompiledType,
                     Errors = new List<string>(),
-                    Diagnostics = new List<CompilationDiagnostic>(),
+                    Diagnostics = new List<CompilationDiagnostic>()
                 };
             }
 
@@ -169,7 +167,7 @@ public class RoslynScriptCompiler : IScriptCompiler
                         .Where(d => d.Severity == DiagnosticSeverity.Error)
                         .Select(d => d.Message)
                         .ToList(),
-                    Diagnostics = diagnostics,
+                    Diagnostics = diagnostics
                 };
             }
 
@@ -190,20 +188,15 @@ public class RoslynScriptCompiler : IScriptCompiler
                 {
                     Success = false,
                     CompiledType = null,
-                    Errors = new List<string>
-                    {
-                        "No public class inheriting from TypeScriptBase found in script",
-                    },
-                    Diagnostics = diagnostics,
+                    Errors = new List<string> { "No public class inheriting from TypeScriptBase found in script" },
+                    Diagnostics = diagnostics
                 };
             }
 
             // Cache the compiled result
             var cachedCompilation = new CachedCompilation
             {
-                CompiledType = compiledType,
-                ContentHash = contentHash,
-                CompiledAt = DateTime.UtcNow,
+                CompiledType = compiledType, ContentHash = contentHash, CompiledAt = DateTime.UtcNow
             };
             _compilationCache[contentHash] = cachedCompilation;
 
@@ -216,10 +209,7 @@ public class RoslynScriptCompiler : IScriptCompiler
 
             return new CompilationResult
             {
-                Success = true,
-                CompiledType = compiledType,
-                Errors = new List<string>(),
-                Diagnostics = diagnostics,
+                Success = true, CompiledType = compiledType, Errors = new List<string>(), Diagnostics = diagnostics
             };
         }
         catch (Exception ex)
@@ -230,7 +220,7 @@ public class RoslynScriptCompiler : IScriptCompiler
                 Success = false,
                 CompiledType = null,
                 Errors = new List<string> { $"Compilation exception: {ex.Message}" },
-                Diagnostics = new List<CompilationDiagnostic>(),
+                Diagnostics = new List<CompilationDiagnostic>()
             };
         }
     }
@@ -284,7 +274,7 @@ public class RoslynScriptCompiler : IScriptCompiler
                     Line = lineSpan.StartLinePosition.Line + 1, // 1-based line numbers
                     Column = lineSpan.StartLinePosition.Character + 1, // 1-based columns
                     Code = diagnostic.Id,
-                    FilePath = lineSpan.Path,
+                    FilePath = lineSpan.Path
                 }
             );
         }
@@ -305,7 +295,7 @@ public class RoslynScriptCompiler : IScriptCompiler
             Microsoft.CodeAnalysis.DiagnosticSeverity.Info => DiagnosticSeverity.Info,
             Microsoft.CodeAnalysis.DiagnosticSeverity.Warning => DiagnosticSeverity.Warning,
             Microsoft.CodeAnalysis.DiagnosticSeverity.Error => DiagnosticSeverity.Error,
-            _ => DiagnosticSeverity.Hidden,
+            _ => DiagnosticSeverity.Hidden
         };
     }
 
@@ -356,7 +346,8 @@ public class RoslynScriptCompiler : IScriptCompiler
             MetadataReference.CreateFromFile(typeof(Point).Assembly.Location), // MonoGame.Framework
             MetadataReference.CreateFromFile(typeof(TypeScriptBase).Assembly.Location), // MonoBallFramework.Scripting
             MetadataReference.CreateFromFile(typeof(Direction).Assembly.Location), // MonoBallFramework.Core
-            MetadataReference.CreateFromFile(typeof(ILogger).Assembly.Location), // Microsoft.Extensions.Logging.Abstractions
+            MetadataReference.CreateFromFile(typeof(ILogger).Assembly
+                .Location) // Microsoft.Extensions.Logging.Abstractions
         };
 
         // Add runtime references for .NET 9
@@ -365,10 +356,7 @@ public class RoslynScriptCompiler : IScriptCompiler
         {
             string[] runtimeRefs = new[]
             {
-                "System.Runtime.dll",
-                "System.Collections.dll",
-                "System.Linq.dll",
-                "netstandard.dll",
+                "System.Runtime.dll", "System.Collections.dll", "System.Linq.dll", "netstandard.dll"
             };
 
             foreach (string runtimeRef in runtimeRefs)
@@ -433,7 +421,7 @@ public class RoslynScriptCompiler : IScriptCompiler
             CachedEntries = _compilationCache.Count,
             TotalSize = _compilationCache.Sum(kvp =>
                 kvp.Value.CompiledType?.Assembly.GetName().Name?.Length ?? 0
-            ),
+            )
         };
     }
 }

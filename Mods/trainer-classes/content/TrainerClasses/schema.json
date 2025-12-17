@@ -4,7 +4,11 @@
   "title": "Trainer Class Definition",
   "description": "Schema for validating trainer class definitions in PokeSharp",
   "type": "object",
-  "required": ["id", "name", "basePrizeMoney"],
+  "required": [
+    "id",
+    "name",
+    "basePrizeMoney"
+  ],
   "properties": {
     "id": {
       "type": "string",
@@ -79,7 +83,10 @@
     "levelRange": {
       "type": "object",
       "description": "Level range for Pokemon used by this trainer class",
-      "required": ["min", "max"],
+      "required": [
+        "min",
+        "max"
+      ],
       "properties": {
         "min": {
           "type": "integer",
@@ -99,7 +106,10 @@
     "teamSize": {
       "type": "object",
       "description": "Team size range for this trainer class",
-      "required": ["min", "max"],
+      "required": [
+        "min",
+        "max"
+      ],
       "properties": {
         "min": {
           "type": "integer",
@@ -124,7 +134,11 @@
     "aiDifficulty": {
       "type": "string",
       "description": "AI difficulty level for this trainer class",
-      "enum": ["easy", "normal", "hard"],
+      "enum": [
+        "easy",
+        "normal",
+        "hard"
+      ],
       "default": "normal"
     }
   },

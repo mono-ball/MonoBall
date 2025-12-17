@@ -43,7 +43,6 @@ public interface IRegistryApi
     /// <example>
     ///     // Get all generic NPC sprites
     ///     var genericNpcs = Registry.GetSpriteIdsBySubcategory("npcs", "generic");
-    ///
     ///     // Get all Brendan player sprites
     ///     var brendanSprites = Registry.GetSpriteIdsBySubcategory("players", "brendan");
     /// </example>

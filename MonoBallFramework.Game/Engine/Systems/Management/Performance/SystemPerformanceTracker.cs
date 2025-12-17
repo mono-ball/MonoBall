@@ -40,16 +40,16 @@ namespace MonoBallFramework.Game.Engine.Systems.Management.Performance;
 ///     <code>
 /// var config = PerformanceConfiguration.Development;
 /// var tracker = new SystemPerformanceTracker(logger, config);
-///
+/// 
 /// // In game loop
 /// tracker.IncrementFrame();
-///
+/// 
 /// // Track system execution
 /// var sw = Stopwatch.StartNew();
 /// mySystem.Update(world, deltaTime);
 /// sw.Stop();
 /// tracker.TrackSystemPerformance("MySystem", sw.Elapsed.TotalMilliseconds);
-///
+/// 
 /// // Log stats periodically
 /// if (tracker.FrameCount % 300 == 0)
 ///     tracker.LogPerformanceStats();
@@ -190,8 +190,7 @@ public class SystemPerformanceTracker
         // Clear() retains capacity, so list only grows once and then reuses memory
         _cachedSortedMetrics.Clear();
         _cachedSortedMetrics.AddRange(_metrics);
-        _cachedSortedMetrics.Sort(
-            (a, b) => b.Value.AverageUpdateMs.CompareTo(a.Value.AverageUpdateMs)
+        _cachedSortedMetrics.Sort((a, b) => b.Value.AverageUpdateMs.CompareTo(a.Value.AverageUpdateMs)
         );
 
         // Log all systems using the custom template
@@ -234,8 +233,7 @@ public class SystemPerformanceTracker
         // OPTIMIZATION: Reuse cached list instead of LINQ allocation
         _cachedSortedMetrics.Clear();
         _cachedSortedMetrics.AddRange(_metrics);
-        _cachedSortedMetrics.Sort(
-            (a, b) => b.Value.AverageUpdateMs.CompareTo(a.Value.AverageUpdateMs)
+        _cachedSortedMetrics.Sort((a, b) => b.Value.AverageUpdateMs.CompareTo(a.Value.AverageUpdateMs)
         );
 
         // Build report using StringBuilder for efficient string construction

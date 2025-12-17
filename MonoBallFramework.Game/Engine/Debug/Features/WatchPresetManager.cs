@@ -10,8 +10,7 @@ public class WatchPresetManager
 {
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
-        WriteIndented = true,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase
     };
 
     private readonly ILogger<WatchPresetManager>? _logger;
@@ -202,10 +201,7 @@ public class WatchPresetManager
     {
         var presets = new List<WatchPreset>
         {
-            CreatePerformancePreset(),
-            CreateCombatPreset(),
-            CreatePlayerStatsPreset(),
-            CreateMemoryPreset(),
+            CreatePerformancePreset(), CreateCombatPreset(), CreatePlayerStatsPreset(), CreateMemoryPreset()
         };
 
         foreach (WatchPreset preset in presets)
@@ -234,22 +230,22 @@ public class WatchPresetManager
                     Expression = "Game.GetFPS()",
                     Group = "performance",
                     IsPinned = true,
-                    Alert = new WatchAlertConfig { Type = "below", Threshold = "55" },
+                    Alert = new WatchAlertConfig { Type = "below", Threshold = "55" }
                 },
                 new()
                 {
                     Name = "frame_time",
                     Expression = "Game.GetFrameTime()",
                     Group = "performance",
-                    Alert = new WatchAlertConfig { Type = "above", Threshold = "16.67" },
+                    Alert = new WatchAlertConfig { Type = "above", Threshold = "16.67" }
                 },
                 new()
                 {
                     Name = "memory_mb",
                     Expression = "GC.GetTotalMemory(false) / (1024.0 * 1024.0)",
-                    Group = "performance",
-                },
-            },
+                    Group = "performance"
+                }
+            }
         };
     }
 
@@ -264,36 +260,30 @@ public class WatchPresetManager
             AutoUpdateEnabled = true,
             Watches = new List<WatchPresetEntry>
             {
-                new()
-                {
-                    Name = "in_battle",
-                    Expression = "Game.InBattle()",
-                    Group = "combat",
-                    IsPinned = true,
-                },
+                new() { Name = "in_battle", Expression = "Game.InBattle()", Group = "combat", IsPinned = true },
                 new()
                 {
                     Name = "player_hp",
                     Expression = "Player.GetHP()",
                     Group = "combat",
                     Condition = "Game.InBattle()",
-                    Alert = new WatchAlertConfig { Type = "below", Threshold = "30" },
+                    Alert = new WatchAlertConfig { Type = "below", Threshold = "30" }
                 },
                 new()
                 {
                     Name = "enemy_hp",
                     Expression = "Battle.GetEnemyHP()",
                     Group = "combat",
-                    Condition = "Game.InBattle()",
+                    Condition = "Game.InBattle()"
                 },
                 new()
                 {
                     Name = "last_damage",
                     Expression = "Battle.GetLastDamage()",
                     Group = "combat",
-                    Condition = "Game.InBattle()",
-                },
-            },
+                    Condition = "Game.InBattle()"
+                }
+            }
         };
     }
 
@@ -308,26 +298,16 @@ public class WatchPresetManager
             AutoUpdateEnabled = true,
             Watches = new List<WatchPresetEntry>
             {
-                new()
-                {
-                    Name = "position",
-                    Expression = "Player.GetPosition()",
-                    Group = "player",
-                },
+                new() { Name = "position", Expression = "Player.GetPosition()", Group = "player" },
                 new()
                 {
                     Name = "money",
                     Expression = "Player.GetMoney()",
                     Group = "player",
-                    Alert = new WatchAlertConfig { Type = "changes" },
+                    Alert = new WatchAlertConfig { Type = "changes" }
                 },
-                new()
-                {
-                    Name = "map",
-                    Expression = "Game.GetCurrentMap()",
-                    Group = "player",
-                },
-            },
+                new() { Name = "map", Expression = "Game.GetCurrentMap()", Group = "player" }
+            }
         };
     }
 
@@ -347,28 +327,18 @@ public class WatchPresetManager
                     Name = "total_memory",
                     Expression = "GC.GetTotalMemory(false) / (1024.0 * 1024.0)",
                     Group = "memory",
-                    IsPinned = true,
+                    IsPinned = true
                 },
                 new()
                 {
                     Name = "gen0_collections",
                     Expression = "GC.CollectionCount(0)",
                     Group = "memory",
-                    Alert = new WatchAlertConfig { Type = "changes" },
+                    Alert = new WatchAlertConfig { Type = "changes" }
                 },
-                new()
-                {
-                    Name = "gen1_collections",
-                    Expression = "GC.CollectionCount(1)",
-                    Group = "memory",
-                },
-                new()
-                {
-                    Name = "gen2_collections",
-                    Expression = "GC.CollectionCount(2)",
-                    Group = "memory",
-                },
-            },
+                new() { Name = "gen1_collections", Expression = "GC.CollectionCount(1)", Group = "memory" },
+                new() { Name = "gen2_collections", Expression = "GC.CollectionCount(2)", Group = "memory" }
+            }
         };
     }
 }

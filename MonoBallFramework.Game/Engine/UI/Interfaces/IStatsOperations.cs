@@ -67,7 +67,7 @@ public interface IStatsOperations
         int Entities,
         int Systems,
         int GCDeltaPerSec
-    ) GetStatistics();
+        ) GetStatistics();
 
     /// <summary>
     ///     Exports current stats to a formatted string.

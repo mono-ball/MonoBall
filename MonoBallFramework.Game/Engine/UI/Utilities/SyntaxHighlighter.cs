@@ -95,7 +95,7 @@ public static class SyntaxHighlighter
         "dynamic",
         "required",
         "scoped",
-        "file",
+        "file"
     };
 
     // Control flow keywords (special color)
@@ -118,7 +118,7 @@ public static class SyntaxHighlighter
         "catch",
         "finally",
         "goto",
-        "yield",
+        "yield"
     };
 
     // Type keywords (built-in types)
@@ -141,16 +141,11 @@ public static class SyntaxHighlighter
         "ushort",
         "void",
         "nint",
-        "nuint",
+        "nuint"
     };
 
     // Literal keywords
-    private static readonly HashSet<string> LiteralKeywords = new(StringComparer.Ordinal)
-    {
-        "true",
-        "false",
-        "null",
-    };
+    private static readonly HashSet<string> LiteralKeywords = new(StringComparer.Ordinal) { "true", "false", "null" };
 
     // Common type names (for better highlighting of common .NET types)
     private static readonly HashSet<string> CommonTypes = new(StringComparer.Ordinal)
@@ -220,7 +215,7 @@ public static class SyntaxHighlighter
         "Point",
         "GameTime",
         "SpriteBatch",
-        "Texture2D",
+        "Texture2D"
     };
 
     // Theme-aware color accessors

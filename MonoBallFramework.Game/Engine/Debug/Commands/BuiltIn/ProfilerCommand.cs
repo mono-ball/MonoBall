@@ -103,7 +103,7 @@ Keyboard: Ctrl+6 to open Profiler tab directly";
             "avg" or "average" => ProfilerSortMode.ByAverageTime,
             "max" or "peak" => ProfilerSortMode.ByMaxTime,
             "name" or "alpha" => ProfilerSortMode.ByName,
-            _ => null,
+            _ => null
         };
 
         if (mode == null)
@@ -137,7 +137,7 @@ Keyboard: Ctrl+6 to open Profiler tab directly";
         {
             "on" or "true" or "1" or "yes" => true,
             "off" or "false" or "0" or "no" => false,
-            _ => null,
+            _ => null
         };
 
         if (showActive == null)

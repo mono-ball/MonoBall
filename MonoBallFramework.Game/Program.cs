@@ -5,17 +5,16 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using MonoBallFramework.Game;
 using MonoBallFramework.Game.Engine.Common.Logging;
 using MonoBallFramework.Game.Engine.Core.Types;
 using MonoBallFramework.Game.Engine.Systems.Management;
-using MonoBallFramework.Game;
 using MonoBallFramework.Game.GameData.Loading;
 using MonoBallFramework.Game.GameData.Services;
 using MonoBallFramework.Game.GameData.Sprites;
 using MonoBallFramework.Game.GameSystems.Services;
 using MonoBallFramework.Game.Infrastructure.Configuration;
 using MonoBallFramework.Game.Infrastructure.Diagnostics;
-using MonoBallFramework.Game.Infrastructure.Services;
 using MonoBallFramework.Game.Initialization.Factories;
 using MonoBallFramework.Game.Input;
 using MonoBallFramework.Game.Scripting.Api;
@@ -89,7 +88,7 @@ try
             GameTime = sp.GetRequiredService<IGameTimeService>(),
             DataLoader = sp.GetRequiredService<GameDataLoader>(),
             MapEntityService = sp.GetRequiredService<MapEntityService>(),
-            SpriteRegistry = sp.GetRequiredService<SpriteRegistry>(),
+            SpriteRegistry = sp.GetRequiredService<SpriteRegistry>()
         };
         return new MonoBallFrameworkGame(loggerFactory, options, sp, gameConfig);
     });

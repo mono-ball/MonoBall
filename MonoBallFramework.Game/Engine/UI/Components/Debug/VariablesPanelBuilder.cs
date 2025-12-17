@@ -41,9 +41,7 @@ public class VariablesPanelBuilder
         return new TextBuffer("variables_buffer")
         {
             // BackgroundColor uses theme fallback - don't set explicitly
-            AutoScroll = false,
-            MaxLines = _maxLines,
-            Constraint = new LayoutConstraint { Anchor = Anchor.StretchTop },
+            AutoScroll = false, MaxLines = _maxLines, Constraint = new LayoutConstraint { Anchor = Anchor.StretchTop }
         };
     }
 
@@ -51,7 +49,7 @@ public class VariablesPanelBuilder
     {
         return new StatusBar("variables_status")
         {
-            Constraint = new LayoutConstraint { Anchor = Anchor.StretchBottom },
+            Constraint = new LayoutConstraint { Anchor = Anchor.StretchBottom }
         };
     }
 }

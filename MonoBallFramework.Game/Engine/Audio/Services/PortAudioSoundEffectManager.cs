@@ -14,24 +14,26 @@ namespace MonoBallFramework.Game.Engine.Audio.Services;
 /// </summary>
 public class PortAudioSoundEffectManager : ISoundEffectManager
 {
+    private readonly ConcurrentDictionary<Guid, SoundInstance> _activeSounds;
     private readonly AudioRegistry _audioRegistry;
     private readonly IContentProvider _contentProvider;
-    private readonly ILogger<PortAudioSoundEffectManager>? _logger;
-    private readonly int _maxConcurrentSounds;
-    private readonly ConcurrentDictionary<Guid, SoundInstance> _activeSounds;
     private readonly object _lock = new();
+    private readonly ILogger<PortAudioSoundEffectManager>? _logger;
     private readonly AudioFormat _mixerFormat;
+    private bool _disposed;
+    private float _masterVolume = AudioConstants.DefaultMasterVolume;
     private AudioMixer? _mixer;
     private PortAudioOutput? _outputDevice;
-    private float _masterVolume = AudioConstants.DefaultMasterVolume;
-    private bool _disposed;
 
     /// <summary>
-    ///     Initializes a new instance of the <see cref="PortAudioSoundEffectManager"/> class.
+    ///     Initializes a new instance of the <see cref="PortAudioSoundEffectManager" /> class.
     /// </summary>
     /// <param name="audioRegistry">The audio registry for looking up sound definitions.</param>
     /// <param name="contentProvider">The content provider for resolving asset paths with mod support.</param>
-    /// <param name="maxConcurrentSounds">Maximum number of concurrent sounds (uses AudioConstants.MaxConcurrentSounds if not specified).</param>
+    /// <param name="maxConcurrentSounds">
+    ///     Maximum number of concurrent sounds (uses AudioConstants.MaxConcurrentSounds if not
+    ///     specified).
+    /// </param>
     /// <param name="logger">Optional logger for diagnostics.</param>
     public PortAudioSoundEffectManager(
         AudioRegistry audioRegistry,
@@ -44,9 +46,11 @@ public class PortAudioSoundEffectManager : ISoundEffectManager
         _logger = logger;
 
         if (maxConcurrentSounds <= 0)
+        {
             throw new ArgumentOutOfRangeException(nameof(maxConcurrentSounds));
+        }
 
-        _maxConcurrentSounds = maxConcurrentSounds;
+        MaxConcurrentSounds = maxConcurrentSounds;
         _activeSounds = new ConcurrentDictionary<Guid, SoundInstance>();
 
         // Initialize mixer format (44100Hz stereo - standard for audio playback)
@@ -59,51 +63,20 @@ public class PortAudioSoundEffectManager : ISoundEffectManager
         set => _masterVolume = Math.Clamp(value, AudioConstants.MinVolume, AudioConstants.MaxVolume);
     }
 
-    public int MaxConcurrentSounds => _maxConcurrentSounds;
+    public int MaxConcurrentSounds { get; }
 
     public int ActiveSoundCount => _activeSounds.Count;
 
-    /// <summary>
-    ///     Ensures the shared mixer and output device are initialized.
-    ///     Called lazily on first sound playback.
-    /// </summary>
-    private void EnsureMixerInitialized()
-    {
-        if (_mixer != null && _outputDevice != null)
-            return;
-
-        lock (_lock)
-        {
-            // Double-check after acquiring lock
-            if (_mixer != null && _outputDevice != null)
-                return;
-
-            try
-            {
-                _mixer = new AudioMixer(_mixerFormat);
-                _outputDevice = new PortAudioOutput(_mixer);
-                _outputDevice.Play();
-                _logger?.LogInformation("Initialized shared audio mixer with format: {Format}", _mixerFormat);
-            }
-            catch (Exception ex)
-            {
-                _logger?.LogError(ex, "Failed to initialize audio mixer");
-                _mixer?.Dispose();
-                _outputDevice?.Dispose();
-                _mixer = null;
-                _outputDevice = null;
-                throw;
-            }
-        }
-    }
-
-    public bool Play(string trackId, float volume = 1.0f, float pitch = 0.0f, float pan = 0.0f, SoundPriority priority = SoundPriority.Normal)
+    public bool Play(string trackId, float volume = 1.0f, float pitch = 0.0f, float pan = 0.0f,
+        SoundPriority priority = SoundPriority.Normal)
     {
         if (_disposed || string.IsNullOrEmpty(trackId))
+        {
             return false;
+        }
 
         // Look up audio definition by track ID
-        var definition = _audioRegistry.GetByTrackId(trackId);
+        AudioEntity? definition = _audioRegistry.GetByTrackId(trackId);
         if (definition == null)
         {
             _logger?.LogWarning("Audio definition not found for track ID: {TrackId}", trackId);
@@ -122,10 +95,13 @@ public class PortAudioSoundEffectManager : ISoundEffectManager
         return PlayFromFile(fullPath, volume, pitch, pan, priority);
     }
 
-    public bool PlayFromFile(string filePath, float volume = 1.0f, float pitch = 0.0f, float pan = 0.0f, SoundPriority priority = SoundPriority.Normal)
+    public bool PlayFromFile(string filePath, float volume = 1.0f, float pitch = 0.0f, float pan = 0.0f,
+        SoundPriority priority = SoundPriority.Normal)
     {
         if (_disposed || string.IsNullOrEmpty(filePath))
+        {
             return false;
+        }
 
         if (!File.Exists(filePath))
         {
@@ -134,7 +110,7 @@ public class PortAudioSoundEffectManager : ISoundEffectManager
         }
 
         // Check if we've hit the concurrent sound limit
-        if (_activeSounds.Count >= _maxConcurrentSounds)
+        if (_activeSounds.Count >= MaxConcurrentSounds)
         {
             // Try to evict a lower priority sound
             if (!TryEvictLowerPrioritySound(priority))
@@ -171,12 +147,15 @@ public class PortAudioSoundEffectManager : ISoundEffectManager
         }
     }
 
-    public ILoopingSoundHandle? PlayLooping(string trackId, float volume = 1.0f, float pitch = 0.0f, float pan = 0.0f, SoundPriority priority = SoundPriority.Normal)
+    public ILoopingSoundHandle? PlayLooping(string trackId, float volume = 1.0f, float pitch = 0.0f, float pan = 0.0f,
+        SoundPriority priority = SoundPriority.Normal)
     {
         if (_disposed || string.IsNullOrEmpty(trackId))
+        {
             return null;
+        }
 
-        var definition = _audioRegistry.GetByTrackId(trackId);
+        AudioEntity? definition = _audioRegistry.GetByTrackId(trackId);
         if (definition == null)
         {
             _logger?.LogWarning("Audio definition not found for track ID: {TrackId}", trackId);
@@ -194,10 +173,13 @@ public class PortAudioSoundEffectManager : ISoundEffectManager
         return PlayLoopingFromFile(fullPath, volume, pitch, pan, priority);
     }
 
-    public ILoopingSoundHandle? PlayLoopingFromFile(string filePath, float volume = 1.0f, float pitch = 0.0f, float pan = 0.0f, SoundPriority priority = SoundPriority.Normal)
+    public ILoopingSoundHandle? PlayLoopingFromFile(string filePath, float volume = 1.0f, float pitch = 0.0f,
+        float pan = 0.0f, SoundPriority priority = SoundPriority.Normal)
     {
         if (_disposed || string.IsNullOrEmpty(filePath))
+        {
             return null;
+        }
 
         if (!File.Exists(filePath))
         {
@@ -205,7 +187,7 @@ public class PortAudioSoundEffectManager : ISoundEffectManager
             return null;
         }
 
-        if (_activeSounds.Count >= _maxConcurrentSounds)
+        if (_activeSounds.Count >= MaxConcurrentSounds)
         {
             if (!TryEvictLowerPrioritySound(priority))
             {
@@ -244,13 +226,15 @@ public class PortAudioSoundEffectManager : ISoundEffectManager
     public void Update()
     {
         if (_disposed)
+        {
             return;
+        }
 
         // Clean up stopped sounds - no LINQ, direct iteration
         // Pre-allocate list for stopped sound IDs (most frames have 0-2 stopped sounds)
         var stoppedSounds = new List<Guid>(4);
 
-        foreach (var kvp in _activeSounds)
+        foreach (KeyValuePair<Guid, SoundInstance> kvp in _activeSounds)
         {
             if (!kvp.Value.IsPlaying)
             {
@@ -261,7 +245,7 @@ public class PortAudioSoundEffectManager : ISoundEffectManager
         // Remove stopped sounds
         for (int i = 0; i < stoppedSounds.Count; i++)
         {
-            if (_activeSounds.TryRemove(stoppedSounds[i], out var sound))
+            if (_activeSounds.TryRemove(stoppedSounds[i], out SoundInstance? sound))
             {
                 sound.Dispose();
             }
@@ -271,11 +255,13 @@ public class PortAudioSoundEffectManager : ISoundEffectManager
     public void StopAll()
     {
         if (_disposed)
+        {
             return;
+        }
 
         lock (_lock)
         {
-            foreach (var sound in _activeSounds.Values)
+            foreach (SoundInstance sound in _activeSounds.Values)
             {
                 sound.Stop();
             }
@@ -285,20 +271,23 @@ public class PortAudioSoundEffectManager : ISoundEffectManager
     public void Preload(params string[] trackIds)
     {
         if (_disposed || trackIds == null)
+        {
             return;
+        }
 
         // PortAudio doesn't require preloading as files are streamed
         // This method is provided for interface compatibility and path validation
-        foreach (var trackId in trackIds)
+        foreach (string trackId in trackIds)
         {
-            var definition = _audioRegistry.GetByTrackId(trackId);
+            AudioEntity? definition = _audioRegistry.GetByTrackId(trackId);
             if (definition != null)
             {
                 // Resolve path using content provider (supports mods)
                 string? fullPath = _contentProvider.ResolveContentPath("Root", definition.AudioPath);
                 if (fullPath == null)
                 {
-                    _logger?.LogWarning("Audio file not found for preload: {TrackId} -> {AudioPath}", trackId, definition.AudioPath);
+                    _logger?.LogWarning("Audio file not found for preload: {TrackId} -> {AudioPath}", trackId,
+                        definition.AudioPath);
                 }
             }
         }
@@ -306,20 +295,23 @@ public class PortAudioSoundEffectManager : ISoundEffectManager
 
     public (int active, int max) GetStatistics()
     {
-        return (_activeSounds.Count, _maxConcurrentSounds);
+        return (_activeSounds.Count, MaxConcurrentSounds);
     }
 
     public void Dispose()
     {
         if (_disposed)
+        {
             return;
+        }
 
         lock (_lock)
         {
-            foreach (var sound in _activeSounds.Values)
+            foreach (SoundInstance sound in _activeSounds.Values)
             {
                 sound.Dispose();
             }
+
             _activeSounds.Clear();
 
             // Dispose shared output device and mixer
@@ -342,9 +334,47 @@ public class PortAudioSoundEffectManager : ISoundEffectManager
         GC.SuppressFinalize(this);
     }
 
+    /// <summary>
+    ///     Ensures the shared mixer and output device are initialized.
+    ///     Called lazily on first sound playback.
+    /// </summary>
+    private void EnsureMixerInitialized()
+    {
+        if (_mixer != null && _outputDevice != null)
+        {
+            return;
+        }
+
+        lock (_lock)
+        {
+            // Double-check after acquiring lock
+            if (_mixer != null && _outputDevice != null)
+            {
+                return;
+            }
+
+            try
+            {
+                _mixer = new AudioMixer(_mixerFormat);
+                _outputDevice = new PortAudioOutput(_mixer);
+                _outputDevice.Play();
+                _logger?.LogInformation("Initialized shared audio mixer with format: {Format}", _mixerFormat);
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "Failed to initialize audio mixer");
+                _mixer?.Dispose();
+                _outputDevice?.Dispose();
+                _mixer = null;
+                _outputDevice = null;
+                throw;
+            }
+        }
+    }
+
     internal void RemoveSound(Guid id)
     {
-        if (_activeSounds.TryRemove(id, out var sound))
+        if (_activeSounds.TryRemove(id, out SoundInstance? sound))
         {
             sound.Dispose();
         }
@@ -361,7 +391,9 @@ public class PortAudioSoundEffectManager : ISoundEffectManager
         // Never evict sounds to make room for Background priority
         // Critical and UI sounds are protected from eviction
         if (newSoundPriority <= SoundPriority.Background)
+        {
             return false;
+        }
 
         // Find lowest priority, oldest sound that is below new sound's priority
         Guid candidateId = Guid.Empty;
@@ -369,17 +401,21 @@ public class PortAudioSoundEffectManager : ISoundEffectManager
         DateTime oldestTime = DateTime.MaxValue;
         bool found = false;
 
-        foreach (var kvp in _activeSounds)
+        foreach (KeyValuePair<Guid, SoundInstance> kvp in _activeSounds)
         {
-            var sound = kvp.Value;
+            SoundInstance sound = kvp.Value;
 
             // Skip protected priorities (Critical and UI are never evicted)
             if (sound.Priority >= SoundPriority.Critical)
+            {
                 continue;
+            }
 
             // Skip sounds at or above the new sound's priority
             if (sound.Priority >= newSoundPriority)
+            {
                 continue;
+            }
 
             // Find the lowest priority, oldest sound
             if (sound.Priority < lowestPriority ||
@@ -392,7 +428,7 @@ public class PortAudioSoundEffectManager : ISoundEffectManager
             }
         }
 
-        if (found && _activeSounds.TryRemove(candidateId, out var evictedSound))
+        if (found && _activeSounds.TryRemove(candidateId, out SoundInstance? evictedSound))
         {
             _logger?.LogDebug("Evicted sound with priority {Priority} to make room for priority {NewPriority}",
                 lowestPriority, newSoundPriority);
@@ -408,48 +444,14 @@ public class PortAudioSoundEffectManager : ISoundEffectManager
     /// </summary>
     private class SoundInstance : IDisposable
     {
-        private readonly VorbisReader _reader;
-        private readonly VolumeSampleProvider _volumeProvider;
-        private readonly PanningSampleProvider? _panningProvider;
         private readonly ILogger? _logger;
         private readonly PortAudioSoundEffectManager _manager;
         private readonly AudioMixer _mixer;
-        private AudioMixer.MixerInput? _mixerInput;
+        private readonly PanningSampleProvider? _panningProvider;
+        private readonly VorbisReader _reader;
+        private readonly VolumeSampleProvider _volumeProvider;
         private bool _disposed;
-
-        public Guid Id { get; } = Guid.NewGuid();
-        public DateTime CreatedAt { get; } = DateTime.UtcNow;
-        public bool IsLooping { get; }
-        public SoundPriority Priority { get; }
-
-        public bool IsPlaying
-        {
-            get
-            {
-                if (_disposed || _mixerInput == null)
-                    return false;
-
-                // Sound is playing if it's still in the mixer
-                // The mixer automatically removes sources that have finished
-                return true;
-            }
-        }
-
-        public float Volume
-        {
-            get => _volumeProvider.Volume;
-            set => _volumeProvider.Volume = Math.Clamp(value, AudioConstants.MinVolume, AudioConstants.MaxVolume);
-        }
-
-        public float Pan
-        {
-            get => _panningProvider?.Pan ?? 0f;
-            set
-            {
-                if (_panningProvider != null)
-                    _panningProvider.Pan = Math.Clamp(value, AudioConstants.MinPan, AudioConstants.MaxPan);
-            }
-        }
+        private AudioMixer.MixerInput? _mixerInput;
 
         public SoundInstance(
             string filePath,
@@ -519,7 +521,7 @@ public class PortAudioSoundEffectManager : ISoundEffectManager
                 }
 
                 // Add to mixer and start playback
-                _mixerInput = _mixer.AddSource(finalProvider, 1.0f);
+                _mixerInput = _mixer.AddSource(finalProvider);
             }
             catch (Exception ex)
             {
@@ -529,68 +531,50 @@ public class PortAudioSoundEffectManager : ISoundEffectManager
             }
         }
 
-        public void Stop()
-        {
-            if (_disposed)
-                return;
+        public Guid Id { get; } = Guid.NewGuid();
+        public DateTime CreatedAt { get; } = DateTime.UtcNow;
+        public bool IsLooping { get; }
+        public SoundPriority Priority { get; }
 
-            try
+        public bool IsPlaying
+        {
+            get
             {
-                // Remove from mixer
-                if (_mixerInput != null)
+                if (_disposed || _mixerInput == null)
                 {
-                    _mixer.RemoveSource(_mixerInput);
-                    _mixerInput = null;
+                    return false;
                 }
-            }
-            catch (Exception ex)
-            {
-                _logger?.LogWarning(ex, "Error stopping sound instance");
+
+                // Sound is playing if it's still in the mixer
+                // The mixer automatically removes sources that have finished
+                return true;
             }
         }
 
-        public void Pause()
+        public float Volume
         {
-            if (_disposed)
-                return;
-
-            try
-            {
-                // Pause by setting volume to 0 (mixer doesn't support pause)
-                if (_mixerInput != null)
-                {
-                    _mixerInput.Volume = 0f;
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger?.LogWarning(ex, "Error pausing sound instance");
-            }
+            get => _volumeProvider.Volume;
+            set => _volumeProvider.Volume = Math.Clamp(value, AudioConstants.MinVolume, AudioConstants.MaxVolume);
         }
 
-        public void Resume()
+        public float Pan
         {
-            if (_disposed)
-                return;
-
-            try
+            get => _panningProvider?.Pan ?? 0f;
+            set
             {
-                // Resume by restoring volume (mixer doesn't support pause)
-                if (_mixerInput != null)
+                if (_panningProvider != null)
                 {
-                    _mixerInput.Volume = 1.0f;
+                    _panningProvider.Pan = Math.Clamp(value, AudioConstants.MinPan, AudioConstants.MaxPan);
                 }
-            }
-            catch (Exception ex)
-            {
-                _logger?.LogWarning(ex, "Error resuming sound instance");
             }
         }
 
         public void Dispose()
         {
             if (_disposed)
+            {
                 return;
+            }
 
             try
             {
@@ -610,6 +594,70 @@ public class PortAudioSoundEffectManager : ISoundEffectManager
 
             _disposed = true;
         }
+
+        public void Stop()
+        {
+            if (_disposed)
+            {
+                return;
+            }
+
+            try
+            {
+                // Remove from mixer
+                if (_mixerInput != null)
+                {
+                    _mixer.RemoveSource(_mixerInput);
+                    _mixerInput = null;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogWarning(ex, "Error stopping sound instance");
+            }
+        }
+
+        public void Pause()
+        {
+            if (_disposed)
+            {
+                return;
+            }
+
+            try
+            {
+                // Pause by setting volume to 0 (mixer doesn't support pause)
+                if (_mixerInput != null)
+                {
+                    _mixerInput.Volume = 0f;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogWarning(ex, "Error pausing sound instance");
+            }
+        }
+
+        public void Resume()
+        {
+            if (_disposed)
+            {
+                return;
+            }
+
+            try
+            {
+                // Resume by restoring volume (mixer doesn't support pause)
+                if (_mixerInput != null)
+                {
+                    _mixerInput.Volume = 1.0f;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogWarning(ex, "Error resuming sound instance");
+            }
+        }
     }
 
     /// <summary>
@@ -617,8 +665,8 @@ public class PortAudioSoundEffectManager : ISoundEffectManager
     /// </summary>
     private class LoopingSampleProvider : ISampleProvider
     {
-        private readonly VorbisReader _source;
         private const int MaxResetRetries = 3;
+        private readonly VorbisReader _source;
 
         public LoopingSampleProvider(VorbisReader source)
         {
@@ -695,7 +743,9 @@ public class PortAudioSoundEffectManager : ISoundEffectManager
             set
             {
                 if (!_disposed)
+                {
                     _instance.Volume = value;
+                }
             }
         }
 
@@ -705,14 +755,18 @@ public class PortAudioSoundEffectManager : ISoundEffectManager
             set
             {
                 if (!_disposed)
+                {
                     _instance.Pan = value;
+                }
             }
         }
 
         public void Stop()
         {
             if (_disposed)
+            {
                 return;
+            }
 
             _instance.Stop();
             _manager.RemoveSound(_instance.Id);
@@ -721,23 +775,28 @@ public class PortAudioSoundEffectManager : ISoundEffectManager
         public void Pause()
         {
             if (!_disposed)
+            {
                 _instance.Pause();
+            }
         }
 
         public void Resume()
         {
             if (!_disposed)
+            {
                 _instance.Resume();
+            }
         }
 
         public void Dispose()
         {
             if (_disposed)
+            {
                 return;
+            }
 
             Stop();
             _disposed = true;
         }
     }
 }
-

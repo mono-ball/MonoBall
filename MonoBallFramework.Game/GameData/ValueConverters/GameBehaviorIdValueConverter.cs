@@ -12,7 +12,9 @@ public class GameBehaviorIdValueConverter : ValueConverter<GameBehaviorId, strin
         : base(
             v => v.Value,
             v => ConvertFromString(v)
-        ) { }
+        )
+    {
+    }
 
     private static GameBehaviorId ConvertFromString(string value)
     {
@@ -29,7 +31,9 @@ public class NullableGameBehaviorIdValueConverter : ValueConverter<GameBehaviorI
         : base(
             v => v != null ? v.Value : null,
             v => ConvertFromString(v)
-        ) { }
+        )
+    {
+    }
 
     private static GameBehaviorId? ConvertFromString(string? value)
     {

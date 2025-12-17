@@ -35,6 +35,7 @@ public class EventBus(ILogger<EventBus>? logger = null) : IEventBus
 
     // OPTIMIZATION: Cache handler arrays to avoid dictionary enumeration on hot path
     private readonly ConcurrentDictionary<Type, HandlerCache> _handlerCache = new();
+
     private readonly ConcurrentDictionary<Type, ConcurrentDictionary<int, Delegate>> _handlers =
         new();
 

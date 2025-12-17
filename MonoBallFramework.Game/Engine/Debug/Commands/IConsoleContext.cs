@@ -233,7 +233,7 @@ public interface IConsoleContext
         string Description,
         int WatchCount,
         DateTime CreatedAt
-    )> ListWatchPresets();
+        )> ListWatchPresets();
 
     /// <summary>Deletes a watch preset.</summary>
     bool DeleteWatchPreset(string name);

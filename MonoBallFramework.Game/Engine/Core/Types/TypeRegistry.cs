@@ -23,12 +23,12 @@ namespace MonoBallFramework.Game.Engine.Core.Types;
 public class TypeRegistry<T> : IAsyncDisposable
     where T : ITypeDefinition
 {
-    private readonly string _dataPath;
     private readonly string _contentType;
-    private readonly IServiceProvider? _serviceProvider;
+    private readonly string _dataPath;
     private readonly ConcurrentDictionary<string, T> _definitions = new();
     private readonly ILogger _logger;
     private readonly ConcurrentDictionary<string, object> _scripts = new();
+    private readonly IServiceProvider? _serviceProvider;
 
     // Lazy resolution to avoid circular dependency:
     // ModLoader -> TypeRegistry -> IContentProvider -> IModLoader -> ModLoader
@@ -61,7 +61,7 @@ public class TypeRegistry<T> : IAsyncDisposable
     /// <param name="logger">Logger instance.</param>
     [Obsolete("Use the constructor with contentType and serviceProvider parameters for mod support.")]
     public TypeRegistry(string dataPath, ILogger logger)
-        : this(dataPath, string.Empty, logger, null)
+        : this(dataPath, string.Empty, logger)
     {
     }
 
@@ -85,6 +85,7 @@ public class TypeRegistry<T> : IAsyncDisposable
                         _contentType);
                 }
             }
+
             return _contentProvider;
         }
     }
@@ -164,7 +165,7 @@ public class TypeRegistry<T> : IAsyncDisposable
         // Try to use ContentProvider for mod-aware loading
         if (ContentProvider != null && !string.IsNullOrEmpty(_contentType))
         {
-            jsonFiles = ContentProvider.GetAllContentPaths(_contentType, "*.json");
+            jsonFiles = ContentProvider.GetAllContentPaths(_contentType);
             _logger.LogDebug(
                 "TypeRegistry<{TypeName}> using ContentProvider with content type '{ContentType}'",
                 typeof(T).Name,
@@ -226,7 +227,7 @@ public class TypeRegistry<T> : IAsyncDisposable
         {
             PropertyNameCaseInsensitive = true,
             ReadCommentHandling = JsonCommentHandling.Skip,
-            AllowTrailingCommas = true,
+            AllowTrailingCommas = true
         };
 
         T? definition = JsonSerializer.Deserialize<T>(json, options);

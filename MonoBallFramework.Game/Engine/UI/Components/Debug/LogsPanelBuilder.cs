@@ -51,17 +51,12 @@ public class LogsPanelBuilder
         return new TextBuffer("log_buffer")
         {
             // BackgroundColor uses theme fallback - don't set explicitly
-            AutoScroll = true,
-            MaxLines = _maxLogs,
-            Constraint = new LayoutConstraint { Anchor = Anchor.StretchTop },
+            AutoScroll = true, MaxLines = _maxLogs, Constraint = new LayoutConstraint { Anchor = Anchor.StretchTop }
         };
     }
 
     private static StatusBar CreateDefaultStatusBar()
     {
-        return new StatusBar("logs_status")
-        {
-            Constraint = new LayoutConstraint { Anchor = Anchor.StretchBottom },
-        };
+        return new StatusBar("logs_status") { Constraint = new LayoutConstraint { Anchor = Anchor.StretchBottom } };
     }
 }

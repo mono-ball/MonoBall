@@ -6,8 +6,8 @@ using Microsoft.Extensions.Logging;
 namespace MonoBallFramework.Game.Engine.Core.Modding.CustomTypes;
 
 /// <summary>
-/// Validates custom type definitions against JSON Schemas.
-/// Provides clear error messages for modders when their definitions don't match the schema.
+///     Validates custom type definitions against JSON Schemas.
+///     Provides clear error messages for modders when their definitions don't match the schema.
 /// </summary>
 public sealed class CustomTypeSchemaValidator : IDisposable
 {
@@ -20,8 +20,13 @@ public sealed class CustomTypeSchemaValidator : IDisposable
         _logger = logger;
     }
 
+    public void Dispose()
+    {
+        _schemaCache.Clear();
+    }
+
     /// <summary>
-    /// Loads and caches a JSON Schema from a file path.
+    ///     Loads and caches a JSON Schema from a file path.
     /// </summary>
     /// <param name="schemaPath">Absolute path to the schema file.</param>
     /// <returns>The parsed schema, or null if loading failed.</returns>
@@ -51,7 +56,7 @@ public sealed class CustomTypeSchemaValidator : IDisposable
     }
 
     /// <summary>
-    /// Validates a JSON document against a schema.
+    ///     Validates a JSON document against a schema.
     /// </summary>
     /// <param name="schema">The schema to validate against.</param>
     /// <param name="document">The JSON document to validate.</param>
@@ -61,12 +66,9 @@ public sealed class CustomTypeSchemaValidator : IDisposable
     {
         try
         {
-            var evaluationOptions = new EvaluationOptions
-            {
-                OutputFormat = OutputFormat.List
-            };
+            var evaluationOptions = new EvaluationOptions { OutputFormat = OutputFormat.List };
 
-            var result = schema.Evaluate(document.RootElement, evaluationOptions);
+            EvaluationResults result = schema.Evaluate(document.RootElement, evaluationOptions);
 
             if (result.IsValid)
             {
@@ -89,14 +91,14 @@ public sealed class CustomTypeSchemaValidator : IDisposable
     }
 
     /// <summary>
-    /// Validates a JSON file against a schema file.
+    ///     Validates a JSON file against a schema file.
     /// </summary>
     /// <param name="schemaPath">Path to the schema file.</param>
     /// <param name="definitionPath">Path to the definition file to validate.</param>
     /// <returns>A validation result with success status and any errors.</returns>
     public SchemaValidationResult ValidateFile(string schemaPath, string definitionPath)
     {
-        var schema = LoadSchema(schemaPath);
+        JsonSchema? schema = LoadSchema(schemaPath);
         if (schema == null)
         {
             return SchemaValidationResult.Failed(new List<SchemaValidationError>
@@ -124,7 +126,7 @@ public sealed class CustomTypeSchemaValidator : IDisposable
     {
         if (!result.IsValid && result.Errors != null)
         {
-            foreach (var error in result.Errors)
+            foreach (KeyValuePair<string, string> error in result.Errors)
             {
                 string path = result.InstanceLocation?.ToString() ?? "";
                 errors.Add(new SchemaValidationError(path, $"{error.Key}: {error.Value}"));
@@ -133,7 +135,7 @@ public sealed class CustomTypeSchemaValidator : IDisposable
 
         if (result.Details != null)
         {
-            foreach (var detail in result.Details)
+            foreach (EvaluationResults detail in result.Details)
             {
                 CollectErrors(detail, errors);
             }
@@ -141,44 +143,47 @@ public sealed class CustomTypeSchemaValidator : IDisposable
     }
 
     /// <summary>
-    /// Clears the schema cache (useful for hot reload).
+    ///     Clears the schema cache (useful for hot reload).
     /// </summary>
     public void ClearCache()
-    {
-        _schemaCache.Clear();
-    }
-
-    public void Dispose()
     {
         _schemaCache.Clear();
     }
 }
 
 /// <summary>
-/// Result of schema validation.
+///     Result of schema validation.
 /// </summary>
 public sealed class SchemaValidationResult
 {
-    public bool IsValid { get; }
-    public IReadOnlyList<SchemaValidationError> Errors { get; }
-
     private SchemaValidationResult(bool isValid, IReadOnlyList<SchemaValidationError> errors)
     {
         IsValid = isValid;
         Errors = errors;
     }
 
-    public static SchemaValidationResult Success() => new(true, Array.Empty<SchemaValidationError>());
+    public bool IsValid { get; }
+    public IReadOnlyList<SchemaValidationError> Errors { get; }
 
-    public static SchemaValidationResult Failed(IReadOnlyList<SchemaValidationError> errors) => new(false, errors);
+    public static SchemaValidationResult Success()
+    {
+        return new SchemaValidationResult(true, Array.Empty<SchemaValidationError>());
+    }
+
+    public static SchemaValidationResult Failed(IReadOnlyList<SchemaValidationError> errors)
+    {
+        return new SchemaValidationResult(false, errors);
+    }
 
     /// <summary>
-    /// Formats all errors as a single string for logging.
+    ///     Formats all errors as a single string for logging.
     /// </summary>
     public string FormatErrors()
     {
         if (Errors.Count == 0)
+        {
             return "No errors";
+        }
 
         return string.Join(Environment.NewLine, Errors.Select(e =>
             string.IsNullOrEmpty(e.Path) ? e.Message : $"  {e.Path}: {e.Message}"));
@@ -186,6 +191,6 @@ public sealed class SchemaValidationResult
 }
 
 /// <summary>
-/// A single schema validation error.
+///     A single schema validation error.
 /// </summary>
 public sealed record SchemaValidationError(string Path, string Message);

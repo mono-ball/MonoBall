@@ -13,11 +13,13 @@ public class GameTrainerIdValueConverter : ValueConverter<GameTrainerId, string>
         : base(
             v => v.Value,
             v => ConvertFromString(v)
-        ) { }
+        )
+    {
+    }
 
     private static GameTrainerId ConvertFromString(string value)
     {
-        return GameTrainerId.TryCreate(value) ?? GameTrainerId.Create(value, null);
+        return GameTrainerId.TryCreate(value) ?? GameTrainerId.Create(value);
     }
 }
 
@@ -30,7 +32,9 @@ public class NullableGameTrainerIdValueConverter : ValueConverter<GameTrainerId?
         : base(
             v => v != null ? v.Value : null,
             v => ConvertFromString(v)
-        ) { }
+        )
+    {
+    }
 
     private static GameTrainerId? ConvertFromString(string? value)
     {
