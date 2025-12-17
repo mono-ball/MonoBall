@@ -4,9 +4,6 @@ ide: QDNET
 profile:
   name: qodana.recommended
 
-dotnet:
-  solution: MonoBallFramework.Game/MonoBallFramework.Game.csproj
-
 exclude:
   - name: All
     paths:
