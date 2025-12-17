@@ -199,17 +199,20 @@ Use 'Help()' in console for full API reference.";
         string watchName = args[1];
 
         // Create a callback that checks if the watch has an alert
+        // CA1031: Watch alerts can throw various exceptions; returning false on error is intentional
+#pragma warning disable CA1031
         Func<bool> alertChecker = () =>
         {
             try
             {
                 return context.Watches.IsAlertActive(watchName);
             }
-            catch
+            catch (Exception)
             {
                 return false;
             }
         };
+#pragma warning restore CA1031
 
         int id = breakpoints.AddWatchAlertBreakpoint(watchName, alertChecker);
         context.WriteLine($"Breakpoint #{id} added: on watch alert '{watchName}'", theme.Success);

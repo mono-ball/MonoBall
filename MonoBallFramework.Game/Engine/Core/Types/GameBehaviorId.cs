@@ -130,7 +130,7 @@ public sealed record GameBehaviorId : EntityId
         {
             return new GameBehaviorId(value);
         }
-        catch
+        catch (ArgumentException)
         {
             return null;
         }

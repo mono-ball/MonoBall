@@ -86,7 +86,7 @@ public sealed record GamePopupOutlineId : EntityId
         {
             return new GamePopupOutlineId(value);
         }
-        catch
+        catch (ArgumentException)
         {
             return null;
         }

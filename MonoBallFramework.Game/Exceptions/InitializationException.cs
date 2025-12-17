@@ -41,7 +41,7 @@ public class ConfigurationException : InitializationException
     }
 
     public string ConfigSection =>
-        Context.TryGetValue("ConfigSection", out object? section) ? section?.ToString() ?? "" : "";
+        Context.TryGetValue("ConfigSection", out object? section) ? section!.ToString() ?? "" : "";
 
     public override bool IsRecoverable => false; // Config errors prevent startup
 
@@ -73,7 +73,7 @@ public class DependencyInjectionException : InitializationException
     }
 
     public string ServiceType =>
-        Context.TryGetValue("ServiceType", out object? type) ? type?.ToString() ?? "" : "";
+        Context.TryGetValue("ServiceType", out object? type) ? type!.ToString() ?? "" : "";
 
     public override bool IsRecoverable => false; // DI errors prevent startup
 
@@ -105,7 +105,7 @@ public class InitializationPipelineException : InitializationException
     }
 
     public string StepName =>
-        Context.TryGetValue("StepName", out object? step) ? step?.ToString() ?? "" : "";
+        Context.TryGetValue("StepName", out object? step) ? step!.ToString() ?? "" : "";
 
     public override bool IsRecoverable => false; // Pipeline failures prevent startup
 
@@ -155,7 +155,7 @@ public class InitialMapLoadException : InitializationException
         WithContext("MapId", mapId);
     }
 
-    public string MapId => Context.TryGetValue("MapId", out object? id) ? id?.ToString() ?? "" : "";
+    public string MapId => Context.TryGetValue("MapId", out object? id) ? id!.ToString() ?? "" : "";
 
     public override bool IsRecoverable => false; // Need initial map to start
 

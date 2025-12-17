@@ -71,7 +71,7 @@ public sealed record GameThemeId : EntityId
         {
             return new GameThemeId(value);
         }
-        catch
+        catch (ArgumentException)
         {
             return null;
         }

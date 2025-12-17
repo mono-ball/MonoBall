@@ -115,7 +115,7 @@ public sealed record GameFlagId : EntityId
         {
             return new GameFlagId(value);
         }
-        catch
+        catch (ArgumentException)
         {
             return null;
         }

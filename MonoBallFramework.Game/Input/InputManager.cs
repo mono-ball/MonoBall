@@ -67,7 +67,7 @@ public class InputManager(ILogger<InputManager> logger)
         QueryDescription query = QueryCache.Get<Player, Camera>();
         world.Query(
             in query,
-            (Entity entity, ref Player player, ref Camera camera) =>
+            (Entity _, ref Player _, ref Camera camera) =>
             {
                 // Zoom in with + or = key (since + requires shift)
                 if (

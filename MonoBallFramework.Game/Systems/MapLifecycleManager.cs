@@ -222,7 +222,7 @@ public class MapLifecycleManager(
         int tilesetsUnloaded = UnloadMapTextures(metadata.TilesetTextureIds);
 
         // 3. PHASE 2: Unload sprite textures for this map
-        int spritesUnloaded = UnloadSpriteTextures(mapId, metadata.SpriteTextureIds);
+        int spritesUnloaded = UnloadSpriteTextures(mapId);
 
         _loadedMaps.Remove(mapId.Value);
 
@@ -358,7 +358,7 @@ public class MapLifecycleManager(
     /// <summary>
     ///     PHASE 2: Unloads sprite textures for a map (with reference counting).
     /// </summary>
-    private int UnloadSpriteTextures(GameMapId mapId, HashSet<string> spriteTextureKeys)
+    private int UnloadSpriteTextures(GameMapId mapId)
     {
         try
         {

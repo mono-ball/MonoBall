@@ -114,6 +114,8 @@ public class PollingWatcher : IScriptWatcher
             return;
         }
 
+        // CA1031: File system operations can throw many exception types; catching general Exception is intentional
+#pragma warning disable CA1031
         try
         {
             string searchPattern = _filter.Replace("*", "");
@@ -140,12 +142,15 @@ public class PollingWatcher : IScriptWatcher
         {
             _logger.LogError(ex, "Failed to scan directory {Directory}", _directory);
         }
+#pragma warning restore CA1031
     }
 
     private async Task PollDirectoryAsync(CancellationToken cancellationToken)
     {
         while (!cancellationToken.IsCancellationRequested)
         {
+            // CA1031: Polling loop must continue despite errors; catching general Exception is intentional
+#pragma warning disable CA1031
             try
             {
                 await Task.Delay(_pollingInterval, cancellationToken);
@@ -166,6 +171,7 @@ public class PollingWatcher : IScriptWatcher
                     }
                 );
             }
+#pragma warning restore CA1031
         }
     }
 

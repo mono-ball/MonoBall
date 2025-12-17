@@ -72,7 +72,7 @@ public sealed record GameMapSectionId : EntityId
         {
             return new GameMapSectionId(value);
         }
-        catch
+        catch (ArgumentException)
         {
             return null;
         }

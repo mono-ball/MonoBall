@@ -202,6 +202,8 @@ public static class ThemeManager
     /// </summary>
     private static void SaveThemePreference(string themeName)
     {
+        // CA1031: File I/O can throw many exception types; silently failing is intentional
+#pragma warning disable CA1031
         try
         {
             string filePath = GetPreferenceFilePath();
@@ -219,10 +221,11 @@ public static class ThemeManager
             );
             File.WriteAllText(filePath, json);
         }
-        catch
+        catch (Exception)
         {
             // Silently fail - theme persistence is not critical
         }
+#pragma warning restore CA1031
     }
 
     /// <summary>

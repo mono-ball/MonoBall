@@ -301,6 +301,7 @@ public class EventInspectorAdapter
     private bool IsCustomEvent(Type eventType)
     {
         // Consider an event "custom" if it's not in the core engine namespaces
-        return !eventType.Namespace?.StartsWith("MonoBallFramework.Engine.Core.Types.Events") ?? false;
+        return eventType.Namespace == null ||
+               !eventType.Namespace.StartsWith("MonoBallFramework.Engine.Core.Types.Events");
     }
 }

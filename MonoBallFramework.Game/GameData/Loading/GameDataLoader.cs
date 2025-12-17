@@ -863,6 +863,8 @@ public class GameDataLoader
         {
             ct.ThrowIfCancellationRequested();
 
+            // CA1031: File I/O and JSON parsing can throw many exception types; catching general Exception is intentional
+#pragma warning disable CA1031
             try
             {
                 string json = await File.ReadAllTextAsync(file, ct);
@@ -900,6 +902,7 @@ public class GameDataLoader
             {
                 _logger.LogWarning(ex, "Failed to load {ContentType}: {File}", contentType, file);
             }
+#pragma warning restore CA1031
         }
 
         await _context.SaveChangesAsync(ct);

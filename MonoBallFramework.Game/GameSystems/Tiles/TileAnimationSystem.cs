@@ -59,7 +59,7 @@ public class TileAnimationSystem(ILogger<TileAnimationSystem>? logger = null)
         // - Sequential Query: <1ms consistent (no overhead)
         world.Query(
             in EcsQueries.AnimatedTiles,
-            (Entity entity, ref AnimatedTile animTile, ref TileSprite sprite) =>
+            (Entity _, ref AnimatedTile animTile, ref TileSprite sprite) =>
             {
                 UpdateTileAnimation(ref animTile, ref sprite, globalTimer);
             }
@@ -74,7 +74,7 @@ public class TileAnimationSystem(ILogger<TileAnimationSystem>? logger = null)
 
             world.Query(
                 in EcsQueries.AnimatedTiles,
-                (Entity entity, ref AnimatedTile tile) =>
+                (Entity _, ref AnimatedTile tile) =>
                 {
                     tileCount++;
                     if (tile.FrameSourceRects != null && tile.FrameSourceRects.Length > 0)

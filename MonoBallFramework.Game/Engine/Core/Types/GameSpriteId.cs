@@ -133,7 +133,7 @@ public sealed record GameSpriteId : EntityId
         {
             return new GameSpriteId(value);
         }
-        catch
+        catch (ArgumentException)
         {
             return null;
         }

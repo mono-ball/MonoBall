@@ -86,7 +86,7 @@ public sealed record GamePopupBackgroundId : EntityId
         {
             return new GamePopupBackgroundId(value);
         }
-        catch
+        catch (ArgumentException)
         {
             return null;
         }

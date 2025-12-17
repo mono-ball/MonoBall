@@ -35,6 +35,8 @@ public static class StartupScriptLoader
     /// <returns>The script content, or null if the file doesn't exist or can't be read.</returns>
     public static string? LoadStartupScript()
     {
+        // CA1031: File I/O can throw many exception types; silently failing is intentional
+#pragma warning disable CA1031
         try
         {
             if (!File.Exists(StartupScriptPath))
@@ -49,6 +51,7 @@ public static class StartupScriptLoader
             // Silently fail - don't crash the console over a startup script
             return null;
         }
+#pragma warning restore CA1031
     }
 
     /// <summary>
@@ -57,6 +60,8 @@ public static class StartupScriptLoader
     /// <param name="content">The script content to save.</param>
     public static bool SaveStartupScript(string content)
     {
+        // CA1031: File I/O can throw many exception types; silently failing is intentional
+#pragma warning disable CA1031
         try
         {
             File.WriteAllText(StartupScriptPath, content);
@@ -67,6 +72,7 @@ public static class StartupScriptLoader
             // Silently fail
             return false;
         }
+#pragma warning restore CA1031
     }
 
     /// <summary>
@@ -101,6 +107,8 @@ Print(""Type 'Hello(""""World"""")' to test the helper function."");
     /// </summary>
     public static bool DeleteStartupScript()
     {
+        // CA1031: File I/O can throw many exception types; silently failing is intentional
+#pragma warning disable CA1031
         try
         {
             if (File.Exists(StartupScriptPath))
@@ -115,6 +123,7 @@ Print(""Type 'Hello(""""World"""")' to test the helper function."");
             // Silently fail
             return false;
         }
+#pragma warning restore CA1031
     }
 
     /// <summary>

@@ -93,7 +93,7 @@ public sealed record GameAudioId : EntityId
         {
             return new GameAudioId(value);
         }
-        catch
+        catch (ArgumentException)
         {
             return null;
         }

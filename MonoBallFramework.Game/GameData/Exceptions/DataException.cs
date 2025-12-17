@@ -44,7 +44,7 @@ public class MapLoadException : DataException
     /// <summary>
     ///     Gets the map identifier that failed to load.
     /// </summary>
-    public string MapId => Context.TryGetValue("MapId", out object? id) ? id?.ToString() ?? "" : "";
+    public string MapId => Context.TryGetValue("MapId", out object? id) ? id!.ToString() ?? "" : "";
 
     public override bool IsRecoverable => true; // Can fallback to default map
 
@@ -65,10 +65,10 @@ public class MapNotFoundException : DataException
         WithContext("MapId", mapId).WithContext("ExpectedPath", expectedPath);
     }
 
-    public string MapId => Context.TryGetValue("MapId", out object? id) ? id?.ToString() ?? "" : "";
+    public string MapId => Context.TryGetValue("MapId", out object? id) ? id!.ToString() ?? "" : "";
 
     public string ExpectedPath =>
-        Context.TryGetValue("ExpectedPath", out object? path) ? path?.ToString() ?? "" : "";
+        Context.TryGetValue("ExpectedPath", out object? path) ? path!.ToString() ?? "" : "";
 
     public override bool IsRecoverable => true;
 
@@ -96,7 +96,7 @@ public class TilesetLoadException : DataException
     }
 
     public string TilesetId =>
-        Context.TryGetValue("TilesetId", out object? id) ? id?.ToString() ?? "" : "";
+        Context.TryGetValue("TilesetId", out object? id) ? id!.ToString() ?? "" : "";
 
     public override bool IsRecoverable => false; // Map can't render without tileset
 
@@ -123,7 +123,7 @@ public class NpcLoadException : DataException
         WithContext("NpcId", npcId);
     }
 
-    public string NpcId => Context.TryGetValue("NpcId", out object? id) ? id?.ToString() ?? "" : "";
+    public string NpcId => Context.TryGetValue("NpcId", out object? id) ? id!.ToString() ?? "" : "";
 
     public override bool IsRecoverable => true; // Map can load without this NPC
 
@@ -151,7 +151,7 @@ public class TrainerLoadException : DataException
     }
 
     public string TrainerId =>
-        Context.TryGetValue("TrainerId", out object? id) ? id?.ToString() ?? "" : "";
+        Context.TryGetValue("TrainerId", out object? id) ? id!.ToString() ?? "" : "";
 
     public override bool IsRecoverable => true; // Map can load without this trainer
 
@@ -179,7 +179,7 @@ public class DataParsingException : DataException
     }
 
     public string FilePath =>
-        Context.TryGetValue("FilePath", out object? path) ? path?.ToString() ?? "" : "";
+        Context.TryGetValue("FilePath", out object? path) ? path!.ToString() ?? "" : "";
 
     public override bool IsRecoverable => false;
 
@@ -201,10 +201,10 @@ public class DataValidationException : DataException
     }
 
     public string EntityType =>
-        Context.TryGetValue("EntityType", out object? type) ? type?.ToString() ?? "" : "";
+        Context.TryGetValue("EntityType", out object? type) ? type!.ToString() ?? "" : "";
 
     public string EntityId =>
-        Context.TryGetValue("EntityId", out object? id) ? id?.ToString() ?? "" : "";
+        Context.TryGetValue("EntityId", out object? id) ? id!.ToString() ?? "" : "";
 
     public override bool IsRecoverable => true; // Skip invalid data
 

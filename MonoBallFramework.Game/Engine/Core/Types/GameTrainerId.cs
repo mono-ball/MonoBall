@@ -104,7 +104,7 @@ public sealed record GameTrainerId : EntityId
         {
             return new GameTrainerId(value);
         }
-        catch
+        catch (ArgumentException)
         {
             return null;
         }

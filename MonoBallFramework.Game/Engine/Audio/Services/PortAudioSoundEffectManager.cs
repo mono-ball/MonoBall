@@ -315,6 +315,8 @@ public class PortAudioSoundEffectManager : ISoundEffectManager
             _activeSounds.Clear();
 
             // Dispose shared output device and mixer
+            // CA1031: Catching general Exception is intentional in Dispose to ensure cleanup continues
+#pragma warning disable CA1031
             try
             {
                 _outputDevice?.Stop();
@@ -324,6 +326,7 @@ public class PortAudioSoundEffectManager : ISoundEffectManager
             {
                 _logger?.LogWarning(ex, "Error disposing output device");
             }
+#pragma warning restore CA1031
 
             _mixer?.Dispose();
             _mixer = null;

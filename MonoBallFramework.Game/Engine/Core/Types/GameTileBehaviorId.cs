@@ -117,7 +117,7 @@ public sealed record GameTileBehaviorId : EntityId
         {
             return new GameTileBehaviorId(value);
         }
-        catch
+        catch (ArgumentException)
         {
             return null;
         }

@@ -1569,6 +1569,8 @@ public class EntitiesPanel : DebugPanelBase, IEntityOperations
             $"[EntitiesPanel] UpdateDisplayPaged: Loading range [{startIndex}, {endIndex}) count={rangeCount}");
 
         List<EntityInfo> visibleEntities;
+        // CA1031: Entity provider can throw various exception types; catching general Exception is intentional for error display
+#pragma warning disable CA1031
         try
         {
             visibleEntities = _entityRangeProvider(startIndex, rangeCount);
@@ -1585,6 +1587,7 @@ public class EntitiesPanel : DebugPanelBase, IEntityOperations
             UpdateStatusBar();
             return;
         }
+#pragma warning restore CA1031
 
         // Show "entities above" indicator
         if (startIndex > 0)

@@ -784,6 +784,8 @@ public sealed class ModLoader : IModLoader
                 continue;
             }
 
+            // CA1031: File I/O and JSON parsing can throw many exception types; catching general Exception is intentional
+#pragma warning disable CA1031
             try
             {
                 // Validate against schema if provided
@@ -858,6 +860,7 @@ public sealed class ModLoader : IModLoader
             {
                 _logger.LogWarning(ex, "Failed to load custom type definition from {File}", file);
             }
+#pragma warning restore CA1031
         }
 
         if (count > 0)

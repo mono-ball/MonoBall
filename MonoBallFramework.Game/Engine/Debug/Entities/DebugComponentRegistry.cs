@@ -122,6 +122,8 @@ public class DebugComponentRegistry
     /// <summary>
     ///     Gets component properties using reflection on entity.Get<T>().
     /// </summary>
+    // CA1031: Reflection operations can throw many exception types; catching general Exception is intentional
+#pragma warning disable CA1031
     private static Dictionary<string, string> GetComponentPropertiesReflection(
         Entity entity,
         Type componentType
@@ -191,6 +193,7 @@ public class DebugComponentRegistry
 
         return properties;
     }
+#pragma warning restore CA1031
 
     /// <summary>
     ///     Checks if an entity has a component using reflection.
@@ -214,7 +217,7 @@ public class DebugComponentRegistry
 
             return (bool)hasMethod.Invoke(null, new object[] { entity })!;
         }
-        catch
+        catch (Exception)
         {
             return false;
         }
@@ -242,7 +245,7 @@ public class DebugComponentRegistry
             // Use GetPropertiesDynamicWithWorld instead when World is available
             return properties;
         }
-        catch
+        catch (Exception)
         {
             // Return empty on any error
         }

@@ -240,6 +240,8 @@ public class ConsoleSystem : IUpdateSystem
             return;
         }
 
+        // CA1031: System update loop must not crash; catching general Exception is intentional
+#pragma warning disable CA1031
         try
         {
             KeyboardState currentKeyboard = Keyboard.GetState();
@@ -271,6 +273,7 @@ public class ConsoleSystem : IUpdateSystem
         {
             _logger.LogError(ex, "Error updating console system");
         }
+#pragma warning restore CA1031
     }
 
     /// <summary>
@@ -1780,6 +1783,8 @@ public class ConsoleSystem : IUpdateSystem
                 continue;
             }
 
+            // CA1031: Entity access can fail during iteration; catching general Exception is intentional
+#pragma warning disable CA1031
             try
             {
                 List<string> components = DetectEntityComponents(entity);
@@ -1787,13 +1792,14 @@ public class ConsoleSystem : IUpdateSystem
 
                 cache[entity.Id] = new EntityCacheEntry { Name = name, Components = components };
             }
-            catch
+            catch (Exception)
             {
                 cache[entity.Id] = new EntityCacheEntry
                 {
                     Name = $"Entity_{entity.Id}", Components = new List<string>()
                 };
             }
+#pragma warning restore CA1031
         }
 
         return cache;
@@ -2011,6 +2017,8 @@ public class ConsoleSystem : IUpdateSystem
     {
         info.Relationships.Clear();
 
+        // CA1031: Entity access can fail during iteration; catching general Exception is intentional
+#pragma warning disable CA1031
         try
         {
             // Forward relationships: Children (ParentOf)
@@ -2065,6 +2073,7 @@ public class ConsoleSystem : IUpdateSystem
         {
             _logger.LogDebug(ex, "Error extracting relationships for entity {EntityId}", entity.Id);
         }
+#pragma warning restore CA1031
     }
 
     /// <summary>
@@ -2088,7 +2097,7 @@ public class ConsoleSystem : IUpdateSystem
                 return;
             }
         }
-        catch
+        catch (Exception)
         {
             // World access failed (can happen during shutdown)
             return;

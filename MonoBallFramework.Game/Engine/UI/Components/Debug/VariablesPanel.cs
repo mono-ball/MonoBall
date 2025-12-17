@@ -573,7 +573,7 @@ public class VariablesPanel : DebugPanelBase, IVariableOperations
                 AddDisplayRow(
                     childPath,
                     $"[{keyStr}]",
-                    entry.Value?.GetType()?.Name ?? "null",
+                    entry.Value?.GetType().Name ?? "null",
                     entry.Value,
                     depth,
                     false,
@@ -591,7 +591,7 @@ public class VariablesPanel : DebugPanelBase, IVariableOperations
                 AddDisplayRow(
                     childPath,
                     $"[{i}]",
-                    item?.GetType()?.Name ?? "null",
+                    item?.GetType().Name ?? "null",
                     item,
                     depth,
                     false,
@@ -639,7 +639,7 @@ public class VariablesPanel : DebugPanelBase, IVariableOperations
                 AddDisplayRow(
                     childPath,
                     $"[{index}]",
-                    item?.GetType()?.Name ?? "null",
+                    item?.GetType().Name ?? "null",
                     item,
                     depth,
                     false,

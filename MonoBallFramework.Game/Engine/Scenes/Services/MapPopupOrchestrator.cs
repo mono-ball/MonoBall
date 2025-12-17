@@ -135,6 +135,8 @@ public class MapPopupOrchestrator : IMapPopupOrchestrator
     /// </summary>
     private void ShowPopupForMap(string mapId, string displayName, string? regionName)
     {
+        // CA1031: Catching general Exception to prevent popup failure from crashing the game
+#pragma warning disable CA1031
         try
         {
             if (string.IsNullOrWhiteSpace(displayName))
@@ -279,6 +281,7 @@ public class MapPopupOrchestrator : IMapPopupOrchestrator
         {
             _logger.LogError(ex, "Failed to display map popup for map {MapName}", displayName);
         }
+#pragma warning restore CA1031
     }
 
     /// <summary>

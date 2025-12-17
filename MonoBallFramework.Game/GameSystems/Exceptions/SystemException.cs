@@ -122,7 +122,7 @@ public class SpatialHashException : SystemException
     }
 
     public string Operation =>
-        Context.TryGetValue("Operation", out object? op) ? op?.ToString() ?? "" : "";
+        Context.TryGetValue("Operation", out object? op) ? op!.ToString() ?? "" : "";
 
     public override bool IsRecoverable => true; // Can fallback to brute force queries
 
@@ -149,7 +149,7 @@ public class MapStreamingException : SystemException
         WithContext("MapId", mapId);
     }
 
-    public string MapId => Context.TryGetValue("MapId", out object? id) ? id?.ToString() ?? "" : "";
+    public string MapId => Context.TryGetValue("MapId", out object? id) ? id!.ToString() ?? "" : "";
 
     public override bool IsRecoverable => true; // Current map still works
 
@@ -185,7 +185,7 @@ public class NpcBehaviorException : SystemException
         Context.TryGetValue("NpcEntityId", out object? id) && id is int i ? i : 0;
 
     public string ScriptName =>
-        Context.TryGetValue("ScriptName", out object? name) ? name?.ToString() ?? "" : "";
+        Context.TryGetValue("ScriptName", out object? name) ? name!.ToString() ?? "" : "";
 
     public override bool IsRecoverable => true; // NPC can use default behavior
 

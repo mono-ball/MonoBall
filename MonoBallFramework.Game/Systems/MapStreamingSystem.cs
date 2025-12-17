@@ -925,6 +925,8 @@ public class MapStreamingSystem : SystemBase, IUpdateSystem
                 mapId.Value
             );
 
+            // CA1031: Catching general Exception to prevent one map unload failure from crashing streaming
+#pragma warning disable CA1031
             try
             {
                 // Get the MapRuntimeId from our cache to cleanup entities
@@ -984,6 +986,7 @@ public class MapStreamingSystem : SystemBase, IUpdateSystem
             {
                 _logger?.LogError(ex, "Failed to unload map: {MapId}", mapId.Value);
             }
+#pragma warning restore CA1031
         }
     }
 

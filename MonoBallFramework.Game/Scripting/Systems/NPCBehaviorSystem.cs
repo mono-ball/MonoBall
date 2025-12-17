@@ -309,6 +309,8 @@ public class NPCBehaviorSystem : BehaviorSystemBase, IUpdateSystem
     {
         if (behavior.IsInitialized && script != null)
         {
+            // CA1031: User scripts can throw any exception type; catching general Exception is intentional
+#pragma warning disable CA1031
             try
             {
                 script.OnUnload();
@@ -329,6 +331,7 @@ public class NPCBehaviorSystem : BehaviorSystemBase, IUpdateSystem
                     ex.Message
                 );
             }
+#pragma warning restore CA1031
 
             behavior.IsInitialized = false;
         }

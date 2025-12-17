@@ -133,7 +133,7 @@ public class WarpExecutionSystem : SystemBase, IUpdateSystem
                         "Warp timed out after {Seconds}s, cancelling",
                         WarpTimeoutSeconds
                     );
-                    CancelWarp(world, playerEntity, ref warpState, ref movement);
+                    CancelWarp(ref warpState, ref movement);
                     return;
                 }
 
@@ -262,7 +262,7 @@ public class WarpExecutionSystem : SystemBase, IUpdateSystem
             // Note: MapLifecycleManager.TransitionToMap() was already called by MapInitializer,
             // but it fires with IsInitialLoad=true because UnloadAllMaps() cleared the current map.
             // We need to fire our own event with the correct old map info.
-            PublishWarpTransitionEvent(world, mapEntity.Value, oldMapId, oldMapName, targetMapId);
+            PublishWarpTransitionEvent(mapEntity.Value, oldMapId, oldMapName, targetMapId);
 
             _logger?.LogInformation(
                 "Warp complete: player now at {MapName} ({MapId}) @ ({X}, {Y})",
@@ -379,8 +379,6 @@ public class WarpExecutionSystem : SystemBase, IUpdateSystem
     ///     Cancels an in-progress or timed-out warp.
     /// </summary>
     private void CancelWarp(
-        World world,
-        Entity playerEntity,
         ref WarpState warpState,
         ref GridMovement movement
     )
@@ -398,7 +396,6 @@ public class WarpExecutionSystem : SystemBase, IUpdateSystem
     ///     This ensures the popup is shown even though UnloadAllMaps() cleared the current map.
     /// </summary>
     private void PublishWarpTransitionEvent(
-        World world,
         Entity mapEntity,
         GameMapId? oldMapId,
         string? oldMapName,

@@ -46,10 +46,10 @@ public class AssetLoadException : RenderingException
     }
 
     public string AssetId =>
-        Context.TryGetValue("AssetId", out object? id) ? id?.ToString() ?? "" : "";
+        Context.TryGetValue("AssetId", out object? id) ? id!.ToString() ?? "" : "";
 
     public string AssetType =>
-        Context.TryGetValue("AssetType", out object? type) ? type?.ToString() ?? "" : "";
+        Context.TryGetValue("AssetType", out object? type) ? type!.ToString() ?? "" : "";
 
     public override bool IsRecoverable => true; // Can use fallback textures
 
@@ -82,10 +82,10 @@ public class TextureLoadException : RenderingException
     }
 
     public string TextureId =>
-        Context.TryGetValue("TextureId", out object? id) ? id?.ToString() ?? "" : "";
+        Context.TryGetValue("TextureId", out object? id) ? id!.ToString() ?? "" : "";
 
     public string FilePath =>
-        Context.TryGetValue("FilePath", out object? path) ? path?.ToString() ?? "" : "";
+        Context.TryGetValue("FilePath", out object? path) ? path!.ToString() ?? "" : "";
 
     public override bool IsRecoverable => true; // Can use fallback textures
 
@@ -113,7 +113,7 @@ public class SpriteLoadException : RenderingException
     }
 
     public string SpriteId =>
-        Context.TryGetValue("SpriteId", out object? id) ? id?.ToString() ?? "" : "";
+        Context.TryGetValue("SpriteId", out object? id) ? id!.ToString() ?? "" : "";
 
     public override bool IsRecoverable => true; // Can use default sprite
 
@@ -138,7 +138,7 @@ public class CacheEvictionException : RenderingException
     }
 
     public string TextureId =>
-        Context.TryGetValue("TextureId", out object? id) ? id?.ToString() ?? "" : "";
+        Context.TryGetValue("TextureId", out object? id) ? id!.ToString() ?? "" : "";
 
     public long CurrentCacheSize =>
         Context.TryGetValue("CurrentCacheSize", out object? size) && size is long l ? l : 0L;
@@ -172,7 +172,7 @@ public class GraphicsDeviceException : RenderingException
     }
 
     public string Operation =>
-        Context.TryGetValue("Operation", out object? op) ? op?.ToString() ?? "" : "";
+        Context.TryGetValue("Operation", out object? op) ? op!.ToString() ?? "" : "";
 
     public override bool IsRecoverable => false; // GPU errors are usually critical
 
@@ -200,7 +200,7 @@ public class AnimationException : RenderingException
     }
 
     public string AnimationId =>
-        Context.TryGetValue("AnimationId", out object? id) ? id?.ToString() ?? "" : "";
+        Context.TryGetValue("AnimationId", out object? id) ? id!.ToString() ?? "" : "";
 
     public override bool IsRecoverable => true; // Can skip animation
 

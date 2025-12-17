@@ -39,7 +39,7 @@ public class EcsException : CoreException
     }
 
     public string Operation =>
-        Context.TryGetValue("Operation", out object? op) ? op?.ToString() ?? "" : "";
+        Context.TryGetValue("Operation", out object? op) ? op!.ToString() ?? "" : "";
 
     public override bool IsRecoverable => false; // ECS errors are critical
 
@@ -67,7 +67,7 @@ public class TemplateException : CoreException
     }
 
     public string TemplateName =>
-        Context.TryGetValue("TemplateName", out object? name) ? name?.ToString() ?? "" : "";
+        Context.TryGetValue("TemplateName", out object? name) ? name!.ToString() ?? "" : "";
 
     public override bool IsRecoverable => true; // Can skip template-based entities
 
@@ -95,7 +95,7 @@ public class SystemManagementException : CoreException
     }
 
     public string SystemName =>
-        Context.TryGetValue("SystemName", out object? name) ? name?.ToString() ?? "" : "";
+        Context.TryGetValue("SystemName", out object? name) ? name!.ToString() ?? "" : "";
 
     public override bool IsRecoverable => false; // System failures are critical
 
@@ -127,7 +127,7 @@ public class ComponentRegistrationException : CoreException
     }
 
     public string ComponentType =>
-        Context.TryGetValue("ComponentType", out object? type) ? type?.ToString() ?? "" : "";
+        Context.TryGetValue("ComponentType", out object? type) ? type!.ToString() ?? "" : "";
 
     public override bool IsRecoverable => false; // Component registration failures are critical
 
@@ -155,7 +155,7 @@ public class EventBusException : CoreException
     }
 
     public string EventType =>
-        Context.TryGetValue("EventType", out object? type) ? type?.ToString() ?? "" : "";
+        Context.TryGetValue("EventType", out object? type) ? type!.ToString() ?? "" : "";
 
     public override bool IsRecoverable => true; // Event failures shouldn't crash the game
 
@@ -183,7 +183,7 @@ public class ModdingException : CoreException
     }
 
     public string ModName =>
-        Context.TryGetValue("ModName", out object? name) ? name?.ToString() ?? "" : "";
+        Context.TryGetValue("ModName", out object? name) ? name!.ToString() ?? "" : "";
 
     public override bool IsRecoverable => true; // Can continue without mod
 

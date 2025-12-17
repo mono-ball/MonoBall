@@ -133,7 +133,7 @@ public class ScriptAttachmentSystem : SystemBase, IUpdateSystem
                     }
 
                     // Execute script tick
-                    ExecuteScriptTick(world, entity, script, deltaTime);
+                    ExecuteScriptTick(entity, script, deltaTime);
                     attachmentCount++;
                 }
                 catch (Exception ex)
@@ -279,11 +279,10 @@ public class ScriptAttachmentSystem : SystemBase, IUpdateSystem
     /// <summary>
     ///     Executes a script's tick method with proper context.
     /// </summary>
-    /// <param name="world">ECS world</param>
     /// <param name="entity">Entity the script is attached to</param>
     /// <param name="script">Script instance to execute</param>
     /// <param name="deltaTime">Time since last frame</param>
-    private void ExecuteScriptTick(World world, Entity entity, ScriptBase script, float deltaTime)
+    private void ExecuteScriptTick(Entity entity, ScriptBase script, float deltaTime)
     {
         try
         {

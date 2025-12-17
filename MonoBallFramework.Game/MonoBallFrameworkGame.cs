@@ -300,7 +300,7 @@ public class MonoBallFrameworkGame : Microsoft.Xna.Framework.Game, IAsyncDisposa
     /// <summary>
     ///     Handles window resize events to update camera viewport and maintain aspect ratio.
     /// </summary>
-    private void OnClientSizeChanged(object? sender, EventArgs e)
+    private void OnClientSizeChanged(object? _, EventArgs e)
     {
         // Only update camera after initialization is complete
         if (_gameInitializer?.CameraViewportSystem != null && GraphicsDevice != null)

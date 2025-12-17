@@ -618,6 +618,8 @@ public class EntityFrameworkPanel : DebugPanelBase
     /// <summary>
     ///     Formats a collection property with expanded items and appends to the detail buffer.
     /// </summary>
+    // CA1031: Reflection operations can throw many exception types; catching general Exception is intentional
+#pragma warning disable CA1031
     private void FormatCollectionPropertyToBuffer(PropertyInfo prop, string indent)
     {
         try
@@ -708,10 +710,13 @@ public class EntityFrameworkPanel : DebugPanelBase
             );
         }
     }
+#pragma warning restore CA1031
 
     /// <summary>
     ///     Formats ExtensionData (mod custom properties) with parsed JSON display.
     /// </summary>
+    // CA1031: Reflection and JSON operations can throw many exception types; catching general Exception is intentional
+#pragma warning disable CA1031
     private void FormatExtensionDataToBuffer(PropertyInfo prop, string indent)
     {
         try
@@ -770,10 +775,13 @@ public class EntityFrameworkPanel : DebugPanelBase
             );
         }
     }
+#pragma warning restore CA1031
 
     /// <summary>
     ///     Formats RawData (custom type definition properties) with parsed display.
     /// </summary>
+    // CA1031: Reflection and JSON operations can throw many exception types; catching general Exception is intentional
+#pragma warning disable CA1031
     private void FormatRawDataToBuffer(PropertyInfo prop, string indent)
     {
         try
@@ -858,6 +866,7 @@ public class EntityFrameworkPanel : DebugPanelBase
             );
         }
     }
+#pragma warning restore CA1031
 
     /// <summary>
     ///     Formats nested JSON object properties with indentation.

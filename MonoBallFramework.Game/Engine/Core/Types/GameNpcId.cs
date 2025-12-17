@@ -106,7 +106,7 @@ public sealed record GameNpcId : EntityId
         {
             return new GameNpcId(value);
         }
-        catch
+        catch (ArgumentException)
         {
             return null;
         }

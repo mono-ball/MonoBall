@@ -128,7 +128,7 @@ public class FileSystemWatcherAdapter : IScriptWatcher
     /// <summary>
     ///     Handles file change events with debouncing and proper CancellationTokenSource disposal.
     /// </summary>
-    private void OnFileChanged(object sender, FileSystemEventArgs e)
+    private void OnFileChanged(object _, FileSystemEventArgs e)
     {
         // Debounce: if file is saved multiple times rapidly, only process once
         if (_debounceTimers.TryGetValue(e.FullPath, out CancellationTokenSource? existingCts))
@@ -182,12 +182,12 @@ public class FileSystemWatcherAdapter : IScriptWatcher
             );
     }
 
-    private void OnFileRenamed(object sender, RenamedEventArgs e)
+    private void OnFileRenamed(object _, RenamedEventArgs e)
     {
-        OnFileChanged(sender, e);
+        OnFileChanged(null!, e);
     }
 
-    private void OnWatcherError(object sender, ErrorEventArgs e)
+    private void OnWatcherError(object _, ErrorEventArgs e)
     {
         _logger.LogError(e.GetException(), "FileSystemWatcher error");
         Error?.Invoke(

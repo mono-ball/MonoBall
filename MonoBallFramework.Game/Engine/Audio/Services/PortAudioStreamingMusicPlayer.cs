@@ -242,6 +242,8 @@ public class PortAudioStreamingMusicPlayer : IMusicPlayer
                 return;
             }
 
+            // CA1031: Audio device exceptions vary by platform; catching general Exception is intentional
+#pragma warning disable CA1031
             try
             {
                 _sharedOutput.Pause();
@@ -251,6 +253,7 @@ public class PortAudioStreamingMusicPlayer : IMusicPlayer
             {
                 _logger?.LogError(ex, "Error pausing streaming playback");
             }
+#pragma warning restore CA1031
         }
     }
 
@@ -263,6 +266,8 @@ public class PortAudioStreamingMusicPlayer : IMusicPlayer
                 return;
             }
 
+            // CA1031: Audio device exceptions vary by platform; catching general Exception is intentional
+#pragma warning disable CA1031
             try
             {
                 _sharedOutput.Play();
@@ -272,6 +277,7 @@ public class PortAudioStreamingMusicPlayer : IMusicPlayer
             {
                 _logger?.LogError(ex, "Error resuming streaming playback");
             }
+#pragma warning restore CA1031
         }
     }
 

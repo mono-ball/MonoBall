@@ -147,7 +147,7 @@ public sealed record GameFontId : EntityId
         {
             return new GameFontId(value);
         }
-        catch
+        catch (ArgumentException)
         {
             return null;
         }

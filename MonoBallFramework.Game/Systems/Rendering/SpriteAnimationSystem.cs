@@ -64,7 +64,7 @@ public class SpriteAnimationSystem : SystemBase, IUpdateSystem
         // Query all entities with Position, Sprite + Animation components
         world.Query(
             in EcsQueries.AnimatedSprites,
-            (Entity entity, ref Position position, ref Sprite sprite, ref Animation anim) =>
+            (Entity _, ref Position _, ref Sprite sprite, ref Animation anim) =>
             {
                 // Copy animation to avoid ref parameter in lambda
                 Animation animCopy = anim;
