@@ -1,5 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using MonoBallFramework.Game.Engine.Content;
 using MonoBallFramework.Game.Engine.Core.Modding;
 using MonoBallFramework.Game.Engine.Scenes;
 
@@ -45,6 +47,19 @@ public class DiscoverModsStep : InitializationStepBase
 
         try
         {
+            // Phase 0: Load base game as a special mod (priority 0)
+            // This ensures base game participates in the mod priority system
+            // instead of being handled as a hardcoded fallback
+            IOptions<ContentProviderOptions>? contentOptions =
+                context.Services.GetService<IOptions<ContentProviderOptions>>();
+            string baseGameRoot = contentOptions?.Value.BaseGameRoot ?? "Assets";
+
+            await modLoader.LoadBaseGameAsync(baseGameRoot);
+            logger.LogInformation(
+                "Loaded base game from '{BaseGameRoot}' as mod",
+                baseGameRoot
+            );
+
             // Phase 1: Discover manifests and register content folders
             // This makes mod content available to ContentProvider during game data loading
             await modLoader.DiscoverModsAsync();

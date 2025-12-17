@@ -233,12 +233,12 @@ def create_map_definition_dto(
     region_capitalized = region.capitalize()
 
     return {
-        "Id": f"base:map:{region.lower()}/{map_name}",
-        "DisplayName": display_name,
-        "Type": "map",
-        "Region": region.lower(),
-        "Description": "",
-        "TiledPath": f"Tiled/Regions/{region_capitalized}/{map_name}.json"
+        "id": f"base:map:{region.lower()}/{map_name}",
+        "name": display_name,
+        "type": "map",
+        "region": region.lower(),
+        "description": "",
+        "tiledPath": f"Tiled/Regions/{region_capitalized}/{map_name}.json"
     }
 
 

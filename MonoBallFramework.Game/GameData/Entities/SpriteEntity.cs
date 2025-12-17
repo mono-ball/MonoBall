@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using MonoBallFramework.Game.Engine.Core.Types;
+using MonoBallFramework.Game.GameData.Entities.Base;
 
 namespace MonoBallFramework.Game.GameData.Entities;
 
@@ -10,7 +11,7 @@ namespace MonoBallFramework.Game.GameData.Entities;
 ///     Replaces direct JSON loading in SpriteRegistry.
 /// </summary>
 [Table("Sprites")]
-public class SpriteEntity
+public class SpriteEntity : BaseEntity
 {
     /// <summary>
     ///     Unique sprite identifier in unified format.
@@ -20,13 +21,6 @@ public class SpriteEntity
     [MaxLength(150)]
     [Column(TypeName = "nvarchar(150)")]
     public GameSpriteId SpriteId { get; set; } = null!;
-
-    /// <summary>
-    ///     Human-readable display name.
-    /// </summary>
-    [Required]
-    [MaxLength(100)]
-    public string Name { get; set; } = string.Empty;
 
     /// <summary>
     ///     Asset type - always "Sprite" for sprite definitions.
@@ -68,18 +62,6 @@ public class SpriteEntity
     ///     Each animation contains: Name, Loop, FrameIndices[], FrameDurations[], FlipHorizontal
     /// </summary>
     public List<SpriteAnimation> Animations { get; set; } = new();
-
-    /// <summary>
-    ///     Source mod ID (null for base game).
-    /// </summary>
-    [MaxLength(100)]
-    public string? SourceMod { get; set; }
-
-    /// <summary>
-    ///     Version for compatibility tracking.
-    /// </summary>
-    [MaxLength(20)]
-    public string Version { get; set; } = "1.0.0";
 
     // Computed properties (not stored in DB)
 

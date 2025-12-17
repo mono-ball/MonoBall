@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using Microsoft.Extensions.Logging;
 using MonoBallFramework.Game.Engine.Audio.Configuration;
 using MonoBallFramework.Game.Engine.Audio.Core;
+using MonoBallFramework.Game.Engine.Content;
 using MonoBallFramework.Game.GameData.Entities;
 
 namespace MonoBallFramework.Game.Engine.Audio.Services;
@@ -14,6 +15,7 @@ namespace MonoBallFramework.Game.Engine.Audio.Services;
 public class PortAudioSoundEffectManager : ISoundEffectManager
 {
     private readonly AudioRegistry _audioRegistry;
+    private readonly IContentProvider _contentProvider;
     private readonly ILogger<PortAudioSoundEffectManager>? _logger;
     private readonly int _maxConcurrentSounds;
     private readonly ConcurrentDictionary<Guid, SoundInstance> _activeSounds;
@@ -28,14 +30,17 @@ public class PortAudioSoundEffectManager : ISoundEffectManager
     ///     Initializes a new instance of the <see cref="PortAudioSoundEffectManager"/> class.
     /// </summary>
     /// <param name="audioRegistry">The audio registry for looking up sound definitions.</param>
+    /// <param name="contentProvider">The content provider for resolving asset paths with mod support.</param>
     /// <param name="maxConcurrentSounds">Maximum number of concurrent sounds (uses AudioConstants.MaxConcurrentSounds if not specified).</param>
     /// <param name="logger">Optional logger for diagnostics.</param>
     public PortAudioSoundEffectManager(
         AudioRegistry audioRegistry,
+        IContentProvider contentProvider,
         int maxConcurrentSounds = AudioConstants.MaxConcurrentSounds,
         ILogger<PortAudioSoundEffectManager>? logger = null)
     {
         _audioRegistry = audioRegistry ?? throw new ArgumentNullException(nameof(audioRegistry));
+        _contentProvider = contentProvider ?? throw new ArgumentNullException(nameof(contentProvider));
         _logger = logger;
 
         if (maxConcurrentSounds <= 0)
@@ -105,8 +110,15 @@ public class PortAudioSoundEffectManager : ISoundEffectManager
             return false;
         }
 
-        // Construct full path
-        string fullPath = Path.Combine(AppContext.BaseDirectory, definition.AudioPath);
+        // Resolve full path using content provider (supports mods)
+        // AudioPath includes content type prefix (e.g., "Audio/SFX/..."), so use "Root"
+        string? fullPath = _contentProvider.ResolveContentPath("Root", definition.AudioPath);
+        if (fullPath == null)
+        {
+            _logger?.LogWarning("Audio file not found: {AudioPath}", definition.AudioPath);
+            return false;
+        }
+
         return PlayFromFile(fullPath, volume, pitch, pan, priority);
     }
 
@@ -171,7 +183,14 @@ public class PortAudioSoundEffectManager : ISoundEffectManager
             return null;
         }
 
-        string fullPath = Path.Combine(AppContext.BaseDirectory, definition.AudioPath);
+        // Resolve full path using content provider (supports mods)
+        string? fullPath = _contentProvider.ResolveContentPath("Root", definition.AudioPath);
+        if (fullPath == null)
+        {
+            _logger?.LogWarning("Audio file not found: {AudioPath}", definition.AudioPath);
+            return null;
+        }
+
         return PlayLoopingFromFile(fullPath, volume, pitch, pan, priority);
     }
 
@@ -269,16 +288,17 @@ public class PortAudioSoundEffectManager : ISoundEffectManager
             return;
 
         // PortAudio doesn't require preloading as files are streamed
-        // This method is provided for interface compatibility
+        // This method is provided for interface compatibility and path validation
         foreach (var trackId in trackIds)
         {
             var definition = _audioRegistry.GetByTrackId(trackId);
             if (definition != null)
             {
-                string fullPath = Path.Combine(AppContext.BaseDirectory, definition.AudioPath);
-                if (!File.Exists(fullPath))
+                // Resolve path using content provider (supports mods)
+                string? fullPath = _contentProvider.ResolveContentPath("Root", definition.AudioPath);
+                if (fullPath == null)
                 {
-                    _logger?.LogWarning("Audio file not found for preload: {TrackId} -> {FilePath}", trackId, fullPath);
+                    _logger?.LogWarning("Audio file not found for preload: {TrackId} -> {AudioPath}", trackId, definition.AudioPath);
                 }
             }
         }

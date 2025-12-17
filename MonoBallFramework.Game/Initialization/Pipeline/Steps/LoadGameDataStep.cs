@@ -7,6 +7,7 @@ namespace MonoBallFramework.Game.Initialization.Pipeline.Steps;
 
 /// <summary>
 ///     Initialization step that loads game data definitions (NPCs, trainers, maps) from JSON files.
+///     Uses ContentProvider for mod-aware path resolution - no manual path configuration needed.
 /// </summary>
 public class LoadGameDataStep : InitializationStepBase
 {
@@ -29,16 +30,11 @@ public class LoadGameDataStep : InitializationStepBase
     {
         ILogger<LoadGameDataStep> logger = context.LoggerFactory.CreateLogger<LoadGameDataStep>();
 
-        // Use path resolver to get the correct absolute path for game data
-        string dataPath = context.PathResolver.Resolve(
-            context.Configuration.Initialization.DataPath
-        );
-
-        logger.LogDebug("Loading game data from: {Path}", dataPath);
-
         try
         {
-            await context.DataLoader.LoadAllAsync(dataPath, cancellationToken);
+            // GameDataLoader uses ContentProvider internally for mod-aware path resolution
+            // Content paths are automatically resolved from mod.json contentFolders mappings
+            await context.DataLoader.LoadAllAsync(cancellationToken);
             logger.LogInformation("Game data definitions loaded successfully");
 
             // Preload all popup themes and sections into cache for O(1) runtime access
@@ -55,24 +51,21 @@ public class LoadGameDataStep : InitializationStepBase
         {
             logger.LogWarning(
                 ex,
-                "Game data directory not found at {Path} - continuing with default templates",
-                dataPath
+                "Game data file not found - continuing with default templates"
             );
         }
         catch (DirectoryNotFoundException ex)
         {
             logger.LogWarning(
                 ex,
-                "Game data directory not found at {Path} - continuing with default templates",
-                dataPath
+                "Game data directory not found - continuing with default templates"
             );
         }
         catch (IOException ex)
         {
             logger.LogError(
                 ex,
-                "I/O error loading game data definitions from {Path} - continuing with default templates",
-                dataPath
+                "I/O error loading game data definitions - continuing with default templates"
             );
         }
         catch (Exception ex)

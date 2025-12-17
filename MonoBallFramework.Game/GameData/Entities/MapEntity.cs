@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using MonoBallFramework.Game.Engine.Core.Types;
+using MonoBallFramework.Game.GameData.Entities.Base;
 
 namespace MonoBallFramework.Game.GameData.Entities;
 
@@ -9,7 +10,7 @@ namespace MonoBallFramework.Game.GameData.Entities;
 ///     Stores Tiled map data and metadata for runtime map loading.
 /// </summary>
 [Table("Maps")]
-public class MapEntity
+public class MapEntity : BaseEntity
 {
     /// <summary>
     ///     Unique map identifier in unified format (e.g., "base:map:hoenn/littleroot_town").
@@ -18,13 +19,6 @@ public class MapEntity
     [MaxLength(100)]
     [Column(TypeName = "nvarchar(100)")]
     public GameMapId MapId { get; set; } = null!;
-
-    /// <summary>
-    ///     Display name shown in-game (e.g., "Littleroot Town", "Route 101").
-    /// </summary>
-    [Required]
-    [MaxLength(100)]
-    public string Name { get; set; } = string.Empty;
 
     /// <summary>
     ///     Region this map belongs to (e.g., "hoenn", "kanto").
@@ -164,18 +158,6 @@ public class MapEntity
     ///     Custom properties as JSON (extensible for modding).
     /// </summary>
     public string? CustomPropertiesJson { get; set; }
-
-    /// <summary>
-    ///     Source mod ID (null for base game).
-    /// </summary>
-    [MaxLength(100)]
-    public string? SourceMod { get; set; }
-
-    /// <summary>
-    ///     Version for compatibility tracking.
-    /// </summary>
-    [MaxLength(20)]
-    public string Version { get; set; } = "1.0.0";
 
     // Navigation properties for map connections (optional, for complex queries)
     // Commented out for now to avoid circular references

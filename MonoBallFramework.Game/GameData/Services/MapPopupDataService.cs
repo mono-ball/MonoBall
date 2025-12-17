@@ -17,8 +17,8 @@ public class MapPopupDataService : IMapPopupDataService
     private readonly ILogger<MapPopupDataService> _logger;
 
     // Cache for O(1) lookups (hot paths like map transitions)
-    private readonly ConcurrentDictionary<string, PopupTheme> _themeCache = new();
-    private readonly ConcurrentDictionary<string, MapSection> _sectionCache = new();
+    private readonly ConcurrentDictionary<string, PopupThemeEntity> _themeCache = new();
+    private readonly ConcurrentDictionary<string, MapSectionEntity> _sectionCache = new();
 
     public MapPopupDataService(GameDataContext context, ILogger<MapPopupDataService> logger)
     {
@@ -90,7 +90,7 @@ public class MapPopupDataService : IMapPopupDataService
     ///     IMPORTANT: Requires PreloadAllAsync() to be called during initialization.
     ///     Returns null if theme not in cache (does NOT query database at runtime).
     /// </summary>
-    public PopupTheme? GetTheme(GameThemeId themeId)
+    public PopupThemeEntity? GetTheme(GameThemeId themeId)
     {
         if (string.IsNullOrWhiteSpace(themeId.Value))
         {
@@ -98,7 +98,7 @@ public class MapPopupDataService : IMapPopupDataService
         }
 
         // Cache-only lookup - no database fallback at runtime
-        if (_themeCache.TryGetValue(themeId, out PopupTheme? cached))
+        if (_themeCache.TryGetValue(themeId, out PopupThemeEntity? cached))
         {
             return cached;
         }
@@ -114,7 +114,7 @@ public class MapPopupDataService : IMapPopupDataService
     /// <summary>
     ///     Get popup theme by ID asynchronously.
     /// </summary>
-    public async Task<PopupTheme?> GetThemeAsync(GameThemeId themeId, CancellationToken ct = default)
+    public async Task<PopupThemeEntity?> GetThemeAsync(GameThemeId themeId, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(themeId.Value))
         {
@@ -122,13 +122,13 @@ public class MapPopupDataService : IMapPopupDataService
         }
 
         // Check cache first
-        if (_themeCache.TryGetValue(themeId, out PopupTheme? cached))
+        if (_themeCache.TryGetValue(themeId, out PopupThemeEntity? cached))
         {
             return cached;
         }
 
         // Query database and cache result
-        PopupTheme? theme = await _context
+        PopupThemeEntity? theme = await _context
             .PopupThemes.FirstOrDefaultAsync(t => t.ThemeId == themeId, ct);
         if (theme != null)
         {
@@ -141,7 +141,7 @@ public class MapPopupDataService : IMapPopupDataService
     /// <summary>
     ///     Get all popup themes (use for tools/editors, not hot paths).
     /// </summary>
-    public async Task<List<PopupTheme>> GetAllThemesAsync(CancellationToken ct = default)
+    public async Task<List<PopupThemeEntity>> GetAllThemesAsync(CancellationToken ct = default)
     {
         return await _context.PopupThemes.OrderBy(t => t.Name).ToListAsync(ct);
     }
@@ -151,8 +151,8 @@ public class MapPopupDataService : IMapPopupDataService
     /// </summary>
     public async Task PreloadThemesAsync(CancellationToken ct = default)
     {
-        List<PopupTheme> themes = await _context.PopupThemes.ToListAsync(ct);
-        foreach (PopupTheme theme in themes)
+        List<PopupThemeEntity> themes = await _context.PopupThemes.ToListAsync(ct);
+        foreach (PopupThemeEntity theme in themes)
         {
             _themeCache[theme.ThemeId] = theme;
         }
@@ -169,7 +169,7 @@ public class MapPopupDataService : IMapPopupDataService
     ///     IMPORTANT: Requires PreloadAllAsync() to be called during initialization.
     ///     Returns null if section not in cache (does NOT query database at runtime).
     /// </summary>
-    public MapSection? GetSection(string sectionId)
+    public MapSectionEntity? GetSection(string sectionId)
     {
         if (string.IsNullOrWhiteSpace(sectionId))
         {
@@ -177,7 +177,7 @@ public class MapPopupDataService : IMapPopupDataService
         }
 
         // Cache-only lookup - no database fallback at runtime
-        if (_sectionCache.TryGetValue(sectionId, out MapSection? cached))
+        if (_sectionCache.TryGetValue(sectionId, out MapSectionEntity? cached))
         {
             return cached;
         }
@@ -193,7 +193,7 @@ public class MapPopupDataService : IMapPopupDataService
     /// <summary>
     ///     Get map section by ID asynchronously (includes Theme navigation property).
     /// </summary>
-    public async Task<MapSection?> GetSectionAsync(
+    public async Task<MapSectionEntity?> GetSectionAsync(
         string sectionId,
         CancellationToken ct = default
     )
@@ -204,13 +204,13 @@ public class MapPopupDataService : IMapPopupDataService
         }
 
         // Check cache first
-        if (_sectionCache.TryGetValue(sectionId, out MapSection? cached))
+        if (_sectionCache.TryGetValue(sectionId, out MapSectionEntity? cached))
         {
             return cached;
         }
 
         // Query database with Theme navigation property and cache result
-        MapSection? section = await _context
+        MapSectionEntity? section = await _context
             .MapSections.Include(s => s.Theme)
             .FirstOrDefaultAsync(s => s.MapSectionId == sectionId, ct);
 
@@ -225,7 +225,7 @@ public class MapPopupDataService : IMapPopupDataService
     /// <summary>
     ///     Get all map sections (use for tools/editors, not hot paths).
     /// </summary>
-    public async Task<List<MapSection>> GetAllSectionsAsync(CancellationToken ct = default)
+    public async Task<List<MapSectionEntity>> GetAllSectionsAsync(CancellationToken ct = default)
     {
         return await _context
             .MapSections.Include(s => s.Theme)
@@ -236,7 +236,7 @@ public class MapPopupDataService : IMapPopupDataService
     /// <summary>
     ///     Get all map sections for a specific theme.
     /// </summary>
-    public async Task<List<MapSection>> GetSectionsByThemeAsync(
+    public async Task<List<MapSectionEntity>> GetSectionsByThemeAsync(
         string themeId,
         CancellationToken ct = default
     )
@@ -252,10 +252,10 @@ public class MapPopupDataService : IMapPopupDataService
     /// </summary>
     public async Task PreloadSectionsAsync(CancellationToken ct = default)
     {
-        List<MapSection> sections = await _context
+        List<MapSectionEntity> sections = await _context
             .MapSections.Include(s => s.Theme)
             .ToListAsync(ct);
-        foreach (MapSection section in sections)
+        foreach (MapSectionEntity section in sections)
         {
             _sectionCache[section.MapSectionId] = section;
         }
@@ -271,9 +271,9 @@ public class MapPopupDataService : IMapPopupDataService
     ///     Get popup theme for a map section ID.
     ///     This is the primary method for map transitions.
     /// </summary>
-    public PopupTheme? GetThemeForSection(string sectionId)
+    public PopupThemeEntity? GetThemeForSection(string sectionId)
     {
-        MapSection? section = GetSection(sectionId);
+        MapSectionEntity? section = GetSection(sectionId);
         if (section == null)
         {
             return null;
@@ -285,12 +285,12 @@ public class MapPopupDataService : IMapPopupDataService
     /// <summary>
     ///     Get popup theme for a map section ID asynchronously.
     /// </summary>
-    public async Task<PopupTheme?> GetThemeForSectionAsync(
+    public async Task<PopupThemeEntity?> GetThemeForSectionAsync(
         string sectionId,
         CancellationToken ct = default
     )
     {
-        MapSection? section = await GetSectionAsync(sectionId, ct);
+        MapSectionEntity? section = await GetSectionAsync(sectionId, ct);
         if (section?.Theme != null)
         {
             // If we loaded the section with Include(s => s.Theme), it's already populated
@@ -313,11 +313,11 @@ public class MapPopupDataService : IMapPopupDataService
     {
         _logger.LogDebug("GetPopupDisplayInfo called for section: '{SectionId}'", sectionId);
 
-        MapSection? section = GetSection(sectionId);
+        MapSectionEntity? section = GetSection(sectionId);
         if (section == null)
         {
             _logger.LogWarning(
-                "MapSection '{SectionId}' not found in database. Total sections cached: {Count}",
+                "MapSectionEntity '{SectionId}' not found in database. Total sections cached: {Count}",
                 sectionId,
                 _sectionCache.Count
             );
@@ -325,17 +325,17 @@ public class MapPopupDataService : IMapPopupDataService
         }
 
         _logger.LogDebug(
-            "Found MapSection: Id='{Id}', Name='{Name}', ThemeId='{ThemeId}'",
+            "Found MapSectionEntity: Id='{Id}', Name='{Name}', ThemeId='{ThemeId}'",
             section.MapSectionId,
             section.Name,
             section.ThemeId
         );
 
-        PopupTheme? theme = GetTheme(section.ThemeId);
+        PopupThemeEntity? theme = GetTheme(section.ThemeId);
         if (theme == null)
         {
             _logger.LogWarning(
-                "PopupTheme '{ThemeId}' not found for section '{SectionId}'. Total themes cached: {Count}",
+                "PopupThemeEntity '{ThemeId}' not found for section '{SectionId}'. Total themes cached: {Count}",
                 section.ThemeId,
                 sectionId,
                 _themeCache.Count
@@ -344,7 +344,7 @@ public class MapPopupDataService : IMapPopupDataService
         }
 
         _logger.LogDebug(
-            "Found PopupTheme: Id='{Id}', Name='{Name}', Background='{Background}', Outline='{Outline}'",
+            "Found PopupThemeEntity: Id='{Id}', Name='{Name}', Background='{Background}', Outline='{Outline}'",
             theme.ThemeId,
             theme.Name,
             theme.Background,
@@ -377,13 +377,13 @@ public class MapPopupDataService : IMapPopupDataService
         CancellationToken ct = default
     )
     {
-        MapSection? section = await GetSectionAsync(sectionId, ct);
+        MapSectionEntity? section = await GetSectionAsync(sectionId, ct);
         if (section == null)
         {
             return null;
         }
 
-        PopupTheme? theme = section.Theme ?? await GetThemeAsync(section.ThemeId, ct);
+        PopupThemeEntity? theme = section.Theme ?? await GetThemeAsync(section.ThemeId, ct);
         if (theme == null)
         {
             return null;

@@ -11,23 +11,23 @@ namespace MonoBallFramework.Game.GameData.Loading;
 
 /// <summary>
 ///     Loads game data from JSON files into EF Core in-memory database.
-///     Focuses on NPCs and trainers initially.
+///     Uses a generic loading pattern to reduce code duplication across entity types.
 /// </summary>
 public class GameDataLoader
 {
     private readonly GameDataContext _context;
     private readonly JsonSerializerOptions _jsonOptions;
     private readonly ILogger<GameDataLoader> _logger;
-    private readonly IContentProvider? _contentProvider;
+    private readonly IContentProvider _contentProvider;
 
     public GameDataLoader(
         GameDataContext context,
         ILogger<GameDataLoader> logger,
-        IContentProvider? contentProvider = null)
+        IContentProvider contentProvider)
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _contentProvider = contentProvider;
+        _contentProvider = contentProvider ?? throw new ArgumentNullException(nameof(contentProvider));
 
         _jsonOptions = new JsonSerializerOptions
         {
@@ -38,56 +38,117 @@ public class GameDataLoader
         };
     }
 
+    #region Generic Definition Loading Infrastructure
+
+    /// <summary>
+    ///     Result of parsing a DTO into an entity with mod override information.
+    /// </summary>
+    /// <typeparam name="TEntity">Entity type.</typeparam>
+    /// <typeparam name="TKey">Entity key type.</typeparam>
+    private record ParseResult<TEntity, TKey>(TEntity Entity, TKey Key, bool Success, string? ErrorMessage = null);
+
+    /// <summary>
+    ///     Generic loader for definition files that handles the common pattern:
+    ///     get files → read JSON → deserialize → validate → create entity → save.
+    /// </summary>
+    /// <typeparam name="TDto">DTO type for JSON deserialization.</typeparam>
+    /// <typeparam name="TEntity">Entity type for EF Core.</typeparam>
+    /// <typeparam name="TKey">Entity key type.</typeparam>
+    /// <param name="contentType">ContentProvider content type key.</param>
+    /// <param name="parseDto">Function to parse DTO into entity with key.</param>
+    /// <param name="addEntity">Action to add entity to DbContext.</param>
+    /// <param name="existingEntities">Optional dictionary of existing entities for override support.</param>
+    /// <param name="handleOverride">Optional action to handle entity override (update existing).</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>Number of entities loaded.</returns>
+    private async Task<int> LoadDefinitionsAsync<TDto, TEntity, TKey>(
+        string contentType,
+        Func<TDto, string, ParseResult<TEntity, TKey>> parseDto,
+        Action<TEntity> addEntity,
+        Dictionary<TKey, TEntity>? existingEntities = null,
+        Action<TEntity, TEntity>? handleOverride = null,
+        CancellationToken ct = default)
+        where TDto : class
+        where TEntity : class
+        where TKey : notnull
+    {
+        IEnumerable<string> files = _contentProvider.GetAllContentPaths(contentType, "*.json");
+        _logger.LogDebug("Using ContentProvider for {ContentType} - found {Count} files", contentType, files.Count());
+        int count = 0;
+
+        foreach (string file in files)
+        {
+            ct.ThrowIfCancellationRequested();
+
+            try
+            {
+                string json = await File.ReadAllTextAsync(file, ct);
+                TDto? dto = JsonSerializer.Deserialize<TDto>(json, _jsonOptions);
+
+                if (dto == null)
+                {
+                    _logger.LogWarning("Failed to deserialize {ContentType}: {File}", contentType, file);
+                    continue;
+                }
+
+                ParseResult<TEntity, TKey> result = parseDto(dto, file);
+                if (!result.Success)
+                {
+                    _logger.LogWarning("{ContentType} validation failed for {File}: {Error}",
+                        contentType, file, result.ErrorMessage ?? "Unknown error");
+                    continue;
+                }
+
+                // Handle mod override if existing entities provided
+                if (existingEntities != null && handleOverride != null &&
+                    existingEntities.TryGetValue(result.Key, out TEntity? existing))
+                {
+                    handleOverride(existing, result.Entity);
+                    _logger.LogDebug("{ContentType} overridden: {Key}", contentType, result.Key);
+                }
+                else
+                {
+                    addEntity(result.Entity);
+                }
+
+                count++;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to load {ContentType}: {File}", contentType, file);
+            }
+        }
+
+        await _context.SaveChangesAsync(ct);
+        _logger.LogInformation("Loaded {Count} {ContentType}", count, contentType);
+        return count;
+    }
+
+    #endregion
+
     /// <summary>
     ///     Load all game data from JSON files.
+    ///     Uses ContentProvider for mod-aware path resolution - paths are resolved automatically
+    ///     based on content type mappings in mod.json files.
     /// </summary>
-    public async Task LoadAllAsync(string dataPath, CancellationToken ct = default)
+    public async Task LoadAllAsync(CancellationToken ct = default)
     {
-        _logger.LogGameDataLoadingStarted(dataPath);
+        _logger.LogInformation("Loading game data definitions via ContentProvider...");
 
         var loadedCounts = new Dictionary<string, int>();
 
-        // Load Maps (from Regions subdirectory)
-        string mapsPath = Path.Combine(dataPath, "Maps", "Regions");
-        loadedCounts["Maps"] = await LoadMapEntitysAsync(mapsPath, ct);
-
-        // Load Popup Themes
-        string themesPath = Path.Combine(dataPath, "Maps", "Popups", "Themes");
-        loadedCounts["PopupThemes"] = await LoadPopupThemesAsync(themesPath, ct);
-
-        // Load Map Sections
-        string sectionsPath = Path.Combine(dataPath, "Maps", "Sections");
-        loadedCounts["MapSections"] = await LoadMapSectionsAsync(sectionsPath, ct);
-
-        // Load Audio Definitions
-        string audioPath = Path.Combine(dataPath, "Audio");
-        loadedCounts["Audios"] = await LoadAudioEntitysAsync(audioPath, ct);
-
-        // === NEW: Load unified definition types ===
-
-        // Load Sprite Definitions (replaces SpriteRegistry JSON loading)
-        string spritesPath = Path.Combine(dataPath, "Sprites");
-        loadedCounts["Sprites"] = await LoadSpriteDefinitionsAsync(spritesPath, ct);
-
-        // Load Popup Backgrounds (replaces PopupRegistry JSON loading)
-        string backgroundsPath = Path.Combine(dataPath, "Maps", "Popups", "Backgrounds");
-        loadedCounts["PopupBackgrounds"] = await LoadPopupBackgroundsAsync(backgroundsPath, ct);
-
-        // Load Popup Outlines (replaces PopupRegistry JSON loading)
-        string outlinesPath = Path.Combine(dataPath, "Maps", "Popups", "Outlines");
-        loadedCounts["PopupOutlines"] = await LoadPopupOutlinesAsync(outlinesPath, ct);
-
-        // Load Behavior Definitions (replaces TypeRegistry<BehaviorDefinition>)
-        string behaviorsPath = Path.Combine(dataPath, "Behaviors");
-        loadedCounts["Behaviors"] = await LoadBehaviorDefinitionsAsync(behaviorsPath, ct);
-
-        // Load Tile Behavior Definitions (replaces TypeRegistry<TileBehaviorDefinition>)
-        string tileBehaviorsPath = Path.Combine(dataPath, "TileBehaviors");
-        loadedCounts["TileBehaviors"] = await LoadTileBehaviorDefinitionsAsync(tileBehaviorsPath, ct);
-
-        // Load Font Definitions (replaces FontLoader hardcoded constants)
-        string fontsPath = Path.Combine(dataPath, "Fonts");
-        loadedCounts["Fonts"] = await LoadFontDefinitionsAsync(fontsPath, ct);
+        // All loading methods use ContentProvider.GetAllContentPaths() internally
+        // Content types are mapped in mod.json contentFolders configuration
+        loadedCounts["Maps"] = await LoadMapEntitysAsync(ct);
+        loadedCounts["PopupThemes"] = await LoadPopupThemesAsync(ct);
+        loadedCounts["MapSections"] = await LoadMapSectionsAsync(ct);
+        loadedCounts["Audios"] = await LoadAudioEntitysAsync(ct);
+        loadedCounts["Sprites"] = await LoadSpriteDefinitionsAsync(ct);
+        loadedCounts["PopupBackgrounds"] = await LoadPopupBackgroundsAsync(ct);
+        loadedCounts["PopupOutlines"] = await LoadPopupOutlinesAsync(ct);
+        loadedCounts["Behaviors"] = await LoadBehaviorDefinitionsAsync(ct);
+        loadedCounts["TileBehaviors"] = await LoadTileBehaviorDefinitionsAsync(ct);
+        loadedCounts["Fonts"] = await LoadFontDefinitionsAsync(ct);
 
         // Log summary
         _logger.LogGameDataLoaded(loadedCounts);
@@ -98,67 +159,24 @@ public class GameDataLoader
     ///     Simple schema: Id, DisplayName, Type, Region, Description, TiledPath.
     ///     Gameplay metadata (music, weather, connections) is read from Tiled at runtime.
     /// </summary>
-    private async Task<int> LoadMapEntitysAsync(string path, CancellationToken ct)
+    private async Task<int> LoadMapEntitysAsync(CancellationToken ct)
     {
-        // Use ContentProvider for mod-aware loading (handles mod overrides)
-        IEnumerable<string> files;
-        if (_contentProvider != null)
-        {
-            // GetAllContentPaths returns files from mods (by priority) then base game
-            // Files with same relative path are deduplicated (mod wins over base)
-            files = _contentProvider.GetAllContentPaths("MapDefinitions", "*.json");
-            _logger.LogDebug("Using ContentProvider for MapDefinitions - found {Count} files", files.Count());
-        }
-        else
-        {
-            // Fallback: direct file system access (no mod support)
-            if (!Directory.Exists(path))
-            {
-                _logger.LogDirectoryNotFound("Maps", path);
-                return 0;
-            }
-            files = Directory
-                .GetFiles(path, "*.json", SearchOption.AllDirectories)
-                .Where(f => !IsHiddenOrSystemDirectory(f));
-        }
-        int count = 0;
-
-        // OPTIMIZATION: Load all existing maps once to avoid N+1 queries
+        // Pre-load existing maps for override support
         Dictionary<GameMapId, MapEntity> existingMaps = await _context
             .Maps.AsNoTracking()
             .ToDictionaryAsync(m => m.MapId, ct);
 
-        foreach (string file in files)
-        {
-            ct.ThrowIfCancellationRequested();
-
-            try
+        return await LoadDefinitionsAsync<MapEntityDto, MapEntity, GameMapId>(
+            "MapDefinitions",
+            (dto, file) =>
             {
-                string json = await File.ReadAllTextAsync(file, ct);
-                MapEntityDto? dto = JsonSerializer.Deserialize<MapEntityDto>(json, _jsonOptions);
-
-                if (dto == null)
-                {
-                    _logger.LogMapDefinitionLoadFailed(file);
-                    continue;
-                }
-
-                // Validate required fields
                 if (string.IsNullOrWhiteSpace(dto.Id) || string.IsNullOrWhiteSpace(dto.TiledPath))
-                {
-                    _logger.LogMapDefinitionLoadFailed(file);
-                    continue;
-                }
+                    return new ParseResult<MapEntity, GameMapId>(null!, default!, false, "Missing Id or TiledPath");
 
-                // Parse GameMapId from the Id field
                 GameMapId? gameMapId = GameMapId.TryCreate(dto.Id);
                 if (gameMapId == null)
-                {
-                    _logger.LogMapDefinitionLoadFailed(file);
-                    continue;
-                }
+                    return new ParseResult<MapEntity, GameMapId>(null!, default!, false, "Invalid map ID format");
 
-                // Convert DTO to entity - only core fields from definition
                 var mapDef = new MapEntity
                 {
                     MapId = gameMapId,
@@ -169,31 +187,16 @@ public class GameDataLoader
                     SourceMod = dto.SourceMod,
                     Version = dto.Version ?? "1.0.0"
                 };
-
-                // Support mod overrides
-                if (existingMaps.TryGetValue(gameMapId, out MapEntity? existing))
-                {
-                    _context.Maps.Attach(existing);
-                    _context.Entry(existing).CurrentValues.SetValues(mapDef);
-                    _logger.LogMapOverridden(mapDef.MapId, mapDef.Name);
-                }
-                else
-                {
-                    _context.Maps.Add(mapDef);
-                }
-
-                count++;
-                _logger.LogMapDefinitionLoaded(mapDef.MapId.Value, mapDef.TiledDataPath);
-            }
-            catch (Exception ex)
+                return new ParseResult<MapEntity, GameMapId>(mapDef, gameMapId, true);
+            },
+            entity => _context.Maps.Add(entity),
+            existingMaps,
+            (existing, newEntity) =>
             {
-                _logger.LogMapLoadFailed(file, ex);
-            }
-        }
-
-        await _context.SaveChangesAsync(ct);
-        _logger.LogMapsLoaded(count);
-        return count;
+                _context.Maps.Attach(existing);
+                _context.Entry(existing).CurrentValues.SetValues(newEntity);
+            },
+            ct);
     }
 
     /// <summary>
@@ -436,57 +439,19 @@ public class GameDataLoader
     /// <summary>
     ///     Load popup theme definitions from JSON files.
     /// </summary>
-    private async Task<int> LoadPopupThemesAsync(string path, CancellationToken ct)
+    private Task<int> LoadPopupThemesAsync(CancellationToken ct)
     {
-        // Use ContentProvider for mod-aware loading (handles mod overrides)
-        IEnumerable<string> files;
-        if (_contentProvider != null)
-        {
-            // GetAllContentPaths returns files from mods (by priority) then base game
-            // Files with same relative path are deduplicated (mod wins over base)
-            files = _contentProvider.GetAllContentPaths("PopupThemes", "*.json");
-            _logger.LogDebug("Using ContentProvider for PopupThemes - found {Count} files", files.Count());
-        }
-        else
-        {
-            // Fallback: direct file system access (no mod support)
-            if (!Directory.Exists(path))
+        return LoadDefinitionsAsync<PopupThemeDto, PopupThemeEntity, GameThemeId>(
+            "PopupThemeDefinitions",
+            (dto, file) =>
             {
-                _logger.LogDirectoryNotFound("PopupThemes", path);
-                return 0;
-            }
-            files = Directory.GetFiles(path, "*.json", SearchOption.TopDirectoryOnly)
-                .Where(f => !Path.GetFileName(f).Equals("README.md", StringComparison.OrdinalIgnoreCase));
-        }
-        int count = 0;
-
-        foreach (string file in files)
-        {
-            ct.ThrowIfCancellationRequested();
-
-            try
-            {
-                string json = await File.ReadAllTextAsync(file, ct);
-                PopupThemeDto? dto = JsonSerializer.Deserialize<PopupThemeDto>(json, _jsonOptions);
-
-                if (dto == null)
-                {
-                    _logger.LogPopupThemeLoadFailed(file);
-                    continue;
-                }
-
-                // Validate required fields
                 if (string.IsNullOrWhiteSpace(dto.Id))
-                {
-                    _logger.LogPopupThemeLoadFailed(file);
-                    continue;
-                }
+                    return new ParseResult<PopupThemeEntity, GameThemeId>(null!, default!, false, "Missing Id");
 
-                // Convert DTO to entity
-                // Use TryCreate first for full ID format, fall back to Create for simple names
-                var theme = new PopupTheme
+                GameThemeId themeId = GameThemeId.TryCreate(dto.Id) ?? GameThemeId.Create(dto.Id);
+                var theme = new PopupThemeEntity
                 {
-                    ThemeId = GameThemeId.TryCreate(dto.Id) ?? GameThemeId.Create(dto.Id),
+                    ThemeId = themeId,
                     Name = dto.Name ?? dto.Id,
                     Description = dto.Description,
                     Background = dto.Background ?? dto.Id,
@@ -495,79 +460,28 @@ public class GameDataLoader
                     SourceMod = dto.SourceMod,
                     Version = dto.Version ?? "1.0.0"
                 };
-
-                _context.PopupThemes.Add(theme);
-                count++;
-
-                _logger.LogPopupThemeLoaded(theme.ThemeId, theme.Name);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogPopupThemeLoadFailed(file, ex);
-            }
-        }
-
-        // Save to in-memory database
-        await _context.SaveChangesAsync(ct);
-
-        _logger.LogPopupThemesLoaded(count);
-        return count;
+                return new ParseResult<PopupThemeEntity, GameThemeId>(theme, themeId, true);
+            },
+            entity => _context.PopupThemes.Add(entity),
+            ct: ct);
     }
 
     /// <summary>
     ///     Load map section definitions from JSON files.
     /// </summary>
-    private async Task<int> LoadMapSectionsAsync(string path, CancellationToken ct)
+    private Task<int> LoadMapSectionsAsync(CancellationToken ct)
     {
-        // Use ContentProvider for mod-aware loading (handles mod overrides)
-        IEnumerable<string> files;
-        if (_contentProvider != null)
-        {
-            // GetAllContentPaths returns files from mods (by priority) then base game
-            // Files with same relative path are deduplicated (mod wins over base)
-            files = _contentProvider.GetAllContentPaths("MapSections", "*.json");
-            _logger.LogDebug("Using ContentProvider for MapSections - found {Count} files", files.Count());
-        }
-        else
-        {
-            // Fallback: direct file system access (no mod support)
-            if (!Directory.Exists(path))
+        return LoadDefinitionsAsync<MapSectionDto, MapSectionEntity, GameMapSectionId>(
+            "MapSectionDefinitions",
+            (dto, file) =>
             {
-                _logger.LogDirectoryNotFound("MapSections", path);
-                return 0;
-            }
-            files = Directory.GetFiles(path, "*.json", SearchOption.TopDirectoryOnly)
-                .Where(f => !Path.GetFileName(f).Equals("README.md", StringComparison.OrdinalIgnoreCase));
-        }
-        int count = 0;
-
-        foreach (string file in files)
-        {
-            ct.ThrowIfCancellationRequested();
-
-            try
-            {
-                string json = await File.ReadAllTextAsync(file, ct);
-                MapSectionDto? dto = JsonSerializer.Deserialize<MapSectionDto>(json, _jsonOptions);
-
-                if (dto == null)
-                {
-                    _logger.LogMapSectionLoadFailed(file);
-                    continue;
-                }
-
-                // Validate required fields
                 if (string.IsNullOrWhiteSpace(dto.Id) || string.IsNullOrWhiteSpace(dto.Theme))
-                {
-                    _logger.LogMapSectionLoadFailed(file);
-                    continue;
-                }
+                    return new ParseResult<MapSectionEntity, GameMapSectionId>(null!, default!, false, "Missing Id or Theme");
 
-                // Convert DTO to entity
-                // Use TryCreate first for full ID format, fall back to Create for simple names
-                var section = new MapSection
+                GameMapSectionId sectionId = GameMapSectionId.TryCreate(dto.Id) ?? GameMapSectionId.Create(dto.Id);
+                var section = new MapSectionEntity
                 {
-                    MapSectionId = GameMapSectionId.TryCreate(dto.Id) ?? GameMapSectionId.Create(dto.Id),
+                    MapSectionId = sectionId,
                     Name = dto.Name ?? dto.Id,
                     ThemeId = GameThemeId.TryCreate(dto.Theme) ?? GameThemeId.Create(dto.Theme),
                     X = dto.X,
@@ -577,95 +491,36 @@ public class GameDataLoader
                     SourceMod = dto.SourceMod,
                     Version = dto.Version ?? "1.0.0"
                 };
-
-                _context.MapSections.Add(section);
-                count++;
-
-                _logger.LogMapSectionLoaded(section.MapSectionId, section.Name);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogMapSectionLoadFailed(file, ex);
-            }
-        }
-
-        // Save to in-memory database
-        await _context.SaveChangesAsync(ct);
-
-        _logger.LogMapSectionsLoaded(count);
-        return count;
+                return new ParseResult<MapSectionEntity, GameMapSectionId>(section, sectionId, true);
+            },
+            entity => _context.MapSections.Add(entity),
+            ct: ct);
     }
 
     /// <summary>
     ///     Load audio definitions from JSON files.
     ///     Recursively processes all subdirectories (Music/Battle, Music/Towns, SFX/Battle, etc.).
     /// </summary>
-    private async Task<int> LoadAudioEntitysAsync(string path, CancellationToken ct)
+    private Task<int> LoadAudioEntitysAsync(CancellationToken ct)
     {
-        // Use ContentProvider for mod-aware loading (handles mod overrides)
-        IEnumerable<string> files;
-        if (_contentProvider != null)
-        {
-            // GetAllContentPaths returns files from mods (by priority) then base game
-            // Files with same relative path are deduplicated (mod wins over base)
-            files = _contentProvider.GetAllContentPaths("AudioDefinitions", "*.json");
-            _logger.LogDebug("Using ContentProvider for AudioDefinitions - found {Count} files", files.Count());
-        }
-        else
-        {
-            // Fallback: direct file system access (no mod support)
-            if (!Directory.Exists(path))
+        return LoadDefinitionsAsync<AudioEntityDto, AudioEntity, GameAudioId>(
+            "AudioDefinitions",
+            (dto, file) =>
             {
-                _logger.LogDirectoryNotFound("AudioEntitys", path);
-                return 0;
-            }
-            files = Directory.GetFiles(path, "*.json", SearchOption.AllDirectories)
-                .Where(f => !IsHiddenOrSystemDirectory(f));
-        }
-        int count = 0;
-
-        foreach (string file in files)
-        {
-            ct.ThrowIfCancellationRequested();
-
-            try
-            {
-                string json = await File.ReadAllTextAsync(file, ct);
-                AudioEntityDto? dto = JsonSerializer.Deserialize<AudioEntityDto>(json, _jsonOptions);
-
-                if (dto == null)
-                {
-                    _logger.LogWarning("Failed to deserialize audio definition: {File}", file);
-                    continue;
-                }
-
-                // Validate required fields
                 if (string.IsNullOrWhiteSpace(dto.Id) || string.IsNullOrWhiteSpace(dto.AudioPath))
-                {
-                    _logger.LogWarning("Audio definition missing required fields: {File}", file);
-                    continue;
-                }
+                    return new ParseResult<AudioEntity, GameAudioId>(null!, default!, false, "Missing Id or AudioPath");
 
-                // Parse GameAudioId from the Id field
                 GameAudioId? audioId = GameAudioId.TryCreate(dto.Id);
                 if (audioId == null)
-                {
-                    _logger.LogWarning("Invalid audio ID format in: {File}", file);
-                    continue;
-                }
+                    return new ParseResult<AudioEntity, GameAudioId>(null!, default!, false, "Invalid audio ID format");
 
-                // Extract category and subcategory from the audio ID
-                string category = audioId.Category;
-                string? subcategory = audioId.AudioSubcategory;
-
-                // Convert DTO to entity
                 var audioDef = new AudioEntity
                 {
                     AudioId = audioId,
                     Name = dto.Name ?? audioId.Name,
                     AudioPath = dto.AudioPath,
-                    Category = category,
-                    Subcategory = subcategory,
+                    Category = audioId.Category,
+                    Subcategory = audioId.AudioSubcategory,
                     Volume = dto.Volume ?? 1.0f,
                     Loop = dto.Loop ?? true,
                     FadeIn = dto.FadeIn ?? 0.0f,
@@ -677,23 +532,10 @@ public class GameDataLoader
                     SourceMod = dto.SourceMod,
                     Version = dto.Version ?? "1.0.0"
                 };
-
-                _context.Audios.Add(audioDef);
-                count++;
-
-                _logger.LogDebug("Loaded audio definition: {AudioId}", audioDef.AudioId.Value);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Failed to load audio definition: {File}", file);
-            }
-        }
-
-        // Save to in-memory database
-        await _context.SaveChangesAsync(ct);
-
-        _logger.LogInformation("Loaded {Count} audio definitions", count);
-        return count;
+                return new ParseResult<AudioEntity, GameAudioId>(audioDef, audioId, true);
+            },
+            entity => _context.Audios.Add(entity),
+            ct: ct);
     }
 
     // ============================================================================
@@ -704,61 +546,19 @@ public class GameDataLoader
     ///     Load sprite definitions from JSON files into EF Core.
     ///     Replaces SpriteRegistry JSON loading.
     /// </summary>
-    private async Task<int> LoadSpriteDefinitionsAsync(string path, CancellationToken ct)
+    private Task<int> LoadSpriteDefinitionsAsync(CancellationToken ct)
     {
-        // Use ContentProvider for mod-aware loading (handles mod overrides)
-        IEnumerable<string> files;
-        if (_contentProvider != null)
-        {
-            // GetAllContentPaths returns files from mods (by priority) then base game
-            // Files with same relative path are deduplicated (mod wins over base)
-            files = _contentProvider.GetAllContentPaths("Sprites", "*.json");
-            _logger.LogDebug("Using ContentProvider for Sprites - found {Count} files", files.Count());
-        }
-        else
-        {
-            // Fallback: direct file system access (no mod support)
-            if (!Directory.Exists(path))
+        return LoadDefinitionsAsync<SpriteDefinitionDto, SpriteEntity, GameSpriteId>(
+            "SpriteDefinitions",
+            (dto, file) =>
             {
-                _logger.LogDirectoryNotFound("SpriteDefinitions", path);
-                return 0;
-            }
-            files = Directory.GetFiles(path, "*.json", SearchOption.AllDirectories)
-                .Where(f => !IsHiddenOrSystemDirectory(f));
-        }
-        int count = 0;
-
-        foreach (string file in files)
-        {
-            ct.ThrowIfCancellationRequested();
-
-            try
-            {
-                string json = await File.ReadAllTextAsync(file, ct);
-                SpriteDefinitionDto? dto = JsonSerializer.Deserialize<SpriteDefinitionDto>(json, _jsonOptions);
-
-                if (dto == null)
-                {
-                    _logger.LogWarning("Failed to deserialize sprite definition: {File}", file);
-                    continue;
-                }
-
-                // Validate required fields
                 if (string.IsNullOrWhiteSpace(dto.Id) || string.IsNullOrWhiteSpace(dto.TexturePath))
-                {
-                    _logger.LogWarning("Sprite definition missing required fields: {File}", file);
-                    continue;
-                }
+                    return new ParseResult<SpriteEntity, GameSpriteId>(null!, default!, false, "Missing Id or TexturePath");
 
-                // Parse GameSpriteId from the Id field
                 GameSpriteId? spriteId = GameSpriteId.TryCreate(dto.Id);
                 if (spriteId == null)
-                {
-                    _logger.LogWarning("Invalid sprite ID format in: {File}", file);
-                    continue;
-                }
+                    return new ParseResult<SpriteEntity, GameSpriteId>(null!, default!, false, "Invalid sprite ID format");
 
-                // Convert DTO to entity with typed collections (EF Core handles JSON serialization)
                 var spriteDef = new SpriteEntity
                 {
                     SpriteId = spriteId,
@@ -768,20 +568,13 @@ public class GameDataLoader
                     FrameWidth = dto.FrameWidth ?? 16,
                     FrameHeight = dto.FrameHeight ?? 32,
                     FrameCount = dto.FrameCount ?? 1,
-                    // Map DTO frames to owned entity type
                     Frames = dto.Frames?.Select(f => new SpriteFrame
                     {
-                        Index = f.Index,
-                        X = f.X,
-                        Y = f.Y,
-                        Width = f.Width,
-                        Height = f.Height
+                        Index = f.Index, X = f.X, Y = f.Y, Width = f.Width, Height = f.Height
                     }).ToList() ?? new List<SpriteFrame>(),
-                    // Map DTO animations to owned entity type
                     Animations = dto.Animations?.Select(a => new SpriteAnimation
                     {
-                        Name = a.Name ?? string.Empty,
-                        Loop = a.Loop,
+                        Name = a.Name ?? string.Empty, Loop = a.Loop,
                         FrameIndices = a.FrameIndices?.ToList() ?? new List<int>(),
                         FrameDurations = a.FrameDurations?.ToList() ?? new List<double>(),
                         FlipHorizontal = a.FlipHorizontal
@@ -789,79 +582,29 @@ public class GameDataLoader
                     SourceMod = dto.SourceMod,
                     Version = dto.Version ?? "1.0.0"
                 };
-
-                _context.Sprites.Add(spriteDef);
-                count++;
-
-                _logger.LogDebug("Loaded sprite definition: {SpriteId}", spriteDef.SpriteId.Value);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Failed to load sprite definition: {File}", file);
-            }
-        }
-
-        // Save to in-memory database
-        await _context.SaveChangesAsync(ct);
-
-        _logger.LogInformation("Loaded {Count} sprite definitions", count);
-        return count;
+                return new ParseResult<SpriteEntity, GameSpriteId>(spriteDef, spriteId, true);
+            },
+            entity => _context.Sprites.Add(entity),
+            ct: ct);
     }
 
     /// <summary>
     ///     Load popup background definitions from JSON files into EF Core.
     ///     Replaces PopupRegistry background JSON loading.
     /// </summary>
-    private async Task<int> LoadPopupBackgroundsAsync(string path, CancellationToken ct)
+    private Task<int> LoadPopupBackgroundsAsync(CancellationToken ct)
     {
-        // Use ContentProvider for mod-aware loading (handles mod overrides)
-        IEnumerable<string> files;
-        if (_contentProvider != null)
-        {
-            // GetAllContentPaths returns files from mods (by priority) then base game
-            // Files with same relative path are deduplicated (mod wins over base)
-            files = _contentProvider.GetAllContentPaths("PopupBackgrounds", "*.json");
-            _logger.LogDebug("Using ContentProvider for PopupBackgrounds - found {Count} files", files.Count());
-        }
-        else
-        {
-            // Fallback: direct file system access (no mod support)
-            if (!Directory.Exists(path))
+        return LoadDefinitionsAsync<PopupBackgroundDto, PopupBackgroundEntity, GamePopupBackgroundId>(
+            "PopupBackgroundDefinitions",
+            (dto, file) =>
             {
-                _logger.LogDirectoryNotFound("PopupBackgrounds", path);
-                return 0;
-            }
-            files = Directory.GetFiles(path, "*.json", SearchOption.TopDirectoryOnly)
-                .Where(f => !IsHiddenOrSystemDirectory(f));
-        }
-        int count = 0;
-
-        foreach (string file in files)
-        {
-            ct.ThrowIfCancellationRequested();
-
-            try
-            {
-                string json = await File.ReadAllTextAsync(file, ct);
-                PopupBackgroundDto? dto = JsonSerializer.Deserialize<PopupBackgroundDto>(json, _jsonOptions);
-
-                if (dto == null)
-                {
-                    _logger.LogWarning("Failed to deserialize popup background: {File}", file);
-                    continue;
-                }
-
-                // Validate required fields
                 if (string.IsNullOrWhiteSpace(dto.Id) || string.IsNullOrWhiteSpace(dto.TexturePath))
-                {
-                    _logger.LogWarning("Popup background missing required fields: {File}", file);
-                    continue;
-                }
+                    return new ParseResult<PopupBackgroundEntity, GamePopupBackgroundId>(null!, default!, false, "Missing Id or TexturePath");
 
-                // Convert DTO to entity - TryCreate parses full IDs, Create for short names
+                GamePopupBackgroundId backgroundId = GamePopupBackgroundId.TryCreate(dto.Id) ?? GamePopupBackgroundId.Create(dto.Id);
                 var backgroundDef = new PopupBackgroundEntity
                 {
-                    BackgroundId = GamePopupBackgroundId.TryCreate(dto.Id) ?? GamePopupBackgroundId.Create(dto.Id),
+                    BackgroundId = backgroundId,
                     Name = dto.Name ?? Path.GetFileNameWithoutExtension(file),
                     Type = dto.Type ?? "Bitmap",
                     TexturePath = dto.TexturePath,
@@ -871,96 +614,39 @@ public class GameDataLoader
                     SourceMod = dto.SourceMod,
                     Version = dto.Version ?? "1.0.0"
                 };
-
-                _context.PopupBackgrounds.Add(backgroundDef);
-                count++;
-
-                _logger.LogDebug("Loaded popup background: {BackgroundId}", backgroundDef.BackgroundId);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Failed to load popup background: {File}", file);
-            }
-        }
-
-        // Save to in-memory database
-        await _context.SaveChangesAsync(ct);
-
-        _logger.LogInformation("Loaded {Count} popup backgrounds", count);
-        return count;
+                return new ParseResult<PopupBackgroundEntity, GamePopupBackgroundId>(backgroundDef, backgroundId, true);
+            },
+            entity => _context.PopupBackgrounds.Add(entity),
+            ct: ct);
     }
 
     /// <summary>
     ///     Load popup outline definitions from JSON files into EF Core.
     ///     Replaces PopupRegistry outline JSON loading.
     /// </summary>
-    private async Task<int> LoadPopupOutlinesAsync(string path, CancellationToken ct)
+    private Task<int> LoadPopupOutlinesAsync(CancellationToken ct)
     {
-        // Use ContentProvider for mod-aware loading (handles mod overrides)
-        IEnumerable<string> files;
-        if (_contentProvider != null)
-        {
-            // GetAllContentPaths returns files from mods (by priority) then base game
-            // Files with same relative path are deduplicated (mod wins over base)
-            files = _contentProvider.GetAllContentPaths("PopupOutlines", "*.json");
-            _logger.LogDebug("Using ContentProvider for PopupOutlines - found {Count} files", files.Count());
-        }
-        else
-        {
-            // Fallback: direct file system access (no mod support)
-            if (!Directory.Exists(path))
+        return LoadDefinitionsAsync<PopupOutlineDto, PopupOutlineEntity, GamePopupOutlineId>(
+            "PopupOutlineDefinitions",
+            (dto, file) =>
             {
-                _logger.LogDirectoryNotFound("PopupOutlines", path);
-                return 0;
-            }
-            files = Directory.GetFiles(path, "*.json", SearchOption.TopDirectoryOnly)
-                .Where(f => !IsHiddenOrSystemDirectory(f));
-        }
-        int count = 0;
-
-        foreach (string file in files)
-        {
-            ct.ThrowIfCancellationRequested();
-
-            try
-            {
-                string json = await File.ReadAllTextAsync(file, ct);
-                PopupOutlineDto? dto = JsonSerializer.Deserialize<PopupOutlineDto>(json, _jsonOptions);
-
-                if (dto == null)
-                {
-                    _logger.LogWarning("Failed to deserialize popup outline: {File}", file);
-                    continue;
-                }
-
-                // Validate required fields
                 if (string.IsNullOrWhiteSpace(dto.Id) || string.IsNullOrWhiteSpace(dto.TexturePath))
-                {
-                    _logger.LogWarning("Popup outline missing required fields: {File}", file);
-                    continue;
-                }
+                    return new ParseResult<PopupOutlineEntity, GamePopupOutlineId>(null!, default!, false, "Missing Id or TexturePath");
 
-                // Convert DTO to entity with typed collections (EF Core handles JSON serialization)
-                // TryCreate parses full IDs, Create for short names
+                GamePopupOutlineId outlineId = GamePopupOutlineId.TryCreate(dto.Id) ?? GamePopupOutlineId.Create(dto.Id);
                 var outlineDef = new PopupOutlineEntity
                 {
-                    OutlineId = GamePopupOutlineId.TryCreate(dto.Id) ?? GamePopupOutlineId.Create(dto.Id),
+                    OutlineId = outlineId,
                     Name = dto.Name ?? Path.GetFileNameWithoutExtension(file),
                     Type = dto.Type ?? "TileSheet",
                     TexturePath = dto.TexturePath,
                     TileWidth = dto.TileWidth ?? 8,
                     TileHeight = dto.TileHeight ?? 8,
                     TileCount = dto.TileCount ?? 0,
-                    // Map DTO tiles to owned entity type
                     Tiles = dto.Tiles?.Select(t => new OutlineTile
                     {
-                        Index = t.Index,
-                        X = t.X,
-                        Y = t.Y,
-                        Width = t.Width,
-                        Height = t.Height
+                        Index = t.Index, X = t.X, Y = t.Y, Width = t.Width, Height = t.Height
                     }).ToList() ?? new List<OutlineTile>(),
-                    // Map DTO tile usage to owned entity type
                     TileUsage = dto.TileUsage != null ? new OutlineTileUsage
                     {
                         TopEdge = dto.TileUsage.TopEdge?.ToList() ?? new List<int>(),
@@ -975,23 +661,10 @@ public class GameDataLoader
                     SourceMod = dto.SourceMod,
                     Version = dto.Version ?? "1.0.0"
                 };
-
-                _context.PopupOutlines.Add(outlineDef);
-                count++;
-
-                _logger.LogDebug("Loaded popup outline: {OutlineId}", outlineDef.OutlineId);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Failed to load popup outline: {File}", file);
-            }
-        }
-
-        // Save to in-memory database
-        await _context.SaveChangesAsync(ct);
-
-        _logger.LogInformation("Loaded {Count} popup outlines", count);
-        return count;
+                return new ParseResult<PopupOutlineEntity, GamePopupOutlineId>(outlineDef, outlineId, true);
+            },
+            entity => _context.PopupOutlines.Add(entity),
+            ct: ct);
     }
 
     /// <summary>
@@ -999,61 +672,20 @@ public class GameDataLoader
     ///     Replaces TypeRegistry&lt;BehaviorDefinition&gt;.
     ///     Uses ContentProvider for mod-aware loading when available.
     /// </summary>
-    private async Task<int> LoadBehaviorDefinitionsAsync(string path, CancellationToken ct)
+    private Task<int> LoadBehaviorDefinitionsAsync(CancellationToken ct)
     {
-        // Use ContentProvider for mod-aware loading (handles mod overrides)
-        IEnumerable<string> files;
-        if (_contentProvider != null)
-        {
-            // GetAllContentPaths returns files from mods (by priority) then base game
-            // Files with same relative path are deduplicated (mod wins over base)
-            files = _contentProvider.GetAllContentPaths("Behaviors", "*.json");
-            _logger.LogDebug("Using ContentProvider for Behaviors - found {Count} files", files.Count());
-        }
-        else
-        {
-            // Fallback: direct file system access (no mod support)
-            if (!Directory.Exists(path))
+        return LoadDefinitionsAsync<BehaviorDefinitionDto, BehaviorEntity, GameBehaviorId>(
+            "BehaviorDefinitions",
+            (dto, file) =>
             {
-                _logger.LogDirectoryNotFound("BehaviorDefinitions", path);
-                return 0;
-            }
-            files = Directory.GetFiles(path, "*.json", SearchOption.AllDirectories)
-                .Where(f => !IsHiddenOrSystemDirectory(f));
-        }
-
-        int count = 0;
-
-        foreach (string file in files)
-        {
-            ct.ThrowIfCancellationRequested();
-
-            try
-            {
-                string json = await File.ReadAllTextAsync(file, ct);
-                BehaviorDefinitionDto? dto = JsonSerializer.Deserialize<BehaviorDefinitionDto>(json, _jsonOptions);
-
-                if (dto == null)
-                {
-                    _logger.LogWarning("Failed to deserialize behavior definition: {File}", file);
-                    continue;
-                }
-
-                // Validate required fields
                 if (string.IsNullOrWhiteSpace(dto.Id))
-                {
-                    _logger.LogWarning("Behavior definition missing required fields: {File}", file);
-                    continue;
-                }
+                    return new ParseResult<BehaviorEntity, GameBehaviorId>(null!, default!, false, "Missing Id");
 
-                // Detect source mod from file path (if file is under Mods/ directory)
                 string? sourceMod = dto.SourceMod ?? DetectSourceModFromPath(file);
-
-                // Convert DTO to entity
-                // Use TryCreate first for full ID format, fall back to Create for simple names
+                GameBehaviorId behaviorId = GameBehaviorId.TryCreate(dto.Id) ?? GameBehaviorId.Create(dto.Id);
                 var behaviorDef = new BehaviorEntity
                 {
-                    BehaviorId = GameBehaviorId.TryCreate(dto.Id) ?? GameBehaviorId.Create(dto.Id),
+                    BehaviorId = behaviorId,
                     Name = dto.Name ?? dto.Id,
                     Description = dto.Description,
                     DefaultSpeed = dto.DefaultSpeed ?? 4.0f,
@@ -1063,28 +695,10 @@ public class GameDataLoader
                     SourceMod = sourceMod,
                     Version = dto.Version ?? "1.0.0"
                 };
-
-                if (sourceMod != null)
-                {
-                    _logger.LogDebug("Loaded mod-overridden behavior: {Id} from {Mod}", dto.Id, sourceMod);
-                }
-
-                _context.Behaviors.Add(behaviorDef);
-                count++;
-
-                _logger.LogDebug("Loaded behavior definition: {BehaviorId}", behaviorDef.BehaviorId);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Failed to load behavior definition: {File}", file);
-            }
-        }
-
-        // Save to in-memory database
-        await _context.SaveChangesAsync(ct);
-
-        _logger.LogInformation("Loaded {Count} behavior definitions", count);
-        return count;
+                return new ParseResult<BehaviorEntity, GameBehaviorId>(behaviorDef, behaviorId, true);
+            },
+            entity => _context.Behaviors.Add(entity),
+            ct: ct);
     }
 
     /// <summary>
@@ -1092,75 +706,25 @@ public class GameDataLoader
     ///     Replaces TypeRegistry&lt;TileBehaviorDefinition&gt;.
     ///     Uses ContentProvider for mod-aware loading when available.
     /// </summary>
-    private async Task<int> LoadTileBehaviorDefinitionsAsync(string path, CancellationToken ct)
+    private Task<int> LoadTileBehaviorDefinitionsAsync(CancellationToken ct)
     {
-        // Use ContentProvider for mod-aware loading (handles mod overrides)
-        IEnumerable<string> files;
-        if (_contentProvider != null)
-        {
-            // GetAllContentPaths returns files from mods (by priority) then base game
-            // Files with same relative path are deduplicated (mod wins over base)
-            files = _contentProvider.GetAllContentPaths("TileBehaviors", "*.json");
-            _logger.LogDebug("Using ContentProvider for TileBehaviors - found {Count} files", files.Count());
-        }
-        else
-        {
-            // Fallback: direct file system access (no mod support)
-            if (!Directory.Exists(path))
+        return LoadDefinitionsAsync<TileBehaviorDefinitionDto, TileBehaviorEntity, GameTileBehaviorId>(
+            "TileBehaviorDefinitions",
+            (dto, file) =>
             {
-                _logger.LogDirectoryNotFound("TileBehaviorDefinitions", path);
-                return 0;
-            }
-            files = Directory.GetFiles(path, "*.json", SearchOption.AllDirectories)
-                .Where(f => !IsHiddenOrSystemDirectory(f));
-        }
-
-        int count = 0;
-
-        foreach (string file in files)
-        {
-            ct.ThrowIfCancellationRequested();
-
-            try
-            {
-                string json = await File.ReadAllTextAsync(file, ct);
-                TileBehaviorDefinitionDto? dto = JsonSerializer.Deserialize<TileBehaviorDefinitionDto>(json, _jsonOptions);
-
-                if (dto == null)
-                {
-                    _logger.LogWarning("Failed to deserialize tile behavior definition: {File}", file);
-                    continue;
-                }
-
-                // Validate required fields
                 if (string.IsNullOrWhiteSpace(dto.Id))
-                {
-                    _logger.LogWarning("Tile behavior definition missing required fields: {File}", file);
-                    continue;
-                }
+                    return new ParseResult<TileBehaviorEntity, GameTileBehaviorId>(null!, default!, false, "Missing Id");
 
-                // Parse flags from string (e.g., "ForcesMovement, DisablesRunning")
-                int flags = 0;
-                if (!string.IsNullOrWhiteSpace(dto.Flags))
-                {
-                    flags = ParseTileBehaviorFlags(dto.Flags);
-                }
-
-                // Detect source mod from file path (if file is under Mods/ directory)
+                int flags = !string.IsNullOrWhiteSpace(dto.Flags) ? ParseTileBehaviorFlags(dto.Flags) : 0;
                 string? sourceMod = dto.SourceMod ?? DetectSourceModFromPath(file);
+                string? extensionDataJson = dto.ExtensionData?.Count > 0
+                    ? JsonSerializer.Serialize(dto.ExtensionData, _jsonOptions)
+                    : null;
 
-                // Serialize extension data from mods (testProperty, modded, etc.)
-                string? extensionDataJson = null;
-                if (dto.ExtensionData != null && dto.ExtensionData.Count > 0)
-                {
-                    extensionDataJson = JsonSerializer.Serialize(dto.ExtensionData, _jsonOptions);
-                }
-
-                // Convert DTO to entity
-                // Use TryCreate first for full ID format, fall back to Create for simple names
+                GameTileBehaviorId tileBehaviorId = GameTileBehaviorId.TryCreate(dto.Id) ?? GameTileBehaviorId.Create(dto.Id);
                 var tileBehaviorDef = new TileBehaviorEntity
                 {
-                    TileBehaviorId = GameTileBehaviorId.TryCreate(dto.Id) ?? GameTileBehaviorId.Create(dto.Id),
+                    TileBehaviorId = tileBehaviorId,
                     Name = dto.Name ?? dto.Id,
                     Description = dto.Description,
                     Flags = flags,
@@ -1169,32 +733,10 @@ public class GameDataLoader
                     Version = dto.Version ?? "1.0.0",
                     ExtensionData = extensionDataJson
                 };
-
-                if (sourceMod != null)
-                {
-                    _logger.LogDebug("Loaded mod-overridden tile behavior: {Id} from {Mod}", dto.Id, sourceMod);
-                    if (extensionDataJson != null)
-                    {
-                        _logger.LogDebug("  Extension data: {ExtensionData}", extensionDataJson);
-                    }
-                }
-
-                _context.TileBehaviors.Add(tileBehaviorDef);
-                count++;
-
-                _logger.LogDebug("Loaded tile behavior definition: {TileBehaviorId}", tileBehaviorDef.TileBehaviorId);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Failed to load tile behavior definition: {File}", file);
-            }
-        }
-
-        // Save to in-memory database
-        await _context.SaveChangesAsync(ct);
-
-        _logger.LogInformation("Loaded {Count} tile behavior definitions", count);
-        return count;
+                return new ParseResult<TileBehaviorEntity, GameTileBehaviorId>(tileBehaviorDef, tileBehaviorId, true);
+            },
+            entity => _context.TileBehaviors.Add(entity),
+            ct: ct);
     }
 
     /// <summary>
@@ -1202,71 +744,25 @@ public class GameDataLoader
     ///     Replaces FontLoader hardcoded constants.
     ///     Uses ContentProvider for mod-aware loading when available.
     /// </summary>
-    private async Task<int> LoadFontDefinitionsAsync(string path, CancellationToken ct)
+    private async Task<int> LoadFontDefinitionsAsync(CancellationToken ct)
     {
-        // Use ContentProvider for mod-aware loading (handles mod overrides)
-        IEnumerable<string> files;
-        if (_contentProvider != null)
-        {
-            // GetAllContentPaths returns files from mods (by priority) then base game
-            // Files with same relative path are deduplicated (mod wins over base)
-            // NOTE: Uses "FontDefinitions" (Definitions/Fonts) not "Fonts" (Assets/Fonts where TTF files are)
-            files = _contentProvider.GetAllContentPaths("FontDefinitions", "*.json");
-            _logger.LogDebug("Using ContentProvider for FontDefinitions - found {Count} files", files.Count());
-        }
-        else
-        {
-            // Fallback: direct file system access (no mod support)
-            if (!Directory.Exists(path))
-            {
-                _logger.LogDirectoryNotFound("FontDefinitions", path);
-                return 0;
-            }
-            files = Directory.GetFiles(path, "*.json", SearchOption.AllDirectories)
-                .Where(f => !IsHiddenOrSystemDirectory(f));
-        }
-
-        int count = 0;
-
-        // OPTIMIZATION: Load all existing fonts once to avoid N+1 queries and support overrides
+        // Pre-load existing fonts for override support
         Dictionary<GameFontId, FontEntity> existingFonts = await _context
             .Fonts.AsNoTracking()
             .ToDictionaryAsync(f => f.FontId, ct);
 
-        foreach (string file in files)
-        {
-            ct.ThrowIfCancellationRequested();
-
-            try
+        return await LoadDefinitionsAsync<FontDefinitionDto, FontEntity, GameFontId>(
+            "FontDefinitions",
+            (dto, file) =>
             {
-                string json = await File.ReadAllTextAsync(file, ct);
-                FontDefinitionDto? dto = JsonSerializer.Deserialize<FontDefinitionDto>(json, _jsonOptions);
-
-                if (dto == null)
-                {
-                    _logger.LogWarning("Failed to deserialize font definition: {File}", file);
-                    continue;
-                }
-
-                // Validate required fields
                 if (string.IsNullOrWhiteSpace(dto.Id) || string.IsNullOrWhiteSpace(dto.FontPath))
-                {
-                    _logger.LogWarning("Font definition missing required fields: {File}", file);
-                    continue;
-                }
+                    return new ParseResult<FontEntity, GameFontId>(null!, default!, false, "Missing Id or FontPath");
 
-                // Parse and validate GameFontId from the Id field
                 GameFontId? fontId = GameFontId.TryCreate(dto.Id);
                 if (fontId == null)
-                {
-                    _logger.LogWarning("Invalid font ID format in: {File}", file);
-                    continue;
-                }
+                    return new ParseResult<FontEntity, GameFontId>(null!, default!, false, "Invalid font ID format");
 
-                // Detect source mod from file path (if file is under Mods/ directory)
                 string? sourceMod = dto.SourceMod ?? DetectSourceModFromPath(file);
-
-                // Convert DTO to entity
                 var fontDef = new FontEntity
                 {
                     FontId = fontId,
@@ -1282,34 +778,16 @@ public class GameDataLoader
                     SourceMod = sourceMod,
                     Version = dto.Version ?? "1.0.0"
                 };
-
-                // Support mod overrides - if font already exists, update it
-                if (existingFonts.TryGetValue(fontDef.FontId, out FontEntity? existing))
-                {
-                    _context.Fonts.Attach(existing);
-                    _context.Entry(existing).CurrentValues.SetValues(fontDef);
-                    _logger.LogDebug("Font overridden: {FontId} by {Source}", fontDef.FontId, sourceMod ?? "base");
-                }
-                else
-                {
-                    _context.Fonts.Add(fontDef);
-                }
-
-                count++;
-
-                _logger.LogDebug("Loaded font definition: {FontId}", fontDef.FontId);
-            }
-            catch (Exception ex)
+                return new ParseResult<FontEntity, GameFontId>(fontDef, fontId, true);
+            },
+            entity => _context.Fonts.Add(entity),
+            existingFonts,
+            (existing, newEntity) =>
             {
-                _logger.LogWarning(ex, "Failed to load font definition: {File}", file);
-            }
-        }
-
-        // Save to in-memory database
-        await _context.SaveChangesAsync(ct);
-
-        _logger.LogInformation("Loaded {Count} font definitions", count);
-        return count;
+                _context.Fonts.Attach(existing);
+                _context.Entry(existing).CurrentValues.SetValues(newEntity);
+            },
+            ct);
     }
 
     /// <summary>
@@ -1377,7 +855,7 @@ public class GameDataLoader
     /// <summary>
     ///     Gets the content provider for mod-aware loading.
     /// </summary>
-    public IContentProvider? ContentProvider => _contentProvider;
+    public IContentProvider ContentProvider => _contentProvider;
 }
 
 #region DTOs for JSON Deserialization

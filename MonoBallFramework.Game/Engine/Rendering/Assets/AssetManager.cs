@@ -62,10 +62,11 @@ public class AssetManager(
 
     /// <summary>
     ///     Loads a texture from a PNG file and caches it.
+    ///     Uses ContentProvider to resolve the path, ensuring mod overrides are respected.
     ///     If the texture was preloaded asynchronously, uses the preloaded data instead of reading from disk.
     /// </summary>
     /// <param name="id">Unique identifier for the texture.</param>
-    /// <param name="relativePath">Path relative to asset root.</param>
+    /// <param name="relativePath">Path relative to asset root (use "Root" content type).</param>
     public void LoadTexture(string id, string relativePath)
     {
         ArgumentException.ThrowIfNullOrEmpty(id);
@@ -85,67 +86,92 @@ public class AssetManager(
         }
 
         // Check if preloaded data is available in the pending queue
-        // Drain matching entries from the queue
         if (TryGetPreloadedTexture(id, out byte[]? preloadedData) && preloadedData != null)
         {
-            var sw = Stopwatch.StartNew();
-
-            using var memoryStream = new MemoryStream(preloadedData);
-            var texture = Texture2D.FromStream(_graphicsDevice, memoryStream);
-
-            sw.Stop();
-            double elapsedMs = sw.Elapsed.TotalMilliseconds;
-
-            _textures.AddOrUpdate(id, texture);
-            _logger?.LogDebug("Used preloaded texture data: {Id} ({ElapsedMs:F1}ms GPU upload)", id, elapsedMs);
+            LoadTextureFromBytes(id, preloadedData);
             return;
         }
 
-        // Fallback to synchronous file load
+        // Normalize path separators
         string normalizedPath = relativePath.Replace('/', Path.DirectorySeparatorChar);
 
-        // Check if path is already absolute and file exists
-        string fullPath;
-        if (Path.IsPathRooted(normalizedPath) && File.Exists(normalizedPath))
+        // Handle absolute paths (for backward compatibility with callers that pre-resolved via ContentProvider)
+        // TODO: Callers should migrate to LoadTextureFromResolvedPath() for explicit intent
+        if (Path.IsPathRooted(normalizedPath))
         {
-            // Use absolute path directly (bypasses ContentProvider for tileset images etc.)
-            fullPath = normalizedPath;
-        }
-        else
-        {
-            // Use ContentProvider to resolve relative path
-            // Paths from definitions include content type prefix (e.g., "Graphics/Maps/..."), so use "Root"
-            string? resolvedPath = _contentProvider.ResolveContentPath("Root", normalizedPath);
-            if (resolvedPath == null)
-            {
-                throw new FileNotFoundException($"Texture not found: {relativePath}");
-            }
-            fullPath = resolvedPath;
+            _logger?.LogDebug(
+                "LoadTexture called with absolute path '{Path}'. Consider using LoadTextureFromResolvedPath() instead.",
+                normalizedPath);
+            LoadTextureFromResolvedPath(id, normalizedPath);
+            return;
         }
 
-        if (!File.Exists(fullPath))
+        // Use ContentProvider to resolve relative path with mod priority
+        string? resolvedPath = _contentProvider.ResolveContentPath("Root", normalizedPath);
+        if (resolvedPath == null)
         {
-            throw new FileNotFoundException($"Texture file not found: {fullPath}");
+            throw new FileNotFoundException($"Texture not found: {relativePath}");
         }
 
-        var swSync = Stopwatch.StartNew();
+        LoadTextureFromResolvedPath(id, resolvedPath);
+    }
 
-        using FileStream fileStream = File.OpenRead(fullPath);
-        var textureSync = Texture2D.FromStream(_graphicsDevice, fileStream);
+    /// <summary>
+    ///     Loads a texture from an already-resolved absolute path.
+    ///     Use this when the caller has already resolved the path via ContentProvider.
+    /// </summary>
+    /// <param name="id">Unique identifier for the texture.</param>
+    /// <param name="absolutePath">The absolute path to the texture file (already resolved via ContentProvider).</param>
+    /// <exception cref="FileNotFoundException">Thrown if the texture file does not exist.</exception>
+    public void LoadTextureFromResolvedPath(string id, string absolutePath)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(id);
+        ArgumentException.ThrowIfNullOrEmpty(absolutePath);
 
-        swSync.Stop();
-        double elapsedMsSync = swSync.Elapsed.TotalMilliseconds;
-
-        _textures.AddOrUpdate(id, textureSync); // LRU cache auto-evicts if needed
-
-        // Log texture loading with timing
-        _logger?.LogTextureLoaded(id, elapsedMsSync, textureSync.Width, textureSync.Height);
-
-        // Warn about slow texture loads (>100ms)
-        if (elapsedMsSync > 100.0)
+        // Already loaded - skip
+        if (HasTexture(id))
         {
-            _logger?.LogSlowTextureLoad(id, elapsedMsSync);
+            return;
         }
+
+        if (!File.Exists(absolutePath))
+        {
+            throw new FileNotFoundException($"Texture file not found: {absolutePath}");
+        }
+
+        var sw = Stopwatch.StartNew();
+
+        using FileStream fileStream = File.OpenRead(absolutePath);
+        var texture = Texture2D.FromStream(_graphicsDevice, fileStream);
+
+        sw.Stop();
+        double elapsedMs = sw.Elapsed.TotalMilliseconds;
+
+        _textures.AddOrUpdate(id, texture);
+
+        _logger?.LogTextureLoaded(id, elapsedMs, texture.Width, texture.Height);
+
+        if (elapsedMs > 100.0)
+        {
+            _logger?.LogSlowTextureLoad(id, elapsedMs);
+        }
+    }
+
+    /// <summary>
+    ///     Loads a texture from raw bytes (used for preloaded textures).
+    /// </summary>
+    private void LoadTextureFromBytes(string id, byte[] data)
+    {
+        var sw = Stopwatch.StartNew();
+
+        using var memoryStream = new MemoryStream(data);
+        var texture = Texture2D.FromStream(_graphicsDevice, memoryStream);
+
+        sw.Stop();
+        double elapsedMs = sw.Elapsed.TotalMilliseconds;
+
+        _textures.AddOrUpdate(id, texture);
+        _logger?.LogDebug("Used preloaded texture data: {Id} ({ElapsedMs:F1}ms GPU upload)", id, elapsedMs);
     }
 
     /// <summary>
@@ -282,10 +308,11 @@ public class AssetManager(
 
     /// <summary>
     ///     Preloads a texture asynchronously - reads file bytes on background thread.
+    ///     Uses ContentProvider to resolve the path, ensuring mod overrides are respected.
     ///     Call ProcessTextureQueue() from Update loop to upload to GPU incrementally.
     /// </summary>
     /// <param name="id">Unique identifier for the texture.</param>
-    /// <param name="relativePath">Path relative to asset root.</param>
+    /// <param name="relativePath">Path relative to asset root (use "Root" content type).</param>
     public void PreloadTextureAsync(string id, string relativePath)
     {
         ArgumentException.ThrowIfNullOrEmpty(id);
@@ -299,33 +326,54 @@ public class AssetManager(
 
         string normalizedPath = relativePath.Replace('/', Path.DirectorySeparatorChar);
 
-        // Check if path is already absolute and file exists
-        string? fullPath;
-        if (Path.IsPathRooted(normalizedPath) && File.Exists(normalizedPath))
+        // Handle absolute paths (for backward compatibility with callers that pre-resolved via ContentProvider)
+        // TODO: Callers should migrate to PreloadTextureFromResolvedPathAsync() for explicit intent
+        if (Path.IsPathRooted(normalizedPath))
         {
-            // Use absolute path directly (bypasses ContentProvider for tileset images etc.)
-            fullPath = normalizedPath;
-        }
-        else
-        {
-            // Use ContentProvider to resolve relative path
-            // Paths from definitions include content type prefix (e.g., "Graphics/Maps/..."), so use "Root"
-            fullPath = _contentProvider.ResolveContentPath("Root", normalizedPath);
-            if (fullPath == null)
-            {
-                _logger?.LogWarning("Texture not found for async preload: {Path}", relativePath);
-                return;
-            }
+            _logger?.LogDebug(
+                "PreloadTextureAsync called with absolute path '{Path}'. Consider using PreloadTextureFromResolvedPathAsync() instead.",
+                normalizedPath);
+            PreloadTextureFromResolvedPathAsync(id, normalizedPath);
+            return;
         }
 
-        if (!File.Exists(fullPath))
+        // Use ContentProvider to resolve relative path with mod priority
+        string? fullPath = _contentProvider.ResolveContentPath("Root", normalizedPath);
+        if (fullPath == null)
         {
-            _logger?.LogWarning("Texture file not found for async preload: {Path}", fullPath);
+            _logger?.LogWarning("Texture not found for async preload: {Path}", relativePath);
+            return;
+        }
+
+        PreloadTextureFromResolvedPathAsync(id, fullPath);
+    }
+
+    /// <summary>
+    ///     Preloads a texture asynchronously from an already-resolved absolute path.
+    ///     Use this when the caller has already resolved the path via ContentProvider.
+    ///     Call ProcessTextureQueue() from Update loop to upload to GPU incrementally.
+    /// </summary>
+    /// <param name="id">Unique identifier for the texture.</param>
+    /// <param name="absolutePath">The absolute path to the texture file (already resolved via ContentProvider).</param>
+    public void PreloadTextureFromResolvedPathAsync(string id, string absolutePath)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(id);
+        ArgumentException.ThrowIfNullOrEmpty(absolutePath);
+
+        // Skip if already loaded, already loading, or already queued
+        if (HasTexture(id) || _loadingTextures.ContainsKey(id))
+        {
+            return;
+        }
+
+        if (!File.Exists(absolutePath))
+        {
+            _logger?.LogWarning("Texture file not found for async preload: {Path}", absolutePath);
             return;
         }
 
         // Start async file read on background thread
-        string pathToLoad = fullPath;
+        string pathToLoad = absolutePath;
         var loadTask = Task.Run(async () =>
         {
             try

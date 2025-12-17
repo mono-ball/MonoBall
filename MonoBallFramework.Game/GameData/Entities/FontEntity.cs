@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using MonoBallFramework.Game.Engine.Core.Types;
+using MonoBallFramework.Game.GameData.Entities.Base;
 
 namespace MonoBallFramework.Game.GameData.Entities;
 
@@ -9,7 +10,7 @@ namespace MonoBallFramework.Game.GameData.Entities;
 ///     Stores font metadata loaded from JSON definition files.
 /// </summary>
 [Table("Fonts")]
-public class FontEntity
+public class FontEntity : BaseEntity
 {
     /// <summary>
     ///     Unique font identifier in unified format.
@@ -19,20 +20,6 @@ public class FontEntity
     [MaxLength(150)]
     [Column(TypeName = "nvarchar(150)")]
     public GameFontId FontId { get; set; } = null!;
-
-    /// <summary>
-    ///     Human-readable display name.
-    ///     Example: "Pokemon Font" or "Debug Font"
-    /// </summary>
-    [Required]
-    [MaxLength(100)]
-    public string Name { get; set; } = string.Empty;
-
-    /// <summary>
-    ///     Optional description of the font.
-    /// </summary>
-    [MaxLength(500)]
-    public string? Description { get; set; }
 
     /// <summary>
     ///     Path to the font file relative to Assets/Fonts folder.
@@ -74,23 +61,6 @@ public class FontEntity
     ///     Whether this is a monospace font.
     /// </summary>
     public bool IsMonospace { get; set; } = false;
-
-    /// <summary>
-    ///     Source mod ID (null for base game).
-    /// </summary>
-    [MaxLength(100)]
-    public string? SourceMod { get; set; }
-
-    /// <summary>
-    ///     Version for compatibility tracking.
-    /// </summary>
-    [MaxLength(20)]
-    public string Version { get; set; } = "1.0.0";
-
-    /// <summary>
-    ///     Additional mod-defined properties stored as JSON.
-    /// </summary>
-    public string? ExtensionData { get; set; }
 
     // Computed properties (not stored in DB)
 

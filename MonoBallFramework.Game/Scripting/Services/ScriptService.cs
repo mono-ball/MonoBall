@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using MonoBallFramework.Game.Engine.Common.Logging;
+using MonoBallFramework.Game.Engine.Content;
 using MonoBallFramework.Game.Engine.Core.Events;
 using MonoBallFramework.Game.Scripting.Api;
 using MonoBallFramework.Game.Engine.Core.Modding;
@@ -32,40 +33,63 @@ public class ScriptService : IAsyncDisposable
     private readonly ILogger<ScriptService> _logger;
     private readonly ILoggerFactory _loggerFactory;
     private readonly string _scriptsBasePath;
+    private readonly IServiceProvider _serviceProvider;
     private readonly World _world;
 
+    private IContentProvider? _contentProvider;
+    private bool _contentProviderResolved;
     private ModLoader? _modLoader;
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="ScriptService" /> class.
     /// </summary>
-    /// <param name="scriptsBasePath">Base path for script files.</param>
+    /// <param name="scriptsBasePath">Base path for script files (fallback when ContentProvider not available).</param>
     /// <param name="logger">Logger instance.</param>
     /// <param name="loggerFactory">Logger factory for creating child loggers.</param>
     /// <param name="apis">Scripting API provider.</param>
     /// <param name="eventBus">Event bus for script event subscriptions.</param>
     /// <param name="world">ECS world for mod initialization.</param>
+    /// <param name="serviceProvider">Service provider for lazy resolution of IContentProvider.</param>
     public ScriptService(
         string scriptsBasePath,
         ILogger<ScriptService> logger,
         ILoggerFactory loggerFactory,
         IScriptingApiProvider apis,
         IEventBus eventBus,
-        World world
+        World world,
+        IServiceProvider serviceProvider
     )
     {
-        _scriptsBasePath =
-            scriptsBasePath ?? throw new ArgumentNullException(nameof(scriptsBasePath));
+        _scriptsBasePath = scriptsBasePath ?? throw new ArgumentNullException(nameof(scriptsBasePath));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _apis = apis ?? throw new ArgumentNullException(nameof(apis));
         _eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
         _world = world ?? throw new ArgumentNullException(nameof(world));
         _loggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
+        _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 
         // Create dependencies
         ILogger<ScriptCompiler> compilerLogger = loggerFactory.CreateLogger<ScriptCompiler>();
         _compiler = new ScriptCompiler(compilerLogger);
         _cache = new ScriptCache();
+    }
+
+    /// <summary>
+    ///     Gets the content provider, resolving it lazily to avoid circular dependency.
+    ///     The circular dependency is: ModLoader -> ScriptService -> IContentProvider -> IModLoader -> ModLoader
+    ///     By resolving lazily, we break the cycle at construction time.
+    /// </summary>
+    private IContentProvider? ContentProvider
+    {
+        get
+        {
+            if (!_contentProviderResolved)
+            {
+                _contentProvider = _serviceProvider.GetService(typeof(IContentProvider)) as IContentProvider;
+                _contentProviderResolved = true;
+            }
+            return _contentProvider;
+        }
     }
 
     /// <summary>
@@ -131,13 +155,29 @@ public class ScriptService : IAsyncDisposable
             return cachedInstance;
         }
 
-        // Handle both absolute paths (from mods) and relative paths (from base game)
-        string fullPath = Path.IsPathRooted(scriptPath)
-            ? scriptPath
-            : Path.Combine(_scriptsBasePath, scriptPath);
+        // Handle both absolute paths (from mods) and relative paths
+        string? fullPath;
+        if (Path.IsPathRooted(scriptPath))
+        {
+            // Absolute path - use directly (already resolved by ModLoader)
+            fullPath = scriptPath;
+        }
+        else
+        {
+            // Relative path - try ContentProvider first (if available), then fallback to base path
+            // ContentProvider is resolved lazily to avoid circular dependency at construction time
+            fullPath = ContentProvider?.ResolveContentPath("Scripts", scriptPath);
+
+            // Fallback to base scripts path if ContentProvider didn't resolve it
+            if (fullPath == null || !File.Exists(fullPath))
+            {
+                fullPath = Path.Combine(_scriptsBasePath, scriptPath);
+            }
+        }
+
         if (!File.Exists(fullPath))
         {
-            _logger.LogError("Script file not found: {Path}", fullPath);
+            _logger.LogError("Script file not found: {Path} (resolved: {ResolvedPath})", scriptPath, fullPath);
             return null;
         }
 

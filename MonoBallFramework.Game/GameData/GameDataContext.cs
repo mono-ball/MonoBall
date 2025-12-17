@@ -47,8 +47,8 @@ public class GameDataContext : DbContext
     public DbSet<AudioEntity> Audios { get; set; } = null!;
 
     // Popup entities
-    public DbSet<PopupTheme> PopupThemes { get; set; } = null!;
-    public DbSet<MapSection> MapSections { get; set; } = null!;
+    public DbSet<PopupThemeEntity> PopupThemes { get; set; } = null!;
+    public DbSet<MapSectionEntity> MapSections { get; set; } = null!;
 
     // === NEW: Unified Definition DbSets ===
 
@@ -119,11 +119,11 @@ public class GameDataContext : DbContext
     }
 
     /// <summary>
-    ///     Configure PopupTheme entity.
+    ///     Configure PopupThemeEntity entity.
     /// </summary>
     private void ConfigurePopupTheme(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<PopupTheme>(entity =>
+        modelBuilder.Entity<PopupThemeEntity>(entity =>
         {
             entity.HasKey(t => t.ThemeId);
 
@@ -167,11 +167,11 @@ public class GameDataContext : DbContext
     }
 
     /// <summary>
-    ///     Configure MapSection entity.
+    ///     Configure MapSectionEntity entity.
     /// </summary>
     private void ConfigureMapSection(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<MapSection>(entity =>
+        modelBuilder.Entity<MapSectionEntity>(entity =>
         {
             entity.HasKey(s => s.MapSectionId);
 

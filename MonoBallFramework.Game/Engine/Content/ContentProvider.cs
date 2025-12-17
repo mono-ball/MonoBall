@@ -1,3 +1,4 @@
+using System.IO;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MonoBallFramework.Game.Engine.Core.Modding;
@@ -411,34 +412,63 @@ public sealed class ContentProvider : IContentProvider
             throw new ArgumentException("Content type cannot be null or whitespace.", nameof(contentType));
         }
 
-        // Check if content type is configured
+        // 1) Prefer mod content folders (highest priority first) so moved assets still resolve
+        var modsOrderedByPriority = _modLoader.LoadedMods.Values
+            .OrderByDescending(m => m.Priority)
+            .ToList();
+
+        foreach (var mod in modsOrderedByPriority)
+        {
+            if (!mod.ContentFolders.TryGetValue(contentType, out string? modFolder))
+            {
+                continue;
+            }
+
+            string modDirectoryPath = string.IsNullOrEmpty(modFolder)
+                ? mod.DirectoryPath
+                : Path.Combine(mod.DirectoryPath, modFolder);
+
+            if (!Directory.Exists(modDirectoryPath))
+            {
+                continue;
+            }
+
+            _logger.LogDebug(
+                "Resolved content directory for '{ContentType}' from mod '{ModId}' (priority {Priority}) -> {Path}",
+                contentType,
+                mod.Id,
+                mod.Priority,
+                modDirectoryPath);
+
+            return modDirectoryPath;
+        }
+
+        // 2) Fallback to base game content folders
         if (!_options.BaseContentFolders.TryGetValue(contentType, out string? contentFolder))
         {
             _logger.LogDebug("Content type '{ContentType}' is not configured", contentType);
             return null;
         }
 
-        // Build the directory path
-        string directoryPath = string.IsNullOrEmpty(contentFolder)
+        string baseDirectoryPath = string.IsNullOrEmpty(contentFolder)
             ? _options.BaseGameRoot
             : Path.Combine(_options.BaseGameRoot, contentFolder);
 
-        // Verify directory exists
-        if (!Directory.Exists(directoryPath))
+        if (!Directory.Exists(baseDirectoryPath))
         {
             _logger.LogDebug(
                 "Content directory for '{ContentType}' does not exist: {Path}",
                 contentType,
-                directoryPath);
+                baseDirectoryPath);
             return null;
         }
 
         _logger.LogDebug(
-            "Resolved content directory for '{ContentType}' -> {Path}",
+            "Resolved content directory for '{ContentType}' from base game -> {Path}",
             contentType,
-            directoryPath);
+            baseDirectoryPath);
 
-        return directoryPath;
+        return baseDirectoryPath;
     }
 
     /// <summary>

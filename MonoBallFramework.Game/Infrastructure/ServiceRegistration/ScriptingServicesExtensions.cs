@@ -61,7 +61,9 @@ public static class ScriptingServicesExtensions
         // Scripting API Provider
         services.AddSingleton<IScriptingApiProvider, ScriptingApiProvider>();
 
-        // Scripting Service - uses path resolver for correct path resolution
+        // Scripting Service - uses lazy IContentProvider resolution to avoid circular dependency:
+        // ModLoader -> ScriptService -> IContentProvider -> IModLoader -> ModLoader
+        // IContentProvider is resolved lazily at first script load, not at construction time.
         services.AddSingleton(sp =>
         {
             IAssetPathResolver pathResolver = sp.GetRequiredService<IAssetPathResolver>();
@@ -71,7 +73,7 @@ public static class ScriptingServicesExtensions
             IEventBus eventBus = sp.GetRequiredService<IEventBus>();
             World world = sp.GetRequiredService<World>();
             string scriptsPath = pathResolver.Resolve("Scripts");
-            return new ScriptService(scriptsPath, logger, loggerFactory, apis, eventBus, world);
+            return new ScriptService(scriptsPath, logger, loggerFactory, apis, eventBus, world, sp);
         });
 
         return services;

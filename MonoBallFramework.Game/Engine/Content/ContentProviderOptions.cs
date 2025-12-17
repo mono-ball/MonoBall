@@ -36,7 +36,6 @@ public class ContentProviderOptions
     public Dictionary<string, string> BaseContentFolders { get; set; } = new()
     {
         ["Root"] = "",  // Root-level assets (logo.png, MonoBall.wav, etc.)
-        ["Definitions"] = "Definitions",
         ["Graphics"] = "Graphics",
         ["Audio"] = "Audio",
         ["Scripts"] = "Scripts",
@@ -44,17 +43,18 @@ public class ContentProviderOptions
         ["Tiled"] = "Tiled",
         ["Tilesets"] = "Tilesets",
 
-        // Definition subdirectories - allows mods to override specific definition types
-        ["TileBehaviors"] = "Definitions/TileBehaviors",
-        ["Behaviors"] = "Definitions/Behaviors",
-        ["Sprites"] = "Definitions/Sprites",
+        // Definition types - each has its own content type for precise mod override control
+        ["TileBehaviorDefinitions"] = "Definitions/TileBehaviors",
+        ["BehaviorDefinitions"] = "Definitions/Behaviors",
+        ["SpriteDefinitions"] = "Definitions/Sprites",
         ["FontDefinitions"] = "Definitions/Fonts",
         ["MapDefinitions"] = "Definitions/Maps/Regions",
         ["AudioDefinitions"] = "Definitions/Audio",
-        ["PopupBackgrounds"] = "Definitions/Maps/Popups/Backgrounds",
-        ["PopupOutlines"] = "Definitions/Maps/Popups/Outlines",
-        ["PopupThemes"] = "Definitions/Maps/Popups/Themes",
-        ["MapSections"] = "Definitions/Maps/Sections"
+        ["PopupBackgroundDefinitions"] = "Definitions/Maps/Popups/Backgrounds",
+        ["PopupOutlineDefinitions"] = "Definitions/Maps/Popups/Outlines",
+        ["PopupThemeDefinitions"] = "Definitions/Maps/Popups/Themes",
+        ["MapSectionDefinitions"] = "Definitions/Maps/Sections",
+        ["TextWindowDefinitions"] = "Definitions/TextWindow"
     };
 
     /// <summary>

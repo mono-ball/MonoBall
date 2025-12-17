@@ -5,20 +5,19 @@ using MonoBallFramework.Game.Engine.Core.Types;
 using MonoBallFramework.Game.Engine.Rendering.Assets;
 using MonoBallFramework.Game.GameData.Entities;
 using MonoBallFramework.Game.GameData.Sprites;
-using MonoBallFramework.Game.Infrastructure.Services;
 
 namespace MonoBallFramework.Game.Systems.Rendering;
 
 /// <summary>
 ///     Service responsible for loading sprite sheet textures into the AssetManager.
 ///     Scans available sprite definitions and loads their sprite sheets.
+///     Uses AssetManager which internally delegates to ContentProvider for mod-aware path resolution.
 /// </summary>
 public class SpriteTextureLoader
 {
     private readonly AssetManager _assetManager;
     private readonly GraphicsDevice _graphicsDevice;
     private readonly ILogger<SpriteTextureLoader>? _logger;
-    private readonly IAssetPathResolver _pathResolver;
 
     // PHASE 2: Per-map sprite tracking for lazy loading
     private readonly Dictionary<GameMapId, HashSet<GameSpriteId>> _mapSpriteIds = new();
@@ -36,14 +35,12 @@ public class SpriteTextureLoader
         SpriteRegistry spriteRegistry,
         AssetManager assetManager,
         GraphicsDevice graphicsDevice,
-        IAssetPathResolver pathResolver,
         ILogger<SpriteTextureLoader>? logger = null
     )
     {
         _spriteRegistry = spriteRegistry ?? throw new ArgumentNullException(nameof(spriteRegistry));
         _assetManager = assetManager ?? throw new ArgumentNullException(nameof(assetManager));
         _graphicsDevice = graphicsDevice ?? throw new ArgumentNullException(nameof(graphicsDevice));
-        _pathResolver = pathResolver ?? throw new ArgumentNullException(nameof(pathResolver));
         _logger = logger;
     }
 
@@ -89,31 +86,20 @@ public class SpriteTextureLoader
                     spriteId.Name
                 );
 
-                string spritesheetPath = _pathResolver.Resolve(definition.TexturePath);
+                // Resolve through AssetManager so mod content is considered before base assets
+                _assetManager.LoadTexture(textureKey, definition.TexturePath);
 
-                if (string.IsNullOrEmpty(spritesheetPath) || !File.Exists(spritesheetPath))
+                if (_assetManager.TryGetTexture(textureKey, out Texture2D? texture) && texture != null)
                 {
-                    _logger?.LogSpriteSheetNotFound(spriteId.Category, spriteId.Name);
-                    failedCount++;
-                    continue;
+                    _logger?.LogSpriteTextureWithDimensions(
+                        spriteId.Category,
+                        spriteId.Name,
+                        texture.Format,
+                        texture.Width,
+                        texture.Height
+                    );
                 }
 
-                // Load texture using MonoGame's Texture2D.FromStream
-                using FileStream fileStream = File.OpenRead(spritesheetPath);
-                var texture = Texture2D.FromStream(_graphicsDevice, fileStream);
-
-                _logger?.LogSpriteTextureWithDimensions(
-                    spriteId.Category,
-                    spriteId.Name,
-                    texture.Format,
-                    texture.Width,
-                    texture.Height
-                );
-
-                // Note: Transparency should be baked into the PNG by the extractor
-                // Runtime mask color application doesn't persist correctly
-                // Register with AssetManager (using a direct registration method)
-                RegisterTexture(textureKey, texture);
                 loadedCount++;
             }
             catch (Exception ex)
@@ -163,29 +149,13 @@ public class SpriteTextureLoader
             return;
         }
 
-        string spritesheetPath = _pathResolver.Resolve(definition.TexturePath);
+        // Resolve through AssetManager so mod content is considered
+        _assetManager.LoadTexture(textureKey, definition.TexturePath);
 
-        if (string.IsNullOrEmpty(spritesheetPath) || !File.Exists(spritesheetPath))
+        if (_assetManager.TryGetTexture(textureKey, out Texture2D? texture) && texture != null)
         {
-            // Only log once per missing sprite
-            if (_reportedMissingSprites.Add(spritePath))
-            {
-                _logger?.LogSpriteSheetNotFound("sprite", spritePath);
-            }
-            return;
+            _logger?.LogSpriteTextureLazyLoaded(textureKey, texture.Format);
         }
-
-        // Load texture (transparency is already baked into the PNG)
-        using FileStream fileStream = File.OpenRead(spritesheetPath);
-        var texture = Texture2D.FromStream(_graphicsDevice, fileStream);
-
-        _logger?.LogSpriteTextureLazyLoaded(textureKey, texture.Format);
-
-        // Note: Transparency should be baked into the PNG by the extractor
-        // Runtime mask color application doesn't persist correctly
-
-        // Register with AssetManager
-        RegisterTexture(textureKey, texture);
 
         _logger?.LogSpriteLoadedOnDemand(textureKey);
     }
@@ -300,19 +270,14 @@ public class SpriteTextureLoader
         }
 
         string textureKey = $"sprites/{spritePath}";
-        string spritesheetPath = _pathResolver.Resolve(definition.TexturePath);
 
-        if (string.IsNullOrEmpty(spritesheetPath) || !File.Exists(spritesheetPath))
+        // Resolve through AssetManager so mod content is considered
+        _assetManager.LoadTexture(textureKey, definition.TexturePath);
+
+        if (_assetManager.TryGetTexture(textureKey, out Texture2D? texture) && texture != null)
         {
-            _logger?.LogSpriteTextureFileNotFound("sprite", spritePath);
-            return;
+            _logger?.LogSpriteTextureLoadedDebug(textureKey);
         }
-
-        using FileStream fileStream = File.OpenRead(spritesheetPath);
-        var texture = Texture2D.FromStream(_graphicsDevice, fileStream);
-
-        RegisterTexture(textureKey, texture);
-        _logger?.LogSpriteTextureLoadedDebug(textureKey);
     }
 
     /// <summary>

@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using MonoBallFramework.Game.Engine.Core.Types;
+using MonoBallFramework.Game.GameData.Entities.Base;
 
 namespace MonoBallFramework.Game.GameData.Entities;
 
@@ -9,7 +10,7 @@ namespace MonoBallFramework.Game.GameData.Entities;
 ///     Stores audio track metadata loaded from JSON definition files.
 /// </summary>
 [Table("Audios")]
-public class AudioEntity
+public class AudioEntity : BaseEntity
 {
     /// <summary>
     ///     Unique audio identifier in unified format.
@@ -19,14 +20,6 @@ public class AudioEntity
     [MaxLength(150)]
     [Column(TypeName = "nvarchar(150)")]
     public GameAudioId AudioId { get; set; } = null!;
-
-    /// <summary>
-    ///     Human-readable display name.
-    ///     Example: "Dewford"
-    /// </summary>
-    [Required]
-    [MaxLength(100)]
-    public string Name { get; set; } = string.Empty;
 
     /// <summary>
     ///     Path to the audio file relative to Assets folder.
@@ -90,18 +83,6 @@ public class AudioEntity
     ///     Loop end position in seconds (for debugging/display).
     /// </summary>
     public float? LoopEndSec { get; set; }
-
-    /// <summary>
-    ///     Source mod ID (null for base game).
-    /// </summary>
-    [MaxLength(100)]
-    public string? SourceMod { get; set; }
-
-    /// <summary>
-    ///     Version for compatibility tracking.
-    /// </summary>
-    [MaxLength(20)]
-    public string Version { get; set; } = "1.0.0";
 
     // Computed properties for convenience (not stored in DB)
 

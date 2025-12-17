@@ -12,22 +12,22 @@ public interface IMapPopupDataService
     /// <summary>
     ///     Get popup theme by ID (O(1) cached).
     /// </summary>
-    PopupTheme? GetTheme(GameThemeId themeId);
+    PopupThemeEntity? GetTheme(GameThemeId themeId);
 
     /// <summary>
     ///     Get popup theme by ID asynchronously.
     /// </summary>
-    Task<PopupTheme?> GetThemeAsync(GameThemeId themeId, CancellationToken ct = default);
+    Task<PopupThemeEntity?> GetThemeAsync(GameThemeId themeId, CancellationToken ct = default);
 
     /// <summary>
     ///     Get map section by ID (O(1) cached).
     /// </summary>
-    MapSection? GetSection(string sectionId);
+    MapSectionEntity? GetSection(string sectionId);
 
     /// <summary>
     ///     Get map section by ID asynchronously.
     /// </summary>
-    Task<MapSection?> GetSectionAsync(string sectionId, CancellationToken ct = default);
+    Task<MapSectionEntity?> GetSectionAsync(string sectionId, CancellationToken ct = default);
 
     /// <summary>
     ///     Get popup display information for rendering.

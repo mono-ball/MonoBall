@@ -124,25 +124,26 @@ class TextWindowExtractor:
                 row = tile_idx // tiles_per_row
                 col = tile_idx % tiles_per_row
                 tiles.append({
-                    "Index": tile_idx,
-                    "X": col * tile_width,
-                    "Y": row * tile_height,
-                    "Width": tile_width,
-                    "Height": tile_height
+                    "index": tile_idx,
+                    "x": col * tile_width,
+                    "y": row * tile_height,
+                    "width": tile_width,
+                    "height": tile_height
                 })
-            
+
             # Create JSON definition - using TileSheet format like popup outlines
+            # Note: Use camelCase to match C# JsonPropertyName conventions
             unified_id = IdTransformer.create_id("textwindow", "tilesheet", filename)
             json_def = {
-                "Id": unified_id,
-                "DisplayName": filename.replace("_", " ").title(),
-                "Type": "TileSheet",
-                "TexturePath": f"Graphics/Sprites/TextWindow/{filename}.png",
-                "TileWidth": tile_width,
-                "TileHeight": tile_height,
-                "TileCount": tile_count,
-                "Tiles": tiles,
-                "Description": "Text window tile sheet from Pokemon Emerald (GBA tile-based rendering)"
+                "id": unified_id,
+                "displayName": filename.replace("_", " ").title(),
+                "type": "TileSheet",
+                "texturePath": f"Graphics/Sprites/TextWindow/{filename}.png",
+                "tileWidth": tile_width,
+                "tileHeight": tile_height,
+                "tileCount": tile_count,
+                "tiles": tiles,
+                "description": "Text window tile sheet from Pokemon Emerald (GBA tile-based rendering)"
             }
             
             # Save definition JSON

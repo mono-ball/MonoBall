@@ -77,13 +77,20 @@ public static class CoreServicesExtensions
 
         // Behavior Type Registries - For NPC and Tile behavior definitions
         // These provide O(1) lookup for moddable behaviors loaded from JSON
+        // Uses IContentProvider (resolved lazily) for mod-aware loading with fallback to base path
         services.AddSingleton(sp =>
         {
             IAssetPathResolver pathResolver = sp.GetRequiredService<IAssetPathResolver>();
             ILogger<TypeRegistry<BehaviorDefinition>> logger =
                 sp.GetRequiredService<ILogger<TypeRegistry<BehaviorDefinition>>>();
             string behaviorPath = pathResolver.Resolve("Definitions/Behaviors");
-            return new TypeRegistry<BehaviorDefinition>(behaviorPath, logger);
+            // Pass content type and service provider for mod-aware loading
+            // IContentProvider is resolved lazily to avoid circular dependency
+            return new TypeRegistry<BehaviorDefinition>(
+                behaviorPath,
+                "BehaviorDefinitions",  // Content type from ContentProviderOptions
+                logger,
+                sp);  // Service provider for lazy IContentProvider resolution
         });
 
         services.AddSingleton(sp =>
@@ -92,7 +99,13 @@ public static class CoreServicesExtensions
             ILogger<TypeRegistry<TileBehaviorDefinition>> logger =
                 sp.GetRequiredService<ILogger<TypeRegistry<TileBehaviorDefinition>>>();
             string tileBehaviorPath = pathResolver.Resolve("Definitions/TileBehaviors");
-            return new TypeRegistry<TileBehaviorDefinition>(tileBehaviorPath, logger);
+            // Pass content type and service provider for mod-aware loading
+            // IContentProvider is resolved lazily to avoid circular dependency
+            return new TypeRegistry<TileBehaviorDefinition>(
+                tileBehaviorPath,
+                "TileBehaviorDefinitions",  // Content type from ContentProviderOptions
+                logger,
+                sp);  // Service provider for lazy IContentProvider resolution
         });
 
         return services;

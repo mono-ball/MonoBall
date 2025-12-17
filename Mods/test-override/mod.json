@@ -6,7 +6,7 @@
   "description": "Tests content override functionality",
   "priority": 100,
   "contentFolders": {
-    "TileBehaviors": "content/Definitions/TileBehaviors"
+    "TileBehaviorDefinitions": "content/Definitions/TileBehaviors"
   },
   "dependencies": []
 }

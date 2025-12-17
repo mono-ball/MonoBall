@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using MonoBallFramework.Game.Engine.Common.Logging;
+using MonoBallFramework.Game.Engine.Content;
 
 namespace MonoBallFramework.Game.Engine.Core.Types;
 
@@ -14,19 +15,79 @@ namespace MonoBallFramework.Game.Engine.Core.Types;
 ///     TypeRegistry provides O(1) lookup performance using ConcurrentDictionary.
 ///     Supports async JSON loading and Roslyn script compilation for IScriptedType implementations.
 ///     Thread-safe for use in multi-threaded game engines.
+///     Uses IContentProvider for mod-aware loading when available, with fallback to direct path.
 ///     SCRIPT PATTERN:
 ///     Scripts are stored as object instances (ScriptBase) and cached as singletons.
 ///     Cast to ScriptBase in the consuming system (e.g., NpcBehaviorSystem).
 /// </remarks>
-public class TypeRegistry<T>(string dataPath, ILogger logger) : IAsyncDisposable
+public class TypeRegistry<T> : IAsyncDisposable
     where T : ITypeDefinition
 {
-    private readonly string _dataPath =
-        dataPath ?? throw new ArgumentNullException(nameof(dataPath));
-
+    private readonly string _dataPath;
+    private readonly string _contentType;
+    private readonly IServiceProvider? _serviceProvider;
     private readonly ConcurrentDictionary<string, T> _definitions = new();
-    private readonly ILogger _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    private readonly ILogger _logger;
     private readonly ConcurrentDictionary<string, object> _scripts = new();
+
+    // Lazy resolution to avoid circular dependency:
+    // ModLoader -> TypeRegistry -> IContentProvider -> IModLoader -> ModLoader
+    private IContentProvider? _contentProvider;
+    private bool _contentProviderResolved;
+
+    /// <summary>
+    ///     Initializes a new instance of the <see cref="TypeRegistry{T}" /> class.
+    /// </summary>
+    /// <param name="dataPath">Fallback path for definitions when ContentProvider is not available.</param>
+    /// <param name="contentType">Content type for ContentProvider resolution (e.g., "BehaviorDefinitions").</param>
+    /// <param name="logger">Logger instance.</param>
+    /// <param name="serviceProvider">Service provider for lazy IContentProvider resolution.</param>
+    public TypeRegistry(
+        string dataPath,
+        string contentType,
+        ILogger logger,
+        IServiceProvider? serviceProvider = null)
+    {
+        _dataPath = dataPath ?? throw new ArgumentNullException(nameof(dataPath));
+        _contentType = contentType ?? throw new ArgumentNullException(nameof(contentType));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _serviceProvider = serviceProvider;
+    }
+
+    /// <summary>
+    ///     Legacy constructor for backward compatibility.
+    /// </summary>
+    /// <param name="dataPath">Path for definitions.</param>
+    /// <param name="logger">Logger instance.</param>
+    [Obsolete("Use the constructor with contentType and serviceProvider parameters for mod support.")]
+    public TypeRegistry(string dataPath, ILogger logger)
+        : this(dataPath, string.Empty, logger, null)
+    {
+    }
+
+    /// <summary>
+    ///     Gets the content provider, resolving it lazily to avoid circular dependency.
+    /// </summary>
+    private IContentProvider? ContentProvider
+    {
+        get
+        {
+            if (!_contentProviderResolved && _serviceProvider != null)
+            {
+                _contentProvider = _serviceProvider.GetService(typeof(IContentProvider)) as IContentProvider;
+                _contentProviderResolved = true;
+
+                if (_contentProvider != null)
+                {
+                    _logger.LogDebug(
+                        "TypeRegistry<{TypeName}> resolved IContentProvider for content type '{ContentType}'",
+                        typeof(T).Name,
+                        _contentType);
+                }
+            }
+            return _contentProvider;
+        }
+    }
 
     /// <summary>
     ///     Get count of registered types.
@@ -91,19 +152,40 @@ public class TypeRegistry<T>(string dataPath, ILogger logger) : IAsyncDisposable
     }
 
     /// <summary>
-    ///     Load all type definitions from JSON files in the data path.
-    ///     Searches recursively for *.json files.
+    ///     Load all type definitions from JSON files.
+    ///     Uses IContentProvider for mod-aware loading when available (searches mods by priority, then base game).
+    ///     Falls back to direct path loading when ContentProvider is not available.
     /// </summary>
     /// <returns>Number of types successfully loaded.</returns>
     public async Task<int> LoadAllAsync()
     {
-        if (!Directory.Exists(_dataPath))
+        IEnumerable<string> jsonFiles;
+
+        // Try to use ContentProvider for mod-aware loading
+        if (ContentProvider != null && !string.IsNullOrEmpty(_contentType))
         {
-            _logger.LogResourceNotFound("Data path", _dataPath);
-            return 0;
+            jsonFiles = ContentProvider.GetAllContentPaths(_contentType, "*.json");
+            _logger.LogDebug(
+                "TypeRegistry<{TypeName}> using ContentProvider with content type '{ContentType}'",
+                typeof(T).Name,
+                _contentType);
+        }
+        else
+        {
+            // Fallback to direct path loading
+            if (!Directory.Exists(_dataPath))
+            {
+                _logger.LogResourceNotFound("Data path", _dataPath);
+                return 0;
+            }
+
+            jsonFiles = Directory.GetFiles(_dataPath, "*.json", SearchOption.AllDirectories);
+            _logger.LogDebug(
+                "TypeRegistry<{TypeName}> using fallback path '{DataPath}'",
+                typeof(T).Name,
+                _dataPath);
         }
 
-        string[] jsonFiles = Directory.GetFiles(_dataPath, "*.json", SearchOption.AllDirectories);
         int successCount = 0;
 
         foreach (string jsonPath in jsonFiles)
@@ -119,10 +201,14 @@ public class TypeRegistry<T>(string dataPath, ILogger logger) : IAsyncDisposable
             }
         }
 
+        string sourcePath = ContentProvider != null && !string.IsNullOrEmpty(_contentType)
+            ? $"ContentProvider:{_contentType}"
+            : _dataPath;
+
         _logger.LogWorkflowStatus(
             "Type definitions loaded",
             ("count", successCount),
-            ("path", _dataPath)
+            ("source", sourcePath)
         );
         return successCount;
     }

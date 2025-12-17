@@ -68,4 +68,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="..\Mods\pokemon-emerald\">
+      <Link>Mods\pokemon-emerald</Link>
+    </Folder>
+  </ItemGroup>
 </Project>

@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using MonoBallFramework.Game.Engine.Core.Types;
+using MonoBallFramework.Game.GameData.Entities.Base;
 
 namespace MonoBallFramework.Game.GameData.Entities;
 
@@ -11,7 +12,7 @@ namespace MonoBallFramework.Game.GameData.Entities;
 ///     Replaces direct JSON loading in PopupRegistry.
 /// </summary>
 [Table("PopupOutlines")]
-public class PopupOutlineEntity
+public class PopupOutlineEntity : BaseEntity
 {
     /// <summary>
     ///     Unique identifier for this outline style.
@@ -20,13 +21,6 @@ public class PopupOutlineEntity
     [Key]
     [Column(TypeName = "nvarchar(150)")]
     public GamePopupOutlineId OutlineId { get; set; } = GamePopupOutlineId.Create("default");
-
-    /// <summary>
-    ///     Display name for this outline style.
-    /// </summary>
-    [Required]
-    [MaxLength(100)]
-    public string Name { get; set; } = string.Empty;
 
     /// <summary>
     ///     Type of rendering: "TileSheet" for GBA-accurate, "9Slice" for legacy.
@@ -92,18 +86,6 @@ public class PopupOutlineEntity
     ///     Height of the border frame in pixels (for legacy 9-slice rendering).
     /// </summary>
     public int BorderHeight { get; set; } = 8;
-
-    /// <summary>
-    ///     Source mod ID (null for base game).
-    /// </summary>
-    [MaxLength(100)]
-    public string? SourceMod { get; set; }
-
-    /// <summary>
-    ///     Version for compatibility tracking.
-    /// </summary>
-    [MaxLength(20)]
-    public string Version { get; set; } = "1.0.0";
 
     // Computed properties
 

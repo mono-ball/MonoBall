@@ -24,8 +24,8 @@ public sealed class ModLoader : IModLoader
     private static readonly HashSet<string> BuiltInContentTypes = new(StringComparer.OrdinalIgnoreCase)
     {
         "Root", "Definitions", "Graphics", "Audio", "Scripts", "Fonts", "Tiled", "Tilesets",
-        "TileBehaviors", "Behaviors", "Sprites", "MapDefinitions", "AudioDefinitions",
-        "PopupBackgrounds", "PopupOutlines", "PopupThemes", "MapSections"
+        "TileBehaviorDefinitions", "BehaviorDefinitions", "SpriteDefinitions", "MapDefinitions", "AudioDefinitions", "FontDefinitions",
+        "PopupBackgroundDefinitions", "PopupOutlineDefinitions", "PopupThemeDefinitions", "MapSectionDefinitions", "TextWindowDefinitions"
     };
 
     private readonly IScriptingApiProvider _apis;
@@ -999,7 +999,7 @@ public sealed class ModLoader : IModLoader
             priority = 1000,
             contentFolders = new Dictionary<string, string>
             {
-                // Broad content categories
+                // Broad content categories (raw asset folders)
                 ["Root"] = "",
                 ["Definitions"] = "Definitions",
                 ["Graphics"] = "Graphics",
@@ -1009,15 +1009,17 @@ public sealed class ModLoader : IModLoader
                 ["Tiled"] = "Tiled",
                 ["Tilesets"] = "Tilesets",
                 // Fine-grained definition types for mod overrides
-                ["TileBehaviors"] = "Definitions/TileBehaviors",
-                ["Behaviors"] = "Definitions/Behaviors",
-                ["Sprites"] = "Definitions/Sprites",
+                ["TileBehaviorDefinitions"] = "Definitions/TileBehaviors",
+                ["BehaviorDefinitions"] = "Definitions/Behaviors",
+                ["SpriteDefinitions"] = "Definitions/Sprites",
+                ["FontDefinitions"] = "Definitions/Fonts",
                 ["MapDefinitions"] = "Definitions/Maps/Regions",
                 ["AudioDefinitions"] = "Definitions/Audio",
-                ["PopupBackgrounds"] = "Definitions/Maps/Popups/Backgrounds",
-                ["PopupOutlines"] = "Definitions/Maps/Popups/Outlines",
-                ["PopupThemes"] = "Definitions/Maps/Popups/Themes",
-                ["MapSections"] = "Definitions/Maps/Sections"
+                ["PopupBackgroundDefinitions"] = "Definitions/Maps/Popups/Backgrounds",
+                ["PopupOutlineDefinitions"] = "Definitions/Maps/Popups/Outlines",
+                ["PopupThemeDefinitions"] = "Definitions/Maps/Popups/Themes",
+                ["MapSectionDefinitions"] = "Definitions/Maps/Sections",
+                ["TextWindowDefinitions"] = "Definitions/TextWindow"
             },
             scripts = Array.Empty<string>(),
             patches = Array.Empty<string>(),

@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using MonoBallFramework.Game.Engine.Core.Types;
+using MonoBallFramework.Game.GameData.Entities.Base;
 
 namespace MonoBallFramework.Game.GameData.Entities;
 
@@ -10,7 +11,7 @@ namespace MonoBallFramework.Game.GameData.Entities;
 ///     Replaces direct JSON loading in PopupRegistry.
 /// </summary>
 [Table("PopupBackgrounds")]
-public class PopupBackgroundEntity
+public class PopupBackgroundEntity : BaseEntity
 {
     /// <summary>
     ///     Unique identifier for this background style.
@@ -19,13 +20,6 @@ public class PopupBackgroundEntity
     [Key]
     [Column(TypeName = "nvarchar(150)")]
     public GamePopupBackgroundId BackgroundId { get; set; } = GamePopupBackgroundId.Create("default");
-
-    /// <summary>
-    ///     Display name for this background style.
-    /// </summary>
-    [Required]
-    [MaxLength(100)]
-    public string Name { get; set; } = string.Empty;
 
     /// <summary>
     ///     Type of rendering (always "Bitmap" for backgrounds).
@@ -50,24 +44,6 @@ public class PopupBackgroundEntity
     ///     Height of the source bitmap in pixels (typically 24 for pokeemerald).
     /// </summary>
     public int Height { get; set; } = 24;
-
-    /// <summary>
-    ///     Optional description of this background style.
-    /// </summary>
-    [MaxLength(500)]
-    public string? Description { get; set; }
-
-    /// <summary>
-    ///     Source mod ID (null for base game).
-    /// </summary>
-    [MaxLength(100)]
-    public string? SourceMod { get; set; }
-
-    /// <summary>
-    ///     Version for compatibility tracking.
-    /// </summary>
-    [MaxLength(20)]
-    public string Version { get; set; } = "1.0.0";
 
     // Computed property for theme name extraction
 

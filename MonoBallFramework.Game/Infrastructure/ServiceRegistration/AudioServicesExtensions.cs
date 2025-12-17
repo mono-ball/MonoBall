@@ -43,11 +43,13 @@ public static class AudioServicesExtensions
         services.AddSingleton<ISoundEffectManager>(sp =>
         {
             var audioRegistry = sp.GetRequiredService<AudioRegistry>();
+            var contentProvider = sp.GetRequiredService<IContentProvider>();
             var audioConfig = sp.GetRequiredService<AudioConfiguration>();
             var logger = sp.GetService<ILogger<PortAudioSoundEffectManager>>();
 
             return new PortAudioSoundEffectManager(
                 audioRegistry,
+                contentProvider,
                 audioConfig.MaxConcurrentSounds,
                 logger);
         });

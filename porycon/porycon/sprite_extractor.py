@@ -20,21 +20,21 @@ logger = get_logger('sprite_extractor')
 @dataclass
 class FrameInfo:
     """Information about a single frame in a sprite sheet."""
-    Index: int
-    X: int
-    Y: int
-    Width: int
-    Height: int
+    index: int
+    x: int
+    y: int
+    width: int
+    height: int
 
 
 @dataclass
 class AnimationInfo:
     """Information about an animation."""
-    Name: str
-    Loop: bool
-    FrameIndices: List[int]
-    FrameDurations: List[float]  # Per-frame durations in seconds (one per frame in FrameIndices)
-    FlipHorizontal: bool
+    name: str
+    loop: bool
+    frameIndices: List[int]
+    frameDurations: List[float]  # Per-frame durations in seconds (one per frame in frameIndices)
+    flipHorizontal: bool
 
 
 @dataclass
@@ -47,16 +47,16 @@ class SpriteSheetInfo:
 
 @dataclass
 class SpriteManifest:
-    """Manifest for a sprite."""
-    Id: str
-    DisplayName: str
-    Type: str
-    TexturePath: str
-    FrameWidth: int
-    FrameHeight: int
-    FrameCount: int
-    Frames: List[FrameInfo]
-    Animations: List[AnimationInfo]
+    """Manifest for a sprite (camelCase for JSON serialization)."""
+    id: str
+    name: str  # Display name
+    type: str
+    texturePath: str
+    frameWidth: int
+    frameHeight: int
+    frameCount: int
+    frames: List[FrameInfo]
+    animations: List[AnimationInfo]
 
 
 class SpriteExtractor:
@@ -313,21 +313,21 @@ class SpriteExtractor:
                     )
                 
                 frames.append(FrameInfo(
-                    Index=logical_index,
-                    X=frame_x,
-                    Y=0,
-                    Width=frame_info.frame_width,
-                    Height=frame_info.frame_height
+                    index=logical_index,
+                    x=frame_x,
+                    y=0,
+                    width=frame_info.frame_width,
+                    height=frame_info.frame_height
                 ))
         else:
             # No mapping: frames are sequential in combined image
             for i, (_, frame_x) in enumerate(physical_frame_positions):
                 frames.append(FrameInfo(
-                    Index=i,
-                    X=frame_x,
-                    Y=0,
-                    Width=frame_info.frame_width,
-                    Height=frame_info.frame_height
+                    index=i,
+                    x=frame_x,
+                    y=0,
+                    width=frame_info.frame_width,
+                    height=frame_info.frame_height
                 ))
         
         logical_frame_count = len(frames)
@@ -347,17 +347,17 @@ class SpriteExtractor:
         # Generate TexturePath (keeps the original directory structure)
         texture_path = f"Graphics/Sprites/{sprite_type}/{sprite_category}/{sprite_name}.png"
 
-        # Create manifest
+        # Create manifest (camelCase for JSON serialization)
         manifest = SpriteManifest(
-            Id=sprite_id,
-            DisplayName=display_name,
-            Type="Sprite",
-            TexturePath=texture_path,
-            FrameWidth=frame_info.frame_width,
-            FrameHeight=frame_info.frame_height,
-            FrameCount=logical_frame_count,
-            Frames=frames,
-            Animations=animations
+            id=sprite_id,
+            name=display_name,
+            type="Sprite",
+            texturePath=texture_path,
+            frameWidth=frame_info.frame_width,
+            frameHeight=frame_info.frame_height,
+            frameCount=logical_frame_count,
+            frames=frames,
+            animations=animations
         )
 
         # Save manifest to Definitions directory
@@ -418,20 +418,20 @@ class SpriteExtractor:
         if physical_frame_mapping:
             for logical_index, physical_index in enumerate(physical_frame_mapping):
                 frames.append(FrameInfo(
-                    Index=logical_index,
-                    X=physical_index * frame_info.frame_width,
-                    Y=0,
-                    Width=frame_info.frame_width,
-                    Height=frame_info.frame_height
+                    index=logical_index,
+                    x=physical_index * frame_info.frame_width,
+                    y=0,
+                    width=frame_info.frame_width,
+                    height=frame_info.frame_height
                 ))
         else:
             for i in range(frame_info.frame_count):
                 frames.append(FrameInfo(
-                    Index=i,
-                    X=i * frame_info.frame_width,
-                    Y=0,
-                    Width=frame_info.frame_width,
-                    Height=frame_info.frame_height
+                    index=i,
+                    x=i * frame_info.frame_width,
+                    y=0,
+                    width=frame_info.frame_width,
+                    height=frame_info.frame_height
                 ))
 
         # Save sprite sheet with transparency to Graphics directory
@@ -469,17 +469,17 @@ class SpriteExtractor:
         # Generate TexturePath (keeps the original directory structure)
         texture_path = f"Graphics/Sprites/{sprite_type}/{sprite_category}/{sprite_name}.png"
 
-        # Create manifest
+        # Create manifest (camelCase for JSON serialization)
         manifest = SpriteManifest(
-            Id=sprite_id,
-            DisplayName=display_name,
-            Type="Sprite",
-            TexturePath=texture_path,
-            FrameWidth=frame_info.frame_width,
-            FrameHeight=frame_info.frame_height,
-            FrameCount=logical_frame_count,
-            Frames=frames,
-            Animations=animations
+            id=sprite_id,
+            name=display_name,
+            type="Sprite",
+            texturePath=texture_path,
+            frameWidth=frame_info.frame_width,
+            frameHeight=frame_info.frame_height,
+            frameCount=logical_frame_count,
+            frames=frames,
+            animations=animations
         )
 
         # Save manifest to Definitions directory
@@ -610,11 +610,11 @@ class SpriteExtractor:
                     )
                 
                 animations.append(AnimationInfo(
-                    Name=anim_def.name,
-                    Loop=True,
-                    FrameIndices=frame_indices,
-                    FrameDurations=frame_durations,  # Per-frame durations
-                    FlipHorizontal=uses_flip
+                    name=anim_def.name,
+                    loop=True,
+                    frameIndices=frame_indices,
+                    frameDurations=frame_durations,  # Per-frame durations
+                    flipHorizontal=uses_flip
                 ))
             
             return animations
