@@ -94,7 +94,21 @@ public class MapEntityApplier
             new HashSet<string>() // Sprite textures handled separately
         );
 
-        // 5. Add tiles to spatial hash for rendering (avoids full rebuild)
+        // 5. Process animated tiles FIRST (before spatial hash)
+        // AnimatedTile components must exist before AddMapTiles() so spatial hash
+        // can correctly detect animated tiles and set IsAnimated flag
+        if (data.AnimatedTiles != null && data.AnimatedTiles.Count > 0)
+        {
+            int animatedCount = ProcessAnimatedTiles(world, data, tileEntities);
+            _logger?.LogDebug(
+                "Added AnimatedTile components to {Count} tiles in map {MapId}",
+                animatedCount,
+                data.MapId.Value
+            );
+        }
+
+        // 6. Add tiles to spatial hash for rendering (avoids full rebuild)
+        // Must happen AFTER AnimatedTile components are added so IsAnimated flag is set correctly
         if (_systemManager != null && tileEntities.Count > 0)
         {
             SpatialHashSystem? spatialHash = _systemManager.GetSystem<SpatialHashSystem>();
@@ -107,18 +121,6 @@ public class MapEntityApplier
                     data.MapId.Value
                 );
             }
-        }
-
-        // 6. CRITICAL: Process animated tiles!
-        // This was missing and caused tile animations to stop on streamed maps
-        if (data.AnimatedTiles != null && data.AnimatedTiles.Count > 0)
-        {
-            int animatedCount = ProcessAnimatedTiles(world, data, tileEntities);
-            _logger?.LogDebug(
-                "Added AnimatedTile components to {Count} tiles in map {MapId}",
-                animatedCount,
-                data.MapId.Value
-            );
         }
 
         sw.Stop();

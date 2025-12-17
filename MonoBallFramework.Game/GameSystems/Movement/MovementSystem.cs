@@ -9,6 +9,7 @@ using MonoBallFramework.Game.Ecs.Components.Movement;
 using MonoBallFramework.Game.Ecs.Components.Rendering;
 using MonoBallFramework.Game.Ecs.Components.Tiles;
 using MonoBallFramework.Game.Engine.Common.Logging;
+using MonoBallFramework.Game.Engine.Common.Utilities;
 using MonoBallFramework.Game.Engine.Core.Events;
 using MonoBallFramework.Game.Engine.Core.Systems;
 using MonoBallFramework.Game.Engine.Core.Systems.Base;
@@ -669,20 +670,22 @@ public class MovementSystem : SystemBase, IUpdateSystem
             : Elevation.Default;
 
         // NEW: Check for forced movement from current tile (before calculating target)
+        // OPTIMIZED: Use pre-computed collision data - entry.HasTileBehavior is pre-computed
         if (_tileBehaviorSystem != null && _spatialQuery != null && position.MapId != null)
         {
-            IReadOnlyList<Entity> currentTileEntities = _spatialQuery.GetEntitiesAt(
+            ReadOnlySpan<CollisionEntry> currentTileEntries = _spatialQuery.GetCollisionEntriesAt(
                 position.MapId,
                 position.X,
                 position.Y
             );
-            foreach (Entity tileEntity in currentTileEntities)
+            foreach (ref readonly CollisionEntry entry in currentTileEntries)
             {
-                if (tileEntity.Has<TileBehavior>())
+                // OPTIMIZATION: entry.HasTileBehavior is pre-computed, no Has<T>() call needed
+                if (entry.HasTileBehavior)
                 {
                     Direction forcedDir = _tileBehaviorSystem.GetForcedMovement(
                         world,
-                        tileEntity,
+                        entry.Entity,
                         direction
                     );
                     if (forcedDir != Direction.None)

@@ -1,111 +1,204 @@
 using Arch.Core;
 using Microsoft.Xna.Framework;
+using MonoBallFramework.Game.Engine.Common.Utilities;
 using MonoBallFramework.Game.Engine.Core.Types;
 
 namespace MonoBallFramework.Game.Engine.Core.Systems;
 
 /// <summary>
-///     Interface for querying entities by spatial position.
-///     Provides efficient tile-based lookups for collision detection, pathfinding, and AI.
+///     Interface for querying entities by spatial position with pre-computed component data.
+///     Provides efficient tile-based lookups for collision detection, rendering, and AI.
 /// </summary>
 /// <remarks>
 ///     <para>
-///         This interface abstracts spatial querying to reduce coupling between systems.
-///         Systems that need spatial data depend on this interface rather than the concrete
-///         SpatialHashSystem implementation, improving testability and modularity.
+///         This interface provides zero-ECS-overhead spatial queries by returning pre-computed
+///         component data that was extracted during spatial hash indexing. Instead of returning
+///         raw Entity references that require Has&lt;T&gt;() and Get&lt;T&gt;() calls, methods return
+///         specialized entry structs containing all relevant data.
 ///     </para>
 ///     <para>
-///         <b>Benefits:</b>
+///         <b>Performance Benefits:</b>
 ///     </para>
 ///     <list type="bullet">
-///         <item>Easier unit testing (can mock spatial queries)</item>
-///         <item>Reduced coupling (Dependency Inversion Principle)</item>
-///         <item>Flexibility to swap implementations if needed</item>
-///         <item>Clearer system dependencies</item>
+///         <item>Zero ECS calls during collision checks</item>
+///         <item>Zero ECS calls during tile rendering</item>
+///         <item>ReadOnlySpan returns enable zero-allocation iteration</item>
+///         <item>Data locality - all needed info in contiguous memory</item>
 ///     </list>
 ///     <para>
 ///         <b>Example Usage:</b>
 ///     </para>
 ///     <code>
-/// public class MySystem
-/// {
-///     private readonly ISpatialQuery _spatialQuery;
-/// 
-///     public MySystem(ISpatialQuery spatialQuery)
-///     {
-///         _spatialQuery = spatialQuery;
-///     }
-/// 
-///     public void CheckCollision(int mapId, int x, int y)
-///     {
-///         // Query all entities at a tile position
-///         var entities = _spatialQuery.GetEntitiesAt(mapId, x, y);
-///         foreach (var entity in entities)
+///         // Collision check - zero ECS calls
+///         foreach (ref readonly CollisionEntry entry in spatialQuery.GetCollisionEntriesAt(mapId, x, y))
 ///         {
-///             // Check collision component...
+///             if (entry.Elevation != entityElevation) continue;
+///             if (entry.IsSolid) return false; // Blocked!
 ///         }
-///     }
-/// 
-///     public void FindEntitiesInArea(int mapId, Rectangle bounds)
-///     {
-///         // Query entities in a rectangular area
-///         var entities = _spatialQuery.GetEntitiesInBounds(mapId, bounds);
-///         // Process entities...
-///     }
-/// }
+///
+///         // Tile rendering - zero ECS calls
+///         spatialQuery.GetTileRenderEntries(mapId, bounds, _buffer);
+///         foreach (ref readonly TileRenderEntry tile in CollectionsMarshal.AsSpan(_buffer))
+///         {
+///             spriteBatch.Draw(GetTexture(tile.TilesetId), ...);
+///         }
 ///     </code>
 /// </remarks>
 public interface ISpatialQuery
 {
+    // ============================================================================
+    // COLLISION QUERIES
+    // ============================================================================
+
     /// <summary>
-    ///     Gets all entities at the specified tile position.
+    ///     Gets pre-computed collision data for all entities at the specified position.
+    ///     Includes both static tiles and dynamic entities.
     /// </summary>
     /// <param name="mapId">The map identifier.</param>
     /// <param name="x">The X tile coordinate.</param>
     /// <param name="y">The Y tile coordinate.</param>
-    /// <returns>Collection of entities at this position. May be empty but never null.</returns>
-    /// <example>
-    ///     <code>
-    /// var mapId = new GameMapId("base:map:hoenn/littleroot_town");
-    /// var entities = spatialQuery.GetEntitiesAt(mapId, x: 10, y: 5);
-    /// foreach (var entity in entities)
-    /// {
-    ///     if (entity.Has&lt;Collision&gt;())
-    ///     {
-    ///         // Handle collision...
-    ///     }
-    /// }
-    /// </code>
-    /// </example>
-    IReadOnlyList<Entity> GetEntitiesAt(GameMapId mapId, int x, int y);
+    /// <returns>
+    ///     ReadOnlySpan of collision entries. Iterate with:
+    ///     <c>foreach (ref readonly CollisionEntry entry in span)</c>
+    /// </returns>
+    /// <remarks>
+    ///     Each entry contains: Entity, Elevation, IsSolid, HasTileBehavior.
+    ///     No ECS calls needed to check collision - all data is pre-computed.
+    /// </remarks>
+    ReadOnlySpan<CollisionEntry> GetCollisionEntriesAt(GameMapId mapId, int x, int y);
 
     /// <summary>
-    ///     Gets all entities within the specified rectangular bounds.
+    ///     Gets pre-computed collision data for static tiles only at the specified position.
+    ///     Does not include dynamic entities (NPCs, player).
     /// </summary>
     /// <param name="mapId">The map identifier.</param>
-    /// <param name="bounds">The bounding rectangle in tile coordinates.</param>
-    /// <returns>Collection of entities within the bounds. May be empty but never null.</returns>
-    /// <example>
-    ///     <code>
-    /// var mapId = new GameMapId("base:map:hoenn/littleroot_town");
-    /// var searchArea = new Rectangle(x: 0, y: 0, width: 10, height: 10);
-    /// var entities = spatialQuery.GetEntitiesInBounds(mapId, searchArea);
-    /// // Process all entities in 10x10 tile area...
-    /// </code>
-    /// </example>
-    IReadOnlyList<Entity> GetEntitiesInBounds(GameMapId mapId, Rectangle bounds);
+    /// <param name="x">The X tile coordinate.</param>
+    /// <param name="y">The Y tile coordinate.</param>
+    /// <returns>ReadOnlySpan of collision entries for static tiles only.</returns>
+    ReadOnlySpan<CollisionEntry> GetStaticCollisionEntriesAt(GameMapId mapId, int x, int y);
 
     /// <summary>
-    ///     Gets only static tile entities within the specified rectangular bounds.
-    ///     Does NOT include dynamic entities (NPCs, player, etc.).
-    ///     Optimized for tile rendering - avoids iterating dynamic entity hash.
+    ///     Gets pre-computed collision data for dynamic entities only at the specified position.
+    ///     Does not include static tiles.
+    /// </summary>
+    /// <param name="mapId">The map identifier.</param>
+    /// <param name="x">The X tile coordinate.</param>
+    /// <param name="y">The Y tile coordinate.</param>
+    /// <returns>ReadOnlySpan of collision entries for dynamic entities only.</returns>
+    ReadOnlySpan<CollisionEntry> GetDynamicCollisionEntriesAt(GameMapId mapId, int x, int y);
+
+    // ============================================================================
+    // RENDER QUERIES
+    // ============================================================================
+
+    /// <summary>
+    ///     Gets pre-computed tile render data at a specific position.
+    ///     Returns a span for zero-allocation iteration.
+    /// </summary>
+    /// <param name="mapId">The map identifier.</param>
+    /// <param name="x">The X tile coordinate.</param>
+    /// <param name="y">The Y tile coordinate.</param>
+    /// <returns>
+    ///     ReadOnlySpan of tile render entries at this position.
+    ///     Iterate with: <c>foreach (ref readonly TileRenderEntry tile in span)</c>
+    /// </returns>
+    /// <remarks>
+    ///     <para>
+    ///         Each entry contains: SourceRect, TilesetId, OffsetX, OffsetY, Entity,
+    ///         Elevation, FlipHorizontally, FlipVertically, IsAnimated.
+    ///     </para>
+    ///     <para>
+    ///         <b>Note:</b> X, Y are NOT in the entry - use the coordinates you passed in.
+    ///         This saves 8 bytes per entry and improves cache efficiency.
+    ///     </para>
+    ///     <para>
+    ///         <b>Usage pattern:</b>
+    ///         <code>
+    ///         for (int y = bounds.Top; y &lt; bounds.Bottom; y++)
+    ///         for (int x = bounds.Left; x &lt; bounds.Right; x++)
+    ///         {
+    ///             foreach (ref readonly var tile in GetTileRenderEntriesAt(mapId, x, y))
+    ///             {
+    ///                 float posX = (x * TileSize) + worldOrigin.X + tile.OffsetX;
+    ///                 // ... render
+    ///             }
+    ///         }
+    ///         </code>
+    ///     </para>
+    /// </remarks>
+    ReadOnlySpan<TileRenderEntry> GetTileRenderEntriesAt(GameMapId mapId, int x, int y);
+
+    /// <summary>
+    ///     Gets pre-computed tile render data within the specified bounds.
+    ///     Fills the caller-provided list to avoid allocation.
     /// </summary>
     /// <param name="mapId">The map identifier.</param>
     /// <param name="bounds">The bounding rectangle in local tile coordinates.</param>
-    /// <returns>Collection of static tile entities within the bounds. May be empty but never null.</returns>
+    /// <param name="results">List to populate with results.</param>
     /// <remarks>
-    ///     Use this method for tile rendering to query only tiles in the visible viewport
-    ///     instead of iterating all tile entities in the world.
+    ///     <para>
+    ///         <b>Prefer GetTileRenderEntriesAt</b> when iterating bounds, as it avoids
+    ///         copying tiles to a buffer and doesn't require X, Y in each entry.
+    ///     </para>
+    ///     <para>
+    ///         Each entry contains: SourceRect, TilesetId, OffsetX, OffsetY, Entity,
+    ///         Elevation, FlipHorizontally, FlipVertically, IsAnimated.
+    ///         No ECS calls needed to render - all data is pre-computed.
+    ///     </para>
+    /// </remarks>
+    void GetTileRenderEntries(GameMapId mapId, Rectangle bounds, List<TileRenderEntry> results);
+
+    // ============================================================================
+    // DYNAMIC ENTITY QUERIES
+    // ============================================================================
+
+    /// <summary>
+    ///     Gets pre-computed dynamic entity data at the specified position.
+    /// </summary>
+    /// <param name="mapId">The map identifier.</param>
+    /// <param name="x">The X tile coordinate.</param>
+    /// <param name="y">The Y tile coordinate.</param>
+    /// <returns>ReadOnlySpan of dynamic entity entries.</returns>
+    ReadOnlySpan<DynamicEntry> GetDynamicEntriesAt(GameMapId mapId, int x, int y);
+
+    // ============================================================================
+    // GENERIC ENTITY QUERIES (for scripting/advanced use cases)
+    // ============================================================================
+
+    /// <summary>
+    ///     Gets all entities at the specified position (both static and dynamic).
+    ///     Use this when you need to access components not covered by specialized entries.
+    /// </summary>
+    /// <param name="mapId">The map identifier.</param>
+    /// <param name="x">The X tile coordinate.</param>
+    /// <param name="y">The Y tile coordinate.</param>
+    /// <returns>ReadOnlySpan of Entity references at this position.</returns>
+    /// <remarks>
+    ///     Prefer using specialized queries (GetCollisionEntriesAt, GetTileRenderEntries)
+    ///     when possible to avoid ECS calls. Use this method only when you need to
+    ///     access components not included in the pre-computed entries.
+    /// </remarks>
+    ReadOnlySpan<Entity> GetEntitiesAt(GameMapId mapId, int x, int y);
+
+    /// <summary>
+    ///     Gets all entities within the specified bounds.
+    /// </summary>
+    /// <param name="mapId">The map identifier.</param>
+    /// <param name="bounds">The bounding rectangle in tile coordinates.</param>
+    /// <param name="results">List to populate with results.</param>
+    void GetEntitiesInBounds(GameMapId mapId, Rectangle bounds, List<Entity> results);
+
+    /// <summary>
+    ///     Gets static tile entities within the specified bounds.
+    ///     Use GetTileRenderEntries() for rendering (zero ECS calls).
+    ///     Use this only when you need raw Entity references.
+    /// </summary>
+    /// <param name="mapId">The map identifier.</param>
+    /// <param name="bounds">The bounding rectangle in tile coordinates.</param>
+    /// <returns>List of Entity references for static tiles.</returns>
+    /// <remarks>
+    ///     For rendering, prefer GetTileRenderEntries() which provides pre-computed
+    ///     render data without requiring ECS calls.
     /// </remarks>
     IReadOnlyList<Entity> GetStaticEntitiesInBounds(GameMapId mapId, Rectangle bounds);
 }

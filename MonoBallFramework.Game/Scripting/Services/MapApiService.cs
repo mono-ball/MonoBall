@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using MonoBallFramework.Game.Ecs.Components.Maps;
 using MonoBallFramework.Game.Ecs.Components.Movement;
 using MonoBallFramework.Game.Engine.Common.Logging;
+using MonoBallFramework.Game.Engine.Common.Utilities;
 using MonoBallFramework.Game.Engine.Core.Systems;
 using MonoBallFramework.Game.Engine.Core.Types;
 using MonoBallFramework.Game.Scripting.Api;
@@ -33,16 +34,13 @@ public class MapApiService(
             return true; // Default to walkable if system not ready
         }
 
-        IReadOnlyList<Entity> entities = _spatialQuery.GetEntitiesAt(mapId, x, y);
-        foreach (Entity entity in entities)
+        // OPTIMIZED: Use pre-computed collision data - zero ECS calls
+        ReadOnlySpan<CollisionEntry> entries = _spatialQuery.GetCollisionEntriesAt(mapId, x, y);
+        foreach (ref readonly CollisionEntry entry in entries)
         {
-            if (_world.Has<Collision>(entity))
+            if (entry.IsSolid)
             {
-                ref Collision collision = ref _world.Get<Collision>(entity);
-                if (collision.IsSolid)
-                {
-                    return false;
-                }
+                return false;
             }
         }
 
@@ -57,7 +55,9 @@ public class MapApiService(
             return [];
         }
 
-        return [.. _spatialQuery.GetEntitiesAt(mapId, x, y)];
+        // GetEntitiesAt returns ReadOnlySpan<Entity>, convert to array for scripting API
+        ReadOnlySpan<Entity> entities = _spatialQuery.GetEntitiesAt(mapId, x, y);
+        return entities.ToArray();
     }
 
     public GameMapId GetCurrentMapId()

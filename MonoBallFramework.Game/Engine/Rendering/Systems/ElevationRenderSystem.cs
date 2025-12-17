@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using Arch.Core;
 using Arch.Core.Extensions;
 using Microsoft.Extensions.Logging;
@@ -12,6 +13,7 @@ using MonoBallFramework.Game.Ecs.Components.Player;
 using MonoBallFramework.Game.Ecs.Components.Rendering;
 using MonoBallFramework.Game.Ecs.Components.Tiles;
 using MonoBallFramework.Game.Engine.Common.Logging;
+using MonoBallFramework.Game.Engine.Common.Utilities;
 using MonoBallFramework.Game.Engine.Core.Systems;
 using MonoBallFramework.Game.Engine.Core.Systems.Base;
 using MonoBallFramework.Game.Engine.Core.Types;
@@ -669,6 +671,7 @@ public class ElevationRenderSystem(
     /// <summary>
     ///     Renders tiles using spatial query - only iterates visible tiles.
     ///     O(visible tiles) instead of O(all tiles) - ~300 vs 1,000,000 for large maps.
+    ///     OPTIMIZED: Uses pre-computed TileRenderEntry data - ZERO ECS calls during rendering.
     /// </summary>
     private int RenderTilesUsingSpatialQuery(World world, Rectangle cameraBounds)
     {
@@ -716,81 +719,83 @@ public class ElevationRenderSystem(
 
             int mapRenderOrder = GetMapRenderOrder(mapInfo.MapId.Value);
 
-            // Query only visible tiles for this map
-            IReadOnlyList<Entity> visibleTiles = _spatialQuery!.GetStaticEntitiesInBounds(
-                mapInfo.MapId,
-                localBounds
-            );
-
-            // Render each visible tile - use index-based loop to avoid enumerator allocation
-            int tileCount = visibleTiles.Count;
-            for (int i = 0; i < tileCount; i++)
+            // OPTIMIZED: Iterate bounds directly and query each position
+            // Benefits: No buffer allocation, no X/Y stored in entries (saves 8 bytes/entry)
+            // Before: Fill buffer, iterate buffer (copies + redundant X/Y storage)
+            // After: Direct iteration, use loop coordinates for position
+            for (int tileY = localBounds.Top; tileY < localBounds.Bottom; tileY++)
             {
-                Entity entity = visibleTiles[i];
-
-                // PERFORMANCE: Use TryGet pattern to combine Has + Get into single operation
-                // Reduces ECS access from 6 operations to 3 per tile
-                if (!entity.TryGet(out TilePosition pos) ||
-                    !entity.TryGet(out TileSprite sprite) ||
-                    !entity.TryGet(out Elevation elevation))
+                for (int tileX = localBounds.Left; tileX < localBounds.Right; tileX++)
                 {
-                    continue;
+                    ReadOnlySpan<TileRenderEntry> tilesAtPos = _spatialQuery.GetTileRenderEntriesAt(
+                        mapInfo.MapId, tileX, tileY);
+
+                    foreach (ref readonly TileRenderEntry tile in tilesAtPos)
+                    {
+                        // PERFORMANCE: Single dictionary lookup instead of HasTexture + GetTexture
+                        if (!AssetManager.TryGetTexture(tile.TilesetId, out Texture2D? texture) || texture == null)
+                        {
+                            continue;
+                        }
+
+                        // Calculate render position using loop coordinates + world offset
+                        // X, Y are from the loop (not stored in tile entry - saves 8 bytes per entry)
+                        _reusablePosition.X = (tileX * TileSize) + worldOrigin.X + tile.OffsetX;
+                        _reusablePosition.Y = ((tileY + 1) * TileSize) + worldOrigin.Y + tile.OffsetY;
+
+                        // Calculate depth using pre-computed elevation
+                        float layerDepth = CalculateElevationDepth(
+                            tile.Elevation,
+                            _reusablePosition.Y,
+                            mapRenderOrder
+                        );
+
+                        // Apply flip flags (pre-computed)
+                        SpriteEffects effects = SpriteEffects.None;
+                        if (tile.FlipHorizontally)
+                        {
+                            effects |= SpriteEffects.FlipHorizontally;
+                        }
+
+                        if (tile.FlipVertically)
+                        {
+                            effects |= SpriteEffects.FlipVertically;
+                        }
+
+                        // Get source rect - for animated tiles, fetch current frame from entity
+                        // Static tiles: use pre-computed SourceRect (zero ECS calls)
+                        // Animated tiles (~100-200): single TryGet to get current animation frame
+                        Rectangle sourceRect;
+                        if (tile.IsAnimated && tile.Entity.TryGet(out TileSprite animSprite))
+                        {
+                            // Animated tile: TileAnimationSystem updates TileSprite.SourceRect each frame
+                            sourceRect = animSprite.SourceRect;
+                        }
+                        else
+                        {
+                            // Static tile: use pre-computed SourceRect
+                            sourceRect = tile.SourceRect;
+                        }
+
+                        // Render tile
+                        _reusableTileOrigin.X = 0;
+                        _reusableTileOrigin.Y = sourceRect.Height;
+
+                        _spriteBatch.Draw(
+                            texture,
+                            _reusablePosition,
+                            sourceRect,
+                            Color.White,
+                            0f,
+                            _reusableTileOrigin,
+                            1f,
+                            effects,
+                            layerDepth
+                        );
+
+                        tilesRendered++;
+                    }
                 }
-
-                // PERFORMANCE: Single dictionary lookup instead of HasTexture + GetTexture
-                if (!AssetManager.TryGetTexture(sprite.TilesetId, out Texture2D? texture) || texture == null)
-                {
-                    continue;
-                }
-
-                // Calculate render position with world offset
-                // PERFORMANCE: Base calculation first, then add offset if present (better branch prediction)
-                _reusablePosition.X = (pos.X * TileSize) + worldOrigin.X;
-                _reusablePosition.Y = ((pos.Y + 1) * TileSize) + worldOrigin.Y;
-
-                // PERFORMANCE: Use entity.TryGet (faster than world.TryGet for single entity)
-                if (entity.TryGet(out LayerOffset offset))
-                {
-                    _reusablePosition.X += offset.X;
-                    _reusablePosition.Y += offset.Y;
-                }
-
-                // Calculate depth
-                float layerDepth = CalculateElevationDepth(
-                    elevation.Value,
-                    _reusablePosition.Y,
-                    mapRenderOrder
-                );
-
-                // Apply flip flags
-                SpriteEffects effects = SpriteEffects.None;
-                if (sprite.FlipHorizontally)
-                {
-                    effects |= SpriteEffects.FlipHorizontally;
-                }
-
-                if (sprite.FlipVertically)
-                {
-                    effects |= SpriteEffects.FlipVertically;
-                }
-
-                // Render tile
-                _reusableTileOrigin.X = 0;
-                _reusableTileOrigin.Y = sprite.SourceRect.Height;
-
-                _spriteBatch.Draw(
-                    texture,
-                    _reusablePosition,
-                    sprite.SourceRect,
-                    Color.White,
-                    0f,
-                    _reusableTileOrigin,
-                    1f,
-                    effects,
-                    layerDepth
-                );
-
-                tilesRendered++;
             }
         }
 

@@ -163,12 +163,9 @@ public class WarpSystem : SystemBase, IUpdateSystem
         }
 
         // Get player elevation for warp matching (Pokemon Emerald behavior)
-        byte playerElevation = 3; // Default elevation
-        if (playerEntity.Has<Elevation>())
-        {
-            ref Elevation elevation = ref playerEntity.Get<Elevation>();
-            playerElevation = elevation.Value;
-        }
+        byte playerElevation = playerEntity.TryGet(out Elevation playerElev)
+            ? playerElev.Value
+            : (byte)3; // Default elevation
 
         // O(1) warp lookup using map's spatial index
         // Must match player elevation with warp source elevation (elevation 0 = wildcard)
@@ -249,7 +246,7 @@ public class WarpSystem : SystemBase, IUpdateSystem
         }
 
         // Get the WarpPoint component
-        if (!warpEntity.Has<WarpPoint>())
+        if (!warpEntity.TryGet(out WarpPoint warpPoint))
         {
             _logger?.LogWarning("Warp entity at ({X}, {Y}) missing WarpPoint component", x, y);
             return false;
@@ -257,20 +254,17 @@ public class WarpSystem : SystemBase, IUpdateSystem
 
         // Check elevation match (Pokemon Emerald behavior)
         // Elevation 0 acts as a wildcard that matches any player elevation
-        if (warpEntity.Has<Elevation>())
+        if (warpEntity.TryGet(out Elevation warpElevation))
         {
-            ref Elevation warpElevation = ref warpEntity.Get<Elevation>();
-            byte warpElevationValue = warpElevation.Value;
-
             // Elevation 0 = wildcard (matches any elevation)
             // Otherwise, must exactly match player elevation
-            if (warpElevationValue != 0 && warpElevationValue != playerElevation)
+            if (warpElevation.Value != 0 && warpElevation.Value != playerElevation)
             {
                 return false; // Elevation mismatch
             }
         }
 
-        warp = warpEntity.Get<WarpPoint>();
+        warp = warpPoint;
         return true;
     }
 }

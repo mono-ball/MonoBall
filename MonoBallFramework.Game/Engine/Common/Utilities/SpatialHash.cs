@@ -1,193 +1,172 @@
-using Arch.Core;
+using System.Runtime.InteropServices;
 using Microsoft.Xna.Framework;
 using MonoBallFramework.Game.Engine.Core.Types;
 
 namespace MonoBallFramework.Game.Engine.Common.Utilities;
 
 /// <summary>
-///     Spatial hash data structure for efficient O(1) entity lookups by grid position.
-///     Maps (mapId, x, y) → List of entities at that position.
+///     Generic spatial hash data structure for efficient O(1) lookups by grid position.
+///     Maps (mapId, x, y) → List of entries of type T.
 /// </summary>
+/// <typeparam name="T">
+///     The entry type to store. Should be a readonly struct containing pre-computed
+///     component data to eliminate ECS calls during lookups.
+/// </typeparam>
 /// <remarks>
-///     Used for collision detection, proximity queries, and spatial searches.
-///     Rebuilt each frame to handle moving entities.
-///     Uses string keys for GameMapId values (e.g., "base:map:hoenn/littleroot_town").
+///     <para>
+///         This generic implementation allows storing pre-computed data alongside entity references,
+///         eliminating the need for Has&lt;T&gt;() and Get&lt;T&gt;() calls during spatial queries.
+///     </para>
+///     <para>
+///         <b>Performance Optimizations:</b>
+///     </para>
+///     <list type="bullet">
+///         <item>Uses CollectionsMarshal.AsSpan for zero-allocation iteration</item>
+///         <item>Pools lists to avoid allocation on Clear()</item>
+///         <item>Uses struct constraint to ensure value type storage</item>
+///         <item>Pre-sizes lists based on typical occupancy</item>
+///     </list>
 /// </remarks>
-public class SpatialHash
+public class SpatialHash<T> where T : struct
 {
-    // Map[MapId][TileX, TileY] → List<Entity>
-    private readonly Dictionary<string, Dictionary<(int x, int y), List<Entity>>> _grid;
+    // Map[MapId][TileX, TileY] → List<T>
+    private readonly Dictionary<string, Dictionary<(int x, int y), List<T>>> _grid = new();
+
+    // Pool of cleared lists for reuse (avoids allocation on Clear)
+    private readonly Stack<List<T>> _listPool = new(64);
 
     /// <summary>
-    ///     Initializes a new instance of the SpatialHash class.
-    /// </summary>
-    public SpatialHash()
-    {
-        _grid = new Dictionary<string, Dictionary<(int x, int y), List<Entity>>>();
-    }
-
-    /// <summary>
-    ///     Clears all entities from the spatial hash.
-    ///     Should be called before rebuilding the hash each frame.
+    ///     Clears all entries from the spatial hash while pooling lists for reuse.
     /// </summary>
     public void Clear()
     {
-        foreach (Dictionary<(int x, int y), List<Entity>> mapGrid in _grid.Values)
-        foreach (List<Entity> entityList in mapGrid.Values)
+        foreach (Dictionary<(int x, int y), List<T>> mapGrid in _grid.Values)
         {
-            entityList.Clear();
+            foreach (List<T> list in mapGrid.Values)
+            {
+                list.Clear();
+                _listPool.Push(list);
+            }
+
+            mapGrid.Clear();
         }
     }
 
     /// <summary>
-    ///     Adds an entity to the spatial hash at the specified position.
+    ///     Adds an entry to the spatial hash at the specified position.
     /// </summary>
-    /// <param name="entity">The entity to add.</param>
     /// <param name="mapId">The map identifier.</param>
     /// <param name="x">The X tile coordinate.</param>
     /// <param name="y">The Y tile coordinate.</param>
-    public void Add(Entity entity, GameMapId mapId, int x, int y)
+    /// <param name="entry">The entry to add (passed by reference for large structs).</param>
+    public void Add(GameMapId mapId, int x, int y, in T entry)
     {
-        // Ensure map exists
-        if (!_grid.TryGetValue(mapId, out Dictionary<(int x, int y), List<Entity>>? mapGrid))
+        // Ensure map grid exists
+        if (!_grid.TryGetValue(mapId, out Dictionary<(int x, int y), List<T>>? mapGrid))
         {
-            mapGrid = new Dictionary<(int x, int y), List<Entity>>();
+            mapGrid = new Dictionary<(int x, int y), List<T>>();
             _grid[mapId] = mapGrid;
         }
 
-        // Ensure position list exists
+        // Ensure position list exists (try pool first)
         (int x, int y) key = (x, y);
-        if (!mapGrid.TryGetValue(key, out List<Entity>? entities))
+        if (!mapGrid.TryGetValue(key, out List<T>? entries))
         {
-            entities = new List<Entity>(4); // Most tiles have 1-2 entities
-            mapGrid[key] = entities;
+            entries = _listPool.Count > 0
+                ? _listPool.Pop()
+                : new List<T>(4); // Most tiles have 1-2 entries
+
+            mapGrid[key] = entries;
         }
 
-        // Add entity to this position
-        entities.Add(entity);
+        entries.Add(entry);
     }
 
     /// <summary>
-    ///     Removes an entity from the spatial hash at the specified position.
-    /// </summary>
-    /// <param name="entity">The entity to remove.</param>
-    /// <param name="mapId">The map identifier.</param>
-    /// <param name="x">The X tile coordinate.</param>
-    /// <param name="y">The Y tile coordinate.</param>
-    /// <returns>True if the entity was removed, false if not found.</returns>
-    public bool Remove(Entity entity, GameMapId mapId, int x, int y)
-    {
-        if (!_grid.TryGetValue(mapId, out Dictionary<(int x, int y), List<Entity>>? mapGrid))
-        {
-            return false;
-        }
-
-        (int x, int y) key = (x, y);
-        if (!mapGrid.TryGetValue(key, out List<Entity>? entities))
-        {
-            return false;
-        }
-
-        return entities.Remove(entity);
-    }
-
-    /// <summary>
-    ///     Gets all entities at the specified position.
+    ///     Gets all entries at the specified position as a span for zero-allocation iteration.
     /// </summary>
     /// <param name="mapId">The map identifier.</param>
     /// <param name="x">The X tile coordinate.</param>
     /// <param name="y">The Y tile coordinate.</param>
-    /// <returns>Collection of entities at this position, or empty if none.</returns>
-    public IEnumerable<Entity> GetAt(GameMapId mapId, int x, int y)
+    /// <returns>
+    ///     ReadOnlySpan of entries at this position. Empty span if none.
+    ///     Iterate with: foreach (ref readonly T entry in span)
+    /// </returns>
+    public ReadOnlySpan<T> GetAt(GameMapId mapId, int x, int y)
     {
-        if (!_grid.TryGetValue(mapId, out Dictionary<(int x, int y), List<Entity>>? mapGrid))
+        if (!_grid.TryGetValue(mapId, out Dictionary<(int x, int y), List<T>>? mapGrid))
         {
-            return [];
+            return ReadOnlySpan<T>.Empty;
         }
 
-        (int x, int y) key = (x, y);
-        if (!mapGrid.TryGetValue(key, out List<Entity>? entities))
+        if (!mapGrid.TryGetValue((x, y), out List<T>? entries))
         {
-            return [];
+            return ReadOnlySpan<T>.Empty;
         }
 
-        return entities;
+        return CollectionsMarshal.AsSpan(entries);
     }
 
     /// <summary>
-    ///     Gets all entities within the specified bounds.
+    ///     Gets all entries within the specified bounds.
     /// </summary>
     /// <param name="mapId">The map identifier.</param>
     /// <param name="bounds">The bounding rectangle in tile coordinates.</param>
     /// <param name="results">List to populate with results (caller provides to avoid allocation).</param>
-    /// <remarks>
-    ///     PERFORMANCE OPTIMIZATION: Uses caller-provided list to eliminate iterator state machine
-    ///     allocation that occurs with yield return. This eliminates ~600-800μs overhead per call.
-    /// </remarks>
-    public void GetInBounds(GameMapId mapId, Rectangle bounds, List<Entity> results)
+    public void GetInBounds(GameMapId mapId, Rectangle bounds, List<T> results)
     {
-        if (!_grid.TryGetValue(mapId, out Dictionary<(int x, int y), List<Entity>>? mapGrid))
+        if (!_grid.TryGetValue(mapId, out Dictionary<(int x, int y), List<T>>? mapGrid))
         {
             return;
         }
 
-        // Iterate over all positions within bounds
         for (int y = bounds.Top; y < bounds.Bottom; y++)
-        for (int x = bounds.Left; x < bounds.Right; x++)
         {
-            (int x, int y) key = (x, y);
-            if (mapGrid.TryGetValue(key, out List<Entity>? entities))
+            for (int x = bounds.Left; x < bounds.Right; x++)
             {
-                // AddRange avoids per-entity method call overhead
-                results.AddRange(entities);
-            }
-        }
-    }
-
-    /// <summary>
-    ///     Gets all entities within the specified bounds (legacy iterator version).
-    /// </summary>
-    /// <param name="mapId">The map identifier.</param>
-    /// <param name="bounds">The bounding rectangle in tile coordinates.</param>
-    /// <returns>Collection of entities within the bounds.</returns>
-    /// <remarks>
-    ///     DEPRECATED: Use the overload with List parameter for better performance.
-    ///     This allocates an iterator state machine on every call.
-    /// </remarks>
-    [Obsolete("Use GetInBounds(GameMapId, Rectangle, List<Entity>) to avoid iterator allocation")]
-    public IEnumerable<Entity> GetInBounds(GameMapId mapId, Rectangle bounds)
-    {
-        if (!_grid.TryGetValue(mapId, out Dictionary<(int x, int y), List<Entity>>? mapGrid))
-        {
-            yield break;
-        }
-
-        // Iterate over all positions within bounds
-        for (int y = bounds.Top; y < bounds.Bottom; y++)
-        for (int x = bounds.Left; x < bounds.Right; x++)
-        {
-            (int x, int y) key = (x, y);
-            if (mapGrid.TryGetValue(key, out List<Entity>? entities))
-            {
-                foreach (Entity entity in entities)
+                if (mapGrid.TryGetValue((x, y), out List<T>? entries))
                 {
-                    yield return entity;
+                    results.AddRange(entries);
                 }
             }
         }
     }
 
     /// <summary>
-    ///     Gets the total number of entities currently in the spatial hash.
+    ///     Removes all entries belonging to the specified map.
     /// </summary>
-    /// <returns>Total entity count across all maps and positions.</returns>
-    public int GetEntityCount()
+    /// <param name="mapId">The map identifier whose entries should be removed.</param>
+    /// <returns>True if the map was found and removed, false if not found.</returns>
+    public bool RemoveMap(GameMapId mapId)
+    {
+        if (!_grid.TryGetValue(mapId, out Dictionary<(int x, int y), List<T>>? mapGrid))
+        {
+            return false;
+        }
+
+        // Pool lists before removing
+        foreach (List<T> list in mapGrid.Values)
+        {
+            list.Clear();
+            _listPool.Push(list);
+        }
+
+        _grid.Remove(mapId);
+        return true;
+    }
+
+    /// <summary>
+    ///     Gets the total number of entries in the spatial hash.
+    /// </summary>
+    public int GetEntryCount()
     {
         int count = 0;
-        foreach (Dictionary<(int x, int y), List<Entity>> mapGrid in _grid.Values)
-        foreach (List<Entity> entities in mapGrid.Values)
+        foreach (Dictionary<(int x, int y), List<T>> mapGrid in _grid.Values)
         {
-            count += entities.Count;
+            foreach (List<T> entries in mapGrid.Values)
+            {
+                count += entries.Count;
+            }
         }
 
         return count;
@@ -196,11 +175,10 @@ public class SpatialHash
     /// <summary>
     ///     Gets the number of unique positions currently occupied.
     /// </summary>
-    /// <returns>Number of (map, x, y) positions with at least one entity.</returns>
     public int GetOccupiedPositionCount()
     {
         int count = 0;
-        foreach (Dictionary<(int x, int y), List<Entity>> mapGrid in _grid.Values)
+        foreach (Dictionary<(int x, int y), List<T>> mapGrid in _grid.Values)
         {
             count += mapGrid.Count;
         }
@@ -209,26 +187,7 @@ public class SpatialHash
     }
 
     /// <summary>
-    ///     Removes all entities belonging to the specified map from the spatial hash.
-    ///     Used during map unloading to incrementally remove tiles without full rebuild.
+    ///     Gets diagnostic info about the pool.
     /// </summary>
-    /// <param name="mapId">The map identifier whose entities should be removed.</param>
-    /// <returns>True if the map was found and removed, false if map was not in the hash.</returns>
-    public bool RemoveMap(GameMapId mapId)
-    {
-        if (!_grid.TryGetValue(mapId, out Dictionary<(int x, int y), List<Entity>>? mapGrid))
-        {
-            return false;
-        }
-
-        // Clear all entity lists in this map
-        foreach (List<Entity> entities in mapGrid.Values)
-        {
-            entities.Clear();
-        }
-
-        // Remove the map entirely from the grid
-        _grid.Remove(mapId);
-        return true;
-    }
+    public int GetPooledListCount() => _listPool.Count;
 }

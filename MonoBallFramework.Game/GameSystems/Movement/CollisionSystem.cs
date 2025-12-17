@@ -5,6 +5,7 @@ using MonoBallFramework.Game.Ecs.Interfaces;
 using MonoBallFramework.Game.Ecs.Components.Movement;
 using MonoBallFramework.Game.Ecs.Components.Rendering;
 using MonoBallFramework.Game.Ecs.Components.Tiles;
+using MonoBallFramework.Game.Engine.Common.Utilities;
 using MonoBallFramework.Game.Engine.Core.Events;
 using MonoBallFramework.Game.Engine.Core.Systems;
 using MonoBallFramework.Game.Engine.Core.Types;
@@ -152,31 +153,28 @@ public class CollisionService : ICollisionService
             }
         }
 
-        // Get all entities at this position from spatial hash
-        IReadOnlyList<Entity> entities = _spatialQuery.GetEntitiesAt(mapId, tileX, tileY);
+        // OPTIMIZED: Get pre-computed collision data - zero ECS calls during iteration
+        ReadOnlySpan<CollisionEntry> entries = _spatialQuery.GetCollisionEntriesAt(mapId, tileX, tileY);
 
-        foreach (Entity entity in entities)
+        foreach (ref readonly CollisionEntry entry in entries)
         {
             // Check elevation first - only collide with entities at same elevation
-            if (entity.Has<Elevation>())
+            // OPTIMIZATION: entry.Elevation is pre-computed, no ECS call needed
+            if (entry.Elevation != entityElevation)
             {
-                ref Elevation elevation = ref entity.Get<Elevation>();
-                if (elevation.Value != entityElevation)
-                    // Different elevation - no collision (e.g., walking under bridge)
-                {
-                    continue;
-                }
+                continue; // Different elevation - no collision (e.g., walking under bridge)
             }
 
-            // NEW: Check tile behaviors first (if TileBehaviorSystem is available)
-            if (_tileBehaviorSystem != null && _world != null && entity.Has<TileBehavior>())
+            // Check tile behaviors first (if TileBehaviorSystem is available)
+            // OPTIMIZATION: entry.HasTileBehavior is pre-computed, no Has<T>() call needed
+            if (_tileBehaviorSystem != null && _world != null && entry.HasTileBehavior)
             {
                 Direction toDirection =
                     fromDirection != Direction.None ? fromDirection.Opposite() : Direction.None;
                 if (
                     _tileBehaviorSystem.IsMovementBlocked(
                         _world,
-                        entity,
+                        entry.Entity,
                         fromDirection,
                         toDirection
                     )
@@ -185,7 +183,7 @@ public class CollisionService : ICollisionService
                     // EVENT-DRIVEN: Publish CollisionDetectedEvent for behavior blocking
                     PublishCollisionDetected(
                         Entity.Null,
-                        entity,
+                        entry.Entity,
                         mapId,
                         tileX,
                         tileY,
@@ -206,36 +204,31 @@ public class CollisionService : ICollisionService
                 }
             }
 
-            // Check if entity has Collision component
-            if (entity.Has<Collision>())
+            // Check for solid collision
+            // OPTIMIZATION: entry.IsSolid is pre-computed, no Has<T>() or Get<T>() call needed
+            if (entry.IsSolid)
             {
-                ref Collision collision = ref entity.Get<Collision>();
+                // EVENT-DRIVEN: Publish CollisionDetectedEvent for solid collision
+                PublishCollisionDetected(
+                    Entity.Null,
+                    entry.Entity,
+                    mapId,
+                    tileX,
+                    tileY,
+                    fromDirection,
+                    entry.HasTileBehavior ? CollisionType.Tile : CollisionType.Entity
+                );
 
-                if (collision.IsSolid)
-                    // Solid collision blocks movement
-                {
-                    // EVENT-DRIVEN: Publish CollisionDetectedEvent for solid collision
-                    PublishCollisionDetected(
-                        Entity.Null,
-                        entity,
-                        mapId,
-                        tileX,
-                        tileY,
-                        fromDirection,
-                        entity.Has<TileBehavior>() ? CollisionType.Tile : CollisionType.Entity
-                    );
+                // Publish resolution event for blocked movement
+                PublishCollisionResolved(
+                    Entity.Null,
+                    mapId,
+                    (tileX, tileY),
+                    (tileX, tileY),
+                    true
+                );
 
-                    // Publish resolution event for blocked movement
-                    PublishCollisionResolved(
-                        Entity.Null,
-                        mapId,
-                        (tileX, tileY),
-                        (tileX, tileY),
-                        true
-                    );
-
-                    return false;
-                }
+                return false;
             }
         }
 
@@ -334,29 +327,27 @@ public class CollisionService : ICollisionService
             }
         }
 
-        // OPTIMIZATION: Single spatial query instead of 2-3 separate queries
-        IReadOnlyList<Entity> entities = _spatialQuery.GetEntitiesAt(mapId, tileX, tileY);
+        // OPTIMIZED: Get pre-computed collision data - zero ECS calls during iteration
+        ReadOnlySpan<CollisionEntry> entries = _spatialQuery.GetCollisionEntriesAt(mapId, tileX, tileY);
 
         bool isJumpTile = false;
         Direction allowedJumpDir = Direction.None;
         bool isWalkable = true;
 
-        // Single pass through entities - check for jump behavior AND collision in one loop
-        foreach (Entity entity in entities)
+        // Single pass through entries - check for jump behavior AND collision in one loop
+        // OPTIMIZATION: All data is pre-computed, no Has<T>() or Get<T>() calls needed
+        foreach (ref readonly CollisionEntry entry in entries)
         {
             // Check elevation first - only collide with entities at same elevation
-            if (entity.Has<Elevation>())
+            // OPTIMIZATION: entry.Elevation is pre-computed
+            if (entry.Elevation != entityElevation)
             {
-                ref Elevation elevation = ref entity.Get<Elevation>();
-                if (elevation.Value != entityElevation)
-                    // Different elevation - no collision (e.g., walking under bridge)
-                {
-                    continue;
-                }
+                continue; // Different elevation - no collision (e.g., walking under bridge)
             }
 
             // Check for jump behavior
-            if (_tileBehaviorSystem != null && _world != null && entity.Has<TileBehavior>())
+            // OPTIMIZATION: entry.HasTileBehavior is pre-computed
+            if (_tileBehaviorSystem != null && _world != null && entry.HasTileBehavior)
             {
                 // fromDirection is the direction the player is moving (e.g., South)
                 // But from the tile's perspective, they're coming FROM the opposite direction (North)
@@ -365,7 +356,7 @@ public class CollisionService : ICollisionService
                     fromDirection != Direction.None ? fromDirection.Opposite() : Direction.None;
                 Direction jumpDir = _tileBehaviorSystem.GetJumpDirection(
                     _world,
-                    entity,
+                    entry.Entity,
                     tileFromDirection
                 );
                 if (jumpDir != Direction.None)
@@ -380,7 +371,7 @@ public class CollisionService : ICollisionService
                 if (
                     _tileBehaviorSystem.IsMovementBlocked(
                         _world,
-                        entity,
+                        entry.Entity,
                         fromDirection,
                         toDirection
                     )
@@ -391,15 +382,10 @@ public class CollisionService : ICollisionService
             }
 
             // Check for solid collision (if not already blocked)
-            if (isWalkable && entity.Has<Collision>())
+            // OPTIMIZATION: entry.IsSolid is pre-computed
+            if (isWalkable && entry.IsSolid)
             {
-                ref Collision collision = ref entity.Get<Collision>();
-
-                if (collision.IsSolid)
-                    // Solid collision blocks movement
-                {
-                    isWalkable = false;
-                }
+                isWalkable = false;
             }
         }
 
