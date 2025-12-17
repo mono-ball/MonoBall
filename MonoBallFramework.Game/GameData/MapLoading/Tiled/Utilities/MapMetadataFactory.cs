@@ -84,9 +84,23 @@ public class MapMetadataFactory
             mapInfoEntity.Add(new MapType(mapDef.MapType));
         }
 
-        if (mapDef.RegionMapSection != null)
+        // Add RegionSection - prefer Tiled property "regionMapSection", fall back to MapEntity
+        string? regionSection = null;
+        if (tmxDoc.Properties != null && tmxDoc.Properties.TryGetValue("regionMapSection", out object? rsValue))
         {
-            mapInfoEntity.Add(new RegionSection(mapDef.RegionMapSection.Value));
+            regionSection = rsValue is JsonElement je && je.ValueKind == JsonValueKind.String
+                ? je.GetString()
+                : rsValue?.ToString();
+        }
+
+        if (string.IsNullOrEmpty(regionSection) && mapDef.RegionMapSection != null)
+        {
+            regionSection = mapDef.RegionMapSection.Value;
+        }
+
+        if (!string.IsNullOrEmpty(regionSection))
+        {
+            mapInfoEntity.Add(new RegionSection(regionSection));
         }
 
         // Add flag components based on bool properties

@@ -35,6 +35,15 @@ public class PreparedMapData
     public string? RegionSection { get; init; }
     public string? MusicTrack { get; init; }
 
+    // Map flags from MapEntity definition (critical for popup display!)
+    public bool ShowMapName { get; init; } = true;
+
+    // Border data for Pokemon Emerald-style map borders
+    public PreparedBorderData? BorderData { get; init; }
+
+    // Animation data for animated tiles (indices into Tilesets)
+    public List<PreparedAnimatedTile>? AnimatedTiles { get; init; }
+
     // Connected maps info
     public List<MapConnection>? Connections { get; init; }
 
@@ -119,4 +128,58 @@ public readonly struct MapConnection
     public required GameMapId TargetMapId { get; init; }
     public required string Direction { get; init; }
     public required int Offset { get; init; }
+}
+
+/// <summary>
+///     Pre-computed border data for map edges.
+///     Borders are rendered at map boundaries to create seamless transitions.
+/// </summary>
+public class PreparedBorderData
+{
+    /// <summary>
+    ///     Bottom layer tile GIDs (2x2 grid, flattened: [top-left, top-right, bottom-left, bottom-right]).
+    /// </summary>
+    public required int[] BottomLayerGids { get; init; }
+
+    /// <summary>
+    ///     Top layer tile GIDs (2x2 grid, flattened: [top-left, top-right, bottom-left, bottom-right]).
+    /// </summary>
+    public required int[] TopLayerGids { get; init; }
+
+    /// <summary>
+    ///     Tileset ID for border rendering.
+    /// </summary>
+    public required string TilesetId { get; init; }
+}
+
+/// <summary>
+///     Pre-computed animated tile data.
+///     Stored per tile GID with frame data for animation.
+/// </summary>
+public readonly struct PreparedAnimatedTile
+{
+    /// <summary>
+    ///     The base GID of the animated tile.
+    /// </summary>
+    public required int TileGid { get; init; }
+
+    /// <summary>
+    ///     Tileset ID containing this animated tile.
+    /// </summary>
+    public required string TilesetId { get; init; }
+
+    /// <summary>
+    ///     Frame source rectangles for animation (pre-calculated).
+    /// </summary>
+    public required Rectangle[] FrameSourceRects { get; init; }
+
+    /// <summary>
+    ///     Duration of each frame in milliseconds.
+    /// </summary>
+    public required int[] FrameDurations { get; init; }
+
+    /// <summary>
+    ///     Total animation duration in milliseconds.
+    /// </summary>
+    public required int TotalDuration { get; init; }
 }

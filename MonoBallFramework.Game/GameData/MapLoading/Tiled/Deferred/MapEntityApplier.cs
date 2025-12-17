@@ -1,9 +1,11 @@
 using System.Diagnostics;
 using Arch.Core;
 using Microsoft.Extensions.Logging;
+using Microsoft.Xna.Framework;
 using MonoBallFramework.Game.Ecs.Components;
 using MonoBallFramework.Game.Ecs.Components.Maps;
 using MonoBallFramework.Game.Ecs.Components.Rendering;
+using MonoBallFramework.Game.Engine.Core.Types;
 using MonoBallFramework.Game.Ecs.Components.Tiles;
 using MonoBallFramework.Game.Engine.Content;
 using MonoBallFramework.Game.Engine.Rendering.Assets;
@@ -11,6 +13,7 @@ using MonoBallFramework.Game.Engine.Systems.BulkOperations;
 using MonoBallFramework.Game.Engine.Systems.Management;
 using MonoBallFramework.Game.GameData.MapLoading.Tiled.Services;
 using MonoBallFramework.Game.GameData.MapLoading.Tiled.Tmx;
+using MonoBallFramework.Game.GameData.MapLoading.Tiled.Utilities;
 using MonoBallFramework.Game.GameSystems.Spatial;
 using MonoBallFramework.Game.Systems;
 
@@ -106,6 +109,18 @@ public class MapEntityApplier
             }
         }
 
+        // 6. CRITICAL: Process animated tiles!
+        // This was missing and caused tile animations to stop on streamed maps
+        if (data.AnimatedTiles != null && data.AnimatedTiles.Count > 0)
+        {
+            int animatedCount = ProcessAnimatedTiles(world, data, tileEntities);
+            _logger?.LogDebug(
+                "Added AnimatedTile components to {Count} tiles in map {MapId}",
+                animatedCount,
+                data.MapId.Value
+            );
+        }
+
         sw.Stop();
         _logger?.LogDebug(
             "Applied prepared map {MapId}: {TileCount} tiles in {ElapsedMs:F2}ms",
@@ -152,6 +167,16 @@ public class MapEntityApplier
             world.Add(entity, new RegionSection(data.RegionSection));
         }
 
+        // Add Music component for map music
+        if (!string.IsNullOrEmpty(data.MusicTrack))
+        {
+            GameAudioId? musicId = GameAudioId.TryCreate(data.MusicTrack);
+            if (musicId != null)
+            {
+                world.Add(entity, new Music(musicId));
+            }
+        }
+
         // CRITICAL: Add connection components for map streaming
         if (data.Connections != null && data.Connections.Count > 0)
         {
@@ -181,7 +206,162 @@ public class MapEntityApplier
             );
         }
 
+        // CRITICAL: Add ShowMapNameOnEntry for popup display!
+        // This was missing and caused popups not to show on streamed maps
+        if (data.ShowMapName)
+        {
+            world.Add(entity, new ShowMapNameOnEntry());
+            _logger?.LogDebug("Added ShowMapNameOnEntry component to map {MapId}", data.MapId.Value);
+        }
+
+        // CRITICAL: Add MapBorder for edge rendering!
+        // This was missing and caused borders to stop rendering on streamed maps
+        if (data.BorderData != null)
+        {
+            AddMapBorder(world, entity, data);
+        }
+
         return entity;
+    }
+
+    /// <summary>
+    ///     Adds MapBorder component with pre-calculated source rectangles.
+    /// </summary>
+    private void AddMapBorder(World world, Entity entity, PreparedMapData data)
+    {
+        PreparedBorderData borderData = data.BorderData!;
+
+        // Find the primary tileset for source rect calculation
+        LoadedTileset? primaryTileset = data.Tilesets.FirstOrDefault(t => t.TilesetId == borderData.TilesetId);
+        if (primaryTileset == null && data.Tilesets.Count > 0)
+        {
+            primaryTileset = data.Tilesets[0];
+        }
+
+        if (primaryTileset == null)
+        {
+            _logger?.LogWarning("Cannot add MapBorder - no tileset available for map {MapId}", data.MapId.Value);
+            return;
+        }
+
+        var mapBorder = new MapBorder(borderData.BottomLayerGids, borderData.TopLayerGids, borderData.TilesetId);
+
+        // Pre-calculate source rectangles for bottom layer
+        mapBorder.BottomSourceRects = new Rectangle[4];
+        for (int i = 0; i < 4; i++)
+        {
+            int tileGid = borderData.BottomLayerGids[i];
+            if (tileGid > 0)
+            {
+                mapBorder.BottomSourceRects[i] = TilesetUtilities.CalculateSourceRect(tileGid, primaryTileset.Tileset);
+            }
+        }
+
+        // Pre-calculate source rectangles for top layer
+        mapBorder.TopSourceRects = new Rectangle[4];
+        for (int i = 0; i < 4; i++)
+        {
+            int tileGid = borderData.TopLayerGids[i];
+            if (tileGid > 0)
+            {
+                mapBorder.TopSourceRects[i] = TilesetUtilities.CalculateSourceRect(tileGid, primaryTileset.Tileset);
+            }
+        }
+
+        world.Add(entity, mapBorder);
+        _logger?.LogDebug(
+            "Added MapBorder to map {MapId}: Bottom=[{B0},{B1},{B2},{B3}], Top=[{T0},{T1},{T2},{T3}]",
+            data.MapId.Value,
+            borderData.BottomLayerGids[0], borderData.BottomLayerGids[1],
+            borderData.BottomLayerGids[2], borderData.BottomLayerGids[3],
+            borderData.TopLayerGids[0], borderData.TopLayerGids[1],
+            borderData.TopLayerGids[2], borderData.TopLayerGids[3]
+        );
+    }
+
+    /// <summary>
+    ///     Processes animated tiles by adding AnimatedTile components to matching tile entities.
+    ///     This is critical for tile animations to work on streamed maps.
+    /// </summary>
+    private int ProcessAnimatedTiles(World world, PreparedMapData data, List<Entity> tileEntities)
+    {
+        if (data.AnimatedTiles == null || data.AnimatedTiles.Count == 0)
+        {
+            return 0;
+        }
+
+        // Build a lookup of animated tile data by GID for fast matching
+        var animationsByGid = new Dictionary<int, PreparedAnimatedTile>(data.AnimatedTiles.Count);
+        foreach (PreparedAnimatedTile animTile in data.AnimatedTiles)
+        {
+            animationsByGid[animTile.TileGid] = animTile;
+        }
+
+        // Find tileset info for each animated tile
+        var tilesetInfoByGid = new Dictionary<int, LoadedTileset>();
+        foreach (PreparedAnimatedTile animTile in data.AnimatedTiles)
+        {
+            LoadedTileset? tileset = data.Tilesets.FirstOrDefault(t => t.TilesetId == animTile.TilesetId);
+            if (tileset != null)
+            {
+                tilesetInfoByGid[animTile.TileGid] = tileset;
+            }
+        }
+
+        int animatedCount = 0;
+
+        // Iterate through tile entities and add AnimatedTile component where needed
+        for (int i = 0; i < tileEntities.Count && i < data.Tiles.Count; i++)
+        {
+            PreparedTile tileData = data.Tiles[i];
+            int tileGid = tileData.TileGid;
+
+            if (!animationsByGid.TryGetValue(tileGid, out PreparedAnimatedTile animData))
+            {
+                continue;
+            }
+
+            if (!tilesetInfoByGid.TryGetValue(tileGid, out LoadedTileset? tileset))
+            {
+                continue;
+            }
+
+            Entity entity = tileEntities[i];
+            TmxTileset tmxTileset = tileset.Tileset;
+
+            // Convert millisecond durations to seconds
+            var frameDurations = new float[animData.FrameDurations.Length];
+            var frameTileIds = new int[animData.FrameDurations.Length];
+            for (int f = 0; f < animData.FrameDurations.Length; f++)
+            {
+                frameDurations[f] = animData.FrameDurations[f] / 1000f;
+                // Frame tile IDs are relative to tileset FirstGid
+                frameTileIds[f] = tmxTileset.FirstGid + f; // Approximation - will use source rects
+            }
+
+            // Calculate tiles per row
+            int tilesPerRow = tmxTileset.Image != null && tmxTileset.TileWidth > 0
+                ? tmxTileset.Image.Width / tmxTileset.TileWidth
+                : 1;
+
+            var animatedTile = new AnimatedTile(
+                baseTileId: tileGid - tmxTileset.FirstGid,
+                frameTileIds: frameTileIds,
+                frameDurations: frameDurations,
+                frameSourceRects: animData.FrameSourceRects,
+                tilesetFirstGid: tmxTileset.FirstGid,
+                tilesPerRow: tilesPerRow,
+                tileWidth: tmxTileset.TileWidth,
+                tileHeight: tmxTileset.TileHeight,
+                tileSpacing: tmxTileset.Spacing,
+                tileMargin: tmxTileset.Margin
+            );
+
+            world.Add(entity, animatedTile);
+            animatedCount++;
+        }
+
+        return animatedCount;
     }
 
     /// <summary>

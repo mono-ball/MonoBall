@@ -222,6 +222,16 @@ public class MapPreparer
         // 7. Get connection data from MapEntityService (critical for map streaming!)
         List<MapConnection>? connections = PrepareConnections(mapId, properties);
 
+        // 8. Get MapEntity for ShowMapName flag (critical for popup display!)
+        MapEntity? mapDef = _mapEntityService.GetMap(mapId);
+        bool showMapName = mapDef?.ShowMapName ?? true; // Default to true for backwards compatibility
+
+        // 9. Prepare border data (critical for map edge rendering!)
+        PreparedBorderData? borderData = PrepareBorderData(properties, tilesets);
+
+        // 10. Prepare animated tile data (critical for tile animations!)
+        List<PreparedAnimatedTile>? animatedTiles = PrepareAnimatedTiles(tilesets);
+
         return new PreparedMapData
         {
             MapId = mapId,
@@ -235,9 +245,14 @@ public class MapPreparer
             Tiles = tiles,
             Tilesets = tilesets,
             Properties = properties,
-            Name = properties.TryGetValue("displayName", out object? dn) ? dn?.ToString() : null,
-            RegionSection = properties.TryGetValue("region_section", out object? rs) ? rs?.ToString() : null,
-            MusicTrack = properties.TryGetValue("music", out object? mt) ? mt?.ToString() : null,
+            Name = GetStringProperty(properties, "displayName"),
+            // CRITICAL: Get RegionMapSection from TMX properties (key: "regionMapSection")
+            // This is needed for popup display to show correct map section name and theme.
+            RegionSection = GetStringProperty(properties, "regionMapSection"),
+            MusicTrack = GetStringProperty(properties, "music"),
+            ShowMapName = showMapName,
+            BorderData = borderData,
+            AnimatedTiles = animatedTiles,
             ImageLayers = imageLayers,
             ObjectGroups = objectGroups,
             Connections = connections
@@ -387,6 +402,26 @@ public class MapPreparer
         }
 
         return (GameMapId.TryCreate(mapIdStr), offset);
+    }
+
+    /// <summary>
+    ///     Gets a string property from TMX properties, handling JsonElement values correctly.
+    /// </summary>
+    private static string? GetStringProperty(Dictionary<string, object> properties, string key)
+    {
+        if (!properties.TryGetValue(key, out object? value) || value == null)
+        {
+            return null;
+        }
+
+        // Handle JsonElement (most common from Tiled JSON parsing)
+        if (value is JsonElement je)
+        {
+            return je.ValueKind == JsonValueKind.String ? je.GetString() : null;
+        }
+
+        // Handle pre-converted string
+        return value.ToString();
     }
 
     private List<PreparedTile> PrepareTiles(
@@ -600,6 +635,182 @@ public class MapPreparer
                 Properties = obj.Properties ?? new Dictionary<string, object>()
             }).ToList()
         }).ToList();
+    }
+
+    /// <summary>
+    ///     Prepares border data from map properties.
+    ///     Border format: { "top_left": GID, "top_right": GID, "bottom_left": GID, "bottom_right": GID,
+    ///                      "top_left_top": GID, "top_right_top": GID, "bottom_left_top": GID, "bottom_right_top": GID }
+    /// </summary>
+    private PreparedBorderData? PrepareBorderData(Dictionary<string, object> properties, IReadOnlyList<LoadedTileset> tilesets)
+    {
+        if (!properties.TryGetValue("border", out object? borderValue) || borderValue == null)
+        {
+            return null;
+        }
+
+        if (tilesets.Count == 0)
+        {
+            _logger?.LogWarning("No tilesets available for border processing");
+            return null;
+        }
+
+        try
+        {
+            int[] bottomLayer = new int[4];
+            int[] topLayer = new int[4];
+
+            if (borderValue is JsonElement je && je.ValueKind == JsonValueKind.Object)
+            {
+                // Bottom layer (ground/trunk)
+                bottomLayer[0] = GetJsonInt(je, "top_left");
+                bottomLayer[1] = GetJsonInt(je, "top_right");
+                bottomLayer[2] = GetJsonInt(je, "bottom_left");
+                bottomLayer[3] = GetJsonInt(je, "bottom_right");
+
+                // Top layer (overhead/foliage)
+                topLayer[0] = GetJsonInt(je, "top_left_top");
+                topLayer[1] = GetJsonInt(je, "top_right_top");
+                topLayer[2] = GetJsonInt(je, "bottom_left_top");
+                topLayer[3] = GetJsonInt(je, "bottom_right_top");
+            }
+            else if (borderValue is Dictionary<string, object> dict)
+            {
+                bottomLayer[0] = GetDictInt(dict, "top_left");
+                bottomLayer[1] = GetDictInt(dict, "top_right");
+                bottomLayer[2] = GetDictInt(dict, "bottom_left");
+                bottomLayer[3] = GetDictInt(dict, "bottom_right");
+
+                topLayer[0] = GetDictInt(dict, "top_left_top");
+                topLayer[1] = GetDictInt(dict, "top_right_top");
+                topLayer[2] = GetDictInt(dict, "bottom_left_top");
+                topLayer[3] = GetDictInt(dict, "bottom_right_top");
+            }
+            else
+            {
+                _logger?.LogWarning("Unknown border value type: {Type}", borderValue.GetType().Name);
+                return null;
+            }
+
+            // Validate we have valid bottom layer GIDs
+            if (bottomLayer.All(g => g == 0))
+            {
+                _logger?.LogDebug("Border has no valid bottom layer GIDs");
+                return null;
+            }
+
+            string tilesetId = tilesets[0].TilesetId;
+
+            _logger?.LogDebug(
+                "Prepared border data: Bottom=[{B0},{B1},{B2},{B3}], Top=[{T0},{T1},{T2},{T3}], Tileset={Tileset}",
+                bottomLayer[0], bottomLayer[1], bottomLayer[2], bottomLayer[3],
+                topLayer[0], topLayer[1], topLayer[2], topLayer[3],
+                tilesetId
+            );
+
+            return new PreparedBorderData
+            {
+                BottomLayerGids = bottomLayer,
+                TopLayerGids = topLayer,
+                TilesetId = tilesetId
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError(ex, "Error preparing border data");
+            return null;
+        }
+    }
+
+    /// <summary>
+    ///     Prepares animated tile data from all tilesets.
+    ///     Extracts animation frames and durations for the TileAnimationSystem.
+    /// </summary>
+    private List<PreparedAnimatedTile>? PrepareAnimatedTiles(IReadOnlyList<LoadedTileset> tilesets)
+    {
+        var animatedTiles = new List<PreparedAnimatedTile>();
+
+        foreach (LoadedTileset loadedTileset in tilesets)
+        {
+            TmxTileset tileset = loadedTileset.Tileset;
+
+            // Skip tilesets without animations
+            if (tileset.Animations == null || tileset.Animations.Count == 0)
+            {
+                continue;
+            }
+
+            foreach (KeyValuePair<int, TmxTileAnimation> kvp in tileset.Animations)
+            {
+                int localTileId = kvp.Key;
+                TmxTileAnimation animation = kvp.Value;
+
+                if (animation.FrameTileIds == null || animation.FrameTileIds.Length == 0)
+                {
+                    continue;
+                }
+
+                // Calculate global GID
+                int tileGid = tileset.FirstGid + localTileId;
+
+                int frameCount = animation.FrameTileIds.Length;
+
+                // Pre-calculate source rectangles for all frames
+                var frameSourceRects = new Rectangle[frameCount];
+                var frameDurations = new int[frameCount];
+                int totalDuration = 0;
+
+                for (int i = 0; i < frameCount; i++)
+                {
+                    // FrameTileIds are local tile IDs - convert to GID
+                    int frameGid = tileset.FirstGid + animation.FrameTileIds[i];
+                    frameSourceRects[i] = TilesetUtilities.CalculateSourceRect(frameGid, tileset);
+
+                    // FrameDurations are in seconds in TmxTileAnimation, convert to milliseconds
+                    int durationMs = (int)(animation.FrameDurations[i] * 1000);
+                    frameDurations[i] = durationMs;
+                    totalDuration += durationMs;
+                }
+
+                animatedTiles.Add(new PreparedAnimatedTile
+                {
+                    TileGid = tileGid,
+                    TilesetId = loadedTileset.TilesetId,
+                    FrameSourceRects = frameSourceRects,
+                    FrameDurations = frameDurations,
+                    TotalDuration = totalDuration
+                });
+            }
+        }
+
+        if (animatedTiles.Count == 0)
+        {
+            return null;
+        }
+
+        _logger?.LogDebug("Prepared {Count} animated tiles", animatedTiles.Count);
+        return animatedTiles;
+    }
+
+    private static int GetJsonInt(JsonElement element, string propertyName)
+    {
+        if (element.TryGetProperty(propertyName, out JsonElement prop) && prop.ValueKind == JsonValueKind.Number)
+        {
+            return prop.GetInt32();
+        }
+        return 0;
+    }
+
+    private static int GetDictInt(Dictionary<string, object> dict, string key)
+    {
+        if (dict.TryGetValue(key, out object? value))
+        {
+            if (value is int intValue) return intValue;
+            if (value is long longValue) return (int)longValue;
+            if (value is JsonElement je && je.ValueKind == JsonValueKind.Number) return je.GetInt32();
+            if (int.TryParse(value?.ToString(), out int parsed)) return parsed;
+        }
+        return 0;
     }
 }
 

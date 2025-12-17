@@ -2,37 +2,155 @@
 #               Qodana analysis is configured by qodana.yaml file               #
 #             https://www.jetbrains.com/help/qodana/qodana-yaml.html            #
 #-------------------------------------------------------------------------------#
-
 #################################################################################
 #              WARNING: Do not store sensitive information in this file,        #
 #               as its contents will be included in the Qodana report.          #
 #################################################################################
 version: "1.0"
-
 #Specify IDE code to run analysis without container (Applied in CI/CD pipeline)
 ide: QDNET
-
 #Specify inspection profile for code analysis
 profile:
   name: qodana.starter
+include:
+  - name: ConvertIfStatementToReturnStatement
+  - name: ConvertIfStatementToConditionalTernaryExpression
+  - name: ConvertIfStatementToNullCoalescingAssignment
+  - name: ArrangeMissingParentheses
+  - name: AutoPropertyCanBeMadeGetOnly.Global
+  - name: AsyncVoidEventHandlerMethod
+  - name: HeapView.BoxingAllocation
+  - name: VirtualMemberNeverOverridden.Global
+  - name: HeapView.PossibleBoxingAllocation
+  - name: CanSimplifySetAddingWithSingleCall
+  - name: CanReplaceCastWithLambdaReturnType
+  - name: ChangeFieldTypeToSystemThreadingLock
+  - name: ClassNeverInstantiated.Global
+  - name: ClassWithVirtualMembersNeverInherited.Global
+  - name: HeapView.ClosureAllocation
+  - name: HeapView.CanAvoidClosure
+  - name: JsonStandardCompliance
+  - name: ConvertIfStatementToSwitchStatement
+  - name: ConvertToPrimaryConstructor
+  - name: ConvertToLocalFunction
+  - name: UseAwaitUsing
+  - name: ConvertToLambdaExpression
+  - name: ConvertClosureToMethodGroup
+  - name: ConvertToConstant.Local
+  - name: UseNegatedPatternInIsExpression
+  - name: ConvertToAutoProperty
+  - name: ConvertToAutoPropertyWhenPossible
+  - name: ConvertToAutoPropertyWithPrivateSetter
+  - name: HeapView.DelegateAllocation
+  - name: CanSimplifyDictionaryLookupWithTryAdd
+  - name: CanSimplifyDictionaryLookupWithTryGetValue
+  - name: DuplicatedSequentialIfBodies
+  - name: EventNeverSubscribedTo.Global
+  - name: ExtractCommonBranchingCode
+  - name: FieldCanBeMadeReadOnly.Global
+  - name: FieldCanBeMadeReadOnly.Local
+  - name: ForCanBeConvertedToForeach
+  - name: ForeachCanBeConvertedToQueryUsingAnotherGetEnumerator
+  - name: InlineOutVariableDeclaration
+  - name: InlineTemporaryVariable
+  - name: IntroduceOptionalParameters.Local
+  - name: InvertIf
+  - name: PossibleUnintendedQueryableAsEnumerable
+  - name: JoinNullCheckWithUsage
+  - name: TooWideLocalVariableScope
+  - name: LoopCanBeConvertedToQuery
+  - name: UseVerbatimString
+  - name: MemberCanBePrivate.Global
+  - name: MemberCanBeProtected.Global
+  - name: MemberCanBeMadeStatic.Global
+  - name: MemberCanBeMadeStatic.Local
+  - name: MergeIntoNegatedPattern
+  - name: MergeIntoPattern
+  - name: MergeIntoLogicalPattern
+  - name: MethodHasAsyncOverload
+  - name: MethodHasAsyncOverloadWithCancellation
+  - name: UnusedMethodReturnValue.Global
+  - name: NotAccessedField.Global
+  - name: HeapView.ObjectAllocation
+  - name: HeapView.ObjectAllocation.Evident
+  - name: HeapView.ObjectAllocation.Possible
+  - name: OutParameterValueIsAlwaysDiscarded.Global
+  - name: ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
+  - name: PropertyCanBeMadeInitOnly.Global
+  - name: PropertyCanBeMadeInitOnly.Local
+  - name: MoveLocalFunctionAfterJumpStatement
+  - name: RedundantIfElseBlock
+  - name: CppRedundantElseKeyword
+  - name: RedundantStringInterpolation
+  - name: FSharpRedundantStringInterpolation
+  - name: RedundantTypeDeclarationBody
+  - name: RedundantVerbatimStringPrefix
+  - name: ArrangeRedundantParentheses
+  - name: ReplaceSubstringWithRangeIndexer
+  - name: ConvertSwitchStatementToSwitchExpression
+  - name: UseNullPropagation
+  - name: ConvertConditionalTernaryExpressionToSwitchExpression
+  - name: ReplaceWithPrimaryConstructorParameter
+  - name: CA1861
+  - name: CA1860
+  - name: CA1869
+  - name: SYSLIB1045
+  - name: CA1816
+  - name: CA1822
+  - name: CA1846
+  - name: CA2263
+  - name: CA1836
+  - name: CA1854
+  - name: CA2254
+  - name: CA1868
+  - name: CA1510
+  - name: CA1512
+  - name: CA1847
+  - name: CA1866
+  - name: CA1865
+  - name: CA1859
+  - name: CA1829
+  - name: CA1513
+  - name: CA1845
+  - name: CA1862
+  - name: SwitchStatementMissingSomeEnumCasesNoDefault
+  - name: SwitchStatementHandlesSomeKnownEnumValuesWithDefault
+  - name: TailRecursiveCall
+  - name: CSharpWarnings__CA2254
+  - name: UnusedType.Global
+  - name: UnusedMemberInSuper.Global
+  - name: UnusedMember.Global
+  - name: TypeParameterCanBeVariant
+  - name: UnusedParameter.Global
+  - name: UseSymbolAlias
+  - name: UseCollectionCountProperty
+  - name: UseCollectionExpression
+  - name: UseDeconstruction
+  - name: SimplifyStringInterpolation
+  - name: UseObjectOrCollectionInitializer
+  - name: SuggestVarOrType_Elsewhere
+  - name: SuggestVarOrType_BuiltInTypes
+  - name: SuggestVarOrType_DeconstructionDeclarations
+  - name: SuggestVarOrType_SimpleTypes
+  - name: ArrangeNamespaceBody
+  - name: ArrangeTrailingCommaInMultilineLists
+  - name: ArrangeObjectCreationWhenTypeEvident
+  - name: ArrangeObjectCreationWhenTypeNotEvident
+  - name: UseRawString
 
 #Enable inspections
 #include:
 #  - name: <SomeEnabledInspectionId>
-
 #Disable inspections
 #exclude:
 #  - name: <SomeDisabledInspectionId>
 #    paths:
 #      - <path/where/not/run/inspection>
-
 #Execute shell command before Qodana execution (Applied in CI/CD pipeline)
 #bootstrap: sh ./prepare-qodana.sh
-
 #Install IDE plugins before Qodana execution (Applied in CI/CD pipeline)
 #plugins:
 #  - id: <plugin.id> #(plugin id can be found at https://plugins.jetbrains.com)
-
 # Quality gate. Will fail the CI/CD pipeline if any condition is not met
 # severityThresholds - configures maximum thresholds for different problem severities
 # testCoverageThresholds - configures minimum code coverage on a whole project and newly added code
